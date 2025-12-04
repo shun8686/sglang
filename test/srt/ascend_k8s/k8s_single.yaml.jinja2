@@ -79,10 +79,10 @@ spec:
                bash $SGLANG_SOURCE_PATH/test/srt/ascend_k8s/run_ascend_deepep.sh {{ test_case }}
           resources:
             requests:
-              huawei.com/ascend-1980: 16
+              huawei.com/ascend-1980: {{ npu_num }}
               cpu: 4
             limits:
-              huawei.com/ascend-1980: 16
+              huawei.com/ascend-1980: {{ npu_num }}
               cpu: 4
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver

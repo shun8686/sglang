@@ -28,6 +28,10 @@ on:
         required: true
         type: string
         description: path of test case file
+      npu_num:
+        required: true
+        type: number
+        description: number of npus required for the testcase
 
 concurrency:
   group: ascend-nightly-singlenode-${{ github.workflow_ref }}-${{ github.ref }}--${{ inputs.test_config_name }}
@@ -73,7 +77,8 @@ jobs:
                   \"kube_job_name\": \"$KUBE_JOB_NAME\",                    \
                   \"kube_config\": \"$KUBECONFIG\",                         \
                   \"sglang_source_path\": \"$sglang_source_path\",          \
-                  \"test_case\": \"$test_case\" }"                         |\
+                  \"test_case\": \"$test_case\",                            \
+                  \"npu_num\": $npu_num }"                                 |\
               jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_single.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_single.yaml
           echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_single.yaml"
 
