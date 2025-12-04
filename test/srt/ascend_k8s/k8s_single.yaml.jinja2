@@ -58,6 +58,7 @@ spec:
             limits:
               huawei.com/ascend-1980: {{ npu_num }}
               cpu: "4"
+          volumeMounts:
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver
           - name: localtime
