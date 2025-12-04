@@ -16,7 +16,7 @@ KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
 KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
 KUBE_JOB_TYPE = os.environ.get('KUBE_JOB_TYPE')
 MONITOR_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE != "single" else \
-    "{}-sglang-single-pod-0".format(os.environ.get('KUBE_JOB_NAME'))
+    "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME'))
 
 
 def run_command(cmd, shell=True):
@@ -33,7 +33,7 @@ def run_command(cmd, shell=True):
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
     start_time = time.time()
-    matching_string = "{}-sglang".format(os.environ.get('KUBE_JOB_NAME'))
+    matching_string = "{}".format(os.environ.get('KUBE_JOB_NAME'))
 
     while time.time() - start_time < timeout:
         cmd = "kubectl get pods -A -o json"
@@ -90,7 +90,7 @@ def check_pods_ready(timeout=300):
 def create_configmap():
     pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
     matching_pods = []
-    matching_string = "{}-sglang".format(os.environ.get('KUBE_JOB_NAME'))
+    matching_string = "{}".format(os.environ.get('KUBE_JOB_NAME'))
 
     for pod in pods.items:
         pod_name = pod.metadata.name
