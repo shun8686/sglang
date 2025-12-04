@@ -54,10 +54,10 @@ spec:
           resources:
             requests:
               huawei.com/ascend-1980: {{ npu_num }}
-              cpu: 4
+              cpu: "4"
             limits:
               huawei.com/ascend-1980: {{ npu_num }}
-              cpu: 4
+              cpu: "4"
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver
           - name: localtime
@@ -78,6 +78,9 @@ spec:
         - name: modelscope
           hostPath:
             path: /data/ascend-ci-share-pkking-sglang/modelscope
+        - name: ascend-910-config
+          configMap:
+            name: rings-config-ascend-sglang-single-test
         - name: ascend-driver
           hostPath:
             path: /usr/local/Ascend/driver
