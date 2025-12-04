@@ -14,7 +14,9 @@ v1 = client.CoreV1Api()
 LOCAL_TIMEOUT = 10800
 KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
 KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
-KUBE_ROUTER_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME'))
+KUBE_JOB_TYPE = os.environ.get('KUBE_JOB_TYPE')
+MONITOR_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE != "single" else \
+    "{}-sglang-single-pod-0".format(os.environ.get('KUBE_JOB_NAME'))
 
 
 def run_command(cmd, shell=True):
@@ -216,15 +218,17 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
                 process.kill()
 
 
-if __name__ == "__main__":
-    print("apply deepep.yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}".format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP))
-    result = run_command("kubectl apply -f deepep.yaml")
+if __name__ == "__main__":    
+    print("apply k8s yaml... KUBE_NAME_SPACE:{KUBE_NAME_SPACE}, KUBE_CONFIG_MAP:{KUBE_CONFIG_MAP}, KUBE_JOB_TYPE:{KUBE_JOB_TYPE}")
+    k8s_yaml = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "deepep.yaml"
+    result = run_command("kubectl apply -f {k8s_yaml}")
     if result:
         print(result)
 
     if check_pods_ready(timeout=LOCAL_TIMEOUT):
-        create_configmap()
+        if KUBE_JOB_TYPE != "single":
+            create_configmap() 
     else:
         print("Pod not ready, maybe not enough resource")
 
-    monitor_pod_logs(KUBE_ROUTER_POD_NAME, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
+    monitor_pod_logs(MONITOR_POD_NAME, KUBE_NAME_SPACE, LOCAL_TIMEOUT)

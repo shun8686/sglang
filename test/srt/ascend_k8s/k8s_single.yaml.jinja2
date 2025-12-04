@@ -1,0 +1,115 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ascend-sglang-single-pod-access
+  namespace: {{ name_space }}
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ascend-sglang-pod-binding
+  namespace: {{ name_space }}
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: {{ name_space }}
+roleRef:
+  kind: Role
+  name: ascend-sglang-single-pod-access
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: batch.volcano.sh/v1alpha1
+kind: Job
+metadata:
+  name: {{ kube_job_name }}
+  namespace: {{ name_space }}
+  labels:
+    ring-controller.atlas: ascend-1980
+    fault-scheduling: "force"
+spec:
+  minAvailable: 1
+  schedulerName: volcano
+  policies:
+    - event: PodEvicted
+      action: RestartJob
+  tasks:
+  - name: "sglang-single-pod"
+    replicas: 1
+    template:
+      metadata:
+        labels:
+          app: sgl-ascend
+          ring-controller.atlas: ascend-1980
+      spec:
+        hostNetwork: True
+        containers:
+        - image: {{ image }}
+          imagePullPolicy: Always
+          securityContext:
+            privileged: true
+          name: sgl-ascend
+          env:
+          - name: HOSTNAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_IP
+            valueFrom:
+              fieldRef:
+                fieldPath: status.hostIP
+          - name: ASCEND_VISIBLE_DEVICES
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.annotations['huawei.com/ascend-1980']
+          - name: SGLANG_SOURCE_PATH
+            value: "{{ sglang_source_path }}"
+          - name: KUBECONFIG
+            value: "{{ kube_config }}"
+          - name: NAMESPACE
+            value: "ascend-sglang-single"
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+               bash $SGLANG_SOURCE_PATH/test/srt/ascend_k8s/run_ascend_deepep.sh {{ test_case }}
+          resources:
+            requests:
+              huawei.com/ascend-1980: 16
+              cpu: 4
+            limits:
+              huawei.com/ascend-1980: 16
+              cpu: 4
+          - name: ascend-driver
+            mountPath: /usr/local/Ascend/driver
+          - name: localtime
+            mountPath: /etc/localtime
+          - name: kube-config
+            mountPath: /root/script
+          - name: share
+            mountPath: /data
+          - name: modelscope
+            mountPath: /root/.cache/modelscope
+        volumes:
+        - name: kube-config
+          hostPath:
+            path: /root/script
+        - name: share
+          hostPath:
+            path: /data
+        - name: modelscope
+          hostPath:
+            path: /data/ascend-ci-share-pkking-sglang/modelscope
+        - name: ascend-driver
+          hostPath:
+            path: /usr/local/Ascend/driver
+        - name: localtime
+          hostPath:
+            path: /etc/localtime
+        nodeSelector:
+          accelerator/huawei-npu: ascend-snt9c
+        restartPolicy: OnFailure

@@ -3,17 +3,27 @@ name: 'e2e nightly test single_node (Ascend NPU)'
 on:
   workflow_call:
     inputs:
-      runner:
+      soc_version:
         required: true
         type: string
+        description: use a2 or a3
+      runner:
+        required: false
+        type: string
+        default: linux-amd64-cpu-0
       image:
         required: false
         type: string
+        description: image for pods
         default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.3.rc1-a3"
       test_config_name:
         required: true
         type: string
         description: test config name
+      sglang_source_path:
+        required: true
+        type: string
+        description: sglang source path in container
       test_case:
         required: true
         type: string
@@ -28,14 +38,62 @@ jobs:
     name: ${{ inputs.test_config_name }}
     runs-on: ${{ inputs.runner }}
     container:
-      image: ${{ inputs.image }}
+      image: swr.ap-southeast-1.myhuaweicloud.com/base_image/ascend-ci/sglang:main-x86
+      env:
+        KUBECONFIG: /data/.cache/kb.yaml
+        KUBECTL: /data/.cache/kubectl
+        NAMESPACE: ascend-sglang-single
+        ASCEND_TEST_CASE_PATH: test/srt/ascend_k8s
+        KUBE_JOB_TYPE: single
+        KUBE_JOB_NAME: ascend-sglang-single-test
     steps:
+      - name: Install system denpendencies
+        run: |
+          pip3 install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple jinja2-cli
+
+      - name: Install kubernetes
+        run: |
+          # Install kubernetes
+          pip3 install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple kubernetes
+          cp $KUBECTL /usr/local/sbin/
+
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check npu info
+      - name: Prepare scripts
         run: |
-          npu-smi info
+          # prepare for k8s yaml
+          image="${{ inputs.image }}"
+          sglang_source_path="${{ inputs.sglang_source_path }}"
+          test_case="${{ inputs.test_case }}"
+          k8s_job_name=${KUBE_JOB_NAME}-$(uuidgen)
+          export KUBE_JOB_NAME=${k8s_job_name}
+          echo "{ \"image\": $image,                                        \
+                  \"name_space\": \"$NAMESPACE\",                           \
+                  \"kube_job_name\": \"$KUBE_JOB_NAME\",                    \
+                  \"kube_config\": \"$KUBECONFIG\",                         \
+                  \"sglang_source_path\": \"$sglang_source_path\",          \
+                  \"test_case\": \"$test_case\" }"                         |\
+              jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_single.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_single.yaml
+          echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_single.yaml"
+
+      - name: Clear resources
+        run: |
+          cd $ASCEND_TEST_CASE_PATH
+          kubectl delete -f ./k8s_single.yaml --ignore-not-found=true || true
+
+          pod_name_prefix="${KUBE_JOB_NAME}-sglang-single-pod"
+          echo "kube name space: $NAMESPACE, pod name prefix: ${pod_name_prefix}"
+          while true; do
+            if kubectl get po -A -n $NAMESPACE | grep -q "${pod_name_prefix}"; then
+              echo "Found exist sglang job, sleeping for 30 seconds..."
+              sleep 30
+              kubectl get pods | grep "${pod_name_prefix}" | awk '{print $1}' | xargs kubectl delete pod -n $NAMESPACE || true
+            else
+              echo "No sglang job exist, start test case..."
+              break
+            fi
+          done
 
       - name: Run test
         timeout-minutes: 300
@@ -44,16 +102,13 @@ jobs:
           SGLANG_IS_IN_CI: true
           HF_ENDPOINT: https://hf-mirror.com
         run: |
-          # speed up by using infra cache services
-          CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
-          sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
-          pip config set global.index-url http://${CACHING_URL}/pypi/simple
-          pip config set global.extra-index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
-          pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
 
-          # copy required file from our daily cache
-          cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
-          # copy download through proxy
-          curl -o /tmp/test.jsonl -L https://gh-proxy.test.osinfra.cn/https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl
+          cd $ASCEND_TEST_CASE_PATH
+          python3 -u run_ascend_ci.py
 
-          python3 -u ${{ inputs.test_case }}
+      - name: Post process
+        if: always()
+        run: |
+          kubectl get pods -n $NAMESPACE
+          cd $ASCEND_TEST_CASE_PATH
+          kubectl delete -f ./k8s_single.yaml --ignore-not-found=true || true

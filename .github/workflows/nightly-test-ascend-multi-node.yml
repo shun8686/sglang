@@ -14,7 +14,7 @@ on:
       image:
         required: false
         type: string
-        description: base image for pods
+        description: image for pods
         default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.3.rc1-a3"
       test_config_name:
         required: true
@@ -56,6 +56,7 @@ jobs:
         KUBECTL: /data/.cache/kubectl
         NAMESPACE: ascend-sglang
         ASCEND_TEST_CASE_PATH: test/srt/ascend_k8s
+        KUBE_JOB_TYPE: multi
         KUBE_JOB_NAME: ascend-sglang-test
         KUBE_CONFIG_MAP: ascend-sglang-info
     steps:
