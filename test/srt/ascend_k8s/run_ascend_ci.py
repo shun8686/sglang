@@ -21,6 +21,16 @@ MONITOR_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME')) 
 SINGLE_NODE_YAML = "k8s_single.yaml"
 MULTI_NODE_YAML = "deepep.yaml"
 
+def run_command(cmd, shell=True):
+    try:
+        result = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, check=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"execute command error: {e}")
+        return None
+
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
     matching_string = "{}".format(os.environ.get('KUBE_JOB_NAME'))
@@ -229,10 +239,9 @@ if __name__ == "__main__":
           .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE))
     
     k8s_yaml = SINGLE_NODE_YAML if KUBE_JOB_TYPE == "single" else MULTI_NODE_YAML
-    responese = create_pod(k8s_yaml, KUBE_NAME_SPACE)
-
-    if responese:
-        print(responese)
+    result = run_command("kubectl apply -f {}".format(k8s_yaml))
+    if result:
+        print(result)
 
     if check_pods_ready(timeout=LOCAL_TIMEOUT):
         if KUBE_JOB_TYPE != "single":
