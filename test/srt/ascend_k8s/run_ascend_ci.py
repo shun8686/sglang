@@ -1,4 +1,4 @@
-import json
+import yaml
 import re
 import signal
 import subprocess
@@ -7,6 +7,7 @@ import time
 import os
 
 from kubernetes import client, config
+from kubernetes.client.rest import ApiException
 
 config.load_kube_config(os.environ.get('KUBECONFIG'))
 v1 = client.CoreV1Api()
@@ -32,91 +33,102 @@ def run_command(cmd, shell=True):
 
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
-    start_time = time.time()
     matching_string = "{}".format(os.environ.get('KUBE_JOB_NAME'))
+    start_time = time.time()
 
     while time.time() - start_time < timeout:
-        cmd = "kubectl get pods -A -o json"
+        pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
 
-        output = run_command(cmd)
-        if not output:
+        if len(pods.items) == 0:
             time.sleep(5)
             continue
 
-        try:
-            data = json.loads(output)
-            all_running = True
-            sglang_pods_found = False
-
-            for item in data.get("items", []):
-                metadata = item.get("metadata", {})
-                pod_name = metadata.get("name", "")
-                if matching_string not in pod_name:
-                    continue
-
-                sglang_pods_found = True
-                status = item.get("status", {})
-                phase = status.get("phase")
-                print(f"Pod: {pod_name}, status: {phase}")
-                if phase != "Running":
-                    all_running = False
-                    break
-
-                containers_ready = True
-                for condition in status.get("conditions", []):
-                    if condition["type"] == "Ready" and condition["status"] != "True":
-                        containers_ready = False
-                        break
-
-                if not containers_ready:
-                    all_running = False
-                    break
-
-            if not sglang_pods_found:
-                print("No sglang pod, waiting...")
-                time.sleep(5)
+        all_running = True
+        sglang_pods_found = False
+        for pod in pods.items:
+            pod_name = pod.metadata.name
+            if matching_string not in pod_name:
                 continue
-            if all_running:
-                print("All sglang Pod is Running !")
-                return True
-        except json.JSONDecodeError as e:
-            print(f"prase json error: {e}")
+            
+            sglang_pods_found = True
+            status = pod.status
+            phase = status.phase
+            print(f"Pod: {pod_name}, status: {phase}")
+            if phase != "Running":
+                all_running = False
+                break
+
+            containers_ready = True
+            for condition in status.conditions:
+                if condition["type"] == "Ready" and condition["status"] != "True":
+                    containers_ready = False
+                    break
+
+            if not containers_ready:
+                all_running = False
+                break
+
+        if not sglang_pods_found:
+            print("No sglang pod, waiting...")
+            time.sleep(5)
+            continue
+        if all_running:
+            print("All sglang Pod is Running !")
+            return True
+
         time.sleep(5)
 
     print(f"timeout in {timeout}s")
     return False
 
+def create_configmap(cm_name: str, data: dict, namespace: str):
+    cm_metadata = client.V1ObjectMeta(name=cm_name, namespace=namespace)
+    configmap = client.V1ConfigMap(
+        api_version="v1",
+        kind="ConfigMap",
+        metadata=cm_metadata,
+        data=data)
 
-def create_configmap():
+    try:
+        response = v1.create_namespaced_config_map(
+            namespace=namespace,
+            body=configmap,
+            pretty=True
+        )
+        print(f"ConfigMap '{cm_name}' create successfully！")
+        print(f"data: {list(data.keys())}")
+        return response
+    except ApiException as e:
+        error_msg = f"ConfigMap create failed: {e.reason}"
+        if e.body:
+            error_msg += f" | details: {e.body}"
+        print(error_msg)
+        raise
+
+
+def create_configmap_for_cluster():
     pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
-    matching_pods = []
-    matching_string = "{}".format(os.environ.get('KUBE_JOB_NAME'))
+    cm_data = {}
+    matching_string = os.environ.get('KUBE_JOB_NAME')
 
     for pod in pods.items:
         pod_name = pod.metadata.name
         if matching_string in pod_name:
             pod_ip = pod.status.pod_ip
-            matching_pods.append(f" {pod_name}: {pod_ip}")
+            cm_data[pod_name] = pod_ip
 
-    if not matching_pods:
-        print("no sglang pod info")
+    if not cm_data:
+        print("no sglang pod info while matching {}".format(matching_string))
         return
-    
-    # generate ConfigMap YAML
-    configmap_yaml = """apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {}
-  namespace: {}
-data:
-""".format(KUBE_CONFIG_MAP, KUBE_NAME_SPACE)
-    configmap_yaml += "\n".join(matching_pods)
 
-    # apply ConfigMap
-    result = run_command(f"echo '{configmap_yaml}' | kubectl apply -f -")
-    if result:
-        print("Create ConfigMap successfully!")
-        print(result)
+    response = create_configmap(
+        cm_name=KUBE_CONFIG_MAP,
+        data=cm_data,
+        namespace=KUBE_NAME_SPACE
+    )
+
+    print("Create ConfigMap successfully!")
+    print(response)
 
 def monitor_pod_logs(pod_name, namespace=None, timeout=None):
     class TimeoutException(Exception):
@@ -228,8 +240,9 @@ if __name__ == "__main__":
 
     if check_pods_ready(timeout=LOCAL_TIMEOUT):
         if KUBE_JOB_TYPE != "single":
-            create_configmap() 
+            create_configmap_for_cluster() 
     else:
         print("Pod not ready, maybe not enough resource")
 
     monitor_pod_logs(MONITOR_POD_NAME, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
+
