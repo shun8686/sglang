@@ -18,18 +18,8 @@ KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
 KUBE_JOB_TYPE = os.environ.get('KUBE_JOB_TYPE')
 MONITOR_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE != "single" else \
     "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME'))
-
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
-
+SINGLE_NODE_YAML = "k8s_single.yaml"
+MULTI_NODE_YAML = "deepep.yaml"
 
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
@@ -105,30 +95,36 @@ def create_configmap(cm_name: str, data: dict, namespace: str):
         print(error_msg)
         raise
 
-
-def create_configmap_for_cluster():
+def repare_cm_data(matching_pod_string):
     pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
     cm_data = {}
-    matching_string = os.environ.get('KUBE_JOB_NAME')
 
     for pod in pods.items:
         pod_name = pod.metadata.name
-        if matching_string in pod_name:
+        if matching_pod_string in pod_name:
             pod_ip = pod.status.pod_ip
             cm_data[pod_name] = pod_ip
+    return cm_data
 
-    if not cm_data:
-        print("no sglang pod info while matching {}".format(matching_string))
-        return
-
-    response = create_configmap(
-        cm_name=KUBE_CONFIG_MAP,
-        data=cm_data,
-        namespace=KUBE_NAME_SPACE
-    )
-
-    print("Create ConfigMap successfully!")
-    print(response)
+def create_pod(yaml_file_path, namespace):
+    with open(yaml_file_path, "r", encoding="utf-8") as f:
+        pod_yaml = yaml.safe_load(f)
+    
+    try:
+        response = v1.create_namespaced_pod(
+        namespace=namespace,
+        body=pod_yaml,
+        pretty=True,
+        replace=True
+        )
+        print(f"Pod create successfully! Pod name: {response.metadata.name}")
+        print(f"Pod Status: {response.status.phase}")
+        return response
+    
+    except ApiException as e:
+        print(f"Pod create failed! Error info: {e.reason}")
+        print(f"Error details: {e.body}")
+        raise
 
 def monitor_pod_logs(pod_name, namespace=None, timeout=None):
     class TimeoutException(Exception):
@@ -229,18 +225,26 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
             except subprocess.TimeoutExpired:
                 process.kill()
 
-
 if __name__ == "__main__":    
     print("apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}"
           .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE))
-    k8s_yaml = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "deepep.yaml"
-    result = run_command("kubectl apply -f {}".format(k8s_yaml))
-    if result:
-        print(result)
+    
+    k8s_yaml = SINGLE_NODE_YAML if KUBE_JOB_TYPE == "single" else MULTI_NODE_YAML
+    responese = create_pod(k8s_yaml)
+
+    if responese:
+        print(responese)
 
     if check_pods_ready(timeout=LOCAL_TIMEOUT):
         if KUBE_JOB_TYPE != "single":
-            create_configmap_for_cluster() 
+            matching_pod_string = os.environ.get('KUBE_JOB_NAME')
+            cm_data = repare_cm_data(matching_pod_string)
+            if not cm_data:
+                print(f"No sglang pod found while matching {matching_pod_string}")
+                
+            response = create_configmap(cm_name=KUBE_CONFIG_MAP, data=cm_data, namespace=KUBE_NAME_SPACE)
+            print("Create ConfigMap successfully!")
+            print(response)
     else:
         print("Pod not ready, maybe not enough resource")
 
