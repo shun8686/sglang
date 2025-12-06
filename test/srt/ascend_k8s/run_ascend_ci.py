@@ -110,12 +110,11 @@ def create_pod(yaml_file_path, namespace):
     with open(yaml_file_path, "r", encoding="utf-8") as f:
         pod_yaml = yaml.safe_load(f)
     
+    print(f"Begin to create pod. Namespace:{namespace}, yaml: {yaml_file_path}")
     try:
         response = v1.create_namespaced_pod(
-        namespace=namespace,
-        body=pod_yaml,
-        pretty=True,
-        replace=True
+            namespace=namespace,
+            body=pod_yaml
         )
         print(f"Pod create successfully! Pod name: {response.metadata.name}")
         print(f"Pod Status: {response.status.phase}")
@@ -230,7 +229,7 @@ if __name__ == "__main__":
           .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE))
     
     k8s_yaml = SINGLE_NODE_YAML if KUBE_JOB_TYPE == "single" else MULTI_NODE_YAML
-    responese = create_pod(k8s_yaml)
+    responese = create_pod(k8s_yaml, KUBE_NAME_SPACE)
 
     if responese:
         print(responese)
