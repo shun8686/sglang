@@ -1,5 +1,8 @@
 import os
 import subprocess
+import sys
+import datetime
+
 import psutil
 import socket
 import unittest
@@ -24,7 +27,8 @@ def get_nic_name():
 
 NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
 
-QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+# QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+QWEN3_32B_MODEL_PATH = "/home/weights/Qwen3-32B-Int8"  #
 QWEN3_32B_OTHER_ARGS = [
         "--trust-remote-code",
         "--nnodes",
@@ -81,9 +85,9 @@ def run_command(cmd, shell=True):
         print(f"command error: {e}")
         return None
 
-def run_bench_serving(host, port, dataset_name="random", request_rate=8.0, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
+def run_bench_serving(host, port, dataset_name="random", dataset_path="", request_rate=8.0, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
                       random_range_ratio=1.0):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name {dataset_name} --request-rate {request_rate} "
+    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name {dataset_name} --dataset-path {dataset_path} --request-rate {request_rate} "
                f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
                f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
     print(f"command:{command}")
@@ -93,6 +97,7 @@ def run_bench_serving(host, port, dataset_name="random", request_rate=8.0, max_c
 class TestLTSQwen332B(CustomTestCase):
     model = QWEN3_32B_MODEL_PATH
     dataset_name = "random"
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
     other_args = QWEN3_32B_OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = QWEN3_32B_ENVS
@@ -104,8 +109,8 @@ class TestLTSQwen332B(CustomTestCase):
     random_range_ratio = 0.5
     ttft = 10000
     tpot = 30
-    output_token_throughput = 500
-    accuracy = 0.00
+    output_token_throughput = 350
+    accuracy = 0.80
 
     print("Nic name: {}".format(NIC_NAME))
 
@@ -134,6 +139,7 @@ class TestLTSQwen332B(CustomTestCase):
             host=host,
             port=port,
             dataset_name=self.dataset_name,
+            dataset_path=self.dataset_path,
             request_rate=self.request_rate,
             max_concurrency=self.max_concurrency,
             num_prompts=self.num_prompts,
@@ -151,35 +157,20 @@ class TestLTSQwen332B(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        # self.assertLessEqual(
-        #     float(res_ttft),
-        #     self.ttft,
-        # )
-        # self.assertLessEqual(
-        #     float(res_tpot),
-        #     self.tpot,
-        # )
-        # self.assertGreaterEqual(
-        #     float(res_output_token_throughput),
-        #     self.output_token_throughput,
-        # )
-        self.assertGreater(
+        self.assertLessEqual(
             float(res_ttft),
-            0,
+            self.ttft,
         )
-        self.assertGreater(
+        self.assertLessEqual(
             float(res_tpot),
-            0,
+            self.tpot,
         )
-        self.assertGreater(
+        self.assertGreaterEqual(
             float(res_output_token_throughput),
-            0,
+            self.output_token_throughput,
         )
 
-    def test_qwen3_32b(self):
-        self.run_throughput()
-
-    def test_gsm8k(self):
+    def run_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -196,5 +187,32 @@ class TestLTSQwen332B(CustomTestCase):
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
         )
 
+    def test_lts_qwen3_32b(self):
+        i = 0
+        while True:
+            i = i + 1
+            time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"=============={time_str}  Execute the {i}-th long-term stability test==============")
+            self.run_throughput()
+            self.run_gsm8k()
+
+
 if __name__ == "__main__":
-    unittest.main()
+    now = datetime.datetime.now()
+    datetime = now.strftime("%Y%m%d%H%")
+    log_file = "/tmp_lte_test_qwen3_32b_" + datetime + ".log"
+
+    with open(log_file, 'w', encoding="utf-8") as f:
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        sys.stdout = f
+        sys.stderr = f
+
+        try:
+            unittest.main(verbosity=2)
+        finally:
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr
+
+    print(f"Test log saved to {log_file}")
+
