@@ -191,16 +191,15 @@ class TestLTSQwen332B(CustomTestCase):
         i = 0
         while True:
             i = i + 1
-            time_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"=============={time_str}  Execute the {i}-th long-term stability test==============")
+            time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f"=============={time_str_1}  Execute the {i}-th long-term stability test==============")
             self.run_throughput()
             self.run_gsm8k()
 
 
 if __name__ == "__main__":
-    now = datetime.datetime.now()
-    datetime = now.strftime("%Y%m%d%H%")
-    log_file = "/tmp_lte_test_qwen3_32b_" + datetime + ".log"
+    time_str = datetime.datetime.now().strftime("%Y%m%d%H")
+    log_file = "/tmp/lts_test_qwen3_32b_" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
         original_stdout = sys.stdout
