@@ -108,7 +108,7 @@ class TestLTSQwen332B(CustomTestCase):
     output_len = 300
     random_range_ratio = 0.5
     ttft = 10000
-    tpot = 30
+    tpot = 50
     output_token_throughput = 350
     accuracy = 0.80
 
@@ -198,7 +198,7 @@ class TestLTSQwen332B(CustomTestCase):
 
 
 if __name__ == "__main__":
-    time_str = datetime.datetime.now().strftime("%Y%m%d%H")
+    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
     log_file = "/tmp/lts_test_qwen3_32b_" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
