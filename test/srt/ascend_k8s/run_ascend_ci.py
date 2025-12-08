@@ -18,8 +18,9 @@ KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
 KUBE_JOB_TYPE = os.environ.get('KUBE_JOB_TYPE')
 MONITOR_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE != "single" else \
     "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME'))
-SINGLE_NODE_YAML = "k8s_single.yaml"
-MULTI_NODE_YAML = "deepep.yaml"
+KUBE_YAML_FILE = os.environ.get('KUBE_YAML_FILE')
+if not KUBE_YAML_FILE:
+    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "deepep.yaml"
 
 def run_command(cmd, shell=True):
     try:
@@ -81,7 +82,7 @@ def check_pods_ready(timeout=300):
     print(f"timeout in {timeout}s")
     return False
 
-def create_configmap(cm_name: str, data: dict, namespace: str):
+def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
     cm_metadata = client.V1ObjectMeta(name=cm_name, namespace=namespace)
     configmap = client.V1ConfigMap(
         api_version="v1",
@@ -106,6 +107,7 @@ def create_configmap(cm_name: str, data: dict, namespace: str):
                 body=configmap
             )
             print(f"ConfigMap {cm_name} updated successfully.")
+            return response
         else:
             error_msg = f"ConfigMap create failed: {e.reason}"
             if e.body:
@@ -243,11 +245,10 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
                 process.kill()
 
 if __name__ == "__main__":    
-    print("apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}"
-          .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE))
+    print("apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}, KUBE_YAML_FILE:{}"
+          .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE, KUBE_YAML_FILE))
     
-    k8s_yaml = SINGLE_NODE_YAML if KUBE_JOB_TYPE == "single" else MULTI_NODE_YAML
-    result = run_command("kubectl apply -f {}".format(k8s_yaml))
+    result = run_command("kubectl apply -f {}".format(KUBE_YAML_FILE))
     if result:
         print(result)
 
@@ -258,8 +259,7 @@ if __name__ == "__main__":
             if not cm_data:
                 print(f"No sglang pod found while matching {matching_pod_string}")
                 
-            response = create_configmap(cm_name=KUBE_CONFIG_MAP, data=cm_data, namespace=KUBE_NAME_SPACE)
-            print("Create ConfigMap successfully!")
+            response = create_or_update_configmap(cm_name=KUBE_CONFIG_MAP, data=cm_data, namespace=KUBE_NAME_SPACE)
             print(response)
     else:
         print("Pod not ready, maybe not enough resource")
