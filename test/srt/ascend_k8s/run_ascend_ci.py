@@ -106,11 +106,12 @@ def create_configmap(cm_name: str, data: dict, namespace: str):
                 body=configmap
             )
             print(f"ConfigMap {cm_name} updated successfully.")
-        error_msg = f"ConfigMap create failed: {e.reason}"
-        if e.body:
-            error_msg += f" | details: {e.body}"
-        print(error_msg)
-        raise
+        else:
+            error_msg = f"ConfigMap create failed: {e.reason}"
+            if e.body:
+                error_msg += f" | details: {e.body}"
+            print(error_msg)
+            raise
 
 def repare_cm_data(matching_pod_string):
     pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
