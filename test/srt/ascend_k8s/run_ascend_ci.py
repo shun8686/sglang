@@ -1,4 +1,3 @@
-import yaml
 import re
 import signal
 import subprocess
@@ -125,25 +124,6 @@ def repare_cm_data(matching_pod_string):
             pod_ip = pod.status.pod_ip
             cm_data[pod_name] = pod_ip
     return cm_data
-
-def create_pod(yaml_file_path, namespace):
-    with open(yaml_file_path, "r", encoding="utf-8") as f:
-        pod_yaml = yaml.safe_load(f)
-    
-    print(f"Begin to create pod. Namespace:{namespace}, yaml: {yaml_file_path}")
-    try:
-        response = v1.create_namespaced_pod(
-            namespace=namespace,
-            body=pod_yaml
-        )
-        print(f"Pod create successfully! Pod name: {response.metadata.name}")
-        print(f"Pod Status: {response.status.phase}")
-        return response
-    
-    except ApiException as e:
-        print(f"Pod create failed! Error info: {e.reason}")
-        print(f"Error details: {e.body}")
-        raise
 
 def monitor_pod_logs(pod_name, namespace=None, timeout=None):
     class TimeoutException(Exception):
