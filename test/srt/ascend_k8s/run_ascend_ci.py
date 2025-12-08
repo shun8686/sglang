@@ -245,4 +245,3 @@ if __name__ == "__main__":
         print("Pod not ready, maybe not enough resource")
 
     monitor_pod_logs(MONITOR_POD_NAME, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
-
