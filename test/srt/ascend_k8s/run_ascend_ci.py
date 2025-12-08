@@ -60,7 +60,7 @@ def check_pods_ready(timeout=300):
 
             containers_ready = True
             for condition in status.conditions:
-                if condition["type"] == "Ready" and condition["status"] != "True":
+                if condition.type == "Ready" and condition.status != "True":
                     containers_ready = False
                     break
 
@@ -92,13 +92,20 @@ def create_configmap(cm_name: str, data: dict, namespace: str):
     try:
         response = v1.create_namespaced_config_map(
             namespace=namespace,
-            body=configmap,
-            pretty=True
+            body=configmap
         )
         print(f"ConfigMap '{cm_name}' create successfully！")
         print(f"data: {list(data.keys())}")
         return response
     except ApiException as e:
+        if e.status == 409:
+            print(f"ConfigMap {cm_name} already exists. Updating...")
+            response = v1.replace_namespaced_config_map(
+                namespace=namespace,
+                name=cm_name,
+                body=configmap
+            )
+            print(f"ConfigMap {cm_name} updated successfully.")
         error_msg = f"ConfigMap create failed: {e.reason}"
         if e.body:
             error_msg += f" | details: {e.body}"
