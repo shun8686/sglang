@@ -2,6 +2,7 @@ import unittest
 
 from test_ascend_single_mix_utils import (
     TestSingleMixUtils,
+    NIC_NAME
 )
 
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
@@ -10,8 +11,8 @@ QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
     "HCCL_BUFFSIZE": "1536",
-    "HCCL_SOCKET_IFNAME": "enp23s0f3",
-    "GLOO_SOCKET_IFNAME": "enp23s0f3",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "ENABLE_ASCEND_MOE_NZ": "1",
     "USE_DEEPEP_INT8": "1",
