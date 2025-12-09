@@ -10,6 +10,7 @@ MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Howeee/D
 MODEL_CONFIG = {
     "model_path": MODEL_PATH,
     "prefill_envs": {
+        "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MLAPO": "1",
@@ -23,6 +24,7 @@ MODEL_CONFIG = {
         "GLOO_SOCKET_IFNAME": NIC_NAME,
     },
     "decode_envs": {
+        "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MLAPO": "1",

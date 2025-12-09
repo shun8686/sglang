@@ -38,7 +38,7 @@ QWEN3_8B_OTHER_ARGS = (
         "--max-prefill-tokens",
         "525000",
         "--tp-size",
-        "4",
+        "2",
         "--mem-fraction-static",
         "0.8",
         "--cuda-graph-bs",
@@ -58,9 +58,9 @@ class TestQwen3_8B(TestSingleMixUtils):
     input_len = 1000
     output_len = 300
     random_range_ratio = 0.5
-    ttft = 291.95
-    tpot = 18.83
-    output_token_throughput = 404.29
+    ttft = 246.29
+    tpot = 6.96
+    output_token_throughput = 1874.81
 
     def test_qwen3_8b(self):
         self.run_throughput()

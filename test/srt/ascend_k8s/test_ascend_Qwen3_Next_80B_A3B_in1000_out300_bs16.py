@@ -39,7 +39,7 @@ Qwen3_Next_80B_A3B_OTHER_ARGS = [
 ]
 
 Qwen3_Next_80B_A3B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "0",
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
