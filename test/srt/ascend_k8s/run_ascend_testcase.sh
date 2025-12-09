@@ -14,7 +14,6 @@ pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
 
 pip install kubernetes
 pip3 install xgrammar==0.1.25
-source /usr/local/Ascend/ascend-toolkit/set_env.sh
 
 # copy or download required file
 cp /data/ascend-ci-share-pkking-sglang/huggingface/hub/datasets--anon8231489123--ShareGPT_Vicuna_unfiltered/snapshots/192ab2185289094fc556ec8ce5ce1e8e587154ca/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
@@ -23,8 +22,17 @@ curl -o /tmp/test.jsonl -L https://gh-proxy.test.osinfra.cn/https://raw.githubus
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
+sysctl -w kernel.sched_migration_cost_ns=50000
 
 export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
+unset https_proxy
+unset http_proxy
+unset HTTPS_PROXY
+unset HTTP_PROXY
+unset ASCEND_LAUNCH_BLOCKING
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+source /usr/local/Ascend/nnal/atb/set_env.sh
+source /usr/local/Ascend/ascend-toolkit/latest/opp/vendors/customize/bin/set_env.bash
 source /usr/local/Ascend/8.5.0/bisheng_toolkit/set_env.sh
 
 echo "Running test case ${test_case}"
