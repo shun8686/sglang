@@ -60,9 +60,9 @@ class TestQwen3_Next_80B_A3B(TestSingleMixUtils):
     input_len = 1000
     output_len = 300
     random_range_ratio = 0.5
-    ttft = 10000
-    tpot = 100
-    output_token_throughput = 300
+    ttft = 5000
+    tpot = 50
+    output_token_throughput = 600
 
     def test_qwen3_next_80b_a3b(self):
         self.run_throughput()

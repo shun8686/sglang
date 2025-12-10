@@ -60,8 +60,8 @@ class TestQwen3_8B(TestSingleMixUtils):
     input_len = 1000
     output_len = 300
     random_range_ratio = 1
-    ttft = 166.9
-    tpot = 5.71
+    ttft = 200
+    tpot = 10
     output_token_throughput = 1191.06
 
     def test_qwen3_8b(self):

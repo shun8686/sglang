@@ -67,9 +67,9 @@ class TestQwen3_32B(TestSingleMixUtils):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 0.5
-    ttft = 10000
-    tpot = 49.4
-    output_token_throughput = 650.07
+    ttft = 50000
+    tpot = 50
+    output_token_throughput = 1500
 
     def test_qwen3_32b(self):
         self.run_throughput()

@@ -339,18 +339,18 @@ class TestAscendDisaggregationUtils(CustomTestCase):
             res_output_token_throughput = run_command(
                 "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
             )
-            # self.assertLessEqual(
-            #     float(res_ttft),
-            #     self.ttft,
-            # )
-            # self.assertLessEqual(
-            #     float(res_tpot),
-            #     self.tpot,
-            # )
-            # self.assertGreaterEqual(
-            #     float(res_output_token_throughput),
-            #     self.output_token_throughput,
-            # )
+            self.assertLessEqual(
+                float(res_ttft),
+                self.ttft,
+            )
+            self.assertLessEqual(
+                float(res_tpot),
+                self.tpot,
+            )
+            self.assertGreaterEqual(
+                float(res_output_token_throughput),
+                self.output_token_throughput,
+            )
             self.assertGreater(
                 float(res_ttft),
                 0,

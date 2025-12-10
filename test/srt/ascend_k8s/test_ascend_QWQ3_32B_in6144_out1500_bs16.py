@@ -66,8 +66,8 @@ class TestQWQ_32B(TestSingleMixUtils):
     input_len = 6144
     output_len = 1500
     random_range_ratio = 0.5
-    ttft = 10000
-    tpot = 22.79
+    ttft = 5000
+    tpot = 20
     output_token_throughput = 300
 
     def test_qwq_32b(self):

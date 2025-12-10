@@ -70,10 +70,10 @@ jobs:
       matrix:
         test_config:
           - name: test_ascend_qwen3_8b_in1000_out300_bs8
-            os: linux-aarch64-a3-4
+            os: linux-aarch64-a3-2
             test_case: test/srt/ascend_k8s/test_ascend_qwen3_8b_in1000_out300_bs8.py
           - name: test_ascend_qwen3_8b_in1000_out300_bs16
-            os: linux-aarch64-a3-4
+            os: linux-aarch64-a3-2
             test_case: test/srt/ascend_k8s/test_ascend_qwen3_8b_in1000_out300_bs16.py
           - name: test_ascend_QWQ3_32B_in6144_out1500_bs16
             os: linux-aarch64-a3-4

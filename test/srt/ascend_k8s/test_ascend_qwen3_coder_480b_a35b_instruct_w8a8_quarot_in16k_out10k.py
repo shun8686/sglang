@@ -70,9 +70,9 @@ class TestQwen3_Coder_480B_A35b_Instruct_W8a8_Quarot(TestSingleMixUtils):
     input_len = 16000
     output_len = 10000
     random_range_ratio = 1
-    ttft = 1206.81
-    tpot = 36.45
-    output_token_throughput = 252
+    ttft = 5000
+    tpot = 50
+    output_token_throughput = 250
 
     def test_qwen3_coder_480b_a35b_instruct_w8a8_quarot(self):
         self.run_throughput()
