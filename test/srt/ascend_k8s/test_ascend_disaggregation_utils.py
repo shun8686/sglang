@@ -270,7 +270,22 @@ def run_bench_serving(host, port, model_path, dataset_name="random", request_rat
                f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
     print(f"command:{command}")
     metrics = run_command(f"{command} | tee ./bench_log.txt")
-    return metrics
+    print("metrics is " + str(metrics))
+    mean_ttft = run_command(
+        "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
+    )
+    mean_tpot = run_command(
+        "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
+    )
+    total_tps = run_command(
+        "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
+    )
+    result = {
+        'mean_ttft': mean_ttft,
+        'mean_tpot': mean_tpot,
+        'total_tps': total_tps
+    }
+    return result
 
 
 class TestAscendDisaggregationUtils(CustomTestCase):
@@ -329,38 +344,28 @@ class TestAscendDisaggregationUtils(CustomTestCase):
                 output_len=self.output_len,
                 random_range_ratio=self.random_range_ratio,
             )
-            print("metrics is " + str(metrics))
-            res_ttft = run_command(
-                "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
-            )
-            res_tpot = run_command(
-                "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
-            )
-            res_output_token_throughput = run_command(
-                "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
-            )
             self.assertLessEqual(
-                float(res_ttft),
+                float(metrics['mean_ttft']),
                 self.ttft,
             )
             self.assertLessEqual(
-                float(res_tpot),
+                float(metrics['mean_tpot']),
                 self.tpot,
             )
             self.assertGreaterEqual(
-                float(res_output_token_throughput),
+                float(metrics['total_tps']),
                 self.output_token_throughput,
             )
             self.assertGreater(
-                float(res_ttft),
+                float(metrics['mean_ttft']),
                 0,
             )
             self.assertGreater(
-                float(res_tpot),
+                float(metrics['mean_tpot']),
                 0,
             )
             self.assertGreater(
-                float(res_output_token_throughput),
+                float(metrics['total_tps']),
                 0,
             )
         else:
