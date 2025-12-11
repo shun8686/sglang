@@ -21,7 +21,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "78",
+        "16",
         "--context-length",
         "8192",
         "--enable-hierarchical-cache",
@@ -64,6 +64,7 @@ class TestQwen3_32B(TestSingleMixUtils):
     dataset_name = "random"
     request_rate = 5.5
     max_concurrency = 16
+    num_prompts = int(max_concurrency) * 4
     input_len = 6144
     output_len = 1500
     random_range_ratio = 0.5

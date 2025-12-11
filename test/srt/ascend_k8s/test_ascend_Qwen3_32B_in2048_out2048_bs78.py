@@ -64,6 +64,7 @@ class TestQwen3_32B(TestSingleMixUtils):
     dataset_name = "random"
     request_rate = 5.5
     max_concurrency = 78
+    num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
     random_range_ratio = 0.5

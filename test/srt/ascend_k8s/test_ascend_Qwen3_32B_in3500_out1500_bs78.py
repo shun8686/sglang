@@ -22,13 +22,6 @@ QWEN3_32B_OTHER_ARGS = (
         "modelslim",
         "--max-running-requests",
         "78",
-        "--context-length",
-        "8192",
-        "--enable-hierarchical-cache",
-        "--hicache-write-policy",
-        "write_through",
-        "--hicache-ratio",
-        "3",
         "--chunked-prefill-size",
         "43008",
         "--max-prefill-tokens",
@@ -36,7 +29,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--tp-size",
         "4",
         "--mem-fraction-static",
-        "0.68",
+        "0.8",
         "--cuda-graph-bs",
         "78",
         "--dtype",
@@ -64,6 +57,7 @@ class TestQwen3_32B(TestSingleMixUtils):
     dataset_name = "random"
     request_rate = 5.5
     max_concurrency = 78
+    num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 0.5

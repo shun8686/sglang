@@ -6,8 +6,8 @@ from test_ascend_single_mix_utils import (
 )
 
 # DEEPSEEK_R1_0528_W4A8_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
-#MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+#MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 MODEL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
@@ -15,8 +15,8 @@ MODEL_ENVS = {
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
-    "HCCL_BUFFSIZE": "1300",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+    "HCCL_BUFFSIZE": "1600",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "SGLANG_NPU_USE_MLAPO": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
@@ -40,13 +40,13 @@ MODEL_OTHER_ARGS = (
         "--cuda-graph-bs",
         "8",
         "16",
-        # "24",
-        # "28",
-        # "32",
+        "24",
+        "28",
+        "32",
         "--mem-fraction-static",
-        "0.85",
+        "0.84",
         "--max-running-requests",
-        "16",
+        "128",
         "--context-length",
         "8188",
         "--disable-radix-cache",
@@ -67,11 +67,11 @@ MODEL_OTHER_ARGS = (
         "--speculative-algorithm",
         "NEXTN",
         "--speculative-num-steps",
-        "1",
+        "3",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "2",
+        "4",
         "--dtype",
         "bfloat16",
     ]
@@ -83,8 +83,8 @@ class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleMixUtils):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    request_rate = 16
-    max_concurrency = 4
+    request_rate = 13
+    max_concurrency = 128
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
