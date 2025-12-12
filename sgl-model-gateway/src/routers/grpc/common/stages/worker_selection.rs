@@ -10,9 +10,9 @@ use super::PipelineStage;
 use crate::{
     core::{ConnectionMode, Worker, WorkerRegistry, WorkerType},
     policies::PolicyRegistry,
-    routers::grpc::{
-        context::{RequestContext, WorkerSelection},
+    routers::{
         error,
+        grpc::context::{RequestContext, WorkerSelection},
     },
 };
 
@@ -124,11 +124,9 @@ impl WorkerSelectionStage {
             false, // get all workers, we'll filter by is_available() next
         );
 
-        let available: Vec<Arc<dyn Worker>> = workers
-            .iter()
-            .filter(|w| w.is_available())
-            .cloned()
-            .collect();
+        // Use into_iter() to take ownership of Arcs without cloning (avoids atomic inc/dec)
+        let available: Vec<Arc<dyn Worker>> =
+            workers.into_iter().filter(|w| w.is_available()).collect();
 
         if available.is_empty() {
             return None;

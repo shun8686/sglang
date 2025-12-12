@@ -16,10 +16,12 @@ use crate::{
             ResponseStatus, ResponseUsage, ResponsesRequest, ResponsesResponse, ResponsesUsage,
         },
     },
-    routers::grpc::{
-        common::{response_collection, response_formatting},
-        context::{DispatchMetadata, ExecutionResult},
+    routers::{
         error,
+        grpc::{
+            common::{response_collection, response_formatting},
+            context::{DispatchMetadata, ExecutionResult},
+        },
     },
 };
 
@@ -128,7 +130,7 @@ impl HarmonyResponseProcessor {
                 .created(dispatch.created)
                 .choices(choices)
                 .usage(usage)
-                .maybe_system_fingerprint(dispatch.weight_version.clone())
+                .maybe_system_fingerprint(dispatch.weight_version.as_deref())
                 .build(),
         )
     }
