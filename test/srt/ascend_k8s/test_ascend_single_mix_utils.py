@@ -3,7 +3,7 @@ import subprocess
 import psutil
 import socket
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -73,10 +73,16 @@ def run_command(cmd, shell=True):
         return None
 
 def run_bench_serving(host, port, dataset_name="random", request_rate=8, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
-                      random_range_ratio=1):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name {dataset_name} --request-rate {request_rate} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
-               f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+                      random_range_ratio=1, dataset_path=None):
+    dataset_configs = (f"--dataset-name {dataset_name}")
+    random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+    if dataset_name == "gsm8k":
+        dataset_configs = (f"{dataset_configs} --dataset-path {dataset_path}")
+        random_configs = (f"--random-input-len {input_len} --random-output-len {output_len}")
+
+    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} {dataset_configs} --request-rate {request_rate} "
+               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
+
     print(f"command:{command}")
     metrics = run_command(f"{command} | tee ./bench_log.txt")
     print("metrics is " + str(metrics))
@@ -99,6 +105,7 @@ def run_bench_serving(host, port, dataset_name="random", request_rate=8, max_con
 class TestSingleMixUtils(CustomTestCase):
     model = None
     dataset_name = None
+    dataset_path = None
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = None
@@ -145,6 +152,7 @@ class TestSingleMixUtils(CustomTestCase):
             input_len=self.input_len,
             output_len=self.output_len,
             random_range_ratio=self.random_range_ratio,
+            dataset_path=self.dataset_path
         )
         self.assertLessEqual(
             float(metrics['mean_ttft']),
