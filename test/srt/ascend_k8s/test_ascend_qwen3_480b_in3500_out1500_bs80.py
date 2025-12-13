@@ -21,7 +21,7 @@ Qwen3_480B_OTHER_ARGS = [
     "--context-length",
     "8192",
     "--dtype",
-    "bfloat16"
+    "bfloat16",
     "--chunked-prefill-size",
     "32768",
     "--max-prefill-tokens",
