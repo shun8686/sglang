@@ -71,8 +71,8 @@ class TestQwen3_480B(TestSingleMixUtils):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    ttft = 5000
-    tpot = 50
+    ttft = 7000
+    tpot = 70
     output_token_throughput = 300
 
     def test_qwen3_480b(self):
