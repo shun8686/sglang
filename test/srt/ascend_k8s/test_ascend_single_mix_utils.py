@@ -140,8 +140,6 @@ class TestSingleMixUtils(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def run_throughput(self):
-        print(f"max_concurrency: {self.max_concurrency}")
-        print(f"num_prompts: {self.num_prompts}")
         _, host, port = self.base_url.split(":")
         host = host[2:]
         metrics = run_bench_serving(
