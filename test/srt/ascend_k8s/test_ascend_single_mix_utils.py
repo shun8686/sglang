@@ -21,47 +21,6 @@ def get_nic_name():
 
 NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
 
-QWEN3_30B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
-QWEN3_30B_A3B_OTHER_ARGS = (
-    [
-        "--tp",
-        "1",
-        "--trust-remote-code",
-        "--attention-backend",
-        "ascend",
-        "--device",
-        "npu",
-        "--watchdog-timeout",
-        "9000",
-        "--mem-fraction-static",
-        "0.9",
-        "--max-running-requests",
-        "48",
-        "--cuda-graph-bs",
-        "48",
-        "--dtype",
-        "bfloat16",
-        "--disable-radix-cache",
-        "--chunked-prefill-size",
-        "15360",
-        "--max-prefill-tokens",
-        "15360",
-    ]
-)
-QWEN3_30B_A3B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
-    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-    "STREAMS_PER_DEVICE": "32",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
-    "HCCL_BUFFSIZE": "1536",
-    "SGLANG_USE_FIA_NZ": "1",
-    "SGLANG_DEEPEP_BF16_DISPATCH": "1",
-    "HCCL_OP_EXPANSION_MODE": "AIV",
-}
-
-
 def run_command(cmd, shell=True):
     try:
         result = subprocess.run(
