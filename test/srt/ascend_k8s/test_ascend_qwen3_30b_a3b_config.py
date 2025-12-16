@@ -1,8 +1,8 @@
 from sglang.srt.utils import is_npu
 from test_ascend_single_mix_utils import NIC_NAME
 
-QWEN3_30B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
-QWEN3_A3B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-a3B_eagle3"
+QWEN3_30B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-30B-A3B-w8a8"
+QWEN3_A3B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-a3B_eagle3"
 
 QWEN3_30B_A3B_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
