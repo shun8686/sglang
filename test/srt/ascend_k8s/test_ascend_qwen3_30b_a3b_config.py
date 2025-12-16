@@ -46,7 +46,7 @@ QWEN3_30B_A3B_OTHER_ARGS = (
         "--dtype",
         "bfloat16",
         "--speculative-algorithm",
-        "EAGLE3"
+        "EAGLE3",
         "--speculative-draft-model-path",
         QWEN3_A3B_EAGLE_MODEL_PATH,
         "--speculative-num-steps",
