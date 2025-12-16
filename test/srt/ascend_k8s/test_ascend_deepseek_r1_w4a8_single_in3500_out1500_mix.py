@@ -11,6 +11,7 @@ MODEL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
+#    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "36",
@@ -81,7 +82,6 @@ class Test_Ascend_DeepSeek_R1_W4A8_In3500_Out3500(TestSingleMixUtils):
     envs = MODEL_ENVS
     dataset_name = "gsm8k"
     dataset_path = "/root/.cache/modelscope/hub/datasets/DeepSeek-R1-0528-w4a8/GSM8K-in3500-mix-jsonl"
-    request_rate = 13
     max_concurrency = 128
     num_prompts = int(max_concurrency) * 4
     input_len = 3500

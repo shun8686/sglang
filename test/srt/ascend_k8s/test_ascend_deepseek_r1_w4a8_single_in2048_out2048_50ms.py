@@ -13,6 +13,7 @@ MODEL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "48",
@@ -85,7 +86,6 @@ class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleMixUtils):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    request_rate = 13
     max_concurrency = 192
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
