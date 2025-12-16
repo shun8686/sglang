@@ -14,6 +14,7 @@ use axum::{
     routing::{delete, get, post},
     serve, Json, Router,
 };
+use rustls::crypto::ring;
 use serde::Deserialize;
 use serde_json::{json, Value};
 use tokio::{net::TcpListener, signal, spawn};
@@ -23,18 +24,20 @@ use crate::{
     app_context::AppContext,
     config::{RouterConfig, RoutingMode},
     core::{
-        worker_to_info,
-        workflow::{
+        steps::{
             create_external_worker_registration_workflow, create_mcp_registration_workflow,
             create_wasm_module_registration_workflow, create_wasm_module_removal_workflow,
-            create_worker_registration_workflow, create_worker_removal_workflow, LoggingSubscriber,
-            WorkflowEngine,
+            create_worker_registration_workflow, create_worker_removal_workflow,
+            create_worker_update_workflow,
         },
-        Job, JobQueue, JobQueueConfig, WorkerManager, WorkerType,
+        worker_to_info, Job, JobQueue, JobQueueConfig, WorkerManager, WorkerType,
     },
-    logging::{self, LoggingConfig},
-    metrics::{self, PrometheusConfig},
     middleware::{self, AuthConfig, QueuedRequest},
+    observability::{
+        logging::{self, LoggingConfig},
+        metrics::{self, PrometheusConfig},
+        otel_trace,
+    },
     protocols::{
         chat::ChatCompletionRequest,
         classify::ClassifyRequest,
@@ -44,11 +47,12 @@ use crate::{
         rerank::{RerankRequest, V1RerankReqInput},
         responses::{ResponsesGetParams, ResponsesRequest},
         validated::ValidatedJson,
-        worker_spec::{WorkerConfigRequest, WorkerErrorResponse, WorkerInfo},
+        worker_spec::{WorkerConfigRequest, WorkerErrorResponse, WorkerInfo, WorkerUpdateRequest},
     },
     routers::{conversations, router_manager::RouterManager, RouterTrait},
     service_discovery::{start_service_discovery, ServiceDiscoveryConfig},
     wasm::route::{add_wasm_module, list_wasm_modules, remove_wasm_module},
+    workflow::{LoggingSubscriber, WorkflowEngine},
 };
 
 #[derive(Clone)]
@@ -586,6 +590,41 @@ async fn delete_worker(State(state): State<Arc<AppState>>, Path(url): Path<Strin
     }
 }
 
+async fn update_worker(
+    State(state): State<Arc<AppState>>,
+    Path(url): Path<String>,
+    Json(update): Json<WorkerUpdateRequest>,
+) -> Response {
+    let worker_id = url.clone();
+    let job = Job::UpdateWorker {
+        url,
+        update: Box::new(update),
+    };
+
+    let job_queue = state
+        .context
+        .worker_job_queue
+        .get()
+        .expect("JobQueue not initialized");
+    match job_queue.submit(job).await {
+        Ok(_) => {
+            let response = json!({
+                "status": "accepted",
+                "worker_id": worker_id,
+                "message": "Worker update queued for background processing"
+            });
+            (StatusCode::ACCEPTED, Json(response)).into_response()
+        }
+        Err(error) => {
+            let error_response = WorkerErrorResponse {
+                error,
+                code: "INTERNAL_SERVER_ERROR".to_string(),
+            };
+            (StatusCode::INTERNAL_SERVER_ERROR, Json(error_response)).into_response()
+        }
+    }
+}
+
 pub struct ServerConfig {
     pub host: String,
     pub port: u16,
@@ -677,8 +716,10 @@ pub fn build_app(
     let worker_routes = Router::new()
         .route("/workers", post(create_worker))
         .route("/workers", get(list_workers_rest))
-        .route("/workers/{url}", get(get_worker))
-        .route("/workers/{url}", delete(delete_worker))
+        .route(
+            "/workers/{url}",
+            get(get_worker).put(update_worker).delete(delete_worker),
+        )
         .route_layer(axum::middleware::from_fn_with_state(
             auth_config.clone(),
             middleware::auth_middleware,
@@ -694,6 +735,7 @@ pub fn build_app(
             max_payload_size,
         ))
         .layer(middleware::create_logging_layer())
+        .layer(middleware::HttpMetricsLayer::new())
         .layer(middleware::RequestIdLayer::new(request_id_headers))
         .layer(create_cors_layer(cors_allowed_origins))
         .fallback(sink_handler)
@@ -703,25 +745,35 @@ pub fn build_app(
 pub async fn startup(config: ServerConfig) -> Result<(), Box<dyn std::error::Error>> {
     static LOGGING_INITIALIZED: AtomicBool = AtomicBool::new(false);
 
+    if let Some(trace_config) = &config.router_config.trace_config {
+        otel_trace::otel_tracing_init(
+            trace_config.enable_trace,
+            Some(&trace_config.otlp_traces_endpoint),
+        )?;
+    }
+
     let _log_guard = if !LOGGING_INITIALIZED.swap(true, Ordering::SeqCst) {
-        Some(logging::init_logging(LoggingConfig {
-            level: config
-                .log_level
-                .as_deref()
-                .and_then(|s| match s.to_uppercase().parse::<Level>() {
-                    Ok(l) => Some(l),
-                    Err(_) => {
-                        warn!("Invalid log level string: '{s}'. Defaulting to INFO.");
-                        None
-                    }
-                })
-                .unwrap_or(Level::INFO),
-            json_format: false,
-            log_dir: config.log_dir.clone(),
-            colorize: true,
-            log_file_name: "sgl-model-gateway".to_string(),
-            log_targets: None,
-        }))
+        Some(logging::init_logging(
+            LoggingConfig {
+                level: config
+                    .log_level
+                    .as_deref()
+                    .and_then(|s| match s.to_uppercase().parse::<Level>() {
+                        Ok(l) => Some(l),
+                        Err(_) => {
+                            warn!("Invalid log level string: '{s}'. Defaulting to INFO.");
+                            None
+                        }
+                    })
+                    .unwrap_or(Level::INFO),
+                json_format: false,
+                log_dir: config.log_dir.clone(),
+                colorize: true,
+                log_file_name: "sgl-model-gateway".to_string(),
+                log_targets: None,
+            },
+            config.router_config.trace_config.clone(),
+        ))
     } else {
         None
     };
@@ -758,12 +810,27 @@ pub async fn startup(config: ServerConfig) -> Result<(), Box<dyn std::error::Err
         .subscribe(Arc::new(LoggingSubscriber))
         .await;
 
-    engine.register_workflow(create_worker_registration_workflow(&config.router_config));
-    engine.register_workflow(create_external_worker_registration_workflow());
-    engine.register_workflow(create_worker_removal_workflow());
-    engine.register_workflow(create_mcp_registration_workflow());
-    engine.register_workflow(create_wasm_module_registration_workflow());
-    engine.register_workflow(create_wasm_module_removal_workflow());
+    engine
+        .register_workflow(create_worker_registration_workflow(&config.router_config))
+        .expect("worker_registration workflow should be valid");
+    engine
+        .register_workflow(create_external_worker_registration_workflow())
+        .expect("external_worker_registration workflow should be valid");
+    engine
+        .register_workflow(create_worker_removal_workflow())
+        .expect("worker_removal workflow should be valid");
+    engine
+        .register_workflow(create_worker_update_workflow())
+        .expect("worker_update workflow should be valid");
+    engine
+        .register_workflow(create_mcp_registration_workflow())
+        .expect("mcp_registration workflow should be valid");
+    engine
+        .register_workflow(create_wasm_module_registration_workflow())
+        .expect("wasm_module_registration workflow should be valid");
+    engine
+        .register_workflow(create_wasm_module_removal_workflow())
+        .expect("wasm_module_removal workflow should be valid");
     app_context
         .workflow_engine
         .set(engine)
@@ -917,13 +984,45 @@ pub async fn startup(config: ServerConfig) -> Result<(), Box<dyn std::error::Err
     // TcpListener::bind accepts &str and handles IPv4/IPv6 via ToSocketAddrs
     let bind_addr = format!("{}:{}", config.host, config.port);
     info!("Starting server on {}", bind_addr);
-    let listener = TcpListener::bind(&bind_addr)
-        .await
-        .map_err(|e| format!("Failed to bind to {}: {}", bind_addr, e))?;
-    serve(listener, app)
-        .with_graceful_shutdown(shutdown_signal())
-        .await
-        .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+
+    if let (Some(cert), Some(key)) = (
+        &config.router_config.server_cert,
+        &config.router_config.server_key,
+    ) {
+        info!("TLS enabled");
+        ring::default_provider()
+            .install_default()
+            .map_err(|e| format!("Failed to install rustls ring provider: {e:?}"))?;
+
+        let tls_config = axum_server::tls_rustls::RustlsConfig::from_pem(cert.clone(), key.clone())
+            .await
+            .map_err(|e| format!("Failed to create TLS config: {}", e))?;
+
+        let addr: std::net::SocketAddr = bind_addr
+            .parse()
+            .map_err(|e| format!("Invalid address: {}", e))?;
+
+        let handle = axum_server::Handle::new();
+        let handle_clone = handle.clone();
+        spawn(async move {
+            shutdown_signal().await;
+            handle_clone.graceful_shutdown(None);
+        });
+
+        axum_server::bind_rustls(addr, tls_config)
+            .handle(handle)
+            .serve(app.into_make_service())
+            .await
+            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    } else {
+        let listener = TcpListener::bind(&bind_addr)
+            .await
+            .map_err(|e| format!("Failed to bind to {}: {}", bind_addr, e))?;
+        serve(listener, app)
+            .with_graceful_shutdown(shutdown_signal())
+            .await
+            .map_err(|e| Box::new(e) as Box<dyn std::error::Error>)?;
+    }
 
     Ok(())
 }
