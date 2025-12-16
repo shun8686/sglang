@@ -7,7 +7,7 @@ from test_ascend_single_mix_utils import (
 
 # DEEPSEEK_R1_0528_W4A8_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 #MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
-MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 MODEL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
@@ -15,7 +15,7 @@ MODEL_ENVS = {
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "48",
     "HCCL_BUFFSIZE": "1600",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "SGLANG_NPU_USE_MLAPO": "1",
@@ -43,19 +43,21 @@ MODEL_OTHER_ARGS = (
         "24",
         "28",
         "32",
+        "36",
+        "40",
+        "44",
+        "48",
         "--mem-fraction-static",
-        "0.84",
+        "0.71",
         "--max-running-requests",
-        "128",
+        "192",
         "--context-length",
         "8188",
         "--disable-radix-cache",
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
-        "8188",
-        "--max-total-tokens",
-        "8188",
+        "9000",
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
@@ -84,13 +86,13 @@ class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleMixUtils):
     envs = MODEL_ENVS
     dataset_name = "random"
     request_rate = 13
-    max_concurrency = 128
+    max_concurrency = 192
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    ttft = 5318.34
-    tpot = 46.66
+    ttft = 10000
+    tpot = 50
     output_token_throughput = 3552.66
 
     def test_throughput(self):

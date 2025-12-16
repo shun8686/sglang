@@ -14,6 +14,7 @@ pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
 
 pip install kubernetes
 pip3 install xgrammar==0.1.25
+pip3 install transformers==4.57.1
 
 # copy or download required file
 cp /data/ascend-ci-share-pkking-sglang/huggingface/hub/datasets--anon8231489123--ShareGPT_Vicuna_unfiltered/snapshots/192ab2185289094fc556ec8ce5ce1e8e587154ca/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
