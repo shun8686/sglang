@@ -5,12 +5,15 @@ QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8
 
 QWEN3_32B_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
-    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+#    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "400",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "HCCL_OP_EXPANSION_MODE": "AIV",
+    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "SGLANG_ENABLE_SPEC_V2": "1",
+    "DISABLE_EAGLE3_QUANT": "1",
 }
 
 QWEN3_32B_OTHER_ARGS = (
@@ -27,7 +30,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "16",
+        "78",
         "--context-length",
         "8192",
         "--enable-hierarchical-cache",
