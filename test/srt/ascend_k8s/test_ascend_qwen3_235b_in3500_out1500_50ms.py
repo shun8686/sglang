@@ -5,18 +5,19 @@ from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 
+QWEN3_235B_A22B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+
 QWEN3_235B_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "24",
-    "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-    "INF_NAN_MODE_FORCE_DISABLE": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-    "HCCL_BUFFSIZE": "2100",
+    "HCCL_BUFFSIZE": "1600",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "HCCL_OP_EXPANSION_MODE": "AIV",
-    "ENABLE_ASCEND_MOE_NZ": "1",
+    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "SGLANG_ENABLE_SPEC_V2": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
 }
 
 QWEN3_235B_OTHER_ARGS = (
@@ -33,21 +34,33 @@ QWEN3_235B_OTHER_ARGS = (
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "576",
+        "272",
         "--context-length",
         "8192",
         "--dtype",
         "bfloat16",
         "--chunked-prefill-size",
-        "102400",
+        "32768",
         "--max-prefill-tokens",
-        "458880",
+        "32768",
+        "--speculative-algorithm",
+        "EAGLE3",
+        "--speculative-draft-model-path",
+        QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+        "--speculative-num-steps",
+        "3",
+        "--speculative-eagle-topk",
+        "1",
+        "--speculative-num-draft-tokens",
+        "4",
         "--disable-radix-cache",
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
         "auto",
-        "--tp-size",
+        "--speculative-draft-model-quantization",
+        "unquant",
+        "--tp",
         "16",
         "--dp-size",
         "16",
@@ -56,10 +69,13 @@ QWEN3_235B_OTHER_ARGS = (
         "--mem-fraction-static",
         "0.8",
         "--cuda-graph-bs",
-        6,
-        12,
-        18,
-        36,
+        "6",
+        "8",
+        "10",
+        "12",
+        "15",
+        "16",
+        "17",
     ]
     if is_npu()
     else []
@@ -70,14 +86,15 @@ class TestQwen3_235B(TestSingleMixUtils):
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
-    request_rate = 5.5
-    max_concurrency = 78
-    input_len = 2048
-    output_len = 2048
-    random_range_ratio = 0.5
-    ttft = 50000
+    max_concurrency = 240
+    num_prompts = int(max_concurrency) * 4
+    input_len = 3500
+    output_len = 1500
+    random_range_ratio = 1
+    ttft = 10000
     tpot = 50
-    output_token_throughput = 300
+    # H20: 290@50ms.   800I: 1.1*H20
+    output_token_throughput = 290*1.1/0.93
 
     def test_qwen3_235b(self):
         self.run_throughput()
