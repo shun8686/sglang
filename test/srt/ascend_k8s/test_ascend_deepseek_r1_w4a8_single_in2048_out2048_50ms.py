@@ -80,7 +80,7 @@ class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleMixUtils):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    max_concurrency = 192
+    max_concurrency = 256
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
