@@ -33,7 +33,7 @@ QWEN3_32B_OTHER_ARGS = (
         "modelslim",
         "--max-running-requests",
         "40",
-        "--disable-redix-cache",
+        "--disable-radix-cache",
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",

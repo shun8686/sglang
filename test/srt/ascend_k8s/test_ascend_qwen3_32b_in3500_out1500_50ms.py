@@ -35,7 +35,7 @@ QWEN3_32B_OTHER_ARGS = (
         "modelslim",
         "--max-running-requests",
         "120",
-        "--disable-redix-cache",
+        "--disable-radix-cache",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",

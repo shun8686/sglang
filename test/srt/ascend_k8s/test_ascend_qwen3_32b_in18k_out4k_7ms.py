@@ -33,7 +33,7 @@ QWEN3_32B_OTHER_ARGS = (
         "npu",
         "--max-running-requests",
         "32",
-        "--disable-redix-cache",
+        "--disable-radix-cache",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
