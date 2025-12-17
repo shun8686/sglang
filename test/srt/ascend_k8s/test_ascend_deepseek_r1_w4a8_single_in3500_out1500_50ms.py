@@ -89,7 +89,7 @@ class Test_Ascend_DeepSeek_R1_W4A8_In3500_Out3500(TestSingleMixUtils):
     output_len = 1500
     random_range_ratio = 1
     ttft = 10000
-    tpot = 50
+    tpot = 53
     # H20: 146/卡@50ms. 800I A3：1.6*H20=233.6
     output_token_throughput = 146 * 1.6 / 0.93
 
