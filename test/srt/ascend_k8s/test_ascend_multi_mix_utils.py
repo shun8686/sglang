@@ -1,0 +1,209 @@
+import os
+import subprocess
+import time
+import requests
+import threading
+
+from kubernetes import client, config
+from kubernetes.client.rest import ApiException
+from sglang.test.test_utils import (
+    CustomTestCase,
+    popen_launch_server,
+)
+from test_ascend_single_mix_utils import NIC_NAME
+
+
+KUBE_CONFIG = os.environ.get('KUBECONFIG')
+NAMESPACE = os.environ.get('NAMESPACE')
+CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
+LOACL_TIMEOUT = 6000
+
+config.load_kube_config(KUBE_CONFIG)
+v1 = client.CoreV1Api()
+
+def run_command(cmd, shell=True):
+    try:
+        result = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, check=False
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"command error: {e}")
+        return None
+
+# query configmap
+def query_configmap(name, namespace):
+    try:
+        configmap = v1.read_namespaced_config_map(name, namespace)
+        print(f"query_configmap successfully!")
+        return configmap
+    except ApiException as e:
+        print(f"query_configmap error {e=}")
+        return None
+
+# launch node
+def launch_node(config):
+    print(f"launch_node start ......")
+    node_ip = os.getenv("POD_IP")
+    hostname = os.getenv("HOSTNAME")
+    pod_index = int(hostname[-1])
+    role = "master" if pod_index == 0 else "worker"
+    # bootstrap_ports = 8995 + pod_index if role == "prefill" else None
+
+    # monitor configmap to generate ASCEND_MF_STORE_URL and dist_init_addr
+    isReady = False
+    dist_init_addr = None
+    while not isReady:
+        configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
+        if configmap.data == None:
+            print(f"configmap is None, wait for 15s ......")
+            time.sleep(15)
+            continue
+
+        print(f"monitor {configmap.data=}")
+
+        master_node_ip = None
+        for pod_name in configmap.data:
+            if "master-0" in pod_name:
+                master_node_ip = configmap.data[pod_name]
+                break
+
+        mf_addr = f"tcp://{master_node_ip}:30110"
+        os.environ["ASCEND_MF_STORE_URL"] = mf_addr
+        print(f"launch_node {mf_addr=}")
+
+        dist_init_addr = f"{master_node_ip}:5000"
+        print(f"launch_node {dist_init_addr=}")
+        isReady = True
+
+    # generate run command
+
+
+    special_args = [
+        "--dist-init-addr",
+        dist_init_addr,
+        "--node-rank",
+        pod_index,
+    ]
+    other_args = config["decode_args"]
+    for sa in special_args:
+            other_args.append(sa)
+
+    print(f"Starting node, {node_ip=} {special_args=}")
+    return popen_launch_server(
+        config["model_path"],
+        f"http://{node_ip}:{8000}",
+        timeout=LOACL_TIMEOUT * 10,
+        other_args=[
+            *special_args,
+        ],
+    )
+
+def run_bench_serving(host, port, dataset_name="random", request_rate=None, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
+                      random_range_ratio=1, dataset_path=None):
+    dataset_configs = (f"--dataset-name {dataset_name}")
+    request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
+    random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+    if dataset_name == "gsm8k":
+        dataset_configs = (f"{dataset_configs} --dataset-path {dataset_path}")
+        random_configs = (f"--random-input-len {input_len} --random-output-len {output_len}")
+
+    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} {dataset_configs} {request_configs} "
+               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
+
+    print(f"command:{command}")
+    metrics = run_command(f"{command} | tee ./bench_log.txt")
+    print("metrics is " + str(metrics))
+    mean_ttft = run_command(
+        "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
+    )
+    mean_tpot = run_command(
+        "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
+    )
+    total_tps = run_command(
+        "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
+    )
+    result = {
+        'mean_ttft': mean_ttft,
+        'mean_tpot': mean_tpot,
+        'total_tps': total_tps
+    }
+    return result
+
+class TestSingleMixUtils(CustomTestCase):
+    model = None
+    dataset_name = None
+    dataset_path = None
+    request_rate = None
+    max_concurrency = 8
+    num_prompts = int(max_concurrency) * 4
+    input_len = None
+    output_len = None
+    random_range_ratio = None
+    ttft = None
+    tpot = None
+    output_token_throughput = None
+
+    print("Nic name: {}".format(NIC_NAME))
+
+    @classmethod
+    def setUpClass(cls):
+        cls.local_ip = os.getenv("POD_IP")
+        hostname = os.getenv("HOSTNAME")
+        cls.role = "master" if "master" in hostname else None
+        print(f"Init {cls.local_ip} {cls.role=}!")
+
+    def wait_service_ready(self, url, timeout=LOACL_TIMEOUT):
+        start_time = time.perf_counter()
+        while True:
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    print(f"Router {url} is ready!")
+                    return
+            except Exception:
+                pass
+
+            if time.perf_counter() - start_time > timeout:
+                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
+            time.sleep(10)
+
+    def run_throughput(self):
+        sglang_thread = threading.Thread(
+            target=launch_node, args=(self.model_config,)
+        )
+        sglang_thread.start()
+
+        if self.role == "master":
+            self.wait_service_ready(f"http://127.0.0.1:6688" + "/health")
+
+            print(f"Wait 120s, starting run benchmark ......")
+            time.sleep(120)
+
+            metrics = run_bench_serving(
+                host="127.0.0.1",
+                port="6688",
+                model_path = self.model_config.get("model_path"),
+                dataset_name=self.dataset_name,
+                request_rate=self.request_rate,
+                max_concurrency=self.max_concurrency,
+                input_len=self.input_len,
+                output_len=self.output_len,
+                random_range_ratio=self.random_range_ratio,
+            )
+            self.assertLessEqual(
+                float(metrics['mean_ttft']),
+                self.ttft * 1.02,
+            )
+            self.assertLessEqual(
+                float(metrics['mean_tpot']),
+                self.tpot * 1.02,
+            )
+            self.assertGreaterEqual(
+                float(metrics['total_tps']),
+                self.output_token_throughput * 0.98,
+            )
+        else:
+            # launch node
+
+            time.sleep(LOACL_TIMEOUT)

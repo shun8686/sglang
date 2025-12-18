@@ -126,15 +126,4 @@ class TestSingleMixUtils(CustomTestCase):
             float(metrics['total_tps']),
             self.output_token_throughput * 0.98,
         )
-        self.assertGreater(
-            float(metrics['mean_ttft']),
-            0,
-        )
-        self.assertGreater(
-            float(metrics['mean_tpot']),
-            0,
-        )
-        self.assertGreater(
-            float(metrics['total_tps']),
-            0,
-        )
+

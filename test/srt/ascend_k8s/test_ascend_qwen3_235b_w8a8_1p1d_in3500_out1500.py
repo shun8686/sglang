@@ -1,9 +1,7 @@
 import unittest
 
-from test_ascend_disaggregation_utils import (
-    TestAscendDisaggregationUtils,
-    NIC_NAME
-)
+from test_ascend_single_mix_utils import NIC_NAME
+from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 

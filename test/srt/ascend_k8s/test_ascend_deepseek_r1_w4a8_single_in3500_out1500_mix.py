@@ -1,9 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import (
-    TestSingleMixUtils,
-    NIC_NAME
-)
+from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
@@ -23,6 +20,7 @@ MODEL_ENVS = {
     "SGLANG_USE_FIA_NZ": "1",
     "ENABLE_MOE_NZ": "1",
 }
+
 MODEL_OTHER_ARGS = (
     [
         "--tp",
