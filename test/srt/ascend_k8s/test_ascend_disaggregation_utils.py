@@ -14,7 +14,7 @@ from sglang.test.test_utils import CustomTestCase, popen_launch_server
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
-LOACL_TIMEOUT = 6000
+LOCAL_TIMEOUT = 6000
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
@@ -241,7 +241,7 @@ def launch_node(config):
     return popen_launch_server(
         config["model_path"],
         f"http://{node_ip}:{8000}",
-        timeout=LOACL_TIMEOUT * 10,
+        timeout=LOCAL_TIMEOUT * 10,
         other_args=[
             *common_args,
         ],
@@ -277,8 +277,8 @@ class TestAscendDisaggregationUtils(CustomTestCase):
     model_config = None
     dataset_name = None
     request_rate = None
-    max_concurrency = 8
-    num_prompts = int(max_concurrency) * 4
+    max_concurrency = None
+    num_prompts = None
     input_len = None
     output_len = None
     random_range_ratio = 1
@@ -294,7 +294,7 @@ class TestAscendDisaggregationUtils(CustomTestCase):
         cls.role = "router" if "router" in hostname else None
         print(f"Init {cls.local_ip} {cls.role=}!")
 
-    def wait_router_ready(self, url, timeout=LOACL_TIMEOUT):
+    def wait_router_ready(self, url, timeout=LOCAL_TIMEOUT):
         start_time = time.perf_counter()
         while True:
             try:
@@ -325,6 +325,7 @@ class TestAscendDisaggregationUtils(CustomTestCase):
                 dataset_name=self.dataset_name,
                 request_rate=self.request_rate,
                 max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
                 input_len=self.input_len,
                 output_len=self.output_len,
                 random_range_ratio=self.random_range_ratio,
@@ -347,4 +348,4 @@ class TestAscendDisaggregationUtils(CustomTestCase):
                 target=launch_node, args=(self.model_config,)
             )
             sglang_thread.start()
-            time.sleep(LOACL_TIMEOUT)
+            time.sleep(LOCAL_TIMEOUT)
