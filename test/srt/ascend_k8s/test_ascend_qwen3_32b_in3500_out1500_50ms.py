@@ -36,6 +36,8 @@ QWEN3_32B_OTHER_ARGS = (
         "--max-running-requests",
         "120",
         "--disable-radix-cache",
+        "--speculative-draft-model-quantization",
+        "unquant",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
