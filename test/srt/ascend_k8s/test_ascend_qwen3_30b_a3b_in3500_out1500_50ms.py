@@ -1,5 +1,7 @@
-from sglang.srt.utils import is_npu
-from test_ascend_single_mix_utils import NIC_NAME
+import unittest
+
+from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
+
 
 QWEN3_30B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
 QWEN3_A3B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-a3B_eagle3"
@@ -60,5 +62,24 @@ QWEN3_30B_A3B_OTHER_ARGS = (
     ]
 )
 
+class TestQwen3_30B(TestSingleMixUtils):
+    model = QWEN3_30B_A3B_MODEL_PATH
+    other_args = QWEN3_30B_A3B_OTHER_ARGS
+    envs = QWEN3_30B_A3B_ENVS
+    dataset_name = "random"
+    max_concurrency = 156
+    num_prompts = int(max_concurrency) * 4
+    input_len = 3500
+    output_len = 1500
+    random_range_ratio = 1
+    ttft = 10000
+    tpot = 50
+    # H20: 1493@51ms       800I: 1.8*H20        Dev-800I: 3166@44.35ms
+    output_token_throughput = 1.8 * 1493
+
+    def test_qwen3_32b(self):
+        self.run_throughput()
 
 
+if __name__ == "__main__":
+    unittest.main()

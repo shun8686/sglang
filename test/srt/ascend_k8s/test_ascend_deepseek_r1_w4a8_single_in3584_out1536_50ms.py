@@ -2,13 +2,16 @@ import unittest
 
 from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
+
+# DEEPSEEK_R1_0528_W4A8_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+#MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 MODEL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
-#    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "36",
@@ -20,7 +23,6 @@ MODEL_ENVS = {
     "SGLANG_USE_FIA_NZ": "1",
     "ENABLE_MOE_NZ": "1",
 }
-
 MODEL_OTHER_ARGS = (
     [
         "--tp",
@@ -46,12 +48,12 @@ MODEL_OTHER_ARGS = (
         "--max-running-requests",
         "144",
         "--context-length",
-        "128000",
+        "8188",
         "--disable-radix-cache",
         "--chunked-prefill-size",
-        "8192",
+        "-1",
         "--max-prefill-tokens",
-        "128000",
+        "9000",
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
@@ -74,20 +76,20 @@ MODEL_OTHER_ARGS = (
 )
 
 
-class Test_Ascend_DeepSeek_R1_W4A8_In3500_Out3500(TestSingleMixUtils):
+class Test_Ascend_DeepSeek_R1_W4A8_In3584_Out3536(TestSingleMixUtils):
     model = MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
-    dataset_name = "gsm8k"
-    dataset_path = "/root/.cache/modelscope/hub/datasets/DeepSeek-R1-0528-w4a8/GSM8K-in3500-mix-jsonl"
-    max_concurrency = 128
+    dataset_name = "random"
+    max_concurrency = 144
     num_prompts = int(max_concurrency) * 4
-    input_len = 3500
-    output_len = 1500
+    input_len = 3584
+    output_len = 1536
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    output_token_throughput = 1000
+    # H20: 146/卡@50ms. 800I A3：1.6*H20
+    output_token_throughput = 146 * 1.6 * 8 / 0.93
 
     def test_throughput(self):
         self.run_throughput()

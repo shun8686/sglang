@@ -89,7 +89,7 @@ class TestQwen3_235B(TestSingleMixUtils):
     ttft = 10000
     tpot = 50
     # PPU: 320@100ms.   800I: 1.8*PPU
-    output_token_throughput = 320*1.8/0.93
+    output_token_throughput = 320 * 1.8 * 8 / 0.93
 
     def test_qwen3_235b(self):
         self.run_throughput()

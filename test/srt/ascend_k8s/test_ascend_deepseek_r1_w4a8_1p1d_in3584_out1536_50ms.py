@@ -3,8 +3,7 @@ import unittest
 from test_ascend_single_mix_utils import NIC_NAME
 from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
 
-
-MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 MODEL_CONFIG = {
     "model_path": MODEL_PATH,
@@ -15,7 +14,7 @@ MODEL_CONFIG = {
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
         "ENABLE_MOE_NZ": "1",
-        "SGLANG_USE_AG_AFTER_QLORA": "1",
+#        "SGLANG_USE_AG_AFTER_QLORA": "1",
         "HCCL_BUFFSIZE": "1536",
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         "TASK_QUEUE_ENABLE": "2",
@@ -29,13 +28,13 @@ MODEL_CONFIG = {
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
         "ENABLE_MOE_NZ": "1",
-        # "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-        # "SGLANG_ENABLE_SPEC_V2": "1",
-        "HCCL_BUFFSIZE": "600",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
+        "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+        "SGLANG_ENABLE_SPEC_V2": "1",
+        "HCCL_BUFFSIZE": "720",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "96",
         "TASK_QUEUE_ENABLE": "0",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
-        "GLOO_SOCKET_IFNAME": NIC_NAME,    
+        "GLOO_SOCKET_IFNAME": NIC_NAME,     
     },
     "prefill_args": [
         "--nnodes",
@@ -47,7 +46,7 @@ MODEL_CONFIG = {
         "--tp-size",
         16,
         "--mem-fraction-static",
-        0.81,
+        0.6,
         "--quantization",
         "modelslim",
         "--max-running-requests",
@@ -63,14 +62,14 @@ MODEL_CONFIG = {
         "deepep",
         "--deepep-mode",
         "normal",
-        # "--speculative-algorithm",
-        # "NEXTN",
-        # "--speculative-num-steps",
-        # 1,
-        # "--speculative-eagle-topk",
-        # 1,
-        # "--speculative-num-draft-tokens",
-        # 2,
+        "--speculative-algorithm",
+        "NEXTN",
+        "--speculative-num-steps",
+        1,
+        "--speculative-eagle-topk",
+        1,
+        "--speculative-num-draft-tokens",
+        2,
         "--dp-size",
         2,
         "--enable-dp-attention",
@@ -80,17 +79,17 @@ MODEL_CONFIG = {
     ],
     "decode_args": [
         "--nnodes",
-        "2",
+        "1",
         "--disaggregation-mode",
         "decode",
         "--tp-size",
-        32,
+        16,
         "--dp-size",
-        32,
+        16,
         "--mem-fraction-static",
         0.8,
         "--max-running-requests",
-        832,
+        384,
         "--quantization",
         "modelslim",
         "--moe-a2a-backend",
@@ -109,41 +108,41 @@ MODEL_CONFIG = {
         20,
         22,
         24,
-        26,
         "--watchdog-timeout",
         9000,
         "--context-length",
         8192,
-        # "--speculative-algorithm",
-        # "NEXTN",
-        # "--speculative-num-steps",
-        # 2,
-        # "--speculative-eagle-topk",
-        # 1,
-        # "--speculative-num-draft-tokens",
-        # 3,
-        "--tokenizer-worker-num",
+        "--speculative-algorithm",
+        "NEXTN",
+        "--speculative-num-steps",
+        3,
+        "--speculative-eagle-topk",
+        1,
+        "--speculative-num-draft-tokens",
         4,
+        "--prefill-round-robin-balance",  
         "--disable-shared-experts-fusion",
         "--dtype",
         "bfloat16",
-        "--prefill-round-robin-balance",  
+        "--tokenizer-worker-num",
+        4,
     ],
 }
 
 
-class Test_DeepSeek_R1_W8A8_2P1D_In2048_Out2048(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W4A8_1P1D_In3584_Out1536(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
     max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
-    input_len = 2048
-    output_len = 2048
+    input_len = 3584
+    output_len = 1536
     random_range_ratio = 1
-    ttft = 3167.46
-    tpot = 46.18
-    output_token_throughput = 12663.9
+    ttft = 10000
+    tpot = 50
+    # H20: 146@50ms.  800I: 1.3*H20
+    output_token_throughput = 146 * 1.3 * 16 /0.93
 
     def test_throughput(self):
         self.run_throughput()

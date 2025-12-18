@@ -88,13 +88,13 @@ class TestQwen3_235B(TestSingleMixUtils):
     dataset_name = "random"
     max_concurrency = 240
     num_prompts = int(max_concurrency) * 4
-    input_len = 3500
-    output_len = 1500
+    input_len = 3584
+    output_len = 1536
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
     # H20: 290@50ms.   800I: 1.1*H20
-    output_token_throughput = 290*1.1/0.93
+    output_token_throughput = 290 * 1.1 * 8 / 0.93
 
     def test_qwen3_235b(self):
         self.run_throughput()
