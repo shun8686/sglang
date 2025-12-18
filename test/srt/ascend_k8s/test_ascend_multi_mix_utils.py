@@ -76,9 +76,6 @@ def launch_node(config):
         print(f"launch_node {dist_init_addr=}")
         isReady = True
 
-    # generate run command
-
-
     special_args = [
         "--dist-init-addr",
         dist_init_addr,
