@@ -93,7 +93,7 @@ def launch_node(config):
     print(f"Starting node, {node_ip=} {other_args=}")
     return popen_launch_server(
         config["model_path"],
-        f"http://{node_ip}:{8000}",
+        f"http://{node_ip}:{6688}",
         timeout=LOCAL_TIMEOUT * 10,
         other_args=[
             *other_args,
