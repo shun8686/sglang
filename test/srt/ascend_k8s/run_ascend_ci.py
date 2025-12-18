@@ -15,11 +15,12 @@ LOCAL_TIMEOUT = 10800
 KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
 KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
 KUBE_JOB_TYPE = os.environ.get('KUBE_JOB_TYPE')
-MONITOR_POD_NAME = "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE != "single" else \
-    "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME'))
+MONITOR_POD_NAME = "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE == "single" else \
+    "{}-sglang-node-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JOB_TYPE == "multi" else \
+    "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME'))
 KUBE_YAML_FILE = os.environ.get('KUBE_YAML_FILE')
 if not KUBE_YAML_FILE:
-    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "deepep.yaml"
+    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "k8s_multi.yaml" if KUBE_JOB_TYPE == "multi" else "deepep.yaml"
 
 def run_command(cmd, shell=True):
     try:

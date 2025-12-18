@@ -56,7 +56,7 @@ jobs:
         KUBECTL: /data/.cache/kubectl
         NAMESPACE: ascend-sglang
         ASCEND_TEST_CASE_PATH: test/srt/ascend_k8s
-        KUBE_JOB_TYPE: multi
+        KUBE_JOB_TYPE: pd-separation
         KUBE_JOB_NAME: ascend-sglang-multi
         KUBE_CONFIG_MAP: ascend-sglang-info
     steps:
