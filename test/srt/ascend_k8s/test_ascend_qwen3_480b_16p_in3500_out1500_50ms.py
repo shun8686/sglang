@@ -51,7 +51,7 @@ MODEL_CONFIG = {
         10,
         12,
         "--enable-dp-lm-head",
-        "--disable-cuda-graph"
+        "--disable-cuda-graph",
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
