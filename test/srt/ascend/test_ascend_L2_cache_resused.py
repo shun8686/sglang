@@ -11,7 +11,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="stage-b-test-2-npu-a3", nightly=False)
+register_npu_ci(est_time=400, suite="stage-b-test-2-npu-a2", nightly=False)
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
@@ -42,7 +42,8 @@ class TestL2Cache(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_L2_cache_01(self):
+    def test_L2_cache_resused(self):
+        """open L2 cache,if two requests input text have lengths exceeding the pagesize and contain different content,reusing the kv_cache"""
         for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
