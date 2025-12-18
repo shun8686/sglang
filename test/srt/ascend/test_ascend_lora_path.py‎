@@ -16,7 +16,6 @@ class TestLoraPath(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
-        # cls.model_name = "inclusionAI/Ling-plus"
         cls.model_name = "/root/.cache/modelscope/hub/models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
         other_args = [
             "--trust-remote-code",
