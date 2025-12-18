@@ -40,7 +40,7 @@ QWEN3_30B_A3B_OTHER_ARGS = (
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
-        "49152",
+        "32768",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
