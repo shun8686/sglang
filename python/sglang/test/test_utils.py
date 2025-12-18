@@ -750,6 +750,12 @@ def get_benchmark_args(
     lora_name=None,
     lora_request_distribution="uniform",
     lora_zipf_alpha=1.5,
+    max_concurrency=None,
+    gsp_num_groups=None,
+    gsp_prompts_per_group=None,
+    gsp_system_prompt_len=None,
+    gsp_question_len=None,
+    gsp_output_len=None,
 ):
     return SimpleNamespace(
         backend="sglang",
@@ -783,6 +789,12 @@ def get_benchmark_args(
         prompt_suffix="",
         device=device,
         pd_separated=pd_separated,
+        max_concurrency=max_concurrency
+        gsp_num_groups=gsp_num_groups,
+        gsp_prompts_per_group=gsp_prompts_per_group,
+        gsp_system_prompt_len=gsp_system_prompt_len,
+        gsp_question_len=gsp_question_len,
+        gsp_output_len=gsp_output_len,
     )
 
 
@@ -802,6 +814,12 @@ def run_bench_serving(
     need_warmup=False,
     seed: int = 0,
     device="auto",
+    max_concurrency=None,
+    gsp_num_groups=None,
+    gsp_prompts_per_group=None,
+    gsp_system_prompt_len=None,
+    gsp_question_len=None,
+    gsp_output_len=None,
     background_task: Optional[Callable[[str, asyncio.Event], Awaitable[None]]] = None,
     lora_name: Optional[str] = None,
 ):
@@ -832,6 +850,12 @@ def run_bench_serving(
         seed=seed,
         device=device,
         lora_name=lora_name,
+        max_concurrency=max_concurrency
+        gsp_num_groups=gsp_num_groups,
+        gsp_prompts_per_group=gsp_prompts_per_group,
+        gsp_system_prompt_len=gsp_system_prompt_len,
+        gsp_question_len=gsp_question_len,
+        gsp_output_len=gsp_output_len,     
     )
 
     async def _run():
