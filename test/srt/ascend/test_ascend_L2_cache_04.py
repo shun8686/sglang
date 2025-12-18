@@ -12,12 +12,13 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="stage-b-test-2-npu-a3", nightly=False)
+register_npu_ci(est_time=400, suite="stage-b-test-2-npu-a2", nightly=False)
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestL2Cache(CustomTestCase):
-    def test_L2_cache_04(cls):
+    def test_L2_cache_mutually_exclusive(cls):
+        """The arguments enable-hierarchical-cache and disable-radix-cache are mutually exclusive,service startup failure"""
         error_message = "The arguments enable-hierarchical-cache and disable-radix-cache are mutually exclusive"
         model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
         base_url = DEFAULT_URL_FOR_TEST
