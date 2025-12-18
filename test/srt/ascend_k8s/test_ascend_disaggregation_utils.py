@@ -250,9 +250,10 @@ def launch_node(config):
 
 def run_bench_serving(host, port, model_path, dataset_name="random", request_rate=8, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
                       random_range_ratio=1):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} --dataset-name {dataset_name} --request-rate {request_rate} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
-               f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+    request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
+    random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+    command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} --dataset-name {dataset_name} {request_configs} "
+               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
     print(f"command:{command}")
     metrics = run_command(f"{command} | tee ./bench_log.txt")
     print("metrics is " + str(metrics))
