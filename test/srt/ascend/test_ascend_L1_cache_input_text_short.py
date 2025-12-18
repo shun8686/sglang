@@ -11,7 +11,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="stage-b-test-2-npu-a3", nightly=False)
+register_npu_ci(est_time=400, suite="stage-b-test-2-npu-a2", nightly=False)
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL1Cache(CustomTestCase):
@@ -41,7 +41,7 @@ class TestL1Cache(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_L1_cache_input_text_short(self):
-        
+        """open L1 cache,If two inference requests have the same input text but are too short in length,they will not be reused"""
         texts = ["who am i?", "who am i?"]
         for text in texts:
             response = requests.post(
