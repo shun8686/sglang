@@ -26,6 +26,8 @@ sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
 export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
+export SGLANG_SET_CPU_AFFINITY=1
+
 unset https_proxy
 unset http_proxy
 unset HTTPS_PROXY

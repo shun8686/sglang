@@ -6,7 +6,7 @@ from test_ascend_single_mix_utils import NIC_NAME
 Qwen3_480B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
 
 Qwen3_480B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
+    # "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "2100",

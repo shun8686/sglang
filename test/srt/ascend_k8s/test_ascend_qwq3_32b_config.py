@@ -3,7 +3,7 @@ from test_ascend_single_mix_utils import NIC_NAME
 QWQ_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/QWQ-32B-W8A8"
 
 QWQ_32B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
+    # "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "INF_NAN_MODE_FORCE_DISABLE": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
