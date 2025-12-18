@@ -1,9 +1,8 @@
 import unittest
 
-from test_ascend_disaggregation_utils import (
-    TestAscendDisaggregationUtils,
-    NIC_NAME
-)
+from test_ascend_single_mix_utils import NIC_NAME
+from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
+
 
 MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 

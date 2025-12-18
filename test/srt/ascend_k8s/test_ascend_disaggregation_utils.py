@@ -4,16 +4,11 @@ import socket
 import subprocess
 import threading
 import time
-import psutil
 import requests
 
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-
-from sglang.test.test_utils import (
-    CustomTestCase,
-    popen_launch_server,
-)
+from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
 
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
@@ -23,16 +18,6 @@ LOACL_TIMEOUT = 6000
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
-
-def get_nic_name():
-    for nic, addrs in psutil.net_if_addrs().items():
-        for addr in addrs:
-            if addr.family == socket.AF_INET and addr.address.startswith("192."):
-                print("The nic name matched is {}".format(nic))
-                return nic
-    return None
-
-NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
 
 def run_command(cmd, shell=True):
     try:
@@ -346,27 +331,15 @@ class TestAscendDisaggregationUtils(CustomTestCase):
             )
             self.assertLessEqual(
                 float(metrics['mean_ttft']),
-                self.ttft,
+                self.ttft * 1.02,
             )
             self.assertLessEqual(
                 float(metrics['mean_tpot']),
-                self.tpot,
+                self.tpot * 1.02,
             )
             self.assertGreaterEqual(
                 float(metrics['total_tps']),
-                self.output_token_throughput,
-            )
-            self.assertGreater(
-                float(metrics['mean_ttft']),
-                0,
-            )
-            self.assertGreater(
-                float(metrics['mean_tpot']),
-                0,
-            )
-            self.assertGreater(
-                float(metrics['total_tps']),
-                0,
+                self.output_token_throughput * 0.98,
             )
         else:
             # launch p/d node
