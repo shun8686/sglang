@@ -7,7 +7,7 @@ from test_ascend_single_mix_utils import (
 
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
+    # "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
     "HCCL_BUFFSIZE": "1536",

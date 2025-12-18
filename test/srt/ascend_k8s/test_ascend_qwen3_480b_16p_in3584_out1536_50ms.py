@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleMixUtils
+from test_ascend_multi_mix_utils import TestMultiMixUtils
 from test_ascend_single_mix_utils import NIC_NAME
 
 Qwen3_480B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
@@ -10,56 +10,65 @@ MODEL_CONFIG = {
     "node_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "24",
         "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+        "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+        "SGLANG_ENABLE_SPEC_V2": "1",
+        "SGLANG_DP_ROUND_ROBIN": "1",
         "HCCL_BUFFSIZE": "2100",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-        "HCCL_OP_EXPANSION_MODE": "AIV",
+        "STREAMS_PER_DEVICE": "32",
+        "TASK_QUEUE_ENABLE": "0",
+        "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     },
     "other_args": [
         "--trust-remote-code",
         "--nnodes",
-        "1",
-        "--node-rank",
-        "0",
+        "2",
+        "--tp-size",
+        "32",
+        "--dp-size",
+        "32",
+        "--mem-fraction-static",
+        "0.75",
+        "--max-running-requests",
+        "384",
         "--attention-backend",
         "ascend",
         "--device",
         "npu",
         "--quantization",
         "modelslim",
-        "--max-running-requests",
-        "96",
-        "--context-length",
-        "8192",
-        "--dtype",
-        "bfloat16",
-        "--chunked-prefill-size",
-        "28672",
-        "--max-prefill-tokens",
-        "458880",
-        "--disable-radix-cache",
+        "--enable-dp-attention",
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
         "auto",
-        "--tp-size",
-        "16",
-        "--dp-size",
-        "4",
-        "--enable-dp-attention",
-        "--enable-dp-lm-head",
-        "--mem-fraction-static",
-        "0.7",
         "--cuda-graph-bs",
-        16,
-        20,
-        24,
+        6,
+        8,
+        10,
+        12,
+        "--enable-dp-lm-head",
+        "--disable-cuda-graph"
+        "--chunked-prefill-size",
+        "-1",
+        "--max-prefill-tokens",
+        "224000",
+        "--disaggregation-transfer-backend",
+        "ascend",
+        "--watchdog-timeout",
+        9000,
+        "--context-length",
+        "8192",
+        "--dtype",
+        "bfloat16",
     ]
 }
 
 
-class TestQwen3_480B(TestSingleMixUtils):
+class TestQwen3_480B(TestMultiMixUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 80

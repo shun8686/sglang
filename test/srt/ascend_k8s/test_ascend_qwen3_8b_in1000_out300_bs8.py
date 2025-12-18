@@ -8,7 +8,6 @@ class TestQwen3_8B(TestSingleMixUtils):
     other_args = QWEN3_8B_OTHER_ARGS
     envs = QWEN3_8B_ENVS
     dataset_name = "random"
-    request_rate = 5.5
     max_concurrency = 8
     input_len = 1000
     output_len = 300

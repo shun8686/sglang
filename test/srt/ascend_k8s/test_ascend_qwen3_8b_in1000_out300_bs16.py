@@ -8,11 +8,10 @@ class TestQwen3_8B(TestSingleMixUtils):
     other_args = QWEN3_8B_OTHER_ARGS
     envs = QWEN3_8B_ENVS
     dataset_name = "random"
-    request_rate = 5.5
     max_concurrency = 16
     input_len = 1000
     output_len = 300
-    random_range_ratio = 0.5
+    random_range_ratio = 1
     ttft = 300
     tpot = 10
     output_token_throughput = 1874.81

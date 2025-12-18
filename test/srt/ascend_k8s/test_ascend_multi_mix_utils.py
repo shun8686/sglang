@@ -16,7 +16,7 @@ from test_ascend_single_mix_utils import NIC_NAME
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
-LOACL_TIMEOUT = 6000
+LOCAL_TIMEOUT = 6000
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
@@ -46,9 +46,7 @@ def launch_node(config):
     print(f"launch_node start ......")
     node_ip = os.getenv("POD_IP")
     hostname = os.getenv("HOSTNAME")
-    pod_index = int(hostname[-1])
-    role = "master" if pod_index == 0 else "worker"
-    # bootstrap_ports = 8995 + pod_index if role == "prefill" else None
+    pod_index = int(hostname.rsplit("-", 1)[-1])
 
     # monitor configmap to generate ASCEND_MF_STORE_URL and dist_init_addr
     isReady = False
@@ -59,14 +57,16 @@ def launch_node(config):
             print(f"configmap is None, wait for 15s ......")
             time.sleep(15)
             continue
-
         print(f"monitor {configmap.data=}")
 
         master_node_ip = None
         for pod_name in configmap.data:
-            if "master-0" in pod_name:
+            if "node-0" in pod_name:
                 master_node_ip = configmap.data[pod_name]
                 break
+        if master_node_ip == None:
+            print(f"Can not find master node in configmap: {configmap.data=}")
+            continue
 
         mf_addr = f"tcp://{master_node_ip}:30110"
         os.environ["ASCEND_MF_STORE_URL"] = mf_addr
@@ -76,26 +76,27 @@ def launch_node(config):
         print(f"launch_node {dist_init_addr=}")
         isReady = True
 
-    # generate run command
-
-
     special_args = [
         "--dist-init-addr",
         dist_init_addr,
         "--node-rank",
         pod_index,
     ]
-    other_args = config["decode_args"]
+    other_args = config["other_args"]
     for sa in special_args:
             other_args.append(sa)
 
-    print(f"Starting node, {node_ip=} {special_args=}")
+    for key, value in config["node_envs"].items():
+        print(f"ENV_VAR {key}:{value}")
+        os.environ[key] = value
+
+    print(f"Starting node, {node_ip=} {other_args=}")
     return popen_launch_server(
         config["model_path"],
-        f"http://{node_ip}:{8000}",
-        timeout=LOACL_TIMEOUT * 10,
+        f"http://{node_ip}:{6688}",
+        timeout=LOCAL_TIMEOUT * 10,
         other_args=[
-            *special_args,
+            *other_args,
         ],
     )
 
@@ -130,13 +131,13 @@ def run_bench_serving(host, port, dataset_name="random", request_rate=None, max_
     }
     return result
 
-class TestSingleMixUtils(CustomTestCase):
+class TestMultiMixUtils(CustomTestCase):
     model = None
     dataset_name = None
     dataset_path = None
     request_rate = None
-    max_concurrency = 8
-    num_prompts = int(max_concurrency) * 4
+    max_concurrency = None
+    num_prompts = None
     input_len = None
     output_len = None
     random_range_ratio = None
@@ -153,7 +154,7 @@ class TestSingleMixUtils(CustomTestCase):
         cls.role = "master" if "master" in hostname else None
         print(f"Init {cls.local_ip} {cls.role=}!")
 
-    def wait_service_ready(self, url, timeout=LOACL_TIMEOUT):
+    def wait_service_ready(self, url, timeout=LOCAL_TIMEOUT):
         start_time = time.perf_counter()
         while True:
             try:
@@ -187,6 +188,7 @@ class TestSingleMixUtils(CustomTestCase):
                 dataset_name=self.dataset_name,
                 request_rate=self.request_rate,
                 max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
                 input_len=self.input_len,
                 output_len=self.output_len,
                 random_range_ratio=self.random_range_ratio,
@@ -206,4 +208,4 @@ class TestSingleMixUtils(CustomTestCase):
         else:
             # launch node
 
-            time.sleep(LOACL_TIMEOUT)
+            time.sleep(LOCAL_TIMEOUT)

@@ -5,10 +5,10 @@ from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 MODEL_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
+    # "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
-#    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    # "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "36",
