@@ -84,7 +84,7 @@ class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleMixUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # H20: 143@50ms. 800I A3: 1.8*H20
+    # T: 143@50ms. 800I A3: 1.8*T
     output_token_throughput = 143 * 1.8 * 8 / 0.93
 
     def test_throughput(self):

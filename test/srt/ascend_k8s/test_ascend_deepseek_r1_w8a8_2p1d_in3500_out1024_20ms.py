@@ -132,19 +132,19 @@ MODEL_CONFIG = {
 }
 
 
-class Test_DeepSeek_R1_W8A8_2P1D_In3584_Out1536(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W8A8_2P1D_In3500_Out1024(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
     max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
-    input_len = 3584
-    output_len = 1536
+    input_len = 3500
+    output_len = 1024
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # H20: 224@40ms    800I: 1.8*H20
-    output_token_throughput = 224 * 1.8 * 32 / 0.93
+    # T: 216@20ms   800I A3: None     Dev-800I: 1163/32@19.52ms
+    output_token_throughput = 1163
 
     def test_throughput(self):
         self.run_throughput()

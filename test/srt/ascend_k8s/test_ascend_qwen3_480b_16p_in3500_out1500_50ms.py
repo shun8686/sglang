@@ -73,8 +73,8 @@ class TestQwen3_480B(TestMultiMixUtils):
     dataset_name = "random"
     max_concurrency = 80
     num_prompts = int(max_concurrency) * 4
-    input_len = 3584
-    output_len = 1536
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 1
     ttft = 10000
     tpot = 50

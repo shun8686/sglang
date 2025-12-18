@@ -142,7 +142,7 @@ class Test_DeepSeek_R1_W4A8_1P1D_In2048_Out2048(TestAscendDisaggregationUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # PPU：143@50ms.  800I: 2*PPU
+    # T：143@50ms.  800I A3: 2*T
     output_token_throughput = 143 * 2 * 16 / 0.93
 
     def test_throughput(self):

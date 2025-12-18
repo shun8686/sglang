@@ -1,4 +1,6 @@
-from test_ascend_single_mix_utils import NIC_NAME
+import unittest
+
+from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
 QWEN3_8B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-8B-W8A8"
 
@@ -43,3 +45,23 @@ QWEN3_8B_OTHER_ARGS = (
     ]
 )
 
+class TestQwen3_8B(TestSingleMixUtils):
+    model = QWEN3_8B_MODEL_PATH
+    other_args = QWEN3_8B_OTHER_ARGS
+    envs = QWEN3_8B_ENVS
+    dataset_name = "random"
+    max_concurrency = 16
+    num_prompts = int(max_concurrency) * 4
+    input_len = 1000
+    output_len = 300
+    random_range_ratio = 1
+    ttft = 300
+    tpot = 10
+    output_token_throughput = 1874.81
+
+    def test_qwen3_8b(self):
+        self.run_throughput()
+
+
+if __name__ == "__main__":
+    unittest.main()
