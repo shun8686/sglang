@@ -5,7 +5,7 @@ from test_ascend_single_mix_utils import (
     NIC_NAME
 )
 
-QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
 QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3"
 
 QWEN3_32B_ENVS = {
@@ -71,7 +71,7 @@ QWEN3_32B_OTHER_ARGS = (
 
 
 class TestQwen3_32B(TestSingleMixUtils):
-    model = QWEN3_32B_MODEL_PATH
+    model = QWEN3_32B_W8A8_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
