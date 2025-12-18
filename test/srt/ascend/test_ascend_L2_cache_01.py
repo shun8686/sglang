@@ -18,7 +18,6 @@ class TestL2Cache(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-        cls.model = "Qwen/Qwen3-32B"
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--enable-hierarchical-cache",
@@ -31,7 +30,6 @@ class TestL2Cache(CustomTestCase):
             "--disable-cuda-graph",
         ]
         
-
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
