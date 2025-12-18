@@ -1,0 +1,63 @@
+import unittest
+
+import requests
+
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
+)
+
+register_npu_ci(est_time=400, suite="stage-b-test-16-npu-a3", nightly=False)
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+
+
+class TestL2Cache(CustomTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--enable-hierarchical-cache",
+            "--mem-fraction-static",
+            0.8,
+            "--tp-size",
+            2,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_L2_cache_03(self):
+        texts = ["who am i?", "who am i?"]
+        for text in texts:
+            response = requests.post(
+                f"{DEFAULT_URL_FOR_TEST}/generate",
+                json={
+                    "text": text,
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 10,
+                    },
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+            self.assertTrue(int(response.json()["meta_info"]["cached_tokens"]) == 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
