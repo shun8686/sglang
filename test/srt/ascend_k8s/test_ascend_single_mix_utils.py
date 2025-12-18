@@ -126,3 +126,4 @@ class TestSingleMixUtils(CustomTestCase):
             float(metrics['total_tps']),
             self.output_token_throughput * 0.98,
         )
+
