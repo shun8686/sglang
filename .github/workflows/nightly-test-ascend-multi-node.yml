@@ -1,4 +1,4 @@
-name: 'e2e nightly test pd-separation (Ascend NPU)'
+name: 'e2e nightly test multi_node (Ascend NPU)'
 
 on:
   workflow_call:
@@ -20,18 +20,10 @@ on:
         required: true
         type: string
         description: test config name
-      prefill_size:
+      node_size:
         required: true
         type: number
-        description: number of prefill nodes
-      decode_size:
-        required: true
-        type: number
-        description: number of decode nodes
-      router_size:
-        required: true
-        type: number
-        description: number of router nodes
+        description: number of nodes
       sglang_source_path:
         required: true
         type: string
@@ -42,7 +34,7 @@ on:
         description: path of test case file
 
 concurrency:
-  group: ascend-nightly-pd-separation-${{ github.ref }}-${{ inputs.soc_version }}
+  group: ascend-nightly-multinode-${{ github.ref }}-${{ inputs.soc_version }}
   cancel-in-progress: true
 
 jobs:
@@ -56,7 +48,7 @@ jobs:
         KUBECTL: /data/.cache/kubectl
         NAMESPACE: ascend-sglang
         ASCEND_TEST_CASE_PATH: test/srt/ascend_k8s
-        KUBE_JOB_TYPE: pd-separation
+        KUBE_JOB_TYPE: multi
         KUBE_JOB_NAME: ascend-sglang-multi
         KUBE_CONFIG_MAP: ascend-sglang-info
     steps:
@@ -77,9 +69,7 @@ jobs:
         run: |
           # prepare for deepep.yaml
           image="${{ inputs.image }}"
-          prefill_size="${{ inputs.prefill_size }}"
-          decode_size="${{ inputs.decode_size }}"
-          router_size="${{ inputs.router_size }}"
+          node_size="${{ inputs.node_size }}"
           sglang_source_path="${{ inputs.sglang_source_path }}"
           test_case="${{ inputs.test_case }}"          
           echo "{ \"image\": $image,                                        \
@@ -87,18 +77,16 @@ jobs:
                   \"kube_job_name\": \"$KUBE_JOB_NAME\",                    \
                   \"kube_config\": \"$KUBECONFIG\",                         \
                   \"kube_config_map\": \"$KUBE_CONFIG_MAP\",                \
-                  \"prefill_size\": $prefill_size,                          \
-                  \"decode_size\": $decode_size,                            \
-                  \"router_size\": $router_size,                            \
+                  \"node_size\": $node_size,                                \
                   \"sglang_source_path\": \"$sglang_source_path\",          \
                   \"test_case\": \"$test_case\" }"                         |\
-              jinja2 ${ASCEND_TEST_CASE_PATH}/deepep.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/deepep.yaml
-          echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/deepep.yaml"
+              jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_multi.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_multi.yaml
+          echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_multi.yaml"
 
       - name: Clear resources
         run: |
           cd $ASCEND_TEST_CASE_PATH
-          kubectl delete -f ./deepep.yaml --ignore-not-found=true || true
+          kubectl delete -f ./k8s_multi.yaml --ignore-not-found=true || true
 
           pod_name_prefix="${KUBE_JOB_NAME}-sglang"
           echo "kube name space: $NAMESPACE, pod name prefix: ${pod_name_prefix}"
@@ -108,7 +96,7 @@ jobs:
               sleep 30
               kubectl get pods | grep "${pod_name_prefix}" | awk '{print $1}' | xargs kubectl delete pod -n $NAMESPACE || true
             else
-              echo "No sglang job exist, start deepep case..."
+              echo "No sglang job exist, start test case..."
               break
             fi
           done
@@ -129,4 +117,4 @@ jobs:
         run: |
           kubectl get pods -n $NAMESPACE
           cd $ASCEND_TEST_CASE_PATH
-          kubectl delete -f ./deepep.yaml --ignore-not-found=true || true
+          kubectl delete -f ./k8s_multi.yaml --ignore-not-found=true || true
