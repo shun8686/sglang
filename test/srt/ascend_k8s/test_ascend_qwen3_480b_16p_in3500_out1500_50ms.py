@@ -55,7 +55,7 @@ MODEL_CONFIG = {
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
-        "224000",
+        "7168",
         "--disaggregation-transfer-backend",
         "ascend",
         "--watchdog-timeout",
