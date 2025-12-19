@@ -70,11 +70,13 @@ def launch_node(config):
             continue
 
         mf_addr = f"tcp://{master_node_ip}:30110"
-        os.environ["ASCEND_MF_STORE_URL"] = mf_addr
-        print(f"launch_node {mf_addr=}")
 
         dist_init_addr = f"{master_node_ip}:5000"
         print(f"launch_node {dist_init_addr=}")
+
+        os.environ["ASCEND_MF_STORE_URL"] = mf_addr
+        print(f"ENV_VAR ASCEND_MF_STORE_URL:{value}")
+
         isReady = True
 
     special_args = [
@@ -90,6 +92,7 @@ def launch_node(config):
     for key, value in config["node_envs"].items():
         print(f"ENV_VAR {key}:{value}")
         os.environ[key] = value
+    
 
     print(f"Starting node, {node_ip=} {other_args=}")
     return popen_launch_server(
@@ -154,6 +157,7 @@ class TestMultiMixUtils(CustomTestCase):
         print(f"Init {cls.local_ip} {cls.role=}!")
 
     def wait_server_ready(self, url, timeout=LOCAL_TIMEOUT):
+        print(f"Waiting for the server to start...")
         start_time = time.perf_counter()
         while True:
             try:
@@ -175,15 +179,15 @@ class TestMultiMixUtils(CustomTestCase):
         sglang_thread.start()
 
         if self.role == "master":
-            print(f"Wait server ready...")
-            self.wait_server_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
+            master_node_ip = os.getenv("POD_IP")
+            self.wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
             print(f"Wait 120s, starting run benchmark ......")
             time.sleep(120)
 
             metrics = run_bench_serving(
-                host="127.0.0.1",
+                host=master_node_ip,
                 port=SERVICE_PORT,
-                model_path = self.model_config.get("model_path"),
+                model_path=self.model_config.get("model_path"),
                 dataset_name=self.dataset_name,
                 request_rate=self.request_rate,
                 max_concurrency=self.max_concurrency,

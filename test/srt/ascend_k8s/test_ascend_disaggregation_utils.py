@@ -323,7 +323,7 @@ class TestAscendDisaggregationUtils(CustomTestCase):
             metrics = run_bench_serving(
                 host="127.0.0.1",
                 port=SERVICE_PORT,
-                model_path = self.model_config.get("model_path"),
+                model_path=self.model_config.get("model_path"),
                 dataset_name=self.dataset_name,
                 request_rate=self.request_rate,
                 max_concurrency=self.max_concurrency,
