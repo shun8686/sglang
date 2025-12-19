@@ -17,7 +17,7 @@ KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 LOCAL_TIMEOUT = 6000
-SERVICE_PORT = 6677
+SERVICE_PORT = "6677"
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
