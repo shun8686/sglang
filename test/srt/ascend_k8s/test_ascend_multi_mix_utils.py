@@ -175,8 +175,8 @@ class TestMultiMixUtils(CustomTestCase):
         sglang_thread.start()
 
         if self.role == "master":
+            print(f"Wait server ready...")
             self.wait_server_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
-
             print(f"Wait 120s, starting run benchmark ......")
             time.sleep(120)
 
@@ -205,4 +205,5 @@ class TestMultiMixUtils(CustomTestCase):
                 self.output_token_throughput * 0.98,
             )
         else:
+            print("Worker node is running.")
             time.sleep(LOCAL_TIMEOUT)

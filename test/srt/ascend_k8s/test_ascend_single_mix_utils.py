@@ -84,6 +84,8 @@ class TestSingleMixUtils(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
+        for key, value in cls.envs.items():
+            print(f"ENV_VAR {key}:{value}")
         env = os.environ.copy()
         env.update(cls.envs)
 
