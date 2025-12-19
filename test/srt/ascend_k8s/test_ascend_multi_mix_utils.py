@@ -69,14 +69,8 @@ def launch_node(config):
             print(f"Can not find master node in configmap: {configmap.data=}")
             continue
 
-        mf_addr = f"tcp://{master_node_ip}:30110"
-
         dist_init_addr = f"{master_node_ip}:5000"
         print(f"launch_node {dist_init_addr=}")
-
-        os.environ["ASCEND_MF_STORE_URL"] = mf_addr
-        print(f"ENV_VAR ASCEND_MF_STORE_URL:{mf_addr}")
-
         isReady = True
 
     special_args = [

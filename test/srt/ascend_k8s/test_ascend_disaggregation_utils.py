@@ -108,7 +108,6 @@ def launch_router():
     while True:
         success_nodes = 0
         port = 8000
-        print(f"==================================")
         for ip in node_ip_list:
             if checkout_port(ip, port):
                 print(f"{ip=} {port} is ready")
@@ -151,7 +150,7 @@ def launch_node(config):
     print(f"launch_node start ......")
     node_ip = os.getenv("POD_IP")
     hostname = os.getenv("HOSTNAME")
-    pod_index = int(hostname[-1])
+    pod_index = int(hostname.rsplit("-", 1)[-1])
     role = "prefill" if "prefill" in hostname else "decode"
     bootstrap_ports = 8995 + pod_index if role == "prefill" else None
 
@@ -187,9 +186,12 @@ def launch_node(config):
         "--disaggregation-transfer-backend",
         "ascend",
     ]
+    service_args = []
+    service_args.extend(common_args)
 
     if role == "prefill":
         for key, value in config["prefill_envs"].items():
+            print(f"ENV_VAR {key}={value}")
             os.environ[key] = value
 
         dist_init_addr = f"{node_ip}:5000"
@@ -216,11 +218,11 @@ def launch_node(config):
                 # prefill_args.extend(["--init-expert-location", hot_map_addr])
                 print(f"{pod_name} get hot map in {hot_map_addr}")
 
-        for pa in prefill_args:
-            common_args.append(pa)
+        service_args.extend(prefill_args)
 
     if role == "decode":
         for key, value in config["decode_envs"].items():
+            print(f"ENV_VAR {key}={value}")
             os.environ[key] = value
 
         decode_args = config["decode_args"]
@@ -228,23 +230,20 @@ def launch_node(config):
             [
                 "--dist-init-addr",
                 dist_init_addr,
-                # "--nnodes",
-                # int(discover_worker_nodes() / 2),
                 "--node-rank",
                 pod_index,
             ]
         )
 
-        for da in decode_args:
-            common_args.append(da)
+        service_args.extend(decode_args)
 
-    print(f"Starting node, {node_ip=} {common_args=}")
+    print(f"Starting node, {node_ip=} {service_args=}")
     return popen_launch_server(
         config["model_path"],
         f"http://{node_ip}:{8000}",
         timeout=LOCAL_TIMEOUT * 10,
         other_args=[
-            *common_args,
+            *service_args,
         ],
     )
 
