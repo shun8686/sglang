@@ -75,7 +75,7 @@ def launch_node(config):
         print(f"launch_node {dist_init_addr=}")
 
         os.environ["ASCEND_MF_STORE_URL"] = mf_addr
-        print(f"ENV_VAR ASCEND_MF_STORE_URL:{value}")
+        print(f"ENV_VAR ASCEND_MF_STORE_URL:{mf_addr}")
 
         isReady = True
 
