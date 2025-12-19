@@ -1,28 +1,28 @@
 import unittest
 
 from sglang.srt.utils import is_npu
-from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
+from test_ascend_multi_mix_utils import TestMultiMixUtils, NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 
 QWEN3_235B_A22B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
 
-QWEN3_235B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
-    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-    "HCCL_BUFFSIZE": "1600",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
-    "HCCL_OP_EXPANSION_MODE": "AIV",
-    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_ENABLE_SPEC_V2": "1",
-    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "ENABLE_PROFILING": "1",
-}
-
-QWEN3_235B_OTHER_ARGS = (
-    [
+MODEL_CONFIG = {
+    "model_path": QWEN3_235B_MODEL_PATH,
+    "node_envs": {
+        "SGLANG_SET_CPU_AFFINITY": "1",
+        "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+        "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+        "HCCL_BUFFSIZE": "1600",
+        "HCCL_SOCKET_IFNAME": NIC_NAME,
+        "GLOO_SOCKET_IFNAME": NIC_NAME,
+        "HCCL_OP_EXPANSION_MODE": "AIV",
+        "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+        "SGLANG_ENABLE_SPEC_V2": "1",
+        "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+        "ENABLE_PROFILING": "1",
+    },
+    "other_args": [
         "--trust-remote-code",
         "--nnodes",
         "1",
@@ -78,15 +78,12 @@ QWEN3_235B_OTHER_ARGS = (
         "18",
         "28",
         "30",
-    ]
-    if is_npu()
+    ] if is_npu()
     else []
-)
+}
 
 class TestQwen3_235B(TestMultiMixUtils):
-    model = QWEN3_235B_MODEL_PATH
-    other_args = QWEN3_235B_OTHER_ARGS
-    envs = QWEN3_235B_ENVS
+    model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 480
     num_prompts = int(max_concurrency) * 4
@@ -95,8 +92,8 @@ class TestQwen3_235B(TestMultiMixUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # PPU: 205@50ms.   800I: 1.8*PPU
-    output_token_throughput = 205 * 1.8 * 8 / 0.93
+    # T: 205@50ms.   800I: 1.8*T
+    output_token_throughput = 205 * 1.8 * 16 / 0.93
 
     def test_qwen3_235b(self):
         self.run_throughput()

@@ -9,9 +9,6 @@ MODEL_CONFIG = {
     "model_path": MODEL_PATH,
     "prefill_envs": {
         "SGLANG_SET_CPU_AFFIMITY": "1",
-        "LD_LIBRARY_PATH": "/usr/local/Ascend/ascend-toolkit/latest/opp/vendors/customize/op_api/lib/:${LD_LIBRARY_PATH}",
-        "PATH": "/usr/local/Ascend/8.5.0/compiler/bisheng/bin:$PATH",
-        "ASCEND_HOME_PATH": "/usr/local/Ascend/ascend-toolkit/latest",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "HCCL_BUFFSIZE": "1024",
@@ -26,9 +23,6 @@ MODEL_CONFIG = {
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFIMITY": "1",
-        "LD_LIBRARY_PATH": "/usr/local/Ascend/ascend-toolkit/latest/opp/vendors/customize/op_api/lib/:${LD_LIBRARY_PATH}",
-        "PATH": "/usr/local/Ascend/8.5.0/compiler/bisheng/bin:$PATH",
-        "ASCEND_HOME_PATH": "/usr/local/Ascend/ascend-toolkit/latest",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MULTI_STREAM": "1",
@@ -137,7 +131,8 @@ class Test_DeepSeek_V3_2_W8A8_1P1D(TestAscendDisaggregationUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 30
-    output_token_throughput = 1
+    # T: 4.7@26ms        800I: None          Dev-800I: 471/ 32
+    output_token_throughput = 471 / 0.93
 
     def test_throughput(self):
         self.run_throughput()

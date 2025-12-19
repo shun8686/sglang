@@ -204,6 +204,14 @@ def launch_node(config):
                 bootstrap_ports,
             ]
         )
+        if "--node-rank" not in prefill_args:
+            print("No node-rank specified and all prefill node will form a single instance.")
+            prefill_args.extend(
+                [
+                    "--node-rank",
+                    pod_index,
+                ]
+            )
 
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
         for pod_name in configmap.data:

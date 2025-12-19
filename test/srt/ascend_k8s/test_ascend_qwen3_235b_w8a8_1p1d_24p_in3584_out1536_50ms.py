@@ -151,7 +151,7 @@ class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendDisaggregationUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # H20:290@50ms. 800I: 1.8*H20
+    # T:290@50ms. 800I: 1.8*H20
     output_token_throughput = 290 * 1.8 * 24 /0.93
 
     def test_throughput(self):
