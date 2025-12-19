@@ -15,6 +15,7 @@ KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 LOCAL_TIMEOUT = 6000
+SERVICE_PORT = 6688
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
@@ -128,7 +129,7 @@ def launch_router():
         "--host",
         "127.0.0.1",
         "--port",
-        "6688",
+        SERVICE_PORT,
     ]
 
     for index, url in enumerate(prefill_url):
@@ -314,14 +315,14 @@ class TestAscendDisaggregationUtils(CustomTestCase):
         if self.role == "router":
             router_thread = threading.Thread(target=launch_router)
             router_thread.start()
-            self.wait_router_ready(f"http://127.0.0.1:6688" + "/health")
+            self.wait_router_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
 
             print(f"Wait 120s, starting run benchmark ......")
             time.sleep(120)
 
             metrics = run_bench_serving(
                 host="127.0.0.1",
-                port="6688",
+                port=SERVICE_PORT,
                 model_path = self.model_config.get("model_path"),
                 dataset_name=self.dataset_name,
                 request_rate=self.request_rate,

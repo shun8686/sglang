@@ -17,6 +17,7 @@ KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 LOCAL_TIMEOUT = 6000
+SERVICE_PORT = 6677
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
@@ -61,7 +62,7 @@ def launch_node(config):
 
         master_node_ip = None
         for pod_name in configmap.data:
-            if "node-0" in pod_name:
+            if pod_name.endswith("sglang-node-0"):
                 master_node_ip = configmap.data[pod_name]
                 break
         if master_node_ip == None:
@@ -93,7 +94,7 @@ def launch_node(config):
     print(f"Starting node, {node_ip=} {other_args=}")
     return popen_launch_server(
         config["model_path"],
-        f"http://{node_ip}:{6688}",
+        f"http://{node_ip}:{SERVICE_PORT}",
         timeout=LOCAL_TIMEOUT * 10,
         other_args=[
             *other_args,
@@ -145,22 +146,20 @@ class TestMultiMixUtils(CustomTestCase):
     tpot = None
     output_token_throughput = None
 
-    print("Nic name: {}".format(NIC_NAME))
-
     @classmethod
     def setUpClass(cls):
         cls.local_ip = os.getenv("POD_IP")
         hostname = os.getenv("HOSTNAME")
-        cls.role = "master" if "master" in hostname else None
+        cls.role = "master" if hostname.endswith("sglang-node-0") else "worker"
         print(f"Init {cls.local_ip} {cls.role=}!")
 
-    def wait_service_ready(self, url, timeout=LOCAL_TIMEOUT):
+    def wait_server_ready(self, url, timeout=LOCAL_TIMEOUT):
         start_time = time.perf_counter()
         while True:
             try:
                 response = requests.get(url)
                 if response.status_code == 200:
-                    print(f"Router {url} is ready!")
+                    print(f"Server {url} is ready!")
                     return
             except Exception:
                 pass
@@ -176,14 +175,14 @@ class TestMultiMixUtils(CustomTestCase):
         sglang_thread.start()
 
         if self.role == "master":
-            self.wait_service_ready(f"http://127.0.0.1:6688" + "/health")
+            self.wait_server_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
 
             print(f"Wait 120s, starting run benchmark ......")
             time.sleep(120)
 
             metrics = run_bench_serving(
                 host="127.0.0.1",
-                port="6688",
+                port=SERVICE_PORT,
                 model_path = self.model_config.get("model_path"),
                 dataset_name=self.dataset_name,
                 request_rate=self.request_rate,
@@ -206,6 +205,4 @@ class TestMultiMixUtils(CustomTestCase):
                 self.output_token_throughput * 0.98,
             )
         else:
-            # launch node
-
             time.sleep(LOCAL_TIMEOUT)
