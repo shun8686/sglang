@@ -3,10 +3,10 @@ import unittest
 from test_ascend_multi_mix_utils import TestMultiMixUtils
 from test_ascend_single_mix_utils import NIC_NAME
 
-Qwen3_480B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
 
 MODEL_CONFIG = {
-    "model_path": Qwen3_480B_MODEL_PATH,
+    "model_path": MODEL_PATH,
     "node_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",

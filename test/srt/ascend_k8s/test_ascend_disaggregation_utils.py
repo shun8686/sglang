@@ -249,7 +249,7 @@ def launch_node(config):
     )
 
 
-def run_bench_serving(host, port, model_path, dataset_name="random", request_rate=8, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
+def run_bench_serving(host, port, model_path, dataset_name="random", request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
                       random_range_ratio=1):
     request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
     random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")

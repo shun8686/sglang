@@ -104,18 +104,12 @@ def launch_node(config):
         ],
     )
 
-def run_bench_serving(host, port, dataset_name="random", request_rate=None, max_concurrency=8, num_prompts=32, input_len=1024, output_len=1024,
-                      random_range_ratio=1, dataset_path=None):
-    dataset_configs = (f"--dataset-name {dataset_name}")
+def run_bench_serving(host, port, model_path, dataset_name="random", request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
+                      random_range_ratio=1):
     request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
     random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
-    if dataset_name == "gsm8k":
-        dataset_configs = (f"{dataset_configs} --dataset-path {dataset_path}")
-        random_configs = (f"--random-input-len {input_len} --random-output-len {output_len}")
-
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} {dataset_configs} {request_configs} "
+    command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} --dataset-name {dataset_name} {request_configs} "
                f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
-
     print(f"command:{command}")
     metrics = run_command(f"{command} | tee ./bench_log.txt")
     print("metrics is " + str(metrics))
