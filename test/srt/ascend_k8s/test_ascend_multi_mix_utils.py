@@ -49,7 +49,7 @@ def launch_node(config):
     hostname = os.getenv("HOSTNAME")
     pod_index = int(hostname.rsplit("-", 1)[-1])
 
-    # monitor configmap to generate ASCEND_MF_STORE_URL and dist_init_addr
+    # monitor configmap to generate dist-init-addr and node-rank
     isReady = False
     dist_init_addr = None
     while not isReady:
