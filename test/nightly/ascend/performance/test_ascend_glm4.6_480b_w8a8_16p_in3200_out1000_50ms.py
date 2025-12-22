@@ -3,24 +3,21 @@ import unittest
 from test_ascend_multi_mix_utils import TestMultiMixUtils
 from test_ascend_single_mix_utils import NIC_NAME
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
 
 MODEL_CONFIG = {
     "model_path": MODEL_PATH,
     "node_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "24",
-        "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-        "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-        "SGLANG_ENABLE_SPEC_V2": "1",
-        "SGLANG_DP_ROUND_ROBIN": "1",
-        "HCCL_BUFFSIZE": "2100",
+        "STREAMS_PER_DEVICE": "32",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-        "STREAMS_PER_DEVICE": "32",
-        "TASK_QUEUE_ENABLE": "0",
-        "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+        "HCCL_BUFFSIZE": "1536",
+        "SGLANG_USE_FIA_NZ": "1",
+        "HCCL_OP_EXPANSION_MODE": "AIV",
+        "SGLANG_USE_NZ_MATMUL": "1",
     },
     "other_args": [
         "--trust-remote-code",
@@ -31,7 +28,7 @@ MODEL_CONFIG = {
         "--dp-size",
         "32",
         "--mem-fraction-static",
-        "0.75",
+        "0.82",
         "--max-running-requests",
         "384",
         "--attention-backend",
@@ -71,15 +68,15 @@ MODEL_CONFIG = {
 class TestQwen3_480B(TestMultiMixUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
-    max_concurrency = 80
+    max_concurrency = 16
     num_prompts = int(max_concurrency) * 4
-    input_len = 3500
-    output_len = 1500
+    input_len = 3200
+    output_len = 1000
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # T: 143@50ms.   800I: xxxxx.     dev：4637@50.34ms
-    output_token_throughput = 4600
+    # T: None   800I: xxxxx.     dev：3192/16@51.19ms
+    output_token_throughput = 3192
 
     def test_qwen3_480b(self):
         self.run_throughput()

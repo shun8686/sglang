@@ -93,7 +93,7 @@ class TestQwen3_235B(TestSingleMixUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
-    # H20: 290@50ms.   800I: 1.1*H20
+    # T: 290@50ms.   800I: 1.1*T
     output_token_throughput = 290 * 1.1 * 8 / 0.93
 
     def test_qwen3_235b(self):
