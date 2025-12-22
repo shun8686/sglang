@@ -1,4 +1,4 @@
-name: 'e2e nightly test multi_node (Ascend NPU)'
+name: 'e2e nightly test multi-node (Ascend NPU)'
 
 on:
   workflow_call:
@@ -34,7 +34,7 @@ on:
         description: path of test case file
 
 concurrency:
-  group: ascend-nightly-multinode-${{ github.ref }}-${{ inputs.soc_version }}
+  group: ascend-nightly-multi-node-${{ github.ref }}-${{ inputs.soc_version }}
   cancel-in-progress: true
 
 jobs:

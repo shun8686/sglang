@@ -5,11 +5,11 @@ from test_ascend_single_mix_utils import (
     NIC_NAME
 )
 
-QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
 QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3"
 
 QWEN3_32B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
+    # "SGLANG_SET_CPU_AFFINITY": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "400",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
@@ -31,10 +31,8 @@ QWEN3_32B_OTHER_ARGS = (
         "ascend",
         "--device",
         "npu",
-        "--quantization",
-        "modelslim",
         "--max-running-requests",
-        "120",
+        "32",
         "--disable-radix-cache",
         "--speculative-draft-model-quantization",
         "unquant",
@@ -43,30 +41,28 @@ QWEN3_32B_OTHER_ARGS = (
         "--speculative-draft-model-path",
         QWEN3_32B_EAGLE_MODEL_PATH,
         "--speculative-num-steps",
-        "1",
+        "2",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "2",
+        "3",
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
-        "49152",
+        "65536",
         "--tp-size",
-        "4",
+        "16",
         "--mem-fraction-static",
-        "0.7",
+        "0.72",
         "--cuda-graph-bs",
-        54,
-        60,
-        66,
-        72,
-        78,
-        84,
-        90,
-        108,
-        114,
-        120,
+        1,
+        4,
+        6,
+        12,
+        18,
+        24,
+        30,
+        32,
         "--dtype",
         "bfloat16",
     ]
@@ -74,19 +70,19 @@ QWEN3_32B_OTHER_ARGS = (
 
 
 class TestQwen3_32B(TestSingleMixUtils):
-    model = QWEN3_32B_W8A8_MODEL_PATH
+    model = QWEN3_32B_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 78
-    num_prompts = 312
-    input_len = 3500
-    output_len = 1500
+    max_concurrency = 1
+    num_prompts = 1
+    input_len = 18000
+    output_len = 4000
     random_range_ratio = 1
     ttft = 10000
-    tpot = 50
-    # T: 387. 800I A3: 1.8*T=696.6
-    output_token_throughput = 387 * 1.8 * 2 / 0.93
+    tpot = 7
+    # 800I A3：74.69
+    output_token_throughput = 74.69 / 0.93
 
     def test_qwen3_32b(self):
         self.run_throughput()
