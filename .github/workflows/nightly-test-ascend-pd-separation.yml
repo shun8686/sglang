@@ -55,7 +55,7 @@ jobs:
         KUBECONFIG: /data/.cache/kb.yaml
         KUBECTL: /data/.cache/kubectl
         NAMESPACE: ascend-sglang
-        ASCEND_TEST_CASE_PATH: test/srt/ascend_k8s
+        ASCEND_TEST_CASE_PATH: test/nightly/ascend/performance
         KUBE_JOB_TYPE: pd-separation
         KUBE_JOB_NAME: ascend-sglang-multi
         KUBE_CONFIG_MAP: ascend-sglang-info
@@ -75,7 +75,7 @@ jobs:
 
       - name: Prepare scripts
         run: |
-          # prepare for deepep.yaml
+          # prepare for k8s_pd_separation.yaml
           image="${{ inputs.image }}"
           prefill_size="${{ inputs.prefill_size }}"
           decode_size="${{ inputs.decode_size }}"
@@ -92,13 +92,13 @@ jobs:
                   \"router_size\": $router_size,                            \
                   \"sglang_source_path\": \"$sglang_source_path\",          \
                   \"test_case\": \"$test_case\" }"                         |\
-              jinja2 ${ASCEND_TEST_CASE_PATH}/deepep.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/deepep.yaml
-          echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/deepep.yaml"
+              jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml
+          echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml"
 
       - name: Clear resources
         run: |
           cd $ASCEND_TEST_CASE_PATH
-          kubectl delete -f ./deepep.yaml --ignore-not-found=true || true
+          kubectl delete -f ./k8s_pd_separation.yaml --ignore-not-found=true || true
 
           pod_name_prefix="${KUBE_JOB_NAME}-sglang"
           echo "kube name space: $NAMESPACE, pod name prefix: ${pod_name_prefix}"
@@ -108,7 +108,7 @@ jobs:
               sleep 30
               kubectl get pods | grep "${pod_name_prefix}" | awk '{print $1}' | xargs kubectl delete pod -n $NAMESPACE || true
             else
-              echo "No sglang job exist, start deepep case..."
+              echo "No sglang job exist, start test case..."
               break
             fi
           done
@@ -129,4 +129,4 @@ jobs:
         run: |
           kubectl get pods -n $NAMESPACE
           cd $ASCEND_TEST_CASE_PATH
-          kubectl delete -f ./deepep.yaml --ignore-not-found=true || true
+          kubectl delete -f ./k8s_pd_separation.yaml --ignore-not-found=true || true

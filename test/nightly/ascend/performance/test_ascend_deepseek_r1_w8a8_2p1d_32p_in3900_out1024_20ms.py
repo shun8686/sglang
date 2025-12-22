@@ -4,7 +4,7 @@ from test_ascend_single_mix_utils import NIC_NAME
 from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
 
 
-MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 
 MODEL_CONFIG = {
     "model_path": MODEL_PATH,
@@ -33,7 +33,7 @@ MODEL_CONFIG = {
         "SGLANG_ENABLE_SPEC_V2": "1",
         "HCCL_BUFFSIZE": "650",
         "SGLANG_DP_ROUND_ROBIN": "1",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "78",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "12",
         "TASK_QUEUE_ENABLE": "0",
         "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
@@ -53,7 +53,7 @@ MODEL_CONFIG = {
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        8,
+        4,
         "--context-length",
         8192,
         "--disable-radix-cache",
@@ -89,11 +89,11 @@ MODEL_CONFIG = {
         "--tp-size",
         32,
         "--dp-size",
-        32,
+        16,
         "--mem-fraction-static",
-        0.815,
+        0.75,
         "--max-running-requests",
-        832,
+        32,
         "--quantization",
         "modelslim",
         "--moe-a2a-backend",
@@ -105,14 +105,9 @@ MODEL_CONFIG = {
         "--moe-dense-tp",
         "1",
         "--cuda-graph-bs",
-        12,
-        14,
-        16,
-        18,
-        20,
-        22,
-        24,
-        26,
+        2,
+        4,
+        6,
         "--watchdog-timeout",
         9000,
         "--context-length",
@@ -120,11 +115,11 @@ MODEL_CONFIG = {
         "--speculative-algorithm",
         "NEXTN",
         "--speculative-num-steps",
-        2,
+        3,
         "--speculative-eagle-topk",
         1,
         "--speculative-num-draft-tokens",
-        3,
+        4,
         "--tokenizer-worker-num",
         4,
         "--prefill-round-robin-balance",
@@ -134,20 +129,19 @@ MODEL_CONFIG = {
     ],
 }
 
-
-class Test_DeepSeek_R1_W8A8_2P1D(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W8A8_2P1D_In3900_Out1024(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
     max_concurrency = 768
     num_prompts = 768
-    input_len = 3500
-    output_len = 1500
+    input_len = 3900
+    output_len = 1024
     random_range_ratio = 1
     ttft = 10000
-    tpot = 50
-    # T: 224@40ms    800I A3: 1.8*T
-    output_token_throughput = 224 * 1.8 * 32 / 0.93
+    tpot = 20
+    # T: None   800I A3: None     Dev-800I: 1140/32@19.77ms
+    output_token_throughput = 1140
 
     def test_throughput(self):
         self.run_throughput()

@@ -4,7 +4,7 @@ from test_ascend_single_mix_utils import NIC_NAME
 from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
 
 
-MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 
 MODEL_CONFIG = {
     "model_path": MODEL_PATH,
@@ -129,19 +129,19 @@ MODEL_CONFIG = {
     ],
 }
 
-class Test_DeepSeek_R1_W8A8_2P1D_In6144_Out1600(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W8A8_2P1D_In3500_Out1024(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
     max_concurrency = 768
     num_prompts = 768
-    input_len = 6144
-    output_len = 1600
+    input_len = 3500
+    output_len = 1024
     random_range_ratio = 1
     ttft = 10000
-    tpot = 15
-    # T: None   800I A3: None     Dev-800I: 1181/32@19.81
-    output_token_throughput = 1181
+    tpot = 20
+    # T: 216@20ms   800I A3: None     Dev-800I: 1163/32@19.52ms
+    output_token_throughput = 1163
 
     def test_throughput(self):
         self.run_throughput()

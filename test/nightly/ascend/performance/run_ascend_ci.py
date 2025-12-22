@@ -20,7 +20,7 @@ MONITOR_POD_NAME = "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JO
     "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME'))
 KUBE_YAML_FILE = os.environ.get('KUBE_YAML_FILE')
 if not KUBE_YAML_FILE:
-    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "k8s_multi.yaml" if KUBE_JOB_TYPE == "multi" else "deepep.yaml"
+    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "k8s_multi.yaml" if KUBE_JOB_TYPE == "multi" else "k8s_pd_separation.yaml"
 
 def run_command(cmd, shell=True):
     try:
@@ -95,7 +95,7 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
             namespace=namespace,
             body=configmap
         )
-        print(f"ConfigMap '{cm_name}' create successfully！")
+        print(f"ConfigMap '{cm_name}' create successfully!")
         print(f"data: {list(data.keys())}")
         return response
     except ApiException as e:
@@ -226,7 +226,7 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
                 process.kill()
 
 if __name__ == "__main__":    
-    print("apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}, KUBE_YAML_FILE:{}"
+    print("Apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}, KUBE_YAML_FILE:{}"
           .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE, KUBE_YAML_FILE))
     
     result = run_command("kubectl apply -f {}".format(KUBE_YAML_FILE))
