@@ -35,6 +35,7 @@ export ENABLE_MOE_NZ=1
 export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
 export TASK_QUEUE_ENABLE=2
 export PYTHONPATH=$PWD/python/:$PYTHONPATH
+export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 
 # P节点
