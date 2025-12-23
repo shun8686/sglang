@@ -40,7 +40,7 @@ export TASK_QUEUE_ENABLE=0
 
 # D节点
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode decode \
---host 192.168.0.102 --port 8001 --trust-remote-code \
+--host 192.168.0.60 --port 8001 --trust-remote-code \
 --nnodes 1 \
 --tp-size 16 \
 --dp-size 16 \
@@ -53,7 +53,6 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --enable-dp-lm-head \
 --cuda-graph-bs 8 10 12 14 16 18 20 22 24 \
 --watchdog-timeout 9000 \
---context-length 8192 \
 --speculative-algorithm NEXTN \
 --speculative-num-steps 3 \
 --speculative-eagle-topk 1 \
