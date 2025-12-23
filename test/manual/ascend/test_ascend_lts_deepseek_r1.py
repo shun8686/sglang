@@ -181,7 +181,7 @@ def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
     metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
     return metrics
 
-class TestLTSQwen3235B(CustomTestCase):
+class TestLTSDeepSeekR1(CustomTestCase):
     model = QWEN3_235B_MODEL_PATH
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
@@ -309,7 +309,7 @@ class TestLTSQwen3235B(CustomTestCase):
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
         )
 
-    def test_lts_qwen3_235b(self):
+    def test_lts_deepseekr1(self):
         i = 0
         while True:
             i = i + 1
