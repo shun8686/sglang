@@ -35,6 +35,7 @@ export HCCL_BUFFSIZE=720
 export SGLANG_DP_ROUND_ROBIN=1
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=96
 export TASK_QUEUE_ENABLE=0
+export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 
