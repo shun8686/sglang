@@ -1,3 +1,6 @@
+export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
+
+
 python -m sglang_router.launch_router \
     --pd-disaggregation \
     --policy cache_aware \
