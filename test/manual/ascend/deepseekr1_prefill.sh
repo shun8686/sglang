@@ -44,12 +44,11 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --node-rank 0 \
 --disaggregation-mode prefill \
 --tp-size 16 \
---mem-fraction-static 0.6 \
+--mem-fraction-static 0.8 \
 --quantization modelslim \
 --max-running-requests 8 \
---context-length 8192 \
 --disable-radix-cache \
---chunked-prefill-size 32768 \
+--chunked-prefill-size -1 \
 --max-prefill-tokens 28680 \
 --moe-a2a-backend deepep \
 --deepep-mode normal \
