@@ -40,7 +40,7 @@ export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 # P节点
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode prefill \
---host  --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
+--host 192.168.0.60 --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
 --nnodes 1 \
 --node-rank 0 \
 --disaggregation-mode prefill \
