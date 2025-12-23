@@ -34,7 +34,7 @@ export SGLANG_USE_FIA_NZ=1
 export ENABLE_MOE_NZ=1
 export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
 export TASK_QUEUE_ENABLE=2
-export PYTHONPATH=$PWD/python/:$PYTHONPATH
+export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 
