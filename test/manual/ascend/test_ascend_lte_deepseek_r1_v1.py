@@ -18,7 +18,7 @@ from sglang.test.test_utils import (
 )
 
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 
 def run_command(cmd, shell=True):
@@ -56,7 +56,6 @@ class TestLTSDeepSeekR1(CustomTestCase):
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
-    envs = QWEN3_235B_ENVS
     request_rate = 5.5
     max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
