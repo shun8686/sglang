@@ -118,12 +118,16 @@ spec:
                 fieldPath: metadata.annotations['huawei.com/ascend-1980']
           - name: SGLANG_SOURCE_PATH
             value: "{{ sglang_source_path }}"
+          - name: METRICS_DATA_FILE
+            value: "{{ metrics_data_file }}"
           - name: KUBECONFIG
             value: "{{ kube_config }}"
           - name: NAMESPACE
             value: "{{ name_space }}"
           - name: KUBE_CONFIG_MAP
             value: "{{ kube_config_map }}"
+          - name: HF_ENDPOINT
+            value: "https://hf-mirror.com"
           command: ["/bin/bash", "-c"]
           args:
             - |
@@ -144,8 +148,8 @@ spec:
             mountPath: /root/script
           - name: share
             mountPath: /data
-          - name: modelscope
-            mountPath: /root/.cache/modelscope
+          - name: cache
+            mountPath: /root/.cache
         volumes:
         - name: kube-config
           hostPath:
@@ -153,9 +157,9 @@ spec:
         - name: share
           hostPath:
             path: /data
-        - name: modelscope
+        - name: cache
           hostPath:
-            path: /data/ascend-ci-share-pkking-sglang/modelscope
+            path: /data/ascend-ci-share-pkking-sglang
         - name: ascend-910-config
           configMap:
             name: rings-config-ascend-sglang-test

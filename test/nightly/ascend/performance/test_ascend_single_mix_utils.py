@@ -32,7 +32,7 @@ def run_command(cmd, shell=True):
         return None
 
 def run_bench_serving(host, port, model_path=None, dataset_name=None, request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
-                      random_range_ratio=1, dataset_path=None):
+                      random_range_ratio=1, dataset_path=None, result_file=None):
     dataset_configs = (f"--dataset-name {dataset_name}")
     request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
     random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
@@ -43,17 +43,20 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
     command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} {dataset_configs} {request_configs} "
                f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
 
+    result_file = "./bench_log.txt" if not result_file else result_file
+    print(f"The metrics result file: {result_file}")
+
     print(f"command:{command}")
-    metrics = run_command(f"{command} | tee ./bench_log.txt")
+    metrics = run_command(f"{command} | tee {result_file}")
     print("metrics is " + str(metrics))
     mean_ttft = run_command(
-        "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
+        "cat {} | grep 'Mean TTFT' | awk '{print $4}'".format(result_file)
     )
     mean_tpot = run_command(
-        "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
+        "cat {}  | grep 'Mean TPOT' | awk '{print $4}'".format(result_file)
     )
     total_tps = run_command(
-        "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
+        "cat {}  | grep 'Output token throughput' | awk '{print $5}'".format(result_file)
     )
     result = {
         'mean_ttft': mean_ttft,
@@ -78,6 +81,7 @@ class TestSingleMixUtils(CustomTestCase):
     ttft = None
     tpot = None
     output_token_throughput = None
+    metrics_data_file = os.getenv("METRICS_DATA_FILE")
 
     print("Nic name: {}".format(NIC_NAME))
 
@@ -115,7 +119,8 @@ class TestSingleMixUtils(CustomTestCase):
             input_len=self.input_len,
             output_len=self.output_len,
             random_range_ratio=self.random_range_ratio,
-            dataset_path=self.dataset_path
+            dataset_path=self.dataset_path,
+            result_file=self.metrics_data_file,
         )
         self.assertLessEqual(
             float(metrics['mean_ttft']),

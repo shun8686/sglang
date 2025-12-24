@@ -71,6 +71,16 @@ jobs:
 
       - name: Prepare scripts
         run: |
+          # prepare for output data
+          current_date=$(date +%Y%m%d)
+          commit_id=${{ github.sha }}
+          test_data_output_path=/data/.cache/tests/output/${current_date}/${commit_id}          
+          mkdir -p ${test_data_output_path}
+          tc_name=${test_case##*/}
+          tc_name=${tc_name%.*}
+          metrics_data_file=${test_data_output_path}/${tc_name}.txt
+          echo "Metrics file: ${metrics_data_file}"
+          
           # prepare for test code
           rm -rf /data/.cache/tests/sglang/*
           cp -r * /data/.cache/tests/sglang/
@@ -91,6 +101,7 @@ jobs:
                   \"decode_size\": $decode_size,                            \
                   \"router_size\": $router_size,                            \
                   \"sglang_source_path\": \"$sglang_source_path\",          \
+                  \"metrics_data_file\": \"$metrics_data_file\",            \
                   \"test_case\": \"$test_case\" }"                         |\
               jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml
           echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml"

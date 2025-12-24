@@ -10,7 +10,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from test_ascend_single_mix_utils import NIC_NAME
+from test_ascend_single_mix_utils import run_bench_serving
 
 
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
@@ -98,31 +98,6 @@ def launch_node(config):
         ],
     )
 
-def run_bench_serving(host, port, model_path, dataset_name="random", request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
-                      random_range_ratio=1):
-    request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
-    random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
-    command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} --dataset-name {dataset_name} {request_configs} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
-    print(f"command:{command}")
-    metrics = run_command(f"{command} | tee ./bench_log.txt")
-    print("metrics is " + str(metrics))
-    mean_ttft = run_command(
-        "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
-    )
-    mean_tpot = run_command(
-        "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
-    )
-    total_tps = run_command(
-        "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
-    )
-    result = {
-        'mean_ttft': mean_ttft,
-        'mean_tpot': mean_tpot,
-        'total_tps': total_tps
-    }
-    return result
-
 class TestMultiMixUtils(CustomTestCase):
     model = None
     dataset_name = None
@@ -136,6 +111,7 @@ class TestMultiMixUtils(CustomTestCase):
     ttft = None
     tpot = None
     output_token_throughput = None
+    metrics_data_file = os.getenv("METRICS_DATA_FILE")
 
     @classmethod
     def setUpClass(cls):
@@ -183,6 +159,7 @@ class TestMultiMixUtils(CustomTestCase):
                 input_len=self.input_len,
                 output_len=self.output_len,
                 random_range_ratio=self.random_range_ratio,
+                result_file=self.metrics_data_file,
             )
             self.assertLessEqual(
                 float(metrics['mean_ttft']),

@@ -2,7 +2,7 @@ import unittest
 
 from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
-Qwen3_Next_80B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Next-80B-A3B-Instruct"
+Qwen3_Next_80B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
 
 Qwen3_Next_80B_A3B_ENVS = {
     # "SGLANG_SET_CPU_AFFINITY": "1",

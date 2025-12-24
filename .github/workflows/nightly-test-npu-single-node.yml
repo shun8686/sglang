@@ -48,6 +48,16 @@ jobs:
           current_path=$(pwd)
           test_case=${{ inputs.test_case }}
 
+          # prepare for output data
+          current_date=$(date +%Y%m%d)
+          commit_id=${{ github.sha }}
+          test_data_output_path=/data/.cache/tests/output/${current_date}/${commit_id}          
+          mkdir -p ${test_data_output_path}
+          tc_name=${test_case##*/}
+          tc_name=${tc_name%.*}
+          export METRICS_DATA_FILE=${test_data_output_path}/${tc_name}.txt
+          echo "Metrics file: ${METRICS_DATA_FILE}"
+
           # speed up by using infra cache services
           CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
           sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
