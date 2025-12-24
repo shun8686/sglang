@@ -28,7 +28,7 @@ export TASK_QUEUE_ENABLE=0
 export HCCL_SOCKET_IFNAME=enp23s0f3
 export GLOO_SOCKET_IFNAME=enp23s0f3
 
-export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
+# export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 logfile="./launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
