@@ -28,12 +28,12 @@ export GLOO_SOCKET_IFNAME=enp23s0f3
 
 export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
-export logfile="./launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
+export logfile="./launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
 
 # P节点
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode prefill \
---host 192.168.0.60 --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
+--host 192.168.0.184 --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
 --nnodes 1 \
 --node-rank 0 \
 --disaggregation-mode prefill \
