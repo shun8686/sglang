@@ -25,7 +25,6 @@ export GLOO_SOCKET_IFNAME=enp23s0f3
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=16
 # export HCCL_OP_EXPANSION_MODE=AIV
 # export HCCL_ALGO="level0:NA;levrl1:ring"
-export SGLANG_SET_CPU_AFFINITY=1
 export SGLANG_NPU_USE_MLAPO=1
 export SGLANG_USE_FIA_NZ=1
 export ENABLE_MOE_NZ=1
@@ -38,8 +37,11 @@ export TASK_QUEUE_ENABLE=0
 export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
+logfile="./launch_decode_$(date +'%Y-%m-%d %H:%M').log"
+
 
 # D节点
+nohup \
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode decode \
 --host 192.168.0.60 --port 8001 --trust-remote-code \
 --nnodes 1 \
@@ -62,3 +64,4 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --disable-shared-experts-fusion \
 --dtype bfloat16 \
 --tokenizer-worker-num 4 \
+> $logfile 2>&1 & \
