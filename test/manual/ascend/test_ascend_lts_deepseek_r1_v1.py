@@ -64,6 +64,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
     tpot = 50
     output_token_throughput = 8314
     accuracy = 0.80
+    base_url = DEFAULT_URL_FOR_TEST
 
     # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
     long_seq_configs = {
