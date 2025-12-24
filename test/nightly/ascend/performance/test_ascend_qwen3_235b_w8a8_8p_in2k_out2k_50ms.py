@@ -18,7 +18,6 @@ QWEN3_235B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "ENABLE_PROFILING": "1",
 }
 
 QWEN3_235B_OTHER_ARGS = (
@@ -88,8 +87,9 @@ class TestQwen3_235B(TestSingleMixUtils):
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
+    request_rate = 15
     max_concurrency = 480
-    num_prompts = int(max_concurrency) * 4
+    num_prompts = 480
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
