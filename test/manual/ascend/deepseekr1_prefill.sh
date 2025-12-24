@@ -1,20 +1,23 @@
 pkill -9 sglang
 pkill -9 python
 
-export cann_path=/usr/local/Ascend/ascend-toolkit/latest
-source /usr/local/Ascend/driver/bin/setenv.bash
-source ${cann_path}/../set_env.sh
-source ${cann_path}/../../nnal/atb/set_env.sh
-source ${cann_path}/opp/vendors/customize/bin/set_env.bash
-export ASCEND_HOME_PATH=${cann_path}
-
-MODEL_PATH= 
+# cpu高性能
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
-
+# 绑核
 export SGLANG_SET_CPU_AFFINITY=1
+
+unset https_proxy
+unset http_proxy
+unset HTTPS_PROXY
+unset HTTP_PROXY
+unset ASCEND_LAUNCH_BLOCKING
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+source /usr/local/Ascend/nnal/atb/set_env.sh
+export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
+
 export PYTORCH_NPU_ALLOC_CONF="expandable_segments:True"
 export STREAMS_PER_DEVICE=32
 export SGLANG_NPU_USE_MLAPO=1
