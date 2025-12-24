@@ -127,6 +127,8 @@ MODEL_CONFIG = {
         "bfloat16",
         "--tokenizer-worker-num",
         4,
+        "--load-balance-method",
+        "decode_round_robin",
     ],
 }
 

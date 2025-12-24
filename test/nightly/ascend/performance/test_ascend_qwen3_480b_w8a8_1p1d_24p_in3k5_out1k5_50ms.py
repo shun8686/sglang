@@ -104,6 +104,8 @@ MODEL_CONFIG = {
         4,
         "--dtype",
         "bfloat16",
+        "--load-balance-method",
+        "decode_round_robin",
     ],
 }
 

@@ -116,7 +116,7 @@ MODEL_CONFIG = {
         4,
         "--prefill-round-robin-balance",  
         "--load-balance-method",
-        "round_robin",
+        "decode_round_robin",
     ],
 }
 

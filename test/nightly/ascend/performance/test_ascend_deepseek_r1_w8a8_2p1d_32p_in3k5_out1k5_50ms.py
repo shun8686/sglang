@@ -131,6 +131,8 @@ MODEL_CONFIG = {
         "--disable-shared-experts-fusion",
         "--dtype",
         "bfloat16",
+        "--load-balance-method",
+        "decode_round_robin",
     ],
 }
 
