@@ -15,13 +15,8 @@ sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
 export SGLANG_SET_CPU_AFFINITY=1
-
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 export STREAMS_PER_DEVICE=32
-
-export HCCL_SOCKET_IFNAME=enp23s0f3
-export GLOO_SOCKET_IFNAME=enp23s0f3
-
 export SGLANG_NPU_USE_MLAPO=1
 export SGLANG_USE_FIA_NZ=1
 export ENABLE_MOE_NZ=1
@@ -30,6 +25,9 @@ export SGLANG_ENABLE_SPEC_V2=1
 export HCCL_BUFFSIZE=720
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=96
 export TASK_QUEUE_ENABLE=0
+export HCCL_SOCKET_IFNAME=enp23s0f3
+export GLOO_SOCKET_IFNAME=enp23s0f3
+
 export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
