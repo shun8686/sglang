@@ -40,13 +40,14 @@ export logfile="./launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
 # P节点
 # -context-length 8192  长序列场景不设置该参数
+# --mem-fraction-static 0.8 长序列场景从0.6增大至0.8
 nohup \
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode prefill \
 --host 192.168.0.184 --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
 --nnodes 1 \
 --node-rank 0 \
 --tp-size 16 \
---mem-fraction-static 0.8 \  # 长序列增大至0.8
+--mem-fraction-static 0.8 \
 --attention-backend ascend \
 --device npu \
 --quantization modelslim \
