@@ -1,7 +1,8 @@
 import unittest
 
 from sglang.srt.utils import is_npu
-from test_ascend_multi_mix_utils import TestMultiMixUtils, NIC_NAME
+from test_ascend_multi_mix_utils import TestMultiMixUtils
+from test_ascend_single_mix_utils import NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 
@@ -19,15 +20,14 @@ MODEL_CONFIG = {
         "HCCL_OP_EXPANSION_MODE": "AIV",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
-        "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-        "ENABLE_PROFILING": "1",
+        "DISABLE_EAGLE3_QUANT": "1",
+        # "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+        # "ENABLE_PROFILING": "1",
     },
     "other_args": [
         "--trust-remote-code",
         "--nnodes",
-        "1",
-        "--node-rank",
-        "0",
+        "2",
         "--attention-backend",
         "ascend",
         "--device",
@@ -35,49 +35,48 @@ MODEL_CONFIG = {
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "480",
+        "1152",
         "--context-length",
         "8192",
         "--dtype",
         "bfloat16",
         "--chunked-prefill-size",
-        "-1",
+        "32768",
         "--max-prefill-tokens",
-        "16384",
-        "--speculative-draft-model-quantization",
-        "unquant",
+        "458880",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
         QWEN3_235B_A22B_EAGLE_MODEL_PATH,
         "--speculative-num-steps",
-        "3",
+        "1",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "4",
+        "2",
         "--disable-radix-cache",
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
         "auto",
         "--tp",
-        "16",
+        "32",
         "--dp-size",
-        "16",
+        "32",
         "--enable-dp-attention",
         "--enable-dp-lm-head",
         "--mem-fraction-static",
-        "0.78",
+        "0.8",
         "--cuda-graph-bs",
         "6",
         "8",
         "10",
         "12",
-        "15",
         "18",
+        "24",
         "28",
-        "30",
+        "32",
+        "36",
     ] if is_npu()
     else []
 }
@@ -86,7 +85,7 @@ class TestQwen3_235B(TestMultiMixUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 480
-    num_prompts = int(max_concurrency) * 4
+    num_prompts = 480
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
