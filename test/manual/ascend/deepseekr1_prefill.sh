@@ -39,6 +39,7 @@ export logfile="./launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
 
 # P节点
+# -context-length 8192  长序列场景不设置该参数
 nohup \
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode prefill \
 --host 192.168.0.184 --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
@@ -51,7 +52,6 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --quantization modelslim \
 --disaggregation-transfer-backend ascend \
 --max-running-requests 8 \
-# -context-length 8192  长序列场景不设置该参数
 --disable-radix-cache \
 --chunked-prefill-size -1 \
 --max-prefill-tokens 28680 \
