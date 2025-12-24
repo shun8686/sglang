@@ -107,9 +107,6 @@ class TestLTSDeepSeekR1(CustomTestCase):
     # 新增：批量执行三种长序列验证
     def run_all_long_seq_verify(self):
         """依次验证16k+1k、32k+1k、64k+1k三种单条长序列"""
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
-
         for seq_type, config in self.long_seq_configs.items():
             print(f"\n========== Start {seq_type} single long sequence test ==========")
             # 执行单条长序列请求
