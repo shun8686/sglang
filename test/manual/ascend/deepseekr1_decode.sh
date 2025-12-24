@@ -41,6 +41,8 @@ export GLOO_SOCKET_IFNAME=enp23s0f3
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 export logfile="./launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
+export node_ip="192.168.0.60"
+
 
 # D节点
 # --context-length 8192 \ 长序列场景，注释该参数
@@ -71,4 +73,5 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --disable-shared-experts-fusion \
 --dtype bfloat16 \
 --tokenizer-worker-num 4 \
+--dist-init-addr ${node_ip}:5000 \
 > $logfile 2>&1 & \
