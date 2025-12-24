@@ -151,7 +151,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
-            host=self.host,
+            host=f"http://{self.host}",
             port=self.port,
         )
         metrics = run_eval(args)
