@@ -6,5 +6,5 @@ python -u -m sglang_router.launch_router \
     --host 127.0.0.1 \
     --port 6688 \
     --prefill http://192.168.0.184:8000 8995\
-    --decode http://192.168.0.60:8000 \
+    --decode http://192.168.0.60:8001 \
 > $logfile 2>&1 & \
