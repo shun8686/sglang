@@ -52,7 +52,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--speculative-num-draft-tokens",
         "2",
         "--dp-size",
-        "1",
+        "2",
         "--enable-dp-attention",
         "--tp-size",
         "8",
