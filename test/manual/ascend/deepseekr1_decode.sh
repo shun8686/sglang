@@ -41,6 +41,7 @@ export logfile="./launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
 
 # D节点
+# --context-length 8192 \ 长序列场景，注释该参数
 nohup \
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode decode \
 --host 192.168.0.60 --port 8001 --trust-remote-code \
@@ -60,7 +61,6 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --cuda-graph-bs 8 10 12 14 16 18 20 22 24 \
 --disaggregation-transfer-backend ascend \
 --watchdog-timeout 9000 \
-# --context-length 8192 \ 长序列场景，注释该参数
 --speculative-algorithm NEXTN \
 --speculative-num-steps 3 \
 --speculative-eagle-topk 1 \
