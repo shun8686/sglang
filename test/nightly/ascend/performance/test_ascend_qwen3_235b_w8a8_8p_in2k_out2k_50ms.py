@@ -42,7 +42,7 @@ QWEN3_235B_OTHER_ARGS = (
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
-        "16384",
+        "8192",
         "--speculative-draft-model-quantization",
         "unquant",
         "--speculative-algorithm",
