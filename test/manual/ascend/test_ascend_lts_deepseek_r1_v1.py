@@ -64,8 +64,9 @@ class TestLTSDeepSeekR1(CustomTestCase):
     tpot = 50
     output_token_throughput = 8314
     accuracy = 0.80
-    base_url = DEFAULT_URL_FOR_TEST
-
+    host = "127.0.0.1"
+    port = 6688
+    
     # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
     long_seq_configs = {
         "16k+1k": {
@@ -89,11 +90,9 @@ class TestLTSDeepSeekR1(CustomTestCase):
     }
 
     def run_throughput(self):
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
         metrics = run_bench_serving(
-            host=host,
-            port=port,
+            host=self.host,
+            port=self.port,
             dataset_name=self.dataset_name,
             dataset_path=self.dataset_path,
             request_rate=self.request_rate,
@@ -115,8 +114,8 @@ class TestLTSDeepSeekR1(CustomTestCase):
             print(f"\n========== Start {seq_type} single long sequence test ==========")
             # 执行单条长序列请求
             metrics = run_single_long_seq_test(
-                host=host,
-                port=port,
+                host=self.host,
+                port=self.port,
                 input_len=config["input_len"],
                 output_len=config["output_len"],
                 seq_type=seq_type
@@ -155,8 +154,8 @@ class TestLTSDeepSeekR1(CustomTestCase):
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            host=self.host,
+            port=self.port,
         )
         metrics = run_eval(args)
         self.assertGreater(
