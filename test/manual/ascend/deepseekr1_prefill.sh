@@ -71,5 +71,5 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --disable-shared-experts-fusion \
 --dtype bfloat16 \
 --dist-init-addr ${node_ip}:5000 \
---disaggregation-bootstrap-port 8995
+--disaggregation-bootstrap-port 8995 \
 > $logfile 2>&1 & \
