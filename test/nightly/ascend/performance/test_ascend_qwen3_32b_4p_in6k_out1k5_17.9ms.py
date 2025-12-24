@@ -52,7 +52,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--speculative-num-draft-tokens",
         "2",
         "--dp-size",
-        "1",
+        "2",
         "--enable-dp-attention",
         "--tp-size",
         "8",
@@ -83,8 +83,8 @@ class TestQwen3_32B(TestSingleMixUtils):
     random_range_ratio = 1
     ttft = 10000
     tpot = 17.9
-    # T: 398@18ms. 800I A3: 1316.66
-    output_token_throughput = 1316.66 / 0.93
+    # T: 398@18ms. 800I A3: 1247.24
+    output_token_throughput = 1247.24 / 0.93
 
     def test_qwen3_32b(self):
         self.run_throughput()
