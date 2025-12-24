@@ -39,13 +39,15 @@ export GLOO_SOCKET_IFNAME=enp23s0f3
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 export logfile="./launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
+export node_ip="192.168.0.184"
+
 
 # P节点
 # -context-length 8192  长序列场景不设置该参数
 # --mem-fraction-static 0.8 长序列场景从0.6增大至0.8
 nohup \
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode prefill \
---host 192.168.0.184 --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
+--host ${node_ip} --port 8000 --disaggregation-bootstrap-port 8995 --trust-remote-code \
 --nnodes 1 \
 --node-rank 0 \
 --tp-size 16 \
@@ -68,4 +70,6 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --enable-dp-attention \
 --disable-shared-experts-fusion \
 --dtype bfloat16 \
+--dist-init-addr ${node_ip}:5000 \
+--disaggregation-bootstrap-port 8995
 > $logfile 2>&1 & \
