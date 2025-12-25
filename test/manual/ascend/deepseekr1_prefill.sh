@@ -34,6 +34,9 @@ export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
 export TASK_QUEUE_ENABLE=2
 export HCCL_SOCKET_TFNAME=enp23s0f3
 export GLOO_SOCKET_IFNAME=enp23s0f3
+# 蚂蚁搬家，ROUND*TOKENS≥chunkedprefillsize/tp*dp
+export DEEPEP_NORMAL_LONG_SEQ_ROUND=4
+export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 
 # export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
@@ -58,7 +61,7 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --disaggregation-transfer-backend ascend \
 --max-running-requests 8 \
 --disable-radix-cache \
---chunked-prefill-size -1 \
+--chunked-prefill-size 8192 \
 --max-prefill-tokens 28680 \
 --moe-a2a-backend deepep \
 --deepep-mode normal \
