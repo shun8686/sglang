@@ -34,8 +34,8 @@ export SGLANG_ENABLE_SPEC_V2=1
 export HCCL_BUFFSIZE=720
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=96
 export TASK_QUEUE_ENABLE=0
-export HCCL_SOCKET_IFNAME=enp23s0f3
-export GLOO_SOCKET_IFNAME=enp23s0f3
+export HCCL_SOCKET_IFNAME=enp194s0f0
+export GLOO_SOCKET_IFNAME=enp194s0f0
 
 # export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 export MODEL_PATH="/home/weights/DeepSeek-R1_w8a8"
