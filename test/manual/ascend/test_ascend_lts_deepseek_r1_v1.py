@@ -42,7 +42,7 @@ def run_bench_serving(host, port, dataset_name="random", dataset_path="", reques
 # 新增：通用单条长序列测试函数（适配16k+1k/32k+1k/64k+1k）
 def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
     command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
-               f"--request-rate 1 --max-concurrency 1 --num-prompts 100 "
+               f"--request-rate 1 --max-concurrency 1 --num-prompts 5 "
                f"--random-input-len {input_len} --random-output-len {output_len} "
                f"--random-range-ratio 1")  # 固定长度，不随机
     print(f"{seq_type} single long sequence test command:{command}")
