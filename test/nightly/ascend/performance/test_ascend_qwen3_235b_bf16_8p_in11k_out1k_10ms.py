@@ -31,8 +31,6 @@ QWEN3_235B_OTHER_ARGS = (
         "ascend",
         "--device",
         "npu",
-        "--quantization",
-        "modelslim",
         "--max-running-requests",
         "1",
         "--dtype",
