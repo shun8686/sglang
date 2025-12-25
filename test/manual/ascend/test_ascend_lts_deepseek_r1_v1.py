@@ -17,7 +17,7 @@ from sglang.test.test_utils import (
 )
 
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+MODEL_PATH = "/home/weights/DeepSeek-R1_w8a8"
 
 
 def run_command(cmd, shell=True):
@@ -150,7 +150,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
         print(f"========== Start gsm8k test ==========\n")
         args = SimpleNamespace(
             num_shots=5,
-            data_path=None,
+            data_path="/home/lts-test/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
