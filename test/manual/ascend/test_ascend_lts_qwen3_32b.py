@@ -97,7 +97,7 @@ def run_bench_serving(host, port, dataset_name="random", dataset_path="", reques
 class TestLTSQwen332B(CustomTestCase):
     model = QWEN3_32B_MODEL_PATH
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    dataset_path = "/home/zhaoming/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
     other_args = QWEN3_32B_OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = QWEN3_32B_ENVS
@@ -173,7 +173,7 @@ class TestLTSQwen332B(CustomTestCase):
     def run_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
-            data_path=None,
+            data_path="/home/zhaoming/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
