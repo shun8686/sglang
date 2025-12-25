@@ -16,7 +16,7 @@ from test_ascend_single_mix_utils import run_bench_serving
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
-LOCAL_TIMEOUT = 6000
+LOCAL_TIMEOUT = 3600
 SERVICE_PORT = "6688"
 
 config.load_kube_config(KUBE_CONFIG)
@@ -251,7 +251,7 @@ def launch_node(config):
     return popen_launch_server(
         config["model_path"],
         f"http://{node_ip}:{8000}",
-        timeout=LOCAL_TIMEOUT * 10,
+        timeout=LOCAL_TIMEOUT,
         other_args=[
             *service_args,
         ],
