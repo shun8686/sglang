@@ -42,7 +42,7 @@ export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 export logfile="./launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
-export node_ip="192.168.0.184"
+export node_ip="141.61.39.231"
 
 
 # P节点
