@@ -53,7 +53,7 @@ def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
 class TestLTSDeepSeekR1(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    dataset_path = "/home/lts-test/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
     request_rate = 5.5
     max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
@@ -69,11 +69,11 @@ class TestLTSDeepSeekR1(CustomTestCase):
     
     # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
     long_seq_configs = {
-        "16k+1k": {
-            "input_len": 16384,
+        "64k+1k": {
+            "input_len": 65536,
             "output_len": 1024,
-            "ttft_threshold": 40000, 
-            "tpot_threshold": 200
+            "ttft_threshold": 100000,
+            "tpot_threshold": 350
         },
         "32k+1k": {
             "input_len": 32768,
@@ -81,15 +81,16 @@ class TestLTSDeepSeekR1(CustomTestCase):
             "ttft_threshold": 70000,
             "tpot_threshold": 250
         },
-        "64k+1k": {
-            "input_len": 65536,
+        "16k+1k": {
+            "input_len": 16384,
             "output_len": 1024,
-            "ttft_threshold": 100000,
-            "tpot_threshold": 350
-        }
+            "ttft_threshold": 40000, 
+            "tpot_threshold": 200
+        },
     }
 
     def run_throughput(self):
+        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
         metrics = run_bench_serving(
             host=self.host,
             port=self.port,
@@ -103,6 +104,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
             random_range_ratio=self.random_range_ratio,
         )
         print("metrics is " + str(metrics))
+        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
 
     # 新增：批量执行三种长序列验证
     def run_all_long_seq_verify(self):
@@ -145,6 +147,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
             print(f"========== {seq_type} single long sequence test PASSED ==========\n")
 
     def run_gsm8k(self):
+        print(f"========== Start gsm8k test ==========\n")
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -155,11 +158,12 @@ class TestLTSDeepSeekR1(CustomTestCase):
             port=self.port,
         )
         metrics = run_eval(args)
-        # self.assertGreater(
-        #     metrics["accuracy"],
-        #     self.accuracy,
-        #     f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
-        # )
+        self.assertGreater(
+            metrics["accuracy"],
+            self.accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+        )
+        print(f"========== gsm8k test PASSED ==========\n")
 
     def test_lts_deepseekr1(self):
         i = 0
