@@ -53,7 +53,7 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --node-rank 0 \
 --tp-size 16 \
 --dp-size 16 \
---mem-fraction-static 0.8 \
+--mem-fraction-static 0.9 \
 --max-running-requests 384 \
 --attention-backend ascend \
 --device npu \
