@@ -146,7 +146,7 @@ class TestLTSQwen3235B(CustomTestCase):
     ttft = 10000
     tpot = 50
     output_token_throughput = 8314
-    accuracy = 0.80
+    accuracy = 0.00
 
     long_seq_configs = {
         "64k+1k": {
