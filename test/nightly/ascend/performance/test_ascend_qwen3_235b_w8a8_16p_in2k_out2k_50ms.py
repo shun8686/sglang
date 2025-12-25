@@ -44,6 +44,8 @@ MODEL_CONFIG = {
         "32768",
         "--max-prefill-tokens",
         "458880",
+        "--speculative-draft-model-quantization",
+        "unquant",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
