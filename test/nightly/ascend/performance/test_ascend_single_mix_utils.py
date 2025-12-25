@@ -50,13 +50,13 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
     metrics = run_command(f"{command} | tee {result_file}")
     print("metrics is " + str(metrics))
     mean_ttft = run_command(
-        "cat {} | grep 'Mean TTFT' | awk '{print $4}'".format(result_file)
+        "grep 'Mean TTFT' " + result_file + " | awk '{print $4}'"
     )
     mean_tpot = run_command(
-        "cat {}  | grep 'Mean TPOT' | awk '{print $4}'".format(result_file)
+        "grep 'Mean TPOT' " + result_file + " | awk '{print $4}'"
     )
     total_tps = run_command(
-        "cat {}  | grep 'Output token throughput' | awk '{print $5}'".format(result_file)
+        "grep 'Output token throughput' " + result_file + " | awk '{print $5}'"
     )
     result = {
         'mean_ttft': mean_ttft,
