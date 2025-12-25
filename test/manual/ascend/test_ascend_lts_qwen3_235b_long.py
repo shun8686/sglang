@@ -256,7 +256,7 @@ class TestLTSQwen3235B(CustomTestCase):
             print(f"========== {seq_type} single long sequence test PASSED ==========\n")
 
     def run_gsm8k(self):
-        print(f"========== Start {seq_type} gsm8k test ==========\n")
+        print(f"========== Start gsm8k test ==========\n")
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
