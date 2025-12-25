@@ -1,47 +1,101 @@
-LOGPATH="./lts_test_log/`date  +"%y%m%d%H%M%S"`"
+#!/bin/bash
+INTERVAL=10
+LOGPATH="./lts_test_log/$(date +"%y%m%d%H%M%S")"
 
-function sglangMonitor()
-{
-	while true
-	do
-		sglangPid=$(ps -ef |grep "python3 -m sglang.launch_server" |awk '{print $2}'|head -1)
-		sglangLsopOpenFile=$(lsof -p $sglangPid|wc -l)
-		sglangRES=$(top -bn1 -p ${sglangPid} |tail -n2|grep ${sglangPid}|awk '{print $6}')
-		sglangMEM=$(top -bn1 -p ${sglangPid} |tail -n2|grep ${sglangPid}|awk '{print $10}')
-		sglangCPU=$(top -bn1 -p ${sglangPid} |tail -n2|grep ${sglangPid}|awk '{print $9}')
-		sglangZoom=$(ps -ef |grep defunc[t]|wc -l)
-		echo "`date +"%y%m%d-%H:%M:%S"` sglangPid:${sglangPid} sglangCPU:"${sglangCPU}%" sglangRES:${sglangRES} sglangMEM:"${sglangMEM}%" sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom} " >> $LOGPATH/server_log.csv
-		sleep 10
-        done
-
+function sglangMonitor() {
+  while true; do
+    sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | awk '{print $2}' | head -1)
+    sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
+    sglangRES=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $6}')
+    sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
+    sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
+    sglangZoom=$(ps -ef | grep defunc[t] | wc -l)
+    echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGPATH/server_log.csv"
+    sleep $INTERVAL
+  done
 }
 
-function nodeMonitor()
-{
-
-	while true
-	do
-		nodeSYCPU=$(top -bn1 |grep Cpu |awk '{print $4}')
-		nodeUSCPU=$(top -bn1 |grep Cpu |awk '{print $2}')
-		nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
-		nodemem_kb=$(vmstat -s |grep "used memory"|awk '{print $1}')
-		nodemem=$(awk "BEGIN {print $nodemem_kb/1024/1024}")
-		echo "`date  +"%y%m%d-%H:%M:%S"` nodeSYCPU:"${nodeSYCPU}%" nodeUSCPU:"${nodeUSCPU}%" nodeCPU:"${nodeCPU}%" nodemem:"${nodemem}g" " >> $LOGPATH/node_log.csv
-		sleep 10
-       done
+function nodeMonitor() {
+  while true; do
+    nodeSYCPU=$(top -bn1 | grep Cpu | awk '{print $4}')
+    nodeUSCPU=$(top -bn1 | grep Cpu | awk '{print $2}')
+    nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
+    nodemem_kb=$(vmstat -s | grep "used memory" | awk '{print $1}')
+    nodemem=$(awk "BEGIN {print $nodemem_kb/1024/1024}")
+    echo "$(date +"%y%m%d-%H:%M:%S") nodeSYCPU:${nodeSYCPU}% nodeUSCPU:${nodeUSCPU}% nodeCPU:${nodeCPU}% nodemem:${nodemem}g" >> "$LOGPATH/node_log.csv"
+    sleep $INTERVAL
+  done
 }
 
-[[ ! -d ${LOGPATH} ]] && mkdir -p ${LOGPATH}
+function npuMonitor() {
+LOG_FILE="npu_monitor.log"
+
+# 定义列宽度常量
+TIMESTAMP_WIDTH=20
+NPU_ID_WIDTH=9
+CHIP_ID_WIDTH=10
+PHY_ID_WIDTH=10
+AICORE_WIDTH=11
+HBM_INFO_WIDTH=20
+
+echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGPATH/$LOG_FILE"
+echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOG_FILE"
+while true; do
+    TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
+    NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
+    
+    OUTPUT=""
+
+    while IFS= read -r line; do
+        if [[ "$line" == *"Process id"* ]]; then
+            break
+        fi
+        if [[ "$line" =~ ^\|[[:space:]]*([0-9]+)[[:space:]]+([0-9]+).*\|[[:space:]]*([0-9]+).*\|.*$ ]]; then
+            chip_id="${BASH_REMATCH[1]}"
+            phy_id="${BASH_REMATCH[2]}"
+            aicore="${BASH_REMATCH[3]}"
+            
+            if [[ "$line" =~ ([0-9]+[[:space:]]*/[[:space:]]*[0-9]+)[[:space:]]*\|[[:space:]]*$ ]]; then
+                hbm_info="${BASH_REMATCH[1]}"
+            else
+                hbm_info="N/A"
+            fi
+            
+            npu_id=$((phy_id / 2))
+            
+            # 使用printf格式化输出，实现左对齐
+            printf -v log_entry "%-${TIMESTAMP_WIDTH}s %-${NPU_ID_WIDTH}s %-${CHIP_ID_WIDTH}s %-${PHY_ID_WIDTH}s %-${AICORE_WIDTH}s %-${HBM_INFO_WIDTH}s" \
+                   "${TIMESTAMP}" \
+                   "NPU_ID:${npu_id}" \
+                   "CHIP_ID:${chip_id}" \
+                   "Phy_ID:${phy_id}" \
+                   "AICORE:${aicore}%" \
+                   "HBM_INFO:${hbm_info}"
+            
+            OUTPUT+="${log_entry}"$'\n'
+        fi
+    done <<< "$NPU_INFO"
+    
+    echo -n "$OUTPUT" >> "$LOGPATH/$LOG_FILE"
+    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOG_FILE"
+    sleep $INTERVAL
+done
+}
+
+[[ ! -d ${LOGPATH} ]] && mkdir -p "${LOGPATH}"
 
 [[ -z $1 ]] && exit 1
 case $1 in
-	server)
-		sglangMonitor
-	;;
-        node)
-		nodeMonitor
-	;;
-	*)
-		exit 1
-	;;
+  server)
+    sglangMonitor
+    ;;
+  node)
+    nodeMonitor
+    ;;
+  npu)
+    npuMonitor
+    ;;
+  *)
+    exit 1
+    ;;
 esac
