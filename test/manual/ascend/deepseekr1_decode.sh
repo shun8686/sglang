@@ -23,7 +23,7 @@ export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 export STREAMS_PER_DEVICE=32
 # pd传输, IP设置为p节点首节点
-export ASCEND_MF_STORE_URL="tcp://192.168.0.184:24667"
+export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
 # enable mlapo
 export SGLANG_NPU_USE_MLAPO=1
 export SGLANG_USE_FIA_NZ=1
@@ -38,10 +38,10 @@ export HCCL_SOCKET_IFNAME=enp23s0f3
 export GLOO_SOCKET_IFNAME=enp23s0f3
 
 # export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
-export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+export MODEL_PATH="/home/weights/DeepSeek-R1_w8a8"
 export logfile="./launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
-export node_ip="192.168.0.60"
+export node_ip="141.61.29.201"
 
 
 # D节点
