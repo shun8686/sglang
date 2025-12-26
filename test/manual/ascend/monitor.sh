@@ -8,7 +8,7 @@ function sglangMonitor() {
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
     echo $sglangPid
     echo "======================debug1=========================="
-    if [ -n $sglangPid ]; then
+    if [[ $str =~ ^.*[^[:space:]].*$ ]]; then
         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
         echo "======================debug2=========================="
         sglangRES=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $6}')
