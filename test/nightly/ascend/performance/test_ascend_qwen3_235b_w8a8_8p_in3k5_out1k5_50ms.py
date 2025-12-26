@@ -18,7 +18,7 @@ QWEN3_235B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "DEEPEP_NORMAL_LONG_SEQ_ROUND": "6",
+    "DEEPEP_NORMAL_LONG_SEQ_ROUND": "8",
     "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
 }
 
@@ -90,8 +90,8 @@ class TestQwen3_235B(TestSingleMixUtils):
     dataset_name = "random"
     max_concurrency = 240
     num_prompts = int(max_concurrency) * 4
-    input_len = 3584
-    output_len = 1536
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 1
     ttft = 10000
     tpot = 50
