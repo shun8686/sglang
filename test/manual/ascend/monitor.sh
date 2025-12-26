@@ -5,8 +5,10 @@ LOGPATH="./lts_test_log/$(date +"%y%m%d-%H:%M")"
 function sglangMonitor() {
     echo "======================sglangMonitor()=========================="
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
+    echo "======================debug=========================="
     if [ -n $sglangPid ]; then
         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
+        echo "======================debug=========================="
         sglangRES=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $6}')
         sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
         sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
