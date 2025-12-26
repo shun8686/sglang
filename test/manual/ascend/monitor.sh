@@ -3,6 +3,7 @@ INTERVAL=10
 LOGPATH="./lts_test_log/$(date +"%y%m%d-%H:%M")"
 
 function sglangMonitor() {
+    echo "======================sglangMonitor()=========================="
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
     if [ -n $sglangPid ]; then
         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
@@ -15,6 +16,7 @@ function sglangMonitor() {
 }
 
 function nodeMonitor() {
+    echo "======================nodeMonitor()=========================="
     nodeSYCPU=$(top -bn1 | grep Cpu | awk '{print $4}')
     nodeUSCPU=$(top -bn1 | grep Cpu | awk '{print $2}')
     nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
@@ -24,6 +26,7 @@ function nodeMonitor() {
 }
 
 function npuMonitor() {
+    echo "======================npuMonitor()=========================="
     LOG_FILE="npu_monitor.log"
 
     # 定义列宽度常量
