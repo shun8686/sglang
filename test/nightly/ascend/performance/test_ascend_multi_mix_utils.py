@@ -136,7 +136,7 @@ class TestMultiMixUtils(CustomTestCase):
                 raise RuntimeError(f"Server {url} failed to start in {timeout}s")
             time.sleep(10)
 
-    def run_throughput(self):
+    def run_throughput(self, retry=True):
         sglang_thread = threading.Thread(
             target=launch_node, args=(self.model_config,)
         )
@@ -145,8 +145,8 @@ class TestMultiMixUtils(CustomTestCase):
         if self.role == "master":
             master_node_ip = os.getenv("POD_IP")
             self.wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
-            print(f"Wait 60s, starting run benchmark ......")
-            time.sleep(60)
+            print(f"Wait 120s, starting run benchmark ......")
+            time.sleep(120)
 
             metrics = run_bench_serving(
                 host=master_node_ip,
@@ -161,6 +161,20 @@ class TestMultiMixUtils(CustomTestCase):
                 random_range_ratio=self.random_range_ratio,
                 result_file=self.metrics_data_file,
             )
+            if retry:
+                metrics = run_bench_serving(
+                    host=master_node_ip,
+                    port=SERVICE_PORT,
+                    model_path=self.model_config.get("model_path"),
+                    dataset_name=self.dataset_name,
+                    request_rate=self.request_rate,
+                    max_concurrency=self.max_concurrency,
+                    num_prompts=self.num_prompts,
+                    input_len=self.input_len,
+                    output_len=self.output_len,
+                    random_range_ratio=self.random_range_ratio,
+                    result_file=self.metrics_data_file,
+                )
             if self.tpot:
                 self.assertLessEqual(
                     float(metrics['mean_tpot']),

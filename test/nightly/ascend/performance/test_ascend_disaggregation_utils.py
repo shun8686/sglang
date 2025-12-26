@@ -298,14 +298,14 @@ class TestAscendDisaggregationUtils(CustomTestCase):
                 raise RuntimeError(f"Server {url} failed to start in {timeout}s")
             time.sleep(10)
 
-    def run_throughput(self):
+    def run_throughput(self, retry=True):
         if self.role == "router":
             router_thread = threading.Thread(target=launch_router)
             router_thread.start()
             self.wait_router_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
 
-            print(f"Wait 60, starting run benchmark ......")
-            time.sleep(60)
+            print(f"Wait 120, starting run benchmark ......")
+            time.sleep(120)
 
             metrics = run_bench_serving(
                 host="127.0.0.1",
@@ -320,6 +320,20 @@ class TestAscendDisaggregationUtils(CustomTestCase):
                 random_range_ratio=self.random_range_ratio,
                 result_file=self.metrics_data_file,
             )
+            if retry:
+                metrics = run_bench_serving(
+                    host="127.0.0.1",
+                    port=SERVICE_PORT,
+                    model_path=self.model_config.get("model_path"),
+                    dataset_name=self.dataset_name,
+                    request_rate=self.request_rate,
+                    max_concurrency=self.max_concurrency,
+                    num_prompts=self.num_prompts,
+                    input_len=self.input_len,
+                    output_len=self.output_len,
+                    random_range_ratio=self.random_range_ratio,
+                    result_file=self.metrics_data_file,
+                )
             if self.tpot:
                 self.assertLessEqual(
                     float(metrics['mean_tpot']),

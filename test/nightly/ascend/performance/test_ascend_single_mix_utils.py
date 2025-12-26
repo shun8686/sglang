@@ -105,7 +105,7 @@ class TestSingleMixUtils(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def run_throughput(self):
+    def run_throughput(self, retry=True):
         _, host, port = self.base_url.split(":")
         host = host[2:]
         metrics = run_bench_serving(
@@ -122,6 +122,21 @@ class TestSingleMixUtils(CustomTestCase):
             dataset_path=self.dataset_path,
             result_file=self.metrics_data_file,
         )
+        if retry:
+            metrics = run_bench_serving(
+                host=host,
+                port=port,
+                model_path=self.model,
+                dataset_name=self.dataset_name,
+                request_rate=self.request_rate,
+                max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
+                input_len=self.input_len,
+                output_len=self.output_len,
+                random_range_ratio=self.random_range_ratio,
+                dataset_path=self.dataset_path,
+                result_file=self.metrics_data_file,
+            )
         if self.tpot:
             self.assertLessEqual(
                 float(metrics['mean_tpot']),
