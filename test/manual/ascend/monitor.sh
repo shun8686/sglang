@@ -4,7 +4,7 @@ LOGDIRPATH="./lts_test_log"
 LOGFILEPATH="monitor_$(date +"%y%m%d-%H:%M").log"
 
 function sglangMonitor() {
-    echo "======================sglangMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
+    echo "======================sglangMonitor()==========================" >> "$LOGDIRPATH/$LOGFILEPATH"
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
     if [[ $str =~ ^.*[^[:space:]].*$ ]]; then
         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
@@ -12,22 +12,22 @@ function sglangMonitor() {
         sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
         sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
         sglangZoom=$(ps -ef | grep defunc[t] | wc -l)
-        echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGPATH/$LOGFILEPATH"
+        echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGDIRPATH/$LOGFILEPATH"
     fi
 }
 
 function nodeMonitor() {
-    echo "======================nodeMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
+    echo "======================nodeMonitor()==========================" >> "$LOGDIRPATH/$LOGFILEPATH"
     nodeSYCPU=$(top -bn1 | grep Cpu | awk '{print $4}')
     nodeUSCPU=$(top -bn1 | grep Cpu | awk '{print $2}')
     nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
     nodemem_kb=$(vmstat -s | grep "used memory" | awk '{print $1}')
     nodemem=$(awk "BEGIN {print $nodemem_kb/1024/1024}")
-    echo "$(date +"%y%m%d-%H:%M:%S") nodeSYCPU:${nodeSYCPU}% nodeUSCPU:${nodeUSCPU}% nodeCPU:${nodeCPU}% nodemem:${nodemem}g" >> "$LOGPATH/$LOGFILEPATH"
+    echo "$(date +"%y%m%d-%H:%M:%S") nodeSYCPU:${nodeSYCPU}% nodeUSCPU:${nodeUSCPU}% nodeCPU:${nodeCPU}% nodemem:${nodemem}g" >> "$LOGDIRPATH/$LOGFILEPATH"
 }
 
 function npuMonitor() {
-    echo "======================npuMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
+    echo "======================npuMonitor()==========================" >> "$LOGDIRPATH/$LOGFILEPATH"
     # 定义列宽度常量
     TIMESTAMP_WIDTH=20
     NPU_ID_WIDTH=9
@@ -36,8 +36,8 @@ function npuMonitor() {
     AICORE_WIDTH=11
     HBM_INFO_WIDTH=20
 
-    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGPATH/$LOGFILEPATH"
-    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGDIRPATH/$LOGFILEPATH"
+    echo "+===========================+===============+====================================================+" >> "$LOGDIRPATH/$LOGFILEPATH"
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
     
@@ -73,12 +73,12 @@ function npuMonitor() {
         fi
     done <<< "$NPU_INFO"
     
-    echo -n "$OUTPUT" >> "$LOGPATH/$LOGFILEPATH"
-    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
+    echo -n "$OUTPUT" >> "$LOGDIRPATH/$LOGFILEPATH"
+    echo "+===========================+===============+====================================================+" >> "$LOGDIRPATH/$LOGFILEPATH"
 }
 
-[[ ! -d ${LOGPATH} ]] && mkdir -p "${LOGPATH}"
-touch "$LOGPATH/$LOGFILEPATH"
+[[ ! -d ${LOGDIRPATH} ]] && mkdir -p "${LOGDIRPATH}"
+touch "$LOGDIRPATH/$LOGFILEPATH"
 
 while true; do
     sglangMonitor
