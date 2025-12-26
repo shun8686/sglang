@@ -104,8 +104,8 @@ class TestLTSQwen332B(CustomTestCase):
     request_rate = 5.5
     max_concurrency = 16
     num_prompts = int(max_concurrency) * 4
-    input_len = 1024
-    output_len = 300
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 0.5
     ttft = 10000
     tpot = 50
@@ -133,6 +133,7 @@ class TestLTSQwen332B(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def run_throughput(self):
+        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
         _, host, port = self.base_url.split(":")
         host = host[2:]
         metrics = run_bench_serving(
@@ -157,6 +158,7 @@ class TestLTSQwen332B(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
+        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
         # self.assertLessEqual(
         #     float(res_ttft),
         #     self.ttft,
