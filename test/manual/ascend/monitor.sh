@@ -3,18 +3,18 @@ INTERVAL=10
 LOGDIRPATH="./lts_test_log"
 LOGFILEPATH="monitor_$(date +"%y%m%d-%H:%M").log"
 
-function sglangMonitor() {
-    echo "======================sglangMonitor()==========================" >> "$LOGDIRPATH/$LOGFILEPATH"
-    sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
-    if [[ $str =~ ^.*[^[:space:]].*$ ]]; then
-        sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
-        sglangRES=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $6}')
-        sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
-        sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
-        sglangZoom=$(ps -ef | grep defunc[t] | wc -l)
-        echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGDIRPATH/$LOGFILEPATH"
-    fi
-}
+# function sglangMonitor() {
+#     echo "======================sglangMonitor()==========================" >> "$LOGDIRPATH/$LOGFILEPATH"
+#     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
+#     if [[ $str =~ ^.*[^[:space:]].*$ ]]; then
+#         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
+#         sglangRES=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $6}')
+#         sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
+#         sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
+#         sglangZoom=$(ps -ef | grep defunc[t] | wc -l)
+#         echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGDIRPATH/$LOGFILEPATH"
+#     fi
+# }
 
 function nodeMonitor() {
     echo "======================nodeMonitor()==========================" >> "$LOGDIRPATH/$LOGFILEPATH"
@@ -78,7 +78,7 @@ function npuMonitor() {
 touch "$LOGDIRPATH/$LOGFILEPATH"
 
 while true; do
-    sglangMonitor
+    # sglangMonitor
     nodeMonitor
     npuMonitor
 
