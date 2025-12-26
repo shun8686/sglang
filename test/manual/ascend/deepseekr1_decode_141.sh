@@ -53,7 +53,7 @@ export node_ip="141.61.29.201"
 # --context-length 8192 \ 长序列场景，注释该参数
 nohup \
 python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode decode \
---host 192.168.0.60 --port 8001 --trust-remote-code \
+--host ${node_ip} --port 8001 --trust-remote-code \
 --nnodes 1 \
 --node-rank 0 \
 --tp-size 16 \
