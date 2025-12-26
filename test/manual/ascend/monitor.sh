@@ -95,6 +95,11 @@ case $1 in
   npu)
     npuMonitor
     ;;
+  all)
+    sglangMonitor
+    nodeMonitor
+    npuMonitor
+    ;;
   *)
     exit 1
     ;;
