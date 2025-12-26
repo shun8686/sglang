@@ -42,7 +42,7 @@ export GLOO_SOCKET_IFNAME=enp23s0f3
 
 # export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 # export MODEL_PATH="/home/weights/DeepSeek-R1_w8a8"
-export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel/"
 export logfile="./launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
 # export node_ip="141.61.29.201"
