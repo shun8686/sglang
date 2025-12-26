@@ -5,7 +5,7 @@ pkill -9 python
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
-# sysctl -w kernel.sched_migration_cost_ns=50000
+sysctl -w kernel.sched_migration_cost_ns=50000
 
 # 绑核
 export SGLANG_SET_CPU_AFFINITY=1
