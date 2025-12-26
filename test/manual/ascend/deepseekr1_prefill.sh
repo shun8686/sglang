@@ -38,7 +38,7 @@ export TASK_QUEUE_ENABLE=2
 export HCCL_SOCKET_IFNAME=enp23s0f3
 export GLOO_SOCKET_IFNAME=enp23s0f3
 # 蚂蚁搬家，ROUND*TOKENS≥chunkedprefillsize/tp*dp
-export DEEPEP_NORMAL_LONG_SEQ_ROUND=4
+export DEEPEP_NORMAL_LONG_SEQ_ROUND=5
 export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 
 # export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
