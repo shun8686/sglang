@@ -1,5 +1,4 @@
 import os
-import subprocess
 import time
 import requests
 import threading
@@ -19,22 +18,11 @@ CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 LOCAL_TIMEOUT = 3600
 SERVICE_PORT = "6677"
 
-config.load_kube_config(KUBE_CONFIG)
-v1 = client.CoreV1Api()
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=False
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"command error: {e}")
-        return None
-
 # query configmap
 def query_configmap(name, namespace):
     try:
+        config.load_kube_config(KUBE_CONFIG)
+        v1 = client.CoreV1Api()
         configmap = v1.read_namespaced_config_map(name, namespace)
         print(f"query_configmap successfully!")
         return configmap

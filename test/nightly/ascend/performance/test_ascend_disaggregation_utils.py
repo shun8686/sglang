@@ -1,5 +1,4 @@
 import os
-import re
 import socket
 import subprocess
 import threading
@@ -22,17 +21,6 @@ SERVICE_PORT = "6688"
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
 
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=False
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
-
-
 def checkout_port(host, port, timeout=3):
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -44,7 +32,6 @@ def checkout_port(host, port, timeout=3):
         print(f"Error: {e}")
         return False
 
-
 # query configmap
 def query_configmap(name, namespace):
     try:
@@ -54,7 +41,6 @@ def query_configmap(name, namespace):
     except ApiException as e:
         print(f"query_configmap error {e=}")
         return None
-
 
 # get node count from k8s
 def discover_worker_nodes():

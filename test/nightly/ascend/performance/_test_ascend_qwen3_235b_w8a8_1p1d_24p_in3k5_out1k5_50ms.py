@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import NIC_NAME
+from test_ascend_single_mix_utils import NIC_NAME, run_command
 from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
@@ -27,6 +27,7 @@ MODEL_CONFIG = {
 #        "ENABLE_ASCEND_MOE_NZ": "1",
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
 #        "ENABLE_PROFILING": "1",
+        "SGLANG_EXPERT_DISTRIBUTION_RECORDER_DIR": "/data/d00662834/hot_map",
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
@@ -88,6 +89,13 @@ MODEL_CONFIG = {
         "normal",
         "--dtype",
         "bfloat16",
+        "--expert-distribution-recorder-buffer-size",
+        "-1",
+        "--expert-distribution-recorder-mode",
+        "stat",
+        "--ep-dispatch-algorithm",
+        "static",
+        "--enable-expert-distribution-metrics",
     ],
     "decode_args": [
         "--disaggregation-mode",
@@ -152,12 +160,13 @@ class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendDisaggregationUtils):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
-    # T:290@50ms. 800I: 1.8*T
-    output_token_throughput = 290 * 1.8 * 24 /0.93
 
     def test_throughput(self):
         self.run_throughput()
+        if self.role == "router":
+            print("Begin to dump hotmap data")
+            run_command(f"curl --location 'http://127.0.0.1:6688/dump_expert_distribution_record'")
+        
 
 
 if __name__ == "__main__":
