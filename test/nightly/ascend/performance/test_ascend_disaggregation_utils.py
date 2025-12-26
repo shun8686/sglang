@@ -300,8 +300,8 @@ class TestAscendDisaggregationUtils(CustomTestCase):
             router_thread.start()
             self.wait_router_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
 
-            print(f"Wait 120s, starting run benchmark ......")
-            time.sleep(120)
+            print(f"Wait 60, starting run benchmark ......")
+            time.sleep(60)
 
             metrics = run_bench_serving(
                 host="127.0.0.1",

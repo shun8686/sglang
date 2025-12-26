@@ -145,8 +145,8 @@ class TestMultiMixUtils(CustomTestCase):
         if self.role == "master":
             master_node_ip = os.getenv("POD_IP")
             self.wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
-            print(f"Wait 120s, starting run benchmark ......")
-            time.sleep(120)
+            print(f"Wait 60s, starting run benchmark ......")
+            time.sleep(60)
 
             metrics = run_bench_serving(
                 host=master_node_ip,
