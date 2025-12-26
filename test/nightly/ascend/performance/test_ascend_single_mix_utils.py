@@ -122,16 +122,19 @@ class TestSingleMixUtils(CustomTestCase):
             dataset_path=self.dataset_path,
             result_file=self.metrics_data_file,
         )
-        self.assertLessEqual(
-            float(metrics['mean_tpot']),
-            self.tpot * 1.02,
-        )
-        self.assertGreaterEqual(
-            float(metrics['total_tps']),
-            self.output_token_throughput * 0.98,
-        )
-        self.assertLessEqual(
-            float(metrics['mean_ttft']),
-            self.ttft * 1.02,
-        )
+        if self.tpot:
+            self.assertLessEqual(
+                float(metrics['mean_tpot']),
+                self.tpot * 1.02,
+            )
+        if self.output_token_throughput:
+            self.assertGreaterEqual(
+                float(metrics['total_tps']),
+                self.output_token_throughput * 0.98,
+            )
+        if self.ttft:
+            self.assertLessEqual(
+                float(metrics['mean_ttft']),
+                self.ttft * 1.02,
+            )
 
