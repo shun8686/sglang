@@ -104,6 +104,15 @@ class TestLTSDeepSeekR1(CustomTestCase):
             output_len=self.output_len,
             random_range_ratio=self.random_range_ratio,
         )
+        res_ttft = run_command(
+            "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
+        )
+        res_tpot = run_command(
+            "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
+        )
+        res_output_token_throughput = run_command(
+            "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
+        )
         print("metrics is " + str(metrics))
         print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
 
