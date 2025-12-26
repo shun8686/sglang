@@ -4,13 +4,10 @@ LOGDIRPATH="./lts_test_log"
 LOGFILEPATH="monitor_$(date +"%y%m%d-%H:%M").log"
 
 function sglangMonitor() {
-    echo "======================sglangMonitor()=========================="
+    echo "======================sglangMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
-    echo $sglangPid
-    echo "======================debug1=========================="
     if [[ $str =~ ^.*[^[:space:]].*$ ]]; then
         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
-        echo "======================debug2=========================="
         sglangRES=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $6}')
         sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
         sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
@@ -20,7 +17,7 @@ function sglangMonitor() {
 }
 
 function nodeMonitor() {
-    echo "======================nodeMonitor()=========================="
+    echo "======================nodeMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
     nodeSYCPU=$(top -bn1 | grep Cpu | awk '{print $4}')
     nodeUSCPU=$(top -bn1 | grep Cpu | awk '{print $2}')
     nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
@@ -30,7 +27,7 @@ function nodeMonitor() {
 }
 
 function npuMonitor() {
-    echo "======================npuMonitor()=========================="
+    echo "======================npuMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
     # 定义列宽度常量
     TIMESTAMP_WIDTH=20
     NPU_ID_WIDTH=9
@@ -39,7 +36,7 @@ function npuMonitor() {
     AICORE_WIDTH=11
     HBM_INFO_WIDTH=20
 
-    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >>"$LOGPATH/$LOGFILEPATH"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGPATH/$LOGFILEPATH"
     echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
@@ -81,6 +78,7 @@ function npuMonitor() {
 }
 
 [[ ! -d ${LOGPATH} ]] && mkdir -p "${LOGPATH}"
+touch "$LOGPATH/$LOGFILEPATH"
 
 while true; do
     sglangMonitor
