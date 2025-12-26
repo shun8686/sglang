@@ -43,7 +43,7 @@ export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 
 # export PYTHONPATH=/usr/local/python3.11.13/lib/python3.11/site-packages/sglang:$PWD/python/:$PYTHONPATH
 # export MODEL_PATH="/home/weights/DeepSeek-R1_w8a8"
-export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
+export MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel/"
 export logfile="./launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
 # export node_ip="141.61.39.231"
