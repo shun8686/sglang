@@ -155,10 +155,12 @@ def launch_node(config):
     pod_index = int(hostname.rsplit("-", 1)[-1])
     role = "prefill" if "prefill" in hostname else "decode"
     bootstrap_ports = 8995 + pod_index if role == "prefill" else None
-
-    # monitor configmap to generate ASCEND_MF_STORE_URL and dist_init_addr
-    isReady = False
+    master_prefill_ip = None
+    master_decode_ip = None
     dist_init_addr = None
+
+    # monitor configmap ready
+    isReady = False
     while not isReady:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
         if configmap.data == None:
@@ -169,13 +171,14 @@ def launch_node(config):
         print(f"monitor {configmap.data=}")
         for pod_name in configmap.data:
             pod_ip = configmap.data[pod_name]
-            if "prefill-0" in pod_name:
-                mf_addr = f"tcp://{pod_ip}:24666"
-                os.environ["ASCEND_MF_STORE_URL"] = mf_addr
-                print(f"launch_node {mf_addr=}")
-            if role == "decode" and "decode-0" in pod_name:
-                dist_init_addr = f"{pod_ip}:5000"
-                print(f"launch_node {dist_init_addr=}")
+            if str(pod_name).endswith("prefill-0"):
+                master_prefill_ip = pod_ip
+            if str(pod_name).endswith("decode-0"):
+                master_decode_ip = pod_ip
+        
+        if not master_prefill_ip or not master_decode_ip:
+            print(f"Can not get the master node of prefill or decode...retry...")
+            continue
         isReady = True
 
     # generate p/d run command
@@ -191,46 +194,47 @@ def launch_node(config):
     service_args = []
     service_args.extend(common_args)
 
+    mf_addr = f"tcp://{master_prefill_ip}:24666"
+    os.environ["ASCEND_MF_STORE_URL"] = mf_addr
+    print(f"ENV_VAR ASCEND_MF_STORE_URL={mf_addr}")
+
     if role == "prefill":
+        # Current node is prefill
+        dist_init_addr = f"{master_prefill_ip}:5000"
+        print(f"launch prefill node {dist_init_addr=}")
+
         for key, value in config["prefill_envs"].items():
             print(f"ENV_VAR {key}={value}")
             os.environ[key] = value
 
-        dist_init_addr = f"{node_ip}:5000"
         prefill_args = config["prefill_args"]
-        prefill_args.extend(
-            [
-                "--dist-init-addr",
-                dist_init_addr,
-                "--disaggregation-bootstrap-port",
-                bootstrap_ports,
-            ]
-        )
         if "--node-rank" not in prefill_args:
             print("No node-rank specified and all prefill node will form a single instance.")
             prefill_args.extend(
                 [
                     "--node-rank",
                     pod_index,
+                    "--dist-init-addr",
+                    dist_init_addr,
+                    "--disaggregation-bootstrap-port",
+                    8995,
                 ]
             )
-
-        configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
-        for pod_name in configmap.data:
-            pod_ip = configmap.data[pod_name]
-            if pod_ip != node_ip:
-                continue
-
-            match = re.search(r"prefill-(\d+)", pod_name)
-            if match:
-                idx = match.group(1)
-                hot_map_addr = f"/data/.cache/hot_map/aisbench_hot_map_p{idx}.pt"
-                # prefill_args.extend(["--init-expert-location", hot_map_addr])
-                print(f"{pod_name} get hot map in {hot_map_addr}")
+        else:
+            print("Node-rank specified and each prefill node is a instance.")
+            prefill_args.extend(
+                [
+                    "--disaggregation-bootstrap-port",
+                    bootstrap_ports,
+                ]
+            )
 
         service_args.extend(prefill_args)
 
     if role == "decode":
+        dist_init_addr = f"{master_decode_ip}:5000"
+        print(f"launch decode node {dist_init_addr=}")
+    
         for key, value in config["decode_envs"].items():
             print(f"ENV_VAR {key}={value}")
             os.environ[key] = value

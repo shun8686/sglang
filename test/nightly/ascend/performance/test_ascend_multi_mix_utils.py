@@ -81,7 +81,7 @@ def launch_node(config):
     ]
     other_args = config["other_args"]
     for sa in special_args:
-            other_args.append(sa)
+        other_args.append(sa)
 
     for key, value in config["node_envs"].items():
         print(f"ENV_VAR {key}:{value}")
