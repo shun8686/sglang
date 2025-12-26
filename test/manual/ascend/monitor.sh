@@ -1,10 +1,10 @@
 #!/bin/bash
 INTERVAL=10
-LOGDIRPATH="./lts_test_log/"
+LOGDIRPATH="./lts_test_log"
 LOGFILEPATH="monitor_$(date +"%y%m%d-%H:%M").log"
 
 function sglangMonitor() {
-    echo "======================sglangMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
+    echo "======================sglangMonitor()=========================="
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
     echo $sglangPid
     echo "======================debug1=========================="
@@ -20,7 +20,7 @@ function sglangMonitor() {
 }
 
 function nodeMonitor() {
-    echo "======================nodeMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
+    echo "======================nodeMonitor()=========================="
     nodeSYCPU=$(top -bn1 | grep Cpu | awk '{print $4}')
     nodeUSCPU=$(top -bn1 | grep Cpu | awk '{print $2}')
     nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
@@ -30,7 +30,7 @@ function nodeMonitor() {
 }
 
 function npuMonitor() {
-    echo "======================npuMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
+    echo "======================npuMonitor()=========================="
     # 定义列宽度常量
     TIMESTAMP_WIDTH=20
     NPU_ID_WIDTH=9
@@ -39,7 +39,7 @@ function npuMonitor() {
     AICORE_WIDTH=11
     HBM_INFO_WIDTH=20
 
-    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGPATH/$LOG_FILE"
+    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >>"$LOGPATH/$LOGFILEPATH"
     echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
@@ -76,7 +76,7 @@ function npuMonitor() {
         fi
     done <<< "$NPU_INFO"
     
-    echo -n "$OUTPUT" >> "$LOGPATH/$LOG_FILE"
+    echo -n "$OUTPUT" >> "$LOGPATH/$LOGFILEPATH"
     echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
 }
 
