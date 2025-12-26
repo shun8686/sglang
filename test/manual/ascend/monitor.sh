@@ -1,10 +1,12 @@
 #!/bin/bash
 INTERVAL=10
-LOGPATH="./lts_test_log/$(date +"%y%m%d-%H:%M")"
+LOGDIRPATH="./lts_test_log/"
+LOGFILEPATH="monitor_$(date +"%y%m%d-%H:%M").log"
 
 function sglangMonitor() {
-    echo "======================sglangMonitor()=========================="
+    echo "======================sglangMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
     sglangPid=$(ps -ef | grep "python3 -m sglang.launch_server" | grep -v grep | awk '{print $2}' | head -1)
+    echo $sglangPid
     echo "======================debug1=========================="
     if [ -n $sglangPid ]; then
         sglangLsopOpenFile=$(lsof -p $sglangPid | wc -l)
@@ -13,24 +15,22 @@ function sglangMonitor() {
         sglangMEM=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $10}')
         sglangCPU=$(top -bn1 -p ${sglangPid} | tail -n2 | grep ${sglangPid} | awk '{print $9}')
         sglangZoom=$(ps -ef | grep defunc[t] | wc -l)
-        echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGPATH/server_log.csv"
+        echo "$(date +"%y%m%d-%H:%M:%S") sglangPid:${sglangPid} sglangCPU:${sglangCPU}% sglangRES:${sglangRES} sglangMEM:${sglangMEM}% sglangLsopOpenFile:${sglangLsopOpenFile} sglangZoom:${sglangZoom}" >> "$LOGPATH/$LOGFILEPATH"
     fi
 }
 
 function nodeMonitor() {
-    echo "======================nodeMonitor()=========================="
+    echo "======================nodeMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
     nodeSYCPU=$(top -bn1 | grep Cpu | awk '{print $4}')
     nodeUSCPU=$(top -bn1 | grep Cpu | awk '{print $2}')
     nodeCPU=$(echo ${nodeSYCPU} + ${nodeUSCPU} | bc)
     nodemem_kb=$(vmstat -s | grep "used memory" | awk '{print $1}')
     nodemem=$(awk "BEGIN {print $nodemem_kb/1024/1024}")
-    echo "$(date +"%y%m%d-%H:%M:%S") nodeSYCPU:${nodeSYCPU}% nodeUSCPU:${nodeUSCPU}% nodeCPU:${nodeCPU}% nodemem:${nodemem}g" >> "$LOGPATH/node_log.csv"
+    echo "$(date +"%y%m%d-%H:%M:%S") nodeSYCPU:${nodeSYCPU}% nodeUSCPU:${nodeUSCPU}% nodeCPU:${nodeCPU}% nodemem:${nodemem}g" >> "$LOGPATH/$LOGFILEPATH"
 }
 
 function npuMonitor() {
-    echo "======================npuMonitor()=========================="
-    LOG_FILE="npu_monitor.log"
-
+    echo "======================npuMonitor()==========================" >> "$LOGPATH/$LOGFILEPATH"
     # 定义列宽度常量
     TIMESTAMP_WIDTH=20
     NPU_ID_WIDTH=9
@@ -40,7 +40,7 @@ function npuMonitor() {
     HBM_INFO_WIDTH=20
 
     echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGPATH/$LOG_FILE"
-    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOG_FILE"
+    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
     
@@ -77,7 +77,7 @@ function npuMonitor() {
     done <<< "$NPU_INFO"
     
     echo -n "$OUTPUT" >> "$LOGPATH/$LOG_FILE"
-    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOG_FILE"
+    echo "+===========================+===============+====================================================+" >> "$LOGPATH/$LOGFILEPATH"
 }
 
 [[ ! -d ${LOGPATH} ]] && mkdir -p "${LOGPATH}"
