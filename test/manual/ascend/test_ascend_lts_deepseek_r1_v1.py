@@ -17,7 +17,7 @@ from sglang.test.test_utils import (
 )
 
 
-MODEL_PATH = "/home/weights/DeepSeek-R1_w8a8"
+# MODEL_PATH = "/home/weights/DeepSeek-R1_w8a8"
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 
 
