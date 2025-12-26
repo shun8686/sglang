@@ -12,7 +12,7 @@ pip config set global.index-url http://${CACHING_URL}/pypi/simple
 pip config set global.extra-index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
 pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
 
-pip install kubernetes
+pip3 install kubernetes
 pip3 install xgrammar==0.1.25
 pip3 install transformers==4.57.1
 
@@ -25,8 +25,7 @@ sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
-export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
-export HF_ENDPOINT=https://hf-mirror.com
+#export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
 export SGLANG_SET_CPU_AFFINITY=1
 
 unset https_proxy

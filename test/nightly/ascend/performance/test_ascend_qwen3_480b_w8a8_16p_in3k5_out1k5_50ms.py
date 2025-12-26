@@ -21,6 +21,8 @@ MODEL_CONFIG = {
         "STREAMS_PER_DEVICE": "32",
         "TASK_QUEUE_ENABLE": "0",
         "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+        "DEEPEP_NORMAL_LONG_SEQ_ROUND": "6",
+        "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
     },
     "other_args": [
         "--trust-remote-code",
