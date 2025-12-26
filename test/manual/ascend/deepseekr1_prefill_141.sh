@@ -67,7 +67,7 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --max-running-requests 8 \
 --disable-radix-cache \
 --chunked-prefill-size 8192 \
---max-prefill-tokens 28680 \
+--max-prefill-tokens 68000 \
 --moe-a2a-backend deepep \
 --deepep-mode normal \
 --speculative-algorithm NEXTN \
