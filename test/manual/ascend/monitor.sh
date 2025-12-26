@@ -36,8 +36,6 @@ function npuMonitor() {
     AICORE_WIDTH=11
     HBM_INFO_WIDTH=20
 
-    echo "$(date '+%Y-%m-%d %H:%M:%S') 开始监控..." >> "$LOGDIRPATH/$LOGFILEPATH"
-    echo "+===========================+===============+====================================================+" >> "$LOGDIRPATH/$LOGFILEPATH"
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
     
@@ -74,7 +72,6 @@ function npuMonitor() {
     done <<< "$NPU_INFO"
     
     echo -n "$OUTPUT" >> "$LOGDIRPATH/$LOGFILEPATH"
-    echo "+===========================+===============+====================================================+" >> "$LOGDIRPATH/$LOGFILEPATH"
 }
 
 [[ ! -d ${LOGDIRPATH} ]] && mkdir -p "${LOGDIRPATH}"
