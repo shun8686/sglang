@@ -84,7 +84,6 @@ class TestQwen3_235B(TestSingleMixUtils):
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    ttft = 10000
     tpot = 50
     # T: 320@100ms      800I:1.8*T         Dev-800I: 6320/8@54.78
     output_token_throughput = 320 * 1.8 * 8 / 0.93

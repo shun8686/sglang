@@ -78,7 +78,6 @@ class TestQwen3_480B(TestMultiMixUtils):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    ttft = 10000
     tpot = 50
     # T: 143@50ms.   800I: xxxxx.     dev：4637@50.34ms
     output_token_throughput = 4600

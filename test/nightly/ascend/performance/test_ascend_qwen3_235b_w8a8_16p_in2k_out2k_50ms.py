@@ -91,7 +91,6 @@ class TestQwen3_235B(TestMultiMixUtils):
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    ttft = 10000
     tpot = 50
     # T: 205@50ms.   800I: 1.8*T
     output_token_throughput = 205 * 1.8 * 16 / 0.93

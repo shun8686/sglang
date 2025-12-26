@@ -118,7 +118,6 @@ class TestQwen3_480B_w8a8_1p1d_in3500_out1500(TestAscendDisaggregationUtils):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    ttft = 10000
     tpot = 50
     # T:143@50ms. 800I: None     Dev-800I: 6390/24@48.27ms
     output_token_throughput = 6390 / 0.93

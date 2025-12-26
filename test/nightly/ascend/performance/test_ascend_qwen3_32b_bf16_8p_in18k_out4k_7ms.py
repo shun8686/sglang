@@ -79,7 +79,6 @@ class TestQwen3_32B(TestSingleMixUtils):
     input_len = 18000
     output_len = 4000
     random_range_ratio = 1
-    ttft = 10000
     tpot = 7
     # 800I A3：79.64
     output_token_throughput = 79.64 / 0.93

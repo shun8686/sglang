@@ -141,7 +141,6 @@ class Test_DeepSeek_R1_W8A8_2P1D(TestAscendDisaggregationUtils):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    ttft = 10000
     tpot = 20
     # T: None    800I: None    Dev-800I: 1183/32@19.92
     output_token_throughput = 1183
