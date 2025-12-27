@@ -102,7 +102,6 @@ class TestLTSDeepSeekR1(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        print("metrics is " + str(metrics))
         print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
 
     # 新增：批量执行三种长序列验证
@@ -131,7 +130,6 @@ class TestLTSDeepSeekR1(CustomTestCase):
             res_ttft = res_ttft.strip() if res_ttft else "0"
             res_tpot = res_tpot.strip() if res_tpot else "0"
             
-            print("metrics is " + str(metrics))
             print(f"========== {seq_type} single long sequence test PASSED ==========\n")
             # self.assertLessEqual(
             #     float(res_ttft),
