@@ -39,17 +39,6 @@ def run_bench_serving(host, port, dataset_name="random", dataset_path="", reques
     metrics = run_command(f"{command} | tee ./bench_log.txt")
     return metrics
 
-# 新增：通用单条长序列测试函数（适配16k+1k/32k+1k/64k+1k）
-def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
-               f"--request-rate 1 --max-concurrency 1 --num-prompts 5 "
-               f"--random-input-len {input_len} --random-output-len {output_len} "
-               f"--random-range-ratio 1")  # 固定长度，不随机
-    print(f"{seq_type} single long sequence test command:{command}")
-    # 不同长度日志分开保存，避免覆盖
-    metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
-    return metrics
-
 class TestLTSDeepSeekR1(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
@@ -122,23 +111,28 @@ class TestLTSDeepSeekR1(CustomTestCase):
         for seq_type, config in self.long_seq_configs.items():
             print(f"\n========== Start {seq_type} single long sequence test ==========")
             # 执行单条长序列请求
-            metrics = run_single_long_seq_test(
+            metrics = run_bench_serving(
                 host=self.host,
                 port=self.port,
                 input_len=config["input_len"],
                 output_len=config["output_len"],
-                seq_type=seq_type
+                dataset_name=self.dataset_name,
+                dataset_path=self.dataset_path,
+                request_rate=1,
+                max_concurrency=2,
+                num_prompts=8,
+                random_range_ratio=1,
             )
             print(f"{seq_type} metrics: {metrics}")
 
-            log_file = f"./single_long_seq_{seq_type}_log.txt"
-            res_ttft = run_command(f"cat {log_file} | grep 'Mean TTFT' | awk '{{print $4}}'")
-            res_tpot = run_command(f"cat {log_file} | grep 'Mean TPOT' | awk '{{print $4}}'")
-            res_error = run_command(f"cat {log_file} | grep 'Error'")
-
+            res_ttft = run_command("cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'")
+            res_tpot = run_command("cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'")
+            res_output_token_throughput = run_command("cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'")
             res_ttft = res_ttft.strip() if res_ttft else "0"
             res_tpot = res_tpot.strip() if res_tpot else "0"
-
+            
+            print("metrics is " + str(metrics))
+            print(f"========== {seq_type} single long sequence test PASSED ==========\n")
             # self.assertLessEqual(
             #     float(res_ttft),
             #     config["ttft_threshold"],
@@ -154,7 +148,6 @@ class TestLTSDeepSeekR1(CustomTestCase):
             #     res_error, "",
             #     f"{seq_type} request failed with error: {res_error}"
             # )
-            print(f"========== {seq_type} single long sequence test PASSED ==========\n")
 
     def run_gsm8k(self):
         print(f"========== Start gsm8k test ==========\n")
