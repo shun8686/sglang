@@ -30,8 +30,6 @@ NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
 # QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
 QWEN3_32B_MODEL_PATH = "/home/weights/Qwen3-32B-Int8"  #
 QWEN3_32B_OTHER_ARGS = [
-        "--port",
-        8000,
         "--trust-remote-code",
         "--nnodes",
         "1",
@@ -64,8 +62,6 @@ QWEN3_32B_OTHER_ARGS = [
         "78",
         "--dtype",
         "bfloat16",
-        # "--base-gpu-id",
-        # 8,
 ]
 
 QWEN3_32B_ENVS = {
@@ -115,7 +111,6 @@ class TestLTSQwen332B(CustomTestCase):
     tpot = 50
     output_token_throughput = 350
     accuracy = 0.80
-    port = 8000
 
     print("Nic name: {}".format(NIC_NAME))
 
@@ -143,7 +138,7 @@ class TestLTSQwen332B(CustomTestCase):
         host = host[2:]
         metrics = run_bench_serving(
             host=host,
-            port=self.port,
+            port=port,
             dataset_name=self.dataset_name,
             dataset_path=self.dataset_path,
             request_rate=self.request_rate,
@@ -186,7 +181,7 @@ class TestLTSQwen332B(CustomTestCase):
             max_new_tokens=512,
             parallel=128,
             host="http://127.0.0.1",
-            port=self.port,
+            port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval(args)
         # self.assertGreater(
@@ -208,7 +203,7 @@ class TestLTSQwen332B(CustomTestCase):
 
 if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_file = "./lts_test_qwen3_32b_DEBUG" + time_str + ".log"
+    log_file = "./lts_test_qwen3_32b_DEBUG_" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
         original_stdout = sys.stdout
