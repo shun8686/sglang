@@ -36,7 +36,7 @@ def run_bench_serving(host, port, dataset_name="random", dataset_path="", reques
                f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
                f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
     print(f"command:{command}")
-    metrics = run_command(f"{command} > ./bench_log.txt")
+    metrics = run_command(f"{command} | tee ./bench_log.txt")
     return metrics
 
 class TestLTSDeepSeekR1(CustomTestCase):
@@ -102,7 +102,9 @@ class TestLTSDeepSeekR1(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        print("metrics is " + str(metrics))
+        print("res_ttft is " + str(res_ttft))
+        print("res_tpot is " + str(res_tpot))
+        print("res_output_token_throughput is " + str(res_output_token_throughput))
         print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
 
     # 新增：批量执行三种长序列验证
@@ -131,7 +133,9 @@ class TestLTSDeepSeekR1(CustomTestCase):
             res_ttft = res_ttft.strip() if res_ttft else "0"
             res_tpot = res_tpot.strip() if res_tpot else "0"
 
-            print("metrics is " + str(metrics))
+            print("res_ttft is " + str(res_ttft))
+            print("res_tpot is " + str(res_tpot))
+            print("res_output_token_throughput is " + str(res_output_token_throughput))
             print(f"========== {seq_type} single long sequence test PASSED ==========\n")
             # self.assertLessEqual(
             #     float(res_ttft),
