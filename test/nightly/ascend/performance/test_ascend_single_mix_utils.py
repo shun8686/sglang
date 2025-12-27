@@ -19,7 +19,7 @@ def get_nic_name():
                 return nic
     return None
 
-NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
+NIC_NAME = "lo" if get_nic_name() is None else get_nic_name()
 
 def run_command(cmd, shell=True):
     try:
@@ -33,12 +33,12 @@ def run_command(cmd, shell=True):
 
 def run_bench_serving(host, port, model_path=None, dataset_name=None, request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
                       random_range_ratio=1, dataset_path=None, result_file=None):
-    dataset_configs = (f"--dataset-name {dataset_name}")
-    request_configs = "" if request_rate==None else (f"--request-rate {request_rate}")
-    random_configs = (f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+    dataset_configs = f"--dataset-name {dataset_name}"
+    request_configs = "" if request_rate is None else f"--request-rate {request_rate}"
+    random_configs = f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}"
     if dataset_name == "gsm8k":
-        dataset_configs = (f"{dataset_configs} --dataset-path {dataset_path}")
-        random_configs = (f"--random-input-len {input_len} --random-output-len {output_len}")
+        dataset_configs = f"{dataset_configs} --dataset-path {dataset_path}"
+        random_configs = f"--random-input-len {input_len} --random-output-len {output_len}"
 
     command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} {dataset_configs} {request_configs} "
                f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")

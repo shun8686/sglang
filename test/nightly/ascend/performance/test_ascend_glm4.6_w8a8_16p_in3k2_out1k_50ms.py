@@ -69,7 +69,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestQwen3_480B(TestMultiMixUtils):
+class TestGlm_4_6_W8A8(TestMultiMixUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 256

@@ -38,11 +38,11 @@ def launch_node(config):
     pod_index = int(hostname.rsplit("-", 1)[-1])
 
     # monitor configmap to generate dist-init-addr and node-rank
-    isReady = False
+    is_ready = False
     dist_init_addr = None
-    while not isReady:
+    while not is_ready:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
-        if configmap.data == None:
+        if configmap.data is None:
             print(f"configmap is None, wait for 15s ......")
             time.sleep(15)
             continue
@@ -53,13 +53,13 @@ def launch_node(config):
             if pod_name.endswith("sglang-node-0"):
                 master_node_ip = configmap.data[pod_name]
                 break
-        if master_node_ip == None:
+        if master_node_ip is None:
             print(f"Can not find master node in configmap: {configmap.data=}")
             continue
 
         dist_init_addr = f"{master_node_ip}:5000"
         print(f"launch_node {dist_init_addr=}")
-        isReady = True
+        is_ready = True
 
     special_args = [
         "--dist-init-addr",
@@ -74,7 +74,6 @@ def launch_node(config):
     for key, value in config["node_envs"].items():
         print(f"ENV_VAR {key}:{value}")
         os.environ[key] = value
-    
 
     print(f"Starting node, {node_ip=} {other_args=}")
     return popen_launch_server(
@@ -86,8 +85,26 @@ def launch_node(config):
         ],
     )
 
+
+def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
+    print(f"Waiting for the server to start...")
+    start_time = time.perf_counter()
+    while True:
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"Server {url} is ready!")
+                return
+        except Exception:
+            pass
+
+        if time.perf_counter() - start_time > timeout:
+            raise RuntimeError(f"Server {url} failed to start in {timeout}s")
+        time.sleep(10)
+
+
 class TestMultiMixUtils(CustomTestCase):
-    model = None
+    model_config = None
     dataset_name = None
     dataset_path = None
     request_rate = None
@@ -108,22 +125,6 @@ class TestMultiMixUtils(CustomTestCase):
         cls.role = "master" if hostname.endswith("sglang-node-0") else "worker"
         print(f"Init {cls.local_ip} {cls.role=}!")
 
-    def wait_server_ready(self, url, timeout=LOCAL_TIMEOUT):
-        print(f"Waiting for the server to start...")
-        start_time = time.perf_counter()
-        while True:
-            try:
-                response = requests.get(url)
-                if response.status_code == 200:
-                    print(f"Server {url} is ready!")
-                    return
-            except Exception:
-                pass
-
-            if time.perf_counter() - start_time > timeout:
-                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
-            time.sleep(10)
-
     def run_throughput(self, retry=True):
         sglang_thread = threading.Thread(
             target=launch_node, args=(self.model_config,)
@@ -132,7 +133,7 @@ class TestMultiMixUtils(CustomTestCase):
 
         if self.role == "master":
             master_node_ip = os.getenv("POD_IP")
-            self.wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
+            wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
             print(f"Wait 120s, starting run benchmark ......")
             time.sleep(120)
 

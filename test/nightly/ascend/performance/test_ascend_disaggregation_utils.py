@@ -49,17 +49,16 @@ def discover_worker_nodes():
     prefill_pods = v1.list_namespaced_pod(
         namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-prefill"
     )
-    docode_pods = v1.list_namespaced_pod(
+    decode_pods = v1.list_namespaced_pod(
         namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-decode"
     )
-    nodes_count = len(prefill_pods.items) + len(docode_pods.items)
+    nodes_count = len(prefill_pods.items) + len(decode_pods.items)
     return nodes_count
 
 
 # launch router
 def launch_router():
     print(f"launch_router start ......")
-    node_ip = os.getenv("POD_IP")
     nodes_count = discover_worker_nodes()
     print(f"launch_router nodes_count {nodes_count=}")
 
@@ -69,11 +68,11 @@ def launch_router():
     bootstrap_ports = []
     node_ip_list = []
 
-    isReady = False
+    is_ready = False
     bootstrap_init_port = 8995
-    while not isReady:
+    while not is_ready:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
-        if configmap.data == None:
+        if configmap.data is None:
             print(f"configmap is None, wait for 15s ......")
             time.sleep(15)
             continue
@@ -87,7 +86,7 @@ def launch_router():
             if "decode-0" in pod_name:
                 decode_url.append(f"{pod_ip}:8000")
                 node_ip_list.append(pod_ip)
-        isReady = True
+        is_ready = True
     print(
         f"monitor configmap end, {prefill_url=} {decode_url=} {bootstrap_ports=} {node_ip_list=}"
     )
@@ -143,13 +142,12 @@ def launch_node(config):
     bootstrap_ports = 8995 + pod_index if role == "prefill" else None
     master_prefill_ip = None
     master_decode_ip = None
-    dist_init_addr = None
 
     # monitor configmap ready
-    isReady = False
-    while not isReady:
+    is_ready = False
+    while not is_ready:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
-        if configmap.data == None:
+        if configmap.data is None:
             print(f"configmap is None, wait for 15s ......")
             time.sleep(15)
             continue
@@ -161,11 +159,11 @@ def launch_node(config):
                 master_prefill_ip = pod_ip
             if str(pod_name).endswith("decode-0"):
                 master_decode_ip = pod_ip
-        
+
         if not master_prefill_ip or not master_decode_ip:
             print(f"Can not get the master node of prefill or decode...retry...")
             continue
-        isReady = True
+        is_ready = True
 
     # generate p/d run command
     common_args = [
@@ -220,7 +218,7 @@ def launch_node(config):
     if role == "decode":
         dist_init_addr = f"{master_decode_ip}:5000"
         print(f"launch decode node {dist_init_addr=}")
-    
+
         for key, value in config["decode_envs"].items():
             print(f"ENV_VAR {key}={value}")
             os.environ[key] = value
@@ -247,6 +245,23 @@ def launch_node(config):
         ],
     )
 
+
+def wait_router_ready(url, timeout=LOCAL_TIMEOUT):
+    start_time = time.perf_counter()
+    while True:
+        try:
+            response = requests.get(url)
+            if response.status_code == 200:
+                print(f"Router {url} is ready!")
+                return
+        except Exception:
+            pass
+
+        if time.perf_counter() - start_time > timeout:
+            raise RuntimeError(f"Server {url} failed to start in {timeout}s")
+        time.sleep(10)
+
+
 class TestAscendDisaggregationUtils(CustomTestCase):
     model_config = None
     dataset_name = None
@@ -269,26 +284,11 @@ class TestAscendDisaggregationUtils(CustomTestCase):
         cls.role = "router" if "router" in hostname else None
         print(f"Init {cls.local_ip} {cls.role=}!")
 
-    def wait_router_ready(self, url, timeout=LOCAL_TIMEOUT):
-        start_time = time.perf_counter()
-        while True:
-            try:
-                response = requests.get(url)
-                if response.status_code == 200:
-                    print(f"Router {url} is ready!")
-                    return
-            except Exception:
-                pass
-
-            if time.perf_counter() - start_time > timeout:
-                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
-            time.sleep(10)
-
     def run_throughput(self, retry=True):
         if self.role == "router":
             router_thread = threading.Thread(target=launch_router)
             router_thread.start()
-            self.wait_router_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
+            wait_router_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
 
             print(f"Wait 120, starting run benchmark ......")
             time.sleep(120)
