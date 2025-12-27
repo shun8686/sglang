@@ -1,4 +1,5 @@
 import unittest
+import os
 
 from test_ascend_single_mix_utils import NIC_NAME, run_command
 from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
@@ -162,8 +163,9 @@ class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendDisaggregationUtils):
     random_range_ratio = 1
 
     def test_throughput(self):
-        self.run_throughput()
+        self.run_throughput(retry=False)
         if self.role == "router":
+            os.environ["SGLANG_EXPERT_DISTRIBUTION_RECORDER_DIR"] = "/data/d00662834/hot_map"
             print("Begin to dump hotmap data")
             run_command(f"curl --location 'http://127.0.0.1:6688/dump_expert_distribution_record'")
         
