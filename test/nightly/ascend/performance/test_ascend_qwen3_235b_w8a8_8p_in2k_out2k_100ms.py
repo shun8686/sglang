@@ -79,8 +79,8 @@ class TestQwen3_235B(TestSingleMixUtils):
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
-    max_concurrency = 576
-    num_prompts = 576
+    max_concurrency = 756
+    num_prompts = 756
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
