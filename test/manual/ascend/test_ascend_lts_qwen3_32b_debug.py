@@ -62,6 +62,8 @@ QWEN3_32B_OTHER_ARGS = [
         "78",
         "--dtype",
         "bfloat16",
+        "--base-gpu-id",
+        8,
 ]
 
 QWEN3_32B_ENVS = {
