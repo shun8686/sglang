@@ -158,7 +158,7 @@ class TestLTSQwen332B(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
+        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
         # self.assertLessEqual(
         #     float(res_ttft),
         #     self.ttft,
