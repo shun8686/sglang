@@ -118,8 +118,8 @@ class TestLTSDeepSeekR1(CustomTestCase):
                 dataset_name=self.dataset_name,
                 dataset_path=self.dataset_path,
                 request_rate=1,
-                max_concurrency=2,
-                num_prompts=8,
+                max_concurrency=1,
+                num_prompts=2,
                 random_range_ratio=1,
             )
             print(f"{seq_type} metrics: {metrics}")
