@@ -61,7 +61,9 @@ QWEN3_32B_OTHER_ARGS = [
         "--cuda-graph-bs",
         "78",
         "--dtype",
-        "bfloat16"
+        "bfloat16",
+        "--base-gpu-id",
+        8,
 ]
 
 QWEN3_32B_ENVS = {
