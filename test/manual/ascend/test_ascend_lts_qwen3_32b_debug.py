@@ -205,7 +205,7 @@ class TestLTSQwen332B(CustomTestCase):
 
 if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_file = "./lts_test_qwen3_32b_" + time_str + ".log"
+    log_file = "./lts_test_qwen3_32b_DEBUG" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
         original_stdout = sys.stdout
