@@ -1,0 +1,21 @@
+{
+    "KBHit":false,
+    "binFileName":"te_fused_op_add_rsqrt_mul_mul_4ec7766996c13b91a22ad446b6bc7db04ab61291ed3fbd91d2c64f22d75cccc8",
+    "binFileSuffix":".o",
+    "blockDim":42,
+    "coreType":"VectorCore",
+    "deterministic":"ignore",
+    "intercoreSync":0,
+    "kernelName":"te_fused_op_add_rsqrt_mul_mul_4ec7766996c13b91a22ad446b6bc7db04ab61291ed3fbd91d2c64f22d75cccc8__kernel0",
+    "magic":"RT_DEV_BINARY_MAGIC_ELF_AIVEC",
+    "memoryStamping":[],
+    "opParaSize":0,
+    "parameters":[
+        null,
+        null,
+        null,
+        null,
+        null
+    ],
+    "sha256":"0a6076834792ebf21ed1939b425247b35bffd625dcfeb492ca7f36f3bea9c160"
+}

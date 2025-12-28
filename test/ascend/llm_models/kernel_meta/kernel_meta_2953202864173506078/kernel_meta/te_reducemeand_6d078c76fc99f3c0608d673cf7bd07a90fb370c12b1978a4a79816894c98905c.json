@@ -1,0 +1,33 @@
+{
+    "KBHit":false,
+    "binFileName":"te_reducemeand_6d078c76fc99f3c0608d673cf7bd07a90fb370c12b1978a4a79816894c98905c",
+    "binFileSuffix":".o",
+    "blockDim":47,
+    "coreType":"MIX",
+    "deterministic":"ignore",
+    "intercoreSync":1,
+    "kernelName":"te_reducemeand_6d078c76fc99f3c0608d673cf7bd07a90fb370c12b1978a4a79816894c98905c__kernel0",
+    "magic":"RT_DEV_BINARY_MAGIC_ELF",
+    "memoryStamping":[],
+    "opParaSize":0,
+    "parameters":[
+        null,
+        null,
+        null,
+        null
+    ],
+    "schedule_mode":1,
+    "sha256":"a727c399a9fdd1cc79c0950e9689f766a9dfabb6c1277046ed06f0805f0cd898",
+    "taskRation":"0:1",
+    "workspace":{
+        "num":2,
+        "size":[
+            10752,
+            13824
+        ],
+        "type":[
+            0,
+            0
+        ]
+    }
+}
