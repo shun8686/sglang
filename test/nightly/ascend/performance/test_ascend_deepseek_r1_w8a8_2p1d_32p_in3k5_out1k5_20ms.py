@@ -37,7 +37,10 @@ MODEL_CONFIG = {
         "TASK_QUEUE_ENABLE": "0",
         "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
-        "GLOO_SOCKET_IFNAME": NIC_NAME,    
+        "GLOO_SOCKET_IFNAME": NIC_NAME,
+    },
+    "router_envs": {
+        "SGLANG_DP_ROUND_ROBIN": "1",
     },
     "prefill_args": [
         "--nnodes",
@@ -128,6 +131,9 @@ MODEL_CONFIG = {
         "bfloat16",
         "--load-balance-method",
         "decode_round_robin",
+    ],
+    "router_args": [
+        "--mini-lb",
     ],
 }
 

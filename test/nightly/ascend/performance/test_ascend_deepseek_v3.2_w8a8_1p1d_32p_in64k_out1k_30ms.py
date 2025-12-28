@@ -35,6 +35,9 @@ MODEL_CONFIG = {
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
     },
+    "router_envs": {
+        "SGLANG_DP_ROUND_ROBIN": "1",
+    },
     "prefill_args": [
         "--nnodes",
         2,
@@ -61,7 +64,7 @@ MODEL_CONFIG = {
         "modelslim",
         "--disable-cuda-graph",
         "--enable-nsa-prefill-context-parallel",
-        "--moe-dense-tp-size",    
+        "--moe-dense-tp-size",
         1,
         "--speculative-algorithm",
         "NEXTN",
@@ -114,9 +117,12 @@ MODEL_CONFIG = {
         1,
         "--speculative-num-draft-tokens",
         4,
-        "--prefill-round-robin-balance",  
+        "--prefill-round-robin-balance",
         "--load-balance-method",
         "decode_round_robin",
+    ],
+    "router_args": [
+        "--mini-lb",
     ],
 }
 

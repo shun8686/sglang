@@ -57,7 +57,7 @@ def discover_worker_nodes():
 
 
 # launch router
-def launch_router():
+def launch_router(config):
     print(f"launch_router start ......")
     nodes_count = discover_worker_nodes()
     print(f"launch_router nodes_count {nodes_count=}")
@@ -67,6 +67,8 @@ def launch_router():
     decode_url = []
     bootstrap_ports = []
     node_ip_list = []
+    is_prefill_instance_multi_node = True if "--node-rank" not in config["prefill_args"] else False
+    is_decode_instance_multi_node = True if "--node-rank" not in config["decode_args"] else False
 
     is_ready = False
     bootstrap_init_port = 8995
@@ -79,11 +81,16 @@ def launch_router():
         print(f"launch_router query_configmap {configmap.data=}")
         for pod_name in configmap.data:
             pod_ip = configmap.data[pod_name]
-            if "prefill" in pod_name:
+            pod_index = int(pod_name.rsplit("-", 1)[-1])
+            prefill_keyword = "prefill-0" if is_prefill_instance_multi_node else "prefill"
+            if prefill_keyword in pod_name:
                 prefill_url.append(f"{pod_ip}:8000")
-                bootstrap_ports.append(str(bootstrap_init_port + int(pod_name[-1])))
+                bootstrap_port = bootstrap_init_port \
+                    if is_prefill_instance_multi_node else bootstrap_init_port + pod_index
+                bootstrap_ports.append(str(bootstrap_port))
                 node_ip_list.append(pod_ip)
-            if "decode-0" in pod_name:
+            decode_keyword = "decode-0" if is_decode_instance_multi_node else "decode"
+            if decode_keyword in pod_name:
                 decode_url.append(f"{pod_ip}:8000")
                 node_ip_list.append(pod_ip)
         is_ready = True
@@ -106,12 +113,20 @@ def launch_router():
             break
         time.sleep(15)
 
+    # set env var
+    for key, value in config["router_envs"].items():
+        print(f"ENV_VAR {key}={value}")
+        os.environ[key] = value
+
+    # router server params
     router_command = [
         "python3",
         "-u",
         "-m",
         "sglang_router.launch_router",
         "--pd-disaggregation",
+        "--policy",
+        "cache_aware"
         "--host",
         "127.0.0.1",
         "--port",
@@ -128,7 +143,6 @@ def launch_router():
         router_command.append("http://" + url)
     router_command_str = " ".join(router_command)
     print(f"Starting router, {router_command_str=}")
-    # subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     subprocess.Popen(router_command_str, shell=True)
 
 
@@ -139,9 +153,11 @@ def launch_node(config):
     hostname = os.getenv("HOSTNAME")
     pod_index = int(hostname.rsplit("-", 1)[-1])
     role = "prefill" if "prefill" in hostname else "decode"
-    bootstrap_ports = 8995 + pod_index if role == "prefill" else None
+    bootstrap_init_port = 8995
     master_prefill_ip = None
     master_decode_ip = None
+    is_prefill_instance_multi_node = True if "--node-rank" not in config["prefill_args"] else False
+    is_decode_instance_multi_node = True if "--node-rank" not in config["decode_args"] else False
 
     # monitor configmap ready
     is_ready = False
@@ -192,7 +208,7 @@ def launch_node(config):
             os.environ[key] = value
 
         prefill_args = config["prefill_args"]
-        if "--node-rank" not in prefill_args:
+        if is_prefill_instance_multi_node:
             print("No node-rank specified and all prefill node will form a single instance.")
             prefill_args.extend(
                 [
@@ -201,7 +217,7 @@ def launch_node(config):
                     "--dist-init-addr",
                     dist_init_addr,
                     "--disaggregation-bootstrap-port",
-                    8995,
+                    bootstrap_init_port,
                 ]
             )
         else:
@@ -209,7 +225,7 @@ def launch_node(config):
             prefill_args.extend(
                 [
                     "--disaggregation-bootstrap-port",
-                    bootstrap_ports,
+                    bootstrap_init_port + pod_index,
                 ]
             )
 
@@ -224,14 +240,18 @@ def launch_node(config):
             os.environ[key] = value
 
         decode_args = config["decode_args"]
-        decode_args.extend(
-            [
-                "--dist-init-addr",
-                dist_init_addr,
-                "--node-rank",
-                pod_index,
-            ]
-        )
+        if is_decode_instance_multi_node:
+            print("No node-rank specified and all decode node will form a single instance.")
+            decode_args.extend(
+                [
+                    "--dist-init-addr",
+                    dist_init_addr,
+                    "--node-rank",
+                    pod_index,
+                ]
+            )
+        else:
+            print("Node-rank specified and each decode node is a instance.")
 
         service_args.extend(decode_args)
 
@@ -286,7 +306,9 @@ class TestAscendDisaggregationUtils(CustomTestCase):
 
     def run_throughput(self, retry=True):
         if self.role == "router":
-            router_thread = threading.Thread(target=launch_router)
+            router_thread = threading.Thread(
+                target=launch_router, args=(self.model_config,)
+            )
             router_thread.start()
             wait_router_ready(f"http://127.0.0.1:{SERVICE_PORT}" + "/health")
 
