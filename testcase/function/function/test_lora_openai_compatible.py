@@ -46,8 +46,6 @@ def setup_class(cls, enable_lora=True):
         "--max-running-requests",
         "10",
         "--disable-radix-cache",  # Disable cache for cleaner tests
-        "--base-gpu-id",
-        6,
     ]
 
     if enable_lora:
