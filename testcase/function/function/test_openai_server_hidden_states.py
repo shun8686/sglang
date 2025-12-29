@@ -226,7 +226,12 @@ class TestOpenAIServerWithHiddenStatesEnabled(
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            other_args=["--enable-return-hidden-states"],
+            other_args=[
+                "--enable-return-hidden-states"，
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+                ],
         )
         cls.base_url += "/v1"
         #cls.tokenizer = get_tokenizer(DEFAULT_SMALL_MODEL_NAME_FOR_TEST)
@@ -254,7 +259,10 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            other_args=["--enable-return-hidden-states", "--disable-cuda-graph"],
+            other_args=["--enable-return-hidden-states", 
+                        "--disable-cuda-graph"，
+                        "--attention-backend",
+                        "ascend",],
         )
         cls.base_url += "/v1"
         cls.tokenizer = get_tokenizer("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct")
@@ -264,62 +272,6 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-
-class TestOpenAIServerWithEAGLEAndHiddenStatesEnabled(
-    CustomTestCase, BaseTestOpenAIServerWithHiddenStates
-):
-    @classmethod
-    def _setUpClass(cls):
-        #cls.model = DEFAULT_EAGLE_TARGET_MODEL_FOR_TEST
-        cls.model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/NousResearch/Llama-2-7b-chat-hf" 
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.api_key = "sk-123456"
-#        cls.speculative_draft_model = DEFAULT_EAGLE_DRAFT_MODEL_FOR_TEST
-        cls.speculative_draft_model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/sglang-EAGLE-llama2-chat-7B"
-        cls.speculative_algorithm = "EAGLE"
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--speculative-algorithm",
-                #"EAGLE",
-                "NEXTN",
-                "--speculative-draft-model-path",
-                #DEFAULT_EAGLE_DRAFT_MODEL_FOR_TEST,
-                "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/sglang-EAGLE-llama2-chat-7B",
-                "--speculative-num-steps",
-                # 5,
-                1,
-                "--speculative-eagle-topk",
-        #        8,
-                1,
-                "--speculative-num-draft-tokens",
-                #64,
-                2,
-                "--mem-fraction-static",
-                0.7,
-                "--chunked-prefill-size",
-                128,
-                "--max-running-requests",
-                8,
-                "--enable-return-hidden-states",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ],
-        )
-        cls.base_url += "/v1"
-        #cls.tokenizer = get_tokenizer(DEFAULT_EAGLE_TARGET_MODEL_FOR_TEST)
-        cls.tokenizer = get_tokenizer("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/NousResearch/Llama-2-7b-chat-hf")
-        cls.return_hidden_states = [False, True]
-        cls.use_list_input = [True, False]
-        cls.parallel_sample_nums = [1]
-
-    @classmethod
-    def _tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
 
