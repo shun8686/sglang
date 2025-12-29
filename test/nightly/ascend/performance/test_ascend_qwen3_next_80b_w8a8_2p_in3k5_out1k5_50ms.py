@@ -53,7 +53,7 @@ class TestQwen3_Next_80B_A3B(TestSingleMixUtils):
     envs = Qwen3_Next_80B_A3B_ENVS
     dataset_name = "random"
     max_concurrency = 80
-    num_prompts = 160
+    num_prompts = 320
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
