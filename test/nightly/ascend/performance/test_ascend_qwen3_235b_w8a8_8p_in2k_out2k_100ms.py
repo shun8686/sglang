@@ -16,8 +16,8 @@ QWEN3_235B_ENVS = {
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_ENABLE_SPEC_V2": "1",    
-    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_ENABLE_SPEC_V2": "1",
+    # "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
 }
 
 QWEN3_235B_OTHER_ARGS = (
@@ -32,15 +32,15 @@ QWEN3_235B_OTHER_ARGS = (
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "756",
+        "576",
         "--context-length",
         "8192",
         "--dtype",
         "bfloat16",
         "--chunked-prefill-size",
-        "-1",
+        "32768",
         "--max-prefill-tokens",
-        "2048",
+        "458880",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
@@ -61,14 +61,18 @@ QWEN3_235B_OTHER_ARGS = (
         "--tp",
         "16",
         "--dp-size",
-        "4",
+        "16",
         "--enable-dp-attention",
         "--enable-dp-lm-head",
         "--mem-fraction-static",
-        "0.81",
+        "0.84",
         "--cuda-graph-bs",
-        "144",
-        "189",
+        8,
+        16,
+        20,
+        24,
+        32,
+        36,
     ]
     if is_npu()
     else []
@@ -79,12 +83,12 @@ class TestQwen3_235B(TestSingleMixUtils):
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
-    max_concurrency = 756
-    num_prompts = 756
+    max_concurrency = 576
+    num_prompts = 576
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 50
+    tpot = 100
     # T: 320@100ms      800I:1.8*T         Dev-800I: 6320/8@54.78
     output_token_throughput = 320 * 1.8 * 8 / 0.93
 
