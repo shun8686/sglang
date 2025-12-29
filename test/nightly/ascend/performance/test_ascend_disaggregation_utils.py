@@ -126,7 +126,7 @@ def launch_router(config):
         "sglang_router.launch_router",
         "--pd-disaggregation",
         "--policy",
-        "cache_aware"
+        "cache_aware",
         "--host",
         "127.0.0.1",
         "--port",
