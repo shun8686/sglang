@@ -118,19 +118,21 @@ def launch_router(config):
         print(f"ENV_VAR {key}={value}")
         os.environ[key] = value
 
+    router_args = config["router_args"]
     # router server params
     router_command = [
         "python3",
         "-u",
         "-m",
         "sglang_router.launch_router",
-        "--pd-disaggregation",
-        "--policy",
-        "cache_aware",
         "--host",
         "127.0.0.1",
         "--port",
         SERVICE_PORT,
+        "--pd-disaggregation",
+        "--policy",
+        "cache_aware",
+        *[str(x) for x in router_args],
     ]
 
     for index, url in enumerate(prefill_url):
