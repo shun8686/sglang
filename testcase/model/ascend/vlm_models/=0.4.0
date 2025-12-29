@@ -1,0 +1,133 @@
+Looking in indexes: https://pypi.org/simple/
+Collecting jsonlines
+  Using cached jsonlines-4.0.0-py3-none-any.whl.metadata (1.6 kB)
+Collecting httpx==0.25.0
+  Using cached httpx-0.25.0-py3-none-any.whl.metadata (7.6 kB)
+Collecting evaluate
+  Using cached evaluate-0.4.6-py3-none-any.whl.metadata (9.5 kB)
+Collecting datasets==2.16.1
+  Using cached datasets-2.16.1-py3-none-any.whl.metadata (20 kB)
+Collecting numexpr
+  Using cached numexpr-2.14.1-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl.metadata (9.0 kB)
+Collecting xgrammar==0.1.25
+  Using cached xgrammar-0.1.25-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (6.5 kB)
+Collecting numpy==1.26.4
+  Using cached numpy-1.26.4-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl.metadata (62 kB)
+Collecting dotenv
+  Using cached dotenv-0.9.9-py2.py3-none-any.whl.metadata (279 bytes)
+Requirement already satisfied: certifi in /usr/local/python3.11.13/lib/python3.11/site-packages (from httpx==0.25.0) (2025.11.12)
+Collecting httpcore<0.19.0,>=0.18.0 (from httpx==0.25.0)
+  Using cached httpcore-0.18.0-py3-none-any.whl.metadata (18 kB)
+Requirement already satisfied: idna in /usr/local/python3.11.13/lib/python3.11/site-packages (from httpx==0.25.0) (3.11)
+Requirement already satisfied: sniffio in /usr/local/python3.11.13/lib/python3.11/site-packages (from httpx==0.25.0) (1.3.1)
+Requirement already satisfied: filelock in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (3.20.0)
+Requirement already satisfied: pyarrow>=8.0.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (22.0.0)
+Collecting pyarrow-hotfix (from datasets==2.16.1)
+  Using cached pyarrow_hotfix-0.7-py3-none-any.whl.metadata (3.6 kB)
+Collecting dill<0.3.8,>=0.3.0 (from datasets==2.16.1)
+  Using cached dill-0.3.7-py3-none-any.whl.metadata (9.9 kB)
+Requirement already satisfied: pandas in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (2.3.3)
+Requirement already satisfied: requests>=2.19.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (2.32.5)
+Requirement already satisfied: tqdm>=4.62.1 in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (4.67.1)
+Requirement already satisfied: xxhash in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (3.6.0)
+Requirement already satisfied: multiprocess in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (0.70.18)
+Collecting fsspec<=2023.10.0,>=2023.1.0 (from fsspec[http]<=2023.10.0,>=2023.1.0->datasets==2.16.1)
+  Using cached fsspec-2023.10.0-py3-none-any.whl.metadata (6.8 kB)
+Requirement already satisfied: aiohttp in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (3.13.2)
+Requirement already satisfied: huggingface-hub>=0.19.4 in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (0.36.0)
+Requirement already satisfied: packaging in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (25.0)
+Requirement already satisfied: pyyaml>=5.1 in /usr/local/python3.11.13/lib/python3.11/site-packages (from datasets==2.16.1) (6.0.3)
+Requirement already satisfied: pydantic in /usr/local/python3.11.13/lib/python3.11/site-packages (from xgrammar==0.1.25) (2.12.5)
+Requirement already satisfied: torch>=1.10.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from xgrammar==0.1.25) (2.8.0+cpu)
+Requirement already satisfied: transformers>=4.38.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from xgrammar==0.1.25) (4.57.1)
+Requirement already satisfied: ninja in /usr/local/python3.11.13/lib/python3.11/site-packages (from xgrammar==0.1.25) (1.13.0)
+Requirement already satisfied: typing-extensions>=4.9.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from xgrammar==0.1.25) (4.15.0)
+Requirement already satisfied: anyio<5.0,>=3.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from httpcore<0.19.0,>=0.18.0->httpx==0.25.0) (4.12.0)
+Collecting h11<0.15,>=0.13 (from httpcore<0.19.0,>=0.18.0->httpx==0.25.0)
+  Using cached h11-0.14.0-py3-none-any.whl.metadata (8.2 kB)
+Requirement already satisfied: attrs>=19.2.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from jsonlines) (25.4.0)
+Collecting python-dotenv (from dotenv)
+  Using cached python_dotenv-1.2.1-py3-none-any.whl.metadata (25 kB)
+Requirement already satisfied: aiohappyeyeballs>=2.5.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from aiohttp->datasets==2.16.1) (2.6.1)
+Requirement already satisfied: aiosignal>=1.4.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from aiohttp->datasets==2.16.1) (1.4.0)
+Requirement already satisfied: frozenlist>=1.1.1 in /usr/local/python3.11.13/lib/python3.11/site-packages (from aiohttp->datasets==2.16.1) (1.8.0)
+Requirement already satisfied: multidict<7.0,>=4.5 in /usr/local/python3.11.13/lib/python3.11/site-packages (from aiohttp->datasets==2.16.1) (6.7.0)
+Requirement already satisfied: propcache>=0.2.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from aiohttp->datasets==2.16.1) (0.4.1)
+Requirement already satisfied: yarl<2.0,>=1.17.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from aiohttp->datasets==2.16.1) (1.22.0)
+Requirement already satisfied: hf-xet<2.0.0,>=1.1.3 in /usr/local/python3.11.13/lib/python3.11/site-packages (from huggingface-hub>=0.19.4->datasets==2.16.1) (1.2.0)
+Requirement already satisfied: charset_normalizer<4,>=2 in /usr/local/python3.11.13/lib/python3.11/site-packages (from requests>=2.19.0->datasets==2.16.1) (3.4.4)
+Requirement already satisfied: urllib3<3,>=1.21.1 in /usr/local/python3.11.13/lib/python3.11/site-packages (from requests>=2.19.0->datasets==2.16.1) (2.5.0)
+Requirement already satisfied: sympy>=1.13.3 in /usr/local/python3.11.13/lib/python3.11/site-packages (from torch>=1.10.0->xgrammar==0.1.25) (1.14.0)
+Requirement already satisfied: networkx in /usr/local/python3.11.13/lib/python3.11/site-packages (from torch>=1.10.0->xgrammar==0.1.25) (3.6.1)
+Requirement already satisfied: jinja2 in /usr/local/python3.11.13/lib/python3.11/site-packages (from torch>=1.10.0->xgrammar==0.1.25) (3.1.6)
+Requirement already satisfied: mpmath<1.4,>=1.1.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from sympy>=1.13.3->torch>=1.10.0->xgrammar==0.1.25) (1.3.0)
+Requirement already satisfied: regex!=2019.12.17 in /usr/local/python3.11.13/lib/python3.11/site-packages (from transformers>=4.38.0->xgrammar==0.1.25) (2025.11.3)
+Requirement already satisfied: tokenizers<=0.23.0,>=0.22.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from transformers>=4.38.0->xgrammar==0.1.25) (0.22.1)
+Requirement already satisfied: safetensors>=0.4.3 in /usr/local/python3.11.13/lib/python3.11/site-packages (from transformers>=4.38.0->xgrammar==0.1.25) (0.7.0)
+Requirement already satisfied: MarkupSafe>=2.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from jinja2->torch>=1.10.0->xgrammar==0.1.25) (2.1.5)
+INFO: pip is looking at multiple versions of multiprocess to determine which version is compatible with other requirements. This could take a while.
+Collecting multiprocess (from datasets==2.16.1)
+  Using cached multiprocess-0.70.17-py311-none-any.whl.metadata (7.2 kB)
+  Using cached multiprocess-0.70.16-py311-none-any.whl.metadata (7.2 kB)
+  Using cached multiprocess-0.70.15-py311-none-any.whl.metadata (7.2 kB)
+Requirement already satisfied: python-dateutil>=2.8.2 in /usr/local/python3.11.13/lib/python3.11/site-packages (from pandas->datasets==2.16.1) (2.9.0.post0)
+Requirement already satisfied: pytz>=2020.1 in /usr/local/python3.11.13/lib/python3.11/site-packages (from pandas->datasets==2.16.1) (2025.2)
+Requirement already satisfied: tzdata>=2022.7 in /usr/local/python3.11.13/lib/python3.11/site-packages (from pandas->datasets==2.16.1) (2025.3)
+Requirement already satisfied: six>=1.5 in /usr/local/python3.11.13/lib/python3.11/site-packages (from python-dateutil>=2.8.2->pandas->datasets==2.16.1) (1.17.0)
+Requirement already satisfied: annotated-types>=0.6.0 in /usr/local/python3.11.13/lib/python3.11/site-packages (from pydantic->xgrammar==0.1.25) (0.7.0)
+Requirement already satisfied: pydantic-core==2.41.5 in /usr/local/python3.11.13/lib/python3.11/site-packages (from pydantic->xgrammar==0.1.25) (2.41.5)
+Requirement already satisfied: typing-inspection>=0.4.2 in /usr/local/python3.11.13/lib/python3.11/site-packages (from pydantic->xgrammar==0.1.25) (0.4.2)
+Using cached httpx-0.25.0-py3-none-any.whl (75 kB)
+Using cached datasets-2.16.1-py3-none-any.whl (507 kB)
+Using cached xgrammar-0.1.25-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (8.5 MB)
+Using cached numpy-1.26.4-cp311-cp311-manylinux_2_17_aarch64.manylinux2014_aarch64.whl (14.2 MB)
+Using cached dill-0.3.7-py3-none-any.whl (115 kB)
+Using cached fsspec-2023.10.0-py3-none-any.whl (166 kB)
+Using cached httpcore-0.18.0-py3-none-any.whl (76 kB)
+Using cached h11-0.14.0-py3-none-any.whl (58 kB)
+Using cached jsonlines-4.0.0-py3-none-any.whl (8.7 kB)
+Using cached evaluate-0.4.6-py3-none-any.whl (84 kB)
+Using cached numexpr-2.14.1-cp311-cp311-manylinux_2_27_aarch64.manylinux_2_28_aarch64.whl (451 kB)
+Using cached dotenv-0.9.9-py2.py3-none-any.whl (1.9 kB)
+Using cached multiprocess-0.70.15-py311-none-any.whl (135 kB)
+Using cached pyarrow_hotfix-0.7-py3-none-any.whl (7.9 kB)
+Using cached python_dotenv-1.2.1-py3-none-any.whl (21 kB)
+Installing collected packages: python-dotenv, pyarrow-hotfix, numpy, jsonlines, h11, fsspec, dill, numexpr, multiprocess, httpcore, dotenv, httpx, datasets, xgrammar, evaluate
+  Attempting uninstall: numpy
+    Found existing installation: numpy 2.4.0
+    Uninstalling numpy-2.4.0:
+      Successfully uninstalled numpy-2.4.0
+  Attempting uninstall: h11
+    Found existing installation: h11 0.16.0
+    Uninstalling h11-0.16.0:
+      Successfully uninstalled h11-0.16.0
+  Attempting uninstall: fsspec
+    Found existing installation: fsspec 2025.10.0
+    Uninstalling fsspec-2025.10.0:
+      Successfully uninstalled fsspec-2025.10.0
+  Attempting uninstall: dill
+    Found existing installation: dill 0.4.0
+    Uninstalling dill-0.4.0:
+      Successfully uninstalled dill-0.4.0
+  Attempting uninstall: multiprocess
+    Found existing installation: multiprocess 0.70.18
+    Uninstalling multiprocess-0.70.18:
+      Successfully uninstalled multiprocess-0.70.18
+  Attempting uninstall: httpcore
+    Found existing installation: httpcore 1.0.9
+    Uninstalling httpcore-1.0.9:
+      Successfully uninstalled httpcore-1.0.9
+  Attempting uninstall: httpx
+    Found existing installation: httpx 0.28.1
+    Uninstalling httpx-0.28.1:
+      Successfully uninstalled httpx-0.28.1
+  Attempting uninstall: datasets
+    Found existing installation: datasets 4.4.2
+    Uninstalling datasets-4.4.2:
+      Successfully uninstalled datasets-4.4.2
+  Attempting uninstall: xgrammar
+    Found existing installation: xgrammar 0.1.27
+    Uninstalling xgrammar-0.1.27:
+      Successfully uninstalled xgrammar-0.1.27
+
+Successfully installed datasets-2.16.1 dill-0.3.7 dotenv-0.9.9 evaluate-0.4.6 fsspec-2023.10.0 h11-0.14.0 httpcore-0.18.0 httpx-0.25.0 jsonlines-4.0.0 multiprocess-0.70.15 numexpr-2.14.1 numpy-1.26.4 pyarrow-hotfix-0.7 python-dotenv-1.2.1 xgrammar-0.1.25

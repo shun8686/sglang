@@ -1,0 +1,20 @@
+Looking in indexes: https://pypi.org/simple/
+Collecting protobuf==6.31.1
+  Using cached protobuf-6.31.1-cp39-abi3-manylinux2014_aarch64.whl.metadata (593 bytes)
+Collecting zss
+  Using cached zss-1.2.0-py3-none-any.whl
+Collecting pre-commit
+  Using cached pre_commit-4.5.1-py2.py3-none-any.whl.metadata (1.2 kB)
+Collecting wandb
+  Using cached wandb-0.23.1-py3-none-manylinux_2_28_aarch64.whl.metadata (12 kB)
+Collecting tenacity==8.3.0
+  Using cached tenacity-8.3.0-py3-none-any.whl.metadata (1.2 kB)
+Requirement already satisfied: loguru in /usr/local/python3.11.13/lib/python3.11/site-packages (0.7.3)
+Collecting openpyxl
+  Using cached openpyxl-3.1.5-py2.py3-none-any.whl.metadata (2.5 kB)
+Collecting latex2sympy2
+  Using cached latex2sympy2-1.9.1-py3-none-any.whl.metadata (6.6 kB)
+Collecting zstandard
+  Using cached zstandard-0.25.0-cp311-cp311-manylinux2014_aarch64.manylinux_2_17_aarch64.whl.metadata (3.3 kB)
+Collecting transformers-stream-generator
+  Using cached transformers_stream_generator-0.0.5-py3-none-any.whl
