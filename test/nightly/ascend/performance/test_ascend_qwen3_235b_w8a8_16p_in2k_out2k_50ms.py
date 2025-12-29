@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.srt.utils import is_npu
 from test_ascend_multi_mix_utils import TestMultiMixUtils
 from test_ascend_single_mix_utils import NIC_NAME
 
@@ -35,7 +34,7 @@ MODEL_CONFIG = {
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "1152",
+        "768",
         "--context-length",
         "8192",
         "--dtype",
@@ -51,11 +50,11 @@ MODEL_CONFIG = {
         "--speculative-draft-model-path",
         QWEN3_235B_A22B_EAGLE_MODEL_PATH,
         "--speculative-num-steps",
-        "1",
+        "3",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "2",
+        "4",
         "--disable-radix-cache",
         "--moe-a2a-backend",
         "deepep",
@@ -76,11 +75,7 @@ MODEL_CONFIG = {
         "12",
         "18",
         "24",
-        "28",
-        "32",
-        "36",
-    ] if is_npu()
-    else []
+    ]
 }
 
 class TestQwen3_235B(TestMultiMixUtils):
