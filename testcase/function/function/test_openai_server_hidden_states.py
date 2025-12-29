@@ -227,7 +227,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
             other_args=[
-                "--enable-return-hidden-states"，
+                "--enable-return-hidden-states",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -260,7 +260,7 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
             other_args=["--enable-return-hidden-states", 
-                        "--disable-cuda-graph"，
+                        "--disable-cuda-graph",
                         "--attention-backend",
                         "ascend",],
         )
