@@ -81,8 +81,8 @@ MODEL_CONFIG = {
 class TestQwen3_235B(TestMultiMixUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
-    max_concurrency = 480
-    num_prompts = 480
+    max_concurrency = 768
+    num_prompts = 768
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
