@@ -1,6 +1,7 @@
 import os
 import time
 import unittest
+import requests
 from types import SimpleNamespace
 
 from sglang.test.few_shot_gsm8k import run_eval
@@ -41,9 +42,13 @@ class TestDisaggregationPPAccuracy(TestDisaggregationBase):
             "ascend",
             "--disaggregation-transfer-backend",
             "ascend",
+            "--tp-size",
+            "2",
             "--pp-size",
             "2",
+            "--disable-overlap-schedule",
         ]
+        prefill_args += cls.transfer_backend + cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
             cls.prefill_url,
@@ -51,9 +56,11 @@ class TestDisaggregationPPAccuracy(TestDisaggregationBase):
             other_args=prefill_args,
         )
 
+
     @classmethod
     def start_decode(cls):
         decode_args = [
+            "--trust-remote-code",
             "--disaggregation-mode",
             "decode",
             "--disable-cuda-graph",
@@ -61,8 +68,10 @@ class TestDisaggregationPPAccuracy(TestDisaggregationBase):
             "ascend",
             "--disaggregation-transfer-backend",
             "ascend",
-            "--base-gpu-id",
+            "--tp",
             "2",
+            "--base-gpu-id",
+            "4",
         ]
         cls.process_decode = popen_launch_pd_server(
             cls.model,
