@@ -34,7 +34,7 @@ Qwen3_Next_80B_A3B_OTHER_ARGS = [
     "--cuda-graph-bs",
     80,
     "--max-prefill-tokens",
-    "16384",
+    "28672",
     "--max-total-tokens",
     "450560",
     "--moe-a2a-backend",
