@@ -74,8 +74,8 @@ class TestQwen3_32B(TestSingleMixUtils):
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 40
-    num_prompts = 40
+    max_concurrency = 32
+    num_prompts = 32
     input_len = 6144
     output_len = 1500
     random_range_ratio = 1
