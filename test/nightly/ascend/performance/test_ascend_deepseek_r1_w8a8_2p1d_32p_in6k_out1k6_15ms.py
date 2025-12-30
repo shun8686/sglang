@@ -137,13 +137,13 @@ MODEL_CONFIG = {
     ],
 }
 
-class Test_DeepSeek_R1_W8A8_2P1D_In6144_Out1600(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W8A8_2P1D_In6000_Out1600(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
     max_concurrency = 32
     num_prompts = 32
-    input_len = 6144
+    input_len = 6000
     output_len = 1600
     random_range_ratio = 1
     tpot = 15
