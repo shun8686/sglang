@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.srt.utils import is_npu
 from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
@@ -18,8 +17,8 @@ QWEN3_235B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "DEEPEP_NORMAL_LONG_SEQ_ROUND": "12",
-    "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
+    # "DEEPEP_NORMAL_LONG_SEQ_ROUND": "12",
+    # "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
 }
 
 QWEN3_235B_OTHER_ARGS = (
@@ -42,9 +41,9 @@ QWEN3_235B_OTHER_ARGS = (
         "--dtype",
         "bfloat16",
         "--chunked-prefill-size",
-        "-1",
+        "32768",
         "--max-prefill-tokens",
-        "2048",
+        "32768",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
@@ -71,16 +70,18 @@ QWEN3_235B_OTHER_ARGS = (
         "--mem-fraction-static",
         "0.8",
         "--cuda-graph-bs",
-        "6",
-        "8",
-        "10",
-        "12",
-        "15",
-        "16",
-        "17",
+        3,
+        4,
+        6,
+        8,
+        10,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
     ]
-    if is_npu()
-    else []
 )
 
 class TestQwen3_235B(TestSingleMixUtils):
@@ -88,7 +89,7 @@ class TestQwen3_235B(TestSingleMixUtils):
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
-    max_concurrency = 240
+    max_concurrency = 272
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
