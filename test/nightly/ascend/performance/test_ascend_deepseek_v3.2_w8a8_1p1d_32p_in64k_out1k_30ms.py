@@ -104,7 +104,7 @@ MODEL_CONFIG = {
         "--cuda-graph-max-bs",
         "4",
         "--moe-a2a-backend",
-        "ascend_fuseep",
+        "deepep",
         "--deepep-mode",
         "low_latency",
         "--quantization",
