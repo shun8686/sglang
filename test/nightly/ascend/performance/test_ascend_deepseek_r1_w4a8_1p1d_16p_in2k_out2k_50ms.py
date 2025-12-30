@@ -35,7 +35,7 @@ MODEL_CONFIG = {
         "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "96",
         "TASK_QUEUE_ENABLE": "0",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
-        "GLOO_SOCKET_IFNAME": NIC_NAME,     
+        "GLOO_SOCKET_IFNAME": NIC_NAME,
     },
     "prefill_args": [
         "--nnodes",
@@ -121,7 +121,7 @@ MODEL_CONFIG = {
         1,
         "--speculative-num-draft-tokens",
         4,
-        "--prefill-round-robin-balance",  
+        "--prefill-round-robin-balance",
         "--disable-shared-experts-fusion",
         "--dtype",
         "bfloat16",
@@ -129,6 +129,8 @@ MODEL_CONFIG = {
         4,
         "--load-balance-method",
         "decode_round_robin",
+    ],
+    "router_args": [
     ],
 }
 

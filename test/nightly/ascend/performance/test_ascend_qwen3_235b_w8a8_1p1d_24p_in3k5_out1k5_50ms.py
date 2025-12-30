@@ -141,6 +141,8 @@ MODEL_CONFIG = {
         "--load-balance-method",
         "decode_round_robin",
     ],
+    "router_args": [
+    ],
 }
 
 
