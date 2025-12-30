@@ -43,6 +43,9 @@ MODEL_CONFIG = {
         "GLOO_SOCKET_IFNAME": NIC_NAME,
         "STREAMS_PER_DEVICE": "32",
     },
+    "router_envs": {
+        "SGLANG_DP_ROUND_ROBIN": "1",
+    },
     "prefill_args": [
         "--disaggregation-mode",
         "prefill",
@@ -139,7 +142,7 @@ MODEL_CONFIG = {
         "--dtype",
         "bfloat16",
         "--load-balance-method",
-        "decode_round_robin",
+        "dp_round_robin",
     ],
     "router_args": [
     ],

@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.srt.utils import is_npu
 from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B"
@@ -60,8 +59,6 @@ QWEN3_235B_OTHER_ARGS = (
         "--cuda-graph-bs",
         "1",
     ]
-    if is_npu()
-    else []
 )
 
 class TestQwen3_235B(TestSingleMixUtils):
