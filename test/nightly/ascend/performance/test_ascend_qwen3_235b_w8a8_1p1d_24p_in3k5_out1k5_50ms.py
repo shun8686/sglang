@@ -142,7 +142,7 @@ MODEL_CONFIG = {
         "--dtype",
         "bfloat16",
         "--load-balance-method",
-        "dp_round_robin",
+        "decode_round_robin",
     ],
     "router_args": [
     ],
