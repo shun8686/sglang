@@ -34,6 +34,8 @@ MODEL_CONFIG = {
         "SGLANG_ENABLE_SEPC_V2": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
+        "HCCL_BUFFSIZE": "400",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
     },
     "router_envs": {
         "SGLANG_DP_ROUND_ROBIN": "1",
