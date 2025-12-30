@@ -132,8 +132,8 @@ class Test_DeepSeek_V3_2_W8A8_1P1D(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = "inf"
-    max_concurrency = 1
-    num_prompts = 1
+    max_concurrency = 32
+    num_prompts = 64
     input_len = 64000
     output_len = 1000
     random_range_ratio = 1
