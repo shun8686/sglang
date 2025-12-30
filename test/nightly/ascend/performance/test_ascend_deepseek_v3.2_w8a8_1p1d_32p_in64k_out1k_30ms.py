@@ -8,7 +8,7 @@ MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 MODEL_CONFIG = {
     "model_path": MODEL_PATH,
     "prefill_envs": {
-        "SGLANG_SET_CPU_AFFIMITY": "1",
+        "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "HCCL_BUFFSIZE": "1024",
@@ -22,7 +22,7 @@ MODEL_CONFIG = {
         "GLOO_SOCKET_IFNAME": NIC_NAME,
     },
     "decode_envs": {
-        "SGLANG_SET_CPU_AFFIMITY": "1",
+        "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MULTI_STREAM": "1",
