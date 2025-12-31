@@ -145,6 +145,7 @@ MODEL_CONFIG = {
         "decode_round_robin",
     ],
     "router_args": [
+        "--mini-lb",
     ],
 }
 
