@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 def get_nic_name():
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
-            if addr.family == socket.AF_INET and addr.address.startswith("192."):
+            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
                 print("The nic name matched is {}".format(nic))
                 return nic
     return None
