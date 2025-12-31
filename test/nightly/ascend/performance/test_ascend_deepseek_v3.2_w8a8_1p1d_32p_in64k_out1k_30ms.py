@@ -135,7 +135,7 @@ class Test_DeepSeek_V3_2_W8A8_1P1D(TestAscendDisaggregationUtils):
     max_concurrency = 32
     num_prompts = 64
     input_len = 64000
-    output_len = 1000
+    output_len = 3000
     random_range_ratio = 1
     tpot = 30
     # T: 4.7@26ms        800I: None          Dev-800I: 471/ 32
