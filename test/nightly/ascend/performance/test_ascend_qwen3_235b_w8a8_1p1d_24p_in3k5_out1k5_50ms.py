@@ -153,7 +153,7 @@ MODEL_CONFIG = {
 class TestQwen3_235B_w8a8_1p1d_in3500_out1500(TestAscendDisaggregationUtils):
     model_config = MODEL_CONFIG
     dataset_name = "random"
-    max_concurrency = 768
+    max_concurrency = 860
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
