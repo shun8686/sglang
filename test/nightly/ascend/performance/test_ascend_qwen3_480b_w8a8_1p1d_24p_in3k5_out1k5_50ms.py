@@ -1,7 +1,7 @@
 import unittest
 
 from test_ascend_single_mix_utils import NIC_NAME
-from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
+from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
 
@@ -112,7 +112,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestQwen3_480B_w8a8_1p1d_in3500_out1500(TestAscendDisaggregationUtils):
+class TestQwen3_480B_w8a8_1p1d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 410

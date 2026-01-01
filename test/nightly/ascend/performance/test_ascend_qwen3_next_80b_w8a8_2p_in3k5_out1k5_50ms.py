@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
+from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
 Qwen3_Next_80B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
 
@@ -47,7 +47,7 @@ Qwen3_Next_80B_A3B_OTHER_ARGS = [
     "-1",
 ]
 
-class TestQwen3_Next_80B_A3B(TestSingleMixUtils):
+class TestQwen3_Next_80B_A3B(TestSingleNodeTestCaseBase):
     model = Qwen3_Next_80B_A3B_MODEL_PATH
     other_args = Qwen3_Next_80B_A3B_OTHER_ARGS
     envs = Qwen3_Next_80B_A3B_ENVS

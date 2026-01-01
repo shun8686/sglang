@@ -2,7 +2,7 @@ import unittest
 import os
 
 from test_ascend_single_mix_utils import NIC_NAME, run_command
-from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
+from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 
@@ -153,7 +153,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendDisaggregationUtils):
+class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 768

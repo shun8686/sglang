@@ -1,7 +1,7 @@
 import unittest
 
 from test_ascend_single_mix_utils import NIC_NAME
-from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
+from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
@@ -135,7 +135,7 @@ MODEL_CONFIG = {
 }
 
 
-class Test_DeepSeek_R1_W4A8_1P1D_In2048_Out2048(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W4A8_1P1D_In2048_Out2048(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 8

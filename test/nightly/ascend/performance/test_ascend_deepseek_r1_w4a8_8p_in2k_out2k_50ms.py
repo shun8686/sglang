@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
+from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
 # DEEPSEEK_R1_0528_W4A8_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
 #MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
@@ -72,7 +72,7 @@ MODEL_OTHER_ARGS = (
 )
 
 
-class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleMixUtils):
+class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleNodeTestCaseBase):
     model = MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS

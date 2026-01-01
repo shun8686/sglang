@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleMixUtils, NIC_NAME
+from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B"
 
@@ -61,7 +61,7 @@ QWEN3_235B_OTHER_ARGS = (
     ]
 )
 
-class TestQwen3_235B(TestSingleMixUtils):
+class TestQwen3_235B(TestSingleNodeTestCaseBase):
     model = QWEN3_235B_MODEL_PATH
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS

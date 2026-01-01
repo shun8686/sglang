@@ -71,7 +71,7 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
         'total_tps': total_tps
     }
 
-class TestSingleMixUtils(CustomTestCase):
+class TestSingleNodeTestCaseBase(CustomTestCase):
     model = None
     dataset_name = None
     dataset_path = None
