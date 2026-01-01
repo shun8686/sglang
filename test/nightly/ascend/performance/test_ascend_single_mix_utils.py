@@ -28,42 +28,48 @@ def run_command(cmd, shell=True):
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
-        print(f"command error: {e}")
+        print(f"Command error: {e}")
         return None
 
 def run_bench_serving(host, port, model_path=None, dataset_name=None, request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
                       random_range_ratio=1, dataset_path=None, result_file=None):
-    dataset_configs = f"--dataset-name {dataset_name}"
-    request_configs = "" if request_rate is None else f"--request-rate {request_rate}"
-    random_configs = f"--random-input-len {input_len} --random-output-len {output_len} --random-range-ratio {random_range_ratio}"
-    if dataset_name == "gsm8k":
-        dataset_configs = f"{dataset_configs} --dataset-path {dataset_path}"
-        random_configs = f"--random-input-len {input_len} --random-output-len {output_len}"
-
-    command = (f"python3 -m sglang.bench_serving --backend sglang --model {model_path} --host {host} --port {port} {dataset_configs} {request_configs} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} {random_configs}")
+    cmd_args = ["python3", "-m", "sglang.bench_serving", "--backend", "sglang", 
+                "--model", model_path, "--host", host, "--port", str(port)]
+    if dataset_name:
+        cmd_args.extend(["--dataset-name", str(dataset_name)])
+    if dataset_path:
+        cmd_args.extend(["--dataset-path", str(dataset_path)])
+    if request_rate:
+        cmd_args.extend(["--request-rate", str(request_rate)])
+    if max_concurrency:
+        cmd_args.extend(["--max-concurrency", str(max_concurrency)])
+    if num_prompts:
+        cmd_args.extend(["--num-prompts", str(num_prompts)])
+    if input_len:
+        cmd_args.extend(["--random-input-len", str(input_len)])
+    if output_len:
+        cmd_args.extend(["--random-output-len", str(output_len)])
+    if random_range_ratio:
+        cmd_args.extend(["--random-range-ratio", str(random_range_ratio)])
 
     result_file = "./bench_log.txt" if not result_file else result_file
     print(f"The metrics result file: {result_file}")
 
-    print(f"command:{command}")
+    command = " " .join(cmd_args)
+    print(f"Command: {command}")
+
     metrics = run_command(f"{command} | tee {result_file}")
-    print("metrics is " + str(metrics))
-    mean_ttft = run_command(
-        "grep 'Mean TTFT' " + result_file + " | awk '{print $4}'"
-    )
-    mean_tpot = run_command(
-        "grep 'Mean TPOT' " + result_file + " | awk '{print $4}'"
-    )
-    total_tps = run_command(
-        "grep 'Output token throughput' " + result_file + " | awk '{print $5}'"
-    )
-    result = {
+    print(f"metrics is {metrics}")
+
+    mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
+    mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
+    total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
+    
+    return {
         'mean_ttft': mean_ttft,
         'mean_tpot': mean_tpot,
         'total_tps': total_tps
     }
-    return result
 
 class TestSingleMixUtils(CustomTestCase):
     model = None
@@ -88,9 +94,12 @@ class TestSingleMixUtils(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
-        for key, value in cls.envs.items():
-            print(f"ENV_VAR {key}:{value}")
+        if cls.envs:
+            for key, value in cls.envs.items():
+                print(f"ENV_VAR_CASE {key}:{value}")
         env = os.environ.copy()
+        for key, value in cls.envs.items():
+            print(f"ENV_VAR_OTHER {key}:{value}")
         env.update(cls.envs)
 
         cls.process = popen_launch_server(
@@ -108,35 +117,24 @@ class TestSingleMixUtils(CustomTestCase):
     def run_throughput(self, retry=True):
         _, host, port = self.base_url.split(":")
         host = host[2:]
-        metrics = run_bench_serving(
-            host=host,
-            port=port,
-            model_path=self.model,
-            dataset_name=self.dataset_name,
-            request_rate=self.request_rate,
-            max_concurrency=self.max_concurrency,
-            num_prompts=self.num_prompts,
-            input_len=self.input_len,
-            output_len=self.output_len,
-            random_range_ratio=self.random_range_ratio,
-            dataset_path=self.dataset_path,
-            result_file=self.metrics_data_file,
-        )
+        bench_params = {
+            'host': host,
+            'port': port,
+            'model_path': self.model,
+            'dataset_name': self.dataset_name,
+            'request_rate': self.request_rate,
+            'max_concurrency': self.max_concurrency,
+            'num_prompts': self.num_prompts,
+            'input_len': self.input_len,
+            'output_len': self.output_len,
+            'random_range_ratio': self.random_range_ratio,
+            'dataset_path': self.dataset_path,
+            'result_file': self.metrics_data_file,
+        }
+        metrics = run_bench_serving(**bench_params)
+
         if retry:
-            metrics = run_bench_serving(
-                host=host,
-                port=port,
-                model_path=self.model,
-                dataset_name=self.dataset_name,
-                request_rate=self.request_rate,
-                max_concurrency=self.max_concurrency,
-                num_prompts=self.num_prompts,
-                input_len=self.input_len,
-                output_len=self.output_len,
-                random_range_ratio=self.random_range_ratio,
-                dataset_path=self.dataset_path,
-                result_file=self.metrics_data_file,
-            )
+            metrics = run_bench_serving(**bench_params)
         if self.tpot:
             self.assertLessEqual(
                 float(metrics['mean_tpot']),
