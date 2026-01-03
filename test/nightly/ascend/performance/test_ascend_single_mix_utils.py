@@ -54,11 +54,12 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
 
     result_file = "./bench_log.txt" if not result_file else result_file
     print(f"The metrics result file: {result_file}")
+    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers' | tee {result_file}")
 
     command = " " .join(cmd_args)
     print(f"Command: {command}")
 
-    metrics = run_command(f"{command} | tee {result_file}")
+    metrics = run_command(f"{command} | tee -a {result_file}")
     print(f"metrics is {metrics}")
 
     mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
