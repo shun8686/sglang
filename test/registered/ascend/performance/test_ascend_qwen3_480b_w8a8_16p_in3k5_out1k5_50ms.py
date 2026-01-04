@@ -67,9 +67,9 @@ class TestQwen3_480B(TestMultiNodePdMixTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
+    tpot = 48.9
     # T: 143@50ms.   800I: xxxxx.     dev：4637@50.34ms
-    output_token_throughput = 4600
+    output_token_throughput = 4880
 
     def test_qwen3_480b(self):
         self.run_throughput()

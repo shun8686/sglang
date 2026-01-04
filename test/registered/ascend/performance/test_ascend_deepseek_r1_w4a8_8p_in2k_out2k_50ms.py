@@ -82,9 +82,9 @@ class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleNodeTestCaseBase):
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 50
+    tpot = 44.7
     # T: 143@50ms. 800I A3: 1.8*T
-    output_token_throughput = 143 * 1.8 * 8 / 0.93
+    output_token_throughput = 4500
 
     def test_throughput(self):
         self.run_throughput()

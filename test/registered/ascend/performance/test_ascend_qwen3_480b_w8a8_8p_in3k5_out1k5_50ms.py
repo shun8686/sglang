@@ -66,9 +66,9 @@ class TestQwen3_480B(TestSingleNodeTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
+    tpot = 49.3
     # T: 143@50ms.   800I: 1.1*T
-    output_token_throughput = 143 * 1.1 * 8 / 0.93
+    output_token_throughput = 1490
 
     def test_qwen3_480b(self):
         self.run_throughput()

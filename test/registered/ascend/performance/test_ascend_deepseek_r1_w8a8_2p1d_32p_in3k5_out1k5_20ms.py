@@ -147,9 +147,9 @@ class Test_DeepSeek_R1_W8A8_2P1D(TestAscendMultiNodePdSepTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 20
+    tpot = 18.9
     # T: None    800I: None    Dev-800I: 1183/32@19.92
-    output_token_throughput = 1183
+    output_token_throughput = 1611
 
     def test_throughput(self):
         self.run_throughput()

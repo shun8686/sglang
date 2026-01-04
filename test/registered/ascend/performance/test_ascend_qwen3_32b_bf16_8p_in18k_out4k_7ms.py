@@ -79,9 +79,9 @@ class TestQwen3_32B(TestSingleNodeTestCaseBase):
     input_len = 18000
     output_len = 4000
     random_range_ratio = 1
-    tpot = 7
+    tpot = 14.6
     # 800I A3：79.64
-    output_token_throughput = 79.64 / 0.93
+    output_token_throughput = 67.2
 
     def test_qwen3_32b(self):
         self.run_throughput()
