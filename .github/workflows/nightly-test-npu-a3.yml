@@ -28,12 +28,12 @@ jobs:
             prefill_size: 1
             decode_size: 1
             router_size: 1
-            test_case: test/nightly/ascend/performance/test_ascend_deepseek_r1_w4a8_1p1d_16p_in2k_out2k_50ms.py
+            test_case: test/registered/ascend/performance/test_ascend_deepseek_r1_w4a8_1p1d_16p_in2k_out2k_50ms.py
           - name: test_ascend_deepseek_r1_w4a8_1p1d_16p_in3k5_out1k5_50ms
             prefill_size: 1
             decode_size: 1
             router_size: 1
-            test_case: test/nightly/ascend/performance/test_ascend_deepseek_r1_w4a8_1p1d_16p_in3k5_out1k5_50ms.py
+            test_case: test/registered/ascend/performance/test_ascend_deepseek_r1_w4a8_1p1d_16p_in3k5_out1k5_50ms.py
     uses: ./.github/workflows/nightly-test-npu-pd-separation.yml
     with:
       soc_version: a3
@@ -56,11 +56,11 @@ jobs:
         test_config:
           - name: test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms
             node_size: 2
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms.py
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms.py
     uses: ./.github/workflows/nightly-test-npu-multi-node.yml
     with:
       soc_version: a3
-      runner: linux-amd64-cpu-0
+      runner: linux-aarch64-910c-0
       image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.3.rc1-a3'
       test_config_name: ${{ matrix.test_config.name }}
       node_size: ${{ matrix.test_config.node_size }}
@@ -76,29 +76,29 @@ jobs:
       matrix:
         test_config:
           - name: test_ascend_qwen3_480b_w8a8_8p_in3k5_out1k5_50ms
-            os: linux-aarch64-a3-16
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_480b_w8a8_8p_in3k5_out1k5_50ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_480b_w8a8_8p_in3k5_out1k5_50ms.py
           - name: test_ascend_qwen3_30b_a3b_1p_in3k5_out1k5_50ms
-            os: linux-aarch64-a3-2
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_30b_w8a8_1p_in3k5_out1k5_50ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_30b_w8a8_1p_in3k5_out1k5_50ms.py
           - name: test_ascend_deepseek_r1_w4a8_8p_in2k_out2k_50ms
-            os: linux-aarch64-a3-16
-            test_case: test/nightly/ascend/performance/test_ascend_deepseek_r1_w4a8_8p_in2k_out2k_50ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_deepseek_r1_w4a8_8p_in2k_out2k_50ms.py
           - name: test_ascend_deepseek_r1_w4a8_8p_in3k5_out1k5_50ms
-            os: linux-aarch64-a3-16
-            test_case: test/nightly/ascend/performance/test_ascend_deepseek_r1_w4a8_8p_in3k5_out1k5_50ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_deepseek_r1_w4a8_8p_in3k5_out1k5_50ms.py
           - name: test_ascend_qwen3_32b_4p_in4k_out1k5_11ms
-            os: linux-aarch64-a3-8
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_32b_bf16_4p_in4k_out1k5_11ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_32b_bf16_4p_in4k_out1k5_11ms.py
           - name: test_ascend_qwen3_32b_8p_in18k_out4k_7ms
-            os: linux-aarch64-a3-16
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_32b_bf16_8p_in18k_out4k_7ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_32b_bf16_8p_in18k_out4k_7ms.py
           - name: test_ascend_qwen3_32b_2p_in3k5_out1k5_50ms
-            os: linux-aarch64-a3-4
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_32b_w8a8_2p_in3k5_out1k5_50ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_32b_w8a8_2p_in3k5_out1k5_50ms.py
           - name: test_ascend_qwen3_32b_2p_in2k_out2k_50ms
-            os: linux-aarch64-a3-4
-            test_case: test/nightly/ascend/performance/test_ascend_qwen3_32b_w8a8_2p_in2k_out2k_50ms.py
+            os: linux-aarch64-910c-16
+            test_case: test/registered/ascend/performance/test_ascend_qwen3_32b_w8a8_2p_in2k_out2k_50ms.py
     uses: ./.github/workflows/nightly-test-npu-single-node.yml
     with:
       runner:  ${{ matrix.test_config.os }}

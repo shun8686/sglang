@@ -43,7 +43,7 @@ jobs:
         KUBECONFIG: /data/.cache/kb.yaml
         KUBECTL: /data/.cache/kubectl
         NAMESPACE: ascend-sglang
-        ASCEND_TEST_CASE_PATH: test/nightly/ascend/performance
+        ASCEND_TEST_CASE_PATH: test/registered/ascend/performance
         KUBE_JOB_TYPE: multi
         KUBE_JOB_NAME: ascend-sglang-multi
         KUBE_CONFIG_MAP: ascend-sglang-info
@@ -66,7 +66,7 @@ jobs:
           # prepare for output data
           current_date=$(date +%Y%m%d)
           commit_id=${{ github.sha }}
-          test_data_output_path=/data/.cache/tests/output/${current_date}/${commit_id}          
+          test_data_output_path=/data/.cache/tests/output/${current_date}/${commit_id}
           mkdir -p ${test_data_output_path}
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
@@ -81,7 +81,7 @@ jobs:
           # prepare for k8s_multi.yaml
           image="${{ inputs.image }}"
           node_size="${{ inputs.node_size }}"
-          test_case="${{ inputs.test_case }}"          
+          test_case="${{ inputs.test_case }}"
           echo "{ \"image\": $image,                                        \
                   \"name_space\": \"$NAMESPACE\",                           \
                   \"kube_job_name\": \"$KUBE_JOB_NAME\",                    \

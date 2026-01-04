@@ -51,7 +51,8 @@ jobs:
           # prepare for output data
           current_date=$(date +%Y%m%d)
           commit_id=${{ github.sha }}
-          test_data_output_path=/data/.cache/tests/output/${current_date}/${commit_id}          
+          echo "commit_id: ${commit_id}"
+          test_data_output_path=/data/.cache/tests/output/${current_date}/
           mkdir -p ${test_data_output_path}
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
