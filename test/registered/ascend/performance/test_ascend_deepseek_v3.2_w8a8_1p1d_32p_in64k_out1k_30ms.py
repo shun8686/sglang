@@ -1,7 +1,7 @@
 import unittest
 
 from test_ascend_single_mix_utils import NIC_NAME
-from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
+from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 
@@ -128,7 +128,7 @@ MODEL_CONFIG = {
     ],
 }
 
-class Test_DeepSeek_V3_2_W8A8_1P1D(TestAscendDisaggregationUtils):
+class Test_DeepSeek_V3_2_W8A8_1P1D(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = "inf"

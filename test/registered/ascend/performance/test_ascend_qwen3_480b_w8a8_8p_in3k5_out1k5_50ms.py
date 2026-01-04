@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleMixUtils
+from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase
 from test_ascend_single_mix_utils import NIC_NAME
 
 Qwen3_480B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
@@ -56,7 +56,7 @@ Qwen3_480B_OTHER_ARGS = [
     24,
 ]
 
-class TestQwen3_480B(TestSingleMixUtils):
+class TestQwen3_480B(TestSingleNodeTestCaseBase):
     model = Qwen3_480B_MODEL_PATH
     other_args = Qwen3_480B_OTHER_ARGS
     envs = Qwen3_480B_ENVS

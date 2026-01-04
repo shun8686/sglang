@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_multi_mix_utils import TestMultiMixUtils
+from test_ascend_multi_mix_utils import TestMultiNodePdMixTestCaseBase
 from test_ascend_single_mix_utils import NIC_NAME
 
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
@@ -78,7 +78,7 @@ MODEL_CONFIG = {
     ]
 }
 
-class TestQwen3_235B(TestMultiMixUtils):
+class TestQwen3_235B(TestMultiNodePdMixTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 768

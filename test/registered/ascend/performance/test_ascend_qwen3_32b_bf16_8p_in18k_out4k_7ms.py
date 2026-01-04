@@ -1,7 +1,7 @@
 import unittest
 
 from test_ascend_single_mix_utils import (
-    TestSingleMixUtils,
+    TestSingleNodeTestCaseBase,
     NIC_NAME
 )
 
@@ -69,7 +69,7 @@ QWEN3_32B_OTHER_ARGS = (
 )
 
 
-class TestQwen3_32B(TestSingleMixUtils):
+class TestQwen3_32B(TestSingleNodeTestCaseBase):
     model = QWEN3_32B_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS

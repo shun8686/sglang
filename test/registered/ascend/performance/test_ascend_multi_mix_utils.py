@@ -85,7 +85,6 @@ def launch_node(config):
         ],
     )
 
-
 def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
     print(f"Waiting for the server to start...")
     start_time = time.perf_counter()
@@ -103,7 +102,7 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
         time.sleep(10)
 
 
-class TestMultiMixUtils(CustomTestCase):
+class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
     dataset_name = None
     dataset_path = None

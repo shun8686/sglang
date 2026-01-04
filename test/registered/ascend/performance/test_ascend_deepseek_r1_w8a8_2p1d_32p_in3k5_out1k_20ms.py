@@ -1,7 +1,7 @@
 import unittest
 
 from test_ascend_single_mix_utils import NIC_NAME
-from test_ascend_disaggregation_utils import TestAscendDisaggregationUtils
+from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
 
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
@@ -137,7 +137,7 @@ MODEL_CONFIG = {
     ],
 }
 
-class Test_DeepSeek_R1_W8A8_2P1D_In3500_Out1024(TestAscendDisaggregationUtils):
+class Test_DeepSeek_R1_W8A8_2P1D_In3500_Out1024(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16

@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_multi_mix_utils import TestMultiMixUtils
+from test_ascend_multi_mix_utils import TestMultiNodePdMixTestCaseBase
 from test_ascend_single_mix_utils import NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
@@ -69,7 +69,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestGlm_4_6_W8A8(TestMultiMixUtils):
+class TestGlm_4_6_W8A8(TestMultiNodePdMixTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 256
