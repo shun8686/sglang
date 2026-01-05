@@ -29,9 +29,9 @@ class TestGrok(CustomTestCase):
                 "--disable-radix-cache",
                 "--disable-cuda-graph",
                 "--tokenizer-path",
-                "--base-gpu-id",
-                "10",
                 "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/huihui-ai/grok-2/tokenizer.tok.json",
+                "--base-gpu-id",
+                "0",
                 "--tp-size",
                 "16",
             ]
