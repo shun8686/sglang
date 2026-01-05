@@ -33,7 +33,7 @@ def run_command(cmd, shell=True):
 
 def run_bench_serving(host, port, model_path=None, dataset_name=None, request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
                       random_range_ratio=1, dataset_path=None, result_file=None):
-    cmd_args = ["python3", "-m", "sglang.bench_serving", "--backend", "sglang", 
+    cmd_args = ["python3", "-m", "sglang.bench_serving", "--backend", "sglang",
                 "--model", model_path, "--host", host, "--port", str(port)]
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
@@ -65,7 +65,7 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
     mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
     mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
     total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
-    
+
     return {
         'mean_ttft': mean_ttft,
         'mean_tpot': mean_tpot,
@@ -136,6 +136,7 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
 
         if retry:
             metrics = run_bench_serving(**bench_params)
+
         if self.tpot:
             self.assertLessEqual(
                 float(metrics['mean_tpot']),

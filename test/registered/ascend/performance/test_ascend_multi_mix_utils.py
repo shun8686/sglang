@@ -136,33 +136,26 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
             print(f"Wait 120s, starting run benchmark ......")
             time.sleep(120)
 
-            metrics = run_bench_serving(
-                host=master_node_ip,
-                port=SERVICE_PORT,
-                model_path=self.model_config.get("model_path"),
-                dataset_name=self.dataset_name,
-                request_rate=self.request_rate,
-                max_concurrency=self.max_concurrency,
-                num_prompts=self.num_prompts,
-                input_len=self.input_len,
-                output_len=self.output_len,
-                random_range_ratio=self.random_range_ratio,
-                result_file=self.metrics_data_file,
-            )
+            bench_params = {
+                'host': master_node_ip,
+                'port': SERVICE_PORT,
+                'model_path': self.model_config.get("model_path"),
+                'dataset_name': self.dataset_name,
+                'request_rate': self.request_rate,
+                'max_concurrency': self.max_concurrency,
+                'num_prompts': self.num_prompts,
+                'input_len': self.input_len,
+                'output_len': self.output_len,
+                'random_range_ratio': self.random_range_ratio,
+                'result_file': self.metrics_data_file,
+            }
+            print(f"Starting benchmark with parameters: {bench_params}")
+            metrics = run_bench_serving(**bench_params)
+
             if retry:
-                metrics = run_bench_serving(
-                    host=master_node_ip,
-                    port=SERVICE_PORT,
-                    model_path=self.model_config.get("model_path"),
-                    dataset_name=self.dataset_name,
-                    request_rate=self.request_rate,
-                    max_concurrency=self.max_concurrency,
-                    num_prompts=self.num_prompts,
-                    input_len=self.input_len,
-                    output_len=self.output_len,
-                    random_range_ratio=self.random_range_ratio,
-                    result_file=self.metrics_data_file,
-                )
+                print(f"Retrying benchmark...")
+                metrics = run_bench_serving(**bench_params)
+
             if self.tpot:
                 self.assertLessEqual(
                     float(metrics['mean_tpot']),

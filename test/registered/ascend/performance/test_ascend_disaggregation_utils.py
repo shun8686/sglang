@@ -81,14 +81,14 @@ def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT):
                 ready_nodes += 1
             else:
                 print(f"Node {ip}:{port} is not ready yet")
-        
+
         if ready_nodes == len(ips):
             print(f"All {len(ips)} nodes' ports are ready!")
             return True
-        
+
         print(f"Waiting for {len(ips) - ready_nodes} more nodes to be ready...")
         time.sleep(15)
-    
+
     print(f"Timeout: Not all nodes are ready after {timeout} seconds")
     return False
 
@@ -349,19 +349,6 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             print(f"Waiting 120 seconds for the server to fully initialize...")
             time.sleep(120)
 
-            bench_params = {
-                'host': "127.0.0.1",
-                'port': SERVICE_PORT,
-                'model_path': self.model_config.get("model_path"),
-                'dataset_name': self.dataset_name,
-                'request_rate': self.request_rate,
-                'max_concurrency': self.max_concurrency,
-                'num_prompts': self.num_prompts,
-                'input_len': self.input_len,
-                'output_len': self.output_len,
-                'random_range_ratio': self.random_range_ratio,
-                'result_file': self.metrics_data_file,
-            }
             bench_params = {
                 'host': "127.0.0.1",
                 'port': SERVICE_PORT,
