@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 )
 
 TEST_MODEL_MATRIX = {
-    "/root.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507": {
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507": {
         "accuracy": 0.90,
         "latency": 180,
         "output_throughput": 20,
@@ -26,7 +26,7 @@ class TestAscendTp4Bf16(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.models = "/root.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
+        cls.models = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         other_args = [
