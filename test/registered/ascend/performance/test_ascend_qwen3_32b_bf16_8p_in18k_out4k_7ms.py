@@ -45,7 +45,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "3",
+        "5",
         "--chunked-prefill-size",
         "-1",
         "--max-prefill-tokens",
