@@ -45,10 +45,15 @@ class TestAscendTp4Bf16(CustomTestCase):
             "--base-gpu-id",
             8,
         ]
+        
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=cls.common_args,
+        )
 
     def test_a_gsm8k(self):
-
-                   
         args = SimpleNamespace(
                 num_shots=5,
                 data_path=None,
