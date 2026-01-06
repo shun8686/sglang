@@ -50,7 +50,7 @@ class TestAscendTp4Bf16(CustomTestCase):
             cls.models,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.common_args,
+            other_args=other_args,
         )
 
     @classmethod
