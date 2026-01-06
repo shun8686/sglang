@@ -8,7 +8,7 @@ import sys
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.test_vlm_utils import TestVLMModels
+from sglang.test.ascend.vlm_utils import TestVLMModels
 
 
 class TestMistralModels(TestVLMModels):
