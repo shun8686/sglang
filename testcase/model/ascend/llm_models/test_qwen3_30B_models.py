@@ -53,6 +53,10 @@ class TestAscendTp4Bf16(CustomTestCase):
             other_args=cls.common_args,
         )
 
+     @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+        
     def test_a_gsm8k(self):
         args = SimpleNamespace(
                 num_shots=5,
@@ -69,7 +73,6 @@ class TestAscendTp4Bf16(CustomTestCase):
                 metrics["accuracy"],
                 TEST_MODEL_MATRIX[model]["accuracy"],    
                 )
-        kill_process_tree(process.pid)
         
 
   #  def test_b_throughput(self):
