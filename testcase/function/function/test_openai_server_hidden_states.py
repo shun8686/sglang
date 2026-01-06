@@ -226,12 +226,12 @@ class TestOpenAIServerWithHiddenStatesEnabled(
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            other_args=[
-                "--enable-return-hidden-states",
+            other_args=["--enable-return-hidden-states",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                ],
+                "--base-gpu-id",
+                8,],
         )
         cls.base_url += "/v1"
         #cls.tokenizer = get_tokenizer(DEFAULT_SMALL_MODEL_NAME_FOR_TEST)
@@ -259,10 +259,13 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            other_args=["--enable-return-hidden-states", 
-                        "--disable-cuda-graph",
-                        "--attention-backend",
-                        "ascend",],
+            other_args=[
+                "--enable-return-hidden-states",
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+                "--base-gpu-id",
+                8,],
         )
         cls.base_url += "/v1"
         cls.tokenizer = get_tokenizer("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct")
@@ -273,6 +276,7 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+
 
 
 class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
@@ -317,6 +321,8 @@ class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
+                "--base-gpu-id",
+                8,
             ],
         )
         cls.base_url += "/v1"
