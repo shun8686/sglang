@@ -54,7 +54,7 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
 
     result_file = "./bench_log.txt" if not result_file else result_file
     print(f"The metrics result file: {result_file}")
-    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers' | tee {result_file}")
+    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep' | tee {result_file}")
 
     command = " " .join(cmd_args)
     print(f"Command: {command}")
