@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 
 class TestXVERSE(CustomTestCase):
-    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Kimi/Kimi-K2-Thinking"
+    model = "/root/.cache/modelscope/hub/models/Kimi/Kimi-K2-Thinking"
     accuracy = 0.95
 
     @classmethod
