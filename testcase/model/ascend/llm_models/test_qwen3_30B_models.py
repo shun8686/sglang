@@ -53,7 +53,7 @@ class TestAscendTp4Bf16(CustomTestCase):
             other_args=cls.common_args,
         )
 
-     @classmethod
+    @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
         
