@@ -6,7 +6,7 @@ from test_ascend_single_mix_utils import (
 )
 
 QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3"
+QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
 
 QWEN3_32B_ENVS = {
     # "SGLANG_SET_CPU_AFFINITY": "1",
@@ -41,7 +41,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--speculative-draft-model-path",
         QWEN3_32B_EAGLE_MODEL_PATH,
         "--speculative-num-steps",
-        "2",
+        "4",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
