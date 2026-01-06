@@ -26,9 +26,7 @@ class TestAscendTp4Bf16(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.models = TEST_MODEL_MATRIX.keys()
-        print(cls.models)
-        print("----------")
+        cls.models = "/root.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         other_args = [
