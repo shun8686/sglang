@@ -29,7 +29,7 @@ class TestAscendTp4Bf16(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        cls.common_args = [
+        other_args = [
             "--trust-remote-code",
             "--mem-fraction-static",
             0.7,
@@ -73,27 +73,6 @@ class TestAscendTp4Bf16(CustomTestCase):
                 metrics["accuracy"],
                 TEST_MODEL_MATRIX[model]["accuracy"],    
                 )
-        
-
-  #  def test_b_throughput(self):
-  #      for model in self.models:
-  #          with self.subTest(model=model):
-  #              print(f"##=== Testing throughput: {model} ===##")
-#
-#                output_throughput = run_bench_offline_throughput(
-#                    model,
-#                    [
-#                        *self.common_args,
-#                    ],
-#                )
-#
-#                print(f"##=== {model} throughput: {output_throughput} ===##")
-
-#                if is_in_ci():
-#                    self.assertGreater(
-#                        output_throughput,
-#                        TEST_MODEL_MATRIX[model]["output_throughput"],
-#                    )
 
 
 if __name__ == "__main__":
