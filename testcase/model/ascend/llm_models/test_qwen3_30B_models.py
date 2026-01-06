@@ -71,7 +71,7 @@ class TestAscendTp4Bf16(CustomTestCase):
         metrics = run_eval_few_shot_gsm8k(args)
         self.assertGreaterEqual(
                 metrics["accuracy"],
-                TEST_MODEL_MATRIX[model]["accuracy"],    
+                TEST_MODEL_MATRIX[self.models]["accuracy"],     
                 )
 
 
