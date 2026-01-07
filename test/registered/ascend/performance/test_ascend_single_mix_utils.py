@@ -35,7 +35,7 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
                       max_concurrency=None, num_prompts=None, input_len=None, output_len=None, random_range_ratio=1,
                       dataset_path=None, result_file=None):
     cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
-                "--model-path", model_path, "--backend", backend]
+                "--model", model_path, "--backend", backend]
 
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
