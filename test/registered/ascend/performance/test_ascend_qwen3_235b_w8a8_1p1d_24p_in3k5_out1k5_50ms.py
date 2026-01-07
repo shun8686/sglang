@@ -24,14 +24,11 @@ MODEL_CONFIG = {
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
         "STREAMS_PER_DEVICE": "32",
-#        "ENABLE_ASCEND_MOE_NZ": "1",
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-#        "ENABLE_PROFILING": "1",
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
         "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
@@ -152,6 +149,7 @@ MODEL_CONFIG = {
 
 class TestQwen3_235B_w8a8_1p1d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
+    backend = "sglang-oai"
     dataset_name = "random"
     max_concurrency = 860
     num_prompts = int(max_concurrency) * 4

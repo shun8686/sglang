@@ -314,6 +314,7 @@ def wait_router_ready(url, timeout=LOCAL_TIMEOUT):
 
 class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
+    backend = "sglang"
     dataset_name = None
     request_rate = None
     max_concurrency = None
@@ -353,6 +354,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
                 'host': "127.0.0.1",
                 'port': SERVICE_PORT,
                 'model_path': self.model_config.get("model_path"),
+                'backend': self.backend,
                 'dataset_name': self.dataset_name,
                 'request_rate': self.request_rate,
                 'max_concurrency': self.max_concurrency,

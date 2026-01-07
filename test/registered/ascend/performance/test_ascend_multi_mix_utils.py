@@ -104,6 +104,7 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
 
 class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
+    backend = "sglang"
     dataset_name = None
     dataset_path = None
     request_rate = None
@@ -140,6 +141,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
                 'host': master_node_ip,
                 'port': SERVICE_PORT,
                 'model_path': self.model_config.get("model_path"),
+                'backend': self.backend,
                 'dataset_name': self.dataset_name,
                 'request_rate': self.request_rate,
                 'max_concurrency': self.max_concurrency,

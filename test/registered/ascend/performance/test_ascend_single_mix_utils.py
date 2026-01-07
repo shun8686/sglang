@@ -31,10 +31,12 @@ def run_command(cmd, shell=True):
         print(f"Command error: {e}")
         return None
 
-def run_bench_serving(host, port, model_path=None, dataset_name=None, request_rate=None, max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
-                      random_range_ratio=1, dataset_path=None, result_file=None):
-    cmd_args = ["python3", "-m", "sglang.bench_serving", "--backend", "sglang",
-                "--model", model_path, "--host", host, "--port", str(port)]
+def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_name=None, request_rate=None,
+                      max_concurrency=None, num_prompts=None, input_len=None, output_len=None, random_range_ratio=1,
+                      dataset_path=None, result_file=None):
+    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
+                "--model-path", model_path, "--backend", backend]
+
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
     if dataset_path:
@@ -74,6 +76,7 @@ def run_bench_serving(host, port, model_path=None, dataset_name=None, request_ra
 
 class TestSingleNodeTestCaseBase(CustomTestCase):
     model = None
+    backend = "sglang"
     dataset_name = None
     dataset_path = None
     other_args = None
@@ -122,6 +125,7 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
             'host': host,
             'port': port,
             'model_path': self.model,
+            'backend': self.backend,
             'dataset_name': self.dataset_name,
             'request_rate': self.request_rate,
             'max_concurrency': self.max_concurrency,
