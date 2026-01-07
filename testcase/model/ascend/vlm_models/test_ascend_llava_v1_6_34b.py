@@ -26,7 +26,7 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
             60,
             "--enable-multimodal",
             "--tokenizer-path",
-            "/data/h30055494/llava-1.6v-34b-tokenizer/"
+            "llava-1.6v-34b-tokenizer/"
     ]
 
 
