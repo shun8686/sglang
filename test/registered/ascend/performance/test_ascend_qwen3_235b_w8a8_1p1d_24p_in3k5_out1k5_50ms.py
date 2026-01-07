@@ -149,7 +149,7 @@ MODEL_CONFIG = {
 
 class TestQwen3_235B_w8a8_1p1d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
-    backend = "vllm"
+    backend = "sglang-oai"
     dataset_name = "random"
     max_concurrency = 860
     num_prompts = int(max_concurrency) * 4
