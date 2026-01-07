@@ -14,7 +14,7 @@ register_npu_ci(
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/google/gemma-3-4b-it"
-    accuracy = 0.00
+    accuracy = 0.36
 
 
 if __name__ == "__main__":
