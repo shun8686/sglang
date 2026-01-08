@@ -13,7 +13,7 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
-        "0.95",
+        "0.92",
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
