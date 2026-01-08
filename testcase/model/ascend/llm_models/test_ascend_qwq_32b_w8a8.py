@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/vllm-ascend/QWQ-32B-W8A8"
-    accuracy = 0
+    accuracy = 0.59
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -18,7 +18,9 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        "2"
+        "2",
+        "--quantization",
+        "modelslim",
     ]
 
 
