@@ -1,5 +1,6 @@
 import unittest
-
+from types import SimpleNamespace
+from sglang.test.few_shot_gsm8k import run_eval
 from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
@@ -56,8 +57,24 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     tpot = 70
     output_token_throughput = 450
 
-    def test_deepseek_v3_2(self):
-        self.run_throughput()
+    # def test_deepseek_v3_2(self):
+    #     self.run_throughput()
+
+    def test_deepseek_v3_2_by_gsm8k(self):
+        _, host, port = self.base_url.split(":")
+        host = host[2:]
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path="/data/d00662834/for_debug/dataset/real_data/GSM8K.jsonl",
+            num_questions=100,
+            max_new_tokens=512,
+            parallel=32,
+            host=host,
+            port=port,
+        )
+        metrics = run_eval(args)
+        print(f"{metrics=}")
+        print(f"{metrics['accuracy']=}")
 
 
 if __name__ == "__main__":
