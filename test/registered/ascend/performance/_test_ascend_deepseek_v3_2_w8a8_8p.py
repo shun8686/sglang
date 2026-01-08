@@ -61,10 +61,11 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     #     self.run_throughput()
 
     def test_deepseek_v3_2_by_gsm8k(self):
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
+        colon_index = self.base_url.rfind(":")
+
+        host = self.base_url[:colon_index]
         print("host:", host)
-        port = int(port)
+        port = int(self.base_url[colon_index+1:])
         print("port:", port)
         args = SimpleNamespace(
             num_shots=5,
