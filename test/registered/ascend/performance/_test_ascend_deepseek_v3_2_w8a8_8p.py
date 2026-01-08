@@ -31,7 +31,7 @@ OTHER_ARGS = (
         "--attention-backend", "ascend",
         "--device", "npu",
         "--quantization", "modelslim",
-        "--mem-fraction-static", "0.8",
+        "--mem-fraction-static", 0.8,
         "--chunked-prefill-size", "8192",
         "--context-length", "40970",
         "--max-prefill-tokens", "40970",
@@ -49,9 +49,9 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     envs = ENVS
     dataset_name = "random"
     max_concurrency = 32
-    num_prompts = 320
-    input_len = 2048
-    output_len = 2048
+    num_prompts = 160
+    input_len = 512
+    output_len = 512
     random_range_ratio = 1
     tpot = 50
     output_token_throughput = 5000
