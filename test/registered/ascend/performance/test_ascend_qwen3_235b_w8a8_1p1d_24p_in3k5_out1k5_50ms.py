@@ -156,9 +156,9 @@ class TestQwen3_235B_w8a8_1p1d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBa
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
+    tpot = 35.8
     # T:290@50ms. 800I: 1.8*T
-    output_token_throughput = 290 * 1.8 * 24 /0.93
+    output_token_throughput = 11570
 
     def test_throughput(self):
         self.run_throughput()

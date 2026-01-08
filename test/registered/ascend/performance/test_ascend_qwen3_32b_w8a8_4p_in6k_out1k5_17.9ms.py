@@ -36,11 +36,9 @@ QWEN3_32B_OTHER_ARGS = (
         "32",
         "--disable-radix-cache",
         "--chunked-prefill-size",
-        "-1",
+        "24576",
         "--max-prefill-tokens",
         "65536",
-        "--speculative-draft-model-quantization",
-        "unquant",
         "--speculative-algorithm",
         "EAGLE3",
         "--speculative-draft-model-path",
@@ -73,12 +71,12 @@ class TestQwen3_32B(TestSingleNodeTestCaseBase):
     dataset_name = "random"
     max_concurrency = 32
     num_prompts = 32
-    input_len = 6144
+    input_len = 6000
     output_len = 1500
     random_range_ratio = 1
-    tpot = 19.1
+    tpot = 17.9
     # T: 398@18ms. 800I A3: 1247.24
-    output_token_throughput = 945
+    output_token_throughput = 967
 
     def test_qwen3_32b(self):
         self.run_throughput()

@@ -17,7 +17,6 @@ QWEN3_32B_ENVS = {
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
-    "DISABLE_EAGLE3_QUANT": "1",
 }
 
 QWEN3_32B_OTHER_ARGS = (
@@ -83,9 +82,9 @@ class TestQwen3_32B(TestSingleNodeTestCaseBase):
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 46.1
+    tpot = 33.5
     # T: 472/@64ms. 800I A3：1972.3
-    output_token_throughput = 1970
+    output_token_throughput = 1960
 
     def test_qwen3_32b(self):
         self.run_throughput()

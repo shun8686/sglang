@@ -17,7 +17,6 @@ QWEN3_32B_ENVS = {
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
-    "DISABLE_EAGLE3_QUANT": "1",
 }
 
 QWEN3_32B_OTHER_ARGS = (
@@ -34,7 +33,7 @@ QWEN3_32B_OTHER_ARGS = (
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        "120",
+        "78",
         "--disable-radix-cache",
         "--speculative-draft-model-quantization",
         "unquant",
@@ -55,20 +54,14 @@ QWEN3_32B_OTHER_ARGS = (
         "--tp-size",
         "4",
         "--mem-fraction-static",
-        "0.7",
+        "0.72",
         "--cuda-graph-bs",
         16,
         32,
-        48,
-        56,
         64,
+        68,
         72,
-        80,
-        88,
-        96,
-        104,
-        112,
-        120,
+        78,
         "--dtype",
         "bfloat16",
     ]
@@ -85,9 +78,9 @@ class TestQwen3_32B(TestSingleNodeTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
+    tpot = 39.8
     # T: 387. 800I A3: 1.8*T=696.6
-    output_token_throughput = 1390
+    output_token_throughput = 1490
 
     def test_qwen3_32b(self):
         self.run_throughput()
