@@ -47,16 +47,16 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
-    dataset_name = "random"
+    dataset_name = "gsm8k"
     max_concurrency = 32
     num_prompts = 160
     input_len = 512
     output_len = 512
     random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 5000
+    tpot = 70
+    output_token_throughput = 450
 
-    def test_qwen3_235b(self):
+    def test_deepseek_v3_2(self):
         self.run_throughput()
 
 
