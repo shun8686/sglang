@@ -32,7 +32,7 @@ OTHER_ARGS = (
         "--device", "npu",
         "--quantization", "modelslim",
         "--mem-fraction-static", "0.8",
-        "--chunked-prefill-size", "8192"
+        "--chunked-prefill-size", "8192",
         "--context-length", "40970",
         "--max-prefill-tokens", "40970",
         "--max-total-tokens", "40970",
