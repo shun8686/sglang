@@ -48,7 +48,7 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
-    dataset_name = "gsm8k"
+    dataset_name = "random"
     max_concurrency = 32
     num_prompts = 160
     input_len = 512
@@ -63,6 +63,9 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     def test_deepseek_v3_2_by_gsm8k(self):
         _, host, port = self.base_url.split(":")
         host = host[2:]
+        print("host:", host)
+        port = int(port)
+        print("port:", port)
         args = SimpleNamespace(
             num_shots=5,
             data_path="/data/d00662834/for_debug/dataset/real_data/GSM8K.jsonl",
