@@ -76,9 +76,10 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
             host=host,
             port=port,
         )
-        metrics = run_eval(args)
-        print(f"{metrics=}")
-        print(f"{metrics['accuracy']=}")
+        for i in range(10):
+            metrics = run_eval(args)
+            print(f"{metrics=}")
+            print(f"{metrics['accuracy']=}")
 
 
 if __name__ == "__main__":
