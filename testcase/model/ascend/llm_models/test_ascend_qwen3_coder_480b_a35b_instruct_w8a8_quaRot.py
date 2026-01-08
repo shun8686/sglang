@@ -18,7 +18,7 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        "2"
+        "4"
     ]
 
 
