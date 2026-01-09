@@ -23,24 +23,37 @@ ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
+
 }
+
+# OTHER_ARGS = (
+#     [
+#         "--tp-size", "16",
+#         "--trust-remote-code",
+#         "--attention-backend", "ascend",
+#         "--device", "npu",
+#         "--quantization", "modelslim",
+#         "--mem-fraction-static", 0.8,
+#         "--chunked-prefill-size", "8192",
+#         "--context-length", "40970",
+#         "--max-prefill-tokens", "40970",
+#         "--max-total-tokens", "40970",
+#         "--watchdog-timeout", "9000",
+#         "--disable-radix-cache",
+#         "--max-running-requests", 32,
+#         "--cuda-graph-bs", 1, 2, 4, 8, 16, 32,
+#     ]
+# )
 
 OTHER_ARGS = (
     [
-        "--tp-size", "16",
         "--trust-remote-code",
+        "--mem-fraction-static", 0.9,
         "--attention-backend", "ascend",
         "--device", "npu",
+        "--disable-cuda-gragh",
+        "--tp-size", "16",
         "--quantization", "modelslim",
-        "--mem-fraction-static", 0.8,
-        "--chunked-prefill-size", "8192",
-        "--context-length", "40970",
-        "--max-prefill-tokens", "40970",
-        "--max-total-tokens", "40970",
-        "--watchdog-timeout", "9000",
-        "--disable-radix-cache",
-        "--max-running-requests", 32,
-        "--cuda-graph-bs", 1, 2, 4, 8, 16, 32,
     ]
 )
 
@@ -69,10 +82,10 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
         print("port:", port)
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/data/d00662834/for_debug/dataset/real_data/GSM8K.jsonl",
-            num_questions=100,
+            data_path=None,
+            num_questions=200,
             max_new_tokens=512,
-            parallel=32,
+            parallel=128,
             host=host,
             port=port,
         )
