@@ -1,4 +1,5 @@
 import unittest
+import os
 
 import requests
 
@@ -51,7 +52,10 @@ class TestCompletionTemplate(CustomTestCase):
     def test_completion_template(self):
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
+        content2 = self.err_log_file.read()
         print(content)
+        print("==================err============")
+        print(content2)
         self.assertIn("Loading completion template: deepseek_coder", content)
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
