@@ -5,7 +5,7 @@ from test_ascend_single_mix_utils import (
     NIC_NAME
 )
 
-QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
 QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
 
 QWEN3_32B_ENVS = {
@@ -30,8 +30,6 @@ QWEN3_32B_OTHER_ARGS = (
         "ascend",
         "--device",
         "npu",
-        "--quantization",
-        "modelslim",
         "--max-running-requests",
         "32",
         "--disable-radix-cache",
