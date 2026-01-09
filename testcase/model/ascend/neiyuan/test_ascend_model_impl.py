@@ -15,7 +15,6 @@ class TestModeImpl(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = (
-           # "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-11B-Vision-Instruct"
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         )
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -30,6 +29,8 @@ class TestModeImpl(CustomTestCase):
                     "--disable-cuda-graph",
                     "--model-impl",
                     "transformers",
+                    "--prefill-max-requests",
+                    5,
                     "--trust-remote-code",
                     "--mem-fraction-static",
                     0.8,
@@ -55,7 +56,7 @@ class TestModeImpl(CustomTestCase):
 
         metrics = run_eval(args)
         print(f"{metrics=}")
-        # self.assertGreaterEqual(metrics["score"], self.mmlu_lower_bound)
+        self.assertGreaterEqual(metrics["score"], self.mmlu_lower_bound)
 
     def test_gsm8k(self):
         args = SimpleNamespace(
@@ -71,7 +72,7 @@ class TestModeImpl(CustomTestCase):
 
         metrics = run_eval(args)
         print(f"{metrics=}")
-        # self.assertGreater(metrics["accuracy"], self.gsm8k_lower_bound)
+        self.assertGreater(metrics["accuracy"], self.gsm8k_lower_bound)
 
 
 if __name__ == "__main__":
