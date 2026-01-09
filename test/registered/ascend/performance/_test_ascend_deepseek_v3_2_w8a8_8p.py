@@ -51,7 +51,7 @@ OTHER_ARGS = (
         "--mem-fraction-static", 0.9,
         "--attention-backend", "ascend",
         "--device", "npu",
-        "--disable-cuda-gragh",
+        "--disable-cuda-graph",
         "--tp-size", "16",
         "--quantization", "modelslim",
     ]
