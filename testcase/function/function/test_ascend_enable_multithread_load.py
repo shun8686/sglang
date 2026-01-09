@@ -46,6 +46,10 @@ class TestEnableMultithreadLoad(CustomTestCase):
         1,
         "--speculative-num-draft-tokens",
         2,
+        "--cuda-graph-max-bs",
+        16,
+        "--enable-torch-compile",
+        "disable-cuda-graph",
         "--model-loader-extra-config",
         json.dumps({"enable_multithread_load": True, "num_threads": 2}),
     ]
@@ -115,6 +119,10 @@ class TestAscendDeepSeekMTP(TestEnableMultithreadLoad):
         1,
         "--speculative-num-draft-tokens",
         2,
+        "--cuda-graph-max-bs",
+        16,
+        "--enable-torch-compile",
+        "disable-cuda-graph",
     ]
 
 
