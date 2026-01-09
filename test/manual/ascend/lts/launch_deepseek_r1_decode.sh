@@ -12,8 +12,8 @@ export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
 
 MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
-mkdir -p lts_test_log
-DECODE_LOG_FILE="./lts_test_log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
+mkdir -p log
+DECODE_LOG_FILE="./log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
 # cpu高性能
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor

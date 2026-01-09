@@ -13,9 +13,8 @@ export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
 
 MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
-mkdir -p lts_test_log
-PREFILL_LOG_FILE="./lts_test_log/launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
-ROUTER_LOG_FILE="./lts_test_log/launch_router_$(date +'%Y-%m-%d-%H:%M').log"
+mkdir -p log
+PREFILL_LOG_FILE="./log/launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
 
 # cpu高性能
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
@@ -93,6 +92,7 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 > $PREFILL_LOG_FILE 2>&1 &
 
 # launch router node
+ROUTER_LOG_FILE="./log/launch_router_$(date +'%Y-%m-%d-%H:%M').log"
 nohup \
 python -u -m sglang_router.launch_router \
     --pd-disaggregation \
