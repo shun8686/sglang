@@ -26,36 +26,36 @@ ENVS = {
 
 }
 
-# OTHER_ARGS = (
-#     [
-#         "--tp-size", "16",
-#         "--trust-remote-code",
-#         "--attention-backend", "ascend",
-#         "--device", "npu",
-#         "--quantization", "modelslim",
-#         "--mem-fraction-static", 0.8,
-#         "--chunked-prefill-size", "8192",
-#         "--context-length", "40970",
-#         "--max-prefill-tokens", "40970",
-#         "--max-total-tokens", "40970",
-#         "--watchdog-timeout", "9000",
-#         "--disable-radix-cache",
-#         "--max-running-requests", 32,
-#         "--cuda-graph-bs", 1, 2, 4, 8, 16, 32,
-#     ]
-# )
-
 OTHER_ARGS = (
     [
+        "--tp-size", "16",
         "--trust-remote-code",
-        "--mem-fraction-static", 0.9,
         "--attention-backend", "ascend",
         "--device", "npu",
-        "--disable-cuda-graph",
-        "--tp-size", "16",
         "--quantization", "modelslim",
+        "--mem-fraction-static", 0.9,
+        "--chunked-prefill-size", "8192",
+        "--context-length", "40970",
+        "--max-prefill-tokens", "40970",
+        "--max-total-tokens", "40970",
+        "--watchdog-timeout", "9000",
+        "--disable-radix-cache",
+        "--max-running-requests", 128,
+        "--cuda-graph-bs", 1, 2, 4, 8, 16, 32,
     ]
 )
+
+# OTHER_ARGS = (
+#     [
+#         "--trust-remote-code",
+#         "--mem-fraction-static", 0.9,
+#         "--attention-backend", "ascend",
+#         "--device", "npu",
+#         "--disable-cuda-graph",
+#         "--tp-size", "16",
+#         "--quantization", "modelslim",
+#     ]
+# )
 
 class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     model = MODEL_PATH
