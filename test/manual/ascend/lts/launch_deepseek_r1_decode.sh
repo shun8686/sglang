@@ -3,9 +3,6 @@ pkill -9 python
 
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
 
-mkdir -p lts_test_log
-LOG_FILE="./lts_test_log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
-
 export node_ip="141.61.29.201"
 # export node_ip="192.168.0.60"
 
@@ -14,6 +11,9 @@ export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
 # export ASCEND_MF_STORE_URL="tcp://192.168.0.184:24667"
 
 MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
+
+mkdir -p lts_test_log
+LOG_FILE="./lts_test_log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
 # cpu高性能
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor

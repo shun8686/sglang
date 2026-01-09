@@ -14,7 +14,8 @@ export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
 MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 mkdir -p lts_test_log
-LOG_FILE="./lts_test_log/launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
+PREFILL_LOG_FILE="./lts_test_log/launch_prefill_$(date +'%Y-%m-%d-%H:%M').log"
+ROUTER_LOG_FILE="./lts_test_log/launch_router_$(date +'%Y-%m-%d-%H:%M').log"
 
 # cpu高性能
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
@@ -58,7 +59,7 @@ export GLOO_SOCKET_IFNAME=enp194s0f0
 export DEEPEP_NORMAL_LONG_SEQ_ROUND=5
 export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 
-# P节点
+# launch prefill node
 # -context-length 8192  长序列场景不设置该参数
 # --mem-fraction-static 0.8 长序列场景从0.6增大至0.8
 nohup \
@@ -88,4 +89,14 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --dtype bfloat16 \
 --dist-init-addr ${node_ip}:5000 \
 --disaggregation-bootstrap-port 8995 \
-> $LOG_FILE 2>&1 &
+> $PREFILL_LOG_FILE 2>&1 &
+
+# launch router node
+nohup \
+python -u -m sglang_router.launch_router \
+    --pd-disaggregation \
+    --host 127.0.0.1 \
+    --port 6688 \
+    --prefill http://141.61.39.231:8000 8995\
+    --decode http://141.61.29.201:8001 \
+> $ROUTER_LOG_FILE 2>&1 &
