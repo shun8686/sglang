@@ -48,8 +48,6 @@ class TestEnableMultithreadLoad(CustomTestCase):
         2,
         "--model-loader-extra-config",
         json.dumps({"enable_multithread_load": True, "num_threads": 2}),
-        "--model-loader-extra-config",
-
     ]
 
     @classmethod
