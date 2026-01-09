@@ -20,16 +20,16 @@ from sglang.test.test_utils import (
 def get_nic_name():
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
-            if addr.family == socket.AF_INET and addr.address.startswith("192."):
+            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
                 print("The nic name matched is {}".format(nic))
                 return nic
     return None
 
 NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
 
-# QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
-QWEN3_32B_MODEL_PATH = "/home/weights/Qwen3-32B-Int8"  #
-QWEN3_32B_OTHER_ARGS = [
+# MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+MODEL_PATH = "/home/weights/Qwen3-32B-Int8"  #
+OTHER_ARGS = [
         "--trust-remote-code",
         "--nnodes",
         "1",
@@ -62,11 +62,9 @@ QWEN3_32B_OTHER_ARGS = [
         "78",
         "--dtype",
         "bfloat16",
-        "--base-gpu-id",
-        8,
 ]
 
-QWEN3_32B_ENVS = {
+ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
@@ -97,12 +95,12 @@ def run_bench_serving(host, port, dataset_name="random", dataset_path="", reques
     return metrics
 
 class TestLTSQwen332B(CustomTestCase):
-    model = QWEN3_32B_MODEL_PATH
+    model = MODEL_PATH
     dataset_name = "random"
     dataset_path = "/home/zhaoming/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
-    other_args = QWEN3_32B_OTHER_ARGS
+    other_args = OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
-    envs = QWEN3_32B_ENVS
+    envs = ENVS
     request_rate = 5.5
     max_concurrency = 16
     num_prompts = int(max_concurrency) * 4
@@ -160,7 +158,7 @@ class TestLTSQwen332B(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
+        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
         # self.assertLessEqual(
         #     float(res_ttft),
         #     self.ttft,
@@ -205,7 +203,7 @@ class TestLTSQwen332B(CustomTestCase):
 
 if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_file = "./lts_test_qwen3_32b_DEBUG_" + time_str + ".log"
+    log_file = "./lts_test_qwen3_32b_" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
         original_stdout = sys.stdout
@@ -220,3 +218,4 @@ if __name__ == "__main__":
             sys.stderr = original_stderr
 
     print(f"Test log saved to {log_file}")
+

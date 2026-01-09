@@ -13,7 +13,7 @@ export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
 MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 mkdir -p lts_test_log
-LOG_FILE="./lts_test_log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
+DECODE_LOG_FILE="./lts_test_log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
 
 # cpu高性能
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
@@ -34,9 +34,9 @@ unset ASCEND_LAUNCH_BLOCKING
 source /usr/local/Ascend/cann/set_env.sh
 # CANN 8.3
 #source /usr/local/Ascend/ascend-toolkit/set_env.sh
-
 source /usr/local/Ascend/nnal/atb/set_env.sh
-export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
+# CANN 8.5不需要
+#export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
 
 # 内存碎片
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
@@ -87,4 +87,4 @@ python -m sglang.launch_server --model-path ${MODEL_PATH} --disaggregation-mode 
 --dtype bfloat16 \
 --tokenizer-worker-num 4 \
 --dist-init-addr ${node_ip}:5000 \
-> $LOG_FILE 2>&1 &
+> $DECODE_LOG_FILE 2>&1 &

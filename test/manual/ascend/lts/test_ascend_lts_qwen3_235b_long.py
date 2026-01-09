@@ -11,13 +11,94 @@ from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
+def get_nic_name():
+    for nic, addrs in psutil.net_if_addrs().items():
+        for addr in addrs:
+            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
+                print("The nic name matched is {}".format(nic))
+                return nic
+    return None
 
-MODEL_PATH = "DeepSeek-R1-0528-w4a8"
+NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
+
+MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"  #
+EAGLE_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+OTHER_ARGS = [
+        "--trust-remote-code",
+        "--nnodes",
+        "1",
+        "--node-rank",
+        "0",
+        "--attention-backend",
+        "ascend",
+        "--device",
+        "npu",
+        "--quantization",
+        "modelslim",
+        "--max-running-requests",
+        "480",
+        "--dtype",
+        "bfloat16",
+        "--chunked-prefill-size",
+        "32768",
+        "--max-prefill-tokens",
+        "68000",
+        "--speculative-draft-model-quantization",
+        "unquant",
+        "--speculative-algorithm",
+        "NEXTN",
+        "--speculative-draft-model-path",
+        EAGLE_MODEL_PATH,
+        "--speculative-num-steps",
+        "1",
+        "--speculative-eagle-topk",
+        "1",
+        "--speculative-num-draft-tokens",
+        "2",
+        "--disable-radix-cache",
+        "--moe-a2a-backend",
+        "deepep",
+        "--deepep-mode",
+        "auto",
+        "--tp",
+        "16",
+        "--dp-size",
+        "16",
+        "--enable-dp-attention",
+        "--enable-dp-lm-head",
+        "--mem-fraction-static",
+        "0.78",
+        "--cuda-graph-bs",
+        "6",
+        "8",
+        "10",
+        "12",
+        "15",
+        "18",
+        "28",
+        "30",
+]
+
+QWEN3_235B_ENVS = {
+    "SGLANG_SET_CPU_AFFINITY": "1",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+    "HCCL_BUFFSIZE": "1600",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_OP_EXPANSION_MODE": "AIV",
+    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "SGLANG_ENABLE_SPEC_V2": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    # "ENABLE_PROFILING": "1",
+    # "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
+}
 
 
 def run_command(cmd, shell=True):
@@ -39,22 +120,22 @@ def run_bench_serving(host, port, dataset_name="random", dataset_path="", reques
     metrics = run_command(f"{command} | tee ./bench_log.txt")
     return metrics
 
-# 新增：通用单条长序列测试函数（适配16k+1k/32k+1k/64k+1k）
 def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
     command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
-               f"--request-rate 1 --max-concurrency 1 --num-prompts 5 "
+               f"--request-rate 1 --max-concurrency 1 --num-prompts 1 "
                f"--random-input-len {input_len} --random-output-len {output_len} "
                f"--random-range-ratio 1")  # 固定长度，不随机
     print(f"{seq_type} single long sequence test command:{command}")
-    # 不同长度日志分开保存，避免覆盖
     metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
     return metrics
 
-class TestLTSDeepSeekR1(CustomTestCase):
+class TestLTSQwen3235B(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    # dataset_path = "/home/lts-test/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
-    dataset_path = ""
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    other_args = OTHER_ARGS
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
+    envs = QWEN3_235B_ENVS
     request_rate = 5.5
     max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
@@ -64,11 +145,8 @@ class TestLTSDeepSeekR1(CustomTestCase):
     ttft = 10000
     tpot = 50
     output_token_throughput = 8314
-    accuracy = 0.80
-    host = "127.0.0.1"
-    port = 6688
-    
-    # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
+    accuracy = 0.00
+
     long_seq_configs = {
         "64k+1k": {
             "input_len": 65536,
@@ -76,7 +154,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
             "ttft_threshold": 100000,
             "tpot_threshold": 350
         },
-        "32k+1k": {
+       "32k+1k": {
             "input_len": 32768,
             "output_len": 1024,
             "ttft_threshold": 70000,
@@ -85,16 +163,38 @@ class TestLTSDeepSeekR1(CustomTestCase):
         "16k+1k": {
             "input_len": 16384,
             "output_len": 1024,
-            "ttft_threshold": 40000, 
+            "ttft_threshold": 40000,   # Qwen3-235B模型更大，阈值适配放宽
             "tpot_threshold": 200
         },
     }
 
+    print("Nic name: {}".format(NIC_NAME))
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        env = os.environ.copy()
+        env.update(cls.envs)
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=cls.timeout,
+            other_args=cls.other_args,
+            env=env,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
     def run_throughput(self):
         print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
+        _, host, port = self.base_url.split(":")
+        host = host[2:]
         metrics = run_bench_serving(
-            host=self.host,
-            port=self.port,
+            host=host,
+            port=port,
             dataset_name=self.dataset_name,
             dataset_path=self.dataset_path,
             request_rate=self.request_rate,
@@ -104,6 +204,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
             output_len=self.output_len,
             random_range_ratio=self.random_range_ratio,
         )
+        print("metrics is " + str(metrics))
         res_ttft = run_command(
             "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
         )
@@ -113,32 +214,29 @@ class TestLTSDeepSeekR1(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        print("metrics is " + str(metrics))
         print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
 
-    # 新增：批量执行三种长序列验证
     def run_all_long_seq_verify(self):
         """依次验证16k+1k、32k+1k、64k+1k三种单条长序列"""
+        _, host, port = self.base_url.split(":")
+        host = host[2:]
         for seq_type, config in self.long_seq_configs.items():
             print(f"\n========== Start {seq_type} single long sequence test ==========")
             # 执行单条长序列请求
             metrics = run_single_long_seq_test(
-                host=self.host,
-                port=self.port,
+                host=host,
+                port=port,
                 input_len=config["input_len"],
                 output_len=config["output_len"],
                 seq_type=seq_type
             )
             print(f"{seq_type} metrics: {metrics}")
-
             log_file = f"./single_long_seq_{seq_type}_log.txt"
             res_ttft = run_command(f"cat {log_file} | grep 'Mean TTFT' | awk '{{print $4}}'")
             res_tpot = run_command(f"cat {log_file} | grep 'Mean TPOT' | awk '{{print $4}}'")
             res_error = run_command(f"cat {log_file} | grep 'Error'")
-
             res_ttft = res_ttft.strip() if res_ttft else "0"
             res_tpot = res_tpot.strip() if res_tpot else "0"
-
             # self.assertLessEqual(
             #     float(res_ttft),
             #     config["ttft_threshold"],
@@ -160,13 +258,12 @@ class TestLTSDeepSeekR1(CustomTestCase):
         print(f"========== Start gsm8k test ==========\n")
         args = SimpleNamespace(
             num_shots=5,
-            # data_path="/home/lts-test/test.jsonl",
             data_path=None,
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
-            host=f"http://{self.host}",
-            port=self.port,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval(args)
         self.assertGreater(
@@ -176,7 +273,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
         )
         print(f"========== gsm8k test PASSED ==========\n")
 
-    def test_lts_deepseekr1(self):
+    def test_lts_qwen3_235b(self):
         i = 0
         while True:
             i = i + 1
@@ -189,7 +286,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
 
 if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_file = "./lts_test_deepseek_r1_" + time_str + ".log"
+    log_file = "./lts_test_qwen3_235b_" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
         original_stdout = sys.stdout

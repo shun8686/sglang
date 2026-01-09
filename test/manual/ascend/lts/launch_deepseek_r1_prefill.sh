@@ -37,6 +37,7 @@ source /usr/local/Ascend/cann/set_env.sh
 # CANN 8.3
 #source /usr/local/Ascend/ascend-toolkit/set_env.sh
 source /usr/local/Ascend/nnal/atb/set_env.sh
+# CANN 8.5不需要
 export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
 
 # 内存碎片
