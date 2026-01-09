@@ -10,6 +10,16 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestBaichuan(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/baichuan-inc/Baichuan2-13B-Chat"
     accuracy = 0
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.8",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--max-running-requests",
+        "8",
+    ]
 
 
 if __name__ == "__main__":
