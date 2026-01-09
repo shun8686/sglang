@@ -20,7 +20,8 @@ class TestCompletionTemplate(CustomTestCase):
         other_args = (
             [
                 "--completion-template",
-                "deepseek_coder",
+                # "deepseek_coder",
+                "star_coder",
                 "--log-level",
                 "debug",
                 "--attention-backend",
@@ -55,7 +56,8 @@ class TestCompletionTemplate(CustomTestCase):
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
         print(content)
-        self.assertIn("Loading completion template: deepseek_coder", content)
+        # self.assertIn("Loading completion template: deepseek_coder", content)
+        self.assertIn("Loading completion template: star_coder", content)
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
