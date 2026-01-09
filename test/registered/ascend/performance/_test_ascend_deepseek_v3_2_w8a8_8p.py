@@ -41,7 +41,8 @@ OTHER_ARGS = (
         "--watchdog-timeout", "9000",
         "--disable-radix-cache",
         "--max-running-requests", 128,
-        "--cuda-graph-bs", 1, 2, 4, 8, 16, 32,
+        # "--cuda-graph-bs", 1, 2, 4, 8, 16, 32,
+        "--disable-cuda-graph",
     ]
 )
 
