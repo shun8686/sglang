@@ -19,6 +19,8 @@ class TestMiniCPM3(GSM8KAscendMixin, CustomTestCase):
         "--disable-cuda-graph",
         "--disable-radix-cache",
         "--disable-overlap-schedule",
+        "--max-running-requests",
+        "8",
     ]
 
 if __name__ == "__main__":
