@@ -21,6 +21,8 @@ class TestCompletionTemplate(CustomTestCase):
             [
                 "--completion-template",
                 "deepseek_coder",
+                "--log-level",
+                "debug",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
