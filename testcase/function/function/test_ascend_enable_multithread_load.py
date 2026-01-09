@@ -61,6 +61,10 @@ class TestEnableMultithreadLoad(CustomTestCase):
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         cls.extra_envs = {
             "SGLANG_NPU_USE_MLAPO": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+            "STREAMS_PER_DEVICE": "32",
         }
         os.environ.update(cls.extra_envs)
 
