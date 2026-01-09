@@ -17,7 +17,7 @@ from sglang.test.test_utils import (
 )
 
 
-MODEL_PATH = "DeepSeek-R1-0528-w4a8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 
 def run_command(cmd, shell=True):
@@ -56,7 +56,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
     accuracy = 0.80
     host = "127.0.0.1"
     port = 6688
-    
+
     # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
     long_seq_configs = {
         "64k+1k": {
@@ -74,7 +74,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
         "16k+1k": {
             "input_len": 16384,
             "output_len": 1024,
-            "ttft_threshold": 40000, 
+            "ttft_threshold": 40000,
             "tpot_threshold": 200
         },
     }
