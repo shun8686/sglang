@@ -62,7 +62,7 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 32
+    max_concurrency = 128
     num_prompts = 160
     input_len = 512
     output_len = 512
@@ -70,29 +70,29 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     tpot = 70
     output_token_throughput = 450
 
-    # def test_deepseek_v3_2(self):
-    #     self.run_throughput()
+    def test_deepseek_v3_2(self):
+        self.run_throughput()
 
-    def test_deepseek_v3_2_by_gsm8k(self):
-        colon_index = self.base_url.rfind(":")
-
-        host = self.base_url[:colon_index]
-        print("host:", host)
-        port = int(self.base_url[colon_index+1:])
-        print("port:", port)
-        args = SimpleNamespace(
-            num_shots=5,
-            data_path=None,
-            num_questions=200,
-            max_new_tokens=512,
-            parallel=128,
-            host=host,
-            port=port,
-        )
-        for i in range(10):
-            metrics = run_eval(args)
-            print(f"{metrics=}")
-            print(f"{metrics['accuracy']=}")
+    # def test_deepseek_v3_2_by_gsm8k(self):
+    #     colon_index = self.base_url.rfind(":")
+    #
+    #     host = self.base_url[:colon_index]
+    #     print("host:", host)
+    #     port = int(self.base_url[colon_index+1:])
+    #     print("port:", port)
+    #     args = SimpleNamespace(
+    #         num_shots=5,
+    #         data_path=None,
+    #         num_questions=200,
+    #         max_new_tokens=512,
+    #         parallel=128,
+    #         host=host,
+    #         port=port,
+    #     )
+    #     for i in range(10):
+    #         metrics = run_eval(args)
+    #         print(f"{metrics=}")
+    #         print(f"{metrics['accuracy']=}")
 
 
 if __name__ == "__main__":
