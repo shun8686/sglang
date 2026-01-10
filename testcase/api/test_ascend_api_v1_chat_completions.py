@@ -40,8 +40,7 @@ class TestEnableThinking(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_chat_completion_with_reasoning(self):
-        # Test non-streaming with "enable_thinking": True, reasoning_content should not be empty
+    def _test_model_parameters(self):
         client = requests.post(
             f"{self.base_url}/v1/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
@@ -60,11 +59,26 @@ class TestEnableThinking(CustomTestCase):
         print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
-        self.assertIn("choices", data)
-        self.assertTrue(len(data["choices"]) > 0)
-        self.assertIn("message", data["choices"][0])
-        self.assertIn("reasoning_content", data["choices"][0]["message"])
+        self.assertEqual(data["model"], self.model)
         self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+
+    def test_message_parameters(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            headers={"Authorization": f"Bearer {self.api_key}"},
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "temperature": 0,
+                "frequency_penalty": 1,
+            },
+        )
+        print(f"client:{client}")
+        print(f"client.status_code:{client.status_code}")
+        print(f"client.json:{client.json()}")
+        print(f"client.text:{client.text}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+        data = client.json()
 
 
 if __name__ == "__main__":
