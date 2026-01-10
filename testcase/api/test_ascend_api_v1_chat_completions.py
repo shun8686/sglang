@@ -79,41 +79,41 @@ class TestEnableThinking(CustomTestCase):
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
-    def test_temperature(self):
-        client1 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0.3,
-            },
-        )
-        print(f"client1.json:{client1.json()}")
-        self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
-        
-        client2 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 1.0,
-            },
-        )
-        print(f"client2.json:{client2.json()}")
-        self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
-    
-    # def test_return_hidden_states(self):
-    #     client = requests.post(
+    # def test_temperature(self):
+    #     client1 = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
     #         json={
     #             "model": self.model,
-    #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "return_hidden_states": True,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 0.3,
     #         },
     #     )
-    #     print(f"client.json:{client.json()}")
-    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    #
+    #     print(f"client1.json:{client1.json()}")
+    #     self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
+        
+    #     client2 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 1.0,
+    #         },
+    #     )
+    #     print(f"client2.json:{client2.json()}")
+    #     self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
+    
+    def test_return_hidden_states(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "return_hidden_states": True,
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    
     # def test_top_k(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
