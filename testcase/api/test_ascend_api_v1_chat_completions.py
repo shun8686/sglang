@@ -67,30 +67,30 @@ class TestEnableThinking(CustomTestCase):
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     #     self.assertEqual(client.json()["choices"][0]["finish_reason"], "length")
 
-    def test_stream(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "stream": True,
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    
-    # def test_temperature(self):
+    # def test_stream(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
     #         json={
     #             "model": self.model,
     #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "temperature": 1,
+    #             "stream": True,
     #         },
     #     )
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    #
+    
+    def test_temperature(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "temperature": 1,
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    
     # def test_return_hidden_states(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
