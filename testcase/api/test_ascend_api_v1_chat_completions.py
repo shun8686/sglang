@@ -25,7 +25,7 @@ class TestEnableThinking(CustomTestCase):
             0.8,
             "--tp-size",
             2,
-            "--bash-gpu-id",
+            "--base-gpu-id",
             "6"
         ]
 
