@@ -60,12 +60,13 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "Hello"}],
-                "max_completion_tokens": 200,
+                "max_completion_tokens": 1,
             },
         )
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    
+        self.assertEqual(client.json()["choices"]["finish_reason"], "length")
+
     # def test_stream(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
