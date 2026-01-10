@@ -55,9 +55,9 @@ class TestEnableThinking(CustomTestCase):
             },
         )
         print(f"client:{client}")
-        print(f"client:{client.status_code}")
-        print(f"client:{client.json}")
-        print(f"client:{client.text}")
+        print(f"client.status_code:{client.status_code}")
+        print(f"client.json:{client.json}")
+        print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
 
