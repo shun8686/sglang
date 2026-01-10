@@ -1,4 +1,5 @@
 import unittest
+import os
 
 import requests
 
@@ -19,7 +20,10 @@ class TestCompletionTemplate(CustomTestCase):
         other_args = (
             [
                 "--completion-template",
-                "deepseek_coder",
+                # "deepseek_coder",
+                "star_coder",
+                "--log-level",
+                "debug",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -29,19 +33,31 @@ class TestCompletionTemplate(CustomTestCase):
                 0.6,
             ]
         )
+        cls.out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
+        cls.err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
         cls.base_url += "/v1"
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        cls.out_log_file.close()
+        cls.err_log_file.close()
+        os.remove("./out_log.txt")
+        os.remove("./err_log.txt")
 
     def test_completion_template(self):
+        self.out_log_file.seek(0)
+        content = self.out_log_file.read()
+        print(content)
+        # self.assertIn("Loading completion template: deepseek_coder", content)
+        self.assertIn("Loading completion template: star_coder", content)
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
