@@ -2,18 +2,17 @@ import os
 import sys
 import datetime
 import unittest
-from types import SimpleNamespace
 from pathlib import Path
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.few_shot_gsm8k import run_eval
+
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from lts_utils import NIC_NAME, run_command, run_bench_serving
+from lts_utils import NIC_NAME, run_command, run_bench_serving, run_gsm8k, run_long_seq_bench_serving
 
 MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"  #
 EAGLE_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
@@ -184,62 +183,21 @@ class TestLTSQwen3235B(CustomTestCase):
         )
         print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
 
-    def run_all_long_seq_verify(self):
-        """依次验证16k+1k、32k+1k、64k+1k三种单条长序列"""
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
-        for seq_type, config in self.long_seq_configs.items():
-            print(f"\n========== Start {seq_type} single long sequence test ==========")
-            # 执行单条长序列请求
-            metrics = run_single_long_seq_test(
-                host=host,
-                port=port,
-                input_len=config["input_len"],
-                output_len=config["output_len"],
-                seq_type=seq_type
-            )
-            print(f"{seq_type} metrics: {metrics}")
-            log_file = f"./single_long_seq_{seq_type}_log.txt"
-            res_ttft = run_command(f"cat {log_file} | grep 'Mean TTFT' | awk '{{print $4}}'")
-            res_tpot = run_command(f"cat {log_file} | grep 'Mean TPOT' | awk '{{print $4}}'")
-            res_error = run_command(f"cat {log_file} | grep 'Error'")
-            res_ttft = res_ttft.strip() if res_ttft else "0"
-            res_tpot = res_tpot.strip() if res_tpot else "0"
-            # self.assertLessEqual(
-            #     float(res_ttft),
-            #     config["ttft_threshold"],
-            #     f"{seq_type} TTFT {res_ttft}ms exceeds threshold {config['ttft_threshold']}ms"
-            # )
-            # self.assertLessEqual(
-            #     float(res_tpot),
-            #     config["tpot_threshold"],
-            #     f"{seq_type} TPOT {res_tpot}ms exceeds threshold {config['tpot_threshold']}ms"
-            # )
-            # # 验证无错误日志
-            # self.assertEqual(
-            #     res_error, "",
-            #     f"{seq_type} request failed with error: {res_error}"
-            # )
-            print(f"========== {seq_type} single long sequence test PASSED ==========\n")
-
     def run_gsm8k(self):
-        print(f"========== Start gsm8k test ==========\n")
-        args = SimpleNamespace(
-            num_shots=5,
-            data_path=None,
-            num_questions=1319,
-            max_new_tokens=512,
-            parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
-        )
-        metrics = run_eval(args)
+        metrics = run_gsm8k("http://127.0.0.1", int(self.base_url.split(":")[-1]))
+
         self.assertGreater(
             metrics["accuracy"],
             self.accuracy,
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
         )
         print(f"========== gsm8k test PASSED ==========\n")
+
+    def run_all_long_seq_verify(self):
+        _, host, port = self.base_url.split(":")
+        host = host[2:]
+        run_long_seq_bench_serving(
+            host=host, port=port, dataset_name=self.dataset_name, dataset_path=self.dataset_path)
 
     def test_lts_qwen3_235b(self):
         i = 0
