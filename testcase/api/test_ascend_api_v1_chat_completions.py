@@ -1,5 +1,5 @@
 import requests
-
+import unittest
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -54,10 +54,10 @@ class TestEnableThinking(CustomTestCase):
                 **self.additional_chat_kwargs,
             },
         )
-        print(client)
-        print(client.status_code)
-        print(client.json)
-        print(client.text)
+        print(f"client:{client}")
+        print(f"client:{client.status_code}")
+        print(f"client:{client.json}")
+        print(f"client:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
 
@@ -66,3 +66,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertIn("message", data["choices"][0])
         self.assertIn("reasoning_content", data["choices"][0]["message"])
         self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+
+
+if __name__ == "__main__":
+    unittest.main()
