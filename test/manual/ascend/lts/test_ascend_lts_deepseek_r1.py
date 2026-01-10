@@ -1,43 +1,16 @@
-import os
-import subprocess
 import sys
 import datetime
 
-import psutil
-import socket
 import unittest
 from types import SimpleNamespace
 
-from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
 )
-
+from lts_utils import run_command, run_bench_serving
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
-
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=False
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"command error: {e}")
-        return None
-
-def run_bench_serving(host, port, dataset_name="random", dataset_path="", request_rate=8.0, max_concurrency=8, num_prompts=32, input_len=3500, output_len=1500,
-                      random_range_ratio=1.0):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name {dataset_name} --dataset-path {dataset_path} --request-rate {request_rate} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
-               f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
-    print(f"command:{command}")
-    metrics = run_command(f"{command} | tee ./bench_log.txt")
-    return metrics
 
 class TestLTSDeepSeekR1(CustomTestCase):
     model = MODEL_PATH
@@ -173,7 +146,7 @@ class TestLTSDeepSeekR1(CustomTestCase):
         )
         print(f"========== gsm8k test PASSED ==========\n")
 
-    def test_lts_deepseekr1(self):
+    def test_lts_deepseek_r1(self):
         i = 0
         while True:
             i = i + 1

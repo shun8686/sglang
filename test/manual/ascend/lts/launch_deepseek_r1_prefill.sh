@@ -1,3 +1,5 @@
+#!/bin/bash
+
 pkill -9 sglang
 pkill -9 python
 
@@ -18,7 +20,6 @@ NIC_NAME="enp194s0f0"
 
 # node ip
 export node_ip="141.61.39.231"
-# export node_ip="192.168.0.184"
 
 # pd传输, IP设置为p节点首节点
 export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"

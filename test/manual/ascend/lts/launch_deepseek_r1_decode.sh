@@ -1,5 +1,10 @@
+#!/bin/bash
+
 pkill -9 sglang
 pkill -9 python
+
+SCRIPT_PATH=$(dirname $(readlink -f $0))
+cd $SCRIPT_PATH
 
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
 

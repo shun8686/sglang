@@ -1,12 +1,9 @@
 import os
-import subprocess
 import sys
 import datetime
-
-import psutil
-import socket
 import unittest
 from types import SimpleNamespace
+from pathlib import Path
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
@@ -16,16 +13,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
-def get_nic_name():
-    for nic, addrs in psutil.net_if_addrs().items():
-        for addr in addrs:
-            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
-                print("The nic name matched is {}".format(nic))
-                return nic
-    return None
-
-NIC_NAME = "lo" if get_nic_name() == None else get_nic_name()
+from lts_utils import NIC_NAME, run_command, run_bench_serving
 
 MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"  #
 EAGLE_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
@@ -99,26 +87,6 @@ QWEN3_235B_ENVS = {
     # "ENABLE_PROFILING": "1",
     # "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
-
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=False
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"command error: {e}")
-        return None
-
-def run_bench_serving(host, port, dataset_name="random", dataset_path="", request_rate=8.0, max_concurrency=8, num_prompts=32, input_len=3500, output_len=1500,
-                      random_range_ratio=1.0):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name {dataset_name} --dataset-path {dataset_path} --request-rate {request_rate} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
-               f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
-    print(f"command:{command}")
-    metrics = run_command(f"{command} | tee ./bench_log.txt")
-    return metrics
 
 def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
     command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
@@ -286,7 +254,9 @@ class TestLTSQwen3235B(CustomTestCase):
 
 if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_file = "./lts_test_qwen3_235b_" + time_str + ".log"
+    log_dir = Path("./log")
+    log_dir.mkdir(parents=True, exist_ok=True)
+    log_file = "./log/lts_test_qwen3_235b_" + time_str + ".log"
 
     with open(log_file, 'w', encoding="utf-8") as f:
         original_stdout = sys.stdout
