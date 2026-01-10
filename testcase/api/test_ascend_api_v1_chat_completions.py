@@ -45,6 +45,7 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
             },
         )
         print(f"client.json:{client.json()}")
