@@ -39,7 +39,7 @@ OTHER_ARGS = (
         "--max-prefill-tokens", "40970",
         "--max-total-tokens", "40970",
         "--watchdog-timeout", "9000",
-        # "--disable-radix-cache",
+        "--disable-radix-cache",
         # "--max-running-requests", 128,
         "--disable-cuda-graph",
     ]
