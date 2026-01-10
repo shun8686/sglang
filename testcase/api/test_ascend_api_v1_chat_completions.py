@@ -114,29 +114,29 @@ class TestEnableThinking(CustomTestCase):
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
-    def test_top_k(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "top_k": 1,
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    
-    # def test_stop_token_ids(self):
+    # def test_top_k(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
     #         json={
     #             "model": self.model,
     #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "stop_token_ids": [1,2],
+    #             "top_k": 1,
     #         },
     #     )
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    
+    def test_stop_token_ids(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "stop_token_ids": [1,2],
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
     # def test_rid(self):
     #     client = requests.post(
