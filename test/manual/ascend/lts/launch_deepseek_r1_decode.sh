@@ -3,9 +3,6 @@
 pkill -9 sglang
 pkill -9 python
 
-SCRIPT_PATH=$(dirname $(readlink -f $0))
-cd $SCRIPT_PATH
-
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
 
 # CANN 8.3
@@ -21,6 +18,7 @@ export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
 NIC_NAME="enp194s0f0"
 #NIC_NAME="enp23s0f3"
 
+# node ip
 export node_ip="141.61.29.201"
 
 # pd传输, IP设置为p节点首节点
