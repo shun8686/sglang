@@ -65,7 +65,7 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        self.assertEqual(client.json()["choices"]["finish_reason"], "length")
+        self.assertEqual(client.json()["choices"][0]["finish_reason"], "length")
 
     # def test_stream(self):
     #     client = requests.post(
