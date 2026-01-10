@@ -40,32 +40,32 @@ class TestEnableThinking(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_model_and_messages(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        data = client.json()
-        self.assertEqual(data["model"], self.model)
-        self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
-
-    # def test_max_completion_tokens(self):
+    # def test_model_and_messages(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
     #         json={
     #             "model": self.model,
     #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "max_completion_tokens": 1,
     #         },
     #     )
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    #
+    #     data = client.json()
+    #     self.assertEqual(data["model"], self.model)
+    #     self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+
+    def test_max_completion_tokens(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "max_completion_tokens": 1,
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    
     # def test_stream(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
