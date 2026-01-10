@@ -1,9 +1,7 @@
 import os
-import sys
 import datetime
 import unittest
 from types import SimpleNamespace
-from pathlib import Path
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
@@ -67,7 +65,7 @@ ENVS = {
 class TestLTSQwen332B(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    dataset_path = "/home/zhaoming/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
     other_args = OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = ENVS

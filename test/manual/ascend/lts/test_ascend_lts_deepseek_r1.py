@@ -12,7 +12,7 @@ MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-chann
 class TestLTSDeepSeekR1(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    dataset_path = None  # the path of test dataset
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
     # dataset_path = ""
     request_rate = 5.5
     max_concurrency = 8

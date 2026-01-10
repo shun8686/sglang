@@ -49,7 +49,7 @@ def run_gsm8k(host="http://127.0.0.1", port=6688, expect_accuracy=None):
     metrics = run_eval(args)
     return metrics
 
-def run_long_seq_bench_serving(host=None, port=None, dataset_name="random", dataset_path=""):
+def run_long_seq_bench_serving(host=None, port=None, dataset_name="random", dataset_path=None):
     """依次验证16k+1k、32k+1k、64k+1k三种单条长序列"""
     # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
     long_seq_configs = {
