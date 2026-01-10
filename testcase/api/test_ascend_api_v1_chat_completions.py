@@ -62,7 +62,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(data["model"], self.model)
         self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
-    def test_message_parameters(self):
+    def test_frequency_penalty_parameters(self):
         client = requests.post(
             f"{self.base_url}/v1/chat/completions",
             headers={"Authorization": f"Bearer {self.api_key}"},
