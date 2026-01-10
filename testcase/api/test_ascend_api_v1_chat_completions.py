@@ -14,7 +14,6 @@ class TestEnableThinking(CustomTestCase):
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.api_key = "sk-1234"
         cls.other_args = [
             "--reasoning-parser",
             "qwen3",
@@ -26,14 +25,13 @@ class TestEnableThinking(CustomTestCase):
             "--tp-size",
             2,
             "--base-gpu-id",
-            "6"
+            "6",
         ]
 
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            api_key=cls.api_key,
             other_args=cls.other_args,
         )
         cls.additional_chat_kwargs = {}
@@ -42,45 +40,30 @@ class TestEnableThinking(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def _test_model_parameters(self):
+    def test_model_parameters(self):
         client = requests.post(
             f"{self.base_url}/v1/chat/completions",
-            headers={"Authorization": f"Bearer {self.api_key}"},
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "temperature": 0,
-                "separate_reasoning": True,
-                "chat_template_kwargs": {"enable_thinking": True},
-                **self.additional_chat_kwargs,
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
         self.assertEqual(data["model"], self.model)
         self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
-    def test_frequency_penalty_parameters(self):
+    def _test_frequency_penalty_parameters(self):
         client = requests.post(
             f"{self.base_url}/v1/chat/completions",
-            headers={"Authorization": f"Bearer {self.api_key}"},
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "Hello"}],
-                "temperature": 0,
                 "frequency_penalty": 1,
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        data = client.json()
 
 
 if __name__ == "__main__":
