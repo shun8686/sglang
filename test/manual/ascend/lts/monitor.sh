@@ -1,6 +1,7 @@
 #!/bin/bash
+
 INTERVAL=10
-LOGDIRPATH="./lts_test_log"
+LOGDIRPATH="./log"
 LOGFILEPATH="monitor_$(date +"%y%m%d-%H:%M").log"
 
 # function sglangMonitor() {
@@ -38,7 +39,7 @@ function npuMonitor() {
 
     TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
     NPU_INFO=$(npu-smi info 2>/dev/null || echo "")
-    
+
     OUTPUT=""
 
     while IFS= read -r line; do
@@ -49,15 +50,15 @@ function npuMonitor() {
             chip_id="${BASH_REMATCH[1]}"
             phy_id="${BASH_REMATCH[2]}"
             aicore="${BASH_REMATCH[3]}"
-            
+
             if [[ "$line" =~ ([0-9]+[[:space:]]*/[[:space:]]*[0-9]+)[[:space:]]*\|[[:space:]]*$ ]]; then
                 hbm_info="${BASH_REMATCH[1]}"
             else
                 hbm_info="N/A"
             fi
-            
+
             npu_id=$((phy_id / 2))
-            
+
             # 使用printf格式化输出，实现左对齐
             printf -v log_entry "%-${TIMESTAMP_WIDTH}s %-${NPU_ID_WIDTH}s %-${CHIP_ID_WIDTH}s %-${PHY_ID_WIDTH}s %-${AICORE_WIDTH}s %-${HBM_INFO_WIDTH}s" \
                    "${TIMESTAMP}" \
@@ -66,11 +67,11 @@ function npuMonitor() {
                    "Phy_ID:${phy_id}" \
                    "AICORE:${aicore}%" \
                    "HBM_INFO:${hbm_info}"
-            
+
             OUTPUT+="${log_entry}"$'\n'
         fi
     done <<< "$NPU_INFO"
-    
+
     echo -n "$OUTPUT" >> "$LOGDIRPATH/$LOGFILEPATH"
 }
 

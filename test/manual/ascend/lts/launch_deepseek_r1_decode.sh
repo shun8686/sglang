@@ -3,8 +3,20 @@ pkill -9 python
 
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
 
+# CANN 8.3
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+source /usr/local/Ascend/nnal/atb/set_env.sh
+export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
+
+# CANN 8.5
+#source /usr/local/Ascend/cann/set_env.sh
+#source /usr/local/Ascend/nnal/atb/set_env.sh
+
+# NIC Name
+NIC_NAME="enp194s0f0"
+#NIC_NAME="enp23s0f3"
+
 export node_ip="141.61.29.201"
-# export node_ip="192.168.0.60"
 
 # pd传输, IP设置为p节点首节点
 export ASCEND_MF_STORE_URL="tcp://141.61.39.231:24667"
@@ -30,14 +42,6 @@ unset HTTPS_PROXY
 unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
-# CANN 8.5
-source /usr/local/Ascend/cann/set_env.sh
-# CANN 8.3
-#source /usr/local/Ascend/ascend-toolkit/set_env.sh
-source /usr/local/Ascend/nnal/atb/set_env.sh
-# CANN 8.5不需要
-#export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
-
 # 内存碎片
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 export STREAMS_PER_DEVICE=32
@@ -52,10 +56,8 @@ export SGLANG_ENABLE_SPEC_V2=1
 export HCCL_BUFFSIZE=720
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=96
 export TASK_QUEUE_ENABLE=0
-export HCCL_SOCKET_IFNAME=enp194s0f0
-export GLOO_SOCKET_IFNAME=enp194s0f0
-# export HCCL_SOCKET_IFNAME=enp23s0f3
-# export GLOO_SOCKET_IFNAME=enp23s0f3
+export HCCL_SOCKET_IFNAME=NIC_NAME
+export GLOO_SOCKET_IFNAME=NIC_NAME
 
 # D节点
 # --context-length 8192 \ 长序列场景，注释该参数
