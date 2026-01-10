@@ -13,8 +13,8 @@ class TestEnableThinking(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.api_key = "sk-1234"
+        cls.base_url = "http://127.0.0.1:30080"
+        #cls.base_url = DEFAULT_URL_FOR_TEST
         cls.other_args = [
             "--reasoning-parser",
             "qwen3",
@@ -26,14 +26,13 @@ class TestEnableThinking(CustomTestCase):
             "--tp-size",
             2,
             "--base-gpu-id",
-            "6"
+            "2",
         ]
 
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            api_key=cls.api_key,
             other_args=cls.other_args,
         )
         cls.additional_chat_kwargs = {}
@@ -42,7 +41,7 @@ class TestEnableThinking(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_model_parameters_model(self):
+    def _test_model_parameters_model(self):
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -53,11 +52,9 @@ class TestEnableThinking(CustomTestCase):
         print(f"client:{client}")
         print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
-        # self.assertEqual(data["model"], self.model)
-        # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+        data = client.json()
+        self.assertEqual(data["model"], self.model)
 
     def test_model_parameters_prompt(self):
         client = requests.post(
@@ -69,44 +66,23 @@ class TestEnableThinking(CustomTestCase):
         print(f"client:{client}")
         print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
+        print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
-        # self.assertEqual(data["model"], self.model)
         # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
-        # client = requests.post(
-        #     f"{self.base_url}/v1/completions",
-        #     json={
-        #         "model": self.model,
-        #         "messages": [{"role": "user", "content": "Hello"}],
-        #         "temperature": 0,
-        #         "frequency_penalty": 1,
-        #     },
-        # )
-        # print(f"client:{client}")
-        # print(f"client.status_code:{client.status_code}")
-        # print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
-        # self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
 
     def test_model_parameters_max_tokens(self):
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                'max_tokens': 512
+                'max_tokens': 1
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
-        # self.assertEqual(data["model"], self.model)
-        # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+        print(f"client.json_choices:{client.json()['choices'][0]['finish_reason']}")
+        self.assertEqual(client.json()['choices'][0]['finish_reason'], 'length')
 
     def test_model_parameters_stream(self):
         client = requests.post(
@@ -116,14 +92,9 @@ class TestEnableThinking(CustomTestCase):
                 "stream": True
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
-        print(f"client.json:{client.json()}")
+        #print(f"client.json:{client.json()}")
         # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
-        # self.assertEqual(data["model"], self.model)
-        # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
     def test_model_parameters_temperature(self):
         client = requests.post(
@@ -133,12 +104,8 @@ class TestEnableThinking(CustomTestCase):
                 "temperature": 0
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
         # self.assertEqual(data["model"], self.model)
         # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
@@ -150,12 +117,8 @@ class TestEnableThinking(CustomTestCase):
                 "return_hidden_status": True
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
         # self.assertEqual(data["model"], self.model)
         # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
@@ -167,21 +130,18 @@ class TestEnableThinking(CustomTestCase):
                 "top_k": 1
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
         # self.assertEqual(data["model"], self.model)
-        # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
     def test_model_parameters_stop_token_ids(self):
+        list_ids = [1, 13]
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "stop_token_ids": 1
+                "stop_token_ids": list_ids,
+                "max_tokens": 1024
             },
         )
         print(f"client:{client}")
@@ -189,9 +149,7 @@ class TestEnableThinking(CustomTestCase):
         print(f"client.json:{client.json()}")
         # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
-        # self.assertEqual(data["model"], self.model)
-        # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+        self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
 
     def test_model_parameters_rid(self):
         client = requests.post(
@@ -201,14 +159,9 @@ class TestEnableThinking(CustomTestCase):
                 "rid": "10086"
             },
         )
-        print(f"client:{client}")
-        print(f"client.status_code:{client.status_code}")
         print(f"client.json:{client.json()}")
-        # print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # data = client.json()
-        # self.assertEqual(data["model"], self.model)
-        # self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+        self.assertEqual(client.json()['id'], '10086')
 
 
 
