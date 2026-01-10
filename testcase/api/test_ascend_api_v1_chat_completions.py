@@ -25,6 +25,8 @@ class TestEnableThinking(CustomTestCase):
             0.8,
             "--tp-size",
             2,
+            "--bash-gpu-id",
+            "6"
         ]
 
         cls.process = popen_launch_server(
