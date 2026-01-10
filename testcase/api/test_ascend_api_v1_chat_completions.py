@@ -84,7 +84,7 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Can you write a poem?"}],
+                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
                 "temperature": 0.3,
             },
         )
@@ -95,7 +95,7 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Can you write a poem?"}],
+                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
                 "temperature": 1.0,
             },
         )
