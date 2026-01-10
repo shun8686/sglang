@@ -173,21 +173,5 @@ class TestLTSQwen332B(CustomTestCase):
 
 
 if __name__ == "__main__":
-    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_dir = Path("./log")
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = "./log/lts_test_qwen3_32b_DEBUG_" + time_str + ".log"
+    unittest.main(verbosity=2)
 
-    with open(log_file, 'w', encoding="utf-8") as f:
-        original_stdout = sys.stdout
-        original_stderr = sys.stderr
-        sys.stdout = f
-        sys.stderr = f
-
-        try:
-            unittest.main(verbosity=2)
-        finally:
-            sys.stdout = original_stdout
-            sys.stderr = original_stderr
-
-    print(f"Test log saved to {log_file}")
