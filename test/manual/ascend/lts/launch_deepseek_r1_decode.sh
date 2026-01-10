@@ -4,6 +4,7 @@ pkill -9 sglang
 pkill -9 python
 
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
+export PYTHONPATH=/data/d00662834/lts-test/release1230/sglang/python:$PYTHONPATH
 
 # CANN 8.3
 source /usr/local/Ascend/ascend-toolkit/set_env.sh
@@ -59,8 +60,8 @@ export SGLANG_ENABLE_SPEC_V2=1
 export HCCL_BUFFSIZE=720
 export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=96
 export TASK_QUEUE_ENABLE=0
-export HCCL_SOCKET_IFNAME=NIC_NAME
-export GLOO_SOCKET_IFNAME=NIC_NAME
+export HCCL_SOCKET_IFNAME=$NIC_NAME
+export GLOO_SOCKET_IFNAME=$NIC_NAME
 
 # D节点
 # --context-length 8192 \ 长序列场景，注释该参数

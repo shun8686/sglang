@@ -4,6 +4,7 @@ pkill -9 sglang
 pkill -9 python
 
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
+export PYTHONPATH=/data/d00662834/lts-test/release1230/sglang/python:$PYTHONPATH
 
 # CANN 8.3
 source /usr/local/Ascend/ascend-toolkit/set_env.sh
@@ -58,8 +59,8 @@ export ENABLE_MOE_NZ=1
 export HCCL_BUFFSIZE=1536
 export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
 export TASK_QUEUE_ENABLE=2
-export HCCL_SOCKET_TFNAME=NIC_NAME
-export GLOO_SOCKET_IFNAME=NIC_NAME
+export HCCL_SOCKET_TFNAME=$NIC_NAME
+export GLOO_SOCKET_IFNAME=$NIC_NAME
 
 # 蚂蚁搬家，ROUND*TOKENS≥chunkedprefillsize/tp*dp
 export DEEPEP_NORMAL_LONG_SEQ_ROUND=5
