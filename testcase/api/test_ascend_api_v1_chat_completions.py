@@ -60,7 +60,7 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "Hello"}],
-                "max_completion_tokens": 50,
+                "max_completion_tokens": 200,
             },
         )
         print(f"client.json:{client.json()}")
