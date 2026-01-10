@@ -102,30 +102,30 @@ class TestEnableThinking(CustomTestCase):
     #     print(f"client2.json:{client2.json()}")
     #     self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
     
-    def test_return_hidden_states(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "return_hidden_states": True,
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    
-    # def test_top_k(self):
+    # def test_return_hidden_states(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
     #         json={
     #             "model": self.model,
     #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "top_k": 1,
+    #             "return_hidden_states": True,
     #         },
     #     )
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-    #
+    
+    def test_top_k(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "top_k": 1,
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    
     # def test_stop_token_ids(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
