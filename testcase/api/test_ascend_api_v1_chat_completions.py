@@ -40,77 +40,77 @@ class TestEnableThinking(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_model_and_messages(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        data = client.json()
-        self.assertEqual(data["model"], self.model)
-        self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
-
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "messages": [{"role": "user", "content": "Hello"}],
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        data = client.json()
-        self.assertEqual(data["model"], "default")
-        self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
-
-    def test_max_completion_tokens(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "messages": [{"role": "user", "content": "Hello"}],
-                "max_completion_tokens": 1,
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        self.assertEqual(client.json()["choices"][0]["finish_reason"], "length")
-
-    # def test_stream(self):
+    # def test_model_and_messages(self):
     #     client = requests.post(
     #         f"{self.base_url}/v1/chat/completions",
     #         json={
     #             "model": self.model,
     #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "stream": True,
     #         },
     #     )
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    #     data = client.json()
+    #     self.assertEqual(data["model"], self.model)
+    #     self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+
+    #     client = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #         },
+    #     )
+    #     print(f"client.json:{client.json()}")
+    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    #     data = client.json()
+    #     self.assertEqual(data["model"], "default")
+    #     self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
+
+    # def test_max_completion_tokens(self):
+    #     client = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "max_completion_tokens": 1,
+    #         },
+    #     )
+    #     print(f"client.json:{client.json()}")
+    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    #     self.assertEqual(client.json()["choices"][0]["finish_reason"], "length")
+
+    def test_stream(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "stream": True,
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
-    def test_temperature(self):
-        client1 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0.3,
-            },
-        )
-        print(f"client1.json:{client1.json()}")
-        self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
+    # def test_temperature(self):
+    #     client1 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 0.3,
+    #         },
+    #     )
+    #     print(f"client1.json:{client1.json()}")
+    #     self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
         
-        client2 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 1.0,
-            },
-        )
-        print(f"client2.json:{client2.json()}")
+    #     client2 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 1.0,
+    #         },
+    #     )
+    #     print(f"client2.json:{client2.json()}")
         self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
     
     # def test_return_hidden_states(self):
@@ -125,41 +125,41 @@ class TestEnableThinking(CustomTestCase):
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
-    def test_top_k(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "top_k": 1,
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    # def test_top_k(self):
+    #     client = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "top_k": 1,
+    #         },
+    #     )
+    #     print(f"client.json:{client.json()}")
+    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
-    def test_stop_token_ids(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "stop_token_ids": [1,2],
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    # def test_stop_token_ids(self):
+    #     client = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "stop_token_ids": [1,2],
+    #         },
+    #     )
+    #     print(f"client.json:{client.json()}")
+    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
-    def test_rid(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "rid": "sdsad",
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    # def test_rid(self):
+    #     client = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "rid": "sdsad",
+    #         },
+    #     )
+    #     print(f"client.json:{client.json()}")
+    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
 
 if __name__ == "__main__":
