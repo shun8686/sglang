@@ -111,7 +111,7 @@ class TestEnableThinking(CustomTestCase):
     #         },
     #     )
     #     print(f"client2.json:{client2.json()}")
-        self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
+        # self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
     
     # def test_return_hidden_states(self):
     #     client = requests.post(
