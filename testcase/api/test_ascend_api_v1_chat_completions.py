@@ -56,11 +56,10 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"client:{client}")
         print(f"client.status_code:{client.status_code}")
-        print(f"client.json:{client.json}")
+        print(f"client.json:{client.json()}")
         print(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
-
         self.assertIn("choices", data)
         self.assertTrue(len(data["choices"]) > 0)
         self.assertIn("message", data["choices"][0])
