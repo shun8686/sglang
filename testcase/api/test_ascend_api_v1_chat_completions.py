@@ -79,42 +79,42 @@ class TestEnableThinking(CustomTestCase):
     #     self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
     #     self.assertEqual(response.json()["choices"][0]["finish_reason"], "length")
 
-    def test_stream(self):
-        response = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "stream": True,
-            },
-        )
-        print(f"response.text:{response.text}")
-        self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
-        has_reasoning = False
-        has_content = False
+    # def test_stream(self):
+    #     response = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "stream": True,
+    #         },
+    #     )
+    #     print(f"response.text:{response.text}")
+    #     self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
+    #     has_reasoning = False
+    #     has_content = False
 
-        print("\n=== Stream With Reasoning ===")
-        for line in response.iter_lines():
-            if line:
-                line = line.decode("utf-8")
-                if line.startswith("data:") and not line.startswith("data: [DONE]"):
-                    data = json.loads(line[6:])
-                    if "choices" in data and len(data["choices"]) > 0:
-                        delta = data["choices"][0].get("delta", {})
+    #     print("\n=== Stream With Reasoning ===")
+    #     for line in response.iter_lines():
+    #         if line:
+    #             line = line.decode("utf-8")
+    #             if line.startswith("data:") and not line.startswith("data: [DONE]"):
+    #                 data = json.loads(line[6:])
+    #                 if "choices" in data and len(data["choices"]) > 0:
+    #                     delta = data["choices"][0].get("delta", {})
 
-                        if "reasoning_content" in delta and delta["reasoning_content"]:
-                            has_reasoning = True
+    #                     if "reasoning_content" in delta and delta["reasoning_content"]:
+    #                         has_reasoning = True
 
-                        if "content" in delta and delta["content"]:
-                            has_content = True
+    #                     if "content" in delta and delta["content"]:
+    #                         has_content = True
 
-        self.assertTrue(
-            has_reasoning,
-            "The reasoning content is not included in the stream response",
-        )
-        self.assertTrue(
-            has_content, "The stream response does not contain normal content"
-        )
+    #     self.assertTrue(
+    #         has_reasoning,
+    #         "The reasoning content is not included in the stream response",
+    #     )
+    #     self.assertTrue(
+    #         has_content, "The stream response does not contain normal content"
+    #     )
 
     # def test_temperature(self):
     #     response1 = requests.post(
@@ -232,31 +232,31 @@ class TestEnableThinking(CustomTestCase):
     #     self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
     #     self.assertEqual(response.json()['choices'][0]['matched_stop'], 13)
 
-    # def test_rid(self):
-    #     response1 = requests.post(
-    #         f"{self.base_url}/v1/chat/completions",
-    #         json={
-    #             "model": self.model,
-    #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "rid": "sssss",
-    #         },
-    #     )
-    #     print(f"response1.json:{response1.json()}")
-    #     self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-    #     self.assertEqual(response1.json()['id'], 'sssss')
+    def test_rid(self):
+        response1 = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "rid": "sssss",
+            },
+        )
+        print(f"response1.json:{response1.json()}")
+        self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
+        self.assertEqual(response1.json()['id'], 'sssss')
 
-    #     response2 = requests.post(
-    #         f"{self.base_url}/v1/chat/completions",
-    #         json={
-    #             "model": self.model,
-    #             "messages": [{"role": "user", "content": "Hello"},
-    #                          {"role": "assistant", "content": "Hi there!"},
-    #                          {"role": "user", "content": "The capital of France is"}],
-    #             "rid": ["aaaaaa", "bbbbbb"],
-    #         },
-    #     )
-    #     print(f"response2.json:{response2.json()}")
-    #     self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
+        response2 = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"},
+                             {"role": "assistant", "content": "Hi there!"},
+                             {"role": "user", "content": "The capital of France is"}],
+                "rid": ["aaaaaa", "bbbbbb"],
+            },
+        )
+        print(f"response2.json:{response2.json()}")
+        self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
 
 
 if __name__ == "__main__":
