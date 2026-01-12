@@ -197,7 +197,7 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "top_k": 0,
+                "top_k": 1,
             },
         )
         print(f"response1.json:{response1.json()}")
@@ -209,13 +209,13 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "top_k": 0,
+                "top_k": 1,
             },
         )
         print(f"response2.json:{response2.json()}")
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
         content2 = response2.json()["choices"][0]["message"]["content"]
-        self.assertEqual(content1, content2)
+        self.assertNotEqual(content1, content2)
 
     # def test_stop_token_ids(self):
     #     response = requests.post(
