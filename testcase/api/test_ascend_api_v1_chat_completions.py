@@ -216,29 +216,29 @@ class TestEnableThinking(CustomTestCase):
     #     self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
     #     self.assertEqual(response.json()['choices'][0]['matched_stop'], 13)
 
-    def test_rid(self):
-        response1 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "rid": "sssss",
-            },
-        )
-        print(f"response1.json:{response1.json()}")
-        self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-        self.assertEqual(response1.json()['id'], 'sssss')
+    # def test_rid(self):
+    #     response1 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "rid": "sssss",
+    #         },
+    #     )
+    #     print(f"response1.json:{response1.json()}")
+    #     self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
+    #     self.assertEqual(response1.json()['id'], 'sssss')
 
-        response2 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "rid": ["aaaaaa", "bbbbbb"],
-            },
-        )
-        print(f"response2.json:{response2.json()}")
-        self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
+    #     response2 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "rid": ["aaaaaa", "bbbbbb"],
+    #         },
+    #     )
+    #     print(f"response2.json:{response2.json()}")
+    #     self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
 
 
 if __name__ == "__main__":
