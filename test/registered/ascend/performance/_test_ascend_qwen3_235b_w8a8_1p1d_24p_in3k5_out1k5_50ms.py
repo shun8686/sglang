@@ -33,7 +33,6 @@ MODEL_CONFIG = {
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
         "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
@@ -168,7 +167,7 @@ class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBa
             os.environ["SGLANG_EXPERT_DISTRIBUTION_RECORDER_DIR"] = "/data/d00662834/hot_map"
             print("Begin to dump hotmap data")
             run_command(f"curl --location 'http://127.0.0.1:6688/dump_expert_distribution_record'")
-        
+
 
 
 if __name__ == "__main__":
