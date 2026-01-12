@@ -1,4 +1,5 @@
 import json
+import os
 import unittest
 from types import SimpleNamespace
 
@@ -31,6 +32,14 @@ class TestPureTP(CustomTestCase):
                 "deepep",
                 "--disable-cuda-graph",
             ],
+            env={
+                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
+                "HCCL_BUFFSIZE": "1024",
+                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                **os.environ,
+            },
         )
 
     @classmethod
@@ -55,6 +64,11 @@ class TestDPAttn(unittest.TestCase):
     def setUpClass(cls):
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
+        os.environ["SGLANG_ENABLE_JIT_DEEPGEMM"] = "0"
+        os.environ["SGLANG_EXPERT_LOCATION_UPDATER_CANARY"] = "1"
+        os.environ["SGLANG_DEEPEP_BF16_DISPATCH"] = "1"
+        os.environ["HCCL_BUFFSIZE"] = "1024"
+        os.environ["MOE_ENABLE_TOPK_NEG_ONE"] = "1"
         with envs.SGLANG_ENABLE_JIT_DEEPGEMM.override(False):
             cls.process = popen_launch_server(
                 cls.model,
