@@ -25,8 +25,6 @@ class TestEnableThinking(CustomTestCase):
             "--tp-size",
             2,
             "--enable-return-hidden-states",
-            "--base-gpu-id",
-            "6",
         ]
 
         cls.process = popen_launch_server(
