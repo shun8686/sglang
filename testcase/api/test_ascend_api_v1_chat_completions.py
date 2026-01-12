@@ -155,7 +155,7 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "Hello"}],
-                "rid": "10086",
+                "rid": "sssss",
             },
         )
         print(f"client.json:{client.json()}")
