@@ -197,7 +197,6 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0,
                 "top_k": 20,
             },
         )
@@ -210,7 +209,6 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0,
                 "top_k": 20,
             },
         )
