@@ -124,6 +124,17 @@ class TestEnableThinking(CustomTestCase):
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         self.assertIn("hidden_states", client.json()["choices"][0])
+
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+        self.assertNotIn("hidden_states", client.json()["choices"][0])
     
     # def test_top_k(self):
     #     client = requests.post(
