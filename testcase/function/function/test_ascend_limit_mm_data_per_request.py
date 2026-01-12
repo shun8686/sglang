@@ -1,0 +1,187 @@
+"""
+Usage:
+python3 -m unittest test_bnb.TestVisionModel.test_vlm
+python3 -m unittest test_bnb.TestLanguageModel.test_mmlu
+"""
+import unittest
+import multiprocessing as mp
+import random
+from concurrent.futures import ThreadPoolExecutor
+from types import SimpleNamespace
+
+import openai
+import requests
+
+from sglang.srt.utils import kill_process_tree
+from sglang.test.run_eval import run_eval
+from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    is_in_ci,
+    popen_launch_server,
+)
+
+MODEL = [
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-30B-A3B-Instruct"
+]
+
+
+# image
+IMAGE_MAN_IRONING_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/man_ironing_on_back_of_suv.png"
+IMAGE_SGL_LOGO_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/sgl_logo.png"
+#IMAGE_MAN_IRONING_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/man_ironing_on_back_of_suv.png"
+#IMAGE_SGL_LOGO_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/sgl_logo.png"
+
+# video
+VIDEO_JOBS_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/jobs_presenting_ipod.mp4"
+#VIDEO_JOBS_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/videos/jobs_presenting_ipod.mp4"
+
+# audio
+AUDIO_TRUMP_SPEECH_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/Trump_WEF_2018_10s.mp3"
+AUDIO_BIRD_SONG_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/bird_song.mp3"
+#AUDIO_TRUMP_SPEECH_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/audios/Trump_WEF_2018_10s.mp3"
+#AUDIO_BIRD_SONG_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/audios/bird_song.mp3"
+
+
+def popen_launch_server_wrapper(base_url, model, other_args):
+    process = popen_launch_server(
+        model,
+        base_url,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
+    )
+    return process
+
+
+class TestVisionModel(CustomTestCase):
+    @classmethod
+    def setUpClass(cls):
+        mp.set_start_method("spawn", force=True)
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.base_url += "/v1"
+        cls.api_key = "sk-123456"
+
+
+    def _run_multi_turn_request(self):
+        print(f"************base_url={self.base_url}")
+        #client = openai.Client(api_key=self.api_key, base_url=self.base_url)
+        messages = [
+                {
+                    "role": "user",
+                    "content": [
+                        #{
+                        #    "type": "image_url",
+                         #   "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                        #},#
+                        {
+                            "type": "video_url",
+                            "video_url": {"url": VIDEO_JOBS_URL},
+                        },
+                        {
+                            "type": "text",
+                            "text": "Describe this video in a sentence.",
+                        },
+                    ],
+                },
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                           "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                        },
+                        {
+                            "type": "text",
+                            "text": "Describe this image in a sentence.",
+                        },
+                    ],
+                },
+        ]
+        response = requests.post(self.base_url+'/chat/completions',json={"messages": messages, "temperature": 0, "max_completion_tokens": 1024})
+        assert response.status_code == 200
+
+    def _run_multi_turn_request1(self):    
+        messages1 = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                        },
+                        {
+                            "type": "vedio_url",
+                            "vedio_url": {"url": VIDEO_JOBS_URL},
+                        },
+                        {
+                            "type": "text",
+                            "text": "Describe this video in a sentence.",
+                        },
+                    ],
+                },
+            ]
+        response1 = requests.post(self.base_url+'/chat/completions',json={"messages": messages1, "temperature": 0, "max_completion_tokens": 1024})
+        print(f"*****{response1.status_code=}")
+        print(f"*****{response1.text=}")
+        assert response1.status_code == 400
+
+    def _run_multi_turn_request2(self):
+        messages2 = [
+                {
+                    "role": "user",
+                    "content": [
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                        },
+                        {
+                            "type": "image_url",
+                            "image_url": {"url": IMAGE_SGL_LOGO_URL},
+                        },
+                        {
+                            "type": "text",
+                            "text": "Describe this video in a sentence.",
+                        },
+                    ],
+                },
+            ]
+        response2 = requests.post(self.base_url+'/chat/completions',json={"messages": messages2, "temperature": 0, "max_completion_tokens": 1024})
+        print(f"*****{response2.status_code=}")
+        print(f"*****{response2.text=}")
+        assert response2.status_code == 400
+
+    def test_vlm(self):
+        models_to_test = MODEL
+
+        if is_in_ci():
+            models_to_test = [random.choice(MODEL)]
+        limit_mm = '{"image":1, "video":1}'
+        for model in models_to_test:
+            with self.subTest(model=model):
+                other_args = [
+                    "--mem-fraction-static",
+                    "0.5",
+                    "--enable-multimodal",
+                    "--limit-mm-data-per-request",
+                    limit_mm,
+                    "--attention-backend",
+                    "ascend",
+                    "--device",
+                    "npu",
+                    "--tp-size",
+                    "16",
+                ]
+                try:
+                    process = popen_launch_server_wrapper(
+                        DEFAULT_URL_FOR_TEST, model, other_args
+                    )
+                    self._run_multi_turn_request()
+                    self._run_multi_turn_request1()
+                    self._run_multi_turn_request2()
+                finally:
+                    kill_process_tree(process.pid)
+
+
+if __name__ == "__main__":
+    unittest.main()
