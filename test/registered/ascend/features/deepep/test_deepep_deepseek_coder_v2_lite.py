@@ -26,10 +26,14 @@ class TestPureTP(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--tp",
+                "--tp-size",
+                "2",
+                "--dp-size",
                 "2",
                 "--moe-a2a-backend",
                 "deepep",
+                "--deepep-mode",
+                "low_latency",
                 "--disable-cuda-graph",
             ],
             env={
