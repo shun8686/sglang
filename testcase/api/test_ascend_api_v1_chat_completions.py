@@ -140,7 +140,7 @@ class TestEnableThinking(CustomTestCase):
         print(f"response2.json:{response2.json()}")
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
         reasoning_content2 = response2.json()["choices"][0]["message"]["reasoning_content"]
-        self.self.assertNotEqual(reasoning_content1, reasoning_content2)
+        self.assertNotEqual(reasoning_content1, reasoning_content2)
 
     # def test_return_hidden_states(self):
     #     response = requests.post(
