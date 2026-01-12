@@ -86,7 +86,8 @@ class TestEnableThinking(CustomTestCase):
                 "stream": True,
             },
         )
-        print(f"client.json:{client.json()}")
+        print(f"client.text:{client.text}")
+        # print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
     # def test_temperature(self):
