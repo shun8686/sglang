@@ -6,18 +6,18 @@ from sglang.srt.environ import envs
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_MLA_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
+MODEL_PATH = "/root/.cache/modelscope/hub/models/deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct/"
 
 class TestPureTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEFAULT_MLA_MODEL_NAME_FOR_TEST
+        cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -53,7 +53,7 @@ class TestPureTP(CustomTestCase):
 class TestDPAttn(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEFAULT_MLA_MODEL_NAME_FOR_TEST
+        cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         with envs.SGLANG_ENABLE_JIT_DEEPGEMM.override(False):
             cls.process = popen_launch_server(
