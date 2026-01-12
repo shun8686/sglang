@@ -160,6 +160,7 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+        self.assertEqual(client.json()['id'], 'sssss')
 
 
 if __name__ == "__main__":
