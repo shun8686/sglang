@@ -116,13 +116,7 @@ class TestEnableThinking(CustomTestCase):
             has_content, "The stream response does not contain normal content"
         )
 
-    
-        self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
-        self.assertIn("hidden_states", response.json()["choices"][0])
-
-        response = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={# def test_temperature(self):
+    def test_temperature(self):
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -155,6 +149,12 @@ class TestEnableThinking(CustomTestCase):
             },
         )
         print(f"response.json:{response.json()}")
+        self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
+        self.assertIn("hidden_states", response.json()["choices"][0])
+
+        response = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "Hello"}],
             },
