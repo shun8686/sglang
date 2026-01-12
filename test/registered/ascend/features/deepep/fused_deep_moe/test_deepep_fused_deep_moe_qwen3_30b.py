@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct/"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
 
 class TestPureTP(CustomTestCase):
     @classmethod
@@ -26,18 +26,14 @@ class TestPureTP(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--tp-size",
-                "2",
-                "--moe-a2a-backend",
-                "deepep",
-                "--deepep-mode",
-                "low_latency",
+                "--tp-size", "2",
+                "--quantization", "modelslim",
+                "--moe-a2a-backend", "ascend_fuseep",
                 "--disable-cuda-graph",
             ],
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
-                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "HCCL_BUFFSIZE": "1024",
                 "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
