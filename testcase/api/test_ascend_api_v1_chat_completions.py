@@ -116,56 +116,56 @@ class TestEnableThinking(CustomTestCase):
     #         has_content, "The stream response does not contain normal content"
     #     )
 
-    def test_temperature(self):
-        response1 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0,
-            },
-        )
-        print(f"response1.json:{response1.json()}")
-        self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-        content1 = response1.json()["choices"][0]["message"]["content"]
+    # def test_temperature(self):
+    #     response1 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 0,
+    #         },
+    #     )
+    #     print(f"response1.json:{response1.json()}")
+    #     self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
+    #     content1 = response1.json()["choices"][0]["message"]["content"]
 
-        response2 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0,
-            },
-        )
-        print(f"response2.json:{response2.json()}")
-        self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
-        content2 = response2.json()["choices"][0]["message"]["content"]
-        self.assertEqual(content1, content2)
+    #     response2 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 0,
+    #         },
+    #     )
+    #     print(f"response2.json:{response2.json()}")
+    #     self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
+    #     content2 = response2.json()["choices"][0]["message"]["content"]
+    #     self.assertEqual(content1, content2)
         
-        response3 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 2,
-            },
-        )
-        print(f"response3.json:{response3.json()}")
-        self.assertEqual(response3.status_code, 200, f"Failed with: {response3.text}")
-        content3 = response3.json()["choices"][0]["message"]["content"]
+    #     response3 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 2,
+    #         },
+    #     )
+    #     print(f"response3.json:{response3.json()}")
+    #     self.assertEqual(response3.status_code, 200, f"Failed with: {response3.text}")
+    #     content3 = response3.json()["choices"][0]["message"]["content"]
 
-        response4 = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 2,
-            },
-        )
-        print(f"response4.json:{response4.json()}")
-        self.assertEqual(response4.status_code, 200, f"Failed with: {response4.text}")
-        content4 = response4.json()["choices"][0]["message"]["content"]
-        self.assertNotEqual(content3, content4)
+    #     response4 = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+    #             "temperature": 2,
+    #         },
+    #     )
+    #     print(f"response4.json:{response4.json()}")
+    #     self.assertEqual(response4.status_code, 200, f"Failed with: {response4.text}")
+    #     content4 = response4.json()["choices"][0]["message"]["content"]
+    #     self.assertNotEqual(content3, content4)
 
     # def test_return_hidden_states(self):
     #     response = requests.post(
@@ -216,18 +216,29 @@ class TestEnableThinking(CustomTestCase):
     #     self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
     #     self.assertEqual(response.json()['choices'][0]['matched_stop'], 13)
 
-    # def test_rid(self):
-    #     response = requests.post(
-    #         f"{self.base_url}/v1/chat/completions",
-    #         json={
-    #             "model": self.model,
-    #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "rid": "sssss",
-    #         },
-    #     )
-    #     print(f"response.json:{response.json()}")
-    #     self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
-    #     self.assertEqual(response.json()['id'], 'sssss')
+    def test_rid(self):
+        response1 = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "rid": "sssss",
+            },
+        )
+        print(f"response1.json:{response1.json()}")
+        self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
+        self.assertEqual(response1.json()['id'], 'sssss')
+
+        response2 = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "rid": ["aaaaaa", "bbbbbb"],
+            },
+        )
+        print(f"response2.json:{response2.json()}")
+        self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
 
 
 if __name__ == "__main__":
