@@ -122,7 +122,7 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                #"temperature": 0.3,
+                "temperature": 0,
             },
         )
         print(f"response1.json:{response1.json()}")
@@ -134,7 +134,7 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                #"temperature": 1.0,
+                "temperature": 0,
             },
         )
         print(f"response2.json:{response2.json()}")
