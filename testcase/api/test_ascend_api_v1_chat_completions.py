@@ -148,6 +148,7 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+        self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
 
     # def test_rid(self):
     #     client = requests.post(
