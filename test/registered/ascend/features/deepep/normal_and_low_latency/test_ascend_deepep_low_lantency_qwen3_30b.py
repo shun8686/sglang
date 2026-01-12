@@ -33,7 +33,7 @@ class TestPureTP(CustomTestCase):
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "low_latency",
+                "auto",
                 "--disable-cuda-graph",
             ],
             env={
