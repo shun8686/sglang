@@ -143,7 +143,7 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "Hello"}],
-                "stop_token_ids": [1,2],
+                "stop_token_ids": [1, 13],
             },
         )
         print(f"client.json:{client.json()}")
