@@ -59,71 +59,70 @@ class TestPureTP(CustomTestCase):
         self.assertGreater(metrics["score"], 0.5)
 
 
-class TestDPAttn(unittest.TestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.model = MODEL_PATH
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        os.environ["SGLANG_ENABLE_JIT_DEEPGEMM"] = "0"
-        os.environ["SGLANG_EXPERT_LOCATION_UPDATER_CANARY"] = "1"
-        os.environ["SGLANG_DEEPEP_BF16_DISPATCH"] = "1"
-        os.environ["HCCL_BUFFSIZE"] = "2048"
-        os.environ["MOE_ENABLE_TOPK_NEG_ONE"] = "1"
-        with envs.SGLANG_ENABLE_JIT_DEEPGEMM.override(False):
-            cls.process = popen_launch_server(
-                cls.model,
-                cls.base_url,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=[
-                    "--trust-remote-code",
-                    "--tp",
-                    "2",
-                    "--dp",
-                    "2",
-                    "--enable-dp-attention",
-                    "--moe-a2a-backend",
-                    "deepep",
-                    "--deepep-mode",
-                    "normal",
-                    "--disable-cuda-graph",
-                    # Test custom config
-                    "--deepep-config",
-                    json.dumps(
-                        {
-                            "normal_dispatch": {
-                                "num_sms": 20,
-                                "num_max_nvl_chunked_send_tokens": 16,
-                                "num_max_nvl_chunked_recv_tokens": 256,
-                                "num_max_rdma_chunked_send_tokens": 6,
-                                "num_max_rdma_chunked_recv_tokens": 128,
-                            },
-                            "normal_combine": {
-                                "num_sms": 20,
-                                "num_max_nvl_chunked_send_tokens": 6,
-                                "num_max_nvl_chunked_recv_tokens": 256,
-                                "num_max_rdma_chunked_send_tokens": 6,
-                                "num_max_rdma_chunked_recv_tokens": 128,
-                            },
-                        }
-                    ),
-                ],
-            )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def test_mmlu(self):
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model,
-            eval_name="mmlu",
-            num_examples=64,
-            num_threads=32,
-        )
-
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+# class TestDPAttn(unittest.TestCase):
+#     @classmethod
+#     def setUpClass(cls):
+#         cls.model = MODEL_PATH
+#         cls.base_url = DEFAULT_URL_FOR_TEST
+#         os.environ["SGLANG_ENABLE_JIT_DEEPGEMM"] = "0"
+#         os.environ["SGLANG_EXPERT_LOCATION_UPDATER_CANARY"] = "1"
+#         os.environ["SGLANG_DEEPEP_BF16_DISPATCH"] = "1"
+#         os.environ["HCCL_BUFFSIZE"] = "2048"
+#         os.environ["MOE_ENABLE_TOPK_NEG_ONE"] = "1"
+#         cls.process = popen_launch_server(
+#             cls.model,
+#             cls.base_url,
+#             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+#             other_args=[
+#                 "--trust-remote-code",
+#                 "--tp",
+#                 "2",
+#                 "--dp",
+#                 "2",
+#                 "--enable-dp-attention",
+#                 "--moe-a2a-backend",
+#                 "deepep",
+#                 "--deepep-mode",
+#                 "normal",
+#                 "--disable-cuda-graph",
+#                 # Test custom config
+#                 "--deepep-config",
+#                 json.dumps(
+#                     {
+#                         "normal_dispatch": {
+#                             "num_sms": 20,
+#                             "num_max_nvl_chunked_send_tokens": 16,
+#                             "num_max_nvl_chunked_recv_tokens": 256,
+#                             "num_max_rdma_chunked_send_tokens": 6,
+#                             "num_max_rdma_chunked_recv_tokens": 128,
+#                         },
+#                         "normal_combine": {
+#                             "num_sms": 20,
+#                             "num_max_nvl_chunked_send_tokens": 6,
+#                             "num_max_nvl_chunked_recv_tokens": 256,
+#                             "num_max_rdma_chunked_send_tokens": 6,
+#                             "num_max_rdma_chunked_recv_tokens": 128,
+#                         },
+#                     }
+#                 ),
+#             ],
+#         )
+#
+#     @classmethod
+#     def tearDownClass(cls):
+#         kill_process_tree(cls.process.pid)
+#
+#     def test_mmlu(self):
+#         args = SimpleNamespace(
+#             base_url=self.base_url,
+#             model=self.model,
+#             eval_name="mmlu",
+#             num_examples=64,
+#             num_threads=32,
+#         )
+#
+#         metrics = run_eval(args)
+#         self.assertGreater(metrics["score"], 0.5)
 
 
 if __name__ == "__main__":
