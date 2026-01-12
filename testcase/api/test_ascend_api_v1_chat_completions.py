@@ -122,24 +122,24 @@ class TestEnableThinking(CustomTestCase):
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 0.3,
+                #"temperature": 0.3,
             },
         )
         print(f"response1.json:{response1.json()}")
         self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-        reasoning_content1 = response1["choices"][0]["message"]["reasoning_content"]
+        reasoning_content1 = response1.json()["choices"][0]["message"]["reasoning_content"]
 
         response2 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
                 "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
-                "temperature": 1.0,
+                #"temperature": 1.0,
             },
         )
         print(f"response2.json:{response2.json()}")
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
-        reasoning_content2 = response2["choices"][0]["message"]["reasoning_content"]
+        reasoning_content2 = response2.json()["choices"][0]["message"]["reasoning_content"]
         self.self.assertNotEqual(reasoning_content1, reasoning_content2)
 
     # def test_return_hidden_states(self):
