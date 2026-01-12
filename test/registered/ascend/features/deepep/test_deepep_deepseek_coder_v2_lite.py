@@ -36,7 +36,7 @@ class TestPureTP(CustomTestCase):
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
                 "SGLANG_DEEPEP_BF16_DISPATCH": "1",
-                "HCCL_BUFFSIZE": "1024",
+                "HCCL_BUFFSIZE": "2048",
                 "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
@@ -67,7 +67,7 @@ class TestDPAttn(unittest.TestCase):
         os.environ["SGLANG_ENABLE_JIT_DEEPGEMM"] = "0"
         os.environ["SGLANG_EXPERT_LOCATION_UPDATER_CANARY"] = "1"
         os.environ["SGLANG_DEEPEP_BF16_DISPATCH"] = "1"
-        os.environ["HCCL_BUFFSIZE"] = "1024"
+        os.environ["HCCL_BUFFSIZE"] = "2048"
         os.environ["MOE_ENABLE_TOPK_NEG_ONE"] = "1"
         with envs.SGLANG_ENABLE_JIT_DEEPGEMM.override(False):
             cls.process = popen_launch_server(
