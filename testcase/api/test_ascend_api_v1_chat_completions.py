@@ -127,7 +127,7 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"response1.json:{response1.json()}")
         self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-        reasoning_content1 = response1.json()["choices"][0]["message"]["reasoning_content"]
+        content1 = response1.json()["choices"][0]["message"]["content"]
 
         response2 = requests.post(
             f"{self.base_url}/v1/chat/completions",
@@ -139,8 +139,33 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"response2.json:{response2.json()}")
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
-        reasoning_content2 = response2.json()["choices"][0]["message"]["reasoning_content"]
-        self.assertNotEqual(reasoning_content1, reasoning_content2)
+        content2 = response2.json()["choices"][0]["message"]["content"]
+        self.assertEqual(content1, content2)
+        
+        response3 = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+                "temperature": 2,
+            },
+        )
+        print(f"response3.json:{response3.json()}")
+        self.assertEqual(response3.status_code, 200, f"Failed with: {response3.text}")
+        content3 = response3.json()["choices"][0]["message"]["content"]
+
+        response4 = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "帮我写一首五言绝句"}],
+                "temperature": 2,
+            },
+        )
+        print(f"response4.json:{response4.json()}")
+        self.assertEqual(response4.status_code, 200, f"Failed with: {response4.text}")
+        content4 = response4.json()["choices"][0]["message"]["content"]
+        self.assertNotEqual(content3, content4)
 
     # def test_return_hidden_states(self):
     #     response = requests.post(
