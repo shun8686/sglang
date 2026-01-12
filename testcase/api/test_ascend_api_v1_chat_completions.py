@@ -113,17 +113,17 @@ class TestEnableThinking(CustomTestCase):
     #     print(f"client2.json:{client2.json()}")
     #     self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
     
-    # def test_return_hidden_states(self):
-    #     client = requests.post(
-    #         f"{self.base_url}/v1/chat/completions",
-    #         json={
-    #             "model": self.model,
-    #             "messages": [{"role": "user", "content": "Hello"}],
-    #             "return_hidden_states": True,
-    #         },
-    #     )
-    #     print(f"client.json:{client.json()}")
-    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    def test_return_hidden_states(self):
+        client = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json={
+                "model": self.model,
+                "messages": [{"role": "user", "content": "Hello"}],
+                "return_hidden_states": True,
+            },
+        )
+        print(f"client.json:{client.json()}")
+        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
     # def test_top_k(self):
     #     client = requests.post(
@@ -137,18 +137,18 @@ class TestEnableThinking(CustomTestCase):
     #     print(f"client.json:{client.json()}")
     #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
     
-    def test_stop_token_ids(self):
-        client = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": self.model,
-                "messages": [{"role": "user", "content": "Hello"}],
-                "stop_token_ids": [1, 13],
-            },
-        )
-        print(f"client.json:{client.json()}")
-        self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
+    # def test_stop_token_ids(self):
+    #     client = requests.post(
+    #         f"{self.base_url}/v1/chat/completions",
+    #         json={
+    #             "model": self.model,
+    #             "messages": [{"role": "user", "content": "Hello"}],
+    #             "stop_token_ids": [1, 13],
+    #         },
+    #     )
+    #     print(f"client.json:{client.json()}")
+    #     self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
+    #     self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
 
     # def test_rid(self):
     #     client = requests.post(
