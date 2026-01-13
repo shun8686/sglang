@@ -1,8 +1,6 @@
 import os
-import sys
 import datetime
 import unittest
-from pathlib import Path
 
 from sglang.srt.utils import kill_process_tree
 
@@ -14,8 +12,8 @@ from sglang.test.test_utils import (
 )
 from lts_utils import NIC_NAME, run_command, run_bench_serving, run_gsm8k, run_long_seq_bench_serving
 
-MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"  #
-EAGLE_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"  #
+EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
 OTHER_ARGS = [
         "--trust-remote-code",
         "--nnodes",
@@ -83,8 +81,6 @@ QWEN3_235B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    # "ENABLE_PROFILING": "1",
-    # "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
 
 def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
@@ -113,29 +109,6 @@ class TestLTSQwen3235B(CustomTestCase):
     tpot = 50
     output_token_throughput = 8314
     accuracy = 0.00
-
-    long_seq_configs = {
-        "64k+1k": {
-            "input_len": 65536,
-            "output_len": 1024,
-            "ttft_threshold": 100000,
-            "tpot_threshold": 350
-        },
-       "32k+1k": {
-            "input_len": 32768,
-            "output_len": 1024,
-            "ttft_threshold": 70000,
-            "tpot_threshold": 250
-        },
-        "16k+1k": {
-            "input_len": 16384,
-            "output_len": 1024,
-            "ttft_threshold": 40000,   # Qwen3-235B模型更大，阈值适配放宽
-            "tpot_threshold": 200
-        },
-    }
-
-    print("Nic name: {}".format(NIC_NAME))
 
     @classmethod
     def setUpClass(cls):
@@ -211,21 +184,5 @@ class TestLTSQwen3235B(CustomTestCase):
 
 
 if __name__ == "__main__":
-    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_dir = Path("./log")
-    log_dir.mkdir(parents=True, exist_ok=True)
-    log_file = "./log/lts_test_qwen3_235b_" + time_str + ".log"
+    unittest.main(verbosity=2)
 
-    with open(log_file, 'w', encoding="utf-8") as f:
-        original_stdout = sys.stdout
-        original_stderr = sys.stderr
-        sys.stdout = f
-        sys.stderr = f
-
-        try:
-            unittest.main(verbosity=2)
-        finally:
-            sys.stdout = original_stdout
-            sys.stderr = original_stderr
-
-    print(f"Test log saved to {log_file}")
