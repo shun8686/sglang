@@ -1,9 +1,8 @@
-import json
 import os
 import unittest
 from types import SimpleNamespace
 
-from sglang.srt.environ import envs
+from registered.ascend.features.deepep.test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -13,12 +12,11 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
 
 class TestPureTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = MODEL_PATH
+        cls.model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,

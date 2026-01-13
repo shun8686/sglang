@@ -2,7 +2,8 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from registered.ascend.features.deepep.test_ascend_deepep_mode_config import QWEN3_30B_A3B_W8A8_MODEL_PATH
+from registered.ascend.features.deepep.test_ascend_deepep_mode_config import QWEN3_30B_A3B_W8A8_MODEL_PATH, \
+    DEEPSEEK_CODER_V2_LITE_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -12,10 +13,11 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+
 class TestPureTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+        cls.model = DEEPSEEK_CODER_V2_LITE_MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -30,7 +32,7 @@ class TestPureTP(CustomTestCase):
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "normal",
+                "auto",
                 "--disable-cuda-graph",
             ],
             env={
@@ -57,6 +59,7 @@ class TestPureTP(CustomTestCase):
 
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], 0.5)
+
 
 
 if __name__ == "__main__":

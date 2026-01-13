@@ -12,6 +12,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+
 class TestPureTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
@@ -30,7 +31,7 @@ class TestPureTP(CustomTestCase):
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "normal",
+                "auto",
                 "--disable-cuda-graph",
             ],
             env={
@@ -57,6 +58,7 @@ class TestPureTP(CustomTestCase):
 
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], 0.5)
+
 
 
 if __name__ == "__main__":

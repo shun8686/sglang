@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
 class TestPureTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+        cls.model = DEEPSEEK_CODER_V2_LITE_MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
