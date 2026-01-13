@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from registered.ascend.features.deepep.test_ascend_deepep_mode_config import QWEN3_30B_A3B_W8A8_MODEL_PATH
+from ..test_ascend_deepep_mode_config import QWEN3_30B_A3B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
