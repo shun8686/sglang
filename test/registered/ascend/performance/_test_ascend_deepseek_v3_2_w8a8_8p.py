@@ -18,11 +18,30 @@ ENVS = {
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
-    "TASK_QUEUE_ENABLE": "0",
+    "TASK_QUEUE_ENABLE": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
 }
+
+# OTHER_ARGS = (
+#     [
+#         "--tp-size", "16",
+#         "--trust-remote-code",
+#         "--attention-backend", "ascend",
+#         "--device", "npu",
+#         "--quantization", "modelslim",
+#         "--mem-fraction-static", 0.9,
+#         "--chunked-prefill-size", "8192",
+#         "--context-length", "40970",
+#         "--max-prefill-tokens", "40970",
+#         "--max-total-tokens", "40970",
+#         "--watchdog-timeout", "9000",
+#         # "--disable-radix-cache",
+#         # "--max-running-requests", 128,
+#         "--disable-cuda-graph",
+#     ]
+# )
 
 OTHER_ARGS = (
     [
@@ -39,7 +58,7 @@ OTHER_ARGS = (
         "--watchdog-timeout", "9000",
         # "--disable-radix-cache",
         # "--max-running-requests", 128,
-        "--disable-cuda-graph",
+        "--cuda-graph-max-bs", 4,
     ]
 )
 
