@@ -4,16 +4,21 @@ pkill -9 sglang
 pkill -9 python
 
 #export PYTHONPATH=/data/d00662834/lts-test/randgun/sglang/python:$PYTHONPATH
-export PYTHONPATH=/data/d00662834/lts-test/release1230/sglang/python:$PYTHONPATH
+#export PYTHONPATH=/data/d00662834/lts-test/release1230/sglang/python:$PYTHONPATH
 
-# CANN 8.3
-source /usr/local/Ascend/ascend-toolkit/set_env.sh
-source /usr/local/Ascend/nnal/atb/set_env.sh
-export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
-
-# CANN 8.5
-#source /usr/local/Ascend/cann/set_env.sh
-#source /usr/local/Ascend/nnal/atb/set_env.sh
+cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info | grep "^version=")
+echo "CANN: ${cann_version}"
+if [[ ${cann_version} == version=8.3.* ]];then
+    echo "Set env for CANN 8.3"
+    source /usr/local/Ascend/ascend-toolkit/set_env.sh
+    source /usr/local/Ascend/nnal/atb/set_env.sh
+    source /usr/local/Ascend/ascend-toolkit/latest/opp/vendors/customize/bin/set_env.bash
+    source /usr/local/Ascend/8.5.0/bisheng_toolkit/set_env.sh
+else
+    echo "Set env for CANN 8.5"
+    source /usr/local/Ascend/cann/set_env.sh
+    source /usr/local/Ascend/nnal/atb/set_env.sh
+fi
 
 # NIC Name
 NIC_NAME="enp194s0f0"
