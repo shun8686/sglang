@@ -5,6 +5,9 @@ if [ ! -f "${test_case}" ];then
   exit 0
 fi
 
+# set dns
+sed -i '1i nameserver 223.5.5.5\nnameserver 223.6.6.6' /etc/resolv.conf
+
 # speed up by using infra cache services
 CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
 sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
