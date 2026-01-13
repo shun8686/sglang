@@ -53,3 +53,14 @@ fi
 echo "Running test case ${test_case}"
 python3 -u ${test_case}
 echo "Finished test case ${test_case}"
+
+plog_path="/root/ascend/log/debug/plog"
+if [ -d "$plog_path" ];then
+    echo "Plog files found. Begin to backup them."
+    tc_name=${test_case##*/}
+    tc_name=${tc_name%.*}
+    target_plog_path="/root/.cache/tests/logs/plog/${tc_name}"
+    rm -rf ${target_plog_path}
+    mkdir -p ${target_plog_path}
+    cp ${plog_path}/* ${target_plog_path}
+fi
