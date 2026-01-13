@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from ..test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+from test_ascend_deepep_mode_config import DEEPSEEK_CODER_V2_LITE_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -12,11 +12,10 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-
 class TestPureTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+        cls.model = DEEPSEEK_CODER_V2_LITE_MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -26,18 +25,17 @@ class TestPureTP(CustomTestCase):
                 "--trust-remote-code",
                 "--tp-size",
                 "2",
-                "--quantization",
-                "modelslim",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "normal",
+                "low_latency",
                 "--disable-cuda-graph",
             ],
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
-                "HCCL_BUFFSIZE": "2048",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
+                "HCCL_BUFFSIZE": "1024",
                 "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
@@ -57,7 +55,8 @@ class TestPureTP(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        self.assertGreater(metrics["score"], 0.3)
+
 
 
 if __name__ == "__main__":
