@@ -1,6 +1,6 @@
 import unittest
 
-from test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, \
+from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, \
     QWEN3_235B_A22B_EAGLE_MODEL_PATH
 from utils.test_ascend_pd_separation_utils import TestAscendPdSepTestCaseBase, NIC_NAME
 
