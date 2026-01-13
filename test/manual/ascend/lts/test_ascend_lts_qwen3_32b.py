@@ -7,7 +7,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
@@ -17,38 +16,39 @@ from lts_utils import NIC_NAME, run_command, run_bench_serving
 MODEL_PATH = "/home/weights/Qwen3-32B-Int8"
 
 OTHER_ARGS = [
-        "--trust-remote-code",
-        "--nnodes",
-        "1",
-        "--node-rank",
-        "0",
-        "--attention-backend",
-        "ascend",
-        "--device",
-        "npu",
-        "--quantization",
-        "modelslim",
-        "--max-running-requests",
-        "78",
-        "--context-length",
-        "8192",
-        "--enable-hierarchical-cache",
-        "--hicache-write-policy",
-        "write_through",
-        "--hicache-ratio",
-        "3",
-        "--chunked-prefill-size",
-        "43008",
-        "--max-prefill-tokens",
-        "52500",
-        "--tp-size",
-        "4",
-        "--mem-fraction-static",
-        "0.68",
-        "--cuda-graph-bs",
-        "78",
-        "--dtype",
-        "bfloat16",
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--quantization",
+    "modelslim",
+    "--max-running-requests",
+    "78",
+    "--context-length",
+    "8192",
+    "--enable-hierarchical-cache",
+    "--hicache-write-policy",
+    "write_through",
+    "--hicache-ratio",
+    "3",
+    "--chunked-prefill-size",
+    "43008",
+    "--max-prefill-tokens",
+    "52500",
+    "--tp-size",
+    "4",
+    "--mem-fraction-static",
+    "0.68",
+    "--cuda-graph-bs",
+    "78",
+    "--dtype",
+    "bfloat16",
+    "--enable-metrics",
 ]
 
 ENVS = {
@@ -84,7 +84,9 @@ class TestLTSQwen332B(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.base_url = "http://0.0.0.0:30000"
+        cls.host = "0.0.0.0"
+        cls.port = 30000
         env = os.environ.copy()
         env.update(cls.envs)
 
@@ -102,11 +104,9 @@ class TestLTSQwen332B(CustomTestCase):
 
     def run_throughput(self):
         print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
         metrics = run_bench_serving(
-            host=host,
-            port=port,
+            host=self.host,
+            port=self.port,
             dataset_name=self.dataset_name,
             dataset_path=self.dataset_path,
             request_rate=self.request_rate,
@@ -144,12 +144,12 @@ class TestLTSQwen332B(CustomTestCase):
         print(f"========== Start gsm8k test ==========\n")
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/home/zhaoming/test.jsonl",
+            data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            host=f"http://{self.host}",
+            port=self.port,
         )
         metrics = run_eval(args)
         # self.assertGreater(
