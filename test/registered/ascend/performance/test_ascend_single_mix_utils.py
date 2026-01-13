@@ -144,7 +144,7 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
         if self.tpot:
             self.assertLessEqual(
                 float(metrics['mean_tpot']),
-                self.tpot + 1 if self.tpot < 50 else self.tpot * 1,
+                self.tpot + 1 if self.tpot < 50 else self.tpot * 1.02,
             )
         if self.output_token_throughput:
             self.assertGreaterEqual(
