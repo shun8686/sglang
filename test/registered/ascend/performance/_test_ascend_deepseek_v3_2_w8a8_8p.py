@@ -1,6 +1,5 @@
 import unittest
-from types import SimpleNamespace
-from sglang.test.few_shot_gsm8k import run_eval
+
 from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
@@ -23,7 +22,6 @@ ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
-
 }
 
 OTHER_ARGS = (
@@ -39,7 +37,7 @@ OTHER_ARGS = (
         "--max-prefill-tokens", "40970",
         "--max-total-tokens", "40970",
         "--watchdog-timeout", "9000",
-        "--disable-radix-cache",
+        # "--disable-radix-cache",
         # "--max-running-requests", 128,
         "--disable-cuda-graph",
     ]
