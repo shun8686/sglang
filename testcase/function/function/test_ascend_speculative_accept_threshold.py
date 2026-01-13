@@ -1,0 +1,127 @@
+import os
+import unittest
+from types import SimpleNamespace
+from urllib.parse import urlparse
+
+from sglang.srt.utils import kill_process_tree
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.test_utils import (
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
+)
+
+TEST_MODEL_MATRIX = {
+    "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel": {
+        "accuracy": 0.00,
+        "latency": 1000,
+        "output_throughput": 6,
+    },
+}
+
+
+class TestAscendDistTimeout(CustomTestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        cls.models = TEST_MODEL_MATRIX.keys()
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
+
+        cls.common_args = [
+            "--trust-remote-code",
+            "--attention-backend",
+            "ascend",
+            "--quantization",
+            "modelslim",
+            "--mem-fraction-static",
+            0.7,
+            "--disable-radix-cache",
+            "--chunked-prefill-size",
+            32768,
+            "--tp-size",
+            16,
+            #"--dp",
+            #2,
+            "--speculative-algorithm",
+            "NEXTN",
+            "--speculative-num-steps",
+            1,
+            "--speculative-eagle-topk",
+            1,
+            "--speculative-num-draft-tokens",
+            2,
+            "--moe-a2a-backend",
+            "deepep",
+            "--deepep-mode",
+            "auto",
+            "--max-running-requests",
+            64,
+            #"--speculative-accept-threshold-single",
+            #0.1,
+            #"--speculative-accept-threshold-acc",
+            #0.8,
+            "--speculative-draft-attention-backend",
+            "ascend",
+            #"ascend_fuseep",
+            "--speculative-moe-runner-backend",
+            "auto",
+            ]
+
+    def _test_short_dist_timeout(self):
+        for model in self.models:
+            with self.subTest(model=model):
+                other_args =  self.common_args + ["--dist-timeout", 1,]
+                out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
+                err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
+                process = popen_launch_server(
+                    model,
+                    self.base_url,
+                    timeout=1500,
+                    other_args=[
+                        *other_args,
+                    ],
+                )
+                err_log_file.seek(0)
+                content = err_log_file.read()
+                print(content)
+                self.assertIn("DistNetworkerError: The client socket has timed out after 1000ms while trying", content)
+                # kill_process_tree(process.pid)
+
+    
+    def test_a_gsm8k(self):
+        for model in self.models:
+            with self.subTest(model=model):
+                print(f"##=== Testing accuracy: {model} ===##")
+                other_args =  self.common_args
+                process = popen_launch_server(
+                    model,
+                    self.base_url,
+                    timeout=1500,
+                    other_args=[
+                         *other_args,
+                     ],
+                  )
+
+                try:
+                    args = SimpleNamespace(
+                        num_shots=5,
+                        data_path="/tmp/test.jsonl",
+                        num_questions=1319,
+                        max_new_tokens=512,
+                        parallel=128,
+                        host=f"http://{self.url.hostname}",
+                        port=int(self.url.port),
+                    )
+
+                    metrics = run_eval_few_shot_gsm8k(args)
+                    self.assertGreaterEqual(
+                        metrics["accuracy"],
+                        TEST_MODEL_MATRIX[model]["accuracy"],
+                     )
+                finally:
+                    kill_process_tree(process.pid)
+
+
+if __name__ == "__main__":
+    unittest.main()
