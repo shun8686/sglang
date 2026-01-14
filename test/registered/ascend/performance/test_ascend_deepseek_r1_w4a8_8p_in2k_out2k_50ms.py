@@ -2,8 +2,6 @@ import unittest
 
 from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
-# DEEPSEEK_R1_0528_W4A8_MODEL_PATH = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-R1-0528-w4a8"
-#MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
 
 MODEL_ENVS = {
@@ -26,48 +24,28 @@ MODEL_ENVS = {
 }
 MODEL_OTHER_ARGS = (
     [
-        "--tp",
-        "16",
+        "--tp", 16,
         "--trust-remote-code",
-        "--attention-backend",
-        "ascend",
-        "--device",
-        "npu",
-        "--quantization",
-        "modelslim",
-        "--watchdog-timeout",
-        "9000",
-        "--cuda-graph-bs",
-        "4",
-        "8",
-        "16",
-        "--mem-fraction-static",
-        "0.74",
-        "--max-running-requests",
-        "256",
+        "--attention-backend", "ascend",
+        "--device", "npu",
+        "--quantization", "modelslim",
+        "--watchdog-timeout", 9000,
+        "--cuda-graph-bs", 4, 8, 16,
+        "--mem-fraction-static", 0.74,
+        "--max-running-requests", 256,
         "--disable-radix-cache",
-        "--chunked-prefill-size",
-        "-1",
-        "--max-prefill-tokens",
-        "1500",
-        "--moe-a2a-backend",
-        "deepep",
-        "--deepep-mode",
-        "auto",
+        "--chunked-prefill-size", "-1",
+        "--max-prefill-tokens", "1500",
+        "--moe-a2a-backend", "deepep",
+        "--deepep-mode", "auto",
         "--enable-dp-attention",
-        "--dp-size",
-        "16",
+        "--dp-size", 16,
         "--enable-dp-lm-head",
-        "--speculative-algorithm",
-        "NEXTN",
-        "--speculative-num-steps",
-        "3",
-        "--speculative-eagle-topk",
-        "1",
-        "--speculative-num-draft-tokens",
-        "4",
-        "--dtype",
-        "bfloat16",
+        "--speculative-algorithm", "NEXTN",
+        "--speculative-num-steps", 3,
+        "--speculative-eagle-topk", 1,
+        "--speculative-num-draft-tokens", 4,
+        "--dtype", "bfloat16",
     ]
 )
 
