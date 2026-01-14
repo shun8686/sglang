@@ -21,6 +21,7 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
         "16",
         "--quantization",
         "modelslim",
+        "--disable-radix-cache",
     ]
 
 
