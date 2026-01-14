@@ -15,6 +15,17 @@ register_npu_ci(
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/google/gemma-3-4b-it"
     accuracy = 0.36
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.8",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--disable-radix-cache",
+        "--chunked-prefill-size",
+        "-1",
+    ]
 
 
 if __name__ == "__main__":
