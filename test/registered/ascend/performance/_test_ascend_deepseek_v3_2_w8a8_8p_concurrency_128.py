@@ -1,0 +1,75 @@
+import unittest
+from types import SimpleNamespace
+
+from sglang.test.few_shot_gsm8k import run_eval
+from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
+
+MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
+
+ENVS = {
+    # "SGLANG_SET_CPU_AFFINITY": "1",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "STREAMS_PER_DEVICE": "32",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
+    "HCCL_BUFFSIZE": "1024",
+    "HCCL_OP_EXPANSION_MODE": "AIV",
+    "SGLANG_NPU_USE_MLAPO": "0",
+    "SGLANG_NPU_USE_MULTI_STREAM": "0",
+}
+
+OTHER_ARGS = (
+    [
+        "--trust-remote-code",
+        "--mem-fraction-static", 0.9,
+        "--attention-backend", "ascend",
+        "--device", "npu",
+        "--disable-cuda-graph",
+        "--tp-size", "16",
+        "--quantization", "modelslim",
+        "--disable-radix-cache",
+        "--max-running-requests", 128,
+    ]
+)
+
+class TestDeepSeekV32(TestSingleNodeTestCaseBase):
+    model = MODEL_PATH
+    other_args = OTHER_ARGS
+    envs = ENVS
+    # dataset_name = "random"
+    # max_concurrency = 80
+    # num_prompts = 320
+    # input_len = 512
+    # output_len = 512
+    # random_range_ratio = 1
+    # tpot = 500
+    # output_token_throughput = 50
+
+    # def test_deepseek_v3_2(self):
+    #     self.run_throughput()
+
+    def test_deepseek_v3_2_by_gsm8k(self):
+        colon_index = self.base_url.rfind(":")
+
+        host = self.base_url[:colon_index]
+        print("host:", host)
+        port = int(self.base_url[colon_index+1:])
+        print("port:", port)
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=1000,
+            max_new_tokens=512,
+            parallel=128,
+            host=host,
+            port=port,
+        )
+        for i in range(10):
+            metrics = run_eval(args)
+            print(f"{metrics=}")
+            print(f"{metrics['accuracy']=}")
+
+
+if __name__ == "__main__":
+    unittest.main()
