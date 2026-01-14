@@ -9,6 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 class TestGemmaModels(TestVLMModels):
     model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-235B-A22B-Instruct"
     mmmu_accuracy = 0.2
+    time_out=3600
     other_args = [
         "--trust-remote-code",
         "--cuda-graph-max-bs",

@@ -15,6 +15,7 @@ from sglang.test.test_utils import (
 class TestVLMModels(CustomTestCase):
     model = ""
     mmmu_accuracy = 0.00
+    time_out=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     other_args = [
         "--trust-remote-code",
         "--cuda-graph-max-bs",
@@ -36,7 +37,6 @@ class TestVLMModels(CustomTestCase):
         # Removed argument parsing from here
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
-        cls.time_out = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
 
         # Set OpenAI API key and base URL environment variables. Needed for lmm-evals to work.
         os.environ["OPENAI_API_KEY"] = cls.api_key
