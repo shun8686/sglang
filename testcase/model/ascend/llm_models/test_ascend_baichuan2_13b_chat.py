@@ -19,6 +19,9 @@ class TestBaichuan(GSM8KAscendMixin, CustomTestCase):
         "--disable-cuda-graph",
         "--max-running-requests",
         "8",
+        "--disable-radix-cache",
+        "--chunked-prefill-size",
+        "-1",
     ]
 
 
