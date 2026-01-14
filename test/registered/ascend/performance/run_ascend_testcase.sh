@@ -13,11 +13,13 @@ echo "DNS info:"
 cat /etc/resolv.conf
 
 # speed up by using infra cache services
-CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
-sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
-pip config set global.index-url http://${CACHING_URL}/pypi/simple
-pip config set global.extra-index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
-pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
+#CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
+#sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
+#pip config set global.index-url http://${CACHING_URL}/pypi/simple
+#pip config set global.extra-index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
+#pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
+pip config set global.index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
+pip config set global.trusted-host "pypi.tuna.tsinghua.edu.cn"
 
 pip3 install kubernetes
 
