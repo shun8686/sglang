@@ -24,7 +24,7 @@ CONVS = [
 
 class TestInternlm2_7bReward(CustomTestCase):
     model_path = (
-        "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Shanghai_AI_Laboratory/internlm2-7b-reward"
+        "/root/.cache/modelscope/hub/models/Shanghai_AI_Laboratory/internlm2-7b-reward"
     )
 #    model_path = (
 #        "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2"

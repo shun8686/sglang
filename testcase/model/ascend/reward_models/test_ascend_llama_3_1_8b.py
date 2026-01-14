@@ -23,7 +23,7 @@ from sglang.test.test_utils import CustomTestCase
 MODELS = [
     # ("LxzGordon/URM-LLaMa-3.1-8B", 1, 4e-2),
     #("Skywork/Skywork-Reward-Llama-3.1-8B-v0.2", 1, 4e-2),
-    ("/data/ascend-ci-share-pkking-sglang/huggingface/hub/models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1/", 1, 4e-2),
+    ("/root/.cache/huggingface/hub/models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1/", 1, 4e-2),
 ]
 TORCH_DTYPES = [torch.float16]
 
