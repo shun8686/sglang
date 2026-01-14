@@ -10,20 +10,22 @@ ENVS = {
     # "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
-    "HCCL_BUFFSIZE": "1024",
-    "DEEPEP_NORMAL_LONG_SEQ_ROUND": "5",
-    "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
-    "SGLANG_NPU_USE_MLAPO": "1",
-    "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-    "SGLANG_NPU_USE_MULTI_STREAM": "1",
-    "HCCL_OP_EXPANSION_MODE": "AIV",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
-    "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
+    "HCCL_BUFFSIZE": "1600",
+    "HCCL_OP_EXPANSION_MODE": "AIV",
+    # before 1
+    "SGLANG_NPU_USE_MLAPO": "0",
+    "SGLANG_NPU_USE_MULTI_STREAM": "1",
     "TASK_QUEUE_ENABLE": "1",
-    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_ENABLE_SPEC_V2": "1",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
+
+    # "DEEPEP_NORMAL_LONG_SEQ_ROUND": "5",
+    # "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
+    # "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
+    # "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
+    # "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    # "SGLANG_ENABLE_SPEC_V2": "1",
 }
 
 OTHER_ARGS = (
@@ -38,7 +40,8 @@ OTHER_ARGS = (
         "--context-length", 8192,
         "--max-prefill-tokens", 20480,
         "--max-running-requests", 64,
-        "--cuda-graph-max-bs", 64,
+        "--cuda-graph-bs", 16, 32, 64,
+        "--cuda-gragh-max-bs", 64,
         "--watchdog-timeout", 600,
         "--disable-radix-cache",
     ]
@@ -49,8 +52,8 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 64
-    num_prompts = 256
+    max_concurrency = 80
+    num_prompts = 320
     input_len = 512
     output_len = 512
     random_range_ratio = 1
@@ -72,7 +75,7 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
             data_path=None,
             num_questions=1000,
             max_new_tokens=256,
-            parallel=n,
+            parallel=80,
             host=host,
             port=port,
         )
