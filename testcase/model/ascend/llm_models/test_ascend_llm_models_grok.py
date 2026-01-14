@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 
 class TestGrok(CustomTestCase):
-    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/huihui-ai/grok-2"
+    model = "/root/.cache/modelscope/hub/models/huihui-ai/grok-2"
     accuracy = 0.60
 
     @classmethod
@@ -29,7 +29,7 @@ class TestGrok(CustomTestCase):
                 "--disable-radix-cache",
                 "--disable-cuda-graph",
                 "--tokenizer-path",
-                "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/huihui-ai/grok-2/tokenizer.tok.json",
+                "/root/.cache/modelscope/hub/models/huihui-ai/grok-2/tokenizer.tok.json",
                 "--base-gpu-id",
                 "0",
                 "--tp-size",
