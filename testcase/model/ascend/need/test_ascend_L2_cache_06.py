@@ -13,7 +13,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     def test_no_chunked_prefill_without_radix_cache(self):
         TTFTS=[]
         model = (
-            "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-32B"
+            "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/DeepSeek-R1-W8A8"
             if is_npu()
             else "Qwen/Qwen3-32B"
         )
@@ -21,7 +21,7 @@ class TestNoChunkedPrefill(CustomTestCase):
             [
                 "--trust-remote-code",
                 "--tp-size",
-                2,
+                16,
                 "--mem-fraction-static",
                 0.8,
                 "--max-running-requests",
@@ -30,31 +30,34 @@ class TestNoChunkedPrefill(CustomTestCase):
                 #3800,
                 "--disable-radix-cache",
                 "--chunked-prefill-size",
-                "-1",
+                "512",
                 #"--attention-backend",
                 #"ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
+                "--quantization",
+                "modelslim",
+                "--attention-backend",
+                "ascend",
+
             ],
             [
                 "--trust-remote-code",
                 "--tp-size",
-                2,
+                16,
                 "--mem-fraction-static",
                 0.8,
                 "--max-running-requests",
                 16,
-                #"--context-length",
-                #3800,
                 #"--disable-radix-cache",
                 "--chunked-prefill-size",
-                "-1",
+                "512",
                 #"--attention-backend",
                 #"ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
+                "--quantization",
+                "modelslim",
+                "--attention-backend",
+                "ascend",
                 "--enable-hierarchical-cache",
                 "--hicache-ratio",
                 5,
