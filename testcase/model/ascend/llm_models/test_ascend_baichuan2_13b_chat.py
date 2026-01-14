@@ -20,8 +20,8 @@ class TestBaichuan(GSM8KAscendMixin, CustomTestCase):
         "--max-running-requests",
         "16",
         "--disable-radix-cache",
-        "--chunked-prefill-size",
-        "-1",
+        # "--chunked-prefill-size",
+        # "-1",
     ]
 
 
