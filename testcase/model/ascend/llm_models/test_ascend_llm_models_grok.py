@@ -30,8 +30,6 @@ class TestGrok(CustomTestCase):
                 "--disable-cuda-graph",
                 "--tokenizer-path",
                 "/root/.cache/modelscope/hub/models/huihui-ai/grok-2/tokenizer.tok.json",
-                "--base-gpu-id",
-                "0",
                 "--tp-size",
                 "16",
             ]
