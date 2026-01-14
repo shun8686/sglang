@@ -16,7 +16,7 @@ class TestGemmaModels(TestVLMModels):
         "32",
         "--enable-multimodal",
         "--mem-fraction-static",
-        0.35,
+        0.8,
         "--log-level",
         "info",
         "--attention-backend",
