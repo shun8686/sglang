@@ -58,7 +58,7 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
     print(f"The metrics result file: {result_file}")
     run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep' | tee {result_file}")
     cann_info="/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
-    run_command(f"echo \"CANN $(cat {cann_info} | grep '^version=')\" | tee {result_file}")
+    run_command(f"echo \"CANN $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}")
 
     command = " " .join(cmd_args)
     print(f"Command: {command}")
