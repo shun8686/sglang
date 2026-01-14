@@ -6,7 +6,9 @@ if [ ! -f "${test_case}" ];then
 fi
 
 # set dns
-sed -i '1i nameserver 223.5.5.5\nnameserver 223.6.6.6' /etc/resolv.conf
+cp /etc/resolv.conf /etc/resolv.conf_bak
+echo -e "nameserver 223.5.5.5\nnameserver 223.6.6.6" > /etc/resolv.conf
+cat /etc/resolv.conf_bak >> /etc/resolv.conf
 
 # speed up by using infra cache services
 CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
@@ -59,7 +61,7 @@ if [ -d "$plog_path" ];then
     echo "Plog files found. Begin to backup them."
     tc_name=${test_case##*/}
     tc_name=${tc_name%.*}
-    target_plog_path="/root/.cache/tests/logs/plog/${tc_name}"
+    target_plog_path="/root/.cache/tests/logs/plog/${tc_name}/${HOSTNAME}"
     rm -rf ${target_plog_path}
     mkdir -p ${target_plog_path}
     cp ${plog_path}/* ${target_plog_path}
