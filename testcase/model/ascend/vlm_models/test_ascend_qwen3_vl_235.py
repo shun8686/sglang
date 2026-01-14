@@ -23,7 +23,7 @@ class TestGemmaModels(TestVLMModels):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        8,
+        16,
     ]
 
     def test_vlm_mmmu_benchmark(self):
