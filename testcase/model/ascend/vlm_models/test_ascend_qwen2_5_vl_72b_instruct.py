@@ -15,14 +15,14 @@ class TestGemmaModels(TestVLMModels):
         "32",
         "--enable-multimodal",
         "--mem-fraction-static",
-        0.8,
+        0.6,
         "--log-level",
         "info",
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        16,
+        8,
     ]
 
     def test_vlm_mmmu_benchmark(self):
