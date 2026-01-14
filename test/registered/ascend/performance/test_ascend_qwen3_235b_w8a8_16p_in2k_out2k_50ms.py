@@ -40,7 +40,7 @@ MODEL_CONFIG = {
         "--dtype",
         "bfloat16",
         "--chunked-prefill-size",
-        "65536",
+        "131072",
         "--max-prefill-tokens",
         "458880",
         "--speculative-draft-model-quantization",
