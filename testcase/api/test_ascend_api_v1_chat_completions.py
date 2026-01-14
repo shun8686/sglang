@@ -141,7 +141,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
         content2 = response2.json()["choices"][0]["message"]["content"]
         self.assertEqual(content1, content2)
-        
+
         response3 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -242,19 +242,6 @@ class TestEnableThinking(CustomTestCase):
         print(f"response1.json:{response1.json()}")
         self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
         self.assertEqual(response1.json()['id'], 'sssss')
-
-        # response2 = requests.post(
-        #     f"{self.base_url}/v1/chat/completions",
-        #     json={
-        #         "model": self.model,
-        #         "messages": [{"role": "user", "content": "Hello"},
-        #                      {"role": "assistant", "content": "Hi there!"},
-        #                      {"role": "user", "content": "The capital of France is"}],
-        #         "rid": ["aaaaaa", "bbbbbb"],
-        #     },
-        # )
-        # print(f"response2.json:{response2.json()}")
-        # self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
 
 
 if __name__ == "__main__":
