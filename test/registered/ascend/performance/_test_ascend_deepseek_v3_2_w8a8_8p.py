@@ -24,63 +24,31 @@ ENVS = {
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
 }
 
-# OTHER_ARGS = (
-#     [
-#         "--tp-size", "16",
-#         "--trust-remote-code",
-#         "--attention-backend", "ascend",
-#         "--device", "npu",
-#         "--quantization", "modelslim",
-#         "--mem-fraction-static", 0.9,
-#         "--chunked-prefill-size", "8192",
-#         "--context-length", "40970",
-#         "--max-prefill-tokens", "40970",
-#         "--max-total-tokens", "40970",
-#         "--watchdog-timeout", "9000",
-#         # "--disable-radix-cache",
-#         # "--max-running-requests", 128,
-#         "--disable-cuda-graph",
-#     ]
-# )
-
 OTHER_ARGS = (
     [
-        "--tp-size", "16",
         "--trust-remote-code",
         "--attention-backend", "ascend",
         "--device", "npu",
+        "--tp-size", 16,
         "--quantization", "modelslim",
-        "--mem-fraction-static", 0.9,
-        "--chunked-prefill-size", "8192",
-        "--context-length", "40970",
-        "--max-prefill-tokens", "40970",
-        "--max-total-tokens", "40970",
-        "--watchdog-timeout", "9000",
+        "--mem-fraction-static", 0.81,
+        "--chunked-prefill-size", -1,
+        "--context-length", 8192,
+        "--max-prefill-tokens", 20480,
+        "--max-running-requests", 64,
+        "--cuda-graph-max-bs", 64,
+        "--watchdog-timeout", 600,
         "--disable-radix-cache",
-        # "--max-running-requests", 128,
-        "--cuda-graph-max-bs", 4,
     ]
 )
-
-# OTHER_ARGS = (
-#     [
-#         "--trust-remote-code",
-#         "--mem-fraction-static", 0.9,
-#         "--attention-backend", "ascend",
-#         "--device", "npu",
-#         "--disable-cuda-graph",
-#         "--tp-size", "16",
-#         "--quantization", "modelslim",
-#     ]
-# )
 
 class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 160
+    max_concurrency = 64
+    num_prompts = 256
     input_len = 512
     output_len = 512
     random_range_ratio = 1
