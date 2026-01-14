@@ -1,5 +1,7 @@
 import unittest
+from types import SimpleNamespace
 
+from sglang.test.few_shot_gsm8k import run_eval
 from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
@@ -55,29 +57,29 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
     tpot = 500
     output_token_throughput = 50
 
-    def test_deepseek_v3_2(self):
-        self.run_throughput()
+    # def test_deepseek_v3_2(self):
+    #     self.run_throughput()
 
-    # def test_deepseek_v3_2_by_gsm8k(self):
-    #     colon_index = self.base_url.rfind(":")
-    #
-    #     host = self.base_url[:colon_index]
-    #     print("host:", host)
-    #     port = int(self.base_url[colon_index+1:])
-    #     print("port:", port)
-    #     args = SimpleNamespace(
-    #         num_shots=5,
-    #         data_path=None,
-    #         num_questions=200,
-    #         max_new_tokens=512,
-    #         parallel=128,
-    #         host=host,
-    #         port=port,
-    #     )
-    #     for i in range(10):
-    #         metrics = run_eval(args)
-    #         print(f"{metrics=}")
-    #         print(f"{metrics['accuracy']=}")
+    def test_deepseek_v3_2_by_gsm8k(self):
+        colon_index = self.base_url.rfind(":")
+
+        host = self.base_url[:colon_index]
+        print("host:", host)
+        port = int(self.base_url[colon_index+1:])
+        print("port:", port)
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=1000,
+            max_new_tokens=256,
+            parallel=n,
+            host=host,
+            port=port,
+        )
+        for i in range(10):
+            metrics = run_eval(args)
+            print(f"{metrics=}")
+            print(f"{metrics['accuracy']=}")
 
 
 if __name__ == "__main__":
