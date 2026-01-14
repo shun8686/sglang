@@ -18,7 +18,7 @@ ENVS = {
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
-    "TASK_QUEUE_ENABLE": "0",
+    "TASK_QUEUE_ENABLE": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
@@ -56,7 +56,7 @@ OTHER_ARGS = (
         "--max-prefill-tokens", "40970",
         "--max-total-tokens", "40970",
         "--watchdog-timeout", "9000",
-        # "--disable-radix-cache",
+        "--disable-radix-cache",
         # "--max-running-requests", 128,
         "--cuda-graph-max-bs", 4,
     ]
