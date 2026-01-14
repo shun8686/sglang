@@ -39,10 +39,10 @@ class TestXVERSE(CustomTestCase):
                 8000,
                 "--max-running-requests",
                 16,
-                # "--moe-a2a-backend",
-                # "deepep",
-                # "--deepep-mode",
-                # "auto",
+                "--moe-a2a-backend",
+                "deepep",
+                "--deepep-mode",
+                "auto",
             ]
             if is_npu()
             else []
