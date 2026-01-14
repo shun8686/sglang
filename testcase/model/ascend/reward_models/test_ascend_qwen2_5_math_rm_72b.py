@@ -33,7 +33,7 @@ class TestInternlm2_7bReward(CustomTestCase):
     #        "/data/l30079981/weights/Qwen2.5-Math-RM-72B"
     #
  #   )
-    model_path="/root/.cache/modelscope/hub/models/Howeee/Qwen2.5-Math-RM-72B"
+    model_path="/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-Math-RM-72B"
     torch_dtype = torch.float16
     tolerance = 4e-2
     tp_size = 4
