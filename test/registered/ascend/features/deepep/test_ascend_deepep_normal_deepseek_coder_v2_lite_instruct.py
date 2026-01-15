@@ -30,7 +30,7 @@ class TestDeepepLowLatency(CustomTestCase):
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "low_latency",
+                "normal",
                 "--disable-cuda-graph",
                 "--disable-radix-cache",
             ],
