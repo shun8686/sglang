@@ -36,7 +36,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "--max-prefill-tokens", 458880,
                 "--disable-radix-cache",
                 "--moe-a2a-backend", "deepep",
-                "--deepep-mode", "low_latency",
+                "--deepep-mode", "auto",
                 "--tp-size", 16,
                 "--dp-size", 4,
                 "--enable-dp-attention",

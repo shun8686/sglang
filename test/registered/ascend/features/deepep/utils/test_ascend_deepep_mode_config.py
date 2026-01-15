@@ -23,4 +23,5 @@ def get_nic_name():
                 return nic
     return None
 
-NIC_NAME = "lo" if get_nic_name() is None else get_nic_name()
+NIC_NAME = get_nic_name()
+NIC_NAME = "lo" if NIC_NAME is None else NIC_NAME
