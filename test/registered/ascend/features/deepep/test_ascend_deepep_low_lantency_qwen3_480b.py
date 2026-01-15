@@ -44,7 +44,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "--enable-dp-lm-head",
                 "--mem-fraction-static", 0.7,
                 "--cuda-graph-bs", 16, 20, 24,
-                "--disable-cuda-graph",
+                # "--disable-cuda-graph",
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -53,7 +53,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
-                "ASCEND_LAUNCH_BLOCKING": "1",
+                # "ASCEND_LAUNCH_BLOCKING": "1",
                 **os.environ,
             },
         )
@@ -70,7 +70,7 @@ class TestDeepEpQwen(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-
+        print("Starting mmlu test...")
         metrics = run_eval(args)
         # Score: 0.750
         self.assertGreater(metrics["score"], 0.7)
@@ -86,6 +86,7 @@ class TestDeepEpQwen(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
+        print("Starting gsm8k test...")
         metrics = run_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],
