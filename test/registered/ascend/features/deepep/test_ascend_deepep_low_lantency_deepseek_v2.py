@@ -27,7 +27,7 @@ class TestPureTP(CustomTestCase):
             other_args=[
                 "--trust-remote-code",
                 "--tp-size",
-                "2",
+                "8",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
