@@ -26,8 +26,6 @@ class TestPureTP(CustomTestCase):
                 "--trust-remote-code",
                 "--tp-size",
                 "2",
-                "--quantization",
-                "modelslim",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
