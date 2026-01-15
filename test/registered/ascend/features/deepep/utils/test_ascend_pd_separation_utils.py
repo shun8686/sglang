@@ -5,7 +5,6 @@ import threading
 import time
 from types import SimpleNamespace
 
-import psutil
 import requests
 
 from kubernetes import client, config
@@ -23,16 +22,6 @@ SERVICE_PORT = "6688"
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
-
-def get_nic_name():
-    for nic, addrs in psutil.net_if_addrs().items():
-        for addr in addrs:
-            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
-                print("The nic name matched is {}".format(nic))
-                return nic
-    return None
-
-NIC_NAME = "lo" if get_nic_name() is None else get_nic_name()
 
 # query configmap
 def query_configmap(name, namespace):

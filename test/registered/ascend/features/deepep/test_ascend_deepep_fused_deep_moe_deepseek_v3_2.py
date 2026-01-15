@@ -1,7 +1,7 @@
 import unittest
 
-from utils.test_ascend_deepep_mode_config import DEEPSEEK_V32_W8A8_MODEL_PATH
-from utils.test_ascend_pd_separation_utils import TestAscendPdSepTestCaseBase, NIC_NAME
+from utils.test_ascend_deepep_mode_config import DEEPSEEK_V32_W8A8_MODEL_PATH, NIC_NAME
+from utils.test_ascend_pd_separation_utils import TestAscendPdSepTestCaseBase
 
 MODEL_CONFIG = {
     "model_path": DEEPSEEK_V32_W8A8_MODEL_PATH,
