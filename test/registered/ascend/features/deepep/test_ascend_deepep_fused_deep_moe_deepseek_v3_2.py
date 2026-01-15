@@ -44,7 +44,7 @@ MODEL_CONFIG = {
         "--node-rank", "0",
         "--tp-size", 16,
         "--dp-size", 16,
-        "--mem-fraction-static", 0.8,
+        "--mem-fraction-static", 0.9,
         "--disable-radix-cache",
         "--quantization", "modelslim",
         "--speculative-algorithm", "NEXTN",
