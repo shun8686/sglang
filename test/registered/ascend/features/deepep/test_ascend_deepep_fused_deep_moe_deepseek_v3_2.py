@@ -1,11 +1,10 @@
 import unittest
 
-from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, \
-    QWEN3_235B_A22B_EAGLE_MODEL_PATH
+from utils.test_ascend_deepep_mode_config import DEEPSEEK_V32_W8A8_MODEL_PATH
 from utils.test_ascend_pd_separation_utils import TestAscendPdSepTestCaseBase, NIC_NAME
 
 MODEL_CONFIG = {
-    "model_path": QWEN3_235B_A22B_W8A8_MODEL_PATH,
+    "model_path": DEEPSEEK_V32_W8A8_MODEL_PATH,
     "prefill_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -49,12 +48,10 @@ MODEL_CONFIG = {
         "--mem-fraction-static", 0.6,
         "--disable-radix-cache",
         "--quantization", "modelslim",
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", "3",
-        "--speculative-eagle-topk", "1",
-        "--speculative-num-draft-tokens", "4",
-        "--speculative-draft-model-quantization", "unquant",
+        "--speculative-algorithm", "NEXTN",
+        "--speculative-num-steps", 1,
+        "--speculative-eagle-topk", 1,
+        "--speculative-num-draft-tokens", 2,
         "--max-running-requests", "128",
         "--chunked-prefill-size", "262144",
         "--max-prefill-tokens", "262144",
@@ -73,13 +70,11 @@ MODEL_CONFIG = {
         "--quantization", "modelslim",
         "--enable-dp-attention",
         "--moe-a2a-backend", "ascend_fuseep",
-        "--cuda-graph-bs", 6, 8, 12, 15, 18, 20, 22, 24,
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", "3",
-        "--speculative-eagle-topk", "1",
-        "--speculative-num-draft-tokens", "4",
-        "--speculative-draft-model-quantization", "unquant",
+        "--cuda-graph-bs", 4,
+        "--speculative-algorithm", "NEXTN",
+        "--speculative-num-steps", 1,
+        "--speculative-eagle-topk", 1,
+        "--speculative-num-draft-tokens", 2,
         "--watchdog-timeout", 9000,
         "--context-length", 8192,
         "--prefill-round-robin-balance",
