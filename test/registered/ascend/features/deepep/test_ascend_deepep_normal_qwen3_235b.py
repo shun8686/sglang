@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH
+from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, NIC_NAME
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -39,7 +39,16 @@ class TestPureTP(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args
+            other_args=cls.other_args,
+            env={
+                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+                "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+                "HCCL_BUFFSIZE": "2100",
+                "HCCL_SOCKET_IFNAME": NIC_NAME,
+                "GLOO_SOCKET_IFNAME": NIC_NAME,
+                "HCCL_OP_EXPANSION_MODE": "AIV",
+                **os.environ,
+            },
         )
 
     @classmethod
