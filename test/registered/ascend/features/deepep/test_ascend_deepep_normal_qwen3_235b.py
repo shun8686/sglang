@@ -28,8 +28,9 @@ class TestPureTP(CustomTestCase):
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "normal",
+        "auto",
     ]
+
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN3_235B_A22B_W8A8_MODEL_PATH
