@@ -44,6 +44,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "--enable-dp-lm-head",
                 "--mem-fraction-static", 0.7,
                 "--cuda-graph-bs", 16, 20, 24,
+                "--disable-cuda-graph",
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -52,6 +53,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
+                "ASCEND_LAUNCH_BLOCKING": "1",
                 **os.environ,
             },
         )
