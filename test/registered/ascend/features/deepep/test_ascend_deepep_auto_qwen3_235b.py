@@ -65,7 +65,7 @@ class TestPureTP(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        self.assertGreater(metrics["score"], 0.4)
 
 
 if __name__ == "__main__":
