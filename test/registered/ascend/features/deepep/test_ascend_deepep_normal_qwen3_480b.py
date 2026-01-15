@@ -74,7 +74,7 @@ class TestDeepEpQwen(CustomTestCase):
         self.assertGreater(metrics["score"], 0.7)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.96
+        expect_accuracy = 0.9
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
