@@ -72,6 +72,23 @@ class TestDeepEpQwen(CustomTestCase):
         # Score: 0.750
         self.assertGreater(metrics["score"], 0.7)
 
+    def test_gsm8k(self):
+        expect_accuracy = 0.96
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        metrics = run_eval(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            expect_accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
+        )
 
 
 if __name__ == "__main__":
