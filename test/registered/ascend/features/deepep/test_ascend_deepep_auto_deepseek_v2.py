@@ -49,6 +49,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 **os.environ,
             },
         )
