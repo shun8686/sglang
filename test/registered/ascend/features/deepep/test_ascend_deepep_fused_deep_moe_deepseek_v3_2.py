@@ -100,7 +100,7 @@ MODEL_CONFIG = {
 class TestDeepSeekV32(TestAscendPdSepTestCaseBase):
     model_config = MODEL_CONFIG
     # 0.875
-    expect_score = 0.5
+    expect_score = 0.8
     # 0.98
     expect_accuracy = 0.9
 
