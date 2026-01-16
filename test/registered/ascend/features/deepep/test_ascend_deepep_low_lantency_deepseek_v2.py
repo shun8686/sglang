@@ -1,21 +1,4 @@
-import os
-import unittest
-from types import SimpleNamespace
-
-from utils.test_ascend_deepep_mode_config import DEEPSEEK_CODER_V2_LITE_MODEL_PATH
-from sglang.srt.utils import kill_process_tree
-from sglang.test.run_eval import run_eval
-from sglang.test.few_shot_gsm8k import run_eval
-from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
-    CustomTestCase,
-    popen_launch_server,
-)
-
-class TestPureTP(CustomTestCase):
-    accuracy = 0.85
-    
+class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = DEEPSEEK_CODER_V2_LITE_MODEL_PATH
@@ -26,20 +9,25 @@ class TestPureTP(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
+                "--attention-backend", "ascend",
                 "--tp-size",
                 "8",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
                 "low_latency",
+                "--mem-fraction-static", 0.7,
                 "--disable-cuda-graph",
+                "--dtype", "bfloat16",
+                "--disable-radix-cache",
             ],
             env={
-                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
-                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
-                "HCCL_BUFFSIZE": "1024",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+                "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+                "HCCL_BUFFSIZE": "2048",
+                "HCCL_SOCKET_IFNAME": NIC_NAME,
+                "GLOO_SOCKET_IFNAME": NIC_NAME,
+                "HCCL_OP_EXPANSION_MODE": "AIV",
                 **os.environ,
             },
         )
@@ -49,6 +37,7 @@ class TestPureTP(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        expect_score = 0.85
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -56,11 +45,12 @@ class TestPureTP(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-
+        print("Starting mmlu test...")
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], self.accuracy)
-        
+        self.assertGreater(metrics["score"], expect_score)
+
     def test_gsm8k(self):
+        expect_accuracy = 0.85
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -70,11 +60,12 @@ class TestPureTP(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
-        metrics = run_eval(args)
-        self.assertGreater(
+        print("Starting gsm8k test...")
+        metrics = run_gsm8k(args)
+        self.assertGreaterEqual(
             metrics["accuracy"],
-            self.accuracy,
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+            expect_accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
         )
 
 
