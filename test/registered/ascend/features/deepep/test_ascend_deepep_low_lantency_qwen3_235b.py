@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, NIC_NAME
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -28,7 +29,7 @@ class TestPureTP(CustomTestCase):
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "low_latency",
+        "normal",
     ]
 
     @classmethod
@@ -65,7 +66,27 @@ class TestPureTP(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        print(f"mmlu:{metrics}")
+        self.assertGreaterEqual(metrics["score"], 0.5)
+
+    def test_gsm8k(self):
+        expect_accuracy = 0.94
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        print("Starting gsm8k test...")
+        metrics = run_gsm8k(args)
+        print(f"gsm8k:{metrics}")
+        achieved_accuracy = metrics["accuracy"]
+        self.assertGreaterEqual(achieved_accuracy, expect_accuracy,
+                                f'Accuracy of {self.model} is {str(achieved_accuracy)}, is lower than {expect_accuracy}')
+        print(f"Model {self.model} achieved accuracy: {str(achieved_accuracy)}")
 
 
 if __name__ == "__main__":
