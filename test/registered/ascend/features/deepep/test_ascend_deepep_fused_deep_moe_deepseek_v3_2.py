@@ -73,7 +73,7 @@ MODEL_CONFIG = {
         "--disable-radix-cache",
         "--chunked-prefill-size", -1,
         "--max-prefill-tokens", 68000,
-        "--cuda-graph-max-bs", 4,
+        "--cuda-graph-max-bs", 30, 60,
         "--moe-a2a-backend", "ascend_fuseep",
         "--quantization", "modelslim",
         "--speculative-algorithm", "NEXTN",

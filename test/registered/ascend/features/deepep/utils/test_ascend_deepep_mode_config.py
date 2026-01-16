@@ -1,5 +1,9 @@
 import psutil
 import socket
+from types import SimpleNamespace
+
+from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 
 DEEPSEEK_R1_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 
@@ -26,3 +30,34 @@ def get_nic_name():
 
 NIC_NAME = get_nic_name()
 NIC_NAME = "lo" if NIC_NAME is None else NIC_NAME
+
+def test_mmlu(base_url, model):
+    print("Starting gsm8k test...")
+    args = SimpleNamespace(
+        base_url=base_url,
+        model=model,
+        eval_name="mmlu",
+        num_examples=8,
+        num_threads=32,
+    )
+    metrics = run_eval(args)
+    return metrics
+
+def test_gsm8k(base_url):
+    print("Starting gsm8k test...")
+    colon_index = base_url.rfind(":")
+    host = base_url[:colon_index]
+    print(f"{host=}")
+    port = int(base_url[colon_index + 1:])
+    print(f"{port=}")
+    args = SimpleNamespace(
+        num_shots=5,
+        data_path=None,
+        num_questions=200,
+        max_new_tokens=512,
+        parallel=128,
+        host=host,
+        port=port,
+    )
+    metrics = run_gsm8k(args)
+    return metrics

@@ -3,15 +3,12 @@ import socket
 import subprocess
 import threading
 import time
-from types import SimpleNamespace
-
 import requests
 
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from sglang.test.run_eval import run_eval
-from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
+from test_ascend_deepep_mode_config import test_mmlu, test_gsm8k
 from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
 
@@ -337,36 +334,6 @@ def launch_server(role, model_config):
         print(f"{role} node started, keeping test alive for {LOCAL_TIMEOUT} seconds")
         time.sleep(LOCAL_TIMEOUT)
 
-def run_mmlu(base_url, model):
-    print("Starting gsm8k test...")
-    args = SimpleNamespace(
-        base_url=base_url,
-        model=model,
-        eval_name="mmlu",
-        num_examples=8,
-        num_threads=32,
-    )
-    metrics = run_eval(args)
-    return metrics
-
-def test_gsm8k(base_url):
-    print("Starting gsm8k test...")
-    colon_index = base_url.rfind(":")
-    host = base_url[:colon_index]
-    print(f"{host=}")
-    port = int(base_url[colon_index + 1:])
-    print(f"{port=}")
-    args = SimpleNamespace(
-        num_shots=5,
-        data_path=None,
-        num_questions=200,
-        max_new_tokens=512,
-        parallel=128,
-        host=host,
-        port=port,
-    )
-    metrics = run_gsm8k(args)
-    return metrics
 
 class TestAscendPdSepTestCaseBase(CustomTestCase):
     model_config = None
@@ -383,7 +350,7 @@ class TestAscendPdSepTestCaseBase(CustomTestCase):
 
     def run_test_mmlu(self):
         if self.role == "router":
-            metrics = run_mmlu(f"http://127.0.0.1:{SERVICE_PORT}", self.model_config.get("model_path"))
+            metrics = test_mmlu(f"http://127.0.0.1:{SERVICE_PORT}", self.model_config.get("model_path"))
             self.assertGreater(metrics["score"], self.expect_score)
 
     def run_test_gsm8k(self):
