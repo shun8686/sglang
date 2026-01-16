@@ -27,7 +27,7 @@ class TestPureTP(CustomTestCase):
                 "--trust-remote-code",
                 "--attention-backend", "ascend",
                 "--device", "npu",
-                "--tp-size", 16,
+                "--tp-size", 8,
                 "--mem-fraction-static", 0.8,
                 "--max-running-requests", 80,
                 "--watchdog-timeout", 9000,
