@@ -135,8 +135,10 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     def run_test_mmlu(self):
         if self.role == "master":
             print("Starting mmlu test...")
+            base_url = f"http://127.0.0.1:{SERVICE_PORT}"
+            print(f"{base_url=}")
             args = SimpleNamespace(
-                base_url=f"http://127.0.0.1:{SERVICE_PORT}",
+                base_url=base_url,
                 model=self.model_config.get("model_path"),
                 eval_name="mmlu",
                 num_examples=8,
@@ -148,14 +150,17 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     def run_test_gsm8k(self):
         if self.role == "master":
             print("Starting gsm8k test...")
+            host = "http://127.0.0.1"
+            port = int(SERVICE_PORT)
+            print(f"{host=}, {port=}")
             args = SimpleNamespace(
                 num_shots=5,
                 data_path=None,
                 num_questions=200,
                 max_new_tokens=512,
                 parallel=128,
-                host="http://127.0.0.1",
-                port=int(SERVICE_PORT),
+                host=host,
+                port=port,
             )
             metrics = run_gsm8k(args)
             self.assertGreater(metrics["accuracy"], self.expect_accuracy)

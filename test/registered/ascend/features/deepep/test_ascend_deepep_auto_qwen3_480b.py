@@ -62,6 +62,8 @@ class TestDeepEpQwen(CustomTestCase):
 
     def test_mmlu(self):
         expect_score = 0.7
+
+        print("Starting mmlu test...")
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -69,22 +71,25 @@ class TestDeepEpQwen(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-        print("Starting mmlu test...")
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
         expect_accuracy = 0.9
+
+        print("Starting gsm8k test...")
+        host = "http://127.0.0.1"
+        port = int(self.base_url.split(":")[-1])
+        print(f"{host=}, {port=}")
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            host=host,
+            port=port,
         )
-        print("Starting gsm8k test...")
         metrics = run_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],
