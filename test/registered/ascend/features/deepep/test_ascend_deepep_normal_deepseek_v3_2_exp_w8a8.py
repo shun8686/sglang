@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestDeepepNormal(CustomTestCase):
+class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
@@ -47,7 +47,8 @@ class TestDeepepNormal(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_mmlu(self):
+     def test_mmlu(self):
+        expect_score = 0.565
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -55,9 +56,28 @@ class TestDeepepNormal(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-
+        print("Starting mmlu test...")
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        self.assertGreater(metrics["score"], expect_score)
+
+    def test_gsm8k(self):
+        expect_accuracy = 0.565
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        print("Starting gsm8k test...")
+        metrics = run_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            expect_accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
+        )
 
 
 if __name__ == "__main__":
