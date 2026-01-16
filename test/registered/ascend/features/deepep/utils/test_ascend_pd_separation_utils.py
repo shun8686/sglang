@@ -10,7 +10,8 @@ import requests
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
 
@@ -324,6 +325,21 @@ def run_mmlu(base_url, model):
 
     metrics = run_eval(args)
     return metrics
+
+def test_gsm8k(base_url):
+    args = SimpleNamespace(
+        num_shots=5,
+        data_path=None,
+        num_questions=200,
+        max_new_tokens=512,
+        parallel=128,
+        host="http://127.0.0.1",
+        port=int(base_url.split(":")[-1]),
+    )
+    print("Starting gsm8k test...")
+    metrics = run_gsm8k(args)
+    return metrics
+
 
 
 class TestAscendPdSepTestCaseBase(CustomTestCase):

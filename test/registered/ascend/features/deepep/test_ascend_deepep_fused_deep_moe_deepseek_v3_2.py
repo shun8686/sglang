@@ -99,10 +99,10 @@ MODEL_CONFIG = {
 
 class TestQwen3W8A8(TestAscendPdSepTestCaseBase):
     model_config = MODEL_CONFIG
+    expect_accuracy = 0.8
 
-    def test_test_mmlu(self):
+    def test_mmlu(self):
         self.run_test_mmlu()
-
 
 
 if __name__ == "__main__":
