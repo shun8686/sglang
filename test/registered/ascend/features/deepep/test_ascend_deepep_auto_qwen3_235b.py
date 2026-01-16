@@ -67,7 +67,7 @@ class TestPureTP(CustomTestCase):
 
         metrics = run_eval(args)
         print(f"mmlu:{metrics}")
-        self.assertGreaterEqual(metrics["score"], 0.4)
+        self.assertGreaterEqual(metrics["score"], 0.5)
 
     def test_gsm8k(self):
         expect_accuracy = 0.94
