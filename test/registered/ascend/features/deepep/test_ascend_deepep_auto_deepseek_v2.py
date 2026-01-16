@@ -37,6 +37,10 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--disable-cuda-graph",
                 "--dtype", "bfloat16",
                 "--disable-radix-cache",
+                "--dp-size", 8,
+                "--enable-dp-attention",
+                "--enable-dp-lm-head",
+                "--chunked-prefill-size", 1024,
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -45,6 +49,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 **os.environ,
             },
         )
