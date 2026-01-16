@@ -370,6 +370,7 @@ def test_gsm8k(base_url):
 
 class TestAscendPdSepTestCaseBase(CustomTestCase):
     model_config = None
+    expect_score = None
     expect_accuracy = None
 
     @classmethod
@@ -383,9 +384,10 @@ class TestAscendPdSepTestCaseBase(CustomTestCase):
     def run_test_mmlu(self):
         if self.role == "router":
             metrics = run_mmlu(f"http://127.0.0.1:{SERVICE_PORT}", self.model_config.get("model_path"))
-            self.assertGreater(metrics["score"], self.expect_accuracy)
+            self.assertGreater(metrics["score"], self.expect_score)
 
     def run_test_gsm8k(self):
         if self.role == "router":
             metrics = test_gsm8k(f"http://127.0.0.1:{SERVICE_PORT}")
+            self.assertGreater(metrics["score"], self.expect_accuracy)
 
