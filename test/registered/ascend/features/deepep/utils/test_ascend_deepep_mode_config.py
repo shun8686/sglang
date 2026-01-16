@@ -1,6 +1,7 @@
 import psutil
 import socket
 
+DEEPSEEK_R1_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 
 DEEPSEEK_V32_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 
