@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from utils.test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -24,14 +25,10 @@ class TestPureTP(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--tp-size",
-                "2",
-                "--quantization",
-                "modelslim",
-                "--moe-a2a-backend",
-                "deepep",
-                "--deepep-mode",
-                "low_latency",
+                "--tp-size", 16,
+                "--quantization", "modelslim",
+                "--moe-a2a-backend", "deepep",
+                "--deepep-mode", "low_latency",
                 "--disable-cuda-graph",
             ],
             env={
@@ -48,6 +45,7 @@ class TestPureTP(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        expect_score = 0.7
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -55,9 +53,28 @@ class TestPureTP(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-
+        print("Starting mmlu test...")
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        self.assertGreater(metrics["score"], expect_score)
+
+    def test_gsm8k(self):
+        expect_accuracy = 0.9
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        print("Starting gsm8k test...")
+        metrics = run_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            expect_accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
+        )
 
 
 
