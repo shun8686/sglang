@@ -47,7 +47,7 @@ class TestDeepEpDeepseek(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-     def test_mmlu(self):
+    def test_mmlu(self):
         expect_score = 0.565
         args = SimpleNamespace(
             base_url=self.base_url,
