@@ -33,7 +33,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "--max-running-requests", 96,
                 "--context-length", 8192,
                 "--dtype", "bfloat16",
-                "--chunked-prefill-size", 8192,
+                "--chunked-prefill-size", 1024,
                 "--max-prefill-tokens", 458880,
                 "--disable-radix-cache",
                 "--moe-a2a-backend", "deepep",
