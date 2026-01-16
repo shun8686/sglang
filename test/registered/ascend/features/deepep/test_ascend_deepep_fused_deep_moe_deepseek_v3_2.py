@@ -74,7 +74,7 @@ MODEL_CONFIG = {
         "--chunked-prefill-size", -1,
         "--max-prefill-tokens", 68000,
         "--max-running-requests", 32,
-        "--cuda-graph-max-bs", 4, 30, 60,
+        "--cuda-graph-max-bs", 30,
         "--moe-a2a-backend", "ascend_fuseep",
         "--quantization", "modelslim",
         "--speculative-algorithm", "NEXTN",
