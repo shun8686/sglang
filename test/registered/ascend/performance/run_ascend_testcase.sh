@@ -5,6 +5,9 @@ if [ ! -f "${test_case}" ];then
   exit 0
 fi
 
+echo "NPU info:"
+npu-smi info
+
 # set dns
 cp /etc/resolv.conf /etc/resolv.conf_bak
 echo -e "nameserver 223.5.5.5\nnameserver 223.6.6.6" > /etc/resolv.conf

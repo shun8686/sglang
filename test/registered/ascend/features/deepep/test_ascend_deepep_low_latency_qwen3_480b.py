@@ -33,17 +33,18 @@ class TestDeepEpQwen(CustomTestCase):
                 "--max-running-requests", 96,
                 "--context-length", 8192,
                 "--dtype", "bfloat16",
-                "--chunked-prefill-size", 28672,
+                "--chunked-prefill-size", 1024,
                 "--max-prefill-tokens", 458880,
                 "--disable-radix-cache",
                 "--moe-a2a-backend", "deepep",
-                "--deepep-mode", "normal",
+                "--deepep-mode", "low_latency",
                 "--tp-size", 16,
                 "--dp-size", 4,
                 "--enable-dp-attention",
                 "--enable-dp-lm-head",
                 "--mem-fraction-static", 0.7,
                 "--cuda-graph-bs", 16, 20, 24,
+                # "--disable-cuda-graph",
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -52,6 +53,7 @@ class TestDeepEpQwen(CustomTestCase):
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
+                # "ASCEND_LAUNCH_BLOCKING": "1",
                 **os.environ,
             },
         )
@@ -61,6 +63,7 @@ class TestDeepEpQwen(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        expect_score = 0.7
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -70,8 +73,7 @@ class TestDeepEpQwen(CustomTestCase):
         )
         print("Starting mmlu test...")
         metrics = run_eval(args)
-        # Score: 0.750
-        self.assertGreater(metrics["score"], 0.7)
+        self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
         expect_accuracy = 0.9

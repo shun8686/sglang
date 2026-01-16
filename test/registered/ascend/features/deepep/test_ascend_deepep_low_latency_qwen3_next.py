@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_CODER_480B_A35B_W8A8_MODEL_PATH, NIC_NAME
+from utils.test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH, NIC_NAME
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -14,10 +14,10 @@ from sglang.test.test_utils import (
 )
 
 
-class TestDeepEpQwen(CustomTestCase):
+class TestQwen3Next(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_CODER_480B_A35B_W8A8_MODEL_PATH
+        cls.model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -25,35 +25,31 @@ class TestDeepEpQwen(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--nnodes", "1",
-                "--node-rank", "0",
                 "--attention-backend", "ascend",
                 "--device", "npu",
-                "--quantization", "modelslim",
-                "--max-running-requests", 96,
-                "--context-length", 8192,
-                "--dtype", "bfloat16",
-                "--chunked-prefill-size", 8192,
-                "--max-prefill-tokens", 458880,
+                "--tp-size", 8,
+                "--mem-fraction-static", 0.8,
+                "--max-running-requests", 80,
+                "--watchdog-timeout", 9000,
                 "--disable-radix-cache",
+                # "--cuda-graph-bs", 80,
+                "--disable-cuda-graph",
+                "--chunked-prefill-size", 1024,
+                "--max-prefill-tokens", 28672,
+                "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "low_latency",
-                "--tp-size", 16,
-                "--dp-size", 4,
-                "--enable-dp-attention",
-                "--enable-dp-lm-head",
-                "--mem-fraction-static", 0.7,
-                "--cuda-graph-bs", 16, 20, 24,
-                # "--disable-cuda-graph",
+                "--quantization", "modelslim",
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-                "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-                "HCCL_BUFFSIZE": "2100",
+                "STREAMS_PER_DEVICE": "32",
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
-                # "ASCEND_LAUNCH_BLOCKING": "1",
+                "HCCL_ALGO": "level0:NA;level1:ring",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
+                "HCCL_BUFFSIZE": "2048",
                 **os.environ,
             },
         )
@@ -63,6 +59,8 @@ class TestDeepEpQwen(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        # 0.625
+        expect_score = 0.56
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -72,10 +70,10 @@ class TestDeepEpQwen(CustomTestCase):
         )
         print("Starting mmlu test...")
         metrics = run_eval(args)
-        # Score: 0.750
-        self.assertGreater(metrics["score"], 0.7)
+        self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
+        # 0.945
         expect_accuracy = 0.9
         args = SimpleNamespace(
             num_shots=5,
@@ -93,6 +91,7 @@ class TestDeepEpQwen(CustomTestCase):
             expect_accuracy,
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
         )
+
 
 
 if __name__ == "__main__":
