@@ -4,11 +4,13 @@ import subprocess
 import threading
 import time
 import requests
+from types import SimpleNamespace
 
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-from test_ascend_deepep_mode_config import test_mmlu, test_gsm8k
+from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
 
@@ -350,11 +352,29 @@ class TestAscendPdSepTestCaseBase(CustomTestCase):
 
     def run_test_mmlu(self):
         if self.role == "router":
-            metrics = test_mmlu(f"http://127.0.0.1:{SERVICE_PORT}", self.model_config.get("model_path"))
+            print("Starting gsm8k test...")
+            args = SimpleNamespace(
+                base_url=f"http://127.0.0.1:{SERVICE_PORT}",
+                model=self.model_config.get("model_path"),
+                eval_name="mmlu",
+                num_examples=8,
+                num_threads=32,
+            )
+            metrics = run_eval(args)
             self.assertGreater(metrics["score"], self.expect_score)
 
     def run_test_gsm8k(self):
         if self.role == "router":
-            metrics = test_gsm8k(f"http://127.0.0.1:{SERVICE_PORT}")
+            print("Starting gsm8k test...")
+            args = SimpleNamespace(
+                num_shots=5,
+                data_path=None,
+                num_questions=200,
+                max_new_tokens=512,
+                parallel=128,
+                host="http://127.0.0.1",
+                port=int(SERVICE_PORT),
+            )
+            metrics = run_gsm8k(args)
             self.assertGreater(metrics["accuracy"], self.expect_accuracy)
 
