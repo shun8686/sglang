@@ -32,6 +32,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "deepep",
                 "--deepep-mode",
                 "auto",
+                "--max-running-requests", 96,
                 "--mem-fraction-static", 0.7,
                 "--disable-cuda-graph",
                 "--dtype", "bfloat16",
