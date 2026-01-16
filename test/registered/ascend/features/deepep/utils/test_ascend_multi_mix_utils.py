@@ -135,7 +135,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     def run_test_mmlu(self):
         if self.role == "master":
             print("Starting mmlu test...")
-            base_url = f"http://127.0.0.1:{SERVICE_PORT}"
+            base_url = f"http://{self.local_ip}:{SERVICE_PORT}"
             print(f"{base_url=}")
             args = SimpleNamespace(
                 base_url=base_url,
@@ -150,7 +150,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     def run_test_gsm8k(self):
         if self.role == "master":
             print("Starting gsm8k test...")
-            host = "http://127.0.0.1"
+            host = f"http://{self.local_ip}"
             port = int(SERVICE_PORT)
             print(f"{host=}, {port=}")
             args = SimpleNamespace(
