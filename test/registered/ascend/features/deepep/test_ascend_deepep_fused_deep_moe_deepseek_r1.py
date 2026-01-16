@@ -93,10 +93,10 @@ MODEL_CONFIG = {
 
 class TestDeepSeekV32(TestAscendPdSepTestCaseBase):
     model_config = MODEL_CONFIG
-    #
-    expect_score = 0.5
-    #
-    expect_accuracy = 0.5
+    # 0.625
+    expect_score = 0.56
+    # 0.985
+    expect_accuracy = 0.9
 
     def test_deepseek_r1(self):
         launch_server(self.role, self.model_config)
