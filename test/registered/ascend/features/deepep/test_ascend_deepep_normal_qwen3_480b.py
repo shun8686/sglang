@@ -61,6 +61,7 @@ class TestDeepEpQwen(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        expect_score = 0.7
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -70,8 +71,7 @@ class TestDeepEpQwen(CustomTestCase):
         )
         print("Starting mmlu test...")
         metrics = run_eval(args)
-        # Score: 0.750
-        self.assertGreater(metrics["score"], 0.7)
+        self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
         expect_accuracy = 0.9
