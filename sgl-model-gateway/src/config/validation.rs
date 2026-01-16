@@ -1,11 +1,10 @@
 use super::*;
-use crate::core::ConnectionMode;
 
 /// Configuration validator
-pub struct ConfigValidator;
+pub(crate) struct ConfigValidator;
 
 impl ConfigValidator {
-    pub fn validate(config: &RouterConfig) -> ConfigResult<()> {
+    pub(crate) fn validate(config: &RouterConfig) -> ConfigResult<()> {
         Self::validate_mode(&config.mode)?;
         Self::validate_policy(&config.policy)?;
         Self::validate_server_settings(config)?;
@@ -16,6 +15,10 @@ impl ConfigValidator {
 
         if let Some(metrics) = &config.metrics {
             Self::validate_metrics(metrics)?;
+        }
+
+        if let Some(trace_config) = &config.trace_config {
+            Self::validate_trace(trace_config)?;
         }
 
         Self::validate_compatibility(config)?;
@@ -144,7 +147,10 @@ impl ConfigValidator {
 
     fn validate_policy(policy: &PolicyConfig) -> ConfigResult<()> {
         match policy {
-            PolicyConfig::Random | PolicyConfig::RoundRobin => {}
+            PolicyConfig::Random
+            | PolicyConfig::RoundRobin
+            | PolicyConfig::Manual { .. }
+            | PolicyConfig::ConsistentHashing => {}
             PolicyConfig::CacheAware {
                 cache_threshold,
                 balance_abs_threshold: _,
@@ -220,6 +226,26 @@ impl ConfigValidator {
                         field: "bucket_adjust_interval_secs".to_string(),
                         value: bucket_adjust_interval_secs.to_string(),
                         reason: "Must be < 4294967296s".to_string(),
+                    });
+                }
+            }
+            PolicyConfig::PrefixHash {
+                prefix_token_count,
+                load_factor,
+            } => {
+                if *prefix_token_count == 0 {
+                    return Err(ConfigError::InvalidValue {
+                        field: "prefix_token_count".to_string(),
+                        value: prefix_token_count.to_string(),
+                        reason: "Must be > 0".to_string(),
+                    });
+                }
+
+                if *load_factor < 1.0 {
+                    return Err(ConfigError::InvalidValue {
+                        field: "load_factor".to_string(),
+                        value: load_factor.to_string(),
+                        reason: "Must be >= 1.0".to_string(),
                     });
                 }
             }
@@ -357,6 +383,46 @@ impl ConfigValidator {
         Ok(())
     }
 
+    fn validate_trace(trace_config: &TraceConfig) -> ConfigResult<()> {
+        if !trace_config.enable_trace {
+            return Ok(());
+        }
+
+        let endpoint = &trace_config.otlp_traces_endpoint;
+
+        let Some((host, port_str)) = endpoint.rsplit_once(':') else {
+            return Err(ConfigError::InvalidValue {
+                field: "trace_config.otlp_traces_endpoint".to_string(),
+                value: endpoint.clone(),
+                reason:
+                    "expected format <host>:<port>, e.g., otel-collector:4317 or 127.0.0.1:4317"
+                        .to_string(),
+            });
+        };
+
+        if host.is_empty() {
+            return Err(ConfigError::InvalidValue {
+                field: "trace_config.otlp_traces_endpoint".to_string(),
+                value: endpoint.clone(),
+                reason: "host part cannot be empty".to_string(),
+            });
+        }
+
+        // check port: must be 1~65535
+        match port_str.parse::<u16>() {
+            Ok(p) if p > 0 => (), // valid port
+            _ => {
+                return Err(ConfigError::InvalidValue {
+                    field: "trace_config.otlp_traces_endpoint".to_string(),
+                    value: endpoint.clone(),
+                    reason: "port must be a number between 1 and 65535".to_string(),
+                });
+            }
+        };
+
+        Ok(())
+    }
+
     fn validate_retry(retry: &RetryConfig) -> ConfigResult<()> {
         if retry.max_retries < 1 {
             return Err(ConfigError::InvalidValue {
@@ -473,15 +539,6 @@ impl ConfigValidator {
             return Ok(());
         }
 
-        if matches!(config.connection_mode, ConnectionMode::Grpc { .. })
-            && config.tokenizer_path.is_none()
-            && config.model_path.is_none()
-        {
-            return Err(ConfigError::ValidationFailed {
-                reason: "gRPC connection mode requires either --tokenizer-path or --model-path to be specified".to_string(),
-            });
-        }
-
         Self::validate_mtls(config)?;
 
         let has_service_discovery = config.discovery.as_ref().is_some_and(|d| d.enabled);
@@ -528,12 +585,6 @@ impl ConfigValidator {
                     });
                 }
             }
-        }
-
-        if has_service_discovery && config.dp_aware {
-            return Err(ConfigError::IncompatibleConfig {
-                reason: "DP-aware routing is not compatible with service discovery".to_string(),
-            });
         }
 
         Ok(())
@@ -586,6 +637,7 @@ impl ConfigValidator {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::ConnectionMode;
 
     #[test]
     fn test_validate_regular_mode() {
@@ -912,27 +964,6 @@ mod tests {
 
         // Should pass validation even with empty URLs
         assert!(ConfigValidator::validate(&config).is_ok());
-    }
-
-    #[test]
-    fn test_validate_grpc_requires_tokenizer() {
-        let mut config = RouterConfig::new(
-            RoutingMode::Regular {
-                worker_urls: vec!["grpc://worker:50051".to_string()],
-            },
-            PolicyConfig::Random,
-        );
-
-        // Set connection mode to gRPC without tokenizer config
-        config.connection_mode = ConnectionMode::Grpc { port: None };
-        config.tokenizer_path = None;
-        config.model_path = None;
-
-        let result = ConfigValidator::validate(&config);
-        assert!(result.is_err());
-        if let Err(e) = result {
-            assert!(e.to_string().contains("gRPC connection mode requires"));
-        }
     }
 
     #[test]
