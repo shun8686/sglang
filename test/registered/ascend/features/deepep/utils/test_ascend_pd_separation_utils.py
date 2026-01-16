@@ -314,7 +314,31 @@ def wait_router_ready(url, timeout=LOCAL_TIMEOUT):
             raise RuntimeError(f"Server {url} failed to start in {timeout}s")
         time.sleep(10)
 
+def launch_server(role, model_config):
+    if role == "router":
+        print(f"Starting router in thread...")
+        router_thread = threading.Thread(
+            target=launch_router, args=(model_config,)
+        )
+        router_thread.start()
+        health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
+        print(f"Waiting for router to be ready at {health_check_url}")
+        wait_router_ready(health_check_url)
+
+        print(f"Waiting 30 seconds for the server to fully initialize...")
+        time.sleep(30)
+
+    else:
+        # launch p/d node
+        sglang_thread = threading.Thread(
+            target=launch_node, args=(model_config,)
+        )
+        sglang_thread.start()
+        print(f"{role} node started, keeping test alive for {LOCAL_TIMEOUT} seconds")
+        time.sleep(LOCAL_TIMEOUT)
+
 def run_mmlu(base_url, model):
+    print("Starting gsm8k test...")
     args = SimpleNamespace(
         base_url=base_url,
         model=model,
@@ -322,28 +346,32 @@ def run_mmlu(base_url, model):
         num_examples=8,
         num_threads=32,
     )
-
     metrics = run_eval(args)
     return metrics
 
 def test_gsm8k(base_url):
+    print("Starting gsm8k test...")
+    colon_index = base_url.rfind(":")
+    host = base_url[:colon_index]
+    print(f"{host=}")
+    port = int(base_url[colon_index + 1:])
+    print(f"{port=}")
     args = SimpleNamespace(
         num_shots=5,
         data_path=None,
         num_questions=200,
         max_new_tokens=512,
         parallel=128,
-        host="http://127.0.0.1",
-        port=int(base_url.split(":")[-1]),
+        host=host,
+        port=port,
     )
-    print("Starting gsm8k test...")
     metrics = run_gsm8k(args)
     return metrics
 
-
-
 class TestAscendPdSepTestCaseBase(CustomTestCase):
     model_config = None
+    expect_score = None
+    expect_accuracy = None
 
     @classmethod
     def setUpClass(cls):
@@ -355,27 +383,11 @@ class TestAscendPdSepTestCaseBase(CustomTestCase):
 
     def run_test_mmlu(self):
         if self.role == "router":
-            print(f"Starting router in thread...")
-            router_thread = threading.Thread(
-                target=launch_router, args=(self.model_config,)
-            )
-            router_thread.start()
-            health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
-            print(f"Waiting for router to be ready at {health_check_url}")
-            wait_router_ready(health_check_url)
-
-            print(f"Waiting 30 seconds for the server to fully initialize...")
-            time.sleep(30)
-
             metrics = run_mmlu(f"http://127.0.0.1:{SERVICE_PORT}", self.model_config.get("model_path"))
-            self.assertGreater(metrics["score"], 0.3)
+            self.assertGreater(metrics["score"], self.expect_score)
 
-        else:
-            # launch p/d node
-            sglang_thread = threading.Thread(
-                target=launch_node, args=(self.model_config,)
-            )
-            sglang_thread.start()
-            print(f"{self.role} node started, keeping test alive for {LOCAL_TIMEOUT} seconds")
-            time.sleep(LOCAL_TIMEOUT)
+    def run_test_gsm8k(self):
+        if self.role == "router":
+            metrics = test_gsm8k(f"http://127.0.0.1:{SERVICE_PORT}")
+            self.assertGreater(metrics["score"], self.expect_accuracy)
 
