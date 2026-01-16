@@ -113,7 +113,7 @@ def launch_server(role, model_config):
     if role == "master":
         master_node_ip = os.getenv("POD_IP")
         wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
-        print(f"Wait 10s, starting run benchmark ......")
+        print(f"Waiting 10 seconds for the server to fully initialize...")
         time.sleep(10)
 
     else:
