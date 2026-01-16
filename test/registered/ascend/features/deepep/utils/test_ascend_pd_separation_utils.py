@@ -352,7 +352,7 @@ class TestAscendPdSepTestCaseBase(CustomTestCase):
 
     def run_test_mmlu(self):
         if self.role == "router":
-            print("Starting gsm8k test...")
+            print("Starting mmlu test...")
             args = SimpleNamespace(
                 base_url=f"http://127.0.0.1:{SERVICE_PORT}",
                 model=self.model_config.get("model_path"),
