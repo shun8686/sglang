@@ -389,5 +389,5 @@ class TestAscendPdSepTestCaseBase(CustomTestCase):
     def run_test_gsm8k(self):
         if self.role == "router":
             metrics = test_gsm8k(f"http://127.0.0.1:{SERVICE_PORT}")
-            self.assertGreater(metrics["score"], self.expect_accuracy)
+            self.assertGreater(metrics["accuracy"], self.expect_accuracy)
 
