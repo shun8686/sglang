@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+from utils.test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH, NIC_NAME
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -25,17 +25,30 @@ class TestPureTP(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
+                "--attention-backend", "ascend",
+                "--device", "npu",
                 "--tp-size", 16,
-                "--quantization", "modelslim",
+                "--mem-fraction-static", 0.685,
+                "--max-running-requests", 80,
+                "--watchdog-timeout", 9000,
+                "--disable-radix-cache",
+                "--cuda-graph-bs", 80,
+                "--max-prefill-tokens", 28672,
+                "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "low_latency",
-                "--disable-cuda-graph",
+                "--quantization", "modelslim",
+                "--chunked-prefill-size", -1,
             ],
             env={
-                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
-                "HCCL_BUFFSIZE": "2048",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+                "STREAMS_PER_DEVICE": "32",
+                "HCCL_SOCKET_IFNAME": NIC_NAME,
+                "GLOO_SOCKET_IFNAME": NIC_NAME,
+                "HCCL_OP_EXPANSION_MODE": "AIV",
+                "HCCL_ALGO": "level0:NA;level1:ring",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
+                "HCCL_BUFFSIZE": "2000",
                 **os.environ,
             },
         )
