@@ -17,8 +17,7 @@ MODEL_CONFIG = {
    },
     "other_args": [
         "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
+        "--nnodes", "2",
         "--attention-backend", "ascend",
         "--device", "npu",
         "--quantization", "modelslim",
