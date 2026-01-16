@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestPureTP(CustomTestCase):
+class TestQwen3Next(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
@@ -34,12 +34,12 @@ class TestPureTP(CustomTestCase):
                 "--disable-radix-cache",
                 # "--cuda-graph-bs", 80,
                 "--disable-cuda-graph",
+                "--chunked-prefill-size", 1024,
                 "--max-prefill-tokens", 28672,
                 "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "low_latency",
                 "--quantization", "modelslim",
-                "--chunked-prefill-size", -1,
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -49,7 +49,7 @@ class TestPureTP(CustomTestCase):
                 "HCCL_OP_EXPANSION_MODE": "AIV",
                 "HCCL_ALGO": "level0:NA;level1:ring",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
-                "HCCL_BUFFSIZE": "2000",
+                "HCCL_BUFFSIZE": "2048",
                 **os.environ,
             },
         )
