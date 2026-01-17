@@ -62,7 +62,7 @@ class GSM8KAscendMixin(ABC):
             port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval(args)
-        self.assertGreater(
+        self.assertGreaterEqual(
             metrics["accuracy"],
             self.accuracy,
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
