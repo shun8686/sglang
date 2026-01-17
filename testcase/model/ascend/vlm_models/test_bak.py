@@ -17,7 +17,7 @@ else:
         #SimpleNamespace(model="google/gemma-3-4b-it", mmmu_accuracy=0.38),
         #SimpleNamespace(model="Qwen/Qwen2.5-VL-3B-Instruct", mmmu_accuracy=0.4),
         #SimpleNamespace(model="openbmb/MiniCPM-V-2_6", mmmu_accuracy=0.4),
-        SimpleNamespace(model="/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/deepseek-ai/deepseek-vl2", mmmu_accuracy=0.4)
+        SimpleNamespace(model="/root/.cache/modelscope/hub/models/deepseek-ai/deepseek-vl2", mmmu_accuracy=0.4)
     ]
 
 

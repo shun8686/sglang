@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 
 class TestXVERSE(CustomTestCase):
-    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/xverse/XVERSE-MoE-A36B"
+    model = "/root/.cache/modelscope/hub/models/xverse/XVERSE-MoE-A36B"
     accuracy = 0.24
 
     @classmethod

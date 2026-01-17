@@ -30,7 +30,7 @@ from sglang.test.test_utils import (
 
 if is_npu():
     MODELS = [
-       ("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/AI-ModelScope/clip-vit-large-patch14-336",1,0.22)
+       ("/root/.cache/modelscope/hub/models/AI-ModelScope/clip-vit-large-patch14-336",1,0.22)
     ]
 else:
     MODELS = [

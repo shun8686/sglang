@@ -17,7 +17,7 @@ class TestQwenPPTieWeightsAccuracy(CustomTestCase):
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
         # cls.model_name = "Qwen/Qwen3-0.6B"
-        cls.model_name = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-0___6B"
+        cls.model_name = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0___6B"
         other_args = [
             "--chunked-prefill-size",
             256,

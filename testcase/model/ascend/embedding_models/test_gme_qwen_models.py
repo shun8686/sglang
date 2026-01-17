@@ -27,7 +27,7 @@ IMAGES = "023.jpg"
 
 
 MODELS = [
-    ("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Alibaba-NLP/gme-Qwen2-VL-2B-Instruct", 1e-3),
+    ("/root/.cache/modelscope/hub/models/Alibaba-NLP/gme-Qwen2-VL-2B-Instruct", 1e-3),
 ]
 TORCH_DTYPES = [torch.float16]
 

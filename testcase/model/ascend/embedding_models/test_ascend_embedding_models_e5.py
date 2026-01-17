@@ -30,7 +30,7 @@ from sglang.test.test_utils import (
 
 if is_npu():
     MODELS = [
-        ("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/intfloat/e5-mistral-7b-instruct", 1, 1e-5),
+        ("/root/.cache/modelscope/hub/models/intfloat/e5-mistral-7b-instruct", 1, 1e-5),
     ]
 else:
     MODELS = [

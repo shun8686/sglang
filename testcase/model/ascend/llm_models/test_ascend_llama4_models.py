@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 MODELS = [
     SimpleNamespace(
         #model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
-        model="/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct",
+        model="/root/.cache/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct",
         accuracy=0.9,
         tp_size=4,
     ),

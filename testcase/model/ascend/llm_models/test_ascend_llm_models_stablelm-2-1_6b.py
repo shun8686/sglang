@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 
 class TestStablelm(CustomTestCase):
-    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/stabilityai/stablelm-2-1_6b"
+    model = "/root/.cache/modelscope/hub/models/stabilityai/stablelm-2-1_6b"
     accuracy = 0.195
 
     @classmethod

@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 class TestQwen3Next(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-Next-80B-A3B-Instruct"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Next-80B-A3B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,

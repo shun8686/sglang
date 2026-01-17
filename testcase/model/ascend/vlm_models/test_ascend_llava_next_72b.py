@@ -9,7 +9,7 @@ from sglang.test.test_utils import CustomTestCase
 
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
-    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/lmms-lab/llava-next-72b/"
+    model = "/root/.cache/modelscope/hub/models/lmms-lab/llava-next-72b/"
     accuracy = 0.25
     other_args = [
             "--trust-remote-code",
