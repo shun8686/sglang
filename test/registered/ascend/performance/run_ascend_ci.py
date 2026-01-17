@@ -5,11 +5,13 @@ import sys
 import time
 import os
 
+import yaml
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 config.load_kube_config(os.environ.get('KUBECONFIG'))
-v1 = client.CoreV1Api()
+core_api = client.CoreV1Api()
+custom_api = client.CustomObjectsApi()
 
 LOCAL_TIMEOUT = 10800
 KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
@@ -22,15 +24,25 @@ KUBE_YAML_FILE = os.environ.get('KUBE_YAML_FILE')
 if not KUBE_YAML_FILE:
     KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "k8s_multi.yaml" if KUBE_JOB_TYPE == "multi" else "k8s_pd_separation.yaml"
 
-def run_command(cmd, shell=True):
+def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
+    with open(yaml_file, "r", encoding="utf-8") as f:
+        pod_yaml = yaml.safe_load(f)
+
+    print(f"create pod yaml file: {yaml_file}. namespace: {namespace}")
     try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
+        api_response = custom_api.create_namespaced_custom_object(
+            group="batch.volcano.sh",
+            version="v1alpha1",
+            namespace=namespace,
+            plural="jobs",
+            body=pod_yaml
         )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
+        print(f"Create pod successfully! {api_response['metadata']['name']}")
+        return api_response
+
+    except ApiException as e:
+        print(f"create pod error: {e}")
+        raise
 
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
@@ -38,7 +50,7 @@ def check_pods_ready(timeout=300):
     start_time = time.time()
 
     while time.time() - start_time < timeout:
-        pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
+        pods = core_api.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
 
         if len(pods.items) == 0:
             time.sleep(5)
@@ -50,7 +62,7 @@ def check_pods_ready(timeout=300):
             pod_name = pod.metadata.name
             if matching_string not in pod_name:
                 continue
-            
+
             sglang_pods_found = True
             status = pod.status
             phase = status.phase
@@ -91,7 +103,7 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
         data=data)
 
     try:
-        response = v1.create_namespaced_config_map(
+        response = core_api.create_namespaced_config_map(
             namespace=namespace,
             body=configmap
         )
@@ -101,7 +113,7 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
     except ApiException as e:
         if e.status == 409:
             print(f"ConfigMap {cm_name} already exists. Updating...")
-            response = v1.replace_namespaced_config_map(
+            response = core_api.replace_namespaced_config_map(
                 namespace=namespace,
                 name=cm_name,
                 body=configmap
@@ -115,16 +127,15 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
             print(error_msg)
             raise
 
-def repare_cm_data(matching_pod_string):
-    pods = v1.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
-    cm_data = {}
-
+def prepare_cm_data(pod_string):
+    pods = core_api.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
+    data = {}
     for pod in pods.items:
         pod_name = pod.metadata.name
-        if matching_pod_string in pod_name:
+        if pod_string in pod_name:
             pod_ip = pod.status.pod_ip
-            cm_data[pod_name] = pod_ip
-    return cm_data
+            data[pod_name] = pod_ip
+    return data
 
 def monitor_pod_logs(pod_name, namespace=None, timeout=None):
     class TimeoutException(Exception):
@@ -225,21 +236,21 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
             except subprocess.TimeoutExpired:
                 process.kill()
 
-if __name__ == "__main__":    
+if __name__ == "__main__":
     print("Apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}, KUBE_YAML_FILE:{}"
           .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE, KUBE_YAML_FILE))
-    
-    result = run_command("kubectl apply -f {}".format(KUBE_YAML_FILE))
+
+    result = create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE)
     if result:
         print(result)
 
     if check_pods_ready(timeout=LOCAL_TIMEOUT):
         if KUBE_JOB_TYPE != "single":
             matching_pod_string = os.environ.get('KUBE_JOB_NAME')
-            cm_data = repare_cm_data(matching_pod_string)
+            cm_data = prepare_cm_data(matching_pod_string)
             if not cm_data:
                 print(f"No sglang pod found while matching {matching_pod_string}")
-                
+
             response = create_or_update_configmap(cm_name=KUBE_CONFIG_MAP, data=cm_data, namespace=KUBE_NAME_SPACE)
             print(response)
     else:
