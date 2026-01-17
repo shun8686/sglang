@@ -37,7 +37,6 @@ def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
         kind = doc.get("kind")
         api_version = doc.get("apiVersion")
 
-        response = None
         try:
             if kind == "Pod" and api_version == "v1":
                 response = core_api.create_namespaced_pod(namespace=namespace, body=doc)
@@ -56,6 +55,7 @@ def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
                     body=doc
                 )
                 print(f"Volcano Job {doc['metadata']['name']} is created")
+                print(f"Response info: {response['metadata']['name']}")
 
             elif kind == "ConfigMap" and api_version == "v1":
                 response = core_api.create_namespaced_config_map(namespace=namespace, body=doc)
@@ -81,9 +81,6 @@ def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
         except ApiException as e:
             print(f"create resource {kind} error: {e}")
             raise
-
-        if response:
-            print(f"Response info: {response['metadata']['name']}")
 
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
