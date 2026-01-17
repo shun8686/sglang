@@ -13,7 +13,7 @@ register_npu_ci(
 
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
-    model = "/root/.cache/modelscope/hub/models/google/gemma-3-4b-it"
+    model = "/root/.cache/modelscope/hub/models/LLM-Research/gemma-3-1b-it"
     accuracy = 0.36
     other_args = [
         "--trust-remote-code",
