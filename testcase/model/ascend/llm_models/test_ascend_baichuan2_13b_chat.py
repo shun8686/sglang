@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestBaichuan(GSM8KAscendMixin, CustomTestCase):
-    model = "/root/.cache/modelscope/hub/models/baichuan-inc/baichuan-inc/Baichuan2-13B-Chat"
+    model = "/root/.cache/modelscope/hub/models/baichuan-inc/Baichuan2-13B-Chat"
     accuracy = 0.48
     gsm8k_num_shots=1
     other_args = [
