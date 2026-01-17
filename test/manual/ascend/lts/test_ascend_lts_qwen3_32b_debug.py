@@ -81,8 +81,6 @@ class TestLTSQwen332B(CustomTestCase):
     output_token_throughput = 350
     accuracy = 0.80
 
-    print("Nic name: {}".format(NIC_NAME))
-
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
