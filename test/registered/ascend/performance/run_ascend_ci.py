@@ -12,6 +12,8 @@ from kubernetes.client.rest import ApiException
 config.load_kube_config(os.environ.get('KUBECONFIG'))
 core_api = client.CoreV1Api()
 custom_api = client.CustomObjectsApi()
+batch_api = client.BatchV1Api()
+rbac_api = client.RbacAuthorizationV1Api()
 
 LOCAL_TIMEOUT = 10800
 KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
@@ -26,23 +28,62 @@ if not KUBE_YAML_FILE:
 
 def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
     with open(yaml_file, "r", encoding="utf-8") as f:
-        pod_yaml = yaml.safe_load(f)
+        yaml_docs = list(yaml.safe_load_all(f))
 
-    print(f"create pod yaml file: {yaml_file}. namespace: {namespace}")
-    try:
-        api_response = custom_api.create_namespaced_custom_object(
-            group="batch.volcano.sh",
-            version="v1alpha1",
-            namespace=namespace,
-            plural="jobs",
-            body=pod_yaml
-        )
-        print(f"Create pod successfully! {api_response['metadata']['name']}")
-        return api_response
+    for doc in yaml_docs:
+        if not doc:
+            continue
 
-    except ApiException as e:
-        print(f"create pod error: {e}")
-        raise
+        kind = doc.get("kind")
+        api_version = doc.get("apiVersion")
+
+        response = None
+        try:
+            if kind == "Pod" and api_version == "v1":
+                response = core_api.create_namespaced_pod(namespace=namespace, body=doc)
+                print(f"Pod {doc['metadata']['name']} is created")
+
+            elif kind == "Job" and api_version == "batch/v1":
+                response = batch_api.create_namespaced_job(namespace=namespace, body=doc)
+                print(f"Job {doc['metadata']['name']} is created")
+
+            elif kind == "Job" and api_version == "batch.volcano.sh/v1alpha1":
+                response = custom_api.create_namespaced_custom_object(
+                    group="batch.volcano.sh",
+                    version="v1alpha1",
+                    namespace=namespace,
+                    plural="jobs",
+                    body=doc
+                )
+                print(f"Volcano Job {doc['metadata']['name']} is created")
+
+            elif kind == "ConfigMap" and api_version == "v1":
+                response = core_api.create_namespaced_config_map(namespace=namespace, body=doc)
+                print(f"ConfigMap {doc['metadata']['name']} is created")
+
+            elif kind == "Role" and api_version == "rbac.authorization.k8s.io/v1":
+                response = rbac_api.create_namespaced_role(
+                    namespace=namespace,
+                    body=doc
+                )
+                print(f"Role {doc['metadata']['name']} is created")
+
+            elif kind == "RoleBinding" and api_version == "rbac.authorization.k8s.io/v1":
+                response = rbac_api.create_namespaced_role_binding(
+                    namespace=namespace,
+                    body=doc
+                )
+                print(f"RoleBinding {doc['metadata']['name']} is created")
+
+            else:
+                print(f"Unrecognized kind: {kind}/{api_version}")
+
+        except ApiException as e:
+            print(f"create resource {kind} error: {e}")
+            raise
+
+        if response:
+            print(f"Response info: {response['metadata']['name']}")
 
 def check_pods_ready(timeout=300):
     print("Waiting all pods to running...")
@@ -240,9 +281,7 @@ if __name__ == "__main__":
     print("Apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}, KUBE_YAML_FILE:{}"
           .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE, KUBE_YAML_FILE))
 
-    result = create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE)
-    if result:
-        print(result)
+    create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE)
 
     if check_pods_ready(timeout=LOCAL_TIMEOUT):
         if KUBE_JOB_TYPE != "single":
