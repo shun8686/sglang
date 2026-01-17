@@ -8,21 +8,30 @@ import sys
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.test_vlm_utils import TestVLMModels
+from vlm_utils import TestVLMModels
 
 
 class TestGLM4Models(TestVLMModels):
-    models = [
-        SimpleNamespace(
-            model="/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.5V",
-            mmmu_accuracy=0.2,
-        ),
+    model = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.5V"
+    mmmu_accuracy = 0.2
+    other_args = [
+        "--trust-remote-code",
+        "--cuda-graph-max-bs",
+        "32",
+        "--enable-multimodal",
+        "--mem-fraction-static",
+        0.7,
+        "--log-level",
+        "info",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        8,
     ]
-    tp_size = 8
-    mem_fraction_static = 0.7
 
     def test_vlm_mmmu_benchmark(self):
-        self.vlm_mmmu_benchmark()
+        self._run_vlm_mmmu_test()
 
 
 if __name__ == "__main__":

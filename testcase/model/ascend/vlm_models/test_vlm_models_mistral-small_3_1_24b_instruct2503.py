@@ -1,28 +1,14 @@
-import argparse
-import glob
-import json
-import os
-import random
-import subprocess
-import sys
 import unittest
-from types import SimpleNamespace
 
-from sglang.test.test_vlm_utils import TestVLMModels
+from vlm_utils import TestVLMModels
 
 
 class TestMistralModels(TestVLMModels):
-    models = [
-        SimpleNamespace(
-            model="/root/.cache/modelscope/hub/models/mistralai/Mistral-Small-3.1-24B-Instruct-2503",
-            mmmu_accuracy=0.2,
-        ),
-    ]
-    tp_size = 4
-    mem_fraction_static = 0.35
+    model="/root/.cache/modelscope/hub/models/mistralai/Mistral-Small-3.1-24B-Instruct-2503"
+    mmmu_accuracy = 0.2
 
     def test_vlm_mmmu_benchmark(self):
-        self.vlm_mmmu_benchmark()
+        self._run_vlm_mmmu_test()
 
 
 if __name__ == "__main__":
