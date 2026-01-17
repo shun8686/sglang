@@ -14,15 +14,12 @@ MODEL_CONFIG = {
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
-        # "ENABLE_MOE_NZ": "1",
-        # "SGLANG_USE_AG_AFTER_QLORA": "1",
         "HCCL_BUFFSIZE": "1536",
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         "TASK_QUEUE_ENABLE": "2",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-        # 定位MF问题临时打开
-        "ASCEND_MF_LOG_LEVEL": "1",
+        # "ASCEND_MF_LOG_LEVEL": "1",
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
@@ -30,7 +27,6 @@ MODEL_CONFIG = {
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
-        # "ENABLE_MOE_NZ": "1",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
         "HCCL_BUFFSIZE": "650",
@@ -39,8 +35,7 @@ MODEL_CONFIG = {
         "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-        # 定位MF问题临时打开
-        "ASCEND_MF_LOG_LEVEL": "1",
+        # "ASCEND_MF_LOG_LEVEL": "1",
     },
     "router_envs": {
         "SGLANG_DP_ROUND_ROBIN": "1",

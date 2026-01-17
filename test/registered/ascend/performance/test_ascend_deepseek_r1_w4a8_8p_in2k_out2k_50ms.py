@@ -50,7 +50,7 @@ MODEL_OTHER_ARGS = (
 )
 
 
-class Test_Ascend_DeepSeek_R1_W4A8_In2048_Out2048(TestSingleNodeTestCaseBase):
+class TestAscendDeepSeekR1W4A8In2048Out2048(TestSingleNodeTestCaseBase):
     model = MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
