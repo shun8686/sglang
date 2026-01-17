@@ -15,6 +15,7 @@ class GSM8KAscendMixin(ABC):
     model = ""
     accuracy = 0.00
     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+    gsm8k_num_shots=5
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -53,7 +54,7 @@ class GSM8KAscendMixin(ABC):
 
     def test_gsm8k(self):
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=self.gsm8k_num_shots,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
