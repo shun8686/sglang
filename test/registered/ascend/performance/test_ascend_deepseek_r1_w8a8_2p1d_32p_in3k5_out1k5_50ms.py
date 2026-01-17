@@ -19,6 +19,8 @@ MODEL_CONFIG = {
         "TASK_QUEUE_ENABLE": "2",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
+        # 定位MF问题临时打开
+        "ASCEND_MF_LOG_LEVEL": "1",
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
@@ -34,6 +36,8 @@ MODEL_CONFIG = {
         "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
+        # 定位MF问题临时打开
+        "ASCEND_MF_LOG_LEVEL": "1",
     },
     "router_envs": {
         "SGLANG_DP_ROUND_ROBIN": "1",
