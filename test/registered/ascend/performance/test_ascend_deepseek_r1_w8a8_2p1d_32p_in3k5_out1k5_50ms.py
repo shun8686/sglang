@@ -95,7 +95,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestDeepSeekR1W8A82P1D(TestAscendMultiNodePdSepTestCaseBase):
+class TestDeepSeekR1W8A8(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
