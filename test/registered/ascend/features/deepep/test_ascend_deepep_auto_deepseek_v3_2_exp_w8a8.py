@@ -35,6 +35,9 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "auto",
                 "--disable-cuda-graph",
                 "--disable-radix-cache",
+                "--context-length", 40960,
+                "--max-prefill-tokens", 40960,
+                "--max-total-tokens", 40960,
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
