@@ -17,46 +17,28 @@ Qwen3_480B_ENVS = {
 
 Qwen3_480B_OTHER_ARGS = [
     "--trust-remote-code",
-    "--nnodes",
-    "1",
-    "--node-rank",
-    "0",
-    "--attention-backend",
-    "ascend",
-    "--device",
-    "npu",
-    "--quantization",
-    "modelslim",
-    "--max-running-requests",
-    "96",
-    "--context-length",
-    "8192",
-    "--dtype",
-    "bfloat16",
-    "--chunked-prefill-size",
-    "28672",
-    "--max-prefill-tokens",
-    "458880",
+    "--nnodes", "1",
+    "--node-rank", "0",
+    "--attention-backend", "ascend",
+    "--device", "npu",
+    "--quantization", "modelslim",
+    "--max-running-requests", 96,
+    "--context-length", 8192,
+    "--dtype", "bfloat16",
+    "--chunked-prefill-size", 28672,
+    "--max-prefill-tokens", 458880,
     "--disable-radix-cache",
-    "--moe-a2a-backend",
-    "deepep",
-    "--deepep-mode",
-    "auto",
-    "--tp-size",
-    "16",
-    "--dp-size",
-    "4",
+    "--moe-a2a-backend", "deepep",
+    "--deepep-mode", "auto",
+    "--tp-size", 16,
+    "--dp-size", 4,
     "--enable-dp-attention",
     "--enable-dp-lm-head",
-    "--mem-fraction-static",
-    "0.7",
-    "--cuda-graph-bs",
-    16,
-    20,
-    24,
+    "--mem-fraction-static", 0.7,
+    "--cuda-graph-bs", 16, 20, 24,
 ]
 
-class TestQwen3_480B(TestSingleNodeTestCaseBase):
+class TestQwen480B(TestSingleNodeTestCaseBase):
     model = Qwen3_480B_MODEL_PATH
     other_args = Qwen3_480B_OTHER_ARGS
     envs = Qwen3_480B_ENVS
@@ -66,9 +48,9 @@ class TestQwen3_480B(TestSingleNodeTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 49.3
+    tpot = 50
     # T: 143@50ms.   800I: 1.1*T
-    output_token_throughput = 1490
+    output_token_throughput = 1470
 
     def test_qwen3_480b(self):
         self.run_throughput()

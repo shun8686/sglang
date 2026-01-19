@@ -59,7 +59,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestQwen3_480B(TestMultiNodePdMixTestCaseBase):
+class TestQwen480B(TestMultiNodePdMixTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 288
