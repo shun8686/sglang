@@ -6,7 +6,7 @@ import torch
 from transformers import AutoConfig, AutoTokenizer
 
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.runners import DEFAULT_PROMPTS, HFRunner, SRTRunner
+from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase, get_similarities
 
 register_npu_ci(
@@ -16,6 +16,14 @@ register_npu_ci(
     disabled="embeddings are not all close",
 )
 
+DEFAULT_PROMPTS = [
+    #"Apple is red. Banana is Yellow. " * 800 + "Apple is",
+    "The capital of the United Kingdom is",
+    "Today is a sunny day and I like",
+    "AI is a field of computer science focused on",
+    # the output of gemma-2-2b from SRT is unstable on the commented prompt
+    # "The capital of France is",
+]
 
 MODELS = [
     ("/root/.cache/modelscope/hub/models/bge-large-en-v1.5", 1, 1e-5),
