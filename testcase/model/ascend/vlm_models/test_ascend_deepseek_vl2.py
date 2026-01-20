@@ -1,65 +1,18 @@
-import argparse
-import random
-import sys
 import unittest
-from types import SimpleNamespace
 
-from sglang.srt.utils import is_hip
-from mmmu_vlm_mixin import DEFAULT_MEM_FRACTION_STATIC, MMMUVLMMixin
-from sglang.test.test_utils import CustomTestCase, is_in_ci
+from vlm_utils import TestVLMModels
+from sglang.test.ci.ci_register import register_npu_ci
 
-_is_hip = is_hip()
-# VLM models for testing
-if _is_hip:
-    MODELS = [SimpleNamespace(model="openbmb/MiniCPM-V-2_6", mmmu_accuracy=0.4)]
-else:
-    MODELS = [
-        #SimpleNamespace(model="google/gemma-3-4b-it", mmmu_accuracy=0.38),
-        #SimpleNamespace(model="Qwen/Qwen2.5-VL-3B-Instruct", mmmu_accuracy=0.4),
-        #SimpleNamespace(model="openbmb/MiniCPM-V-2_6", mmmu_accuracy=0.4),
-        SimpleNamespace(model="/root/.cache/modelscope/hub/models/deepseek-ai/deepseek-vl2", mmmu_accuracy=0.2)
-    ]
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestVLMModels(MMMUVLMMixin, CustomTestCase):
+class TestGemmaModels(TestVLMModels):
+    model = "/root/.cache/modelscope/hub/models/deepseek-ai/deepseek-vl2"
+    mmmu_accuracy = 0.2
+
     def test_vlm_mmmu_benchmark(self):
-        """Test VLM models against MMMU benchmark."""
-        models_to_test = MODELS
-
-        if is_in_ci():
-            models_to_test = [random.choice(MODELS)]
-
-        for model in models_to_test:
-            self._run_vlm_mmmu_test(model, "./logs")
+        self._run_vlm_mmmu_test()
 
 
 if __name__ == "__main__":
-    # Define and parse arguments here, before unittest.main
-    parser = argparse.ArgumentParser(description="Test VLM models")
-    parser.add_argument(
-        "--mem-fraction-static",
-        type=float,
-        help="Static memory fraction for the model",
-        default=0.95,
-    )
-    parser.add_argument(
-        "--tp-size",
-        type=int,
-        default=4,
-    )
-
-    # Parse args intended for unittest
-    args = parser.parse_args()
-
-    # Store the parsed args object on the class
-    TestVLMModels.parsed_args = args
-    TestVLMModels.other_arga = [
-            "--tp-size",
-            4,
-            "--mem-fraction-static",
-            0.95,
-            ]
-
-
-    # Pass args to unittest
-    unittest.main(argv=[sys.argv[0]])
+    unittest.main()
