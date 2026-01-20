@@ -6,6 +6,7 @@ from test_ascend_single_mix_utils import (
 )
 
 QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+# https://huggingface.co/Zjcxy-SmartAI/Eagle3-Qwen3-32B-zh/tree/main
 QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
 
 QWEN3_32B_ENVS = {
