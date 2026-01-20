@@ -15,8 +15,9 @@ from test_ascend_single_mix_utils import run_bench_serving
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
-LOCAL_TIMEOUT = 3600
+LOCAL_TIMEOUT = 1800
 SERVICE_PORT = "6688"
+LOCAL_PORT = "8000"
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
@@ -120,13 +121,13 @@ def launch_router(config):
             pod_index = int(pod_name.rsplit("-", 1)[-1])
             prefill_keyword = "prefill-0" if is_prefill_instance_multi_node else "prefill"
             if prefill_keyword in pod_name:
-                prefill_url.append(f"{pod_ip}:8000")
+                prefill_url.append(f"{pod_ip}:{LOCAL_PORT}")
                 bootstrap_port = (bootstrap_init_port if is_prefill_instance_multi_node else bootstrap_init_port + pod_index)
                 bootstrap_ports.append(str(bootstrap_port))
                 node_ip_list.append(pod_ip)
             decode_keyword = "decode-0" if is_decode_instance_multi_node else "decode"
             if decode_keyword in pod_name:
-                decode_url.append(f"{pod_ip}:8000")
+                decode_url.append(f"{pod_ip}:{LOCAL_PORT}")
                 node_ip_list.append(pod_ip)
         if prefill_url and decode_url:
             is_ready = True
@@ -142,7 +143,7 @@ def launch_router(config):
     )
 
     # checkout all node port ready
-    if not wait_for_all_ports_ready(node_ip_list, 8000):
+    if not wait_for_all_ports_ready(ips=node_ip_list, port=LOCAL_PORT, timeout=LOCAL_TIMEOUT):
         raise RuntimeError("Failed to wait for all nodes to be ready")
 
     # set env var
@@ -201,7 +202,7 @@ def launch_node(config):
     # monitor configmap ready
     is_ready = False
     start_time = time.time()
-    while not is_ready and time.time() - start_time < 1800:
+    while not is_ready and time.time() - start_time < LOCAL_TIMEOUT:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
         if not configmap or not configmap.data:
             print(f"ConfigMap data is not available yet, waiting for 15s...")
@@ -286,7 +287,7 @@ def launch_node(config):
     try:
         process = popen_launch_server(
             config["model_path"],
-            f"http://{node_ip}:{8000}",
+            f"http://{node_ip}:{LOCAL_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *service_args,
@@ -332,7 +333,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.process = None
         cls.local_ip = os.getenv("POD_IP")
         hostname = os.getenv("HOSTNAME")
-        cls.role = "router" if "router" in hostname else None
+        cls.role = "router" if "router" in hostname else "prefill" if "prefill" in hostname else "decode"
         print(f"Init {cls.local_ip} {cls.role=}!")
 
     def run_throughput(self, retry=True):
@@ -392,5 +393,6 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
                 target=launch_node, args=(self.model_config,)
             )
             sglang_thread.start()
-            print(f"{self.role} node started, keeping test alive for {LOCAL_TIMEOUT} seconds")
-            time.sleep(LOCAL_TIMEOUT)
+            keep_alive_time = LOCAL_TIMEOUT * 2
+            print(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
+            time.sleep(keep_alive_time)

@@ -39,11 +39,11 @@ def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
 
         try:
             if kind == "Pod" and api_version == "v1":
-                response = core_api.create_namespaced_pod(namespace=namespace, body=doc)
+                core_api.create_namespaced_pod(namespace=namespace, body=doc)
                 print(f"Pod {doc['metadata']['name']} is created")
 
             elif kind == "Job" and api_version == "batch/v1":
-                response = batch_api.create_namespaced_job(namespace=namespace, body=doc)
+                batch_api.create_namespaced_job(namespace=namespace, body=doc)
                 print(f"Job {doc['metadata']['name']} is created")
 
             elif kind == "Job" and api_version == "batch.volcano.sh/v1alpha1":
@@ -58,18 +58,18 @@ def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
                 print(f"Response info: {response['metadata']['name']}")
 
             elif kind == "ConfigMap" and api_version == "v1":
-                response = core_api.create_namespaced_config_map(namespace=namespace, body=doc)
+                core_api.create_namespaced_config_map(namespace=namespace, body=doc)
                 print(f"ConfigMap {doc['metadata']['name']} is created")
 
             elif kind == "Role" and api_version == "rbac.authorization.k8s.io/v1":
-                response = rbac_api.create_namespaced_role(
+                rbac_api.create_namespaced_role(
                     namespace=namespace,
                     body=doc
                 )
                 print(f"Role {doc['metadata']['name']} is created")
 
             elif kind == "RoleBinding" and api_version == "rbac.authorization.k8s.io/v1":
-                response = rbac_api.create_namespaced_role_binding(
+                rbac_api.create_namespaced_role_binding(
                     namespace=namespace,
                     body=doc
                 )
