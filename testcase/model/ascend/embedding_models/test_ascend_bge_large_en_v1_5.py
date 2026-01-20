@@ -17,12 +17,9 @@ register_npu_ci(
 )
 
 DEFAULT_PROMPTS = [
-    #"Apple is red. Banana is Yellow. " * 800 + "Apple is",
     "The capital of the United Kingdom is",
     "Today is a sunny day and I like",
     "AI is a field of computer science focused on",
-    # the output of gemma-2-2b from SRT is unstable on the commented prompt
-    # "The capital of France is",
 ]
 
 MODELS = [
