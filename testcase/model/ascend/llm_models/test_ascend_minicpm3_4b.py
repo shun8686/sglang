@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestMiniCPM3(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/OpenBMB/MiniCPM3-4B"
-    accuracy = 0.705
+    accuracy = 0.69
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

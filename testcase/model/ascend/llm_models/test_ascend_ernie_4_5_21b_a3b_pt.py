@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestERNIE(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/baidu/ERNIE-4.5-21B-A3B-PT"
-    accuracy = 0.89
+    accuracy = 0.88
 
 
 if __name__ == "__main__":

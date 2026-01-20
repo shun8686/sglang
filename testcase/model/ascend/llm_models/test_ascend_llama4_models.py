@@ -1,78 +1,28 @@
-import random
 import unittest
-from types import SimpleNamespace
 
-from sglang.srt.utils import kill_process_tree
-from sglang.test.few_shot_gsm8k import run_eval
-from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
-    CustomTestCase,
-    popen_launch_server,
-)
+from gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import CustomTestCase
 
-MODELS = [
-    SimpleNamespace(
-        #model="meta-llama/Llama-4-Scout-17B-16E-Instruct",
-        model="/root/.cache/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct",
-        accuracy=0.9,
-        tp_size=4,
-    ),
-]
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestLlama4(CustomTestCase):
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-
-    def test_gsm8k(self):
-
-        for model in MODELS:
-            try:
-                process = popen_launch_server(
-                    model.model,
-                    self.base_url,
-                    timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                    other_args=[
-                        "--chat-template",
-                        "llama-4",
-                        "--tp-size",
-                        str(model.tp_size),
-                        "--mem-fraction-static",
-                        "0.9",
-                        "--context-length",
-                        "8192",
-                        "--attention-backend",
-                        "ascend",
-                        "--disable-cuda-graph",
-                    ],
-                )
-                args = SimpleNamespace(
-                    num_shots=5,
-                    data_path=None,
-                    num_questions=200,
-                    max_new_tokens=512,
-                    parallel=128,
-                    host="http://127.0.0.1",
-                    port=int(self.base_url.split(":")[-1]),
-                )
-                metrics = run_eval(args)
-                print(f"{metrics=}")
-                self.assertGreaterEqual(metrics["accuracy"], model.accuracy)
-            except Exception as e:
-                print(f"Error testing {model.model}: {e}")
-                self.fail(f"Test failed for {model.model}: {e}")
-
-            finally:
-                # Ensure process cleanup happens regardless of success/failure
-                if process is not None and process.poll() is None:
-                    print(f"Cleaning up process {process.pid}")
-                    try:
-                        kill_process_tree(process.pid)
-                    except Exception as e:
-                        print(f"Error killing process: {e}")
-
+class TestLlama4(GSM8KAscendMixin, CustomTestCase):
+    model = "/root/.cache/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct"
+    accuracy = 0.9
+    other_args = [
+        "--chat-template",
+        "llama-4",
+        "--tp-size",
+        4,
+        "--mem-fraction-static",
+        "0.9",
+        "--context-length",
+        "8192",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+    ]
 
 if __name__ == "__main__":
     unittest.main()
