@@ -22,7 +22,7 @@ register_npu_ci(
 
 class TestC4AI(CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/CohereForAI/c4ai-command-r-v01"
-    accuracy = 0.05
+    accuracy = 0.56
 
     @classmethod
     def setUpClass(cls):

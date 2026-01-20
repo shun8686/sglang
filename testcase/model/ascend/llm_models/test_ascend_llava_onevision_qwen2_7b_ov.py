@@ -10,7 +10,7 @@ from sglang.test.test_utils import CustomTestCase
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/lmms-lab/llava-onevision-qwen2-7b-ov"
-    accuracy = 0.25
+    accuracy = 0.73
     other_args = [
             #"--api-key",
             #"sk-123456",

@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 
 class TestGrok(CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/huihui-ai/grok-2"
-    accuracy = 0.60
+    accuracy = 0.91
 
     @classmethod
     def setUpClass(cls):
