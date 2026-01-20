@@ -41,7 +41,7 @@ MODEL_CONFIG = {
         "--disable-radix-cache",
         "--moe-a2a-backend", "deepep",
         "--deepep-mode", "auto",
-        "--tp", 32,
+        "--tp-size", 32,
         "--dp-size", 32,
         "--enable-dp-attention",
         "--enable-dp-lm-head",

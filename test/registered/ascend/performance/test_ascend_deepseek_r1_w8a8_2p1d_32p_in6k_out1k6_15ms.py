@@ -76,7 +76,7 @@ MODEL_CONFIG = {
         "--deepep-mode", "low_latency",
         "--enable-dp-lm-head",
         "--moe-dense-tp", "1",
-        "--cuda-graph-bs", 4,
+        "--cuda-graph-bs", 2, 4, 6,
         "--watchdog-timeout", 9000,
         "--speculative-algorithm", "NEXTN",
         "--speculative-num-steps", 3,

@@ -18,36 +18,23 @@ Qwen3_Next_80B_A3B_ENVS = {
 
 Qwen3_Next_80B_A3B_OTHER_ARGS = [
     "--trust-remote-code",
-    "--attention-backend",
-    "ascend",
-    "--device",
-    "npu",
-    "--tp-size",
-    "4",
-    "--mem-fraction-static",
-    "0.685",
-    "--max-running-requests",
-    "80",
-    "--watchdog-timeout",
-    9000,
+    "--attention-backend", "ascend",
+    "--device", "npu",
+    "--tp-size", 4,
+    "--mem-fraction-static", 0.685,
+    "--max-running-requests", 80,
+    "--watchdog-timeout", 9000,
     "--disable-radix-cache",
-    "--cuda-graph-bs",
-    80,
-    "--max-prefill-tokens",
-    "28672",
-    "--max-total-tokens",
-    "450560",
-    "--moe-a2a-backend",
-    "deepep",
-    "--deepep-mode",
-    "auto",
-    "--quantization",
-    "modelslim",
-    "--chunked-prefill-size",
-    "-1",
+    "--cuda-graph-bs", 80,
+    "--max-prefill-tokens", 28672,
+    "--max-total-tokens", 450560,
+    "--moe-a2a-backend", "deepep",
+    "--deepep-mode", "auto",
+    "--quantization", "modelslim",
+    "--chunked-prefill-size", -1,
 ]
 
-class TestQwen3_Next_80B_A3B(TestSingleNodeTestCaseBase):
+class TestQwen3Next80BA3B(TestSingleNodeTestCaseBase):
     model = Qwen3_Next_80B_A3B_MODEL_PATH
     other_args = Qwen3_Next_80B_A3B_OTHER_ARGS
     envs = Qwen3_Next_80B_A3B_ENVS

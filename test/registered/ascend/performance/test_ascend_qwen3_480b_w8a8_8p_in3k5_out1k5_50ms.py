@@ -22,7 +22,7 @@ Qwen3_480B_OTHER_ARGS = [
     "--attention-backend", "ascend",
     "--device", "npu",
     "--quantization", "modelslim",
-    "--max-running-requests", 96,
+    "--max-running-requests", 80,
     "--context-length", 8192,
     "--dtype", "bfloat16",
     "--chunked-prefill-size", 28672,

@@ -40,7 +40,7 @@ QWEN3_235B_OTHER_ARGS = (
         "--moe-a2a-backend", "deepep",
         "--deepep-mode", "auto",
         "--speculative-draft-model-quantization", "unquant",
-        "--tp", 16,
+        "--tp-size", 16,
         "--dp-size", 16,
         "--enable-dp-attention",
         "--enable-dp-lm-head",
