@@ -23,8 +23,7 @@ MODEL_ENVS = {
 }
 MODEL_OTHER_ARGS = (
     [
-        "--tp",
-        "16",
+        "--tp-size", 16,
         "--trust-remote-code",
         "--attention-backend", "ascend",
         "--device", "npu",

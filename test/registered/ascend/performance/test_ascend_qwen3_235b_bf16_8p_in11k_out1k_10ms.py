@@ -38,7 +38,7 @@ QWEN3_235B_OTHER_ARGS = (
         "--speculative-num-draft-tokens", 5,
         "--disable-radix-cache",
         "--enable-dp-lm-head",
-        "--tp", 16,
+        "--tp-size", 16,
         "--mem-fraction-static", 0.78,
         "--cuda-graph-bs", 1,
     ]
