@@ -12,7 +12,7 @@ Usage:
     python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_streaming_with_adapter
     python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRADisabledError.test_lora_disabled_error
 """
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 import unittest
 
 import openai
@@ -25,6 +25,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 def get_real_lora_adapter() -> str:
     """Use a real LoRA adapter from Hugging Face."""
