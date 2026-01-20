@@ -28,33 +28,22 @@ QWEN3_32B_OTHER_ARGS = (
         "--device", "npu",
         "--max-running-requests", 1,
         "--disable-radix-cache",
-        "--speculative-algorithm",
-        "EAGLE3",
-        "--speculative-draft-model-path",
-        QWEN3_32B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps",
-        "4",
-        "--speculative-eagle-topk",
-        "1",
-        "--speculative-num-draft-tokens",
-        "5",
-        "--chunked-prefill-size",
-        "24576",
-        "--max-prefill-tokens",
-        "65536",
-        "--tp-size",
-        "8",
-        "--mem-fraction-static",
-        "0.72",
-        "--cuda-graph-bs",
-        1,
-        "--dtype",
-        "bfloat16",
+        "--speculative-algorithm", "EAGLE3",
+        "--speculative-draft-model-path", QWEN3_32B_EAGLE_MODEL_PATH,
+        "--speculative-num-steps", 4,
+        "--speculative-eagle-topk", 1,
+        "--speculative-num-draft-tokens", 5,
+        "--chunked-prefill-size", 24576,
+        "--max-prefill-tokens", 65536,
+        "--tp-size", 8,
+        "--mem-fraction-static", 0.72,
+        "--cuda-graph-bs", 1,
+        "--dtype", "bfloat16",
     ]
 )
 
 
-class TestQwen3_32B(TestSingleNodeTestCaseBase):
+class TestQwen32B(TestSingleNodeTestCaseBase):
     model = QWEN3_32B_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS

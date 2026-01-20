@@ -44,7 +44,7 @@ QWEN3_32B_OTHER_ARGS = (
 )
 
 
-class TestQwen3_32B(TestSingleNodeTestCaseBase):
+class TestQwen32B(TestSingleNodeTestCaseBase):
     model = QWEN3_32B_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
