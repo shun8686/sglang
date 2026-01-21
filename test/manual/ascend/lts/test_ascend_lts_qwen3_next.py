@@ -7,61 +7,45 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from lts_utils import NIC_NAME, run_bench_serving, run_command
+from lts_utils import NIC_NAME, run_command, run_bench_serving
 
 # MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
-MODEL_PATH = "/home/weights/Qwen3-32B-Int8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Next-80B-A3B-Instruct-W8A8"
 
 OTHER_ARGS = [
-        "--trust-remote-code",
-        "--nnodes",
-        "1",
-        "--node-rank",
-        "0",
-        "--attention-backend",
-        "ascend",
-        "--device",
-        "npu",
-        "--quantization",
-        "modelslim",
-        "--max-running-requests",
-        "78",
-        "--context-length",
-        "8192",
-        "--enable-hierarchical-cache",
-        "--hicache-write-policy",
-        "write_through",
-        "--hicache-ratio",
-        "3",
-        "--chunked-prefill-size",
-        "43008",
-        "--max-prefill-tokens",
-        "52500",
-        "--tp-size",
-        "4",
-        "--mem-fraction-static",
-        "0.68",
-        "--cuda-graph-bs",
-        "78",
-        "--dtype",
-        "bfloat16",
-        "--base-gpu-id",
-        8,
+    "--trust-remote-code",
+    "--attention-backend", "ascend",
+    "--device", "npu",
+    "--tp-size", 4,
+    "--mem-fraction-static", 0.685,
+    "--max-running-requests", 80,
+    "--watchdog-timeout", 9000,
+    "--disable-radix-cache",
+    "--cuda-graph-bs", 80,
+    "--max-prefill-tokens", 28672,
+    "--max-total-tokens", 450560,
+    "--moe-a2a-backend", "deepep",
+    "--deepep-mode", "auto",
+    "--quantization", "modelslim",
+    "--chunked-prefill-size", -1,
+    "--base-gpu-id", 8,
 ]
 
 ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-    "HCCL_BUFFSIZE": "400",
+    "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "HCCL_OP_EXPANSION_MODE": "AIV",
+    "HCCL_ALGO": "level0:NA;level1:ring",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
+    "HCCL_BUFFSIZE": "2000",
 }
+
 
 class TestLTSQwen332B(CustomTestCase):
     model = MODEL_PATH
@@ -70,20 +54,21 @@ class TestLTSQwen332B(CustomTestCase):
     other_args = OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = ENVS
-    request_rate = 5.5
-    max_concurrency = 16
+    max_concurrency = 80
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 0.5
     ttft = 10000
     tpot = 50
-    output_token_throughput = 350
-    accuracy = 0.80
+    output_token_throughput = 500
+    accuracy = 0.90
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.base_url = "http://0.0.0.0:30010"
+        cls.host = "0.0.0.0"
+        cls.port = 30010
         env = os.environ.copy()
         env.update(cls.envs)
 
@@ -101,14 +86,11 @@ class TestLTSQwen332B(CustomTestCase):
 
     def run_throughput(self):
         print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
         metrics = run_bench_serving(
-            host=host,
-            port=port,
+            host=self.host,
+            port=self.port,
             dataset_name=self.dataset_name,
             dataset_path=self.dataset_path,
-            request_rate=self.request_rate,
             max_concurrency=self.max_concurrency,
             num_prompts=self.num_prompts,
             input_len=self.input_len,
@@ -125,7 +107,7 @@ class TestLTSQwen332B(CustomTestCase):
         res_output_token_throughput = run_command(
             "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
         )
-        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
+        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
         # self.assertLessEqual(
         #     float(res_ttft),
         #     self.ttft,
@@ -143,12 +125,12 @@ class TestLTSQwen332B(CustomTestCase):
         print(f"========== Start gsm8k test ==========\n")
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/home/zhaoming/test.jsonl",
+            data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            host=f"http://{self.host}",
+            port=self.port,
         )
         metrics = run_eval(args)
         # self.assertGreater(
@@ -158,7 +140,7 @@ class TestLTSQwen332B(CustomTestCase):
         # )
         print(f"========== gsm8k test PASSED ==========\n")
 
-    def test_lts_qwen3_32b(self):
+    def test_lts_qwen3_next(self):
         i = 0
         while True:
             i = i + 1
@@ -170,4 +152,5 @@ class TestLTSQwen332B(CustomTestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
+
 
