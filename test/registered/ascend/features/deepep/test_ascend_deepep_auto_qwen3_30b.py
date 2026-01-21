@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from utils.test_ascend_deepep_mode_config import QWEN3_30B_A3B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -25,7 +26,7 @@ class TestPureTP(CustomTestCase):
             other_args=[
                 "--trust-remote-code",
                 "--tp-size",
-                "2",
+                "16",
                 "--quantization",
                 "modelslim",
                 "--moe-a2a-backend",
@@ -42,11 +43,12 @@ class TestPureTP(CustomTestCase):
                 **os.environ,
             },
         )
+        cls.accuracy = 0.90
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-
+    
     def test_mmlu(self):
         args = SimpleNamespace(
             base_url=self.base_url,
@@ -59,7 +61,22 @@ class TestPureTP(CustomTestCase):
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], 0.5)
 
-
-
+    def test_gsm8k(self):
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        metrics = run_eval_gsm8k(args)
+        self.assertGreater(
+            metrics["accuracy"],
+            self.accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])},is lower than {self.accuracy}',
+        )
+    
 if __name__ == "__main__":
     unittest.main()
