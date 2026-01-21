@@ -1,5 +1,7 @@
 import os
 import subprocess
+import time
+
 import psutil
 import socket
 
@@ -94,6 +96,7 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
     tpot = None
     output_token_throughput = None
     metrics_data_file = os.getenv("METRICS_DATA_FILE")
+    retry_wait_time = 30
 
     print("Nic name: {}".format(NIC_NAME))
 
@@ -141,6 +144,7 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
         metrics = run_bench_serving(**bench_params)
 
         if retry:
+            time.sleep(self.retry_wait_time)
             metrics = run_bench_serving(**bench_params)
 
         if self.tpot:
