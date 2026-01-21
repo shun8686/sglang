@@ -16,7 +16,6 @@ register_npu_ci(
     disabled="embeddings are not all close",
 )
 
-
 MODELS = [
     ("/root/.cache/modelscope/hub/models/iic/gte_Qwen2-1.5B-instruct", 1, 1e-5),
     ("/root/.cache/modelscope/hub/models/Qwen/Qwen3-Embedding-8B", 1, 1e-5),

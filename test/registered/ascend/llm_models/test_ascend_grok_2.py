@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 class TestGrok2(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/huihui-ai/grok-2"
-    accuracy = 0.60
+    accuracy = 0.91
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -23,6 +23,7 @@ class TestGrok2(GSM8KAscendMixin, CustomTestCase):
         "--tp-size",
         "16",
     ]
+
 
 if __name__ == "__main__":
     unittest.main()

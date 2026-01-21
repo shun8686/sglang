@@ -10,7 +10,6 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
     accuracy = 0.96
-    timeout=3000
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

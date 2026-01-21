@@ -23,5 +23,6 @@ class TestQwen3Next80B(GSM8KAscendMixin, CustomTestCase):
         "--disable-radix-cache",
     ]
 
+
 if __name__ == "__main__":
     unittest.main()

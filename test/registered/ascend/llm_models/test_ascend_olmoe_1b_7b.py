@@ -11,5 +11,6 @@ class TestOlMoe(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/allenai/OLMoE-1B-7B-0924"
     accuracy = 0.13
 
+
 if __name__ == "__main__":
     unittest.main()

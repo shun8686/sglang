@@ -18,5 +18,6 @@ class TestQwen306B(GSM8KAscendMixin, CustomTestCase):
         "--disable-cuda-graph",
     ]
 
+
 if __name__ == "__main__":
     unittest.main()

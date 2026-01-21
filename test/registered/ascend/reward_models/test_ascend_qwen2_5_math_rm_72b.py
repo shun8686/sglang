@@ -22,7 +22,7 @@ CONVS = [
 
 
 class TestInternlm2_7bReward(CustomTestCase):
-    model_path="/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-Math-RM-72B"
+    model_path = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-Math-RM-72B"
     torch_dtype = torch.float16
     tolerance = 4e-2
     tp_size = 4
@@ -38,7 +38,7 @@ class TestInternlm2_7bReward(CustomTestCase):
             model_type="reward",
             trust_remote_code=True,
             disable_cuda_graph=True,
-            tp_size = 4,
+            tp_size=4,
             mem_fraction_static=0.8,
         ) as srt_runner:
             prompts = srt_runner.tokenizer.apply_chat_template(CONVS, tokenize=False)
@@ -48,7 +48,7 @@ class TestInternlm2_7bReward(CustomTestCase):
         self.assertIsInstance(srt_scores, torch.Tensor)
 
 
-#class TestQwen2_5Apeach(TestInternlm2_7bReward):
+# class TestQwen2_5Apeach(TestInternlm2_7bReward):
 #    model_path = "/data/l30079981/weights/Qwen2.5-1.5B-apeach"
 
 
