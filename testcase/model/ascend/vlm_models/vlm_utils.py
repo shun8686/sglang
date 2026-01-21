@@ -87,7 +87,7 @@ class TestVLMModels(CustomTestCase):
             "--limit",
             limit,
             "--config",
-            "mmmu-val.yaml",
+            "/data/c30044170/code/newHDK/mmmu-val.yaml",
         ]
 
         subprocess.run(

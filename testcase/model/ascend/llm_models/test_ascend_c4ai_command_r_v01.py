@@ -27,7 +27,7 @@ class TestC4AI(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
-        chat_template_path = "tool_chat_template_c4ai_command_r_v01.jinja"
+        chat_template_path = "/data/c30044170/code/newHDK/tool_chat_template_c4ai_command_r_v01.jinja"
 
         other_args = [
             "--trust-remote-code",
