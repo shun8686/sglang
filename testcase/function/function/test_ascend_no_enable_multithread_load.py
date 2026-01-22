@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -24,7 +25,7 @@ TEST_MODEL_MATRIX = {
 }
 
 
-class TestEnableMultithreadLoad(CustomTestCase):
+class TestNoEnableMultithreadLoad(CustomTestCase):
     common_args = [
         "--trust-remote-code",
         "--attention-backend",
@@ -71,6 +72,7 @@ class TestEnableMultithreadLoad(CustomTestCase):
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
 
+                start_time = time.time()
                 process = popen_launch_server(
                     model,
                     self.base_url,
@@ -79,6 +81,7 @@ class TestEnableMultithreadLoad(CustomTestCase):
                         *self.common_args,
                     ],
                 )
+                end_time = time.time()
 
                 try:
                     args = SimpleNamespace(
@@ -96,6 +99,7 @@ class TestEnableMultithreadLoad(CustomTestCase):
                         metrics["accuracy"],
                         TEST_MODEL_MATRIX[model]["accuracy"],
                     )
+                    print(f"popen launch server elapsed time:{end_time - start_time}")
                 finally:
                     kill_process_tree(process.pid)
 

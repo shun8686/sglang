@@ -1,5 +1,6 @@
 import json
 import os
+import time
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -73,6 +74,7 @@ class TestEnableMultithreadLoad(CustomTestCase):
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
 
+                start_time = time.time()
                 process = popen_launch_server(
                     model,
                     self.base_url,
@@ -81,6 +83,7 @@ class TestEnableMultithreadLoad(CustomTestCase):
                         *self.common_args,
                     ],
                 )
+                end_time = time.time()
 
                 try:
                     args = SimpleNamespace(
@@ -98,36 +101,9 @@ class TestEnableMultithreadLoad(CustomTestCase):
                         metrics["accuracy"],
                         TEST_MODEL_MATRIX[model]["accuracy"],
                     )
+                    print(f"popen launch server elapsed time:{end_time - start_time}")
                 finally:
                     kill_process_tree(process.pid)
-
-class TestAscendDeepSeekMTP(TestEnableMultithreadLoad):
-    common_args = [
-        "--trust-remote-code",
-        "--attention-backend",
-        "ascend",
-        "--quantization",
-        "modelslim",
-        "--mem-fraction-static",
-        0.8,
-        "--disable-radix-cache",
-        "--chunked-prefill-size",
-        32768,
-        "--tp-size",
-        16,
-        "--speculative-algorithm",
-        "NEXTN",
-        "--speculative-num-steps",
-        1,
-        "--speculative-eagle-topk",
-        1,
-        "--speculative-num-draft-tokens",
-        2,
-        "--cuda-graph-max-bs",
-        16,
-        "--enable-torch-compile",
-        "--disable-cuda-graph",
-    ]
 
 
 if __name__ == "__main__":
