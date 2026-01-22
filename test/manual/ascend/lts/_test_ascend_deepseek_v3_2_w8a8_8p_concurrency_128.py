@@ -1,8 +1,13 @@
+import os
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.few_shot_gsm8k import run_eval
-from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
+from sglang.srt.utils import kill_process_tree
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
+from sglang.test.test_utils import (
+    CustomTestCase, DEFAULT_URL_FOR_TEST, popen_launch_server, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+)
+from lts_utils import NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 
@@ -33,10 +38,11 @@ OTHER_ARGS = (
     ]
 )
 
-class TestDeepSeekV32(TestSingleNodeTestCaseBase):
+class TestDeepSeekV32(CustomTestCase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     # dataset_name = "random"
     # max_concurrency = 80
     # num_prompts = 320
@@ -48,6 +54,29 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
 
     # def test_deepseek_v3_2(self):
     #     self.run_throughput()
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        if cls.envs:
+            for key, value in cls.envs.items():
+                print(f"ENV_VAR_CASE {key}:{value}")
+        env = os.environ.copy()
+        for key, value in cls.envs.items():
+            print(f"ENV_VAR_OTHER {key}:{value}")
+        env.update(cls.envs)
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=cls.timeout,
+            other_args=cls.other_args,
+            env=env,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
 
     def test_deepseek_v3_2_by_gsm8k(self):
         colon_index = self.base_url.rfind(":")
@@ -66,7 +95,7 @@ class TestDeepSeekV32(TestSingleNodeTestCaseBase):
             port=port,
         )
         for i in range(10):
-            metrics = run_eval(args)
+            metrics = run_gsm8k(args)
             print(f"{metrics=}")
             print(f"{metrics['accuracy']=}")
 
