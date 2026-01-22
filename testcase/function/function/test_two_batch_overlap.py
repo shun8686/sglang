@@ -18,8 +18,8 @@ from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     popen_launch_server,
 )
-
-
+DEFAULT_ENABLE_THINKING_MODEL_NAME_FOR_TEST="/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
+DEFAULT_MLA_MODEL_NAME_FOR_TEST="/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
 class TestTwoBatchOverlap(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

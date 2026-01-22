@@ -34,11 +34,11 @@ class TestQwenPPTieWeightsAccuracy(CustomTestCase):
             "4",
             "--enable-hierarchical-cache",
             "--radix-eviction-policy",
-            "lfu",
+            "lru",
             "--hicache-io-backend",
             "direct",
             "--hicache-mem-layout",
-            "page_first_direct",    
+            "page_first_kv_split",    
         ]
         cls.process = popen_launch_server(
             cls.model_name,
