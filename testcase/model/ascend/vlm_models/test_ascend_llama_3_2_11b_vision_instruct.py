@@ -1,16 +1,14 @@
 import unittest
 
-from gsm8k_ascend_mixin import GSM8KAscendMixin
-
+from vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
+class TestLlama3211BVisionInstruct(TestVLMModels):
     model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-11B-Vision-Instruct"
-    accuracy = 0
+    mmmu_accuracy = 0.2
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -20,6 +18,9 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
         "--disable-cuda-graph",
         "--disable-radix-cache",
     ]
+
+    def test_vlm_mmmu_benchmark(self):
+        self._run_vlm_mmmu_test()
 
 
 if __name__ == "__main__":
