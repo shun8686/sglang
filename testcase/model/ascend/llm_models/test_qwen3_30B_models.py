@@ -42,10 +42,8 @@ class TestAscendTp4Bf16(CustomTestCase):
             32,
             "--tp-size",
             2,
-            "--base-gpu-id",
-            8,
         ]
-        
+
         cls.process = popen_launch_server(
             cls.models,
             cls.base_url,
@@ -56,7 +54,7 @@ class TestAscendTp4Bf16(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        
+
     def test_a_gsm8k(self):
         args = SimpleNamespace(
                 num_shots=5,
@@ -65,13 +63,13 @@ class TestAscendTp4Bf16(CustomTestCase):
                 max_new_tokens=512,
                 parallel=128,
                 host=f"http://{self.url.hostname}",
-                port=int(self.url.port),    
+                port=int(self.url.port),
                 )
 
         metrics = run_eval_few_shot_gsm8k(args)
         self.assertGreaterEqual(
                 metrics["accuracy"],
-                TEST_MODEL_MATRIX[self.models]["accuracy"],     
+                TEST_MODEL_MATRIX[self.models]["accuracy"],
                 )
 
 
