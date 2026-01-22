@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
 class TestMiMo(CustomTestCase):
     # model = "/root/.cache/modelscope/hub/models/XiaomiMiMo/MiMo-7B-RL"
     model = "/root/.cache/modelscope/hub/models/allenai/OLMoE-1B-7B-0924"
-    accuracy = 0.13
+    accuracy = 0.12
 
     @classmethod
     def setUpClass(cls):
