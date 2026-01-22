@@ -1,3 +1,4 @@
+import os
 import json
 import re
 import time
@@ -21,7 +22,10 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-
+os.environ["SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN"] = "1"
+os.environ["SGLANG_ENABLE_OVERLAP_PLAN_SITEAM"] = "1"
+os.environ["SGLANG_ENABLE_SPEC_V2"] = "1"
+ENV = os.environ.copy()
 class BaseTestOpenAIServerWithHiddenStates(ABC):
 
     @classmethod
@@ -220,7 +224,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
         #cls.model = DEFAULT_SMALL_MODEL_NAME_FOR_TEST
         cls.model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.api_key = "sk-123456"
+        cls.api_key = "sk-123456"      
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -232,6 +236,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
                 "--disable-cuda-graph",
                 "--base-gpu-id",
                 8,],
+            env=ENV,
         )
         cls.base_url += "/v1"
         #cls.tokenizer = get_tokenizer(DEFAULT_SMALL_MODEL_NAME_FOR_TEST)
@@ -266,6 +271,7 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
                 "--disable-cuda-graph",
                 "--base-gpu-id",
                 8,],
+            env=ENV,
         )
         cls.base_url += "/v1"
         cls.tokenizer = get_tokenizer("/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct")
@@ -324,6 +330,7 @@ class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
                 "--base-gpu-id",
                 8,
             ],
+            env=ENV,
         )
         cls.base_url += "/v1"
         cls.tokenizer = get_tokenizer(cls.model)
