@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-
+DEFAULT_SMALL_MODEL_NAME_FOR_TEST="/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
 class TestJSONModeMixin:
     """Mixin class containing JSON mode test methods"""
 

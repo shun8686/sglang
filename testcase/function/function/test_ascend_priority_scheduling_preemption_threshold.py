@@ -80,8 +80,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
             )
         )
         
-        # 等待2秒，确保作业A已完全启动并占用运行位（延长等待，避免抢占逻辑未触发）
-        loop.run_until_complete(asyncio.sleep(2))
+        loop.run_until_complete(asyncio.sleep(0.5))
         
         # 步骤2：调整发送顺序：先C（10）后B（5），并添加间隔，确保C优先抢占
         # 2.1 先发送高优先级的C（10），满足与A的差值≥5，触发抢占
@@ -148,7 +147,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         )
         
         # 等待2秒，确保作业A已完全启动并占用运行位（延长等待，避免抢占逻辑未触发）
-        loop.run_until_complete(asyncio.sleep(2))
+        loop.run_until_complete(asyncio.sleep(0.5))
         
         # 步骤2：调整发送顺序：先C（10）后B（5），并添加间隔，确保C优先抢占
         # 2.1 先发送高优先级的C（10），满足与A的差值≥5，触发抢占
@@ -161,7 +160,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
                 self.base_url, [request_c]
             )
         )
-        
+        loop.run_until_complete(asyncio.sleep(0.5))
         # 2.2 等待0.5秒，确保C已完成并释放运行位，再发送B（2），避免干扰
         request_b = {
             "priority": 2,

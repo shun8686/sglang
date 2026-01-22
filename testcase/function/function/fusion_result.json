@@ -4,10 +4,6 @@
             "IndexByTensorStaticFusionPass": {
                 "effect_times": "0",
                 "match_times": "1"
-            },
-            "RefreshInt64ToInt32FusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
             }
         },
         "ub_fusion": {
@@ -18,52 +14,9 @@
             }
         }
     },
-    "session_and_graph_id_0_2": {
-        "graph_fusion": {
-            "CastRemoveFusionPass": {
-                "effect_times": "3",
-                "match_times": "7"
-            },
-            "ForceFp16CastFusionPass": {
-                "effect_times": "0",
-                "match_times": "4"
-            },
-            "MulAddFusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
-            },
-            "MulSquareFusionPass": {
-                "effect_times": "0",
-                "match_times": "2"
-            },
-            "RealDiv2MulsFusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
-            },
-            "RefreshInt64ToInt32FusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
-            },
-            "RemoveCastFusionPass": {
-                "effect_times": "0",
-                "match_times": "4"
-            }
-        },
-        "ub_fusion": {
-            "AutomaticUbFusion": {
-                "effect_times": "0",
-                "match_times": "1",
-                "repository_hit_times": "0"
-            }
-        }
-    },
-    "session_and_graph_id_0_3": {
+    "session_and_graph_id_0_1": {
         "graph_fusion": {
             "IndexByTensorStaticFusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
-            },
-            "RefreshInt64ToInt32FusionPass": {
                 "effect_times": "0",
                 "match_times": "1"
             }
@@ -72,45 +25,6 @@
             "AutomaticUbFusion": {
                 "effect_times": "2",
                 "match_times": "2",
-                "repository_hit_times": "0"
-            }
-        }
-    },
-    "session_and_graph_id_0_4": {
-        "graph_fusion": {
-            "CastRemoveFusionPass": {
-                "effect_times": "3",
-                "match_times": "7"
-            },
-            "ForceFp16CastFusionPass": {
-                "effect_times": "0",
-                "match_times": "4"
-            },
-            "MulAddFusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
-            },
-            "MulSquareFusionPass": {
-                "effect_times": "0",
-                "match_times": "2"
-            },
-            "RealDiv2MulsFusionPass": {
-                "effect_times": "1",
-                "match_times": "1"
-            },
-            "RefreshInt64ToInt32FusionPass": {
-                "effect_times": "0",
-                "match_times": "1"
-            },
-            "RemoveCastFusionPass": {
-                "effect_times": "0",
-                "match_times": "4"
-            }
-        },
-        "ub_fusion": {
-            "AutomaticUbFusion": {
-                "effect_times": "1",
-                "match_times": "1",
                 "repository_hit_times": "0"
             }
         }

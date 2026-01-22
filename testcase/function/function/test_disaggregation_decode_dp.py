@@ -16,6 +16,7 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
 class TestDisaggregationDecodeDp(TestDisaggregationBase):
     @classmethod
@@ -24,8 +25,8 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         )
-        os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
-        env = os.environ.copy()
+        #os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
+        #env = os.environ.copy()
 
         # Non blocking start servers
         cls.start_prefill()
@@ -54,12 +55,15 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
                 0.8,
             ]
         )
+        
+        env = os.environ.copy()
 
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
             cls.prefill_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=prefill_args,
+            env=env,
         )
 
     @classmethod
@@ -79,11 +83,15 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
                 0.8,
             ]
         )
+
+        env = os.environ.copy()
+
         cls.process_decode = popen_launch_pd_server(
             cls.model,
             cls.decode_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=decode_args,
+            env=env,
         )
 
     def test_disaggregation_decode_dp(self):
