@@ -28,18 +28,18 @@ MODEL = [
 
 
 # image
-IMAGE_MAN_IRONING_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/man_ironing_on_back_of_suv.png"
-IMAGE_SGL_LOGO_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/sgl_logo.png"
+IMAGE_MAN_IRONING_URL = "/tmp/man_ironing_on_back_of_suv.png"
+IMAGE_SGL_LOGO_URL = "/tmp/function/sgl_logo.png"
 #IMAGE_MAN_IRONING_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/man_ironing_on_back_of_suv.png"
 #IMAGE_SGL_LOGO_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/sgl_logo.png"
 
 # video
-VIDEO_JOBS_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/jobs_presenting_ipod.mp4"
+VIDEO_JOBS_URL = "/tmp/jobs_presenting_ipod.mp4"
 #VIDEO_JOBS_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/videos/jobs_presenting_ipod.mp4"
 
 # audio
-AUDIO_TRUMP_SPEECH_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/Trump_WEF_2018_10s.mp3"
-AUDIO_BIRD_SONG_URL = "/data/y30061092/hhh1252023/sglang/testcase/function/function/bird_song.mp3"
+AUDIO_TRUMP_SPEECH_URL = "/tmp/Trump_WEF_2018_10s.mp3"
+AUDIO_BIRD_SONG_URL = "/tmp/bird_song.mp3"
 #AUDIO_TRUMP_SPEECH_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/audios/Trump_WEF_2018_10s.mp3"
 #AUDIO_BIRD_SONG_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/audios/bird_song.mp3"
 
@@ -101,7 +101,7 @@ class TestVisionModel(CustomTestCase):
         response = requests.post(self.base_url+'/chat/completions',json={"messages": messages, "temperature": 0, "max_completion_tokens": 1024})
         assert response.status_code == 200
 
-    def _run_multi_turn_request1(self):    
+    def _run_multi_turn_request1(self):
         messages1 = [
                 {
                     "role": "user",
