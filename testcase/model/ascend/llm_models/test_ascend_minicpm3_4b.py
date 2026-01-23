@@ -20,9 +20,7 @@ class TestMiniCPM3(GSM8KAscendMixin, CustomTestCase):
         "--disable-radix-cache",
         "--disable-overlap-schedule",
         "--max-running-requests",
-        "128",
-        "--chunked-prefill-size",
-        "-1",
+        "8",
     ]
 
 if __name__ == "__main__":
