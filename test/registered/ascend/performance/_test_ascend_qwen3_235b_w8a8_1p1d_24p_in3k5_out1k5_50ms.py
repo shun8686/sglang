@@ -162,7 +162,7 @@ class TestQwen3_235B_w8a8_1p2d_in3500_out1500(TestAscendMultiNodePdSepTestCaseBa
     random_range_ratio = 1
 
     def test_throughput(self):
-        self.run_throughput(retry=False)
+        self.run_throughput(retry_times=0)
         if self.role == "router":
             os.environ["SGLANG_EXPERT_DISTRIBUTION_RECORDER_DIR"] = "/data/d00662834/hot_map"
             print("Begin to dump hotmap data")

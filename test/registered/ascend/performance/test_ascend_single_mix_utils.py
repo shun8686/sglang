@@ -120,7 +120,7 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def run_throughput(self, retry=True):
+    def run_throughput(self, retry_times=1):
         _, host, port = self.base_url.split(":")
         host = host[2:]
         bench_params = {
@@ -138,10 +138,12 @@ class TestSingleNodeTestCaseBase(CustomTestCase):
             'dataset_path': self.dataset_path,
             'result_file': self.metrics_data_file,
         }
-        metrics = run_bench_serving(**bench_params)
+        print(f"Starting benchmark with parameters: {bench_params}")
 
-        if retry:
-            time.sleep(120)
+        metrics = None
+        test_times = 1 + retry_times
+        for i in range(test_times):
+            print(f"Running benchmark, {i + 1}/{test_times}")
             metrics = run_bench_serving(**bench_params)
 
         if self.tpot:
