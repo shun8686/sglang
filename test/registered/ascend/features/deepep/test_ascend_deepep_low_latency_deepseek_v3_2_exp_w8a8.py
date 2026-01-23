@@ -1,3 +1,4 @@
+import time
 import os
 import unittest
 from types import SimpleNamespace
@@ -14,7 +15,6 @@ from sglang.test.test_utils import (
 )
 
 
-
 class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
@@ -25,37 +25,38 @@ class TestDeepEpDeepseek(CustomTestCase):
             cls.base_url,
             timeout=6000,
             other_args=[
-                # "--trust-remote-code",
-                # "--tp-size",
-                # "16",
-                # "--quantization",
-                # "modelslim",
+                "--trust-remote-code",
+                "--tp-size",
+                "16",
+                "--quantization",
+                "modelslim",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
                 "low_latency",
-                # "--disable-cuda-graph",
-                # "--disable-radix-cache",
-                # "--trust-remote-code",
-                "--attention-backend", "ascend",
-                "--device", "npu",
-                "--tp-size", 16,
-                "--quantization", "modelslim",
-                "--mem-fraction-static", 0.81,
-                "--chunked-prefill-size", -1,
-                "--context-length", 8192,
-                "--max-prefill-tokens", 20480,
-                "--max-running-requests", 64,
-                "--cuda-graph-bs", 16, 32, 64,
-                "--cuda-graph-max-bs", 64,
-                "--watchdog-timeout", 600,
+                "--mem-fraction-static",
+                0.82,
+                "--disable-cuda-graph",
                 "--disable-radix-cache",
+                "--context-length", 40960,
+                "--max-prefill-tokens", 128,
+                "--max-total-tokens", 40960,
+                #"--dp-size", 4,
+                #"--enable-dp-attention",
+                #"--enable-dp-lm-head",
+                #"--chunked-prefill-size", 128,
             ],
             env={
-                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
+                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+                "STREAMS_PER_DEVICE": "32",
+                "HCCL_SOCKET_IFNAME": NIC_NAME,
+                "GLOO_SOCKET_IFNAME": NIC_NAME,
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
                 "HCCL_BUFFSIZE": "2048",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                "HCCL_OP_EXPANSION_MODE": "AIV",
+                #"SGLANG_NPU_USE_MLAPO": "0",
+                #"SGLANG_NPU_USE_MULTI_STREAM": "1",
+                "TASK_QUEUE_ENABLE": "0",
                 **os.environ,
             },
         )
@@ -82,6 +83,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
+            timeout=60000,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,

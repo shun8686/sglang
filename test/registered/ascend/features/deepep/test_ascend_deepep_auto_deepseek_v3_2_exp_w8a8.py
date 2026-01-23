@@ -1,3 +1,4 @@
+import time
 import os
 import unittest
 from types import SimpleNamespace
@@ -33,6 +34,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "deepep",
                 "--deepep-mode",
                 "auto",
+                "--mem-fraction-static",
+                0.82,
                 "--disable-cuda-graph",
                 "--disable-radix-cache",
                 "--context-length", 40960,
@@ -50,10 +53,6 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "SGLANG_NPU_USE_MLAPO": "0",
                 "SGLANG_NPU_USE_MULTI_STREAM": "1",
                 "TASK_QUEUE_ENABLE": "0",
-                # "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                # "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
-                # "HCCL_BUFFSIZE": "2048",
-                # "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
         )
@@ -80,6 +79,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
+            timeout=60000,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
