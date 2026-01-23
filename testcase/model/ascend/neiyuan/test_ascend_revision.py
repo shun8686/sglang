@@ -20,6 +20,7 @@ class TestRevisionDefault(CustomTestCase):
             [
                 "--attention-backend",
                 "ascend",
+                "--weight-loader-disable-mmap",
                 "--disable-cuda-graph",
                 "--trust-remote-code",
             ]

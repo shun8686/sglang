@@ -42,7 +42,7 @@ class TestWarmups(CustomTestCase):
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            timeout=3600,
             other_args=other_args,
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
