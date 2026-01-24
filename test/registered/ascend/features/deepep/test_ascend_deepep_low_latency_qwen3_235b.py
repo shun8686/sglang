@@ -14,24 +14,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestPureTP(CustomTestCase):
-    other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.8",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        "8",
-        "--quantization",
-        "modelslim",
-        "--moe-a2a-backend",
-        "deepep",
-        "--deepep-mode",
-        "low_latency",
-    ]
-
+class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN3_235B_A22B_W8A8_MODEL_PATH
@@ -40,17 +23,28 @@ class TestPureTP(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
+            other_args=[
+                "--trust-remote-code",
+                "--attention-backend", "ascend",
+                "--tp-size",
+                "8",
+                "--moe-a2a-backend",
+                "deepep",
+                "--deepep-mode",
+                "low_latency",
+                "--disable-cuda-graph",
+                "--dp-size", 2,
+                "--enable-dp-attention",
+                "--chunked-prefill-size", 1024,
+                "--quantization",
+                "modelslim",
+                "--mem-fraction-static",
+                "0.75",
+            ],
             env={
-                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-                "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-                "HCCL_BUFFSIZE": "2100",
-                "HCCL_SOCKET_IFNAME": NIC_NAME,
-                "GLOO_SOCKET_IFNAME": NIC_NAME,
-                "HCCL_OP_EXPANSION_MODE": "AIV",
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                # "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                "HCCL_BUFFSIZE": "2048",
                 "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
@@ -61,6 +55,7 @@ class TestPureTP(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        expect_score = 0.85
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
