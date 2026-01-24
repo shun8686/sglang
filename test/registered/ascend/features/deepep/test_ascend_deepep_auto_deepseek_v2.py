@@ -27,7 +27,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--trust-remote-code",
                 "--attention-backend", "ascend",
                 "--tp-size",
-                "2",
+                "8",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
