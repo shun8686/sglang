@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, NIC_NAME
+from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -25,7 +25,8 @@ class TestDeepEpDeepseek(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--attention-backend", "ascend",
+                "--attention-backend",
+                "ascend",
                 "--tp-size",
                 "8",
                 "--moe-a2a-backend",
@@ -35,7 +36,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--disable-cuda-graph",
                 "--dp-size", 2,
                 "--enable-dp-attention",
-                "--chunked-prefill-size", 1024,
+                "--chunked-prefill-size",
+                1024,
                 "--quantization",
                 "modelslim",
                 "--mem-fraction-static",
@@ -45,7 +47,6 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
                 "HCCL_BUFFSIZE": "2048",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
         )

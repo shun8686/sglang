@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH, NIC_NAME
+from utils.test_ascend_deepep_mode_config import QWEN3_235B_A22B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -14,24 +14,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestPureTP(CustomTestCase):
-    other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.8",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        "8",
-        "--quantization",
-        "modelslim",
-        "--moe-a2a-backend",
-        "deepep",
-        "--deepep-mode",
-        "auto",
-    ]
-
+class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN3_235B_A22B_W8A8_MODEL_PATH
@@ -40,14 +23,30 @@ class TestPureTP(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
+            other_args=[
+                "--trust-remote-code",
+                "--attention-backend",
+                "ascend",
+                "--tp-size",
+                "8",
+                "--moe-a2a-backend",
+                "deepep",
+                "--deepep-mode",
+                "auto",
+                "--disable-cuda-graph",
+                "--dp-size", 2,
+                "--enable-dp-attention",
+                "--chunked-prefill-size",
+                1024,
+                "--quantization",
+                "modelslim",
+                "--mem-fraction-static",
+                "0.75",
+            ],
             env={
-                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-                "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-                "HCCL_BUFFSIZE": "2100",
-                "HCCL_SOCKET_IFNAME": NIC_NAME,
-                "GLOO_SOCKET_IFNAME": NIC_NAME,
-                "HCCL_OP_EXPANSION_MODE": "AIV",
+                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                "HCCL_BUFFSIZE": "2048",
                 **os.environ,
             },
         )
