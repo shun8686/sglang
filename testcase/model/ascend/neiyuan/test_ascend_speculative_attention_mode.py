@@ -3,11 +3,12 @@ import os
 import time
 import unittest
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 import requests
 
 from sglang.test.run_eval import run_eval
-# from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
@@ -19,18 +20,15 @@ from sglang.test.test_utils import (
 
 QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3"
 
-TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE": {
-        "accuracy": 0.81,
-    },
-}
-
 
 class TestNumReservedDecodeTokens(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = TEST_MODEL_MATRIX.keys()
+        cls.model = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+        cls.accuracy = 0.81
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
         env = os.environ.copy()
 
@@ -75,7 +73,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "1",
                 "--speculative-num-draft-tokens",
                 "5",
-                "--speculative-attention-backend",
+                "--speculative-attention-mode",
                 "decode",
                 "--tp-size",
                 "4",
@@ -132,7 +130,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "1",
                 "--speculative-num-draft-tokens",
                 "5",
-                "--speculative-attention-backend",
+                "--speculative-attention-mode",
                 "prefill",
                 "--tp-size",
                 "4",
@@ -156,34 +154,22 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
         )
 
     def test_a_gsm8k(self):
-        for model in self.model:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
+        print(f"##=== Testing accuracy: {cls.model} ===##")
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=1319,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
 
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=1500,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
-
-                args = SimpleNamespace(
-                    num_shots=5,
-                    data_path=None,
-                    num_questions=1319,
-                    max_new_tokens=512,
-                    parallel=128,
-                    host=f"http://{self.url.hostname}",
-                    port=int(self.url.port),
-                )
-
-                metrics = run_eval_few_shot_gsm8k(args)
-                self.assertGreaterEqual(
-                    metrics["accuracy"],
-                    TEST_MODEL_MATRIX[model]["accuracy"],
-                )
+        metrics = run_eval_few_shot_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            cls.accuracy,
+        )
 
     @classmethod
     def tearDownClass(cls):
