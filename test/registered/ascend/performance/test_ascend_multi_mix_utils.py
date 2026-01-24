@@ -125,7 +125,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
         cls.role = "master" if hostname.endswith("sglang-node-0") else "worker"
         print(f"Init {cls.local_ip} {cls.role=}!")
 
-    def run_throughput(self, retry_times=1):
+    def run_throughput(self, run_cycles=2):
         sglang_thread = threading.Thread(
             target=launch_node, args=(self.model_config,)
         )
@@ -154,9 +154,8 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
             print(f"Starting benchmark with parameters: {bench_params}")
 
             metrics = None
-            test_times = 1 + retry_times
-            for i in range(test_times):
-                print(f"Running benchmark, {i+1}/{test_times}")
+            for i in range(run_cycles):
+                print(f"Running benchmark, {i+1}/{run_cycles}")
                 metrics = run_bench_serving(**bench_params)
 
             if self.tpot:

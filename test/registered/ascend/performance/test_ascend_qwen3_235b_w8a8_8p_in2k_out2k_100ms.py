@@ -65,7 +65,7 @@ class TestQwen235B(TestSingleNodeTestCaseBase):
     output_token_throughput = 6856
 
     def test_qwen3_235b(self):
-        self.run_throughput(retry_times=2)
+        self.run_throughput(run_cycles=4)
 
 
 if __name__ == "__main__":
