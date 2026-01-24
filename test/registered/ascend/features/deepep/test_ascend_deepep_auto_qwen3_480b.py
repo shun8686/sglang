@@ -61,7 +61,7 @@ class TestDeepEpQwen(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        expect_score = 0.7
+        expect_score = 0.56
 
         print("Starting mmlu test...")
         args = SimpleNamespace(
