@@ -29,7 +29,7 @@ class TestPureTP(CustomTestCase):
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "normal",
+        "low_latency",
     ]
 
     @classmethod
