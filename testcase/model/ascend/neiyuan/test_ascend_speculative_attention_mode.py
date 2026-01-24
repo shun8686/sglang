@@ -154,7 +154,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
         )
 
     def test_a_gsm8k(self):
-        print(f"##=== Testing accuracy: {cls.model} ===##")
+        print(f"##=== Testing accuracy: {self.model} ===##")
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -168,7 +168,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
         metrics = run_eval_few_shot_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],
-            cls.accuracy,
+            self.accuracy,
         )
 
     @classmethod
