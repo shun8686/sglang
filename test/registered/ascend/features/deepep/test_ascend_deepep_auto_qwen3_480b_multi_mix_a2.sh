@@ -4,25 +4,16 @@
 MODEL_PATH=/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot
 NIC_NAME=enp189s0f0
 NODE_IP=('61.47.16.106' '61.47.16.107')
+
 SERVER_PORT=6688
 HEALTH_CHECK_URL="http://127.0.0.1:${SERVER_PORT}/health"
 TEST_CASE_FILE=test_ascend_deepep_qwen3_480b_a2.py
-
-set_proxy() {
-    export http_proxy=61.251.170.143:30066
-    export https_proxy=$http_proxy
-    export no_proxy=127.0.0.1,localhost,local,.local
-}
 
 echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
 sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
-unset https_proxy
-unset http_proxy
-unset HTTPS_PROXY
-unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
 cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info | grep "^version=")
@@ -62,7 +53,7 @@ wait_server_ready() {
     MAX_RETRY=50
     RETRY_COUNT=0
     while true; do
-        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL")    
+        HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" "$HEALTH_CHECK_URL")
         if [ "$HTTP_CODE" -eq 200 ]; then
             log "Response code is 200. The server is ready."
             break
@@ -102,7 +93,6 @@ launch_server() {
 }
 
 run_test_case() {
-    set_proxy
     test_case_file=$1
     if ! [ -e "$test_case_file" ];then
         echo "The test case file is not exist: $test_case_file"
