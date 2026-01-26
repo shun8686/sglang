@@ -27,7 +27,7 @@ def run_command(cmd, shell=True):
 class TestGpuId(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.device_id = 9
+        cls.device_id = 0
         cls.step = 2
         other_args = (
             [

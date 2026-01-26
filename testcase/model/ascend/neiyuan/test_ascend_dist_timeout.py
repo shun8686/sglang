@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 TEST_MODEL_MATRIX = {
     "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8": {
-        "accuracy": 0.00,
+        "accuracy": 0.95,
         "latency": 1000,
         "output_throughput": 6,
     },
@@ -27,10 +27,7 @@ class TestAscendDistTimeout(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        os.environ["HCCL_BUFFSIZE"] = "2048"
-        os.environ["SGLANG_ENABLE_OVERLAP_PLAN_STREAM"]="1"
-        os.environ["SGLANG_ENABLE_SPEC_V2"]="1"
-        cls.env = os.environ.copy()
+
         cls.common_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -38,48 +35,35 @@ class TestAscendDistTimeout(CustomTestCase):
             "--quantization",
             "modelslim",
             "--mem-fraction-static",
-            0.8,
+            0.87,
             "--disable-radix-cache",
             "--chunked-prefill-size",
-            2048,
+            32768,
             "--tp-size",
             16,
+            "--dist-timeout",
+            3600,
             "--disable-cuda-graph",
-            "--speculative-moe-a2a-backend",
-            "ascend_fuseep",
-            "--speculative-algorithm",
-            "NEXTN",
-            "--speculative-num-steps",
-            1,
-            "--speculative-eagle-topk",
-            1,
-            "--speculative-num-draft-tokens",
-            2,
-            "--moe-a2a-backend",
-            "ascend_fuseep",
-            "--deepep-mode",
-            "auto",
-            ]
+        ]
+
     
     def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
-                other_args =  self.common_args
                 process = popen_launch_server(
                     model,
                     self.base_url,
                     timeout=1500,
                     other_args=[
-                         *other_args,
-                     ],
-                    env = self.env,
-                  )
+                        *self.common_args,
+                    ],
+                )
 
                 try:
                     args = SimpleNamespace(
                         num_shots=5,
-                        data_path="/tmp/test.jsonl",
+                        data_path=None,
                         num_questions=1319,
                         max_new_tokens=512,
                         parallel=128,
@@ -91,7 +75,7 @@ class TestAscendDistTimeout(CustomTestCase):
                     self.assertGreaterEqual(
                         metrics["accuracy"],
                         TEST_MODEL_MATRIX[model]["accuracy"],
-                     )
+                    )
                 finally:
                     kill_process_tree(process.pid)
 
