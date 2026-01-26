@@ -27,7 +27,10 @@ class TestAscendDistTimeout(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-
+        os.environ["HCCL_BUFFSIZE"] = "2048"
+        os.environ["SGLANG_ENABLE_OVERLAP_PLAN_STREAM"]="1"
+        os.environ["SGLANG_ENABLE_SPEC_V2"]="1"
+        cls.env = os.environ.copy()
         cls.common_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -38,12 +41,24 @@ class TestAscendDistTimeout(CustomTestCase):
             0.8,
             "--disable-radix-cache",
             "--chunked-prefill-size",
-            32768,
+            2048,
             "--tp-size",
             16,
             "--disable-cuda-graph",
             "--speculative-moe-a2a-backend",
             "ascend_fuseep",
+            "--speculative-algorithm",
+            "NEXTN",
+            "--speculative-num-steps",
+            1,
+            "--speculative-eagle-topk",
+            1,
+            "--speculative-num-draft-tokens",
+            2,
+            "--moe-a2a-backend",
+            "ascend_fuseep",
+            "--deepep-mode",
+            "auto",
             ]
     
     def test_a_gsm8k(self):
@@ -58,6 +73,7 @@ class TestAscendDistTimeout(CustomTestCase):
                     other_args=[
                          *other_args,
                      ],
+                    env = self.env,
                   )
 
                 try:
