@@ -40,7 +40,7 @@ class TestPureTP(CustomTestCase):
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
                 "HCCL_BUFFSIZE": "2048",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                #"MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
         )
