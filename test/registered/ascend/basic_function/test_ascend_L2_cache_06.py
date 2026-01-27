@@ -11,6 +11,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 class TestNoChunkedPrefill(CustomTestCase):
+    """Test DeepSeek R1 model
+    Enable L2 cache increases hit rate by up to 50% and improves TTFT by 20%.
+    --enable-hierarchical-cache: enable L2 cache
+    """
     def test_no_chunked_prefill_without_radix_cache(self):
         TTFTS=[]
         model = (

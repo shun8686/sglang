@@ -26,7 +26,9 @@ class _MockTemplateManager:
 
 
 class ServingCompletionTestCase(unittest.TestCase):
-    """Bundle all prompt/echo tests in one TestCase."""
+    """Bundle all prompt/echo tests in one TestCase.
+    Unit tests for OpenAIServingCompletion.
+    """
 
     # ---------- shared test fixtures ----------
     def setUp(self):

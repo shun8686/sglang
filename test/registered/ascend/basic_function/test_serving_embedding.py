@@ -56,6 +56,9 @@ class _MockTemplateManager:
 
 
 class ServingEmbeddingTestCase(unittest.TestCase):
+    """
+    Unit tests for OpenAIServingEmbedding.
+    """
     def setUp(self):
         """Set up test fixtures."""
         self.tokenizer_manager = _MockTokenizerManager()

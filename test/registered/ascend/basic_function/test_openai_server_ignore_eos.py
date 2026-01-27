@@ -15,6 +15,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestOpenAIServerIgnoreEOS(CustomTestCase):
+    """
+    Test 'ignore_eos' is True
+    The EOS is ignore and continue reasoning.
+    """
     @classmethod
     def setUpClass(cls):
         if is_npu():

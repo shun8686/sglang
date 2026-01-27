@@ -13,6 +13,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL1Cache(CustomTestCase):
+    """
+    Test shows that L2 cache is enabled, 
+    and inference request outputs shorter than the page size will not be reused.
+    """
     @classmethod
     def setUpClass(cls):
         if is_npu():

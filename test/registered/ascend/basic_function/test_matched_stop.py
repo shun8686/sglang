@@ -21,6 +21,10 @@ The story should span multiple events, challenges, and character developments ov
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestMatchedStop(CustomTestCase):
+    """
+    Test validating different input requests
+    The returned value of matched_stop is consistent with expectations.
+    """
     @classmethod
     def setUpClass(cls):
         if is_npu():

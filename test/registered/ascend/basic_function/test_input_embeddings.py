@@ -18,6 +18,9 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestInputEmbeds(CustomTestCase):
+    """
+    Test API allows for different input formats(text, embed, file).
+    """
     @classmethod
     def setUpClass(cls):
         if is_npu():

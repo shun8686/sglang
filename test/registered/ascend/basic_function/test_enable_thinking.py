@@ -29,6 +29,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestEnableThinking(CustomTestCase):
+    """
+    Test Enable the 'enable_thinking' feature
+    Inference request successfully processed.
+    """
     @classmethod
     def setUpClass(cls):
         if is_npu():

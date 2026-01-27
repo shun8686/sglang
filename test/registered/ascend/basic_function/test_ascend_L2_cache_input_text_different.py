@@ -13,6 +13,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL1Cache(CustomTestCase):
+    """
+    Test enable L2 cache, inputting different text inference requests.
+    --enable-hierarchical-cache: enable L2 cache
+    """
     @classmethod
     def setUpClass(cls):
         if is_npu():
