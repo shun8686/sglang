@@ -73,7 +73,6 @@ class TestGpuId(CustomTestCase):
         result = run_command("npu-smi info")
         print(result)
         result1 = run_command(
-           # "npu-smi info | grep '| 1     ' | grep '/ 65536' | awk -F '|' '{print $4}' | awk '{print $5}' | awk -F '/' '{print $1}'"
            "npu-smi info | grep '/ 65536' | awk -F '|' '{print $4}' | awk '{print $5}' | awk -F '/' '{print $1}'"
         )
         result2 = result1.split("\n")
