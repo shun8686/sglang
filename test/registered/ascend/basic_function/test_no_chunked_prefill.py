@@ -18,6 +18,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     - mmlu: MMLU dataset
     - random: Random prompts dataset
     """
+
     def _no_chunked_prefill(self):
         run_mmlu_test(
             disable_radix_cache=False, enable_mixed_chunk=False, chunked_prefill_size=-1
