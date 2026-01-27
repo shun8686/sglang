@@ -11,6 +11,7 @@ from sglang.srt.parser.harmony_parser import (
 )
 from sglang.test.test_utils import CustomTestCase
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestEvent(CustomTestCase):
     def test_init(self):

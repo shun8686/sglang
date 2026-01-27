@@ -10,6 +10,7 @@ from sglang.srt.utils.common import is_npu
 
 env_type = "npu" if is_npu() else "cuda"
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestCreateKvIndices(CustomTestCase):
     @classmethod

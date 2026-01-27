@@ -8,6 +8,7 @@ from sglang.test.test_utils import (
     run_mmlu_test,
 )
 
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 class TestNoChunkedPrefill(CustomTestCase):
     def test_no_chunked_prefill_without_radix_cache(self):

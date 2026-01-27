@@ -7,6 +7,7 @@ import sglang as sgl
 from sglang.srt.utils import is_npu
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST, CustomTestCase
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestHiddenState(CustomTestCase):
     def test_return_hidden_states(self):

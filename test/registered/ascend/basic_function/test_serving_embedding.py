@@ -16,6 +16,7 @@ from sglang.srt.entrypoints.openai.protocol import (
 from sglang.srt.entrypoints.openai.serving_embedding import OpenAIServingEmbedding
 from sglang.srt.managers.io_struct import EmbeddingReqInput
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 # Mock TokenizerManager for embedding tests
 class _MockTokenizerManager:

@@ -12,6 +12,7 @@ from sglang.srt.entrypoints.openai.protocol import CompletionRequest
 from sglang.srt.entrypoints.openai.serving_completions import OpenAIServingCompletion
 from sglang.srt.managers.tokenizer_manager import TokenizerManager
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class _MockTemplateManager:
     """Minimal mock for TemplateManager."""
