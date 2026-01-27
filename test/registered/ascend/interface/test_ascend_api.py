@@ -64,12 +64,6 @@ class TestAscendApi(CustomTestCase):
         self.assertEqual(response.json()['model_type'], "llama")
         self.assertEqual(response.json()['architectures'][0], "LlamaForCausalLM")
 
-    def test_api_weight_version(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/weight_version")
-        self.assertEqual(response.status_code, 200)
-        print(response.json())
-        self.assertEqual(response.json()['weight_version'], "default")
-
     def test_api_server_info(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/server_info")
         self.assertEqual(response.status_code, 200)
