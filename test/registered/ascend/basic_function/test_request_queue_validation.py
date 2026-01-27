@@ -5,6 +5,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 
 from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
