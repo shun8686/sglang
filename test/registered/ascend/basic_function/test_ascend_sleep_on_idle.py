@@ -4,7 +4,7 @@ import requests
 
 from sglang.srt.utils import is_npu, kill_process_tree
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
+    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -14,33 +14,26 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
-
-class TestMaxLoadedLoras(CustomTestCase):
-    """Test configuration for max-loaded-loras inference successful.
-    --max-loaded-loras: limits the maximum number of LoRA adapters loaded in CPU memory at a time.
+class TestSleepOnIdle(CustomTestCase):
+    """Test the basic functions of sleep-on-idle
+    --sleep-on-idle: Reduce CPU usage when sglang is idle.
     """
-    def test_max_loaded_loras(self):
+    def test_sleep_on_idle(self):
         other_args = (
             [
-                "--max-loaded-loras",
-                1,
+                "--sleep-on-idle",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
             ]
             if is_npu()
             else [
-                "--max-loaded-loras",
-                1,
-                "--mem-fraction-static",
-                0.8,
+                "--sleep-on-idle",
             ]
         )
         process = popen_launch_server(
             (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
+                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
                 if is_npu()
                 else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
             ),
@@ -65,11 +58,7 @@ class TestMaxLoadedLoras(CustomTestCase):
         self.assertIn("Paris", response.text)
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-
-        self.assertEqual(
-            response.json()["max_loaded_loras"],
-            1,
-        )
+        self.assertEqual(response.json()["sleep_on_idle"], True)
         kill_process_tree(process.pid)
 
 
