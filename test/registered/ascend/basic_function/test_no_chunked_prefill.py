@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.srt.utils import is_npu
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
     CustomTestCase,
