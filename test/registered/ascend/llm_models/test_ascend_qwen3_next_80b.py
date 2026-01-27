@@ -16,8 +16,6 @@ class TestQwen3Next80B(GSM8KAscendMixin, CustomTestCase):
         "--disable-cuda-graph",
         "--attention-backend",
         "ascend",
-        "--base-gpu-id",
-        10,
         "--mem-fraction-static",
         0.8,
         "--disable-radix-cache",

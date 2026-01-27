@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
-    accuracy = 0.00
+    accuracy = 0.8
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

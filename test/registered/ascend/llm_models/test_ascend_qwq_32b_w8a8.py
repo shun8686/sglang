@@ -7,22 +7,20 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
-class TestQwen330B(GSM8KAscendMixin, CustomTestCase):
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
-    accuracy = 0.90
+class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
+    model = "/root/.cache/modelscope/hub/models/vllm-ascend/QWQ-32B-W8A8"
+    accuracy = 0.59
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
-        0.7,
-        "--max-running-requests",
-        32,
+        "0.8",
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--cuda-graph-max-bs",
-        32,
         "--tp-size",
-        2,
+        "2",
+        "--quantization",
+        "modelslim",
     ]
 
 

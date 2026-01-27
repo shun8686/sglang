@@ -1,13 +1,18 @@
 import multiprocessing as mp
+import random
 import unittest
-from typing import Optional
 
 import torch
 from transformers import AutoConfig, AutoTokenizer
 
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import DEFAULT_PROMPTS, HFRunner, SRTRunner
-from sglang.test.test_utils import CustomTestCase, get_similarities
+from sglang.test.test_utils import (
+    CustomTestCase,
+    get_similarities,
+    is_in_amd_ci,
+    is_in_ci,
+)
 
 register_npu_ci(
     est_time=400,
@@ -17,8 +22,7 @@ register_npu_ci(
 )
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/iic/gte_Qwen2-1.5B-instruct", 1, 1e-5),
-    ("/root/.cache/modelscope/hub/models/Qwen/Qwen3-Embedding-8B", 1, 1e-5),
+    ("/root/.cache/modelscope/hub/models/AI-ModelScope/clip-vit-large-patch14-336", 1, 0.22)
 ]
 TORCH_DTYPES = [torch.float16]
 
@@ -31,7 +35,7 @@ class TestEmbeddingModels(CustomTestCase):
 
     def _truncate_prompts(self, prompts, model_path):
         config = AutoConfig.from_pretrained(model_path)
-        max_length = getattr(config, "max_position_embeddings", 2048)
+        max_length = getattr(config, "max_position_embeddings", 76)
 
         tokenizer = AutoTokenizer.from_pretrained(model_path)
 
@@ -54,7 +58,6 @@ class TestEmbeddingModels(CustomTestCase):
         tp_size,
         torch_dtype,
         prefill_tolerance,
-        matryoshka_dim: Optional[int] = None,
     ) -> None:
         truncated_prompts = self._truncate_prompts(prompts, model_path)
 
@@ -62,24 +65,18 @@ class TestEmbeddingModels(CustomTestCase):
             model_path,
             torch_dtype=torch_dtype,
             model_type="embedding",
-            matryoshka_dim=matryoshka_dim,
         ) as hf_runner:
             hf_outputs = hf_runner.forward(truncated_prompts)
 
-        attention_backend = "ascend"
+        attention_backend = "triton" if is_in_amd_ci() else None
         with SRTRunner(
             model_path,
             tp_size=tp_size,
             torch_dtype=torch_dtype,
             model_type="embedding",
             attention_backend=attention_backend,
-            json_model_override_args=(
-                {"matryoshka_dimensions": [matryoshka_dim]} if matryoshka_dim else None
-            ),
         ) as srt_runner:
-            srt_outputs = srt_runner.forward(
-                truncated_prompts, dimensions=matryoshka_dim
-            )
+            srt_outputs = srt_runner.forward(truncated_prompts)
 
         for i in range(len(prompts)):
             hf_logits = torch.Tensor(hf_outputs.embed_logits[i])
@@ -95,6 +92,9 @@ class TestEmbeddingModels(CustomTestCase):
 
     def test_prefill_logits(self):
         models_to_test = MODELS
+
+        if is_in_ci():
+            models_to_test = [random.choice(MODELS)]
 
         for model, tp_size, prefill_tolerance in models_to_test:
             for torch_dtype in TORCH_DTYPES:

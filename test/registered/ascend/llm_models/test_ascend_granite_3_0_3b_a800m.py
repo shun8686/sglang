@@ -11,7 +11,7 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     model = (
         "/root/.cache/modelscope/hub/models/ibm-granite/granite-3.0-3b-a800m-instruct"
     )
-    accuracy = 0.00
+    accuracy = 0.38
 
 
 if __name__ == "__main__":
