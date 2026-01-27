@@ -15,7 +15,13 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
-class TestDisableCudaGraphPadding(CustomTestCase):
+class TestAbortOnPriority(CustomTestCase):
+    """Test class for --abort-on-priority-when-disabled parameter with CUDA Graph disabled.
+    
+    Core Purpose:
+    - Verify abort behavior for high-priority requests when CUDA Graph is disabled
+    - Validate --abort-on-priority-when-disabled parameter configuration effectiveness
+    """
     @classmethod
     def setUpClass(cls):
         other_args = (
@@ -40,7 +46,7 @@ class TestDisableCudaGraphPadding(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_disable_cuda_graph_padding(self):
+    def test_abort_on_priority_when_disabled(self):
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
