@@ -25,6 +25,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import sglang as sgl
 from sglang.srt.utils import is_npu
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST
+from sglang.test.ci.ci_register import register_npu_ci
 
 # ------------------------- Configurable via env ------------------------- #
 MODEL_ID = (
