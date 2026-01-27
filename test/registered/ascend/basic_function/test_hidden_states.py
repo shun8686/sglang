@@ -4,7 +4,6 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sglang as sgl
-from sglang.srt.utils import is_npu
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST, CustomTestCase
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -18,8 +17,6 @@ class TestHiddenState(CustomTestCase):
         prompts = ["Today is", "Today is a sunny day and I like"]
         model_path = (
             "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            if is_npu()
-            else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
         )
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         input_ids = tokenizer(prompts).input_ids
@@ -29,22 +26,14 @@ class TestHiddenState(CustomTestCase):
             "max_new_tokens": 8,
         }
 
-        if is_npu():
-            engine = sgl.Engine(
-                model_path=model_path,
-                random_seed=42,
-                skip_tokenizer_init=True,
-                enable_return_hidden_states=True,
-                attention_backend="ascend",
-                disable_cuda_graph=True,
-            )
-        else:
-            engine = sgl.Engine(
-                model_path=model_path,
-                random_seed=42,
-                skip_tokenizer_init=True,
-                enable_return_hidden_states=True,
-            )
+        engine = sgl.Engine(
+            model_path=model_path,
+            random_seed=42,
+            skip_tokenizer_init=True,
+            enable_return_hidden_states=True,
+            attention_backend="ascend",
+            disable_cuda_graph=True,
+        )
         outputs = engine.generate(
             input_ids=input_ids,
             sampling_params=sampling_params,
@@ -65,8 +54,7 @@ class TestHiddenState(CustomTestCase):
             outputs[0]["meta_info"]["hidden_states"][0].shape[0],
         )
 
-        if is_npu():
-            device_map = "npu" if is_npu() else "cuda"
+        device_map = "npu" if True else "cuda"
         model = AutoModelForCausalLM.from_pretrained(
             model_path, torch_dtype=torch.bfloat16, device_map=device_map
         )
@@ -81,20 +69,12 @@ class TestHiddenState(CustomTestCase):
                 )
             print("=== HF Hiddens ===")
             print(hf_out["hidden_states"][-1][0])
-            if is_npu():
-                sg_hidden_states = torch.cat(
-                    [
-                        i.unsqueeze(0) if len(i.shape) == 1 else i
-                        for i in output["meta_info"]["hidden_states"]
-                    ]
-                ).to("npu")
-            else:
-                sg_hidden_states = torch.cat(
-                    [
-                        i.unsqueeze(0) if len(i.shape) == 1 else i
-                        for i in output["meta_info"]["hidden_states"]
-                    ]
-                ).to("cuda")
+            sg_hidden_states = torch.cat(
+                [
+                    i.unsqueeze(0) if len(i.shape) == 1 else i
+                    for i in output["meta_info"]["hidden_states"]
+                ]
+            ).to("npu")
             print("=== SRT Hiddens ===")
             print(sg_hidden_states)
 
@@ -116,8 +96,6 @@ class TestHiddenState(CustomTestCase):
         prompts = ["Today is", "Today is a sunny day and I like"]
         model_path = (
             "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            if is_npu()
-            else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
         )
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         input_ids = tokenizer(prompts).input_ids
@@ -127,22 +105,14 @@ class TestHiddenState(CustomTestCase):
             "max_new_tokens": 8,
         }
 
-        if is_npu():
-            engine = sgl.Engine(
-                model_path=model_path,
-                random_seed=42,
-                skip_tokenizer_init=True,
-                enable_return_hidden_states=True,
-                attention_backend="ascend",
-                disable_cuda_graph=True,
-            )
-        else:
-            engine = sgl.Engine(
-                model_path=model_path,
-                random_seed=42,
-                skip_tokenizer_init=True,
-                enable_return_hidden_states=True,
-            )
+        engine = sgl.Engine(
+            model_path=model_path,
+            random_seed=42,
+            skip_tokenizer_init=True,
+            enable_return_hidden_states=True,
+            attention_backend="ascend",
+            disable_cuda_graph=True,
+        )
         outputs_completion_first_round = engine.generate(
             input_ids=input_ids,
             sampling_params=sampling_params,
