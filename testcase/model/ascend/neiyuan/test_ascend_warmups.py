@@ -4,7 +4,7 @@ from types import SimpleNamespace
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -21,8 +21,7 @@ class TestWarmups(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        other_args = (
-            [
+        other_args = [
                 "--trust-remote-code",
                 "--warmups",
                 "voice_chat",
@@ -33,10 +32,7 @@ class TestWarmups(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-            ]
-            if is_npu()
-            else ["--tp-size", "4", "--warmups", "voice_chat"]
-        )
+        ]
         cls.out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
         cls.err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
         cls.process = popen_launch_server(
