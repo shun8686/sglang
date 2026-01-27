@@ -6,7 +6,6 @@ python3 test_overlap_schedule.py
 
 import unittest
 
-from sglang.srt.utils import is_npu
 from sglang.test.test_utils import CustomTestCase, run_mmlu_test
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -24,7 +23,7 @@ class TestOverlapSchedule(CustomTestCase):
     """
 
     def test_no_radix_attention_chunked_prefill(self):
-        chunked_prefill_size = 128 if is_npu() else 32
+        chunked_prefill_size = 128
         run_mmlu_test(
             disable_radix_cache=True,
             chunked_prefill_size=chunked_prefill_size,
@@ -37,7 +36,7 @@ class TestOverlapSchedule(CustomTestCase):
         )
 
     def test_radix_attention_chunked_prefill(self):
-        chunked_prefill_size = 128 if is_npu() else 32
+        chunked_prefill_size = 128
         run_mmlu_test(
             disable_radix_cache=False,
             chunked_prefill_size=chunked_prefill_size,
