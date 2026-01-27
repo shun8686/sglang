@@ -20,7 +20,7 @@ class TestFimCompletion(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--mem-fraction-static",
-        0.8
+        0.8,
     ]
 
     @classmethod
@@ -85,7 +85,7 @@ class TestFimCompletionJson(TestFimCompletion):
         "ascend",
         "--disable-cuda-graph",
         "--mem-fraction-static",
-        0.8
+        0.8,
     ]
 
 

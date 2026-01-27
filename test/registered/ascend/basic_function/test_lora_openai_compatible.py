@@ -69,7 +69,15 @@ def setup_class(cls, enable_lora=True):
 
 
 class TestLoRAOpenAICompatible(CustomTestCase):
-    """Test OpenAI-compatible LoRA adapter usage."""
+    """Test class for OpenAI-compatible LoRA adapter usage (Llama-3.2-1B-Instruct).
+
+    Tests core LoRA adapter functionalities with OpenAI API:
+    - syntax: model:adapter new syntax & explicit lora_path legacy syntax
+    - priority: model:adapter takes precedence over explicit lora_path
+    - basic: base model usage without adapter
+    - api: completions/chat/completions (streaming/non-streaming) with adapter
+    - multiple: sequential usage of different adapters (tool_calling/base)
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -197,7 +205,11 @@ class TestLoRAOpenAICompatible(CustomTestCase):
 
 
 class TestLoRADisabledError(CustomTestCase):
-    """Test error handling when LoRA is disabled."""
+    """Test class for LoRA disabled error handling (Llama-3.2-1B-Instruct).
+
+    Tests error behavior when LoRA is disabled but adapter is requested:
+    - error: APIError raised with 'LoRA not enabled' in message
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -226,7 +238,13 @@ class TestLoRADisabledError(CustomTestCase):
 
 
 class TestLoRAEdgeCases(CustomTestCase):
-    """Test edge cases for LoRA adapter usage."""
+    """Test class for LoRA adapter edge cases .
+
+    Tests edge scenarios for LoRA adapter usage:
+    - syntax: model parameter ending with colon (empty adapter)
+    - explicit: lora_path set to None (base model usage)
+    - invalid: non-existent adapter name (APIError raised)
+    """
 
     @classmethod
     def setUpClass(cls):

@@ -16,6 +16,14 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestLoraPaths(CustomTestCase):
+    """Test class for Llama-3.2-1B with --max-loras-per-batch=1 parameter.
+
+    Tests functionality with max LoRA adapters per batch set to 1:
+    - health-check: /health_generate API returns 200 OK (service availability)
+    - inference: Generate API returns valid result (200 OK + "Paris" in response)
+    - server-info: get_server_info API confirms max_loras_per_batch is 1 
+    """
+    
     @classmethod
     def setUpClass(cls):
         other_args = (
@@ -63,6 +71,8 @@ class TestLoraPaths(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+        
+        # Verify max_loras_per_batch parameter is correctly set in server info
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["max_loras_per_batch"], 1)
