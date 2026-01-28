@@ -15,11 +15,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestStreamingParseResult(CustomTestCase):
-    """Unit test for reasoning_parser.
+    """Testcase：Unit test for internal functions of reasoning parser - StreamingParseResult initialization logic
 
-    Tests core initialization logic of the result container:
-    - default-init: Empty string initialization
-    - custom-init: Initialization with specified normal/reasoning text
+    [Test Category] Parameter
+    [Test Target] StreamingParseResult;
     """
 
     def test_init_default(self):
@@ -36,6 +35,11 @@ class TestStreamingParseResult(CustomTestCase):
 
 
 class TestBaseReasoningFormatDetector(CustomTestCase):
+    """Testcase：Unit test for internal functions of reasoning parser - BaseReasoningFormatDetector core parsing logic
+
+    [Test Category] Parameter
+    [Test Target] BaseReasoningFormatDetector;detect_and_parse;parse_streaming_increment;think_start_token;think_end_token;force_reasoning;stream_reasoning
+    """
     def setUp(self):
         self.detector = BaseReasoningFormatDetector(
             think_start_token="<think>",

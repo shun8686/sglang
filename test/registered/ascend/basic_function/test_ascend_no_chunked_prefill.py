@@ -13,11 +13,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNoChunkedPrefill(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with disabled chunked prefill.
+    """Testcase：Verify service availability and request processing accuracy of Llama-3.1-8B-Instruct model when chunked prefill is disabled
 
-    Tests accuracy on datasets with chunked prefill disabled:
-    - mmlu: MMLU dataset
-    - random: Random prompts dataset
+    [Test Category] Parameter
+    [Test Target] --disable-radix-cache
     """
 
     def _no_chunked_prefill(self):

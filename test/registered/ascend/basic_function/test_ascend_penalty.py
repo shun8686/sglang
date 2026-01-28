@@ -19,14 +19,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPenalty(CustomTestCase):
-    """Test class for penalty mechanisms with Llama-3.2-1B-Instruct.
+    """Testcase：Verify successful processing of inference requests with different penalty mechanism configurations
 
-    Tests inference request handling with different penalty configurations:
-    - default-values: No penalty parameters (default settings)
-    - frequency-penalty: Frequency penalty only
-    - min-new-tokens: Minimum new tokens constraint only
-    - presence-penalty: Presence penalty only
-    - penalty-mixed: Mixed penalty parameters (concurrent requests)
+    [Test Category] Parameter
+    [Test Target] frequency_penalty;presence_penalty;min_new_tokens
     """
 
     @classmethod
