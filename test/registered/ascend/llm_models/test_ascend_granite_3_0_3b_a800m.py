@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestGranite(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the granite-3.0-3b-a800m-instruct model was tested using the GSM8K dataset.
+    """
+
     model = (
         "/root/.cache/modelscope/hub/models/ibm-granite/granite-3.0-3b-a800m-instruct"
     )

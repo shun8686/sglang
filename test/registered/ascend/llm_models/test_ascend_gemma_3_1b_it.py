@@ -13,6 +13,10 @@ register_npu_ci(
 
 
 class TestGemma(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the gemma-3-1b-it model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/LLM-Research/gemma-3-1b-it"
     accuracy = 0.7
 

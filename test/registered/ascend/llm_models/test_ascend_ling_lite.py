@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLingLite(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the Ling-lite model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/inclusionAI/Ling-lite"
     accuracy = 0.75
 

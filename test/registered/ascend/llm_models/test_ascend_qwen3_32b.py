@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestQwen332B(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the Qwen3-32B model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
     accuracy = 0.89
     other_args = [

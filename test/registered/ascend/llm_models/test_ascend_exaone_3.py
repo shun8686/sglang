@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEXAONE(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the EXAONE-3.5-7.8B-Instruct model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
     accuracy = 0.8
     other_args = [

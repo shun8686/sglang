@@ -7,6 +7,10 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestGemmaModels(TestVLMModels):
+    """
+    Accuracy of the gemma-3-4b-it model was tested using the mmmu dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/google/gemma-3-4b-it"
     mmmu_accuracy = 0.2
 

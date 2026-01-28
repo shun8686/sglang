@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestGrok2(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the grok-2 model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/huihui-ai/grok-2"
     accuracy = 0.91
     other_args = [

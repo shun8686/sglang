@@ -65,7 +65,6 @@ class TestDeepEpAutoQwen3235B(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        print(f"mmlu:{metrics}")
         self.assertGreaterEqual(metrics["score"], 0.5)
 
     def test_gsm8k(self):
@@ -79,9 +78,7 @@ class TestDeepEpAutoQwen3235B(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
-        print("Starting gsm8k test...")
         metrics = run_gsm8k(args)
-        print(f"gsm8k:{metrics}")
         achieved_accuracy = metrics["accuracy"]
         self.assertGreaterEqual(achieved_accuracy, expect_accuracy,
                                 f'Accuracy of {self.model} is {str(achieved_accuracy)}, is lower than {expect_accuracy}')

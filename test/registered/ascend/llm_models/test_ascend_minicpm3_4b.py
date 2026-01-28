@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMiniCPM3(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the MiniCPM3-4B model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/OpenBMB/MiniCPM3-4B"
     accuracy = 0.69
     other_args = [

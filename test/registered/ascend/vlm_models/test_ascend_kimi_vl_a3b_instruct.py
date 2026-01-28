@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestKimiVLA3BInstruct(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the Kimi-VL-A3B-Instruct model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/Kimi/Kimi-VL-A3B-Instruct"
     accuracy = 0.66
     other_args = [

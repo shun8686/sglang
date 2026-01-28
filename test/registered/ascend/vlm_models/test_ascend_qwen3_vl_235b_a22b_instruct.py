@@ -7,6 +7,10 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestQwen3VL235BA22B(TestVLMModels):
+    """
+    Accuracy of the Qwen3-VL-235B-A22B-Instruct model was tested using the mmmu dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-235B-A22B-Instruct"
     mmmu_accuracy = 0.2
     other_args = [

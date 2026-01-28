@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestInternlm2(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the internlm2-7b model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/Shanghai_AI_Laboratory/internlm2-7b"
     accuracy = 0.6
 

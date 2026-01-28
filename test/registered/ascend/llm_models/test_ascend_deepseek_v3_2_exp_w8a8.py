@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDeepSeek(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the DeepSeek-V3.2-Exp-W8A8 model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
     accuracy = 0.51
     other_args = [

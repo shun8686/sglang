@@ -7,6 +7,10 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestJanusPro1B(TestVLMModels):
+    """
+    Accuracy of the Janus-Pro-1B model was tested using the mmmu dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/deepseek-ai/Janus-Pro-1B"
     mmmu_accuracy = 0.2
 

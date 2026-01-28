@@ -8,6 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOlMoe(GSM8KAscendMixin, CustomTestCase):
+    """
+    Accuracy of the OLMoE-1B-7B-0924 model was tested using the GSM8K dataset.
+    """
+
     model = "/root/.cache/modelscope/hub/models/allenai/OLMoE-1B-7B-0924"
     accuracy = 0.12
 
