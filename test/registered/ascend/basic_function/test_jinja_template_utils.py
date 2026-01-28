@@ -14,7 +14,11 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestTemplateContentFormatDetection(CustomTestCase):
-    """Test template content format detection functionality."""
+    """Testcase: Test template content format detection functionality.
+
+    [Test Category] jinja_template
+    [Test Target] Check Jinja template content format
+    """
 
     def test_detect_llama4_openai_format(self):
         """Test detection of llama4-style template (should be 'openai' format)."""

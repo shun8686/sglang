@@ -14,10 +14,12 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL2Cache(CustomTestCase):
+    """Testcase: Test enabled L2 cache inference request reuse succeddfully
+
+    [Test Category] --enable-hierarchical-cache
+    [Test Target] enable L2 cache
     """
-    Test enabled L2 cache inference request reuse succeddfully.
-    --enable-hierarchical-cache: enable L2 cache
-    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
