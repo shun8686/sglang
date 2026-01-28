@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
     CustomTestCase,
@@ -31,6 +32,18 @@ class TestNoChunkedPrefill(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
+        
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model,
+            eval_name="mmlu",
+            num_examples=64,
+            num_threads=32,
+        )
+
+        metrics = run_eval(args)
+        self.assertGreaterEqual(metrics["score"], 0.65)
+        
         res = run_bench_serving(
             model=model,
             num_prompts=10,
