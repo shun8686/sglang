@@ -23,15 +23,12 @@ import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sglang as sgl
-from sglang.srt.utils import is_npu
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST
 from sglang.test.ci.ci_register import register_npu_ci
 
 # ------------------------- Configurable via env ------------------------- #
 MODEL_ID = (
     "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-    if is_npu()
-    else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
 )
 PROMPTS = [
     "Hello, my name is",
@@ -137,22 +134,15 @@ class TestOriginalLogprob(unittest.TestCase):
                 os.environ["SGLANG_RETURN_ORIGINAL_LOGPROB"] = env_val
 
                 # ----- SGLang side -----
-                if is_npu():
-                    sgl_engine = sgl.Engine(
-                        model_path=MODEL_ID,
-                        skip_tokenizer_init=True,
-                        trust_remote_code=True,
-                        mem_fraction_static=0.60,
-                        attention_backend="ascend",
-                        disable_cuda_graph=True,
-                    )
-                else:
-                    sgl_engine = sgl.Engine(
-                        model_path=MODEL_ID,
-                        skip_tokenizer_init=True,
-                        trust_remote_code=True,
-                        mem_fraction_static=0.60,
-                    )
+                sgl_engine = sgl.Engine(
+                    model_path=MODEL_ID,
+                    skip_tokenizer_init=True,
+                    trust_remote_code=True,
+                    mem_fraction_static=0.60,
+                    attention_backend="ascend",
+                    disable_cuda_graph=True,
+                )
+
 
                 for prompt in PROMPTS:
                     random_token_ids = sorted(
