@@ -3,7 +3,7 @@ import unittest
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -44,8 +44,6 @@ class TestNcclPort(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
             ]
-            if is_npu()
-            else ["--nccl-port", "8111", "--tp-size", "2"]
         )
         process = popen_launch_server(
             self.model,
