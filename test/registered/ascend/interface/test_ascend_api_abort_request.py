@@ -6,6 +6,7 @@ import time
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -18,6 +19,9 @@ responses = []
 def send_requests(url, **kwargs):
     response = requests.post('http://127.0.0.1:2345' + url, json=kwargs)
     responses.append(response)
+
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestAscendApi(CustomTestCase):
     @classmethod
