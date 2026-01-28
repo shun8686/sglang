@@ -5,9 +5,7 @@ import unittest
 from concurrent.futures import ThreadPoolExecutor
 
 from sglang.srt.utils import is_npu, kill_process_tree
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     STDERR_FILENAME,
@@ -17,25 +15,22 @@ from sglang.test.test_utils import (
     send_concurrent_generate_requests,
     send_generate_requests,
 )
+from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMaxQueuedRequests(CustomTestCase):
-    """Test class for Llama-3.2-1B-Instruct with max request limits.
-
-    Tests request handling with --max-running-requests=1 and --max-queued-requests=1:
-    - serial-requests: No throttling for serial requests (all 200 OK)
-    - concurrent-requests: Throttling for concurrent requests (2 success, 8 503)
-    - log-validation: Running/queued request counts in logs ≤ 1
+    """Test class for Llama-3.2-1B-Instruct with maximum number of requests.
+    Tests core functionality with queued-requests configuration:
+    --max-running-requests: The maximum number of running requests.
+    --max-queued-requests: The maximum number of queued requests
     """
-    
+
     @classmethod
     def setUpClass(cls):
         cls.model = (
             "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            if is_npu()
-            else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
         )
         other_args = (
             (
@@ -46,13 +41,6 @@ class TestMaxQueuedRequests(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-            )
-            if is_npu()
-            else (
-                "--max-running-requests",  # Enforce max request concurrency is 1
-                "1",
-                "--max-queued-requests",  # Enforce max queued request number is 1
-                "1",
             )
         )
         cls.base_url = DEFAULT_URL_FOR_TEST
