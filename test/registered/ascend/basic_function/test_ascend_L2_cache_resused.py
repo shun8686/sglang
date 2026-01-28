@@ -2,7 +2,7 @@ import unittest
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -20,10 +20,7 @@ class TestL2Cache(CustomTestCase):
     """
     @classmethod
     def setUpClass(cls):
-        if is_npu():
-            cls.model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-32B"
-        else:
-            cls.model = "Qwen/Qwen3-32B"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
         cls.base_url = DEFAULT_URL_FOR_TEST
         common_args = [
             "--enable-hierarchical-cache",
@@ -40,8 +37,6 @@ class TestL2Cache(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
             ]
-            if is_npu()
-            else []
         )
 
         cls.process = popen_launch_server(
