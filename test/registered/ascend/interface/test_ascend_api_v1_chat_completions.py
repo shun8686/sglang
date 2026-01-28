@@ -12,6 +12,12 @@ from sglang.test.test_utils import (
 
 
 class TestChatCompletionsInterface(CustomTestCase):
+    """Testcase:The test is to verify whether the functions of each parameter of the v1/chat/completions interface are normal.
+
+    [Test Category] Model
+    [Test Target] v1/chat/completions
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
