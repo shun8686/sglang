@@ -14,9 +14,12 @@ env_type = "npu" if is_npu() else "cuda"
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestCreateKvIndices(CustomTestCase):
+    """Testcase: Test created key-value index successfully
+
+    [Test Category] kv_indices 
+    [Test Target] create key-value index
     """
-    Tset created key-value index successfully.
-    """
+
     @classmethod
     def setUpClass(cls):
         if not (torch.cuda.is_available() or is_npu()):
