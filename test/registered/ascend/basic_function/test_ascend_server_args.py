@@ -10,11 +10,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPrepareServerArgs(CustomTestCase):
-    """Unit test for prepare_server_args function.
+    """Testcase：Verify the correctness of server startup argument parsing logic in prepare_server_args function
 
-    Tests parsing of server startup arguments:
-    - model-path: Correct parsing of model path parameter
-    - json-model-override-args: Correct parsing of JSON-formatted model override args
+    [Test Category] Parameter
+    [Test Target] prepare_server_args;--model-path;--json-model-override-args
     """
 
     def test_prepare_server_args(self):
@@ -35,14 +34,10 @@ class TestPrepareServerArgs(CustomTestCase):
 
 
 class TestPortArgs(unittest.TestCase):
-    """Unit test for PortArgs initialization logic.
+    """Testcase：Verify the initialization logic and network address parsing correctness of PortArgs class
 
-    Tests PortArgs.init_new with different network configurations:
-    - standard-case: Basic IPC/TCP port configuration (no DP attention)
-    - dp-attention: TCP address configuration with DP attention enabled
-    - dp-rank: Port assignment with specified DP rank and worker ports
-    - ipv4: Valid/invalid IPv4 address + port parsing
-    - ipv6: Valid/invalid IPv6 address + port parsing (brackets/port validation)
+    [Test Category] Parameter
+    [Test Target] PortArgs.init_new;--port;--nccl-port;--enable-dp-attention;--nnodes;--dist-init-addr;--tokenizer-worker-num
     """
     
     @patch("sglang.srt.server_args.is_port_available")
