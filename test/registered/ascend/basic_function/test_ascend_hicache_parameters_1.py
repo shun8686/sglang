@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -25,14 +26,17 @@ HICACHE_CONFIGS = [
 
 # 基础服务配置（通用配置，不随HiCache变化）
 BASE_OTHER_ARGS = [
-    "--chunked-prefill-size", "256",          # 分块预填充大小（适配32B模型长序列）
-    "--attention-backend", "ascend",          # 昇腾注意力后端（NPU硬件加速）
-    "--disable-cuda-graph",                   # 禁用CUDA Graph（昇腾NPU适配）
-    "--mem-fraction-static", "0.8",           # 静态内存占比80%（32B模型内存优化）
-    "--tp-size", "2",                         # 张量并行度2（单机部署适配）
-    "--base-gpu-id", "4",                     # 从ID4开始使用NPU（资源隔离）
-    "--enable-hierarchical-cache",            # 核心：开启HiCache层级缓存特性
+    "--chunked-prefill-size", "256",
+    "--attention-backend", "ascend",
+    "--disable-cuda-graph",
+    "--mem-fraction-static", "0.8",
+    "--tp-size", "2",
+    "--base-gpu-id", "4",
+    "--enable-hierarchical-cache",
 ]
+
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class BaseQwenHiCacheTest(CustomTestCase):
     """Qwen3-32B HiCache精度验证基础类"""
