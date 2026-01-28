@@ -14,7 +14,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     """Testcase：Verify service availability and request processing accuracy of Llama-3.1-8B-Instruct model when chunked prefill is disabled
 
     [Test Category] Parameter
-    [Test Target] --disable-radix-cache
+    [Test Target] --chunked-prefill-size
     """
 
     def test_no_chunked_prefill_without_radix_cache(self):
