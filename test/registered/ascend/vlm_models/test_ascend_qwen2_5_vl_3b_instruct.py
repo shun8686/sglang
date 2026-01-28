@@ -7,7 +7,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestQwen25VL3B(TestVLMModels):
-    """Testcase:Accuracy of the Qwen/Qwen2.5-VL-3B-Instruct model was tested using the mmmu dataset.
+    """Testcase:Test the accuracy of the Qwen/Qwen2.5-VL-3B-Instruct model using the mmmu dataset.
 
     [Test Category] Model
     [Test Target] Qwen/Qwen2.5-VL-3B-Instruct

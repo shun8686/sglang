@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestKimiVLA3BInstruct(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the Kimi/Kimi-VL-A3B-Instruct model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the Kimi/Kimi-VL-A3B-Instruct model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] Kimi/Kimi-VL-A3B-Instruct

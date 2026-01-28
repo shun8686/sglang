@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the mistralai/Mistral-7B-Instruct-v0.2 model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the mistralai/Mistral-7B-Instruct-v0.2 model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] mistralai/Mistral-7B-Instruct-v0.2

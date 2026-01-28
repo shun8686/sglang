@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestERNIE(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the baidu/ERNIE-4.5-21B-A3B-PT model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the baidu/ERNIE-4.5-21B-A3B-PT model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] baidu/ERNIE-4.5-21B-A3B-PT

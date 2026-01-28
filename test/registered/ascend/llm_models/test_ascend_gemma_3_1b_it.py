@@ -13,7 +13,7 @@ register_npu_ci(
 
 
 class TestGemma(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the LLM-Research/gemma-3-1b-it model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the LLM-Research/gemma-3-1b-it model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] LLM-Research/gemma-3-1b-it

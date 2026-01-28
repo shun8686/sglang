@@ -7,7 +7,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestDeepseekVl2(TestVLMModels):
-    """Testcase:Accuracy of the deepseek-ai/deepseek-vl2 model was tested using the mmmu dataset.
+    """Testcase:Test the accuracy of the deepseek-ai/deepseek-vl2 model using the mmmu dataset.
 
     [Test Category] Model
     [Test Target] deepseek-ai/deepseek-vl2

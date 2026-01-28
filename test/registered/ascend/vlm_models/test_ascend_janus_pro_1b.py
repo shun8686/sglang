@@ -7,7 +7,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestJanusPro1B(TestVLMModels):
-    """Testcase:Accuracy of the deepseek-ai/Janus-Pro-1B model was tested using the mmmu dataset.
+    """Testcase:Test the accuracy of the deepseek-ai/Janus-Pro-1B model using the mmmu dataset.
 
     [Test Category] Model
     [Test Target] deepseek-ai/Janus-Pro-1B

@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestQwen306B(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the Qwen/Qwen3-0.6B model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the Qwen/Qwen3-0.6B model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] Qwen/Qwen3-0.6B

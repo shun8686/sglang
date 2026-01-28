@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestLlava(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the AI-ModelScope/llava-v1.6-34b model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the AI-ModelScope/llava-v1.6-34b model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] AI-ModelScope/llava-v1.6-34b

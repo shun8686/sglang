@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestLlavaOneVision(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the lmms-lab/llava-onevision-qwen2-7b-ov model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the lmms-lab/llava-onevision-qwen2-7b-ov model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] lmms-lab/llava-onevision-qwen2-7b-ov

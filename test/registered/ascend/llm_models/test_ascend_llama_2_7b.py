@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLlama(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Accuracy of the LLM-Research/Llama-2-7B model was tested using the GSM8K dataset.
+    """Testcase:Test the accuracy of the LLM-Research/Llama-2-7B model using the GSM8K dataset.
 
     [Test Category] Model
     [Test Target] LLM-Research/Llama-2-7B
