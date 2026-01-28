@@ -19,7 +19,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestLogLevel(CustomTestCase):
     """Testcase：Verify the log-level parameter is set ,the inference request is successfully processed ,and the printed log level is the same as the configured log level
        [Test Category] Parameter
-       [Test Target] --log-level=warning
+       [Test Target] --log-level
        """
 
     def test_log_level(self):
