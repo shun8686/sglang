@@ -13,13 +13,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOverlapSchedule(CustomTestCase):
-    """Test class for overlap schedule with radix attention and chunked prefill.
+    """Testcase：Verify successful processing of inference requests when overlap scheduler is disabled with different radix cache and chunked prefill combinations
 
-    Tests MMLU accuracy with different combinations:
-    - no-radix+chunked-prefill: Disable radix cache, enable chunked prefill
-    - no-radix+no-chunked-prefill: Disable radix cache and chunked prefill
-    - radix+chunked-prefill: Enable radix cache, enable chunked prefill
-    - radix+no-chunked-prefill: Enable radix cache, disable chunked prefill
+    [Test Category] Parameter
+    [Test Target] --disable-radix-cache;--disable-overlap
     """
 
     def test_no_radix_attention_chunked_prefill(self):
