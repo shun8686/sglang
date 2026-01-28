@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -17,10 +17,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRetractDecode(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with retract decode enabled.
+    """Testcase：Verify MMLU dataset accuracy of Llama-3.1-8B-Instruct model with retract decode feature enabled
 
-    Tests MMLU dataset accuracy with retract decode feature:
-    - mmlu: MMLU dataset accuracy verification (score ≥ 0.65)
+    [Test Category] Parameter
+    [Test Target] SGLANG_TEST_RETRACT
     """
     @classmethod
     def setUpClass(cls):
@@ -29,8 +29,6 @@ class TestRetractDecode(CustomTestCase):
 
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-            if is_npu()
-            else DEFAULT_MODEL_NAME_FOR_TEST
         )
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
@@ -41,8 +39,6 @@ class TestRetractDecode(CustomTestCase):
                 "--mem-fraction-static",
                 0.8,
             ]
-            if is_npu()
-            else []
         )
         # Launch model server with retract decode enabled
         cls.process = popen_launch_server(
@@ -54,7 +50,6 @@ class TestRetractDecode(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Clean up model server process after test
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
@@ -67,30 +62,25 @@ class TestRetractDecode(CustomTestCase):
             num_threads=32,
         )
 
-        # Run MMLU evaluation and verify accuracy threshold
         metrics = run_eval(args)
         self.assertGreaterEqual(metrics["score"], 0.65)
 
 
 class TestRetractDecodeChunkCache(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with retract decode + chunk cache.
+    """Testcase：Verify MMLU dataset accuracy of Llama-3.1-8B-Instruct model with retract decode + chunk cache enabled
 
-    Tests MMLU dataset accuracy with retract decode + chunked prefill:
-    - chunk-cache: Retract decode with disabled radix cache + chunked prefill (size=128)
+    [Test Category] Parameter|Model
+    [Test Target] SGLANG_TEST_RETRACT;--chunked-prefill-size
     """
     @classmethod
     def setUpClass(cls):
         # Enable retract decode feature for test
         os.environ["SGLANG_TEST_RETRACT"] = "1"
 
-        # Set model path (NPU uses ModelScope path, others use default test model)
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-            if is_npu()
-            else DEFAULT_MODEL_NAME_FOR_TEST
         )
         cls.base_url = DEFAULT_URL_FOR_TEST
-        # Configure server arguments with chunked prefill (disable radix cache)
         other_args = (
             [
                 "--disable-radix-cache",
@@ -102,8 +92,6 @@ class TestRetractDecodeChunkCache(CustomTestCase):
                 "--mem-fraction-static",
                 0.8,
             ]
-            if is_npu()
-            else ["--disable-radix-cache", "--chunked-prefill-size", 128]
         )
         cls.process = popen_launch_server(
             cls.model,
