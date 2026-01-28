@@ -15,7 +15,7 @@ class TestC4AI(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = "/root/.cache/modelscope/hub/models/CohereForAI/c4ai-command-r-v01"
-    accuracy = 0.05
+    accuracy = 0.55
     chat_template_path = "/__w/sglang/sglang/test/nightly/ascend/llm_models/tool_chat_template_c4ai_command_r_v01.jinja"
     other_args = [
         "--trust-remote-code",
