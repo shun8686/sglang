@@ -16,11 +16,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
-    """Test class for Llama-3.2-1B with request time stats logging enabled.
+    """Testcase：Verify the correctness of request time stats logging feature and related API availability with --enable-request-time-stats-logging enabled
 
-    Tests functionality with --enable-request-time-stats-logging parameter:
-    - inference: Generate API returns valid result (200 OK + "Paris" in response)
-    - server-info: get_server_info API confirms logging is enabled
+    [Test Category] Parameter
+    [Test Target] --enable-request-time-stats-logging
     """
     
     @classmethod

@@ -16,10 +16,12 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestOpenAIServerIgnoreEOS(CustomTestCase):
+    """Testcase: Test 'ignore_eos' is True, the EOS is ignore and continue reasoning 
+
+    [Test Category] ignore_eos 
+    [Test Target] Ignore EOS and continue reasoning
     """
-    Test 'ignore_eos' is True
-    The EOS is ignore and continue reasoning.
-    """
+
     @classmethod
     def setUpClass(cls):
         if is_npu():

@@ -27,8 +27,10 @@ class _MockTemplateManager:
 
 
 class ServingCompletionTestCase(unittest.TestCase):
-    """Bundle all prompt/echo tests in one TestCase.
-    Unit tests for OpenAIServingCompletion.
+    """Testcase: Unit tests for OpenAIServingCompletion.
+
+    [Test Category] OpenAIServingCompletion 
+    [Test Target] Test OpenAIServingCompletion interface 
     """
 
     # ---------- shared test fixtures ----------

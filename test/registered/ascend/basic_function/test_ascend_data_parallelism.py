@@ -19,12 +19,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDataParallelism(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with data parallelism (DP=2).
+    """Testcase：Verify model accuracy and related API availability of Llama-3.1-8B-Instruct with data parallelism (DP=2) enabled
 
-    Tests core functionalities with DP=2 configuration:
-    - mmlu: MMLU dataset accuracy verification (score ≥ 0.65)
-    - update-weight: /update_weights_from_disk API availability (200 OK)
-    - memory-pool: /get_server_info API availability (200 OK)
+    [Test Category] Parameter
+    [Test Target] --dp
     """
 
     @classmethod

@@ -30,10 +30,12 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestEnableThinking(CustomTestCase):
+    """Testcase: Test Enable the 'enable_thinking' feature
+
+    [Test Category] enable_thinking
+    [Test Target] Testing the Qwen3-30B-A3B model with enable_thinking, reasoning successful.  
     """
-    Test Enable the 'enable_thinking' feature
-    Inference request successfully processed.
-    """
+
     @classmethod
     def setUpClass(cls):
         if is_npu():
