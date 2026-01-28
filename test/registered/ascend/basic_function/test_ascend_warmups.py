@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 import requests
 
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -13,12 +14,16 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestWarmups(CustomTestCase):
+    """Testcase: Test that the warm-up task runs successfully when the --warmups voice_chat parameter is specified upon service startup.
+
+    [Test Category] Parameter
+    [Test Target] --warmups
+    """
     model = "/root/.cache/modelscope/hub/models/openbmb/MiniCPM-o-2_6"
     base_url = DEFAULT_URL_FOR_TEST
 
@@ -55,20 +60,19 @@ class TestWarmups(CustomTestCase):
         os.remove("./err_log.txt")
 
     def test_warmups_voice_chat(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
+        # Call the get_server_info API to verify that the warmups parameter configuration takes effect.
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         self.assertEqual("voice_chat", response.json().get("warmups"))
-
+        
+        # Verify the actual execution of the warm-up task.
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
         print(content)
         self.assertTrue(len(content) > 0)
         self.assertIn("Running warmup voice_chat", content)
 
+        # Verify that the inference API functions properly.
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -79,7 +83,6 @@ class TestWarmups(CustomTestCase):
                 },
             },
         )
-
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
