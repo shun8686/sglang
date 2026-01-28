@@ -13,9 +13,15 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
+
 class TestEnableMultimodalNonMlm(CustomTestCase):
+    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the inference request is successful ,and the accuracy not deteriorate
+           [Test Category] Parameter
+           [Test Target] --enable-multimodal
+           """
     model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
     base_url = DEFAULT_URL_FOR_TEST
 
