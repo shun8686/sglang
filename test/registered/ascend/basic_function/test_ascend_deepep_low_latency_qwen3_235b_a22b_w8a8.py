@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestDeepEpLowLatencyQWEN3_235B(CustomTestCase):
+class TestDeepEpLowLatencyQwen3235B(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"

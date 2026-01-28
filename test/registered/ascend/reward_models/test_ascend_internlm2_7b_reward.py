@@ -21,7 +21,7 @@ CONVS = [
 ]
 
 
-class TestInternlm2_7bReward(CustomTestCase):
+class TestInternlm2(CustomTestCase):
     model_path = (
         "/root/.cache/modelscope/hub/models/Shanghai_AI_Laboratory/internlm2-7b-reward"
     )

@@ -28,7 +28,7 @@ MODELS = [
 TORCH_DTYPES = [torch.float16]
 
 
-class TestEmbeddingModels(CustomTestCase):
+class TestBgeLargeEn(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):

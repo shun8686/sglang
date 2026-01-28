@@ -21,7 +21,7 @@ CONVS = [
 ]
 
 
-class TestInternlm2_7bReward(CustomTestCase):
+class TestQwen25Math(CustomTestCase):
     model_path = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-Math-RM-72B"
     torch_dtype = torch.float16
     tolerance = 4e-2

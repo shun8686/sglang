@@ -21,7 +21,7 @@ ATTENTION_BACKEND = ["ascend"]
 TORCH_DTYPES = [torch.bfloat16]
 
 
-class TestCrossEncoderModels(CustomTestCase):
+class TestBgeReranker(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):

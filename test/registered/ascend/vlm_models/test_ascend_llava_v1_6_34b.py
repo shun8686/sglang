@@ -7,7 +7,7 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
+class TestLlava(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/AI-ModelScope/llava-v1.6-34b"
     accuracy = 0.63
     other_args = [

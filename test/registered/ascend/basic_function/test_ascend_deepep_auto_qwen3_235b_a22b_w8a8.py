@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestDeepEpAutoQWEN3_235B(CustomTestCase):
+class TestDeepEpAutoQwen3235B(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"

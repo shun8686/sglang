@@ -21,7 +21,7 @@ CONVS = [
 ]
 
 
-class TestInternlm2_7bReward(CustomTestCase):
+class TestQwen2(CustomTestCase):
     model_path = "/root/.cache/modelscope/hub/models/Howeee/Qwen2.5-1.5B-apeach"
     torch_dtype = torch.float16
     tolerance = 4e-2

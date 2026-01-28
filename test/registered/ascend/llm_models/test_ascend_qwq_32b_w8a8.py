@@ -7,7 +7,7 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
-class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
+class TestQWQ32BW8A8(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/vllm-ascend/QWQ-32B-W8A8"
     accuracy = 0.59
     other_args = [

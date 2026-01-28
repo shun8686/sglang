@@ -11,7 +11,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestEnableThinking(CustomTestCase):
+class TestChatCompletionsInterface(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"

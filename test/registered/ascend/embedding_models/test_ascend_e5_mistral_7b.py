@@ -27,7 +27,7 @@ MODELS = [
 TORCH_DTYPES = [torch.float16]
 
 
-class TestEmbeddingModels(CustomTestCase):
+class TestE5Mistral7b(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):

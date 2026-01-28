@@ -6,7 +6,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestGemmaModels(TestVLMModels):
+class TestQwen25VL3B(TestVLMModels):
     model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-VL-3B-Instruct"
     mmmu_accuracy = 0.2
 

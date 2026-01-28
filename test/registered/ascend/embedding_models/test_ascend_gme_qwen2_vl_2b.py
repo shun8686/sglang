@@ -23,7 +23,7 @@ MODELS = [
 TORCH_DTYPES = [torch.float16]
 
 
-class TestQmeQwenModels(CustomTestCase):
+class TestGmeQwen2VL2B(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         mp.set_start_method("spawn", force=True)

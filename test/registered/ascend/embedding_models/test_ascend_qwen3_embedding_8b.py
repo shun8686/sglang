@@ -22,7 +22,7 @@ MODELS = [
 TORCH_DTYPES = [torch.float16]
 
 
-class TestEmbeddingModels(CustomTestCase):
+class TestQwen3Embedding8B(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):

@@ -7,7 +7,7 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
-class TestDeepSeekV3_2ExpW8A8(GSM8KAscendMixin, CustomTestCase):
+class TestDeepSeek(GSM8KAscendMixin, CustomTestCase):
     model = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
     accuracy = 0.51
     other_args = [

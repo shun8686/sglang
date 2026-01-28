@@ -26,7 +26,7 @@ CONVS = [
 ]
 
 
-class TestRewardModels(CustomTestCase):
+class TestGemma(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
