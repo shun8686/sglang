@@ -32,6 +32,12 @@ class TestToken(CustomTestCase):
 
 
 class TestPrefixHold(CustomTestCase):
+    """Testcase: Test prefix_hold, different inputs 
+
+    [Test Category] prefix_hold
+    [Test Target] Key-value cache that retains a common prefix between consecutive requests
+    """
+
     def test_empty_text(self):
         """Test prefix_hold with empty text."""
         emit, hold = prefix_hold("", ["<|start|>"])

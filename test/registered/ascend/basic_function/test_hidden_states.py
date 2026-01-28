@@ -10,8 +10,10 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestHiddenState(CustomTestCase):
-    """
-    Test show that sglang returns hidden states when generating test.
+    """Testcase: Testing sglang's ability to return hidden states when generating text. 
+
+    [Test Category] hidden_states
+    [Test Target] hidden states 
     """
     def test_return_hidden_states(self):
         prompts = ["Today is", "Today is a sunny day and I like"]
