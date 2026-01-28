@@ -16,9 +16,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHiCachePage(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with hierarchical cache (HiCache) enabled.
-    Tests core functionality with --page-size configuration:
-    - mmlu: MMLU dataset accuracy verification (score ≥ 0.65)
+    """Testcase: Test class for Llama-3.1-8B-Instruct with hierarchical cache (HiCache) enabled.
+                MMLU dataset accuracy verification (score ≥ 0.65)
+
+    [Test Category] --page-size
+    [Test Target] The number of tikens in a page
     """
 
     @classmethod

@@ -15,9 +15,12 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestSleepOnIdle(CustomTestCase):
-    """Test the basic functions of sleep-on-idle
-    --sleep-on-idle: Reduce CPU usage when sglang is idle.
+    """Testcase: Test the basic functions of sleep-on-idle
+
+    [Test Category] --sleep-on-idle
+    [Test Target] Reduce CPU usage when sglang is idle.
     """
+
     def test_sleep_on_idle(self):
         other_args = (
             [

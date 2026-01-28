@@ -16,9 +16,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHicacheIoBackend(CustomTestCase):
-    """Test class for Llama-3.2-1B with Hicache(Tiered Cache).
-    Tests core functionality with --hicache-io-backend configuration:
-    --hicache-io-backend: direct (The IO backend for KV cache transfer between CPU and GPU)
+    """Testcase: Tests core functionality with --hicache-io-backend configuration
+
+    [Test Category] --hicache-io-backend
+    [Test Target] The IO backend for KV cache transfer between CPU and GPU
     """
 
     def test_hicache_io_backend(self):

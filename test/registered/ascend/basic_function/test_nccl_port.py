@@ -27,9 +27,12 @@ def run_command(cmd, shell=True):
 
 
 class TestNcclPort(CustomTestCase):
-    """Test the basic functions of nccl-port
-    --nccl-port: The port for NCCL distributed environment setup
+    """Testcase: Test the basic functions of nccl-port
+
+    [Test Category] --nccl-port
+    [Test Target] The port for NCCL distributed environment setup
     """
+
     model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-2-7B"
 
     def test_nccl_port(self):

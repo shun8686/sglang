@@ -218,15 +218,17 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 class TestOpenAIServerWithHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Test class for Llama-3.2-1B-Instruct with return hidden states.
-    Tests core functionality with --enable-return-hidden-states configuration:
-    --enable-return-hidden-states: Enable returning hidden states with responses.
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration
+
+    [Test Category] --enable-return-hidden-states
+    [Test Target] Enable returning hidden states with responses
     """
+
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.api_key = "sk-123456"      
+        cls.api_key = "sk-123456"
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
