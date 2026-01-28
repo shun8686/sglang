@@ -1,5 +1,4 @@
 import multiprocessing as mp
-import random
 import unittest
 
 import torch
@@ -10,8 +9,6 @@ from sglang.test.runners import DEFAULT_PROMPTS, HFRunner, SRTRunner
 from sglang.test.test_utils import (
     CustomTestCase,
     get_similarities,
-    is_in_amd_ci,
-    is_in_ci,
 )
 
 register_npu_ci(
@@ -68,7 +65,7 @@ class TestClipVitLargePatch14(CustomTestCase):
         ) as hf_runner:
             hf_outputs = hf_runner.forward(truncated_prompts)
 
-        attention_backend = "triton" if is_in_amd_ci() else None
+        attention_backend = "ascend"
         with SRTRunner(
             model_path,
             tp_size=tp_size,
@@ -92,9 +89,6 @@ class TestClipVitLargePatch14(CustomTestCase):
 
     def test_prefill_logits(self):
         models_to_test = MODELS
-
-        if is_in_ci():
-            models_to_test = [random.choice(MODELS)]
 
         for model, tp_size, prefill_tolerance in models_to_test:
             for torch_dtype in TORCH_DTYPES:

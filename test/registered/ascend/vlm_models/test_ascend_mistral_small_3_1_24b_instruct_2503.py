@@ -7,6 +7,12 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestMistralModels(TestVLMModels):
+    """Testcase:Accuracy of the mistralai/Mistral-Small-3.1-24B-Instruct-2503 model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] mistralai/Mistral-Small-3.1-24B-Instruct-2503
+    """
+
     model = "/root/.cache/modelscope/hub/models/mistralai/Mistral-Small-3.1-24B-Instruct-2503"
     mmmu_accuracy = 0.2
 

@@ -8,6 +8,12 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestLlama4(GSM8KAscendMixin, CustomTestCase):
+    """Testcase:Accuracy of the meta-llama/Llama-4-Scout-17B-16E-Instruct model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] meta-llama/Llama-4-Scout-17B-16E-Instruct
+    """
+
     model = (
         "/root/.cache/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct"
     )

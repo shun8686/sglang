@@ -7,6 +7,12 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestGLM4Models(TestVLMModels):
+    """Testcase:Accuracy of the ZhipuAI/GLM-4.5V model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] ZhipuAI/GLM-4.5V
+    """
+
     model = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.5V"
     mmmu_accuracy = 0.2
     other_args = [

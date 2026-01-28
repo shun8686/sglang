@@ -7,6 +7,12 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestMiniCPMModelsO(TestVLMModels):
+    """Testcase:Accuracy of the openbmb/MiniCPM-o-2_6 model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] openbmb/MiniCPM-o-2_6
+    """
+
     model = "/root/.cache/modelscope/hub/models/openbmb/MiniCPM-o-2_6"
     mmmu_accuracy = 0.2
 

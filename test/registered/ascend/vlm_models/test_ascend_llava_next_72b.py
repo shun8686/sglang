@@ -8,6 +8,12 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestLlavaNext72B(GSM8KAscendMixin, CustomTestCase):
+    """Testcase:Accuracy of the lmms-lab/llava-next-72b model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] lmms-lab/llava-next-72b
+    """
+
     model = "/root/.cache/modelscope/hub/models/lmms-lab/llava-next-72b"
     accuracy = 0.79
     other_args = [

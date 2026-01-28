@@ -8,6 +8,12 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestXverse(GSM8KAscendMixin, CustomTestCase):
+    """Testcase:Accuracy of the xverse/XVERSE-MoE-A36B model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] xverse/XVERSE-MoE-A36B
+    """
+
     model = "/root/.cache/modelscope/hub/models/xverse/XVERSE-MoE-A36B"
     accuracy = 0.24
     other_args = [

@@ -8,6 +8,12 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestBaichuan(GSM8KAscendMixin, CustomTestCase):
+    """Testcase:Accuracy of the baichuan-inc/Baichuan2-13B-Chat model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] baichuan-inc/Baichuan2-13B-Chat
+    """
+
     model = "/root/.cache/modelscope/hub/models/baichuan-inc/Baichuan2-13B-Chat"
     accuracy = 0.48
     other_args = [

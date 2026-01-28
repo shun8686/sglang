@@ -16,12 +16,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLoraTargetModules(CustomTestCase):
-    """Test class for Llama-3.2-1B with --lora-target-modules=all parameter.
+    """Testcase：Verify the functionality and parameter effectiveness when --lora-target-modules=all is set for Llama-3.2-1B
 
-    Tests functionality with LORA target modules set to 'all':
-    - health-check: /health_generate API returns 200 OK
-    - inference: Generate API returns valid result (200 OK + "Paris" in response)
-    - server-info: get_server_info API confirms lora_target_modules is ["all"]
+    [Test Category] Parameter
+    [Test Target] --lora-target-modules
     """
 
     @classmethod

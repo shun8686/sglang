@@ -8,6 +8,12 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestQwen3Coder480BA35B(GSM8KAscendMixin, CustomTestCase):
+    """Testcase:Accuracy of the Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot
+    """
+
     model = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
     accuracy = 0.96
     other_args = [

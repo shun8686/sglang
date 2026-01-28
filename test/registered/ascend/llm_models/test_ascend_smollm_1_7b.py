@@ -8,6 +8,12 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestSmolLM(GSM8KAscendMixin, CustomTestCase):
+    """Testcase:Accuracy of the HuggingFaceTB/SmolLM-1.7B model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] HuggingFaceTB/SmolLM-1.7B
+    """
+
     model = "/root/.cache/modelscope/hub/models/HuggingFaceTB/SmolLM-1.7B"
     accuracy = 0.05
     other_args = [

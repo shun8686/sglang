@@ -7,6 +7,12 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestQwen25VL72B(TestVLMModels):
+    """Testcase:Accuracy of the Qwen/Qwen2.5-VL-72B-Instruct model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] Qwen/Qwen2.5-VL-72B-Instruct
+    """
+
     model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-VL-72B-Instruct"
     mmmu_accuracy = 0.3
     other_args = [
