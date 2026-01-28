@@ -16,10 +16,14 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMixedChunk(CustomTestCase):
-    """Test class for mixed chunk feature with SGLang framework.
+    """Testcase：Verify the correctness of --enable-mixed-chunk feature and related APIs (health/generate/server-info) availability.
 
+    [Test Category] Parameter
+    [Test Target] --enable-mixed-chunk
     """
+
     def test_enable_mixed_chunk(self):
+    """Verify the availability of related APIs and the correctness of --enable-mixed-chunk parameter configuration"""
         other_args = (
             [
                 "--enable-mixed-chunk",
@@ -28,6 +32,7 @@ class TestEnableMixedChunk(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
+        # Launch the service with mixed chunk feature enabled
         process = popen_launch_server(
             (
                 "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
@@ -39,6 +44,7 @@ class TestEnableMixedChunk(CustomTestCase):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
+        # Verify that the /generate inference interface returns 200 OK and contains the expected result "Paris"
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -52,7 +58,7 @@ class TestEnableMixedChunk(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-        #Verify enable_mixed_chunk parameter is correctly set
+        # Verify enable_mixed_chunk parameter is correctly set
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["enable_mixed_chunk"], True)
