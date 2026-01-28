@@ -57,7 +57,7 @@ class TestAscendApi(CustomTestCase):
         print(response.json().keys())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meta_info']['id'], "2")
-        #self.assertEqual(response.json()['sampling_params']['temperature'], 0)
+
     def test_api_encode_02(self):
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/encode",
@@ -73,8 +73,7 @@ class TestAscendApi(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meta_info']['id'], "3")
-        #self.assertEqual(response.json()['sampling_params']['temperature'], 0)
-        
+
     def test_api_encode_03(self):
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/encode",
@@ -92,7 +91,6 @@ class TestAscendApi(CustomTestCase):
         print(response.json().keys)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meta_info']['id'], "4")
-        #self.assertEqual(response.json()['sampling_params']['temperature'], 0)
 
 
 if __name__ == "__main__":
