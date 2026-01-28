@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestDeepEpDeepseek(CustomTestCase):
+class TestDeepEpAutoQWEN3_235B(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN3_235B_A22B_W8A8_MODEL_PATH
@@ -32,7 +32,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "low_latency",
+                "auto",
                 "--disable-cuda-graph",
                 "--dp-size",
                 2,
