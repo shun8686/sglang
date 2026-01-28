@@ -2,7 +2,7 @@ import unittest
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -26,16 +26,10 @@ class TestSleepOnIdle(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
             ]
-            if is_npu()
-            else [
-                "--sleep-on-idle",
-            ]
         )
         process = popen_launch_server(
             (
                 "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
-                if is_npu()
-                else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
             ),
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
