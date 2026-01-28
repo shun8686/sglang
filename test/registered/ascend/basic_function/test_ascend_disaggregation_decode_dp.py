@@ -108,7 +108,13 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
         )
 
     def test_disaggregation_decode_dp(self):
-         """Verify the availability of disaggregated services and the correctness of --disaggregation-decode-dp=2 configuration"""
+        """Test core functionality of disaggregation-decode-tp parameter.
+
+        Test Steps:
+        1. Verify LB service health (basic availability check)
+        2. Validate inference correctness (France capital = Paris)
+        3. Confirm disaggregation_decode_dp=2 in Prefill server info (parameter validation)
+        """
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
