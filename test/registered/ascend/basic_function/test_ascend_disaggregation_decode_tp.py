@@ -7,7 +7,7 @@ from types import SimpleNamespace
 import requests
 
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
-from sglang.test.test_disaggregation_utils import TestDisaggregationBase
+from sglang.test.registered.ascend.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
@@ -22,16 +22,15 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDisaggregationDecodeTp(TestDisaggregationBase):
-    """Test class for Decode TP (Tensor Parallelism) in disaggregated Prefill-Decode architecture.
+    """Testcase：Verify the correctness of --disaggregation-decode-tp=2 and Prefill/Decode disaggregated services availability on Ascend NPU backend.
 
-    Core Purpose:
-    - Verify disaggregation-decode-tp=2 parameter functionality on Ascend backend
-    - Validate Prefill/Decode disaggregated services with Decode TP configuration
-    - Ensure inference correctness and parameter configuration effectiveness
+    [Test Category] Parameter
+    [Test Target] --disaggregation-decode-tp; --disaggregation-mode; --disaggregation-transfer-backend
     """
 
     @classmethod
     def setUpClass(cls):
+         """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
         super().setUpClass()
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
@@ -51,6 +50,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
 
     @classmethod
     def start_prefill(cls):
+        """Launch the Prefill service with --disaggregation-decode-tp=2 configuration for Ascend NPU"""
         prefill_args = (
             [
                 "--disaggregation-mode",
@@ -78,6 +78,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
 
     @classmethod
     def start_decode(cls):
+        """Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)"""
         decode_args = (
             [
                 "--disaggregation-mode",

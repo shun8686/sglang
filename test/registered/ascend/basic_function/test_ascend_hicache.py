@@ -18,14 +18,15 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestHiCache(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with hierarchical cache (HiCache) enabled.
+    """Testcase：Verify the correctness of --enable-hierarchical-cache (HiCache) and MMLU dataset accuracy meets the requirement (score ≥ 0.65).
 
-    Tests core functionality with --enable-hierarchical-cache configuration:
-    - mmlu: MMLU dataset accuracy verification (score ≥ 0.65)
+    [Test Category] Parameter
+    [Test Target] --enable-hierarchical-cache
     """
 
     @classmethod
     def setUpClass(cls):
+        """Test class initialization: Launch the service with HiCache enabled and related NPU/HIP configurations"""
         cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
@@ -49,6 +50,7 @@ class TestHiCache(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+         """Verify MMLU dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65) with HiCache enabled"""
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,

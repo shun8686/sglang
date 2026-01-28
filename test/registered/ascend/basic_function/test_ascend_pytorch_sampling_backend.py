@@ -17,11 +17,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPyTorchSamplingBackend(CustomTestCase):
-    """Test class for Llama-3.1-8B-Instruct with PyTorch sampling backend.
+    """Testcase：Verify the correctness of --sampling-backend=pytorch and core functionalities (MMLU accuracy, greedy sampling consistency).
 
-    Tests core functionalities with --sampling-backend=pytorch configuration:
-    - mmlu: MMLU dataset accuracy verification (score ≥ 0.65)
-    - greedy: Greedy sampling consistency (single/batch requests return identical results)
+    [Test Category] Parameter
+    [Test Target] --sampling-backend;
     """
 
     @classmethod
@@ -47,6 +46,7 @@ class TestPyTorchSamplingBackend(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        """Verify MMLU dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65)"""
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -60,10 +60,11 @@ class TestPyTorchSamplingBackend(CustomTestCase):
         self.assertGreaterEqual(metrics["score"], 0.65)
 
     def test_greedy(self):
+        """Verify greedy sampling consistency (identical results for single/batch requests with temperature=0)"""
 
         first_text = None
 
-        # ensure the answer is identical across single response
+        # 1. Verify consistency of results for 5 consecutive single requests
         for _ in range(5):
             response_single = requests.post(
                 self.base_url + "/generate",
@@ -83,6 +84,7 @@ class TestPyTorchSamplingBackend(CustomTestCase):
 
         first_text = None
 
+        # 2. Send a batch request with 10 identical prompts
         response_batch = requests.post(
             self.base_url + "/generate",
             json={
@@ -94,7 +96,7 @@ class TestPyTorchSamplingBackend(CustomTestCase):
             },
         ).json()
 
-        # ensure the answer is identical among the batch
+       # 3. Verify consistency of results within the batch response
         for i in range(10):
             text = response_batch[i]["text"]
             if first_text is None:
