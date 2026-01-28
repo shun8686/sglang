@@ -33,6 +33,7 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             ]
         )
 
+        # Launch the model server as a child process and save the process handle for subsequent termination
         cls.process = popen_launch_server(
             (
                 "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
@@ -47,7 +48,12 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_enable_request_time_stats_logging(self):
-        """Test request time stats logging parameter takes effect correctly."""
+        """Core Test: Verify that the --enable-request-time-stats-logging parameter takes effect and the server functions normally
+
+        Two-Step Verification Logic:
+        1. Verify the /generate API works normally (correct inference result, 200 status code)
+        2. Verify the feature is enabled in the server info API (configuration takes effect)
+        """
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -62,6 +68,7 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
+        
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
         )
