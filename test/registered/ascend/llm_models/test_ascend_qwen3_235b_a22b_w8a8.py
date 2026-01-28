@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestQwen3235BA22BW8A8(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the Qwen3-235B-A22B-W8A8 model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the vllm-ascend/Qwen3-235B-A22B-W8A8 model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] vllm-ascend/Qwen3-235B-A22B-W8A8
     """
 
     model = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"

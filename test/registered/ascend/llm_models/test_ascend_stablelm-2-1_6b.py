@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestStablelm(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the stablelm-2-1_6b model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the stabilityai/stablelm-2-1_6b model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] stabilityai/stablelm-2-1_6b
     """
 
     model = "/root/.cache/modelscope/hub/models/stabilityai/stablelm-2-1_6b"

@@ -7,8 +7,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLlama3211BVisionInstruct(TestVLMModels):
-    """
-    Accuracy of the Llama-3.2-11B-Vision-Instruct model was tested using the mmmu dataset.
+    """Testcase:Accuracy of the LLM-Research/Llama-3.2-11B-Vision-Instruct model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] LLM-Research/Llama-3.2-11B-Vision-Instruct
     """
 
     model = (

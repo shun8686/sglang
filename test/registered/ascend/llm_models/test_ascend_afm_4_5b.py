@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAFM(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the AFM-4.5B-Base model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the arcee-ai/AFM-4.5B-Base model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] arcee-ai/AFM-4.5B-Base
     """
 
     model = "/root/.cache/modelscope/hub/models/arcee-ai/AFM-4.5B-Base"

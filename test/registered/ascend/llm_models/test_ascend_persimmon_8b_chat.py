@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPersimmon8BChat(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the persimmon-8b-chat model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the Howeee/persimmon-8b-chat model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] Howeee/persimmon-8b-chat
     """
 
     model = "/root/.cache/modelscope/hub/models/Howeee/persimmon-8b-chat"

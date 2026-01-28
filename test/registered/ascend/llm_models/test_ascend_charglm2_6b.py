@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestChatGlm2(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the chatglm2-6b model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the ZhipuAI/chatglm2-6b model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] ZhipuAI/chatglm2-6b
     """
 
     model = "/root/.cache/modelscope/hub/models/ZhipuAI/chatglm2-6b"

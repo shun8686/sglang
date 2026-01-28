@@ -7,8 +7,10 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestMiMoModels(TestVLMModels):
-    """
-    Accuracy of the MiMo-VL-7B-RL model was tested using the mmmu dataset.
+    """Testcase:Accuracy of the XiaomiMiMo/MiMo-VL-7B-RL model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] XiaomiMiMo/MiMo-VL-7B-RL
     """
 
     model = "/root/.cache/modelscope/hub/models/XiaomiMiMo/MiMo-VL-7B-RL"

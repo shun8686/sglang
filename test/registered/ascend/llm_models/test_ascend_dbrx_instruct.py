@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestDbrx(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the dbrx-instruct model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the AI-ModelScope/dbrx-instruct model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] AI-ModelScope/dbrx-instruct
     """
 
     model = "/root/.cache/modelscope/hub/models/AI-ModelScope/dbrx-instruct"

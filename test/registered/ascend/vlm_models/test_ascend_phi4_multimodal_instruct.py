@@ -7,8 +7,10 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestPhi4Multimodal(TestVLMModels):
-    """
-    Accuracy of the Phi-4-multimodal-instruct model was tested using the mmmu dataset.
+    """Testcase:Accuracy of the microsoft/Phi-4-multimodal-instruct model was tested using the mmmu dataset.
+
+    [Test Category] Model
+    [Test Target] microsoft/Phi-4-multimodal-instruct
     """
 
     model = "/root/.cache/modelscope/hub/models/microsoft/Phi-4-multimodal-instruct"

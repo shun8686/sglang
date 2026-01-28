@@ -8,8 +8,10 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestQWQ32BW8A8(GSM8KAscendMixin, CustomTestCase):
-    """
-    Accuracy of the QWQ-32B-W8A8 model was tested using the GSM8K dataset.
+    """Testcase:Accuracy of the vllm-ascend/QWQ-32B-W8A8 model was tested using the GSM8K dataset.
+
+    [Test Category] Model
+    [Test Target] vllm-ascend/QWQ-32B-W8A8
     """
 
     model = "/root/.cache/modelscope/hub/models/vllm-ascend/QWQ-32B-W8A8"
