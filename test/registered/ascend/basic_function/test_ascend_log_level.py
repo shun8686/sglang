@@ -17,7 +17,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLogLevel(CustomTestCase):
-    """Testcase：Verify the log-level parameter is set ,the inference request is successfully processed ,and the printed log level is the same as the configured log level
+    """Testcase：Verify set log-level parameter ,the inference request is successfully processed ,and the printed log level is the same as the configured log level
        [Test Category] Parameter
        [Test Target] --log-level
        """
