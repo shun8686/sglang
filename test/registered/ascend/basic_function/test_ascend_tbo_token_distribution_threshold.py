@@ -16,17 +16,17 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestTboTokenDistributionThresholdBase(CustomTestCase):
-    """Base test class for TBO (Two-Batch Overlap) token distribution threshold parameter.
+   """Testcase：Verify the correctness of --tbo-token-distribution-threshold (0.8) and related  API availability.
 
-    Core Purpose:
-    - Verify tbo-token-distribution-threshold parameter functionality
-    - Validate inference correctness and parameter configuration effectiveness
+    [Test Category] Parameter
+    [Test Target] --tbo-token-distribution-threshold;
     """
 
     tbo_token_distribution_threshold = 0.8
 
     @classmethod
     def setUpClass(cls):
+        """Test class initialization: Launch the service with TBO token distribution threshold configured"""
         other_args = (
             [
                 "--attention-backend",
@@ -51,6 +51,9 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tbo_token_distribution_threshold(self):
+        """Verify inference correctness and the accuracy of TBO token distribution threshold configuration"""
+
+        # Verify that the /generate inference interface returns 200 OK and contains the expected result "Paris"
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -69,6 +72,7 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
+        # Verify tbo_token_distribution_threshold parameter is correctly set
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
         print(response.json())
         self.assertEqual(
@@ -82,6 +86,11 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
 
 
 class TestDisableTboTokenDistributionThreshold(TestTboTokenDistributionThresholdBase):
+    """Testcase：Verify the correctness of --tbo-token-distribution-threshold (0, disabled) and related API availability.
+
+    [Test Category] Parameter
+    [Test Target] --tbo-token-distribution-threshold
+    """
     tbo_token_distribution_threshold = 0
 
 
