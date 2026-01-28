@@ -3,7 +3,7 @@ import unittest
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -35,25 +35,14 @@ class TestSkipServerWarmup(CustomTestCase):
                 "--enable-hierarchical-cache",
                 "--disable-radix-cache",
                 ]
-            if is_npu()
-            else [
-                    "--mem-fraction-static",
-                    0.8,
-                    "--tp-size",
-                    2,
-                    "--enable-hierarchical-cache",
-                    "--disable-radix-cache",
-                ]
         )
         out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
         err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
         try:
             process = popen_launch_server(
                 (
-                    "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-32B"
-                    if is_npu()
-                    else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
-                 ),
+                    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+                ),
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=other_args,
