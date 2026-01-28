@@ -47,6 +47,13 @@ class TestLoraTargetModules(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_lora_target_modules(self):
+        """Core Test: Verify the effectiveness of --lora-target-modules=all and normal server functionality
+        
+        Three-Step Verification Logic:
+        1. Verify health check API availability (service readiness)
+        2. Verify core generate API functionality (normal inference with correct results)
+        3. Verify LoRA parameter configuration effectiveness via server info API
+        """
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
