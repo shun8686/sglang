@@ -4,7 +4,7 @@ import re
 import unittest
 from concurrent.futures import ThreadPoolExecutor
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -21,10 +21,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMaxQueuedRequests(CustomTestCase):
-    """Test class for Llama-3.2-1B-Instruct with maximum number of requests.
-    Tests core functionality with queued-requests configuration:
-    --max-running-requests: The maximum number of running requests.
-    --max-queued-requests: The maximum number of queued requests
+    """Testcase：Verify the correctness of request throttling functionality with configured max running/queued requests limits
+
+    [Test Category] Parameter
+    [Test Target] --max-running-requests;--max-queued-requests
     """
 
     @classmethod
