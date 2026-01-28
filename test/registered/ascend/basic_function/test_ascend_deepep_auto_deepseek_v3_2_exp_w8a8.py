@@ -4,6 +4,7 @@ import unittest
 from types import SimpleNamespace
 
 from utils.test_ascend_deepep_mode_config import NIC_NAME
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -14,6 +15,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
