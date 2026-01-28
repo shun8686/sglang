@@ -18,7 +18,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestWarmups(CustomTestCase):
+class TestAscendWarmups(CustomTestCase):
     """Testcase: Test that the warm-up task runs successfully when the --warmups voice_chat parameter is specified upon service startup.
 
     [Test Category] Parameter
@@ -59,7 +59,7 @@ class TestWarmups(CustomTestCase):
         os.remove("./out_log.txt")
         os.remove("./err_log.txt")
 
-    def test_warmups_voice_chat(self):
+    def test_warmups_with_voice_chat(self):
         # Call the get_server_info API to verify that the warmups parameter configuration takes effect.
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
         self.assertEqual(response.status_code, 200)
