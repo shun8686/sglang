@@ -54,6 +54,12 @@ class TestDataParallelism(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
+        """Test MMLU accuracy with DP=2 enabled (core functionality validation)
+        
+        Key Validations:
+        1. MMLU score ≥ 0.65 (accuracy baseline)
+        2. Ensure DP=2 does not degrade model accuracy
+        """
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -61,11 +67,12 @@ class TestDataParallelism(CustomTestCase):
             num_examples=64,
             num_threads=32,
         )
-
+        # Critical assertion: accuracy baseline validation
         metrics = run_eval(args)
         self.assertGreaterEqual(metrics["score"], 0.65)
 
     def test_update_weight(self):
+        #Test update_weights_from_disk API availability with DP=2
         response = requests.post(
             self.base_url + "/update_weights_from_disk",
             json={"model_path": self.model},
