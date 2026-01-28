@@ -115,7 +115,7 @@ class TestQwen235bW8A8(TestAscendMultiNodePdSepTestCaseBase):
     output_token_throughput = 11570
 
     def test_throughput(self):
-        self.run_throughput()
+        self.run_throughput(run_cycles=3)
 
 
 if __name__ == "__main__":
