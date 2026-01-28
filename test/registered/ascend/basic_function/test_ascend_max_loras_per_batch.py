@@ -2,7 +2,7 @@ import unittest
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -16,12 +16,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestLoraPaths(CustomTestCase):
-    """Test class for Llama-3.2-1B with --max-loras-per-batch=1 parameter.
+    """Testcase：Verify the correctness of --max-loras-per-batch=1 and related APIs availability.
 
-    Tests functionality with max LoRA adapters per batch set to 1:
-    - health-check: /health_generate API returns 200 OK (service availability)
-    - inference: Generate API returns valid result (200 OK + "Paris" in response)
-    - server-info: get_server_info API confirms max_loras_per_batch is 1 
+    [Test Category] Parameter
+    [Test Target] --max-loras-per-batch
     """
     
     @classmethod
@@ -34,17 +32,10 @@ class TestLoraPaths(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
             ]
-            if is_npu()
-            else [
-                "--max-loras-per-batch",
-                1,
-            ]
         )
         cls.process = popen_launch_server(
             (
                 "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
-                if is_npu()
-                else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
             ),
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -56,6 +47,7 @@ class TestLoraPaths(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_lora_paths(self):
+        """Core test case: Verify the availability of 3 core APIs and the correctness of --max-loras-per-batch parameter configuration"""
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -78,5 +70,4 @@ class TestLoraPaths(CustomTestCase):
         self.assertEqual(response.json()["max_loras_per_batch"], 1)
 
 if __name__ == "__main__":
-
     unittest.main()
