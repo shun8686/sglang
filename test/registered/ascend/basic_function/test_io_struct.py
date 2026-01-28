@@ -12,7 +12,11 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestGenerateReqInputNormalization(CustomTestCase):
-    """Test the normalization of GenerateReqInput for batch processing and different input formats."""
+    """Testcase: Test the basic functionality of io_struct.
+
+    [Test Category] list
+    [Test Target] Alist of diffrtent image to test
+    """
 
     @classmethod
     def setUpClass(cls):
