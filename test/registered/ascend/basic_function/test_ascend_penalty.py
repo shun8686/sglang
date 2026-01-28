@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -29,8 +29,6 @@ class TestPenalty(CustomTestCase):
     def setUpClass(cls):
         cls.model = (
             "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            if is_npu()
-            else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
         )
         other_args = (
             [
@@ -38,8 +36,6 @@ class TestPenalty(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
             ]
-            if is_npu()
-            else []
         )
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
