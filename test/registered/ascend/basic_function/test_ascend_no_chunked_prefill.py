@@ -29,8 +29,6 @@ class TestNoChunkedPrefill(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                2,
             ]
         )
         res = run_bench_serving(
