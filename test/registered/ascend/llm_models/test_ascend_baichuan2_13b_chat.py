@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestBaichuan(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the baichuan-inc/Baichuan2-13B-Chat model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the baichuan-inc/Baichuan2-13B-Chat model on the GSM8K dataset is no less than 0.48.
 
     [Test Category] Model
     [Test Target] baichuan-inc/Baichuan2-13B-Chat
