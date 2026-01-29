@@ -24,7 +24,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestMatchedStop(CustomTestCase):
     """Testcase: Test different input requests
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] prompt
     """
 

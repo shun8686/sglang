@@ -21,7 +21,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestEnableThinking(CustomTestCase):
     """Testcase: Test Enable the 'enable_thinking' feature
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] enable_thinking
     """
 

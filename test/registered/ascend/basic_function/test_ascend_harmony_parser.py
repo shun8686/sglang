@@ -34,7 +34,7 @@ class TestToken(CustomTestCase):
 class TestPrefixHold(CustomTestCase):
     """Testcase: Test prefix_hold, different inputs
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] prefix_hold
     """
 
