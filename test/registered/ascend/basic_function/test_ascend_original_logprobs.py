@@ -24,12 +24,12 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sglang as sgl
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST
+from sglang.test.ascend.test_ascend_utils import Llama_3.2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
 # ------------------------- Configurable via env ------------------------- #
-MODEL_ID = (
-    "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-)
+MODEL_ID = Llama_3.2_1B_Instruct_WEIGHTS_PATH
+
 PROMPTS = [
     "Hello, my name is",
     "The future of AI is",
@@ -52,10 +52,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOriginalLogprob(unittest.TestCase):
-    """Testcase：Test the alignment of original log probabilities between SGLang and Hugging Face
+    """Testcase: Verify the behavior and log probability alignment of SGLang under two configurations of the environment variable `SGLANG_RETURN_ORIGINAL_LOGPROB` (True/False), 
+        by comparing SGLang's output with reference values from Hugging Face.
 
     [Test Category] Parameter
-    [Test Target] SGLANG_RETURN_ORIGINAL_LOGPROB;top_logprobs_num;token_ids_logprob
+    [Test Target] SGLANG_RETURN_ORIGINAL_LOGPROB
     """
     def setUp(self):
         # ----- HF side (float32 weights) -----

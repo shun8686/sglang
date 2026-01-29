@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLoraBackend(CustomTestCase):
-    """Testcase: Test configuration of lora-backend parameters.
+    """Testcase: Test configuration of lora-backend parameters, and inference request successful.
 
     [Test Category] Parameter
     [Test Target] --lora-backend

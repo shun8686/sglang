@@ -1,5 +1,4 @@
 import json
-import time
 import unittest
 
 import openai
@@ -8,7 +7,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -19,7 +17,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOpenAIServerFunctionCalling(CustomTestCase):
-    """Testcase：Verify the correctness of OpenAI-style function calling functionality with llama3 parser for Llama-3.2-1B-Instruct
+     """Testcase：Verify the correctness of full-scenario OpenAI-style function calling with llama3 parser for Llama-3.2-1B-Instruct model.
+        Cover: Single/multi-turn calls, streaming/non-streaming returns, multi-parameter verification of tool_choice, and JSON parsing validity of function parameters.
 
     [Test Category] Parameter
     [Test Target] --tool-call-parser;tool_choice
@@ -40,7 +39,7 @@ class TestOpenAIServerFunctionCalling(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Replace with the model name needed for testing; if not required, reuse DEFAULT_SMALL_MODEL_NAME_FOR_TEST
+        # Replace with the model name needed for testing
         cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
@@ -789,7 +788,8 @@ class TestOpenAIServerFunctionCalling(CustomTestCase):
 
 
 class TestOpenAIPythonicFunctionCalling(CustomTestCase):
-    """Testcase：Verify the correctness of Pythonic format function calling functionality with pythonic parser for Llama-3.2-1B-Instruct
+    """Testcase：Verify the functionality of Python-style list-format function calling with pythonic parser for Llama-3.2-1B-Instruct model on Ascend NPU backend.
+    Cover: Explicit format prompt verification, streaming call index integrity, and return validity of parallel tool calls.
 
     [Test Category] Parameter
     [Test Target] --tool-call-parser
@@ -931,7 +931,6 @@ class TestOpenAIPythonicFunctionCalling(CustomTestCase):
             "get_weather" in found_names or "get_tourist_attractions" in found_names,
             f"Function name '{found_names}' should container either 'get_weather' or 'get_tourist_attractions'",
         )
-
 
 
 if __name__ == "__main__":

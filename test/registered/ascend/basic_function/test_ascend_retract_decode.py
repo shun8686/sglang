@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3.1_8B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -17,7 +17,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRetractDecode(CustomTestCase):
-    """Testcase：Verify MMLU dataset accuracy of Llama-3.1-8B-Instruct model with retract decode feature enabled
+    """When retract decode feature is enabled, verify that the MMLU dataset accuracy of the Llama-3.1-8B-Instruct model is greater than 0.65.
 
     [Test Category] Parameter
     [Test Target] SGLANG_TEST_RETRACT
@@ -27,9 +27,7 @@ class TestRetractDecode(CustomTestCase):
         # Enable retract decode feature for test
         os.environ["SGLANG_TEST_RETRACT"] = "1"
 
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        )
+        cls.model = Llama_3.1_8B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
             [
@@ -53,7 +51,7 @@ class TestRetractDecode(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        """Test MMLU dataset accuracy with retract decode enabled."""
+        # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,

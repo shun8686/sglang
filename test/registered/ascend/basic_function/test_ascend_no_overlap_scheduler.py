@@ -13,7 +13,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOverlapSchedule(CustomTestCase):
-    """Testcase: Verify the model's ability to successfully process inference requests and ensure inference accuracy, under the condition that the overlap scheduler is disabled, 
+    """Testcase: Verify the model's ability to successfully process inference requests and ensure inference accuracy ≥ 0.65, under the condition that the overlap scheduler is disabled, 
                  with all combinations of radix cache (enabled/disabled) and chunked prefill (enabled/disabled).
 
     [Test Category] Parameter

@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.ascend.test_ascend_utils import Qwen2_5_7B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -19,7 +20,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=250, suite="nightly-2-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct": {
+    Qwen2_5_7B_Instruct_WEIGHTS_PATH: {
         "accuracy": 0.85,
         "latency": 180,
         "output_throughput": 20,
@@ -29,8 +30,8 @@ TEST_MODEL_MATRIX = {
 
 class TestAscendTp2Bf16(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset
-    when graph mode is disabled, radix attention is disabled and tp-size is 2
+    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is disabled,
+    tp-size is 2 and FIA acceleration is used.
 
     [Test Category] Parameter
     [Test Target] --disable-cuda-graph, --tp-size 2, --disable-radix-cache, os.environ["ASCEND_USE_FIA"] = "true"

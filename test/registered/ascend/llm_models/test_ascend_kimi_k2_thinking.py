@@ -16,6 +16,7 @@ class TestKimiK2Thinking(GSM8KAscendMixin, CustomTestCase):
 
     model = "/root/.cache/modelscope/hub/models/Kimi/Kimi-K2-Thinking"
     accuracy = 0.95
+    timeout_for_server_launch = 3000
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

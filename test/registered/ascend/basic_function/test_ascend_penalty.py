@@ -7,6 +7,7 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3.2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -19,7 +20,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPenalty(CustomTestCase):
-    """Testcase：Verify successful processing of inference requests with different penalty mechanism configurations
+    """Testcase：Verify successful processing of inference requests with different penalty mechanism configurations by confirming that the status_code is 200.
 
     [Test Category] Parameter
     [Test Target] frequency_penalty;presence_penalty;min_new_tokens
@@ -27,9 +28,7 @@ class TestPenalty(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-        )
+        cls.model = Llama_3.2_1B_Instruct_WEIGHTS_PATH
         other_args = (
             [
                 "--attention-backend",

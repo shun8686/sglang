@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHicacheIoBackend(CustomTestCase):
-    """Testcase: Tests core functionality with --hicache-io-backend configuration
+    """Testcase: Tests core functionality with --hicache-io-backend configuration, inference requests successful.
 
     [Test Category] Parameter
     [Test Target] --hicache-io-backend

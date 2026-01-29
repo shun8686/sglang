@@ -19,9 +19,10 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestEnableThinking(CustomTestCase):
-    """Testcase: Test Enable the 'enable_thinking' feature
+    """Testcase: Testing with the 'enable_thinking' feature enabled/disabled,
+                 both streaming and non-streaming input requests successful
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] enable_thinking
     """
 

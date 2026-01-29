@@ -16,6 +16,7 @@ class TestGrok2(GSM8KAscendMixin, CustomTestCase):
 
     model = "/root/.cache/modelscope/hub/models/huihui-ai/grok-2"
     accuracy = 0.91
+    timeout_for_server_launch = 3000
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

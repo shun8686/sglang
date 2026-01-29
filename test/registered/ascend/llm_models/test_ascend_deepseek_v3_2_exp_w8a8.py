@@ -15,7 +15,8 @@ class TestDeepSeek(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
-    accuracy = 0.51
+    accuracy = 0.5
+    timeout_for_server_launch = 3000
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

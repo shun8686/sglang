@@ -4,7 +4,7 @@ import unittest
 import requests
 
 from sglang.test.ci.ci_register import register_npu_ci
-from common.test_disaggregation_utils import TestDisaggregationBase
+from sglang.test.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -30,8 +30,6 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         )
-        #os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
-        #env = os.environ.copy()
 
         # Non blocking start servers
         cls.start_prefill()

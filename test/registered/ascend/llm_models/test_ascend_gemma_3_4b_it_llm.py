@@ -12,15 +12,20 @@ register_npu_ci(
 )
 
 
-class TestGemma(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the LLM-Research/gemma-3-1b-it model using the GSM8K dataset.
-
-    [Test Category] Model
-    [Test Target] LLM-Research/gemma-3-1b-it
-    """
-
-    model = "/root/.cache/modelscope/hub/models/LLM-Research/gemma-3-1b-it"
+class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
+    model = "/root/.cache/modelscope/hub/models/google/gemma-3-4b-it"
     accuracy = 0.7
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.8",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--disable-radix-cache",
+        "--chunked-prefill-size",
+        "-1",
+    ]
 
 
 if __name__ == "__main__":

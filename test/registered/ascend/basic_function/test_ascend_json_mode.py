@@ -6,13 +6,11 @@ import openai
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
+    ,
 )
-DEFAULT_SMALL_MODEL_NAME_FOR_TEST="/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
@@ -96,7 +94,7 @@ class ServerWithGrammarBackend(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DEFAULT_SMALL_MODEL_NAME_FOR_TEST
+        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
 
         other_args = [

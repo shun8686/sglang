@@ -24,7 +24,7 @@ class _MockTemplateManager:
 class ServingCompletionTestCase(unittest.TestCase):
     """Testcase: Unit tests for OpenAIServingCompletion.
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] OpenAIServingCompletion
     """
 

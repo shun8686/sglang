@@ -1,10 +1,11 @@
+import os
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
-from sglang.test.ascend.test_ascend_utils import Qwen2_5_7B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DeepSeek_V2_Lite_W8A8_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -16,41 +17,47 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=200, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    Qwen2_5_7B_Instruct_WEIGHTS_PATH: {
-        "accuracy": 0.85,
-        "latency": 180,
-        "output_throughput": 20,
+    DeepSeek_V2_Lite_W8A8_WEIGHTS_PATH: {
+        "accuracy": 0.34,
+        "latency": 1000,
+        "output_throughput": 6,
     },
 }
 
 
-class TestAscendGraphTp2Bf16(CustomTestCase):
+class TestAscendMlaW8A8Int8(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is enabled and tp-size is 2
+    Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
+    DeepSeek model with W8A8 INT8 quantization when the FIA acceleration is used.
 
     [Test Category] Parameter
-    [Test Target] Not set --disable-cuda-graph, --tp-size 2
+    [Test Target] --quantization modelslim, os.environ["ASCEND_USE_FIA"] = "true"
     """
 
     @classmethod
     def setUpClass(cls):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(cls.base_url)
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         cls.common_args = [
             "--trust-remote-code",
+            "--disable-cuda-graph",
             "--mem-fraction-static",
             0.8,
             "--attention-backend",
             "ascend",
+            "--quantization",
+            "modelslim",
             "--tp-size",
             2,
+            "--disable-radix-cache",
         ]
 
     def test_a_gsm8k(self):
+        os.environ["ASCEND_USE_FIA"] = "true"
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")

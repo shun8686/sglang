@@ -5,7 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -16,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
-    """Testcase：Verify the correctness of request time stats logging feature and related API availability with --enable-request-time-stats-logging enabled
+    """Testcase：With --enable-request-time-stats-logging enabled, verify the correctness of request time stats logging feature and related API availability 
 
     [Test Category] Parameter
     [Test Target] --enable-request-time-stats-logging
