@@ -23,7 +23,7 @@ class TestEnableMixedChunk(CustomTestCase):
     """
 
     def test_enable_mixed_chunk(self):
-    """Verify the availability of related APIs and the correctness of --enable-mixed-chunk parameter configuration"""
+        # Verify the availability of related APIs and the correctness of --enable-mixed-chunk parameter configuration
         other_args = (
             [
                 "--enable-mixed-chunk",
