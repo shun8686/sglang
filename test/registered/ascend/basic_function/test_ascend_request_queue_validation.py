@@ -16,6 +16,7 @@ from sglang.test.test_utils import (
     send_generate_requests,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -29,9 +30,7 @@ class TestMaxQueuedRequests(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-        )
+        cls.model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
         other_args = (
             (
                 "--max-running-requests",  # Enforce max request concurrency is 1
