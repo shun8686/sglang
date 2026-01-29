@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPhi4(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the microsoft/Phi-4-multimodal-instruct model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the microsoft/Phi-4-multimodal-instruct model on the GSM8K dataset is no less than 0.8.
 
     [Test Category] Model
     [Test Target] microsoft/Phi-4-multimodal-instruct
