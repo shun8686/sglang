@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestQwen3VL8B(TestVLMModels):
-    """Testcase:Test the accuracy of the Qwen/Qwen3-VL-8B-Instruct model using the mmmu dataset.
+    """Testcase: Verify that the inference accuracy of the Qwen/Qwen3-VL-8B-Instruct model on the MMMU dataset is no less than 0.3.
 
     [Test Category] Model
     [Test Target] Qwen/Qwen3-VL-8B-Instruct
