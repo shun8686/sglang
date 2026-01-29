@@ -3,6 +3,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import Meta_Llama_3_1_8B_Instruct
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -36,7 +37,7 @@ class TestMaxLoadedLoras(CustomTestCase):
         )
         process = popen_launch_server(
             (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
+                Meta_Llama_3_1_8B_Instruct
             ),
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,

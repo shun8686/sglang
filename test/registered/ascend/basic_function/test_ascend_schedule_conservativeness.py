@@ -3,6 +3,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -35,7 +36,7 @@ class TestScheduleConservativeness(CustomTestCase):
         )
         process = popen_launch_server(
             (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
+                Llama_3_2_1B_WEIGHTS_PATH
             ),
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
