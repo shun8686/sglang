@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestTboTokenDistributionThresholdBase(CustomTestCase):
-   """Testcase：Verify the correctness of --tbo-token-distribution-threshold (0.8) and related(exitgenerate/server-info) API availability.
+   """Testcase：Verify the correctness of --tbo-token-distribution-threshold (0.8) and related(/generate /get_server_info) API availability.
 
     [Test Category] Parameter
     [Test Target] --tbo-token-distribution-threshold;
@@ -26,7 +26,7 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Test class initialization: Launch the service with TBO token distribution threshold configured"""
+        # Test class initialization: Launch the service with TBO token distribution threshold configured
         other_args = (
             [
                 "--attention-backend",
@@ -49,8 +49,6 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tbo_token_distribution_threshold(self):
-        """Verify inference correctness and the accuracy of TBO token distribution threshold configuration"""
-
         # Verify that the /generate inference interface returns 200 OK and contains the expected result "Paris"
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
