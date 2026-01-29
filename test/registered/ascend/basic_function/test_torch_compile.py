@@ -23,8 +23,8 @@ class TestTorchCompile(CustomTestCase):
     """Testcase: Tests core functionality with --enable-torch-compile configuration
                  MMLU dataset accuracy verification (score ≥ 0.65)
 
-    [Test Category] Parameter
-    [Test Target] --enable-torch-compile
+    [Test Category] --enable-torch-compile
+    [Test Target] optimize the model with torch.compile
     """
 
     @classmethod

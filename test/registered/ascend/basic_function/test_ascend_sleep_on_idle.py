@@ -17,8 +17,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestSleepOnIdle(CustomTestCase):
     """Testcase: Test the basic functions of sleep-on-idle
 
-    [Test Category] Parameter
-    [Test Target] --sleep-on-idle
+    [Test Category] --sleep-on-idle
+    [Test Target] Reduce CPU usage when sglang is idle.
     """
 
     def test_sleep_on_idle(self):

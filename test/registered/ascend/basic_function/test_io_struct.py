@@ -14,8 +14,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestGenerateReqInputNormalization(CustomTestCase):
     """Testcase: Test the basic functionality of io_struct.
 
-    [Test Category] Interface
-    [Test Target] Alist
+    [Test Category] list
+    [Test Target] Alist of diffrtent image to test
     """
 
     @classmethod

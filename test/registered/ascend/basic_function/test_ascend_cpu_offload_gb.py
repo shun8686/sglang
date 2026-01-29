@@ -18,8 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestAscendCpuOffloadGb(CustomTestCase):
     """Testcase: Tests core functionality with --cpu-offload-gb configuration
 
-    [Test Category] Parameter
-    [Test Target] --cpu-offload-gb
+    [Test Category] --cpu-offload-gb
+    [Test Target] CPU offload memory size
     """
 
     def test_cpu_offload_gb(self):

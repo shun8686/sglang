@@ -4,7 +4,7 @@ import re
 import unittest
 from typing import Any, List, Optional, Tuple
 
-from sglang.srt.utils import kill_process_tree
+from sglang.srt.utils import is_npu, kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -21,9 +21,9 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestPriorityScheduling(CustomTestCase):
     """Testcase: Tests core functionality with --enable-priority-scheduling configuration
-
-    [Test Category] Parameter
-    [Test Target] --enable-priority-scheduling
+    
+    [Test Category] --enable-priority-scheduling
+    [Test Target] Enable priority scheduling
     """
 
     @classmethod

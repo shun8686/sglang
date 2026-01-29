@@ -19,8 +19,8 @@ class TestHiCachePage(CustomTestCase):
     """Testcase: Test class for Llama-3.1-8B-Instruct with hierarchical cache (HiCache) enabled.
                 MMLU dataset accuracy verification (score ≥ 0.65)
 
-    [Test Category] Parameter
-    [Test Target] --page-size
+    [Test Category] --page-size
+    [Test Target] The number of tikens in a page
     """
 
     @classmethod

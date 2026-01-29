@@ -17,8 +17,8 @@ class TestL1Cache(CustomTestCase):
     """Testcase: Test shows that L2 cache is enabled,
     and inference request outputs shorter than the page size will not be reused
 
-    [Test Category] Parameter
-    [Test Target] --enable-hierarchical-cache
+    [Test Category] --enable-hierarchical-cache
+    [Test Target] enable L2 cache
     """
 
     @classmethod

@@ -1,10 +1,22 @@
+"""
+Usage:
+python3 -m unittest openai_server.features.test_enable_thinking.TestEnableThinking.test_chat_completion_with_reasoning
+python3 -m unittest openai_server.features.test_enable_thinking.TestEnableThinking.test_chat_completion_without_reasoning
+python3 -m unittest openai_server.features.test_enable_thinking.TestEnableThinking.test_stream_chat_completion_with_reasoning
+python3 -m unittest openai_server.features.test_enable_thinking.TestEnableThinking.test_stream_chat_completion_without_reasoning
+"""
+
+import asyncio
 import json
+import os
+import sys
+import time
 import unittest
 
 import openai
 import requests
 
-from sglang.srt.utils import kill_process_tree
+from sglang.srt.utils import is_npu, kill_process_tree
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.test_utils import (
     DEFAULT_ENABLE_THINKING_MODEL_NAME_FOR_TEST,
@@ -20,14 +32,16 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestEnableThinking(CustomTestCase):
     """Testcase: Test Enable the 'enable_thinking' feature
 
-    [Test Category] Interface
-    [Test Target] enable_thinking
+    [Test Category] enable_thinking
+    [Test Target] Testing the Qwen3-30B-A3B model with enable_thinking, reasoning successful.  
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
-
+        if is_npu():
+            cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
+        else:
+            cls.model = DEFAULT_ENABLE_THINKING_MODEL_NAME_FOR_TEST
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-1234"
         cls.other_args = (
@@ -42,6 +56,8 @@ class TestEnableThinking(CustomTestCase):
                 "--tp",
                 2,
             ]
+            if is_npu()
+            else ["--reasoning-parser", "qwen3"]
         )
         cls.process = popen_launch_server(
             cls.model,

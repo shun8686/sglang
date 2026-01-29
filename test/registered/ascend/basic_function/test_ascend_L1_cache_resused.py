@@ -17,8 +17,8 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestL1Cache(CustomTestCase):
     """Testcase: Test enabled L1 cache inference request reuse succeddfully
 
-    [Test Category] Parameter
-    [Test Target] --disable-radix-cache
+    [Test Category] --disable-radix-cache
+    [Test Target] enable L1 cache
     """
 
     @classmethod
