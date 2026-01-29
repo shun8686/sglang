@@ -6,6 +6,7 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -17,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPyTorchSamplingBackend(CustomTestCase):
-    """Testcase：Verify the correctness of --sampling-backend=pytorch and core functionalities (MMLU accuracy, greedy sampling consistency).
+    """Testcase：When --sampling-backend=pytorch, verify the MMLU dataset accuracy (>0.65) and greedy sampling consistency of the Llama-3.1-8B-Instruct mode
 
     [Test Category] Parameter
     [Test Target] --sampling-backend;
@@ -25,7 +26,7 @@ class TestPyTorchSamplingBackend(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
+        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
