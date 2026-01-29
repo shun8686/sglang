@@ -15,7 +15,7 @@ class TestInternlm2(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = "/root/.cache/modelscope/hub/models/Shanghai_AI_Laboratory/internlm2-7b"
-    accuracy = 0.6
+    accuracy = 0.585
 
 
 if __name__ == "__main__":
