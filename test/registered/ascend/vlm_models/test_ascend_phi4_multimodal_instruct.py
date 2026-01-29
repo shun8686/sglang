@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestPhi4Multimodal(TestVLMModels):
-    """Testcase:Test the accuracy of the microsoft/Phi-4-multimodal-instruct model using the mmmu dataset.
+    """Testcase: Verify that the inference accuracy of the microsoft/Phi-4-multimodal-instruct model on the MMMU dataset is no less than 0.2.
 
     [Test Category] Model
     [Test Target] microsoft/Phi-4-multimodal-instruct
