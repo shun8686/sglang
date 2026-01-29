@@ -18,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMultimodalNonMlm(CustomTestCase):
-    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the mmlu accuracy not deteriorate 0.2 and the inference request is successful
+    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the mmlu accuracy not less than 0.2 and the inference request is successful
            [Test Category] Parameter
            [Test Target] --enable-multimodal
            """

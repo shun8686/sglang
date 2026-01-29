@@ -59,8 +59,8 @@ class _MockTemplateManager:
 class ServingEmbeddingTestCase(unittest.TestCase):
     """Testcase: Unit tests for OpenAIServingEmbedding.
 
-    [Test Category] OpenAIServingEmbedding
-    [Test Target] Test OpenAIServingEmbedding interface  
+    [Test Category] Parameter
+    [Test Target] OpenAIServingEmbedding
     """
     def setUp(self):
         """Set up test fixtures."""

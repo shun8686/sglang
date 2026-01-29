@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNoChunkedPrefill(CustomTestCase):
-    """Testcase：Verify service availability and request processing accuracy of Llama-3.1-8B-Instruct model when chunked prefill is disabled
+    """When chunked prefill is disabled, verify that the request processing accuracy of the Llama-3.1-8B-Instruct model is greater than 0.65.
 
     [Test Category] Parameter
     [Test Target] --chunked-prefill-size
@@ -23,7 +23,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     
     @classmethod
     def setUpClass(cls):
-        # Start server: disable chunked prefill (-1) and cache, adapt to NPU environment
+        # Start server: disable chunked prefill (-1) and cache
         cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
@@ -46,16 +46,16 @@ class TestNoChunkedPrefill(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_no_chunked_prefill_without_radix_cache(self):
-    # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
-    args = SimpleNamespace(
-        base_url=self.base_url,
-        model=self.model,
-        eval_name="mmlu",
-        num_examples=64,
-        num_threads=32,
-    )
-    metrics = run_eval(args)
-    self.assertGreaterEqual(metrics["score"], 0.65)
+        # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model,
+            eval_name="mmlu",
+            num_examples=64,
+            num_threads=32,
+        )
+        metrics = run_eval(args)
+        self.assertGreaterEqual(metrics["score"], 0.65)
 
 
 

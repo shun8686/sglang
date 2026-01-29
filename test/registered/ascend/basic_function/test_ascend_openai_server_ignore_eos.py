@@ -2,7 +2,7 @@ import unittest
 
 import openai
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -16,20 +16,17 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestOpenAIServerIgnoreEOS(CustomTestCase):
-    """Testcase: Test 'ignore_eos' is True, the EOS is ignore and continue reasoning 
+    """Testcase: Test 'ignore_eos' is True, the EOS is ignore and continue reasoning
 
-    [Test Category] ignore_eos 
-    [Test Target] Ignore EOS and continue reasoning
+    [Test Category] Parameter
+    [Test Target] ignore_eos
     """
 
     @classmethod
     def setUpClass(cls):
-        if is_npu():
-            cls.model = (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            )
-        else:
-            cls.model = DEFAULT_SMALL_MODEL_NAME_FOR_TEST
+        cls.model = (
+            "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+        )
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
         cls.other_args = (
@@ -38,8 +35,6 @@ class TestOpenAIServerIgnoreEOS(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
             ]
-            if is_npu()
-            else []
         )
         cls.process = popen_launch_server(
             cls.model,

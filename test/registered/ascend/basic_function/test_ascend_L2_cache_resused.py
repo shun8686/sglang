@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestL2Cache(CustomTestCase):
     """Testcase: Test enabled L2 cache inference request reuse succeddfully
 
-    [Test Category] --enable-hierarchical-cache
+    [Test Category] Parameter--enable-hierarchical-cache
     [Test Target] enable L2 cache
     """
 

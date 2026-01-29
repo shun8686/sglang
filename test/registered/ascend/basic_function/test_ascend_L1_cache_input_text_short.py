@@ -17,8 +17,8 @@ class TestL1Cache(CustomTestCase):
     """Testcase: Test shows that L1 cache is enabled,
     and inference request outputs shorter than the page size will not be reused.
 
-    [Test Category] --disable-radix-cache
-    [Test Target] enable L1 cache
+    [Test Category] Parameter
+    [Test Target] --disable-radix-cache
     """
 
     @classmethod
