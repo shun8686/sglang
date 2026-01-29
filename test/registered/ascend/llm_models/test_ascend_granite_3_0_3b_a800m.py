@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestGranite(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the ibm-granite/granite-3.0-3b-a800m-instruct model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the ibm-granite/granite-3.0-3b-a800m-instruct model on the GSM8K dataset is no less than 0.38.
 
     [Test Category] Model
     [Test Target] ibm-granite/granite-3.0-3b-a800m-instruct
