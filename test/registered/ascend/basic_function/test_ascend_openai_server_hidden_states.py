@@ -220,8 +220,8 @@ class TestOpenAIServerWithHiddenStatesEnabled(
 ):
     """Testcase: Tests core functionality with --enable-return-hidden-states configuration
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --enable-return-hidden-states
     """
 
     @classmethod

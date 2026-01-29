@@ -18,8 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestMaxLoadedLoras(CustomTestCase):
     """Testcase: Test configuration for max-loaded-loras inference successful
 
-    [Test Category] --max-loaded-loras
-    [Test Target] limits the maximum number of LoRA adapters loaded in CPU memory at a time.
+    [Test Category] Parameter
+    [Test Target] --max-loaded-loras
     """
 
     def test_max_loaded_loras(self):

@@ -18,8 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestSkipServerWarmup(CustomTestCase):
     """Testcase: Test the L2 cache service will fail to start if L1 cache is not enabled
 
-    [Test Category] --disable-radix-cache; --enable-hierarchical-cache
-    [Test Target] The arguments enable-hierarchical-cache and disable-radix-cache are mutually exclusive and cannot be used at the same time
+    [Test Category] Parameter
+    [Test Target] --disable-radix-cache; --enable-hierarchical-cache
     """
 
     def test_L2_cache_04(self):

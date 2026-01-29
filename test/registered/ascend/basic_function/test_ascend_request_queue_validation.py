@@ -2,7 +2,6 @@ import asyncio
 import os
 import re
 import unittest
-from concurrent.futures import ThreadPoolExecutor
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -23,8 +22,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestMaxQueuedRequests(CustomTestCase):
     """Testcase：Verify the correctness of request throttling functionality with configured max running/queued requests limits
 
-    [Test Category] --max-running-requests; --max-queued-requests
-    [Test Target] The maximum number of requests and The maximum number of queued requests
+    [Test Category] Parameter
+    [Test Target] --max-running-requests; --max-queued-requests
     """
 
     @classmethod
