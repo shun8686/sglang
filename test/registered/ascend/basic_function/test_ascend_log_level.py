@@ -38,10 +38,7 @@ class TestLogLevel(CustomTestCase):
         out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
         err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
         process = popen_launch_server(
-            (
-                model
-
-            ),
+            model,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
@@ -89,10 +86,7 @@ class TestLogLevel(CustomTestCase):
         out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
         err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
         process = popen_launch_server(
-            (
-                model
-
-            ),
+            model,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
