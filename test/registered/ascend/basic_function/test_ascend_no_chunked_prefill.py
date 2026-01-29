@@ -46,7 +46,7 @@ class TestNoChunkedPrefill(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_no_chunked_prefill_without_radix_cache(self):
-    # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
+        # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
