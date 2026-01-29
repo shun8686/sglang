@@ -24,11 +24,11 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sglang as sgl
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST
-from sglang.test.ascend.test_ascend_utils import Llama_3.2_1B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
 # ------------------------- Configurable via env ------------------------- #
-MODEL_ID = Llama_3.2_1B_Instruct_WEIGHTS_PATH
+MODEL_ID = Llama_3_2_1B_Instruct_WEIGHTS_PATH
 
 PROMPTS = [
     "Hello, my name is",
