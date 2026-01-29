@@ -50,7 +50,7 @@ class TestHiCache(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-         """Verify MMLU dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65) with HiCache enabled"""
+        # Verify MMLU dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65) with HiCache enabled
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
