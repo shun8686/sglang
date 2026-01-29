@@ -19,7 +19,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPenalty(CustomTestCase):
-    """Testcase：Verify successful processing of inference requests with different penalty mechanism configurations
+    """Testcase：Verify successful processing of inference requests with different penalty mechanism configurations by confirming that the status_code is 200.
 
     [Test Category] Parameter
     [Test Target] frequency_penalty;presence_penalty;min_new_tokens
