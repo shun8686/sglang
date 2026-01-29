@@ -6,12 +6,15 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import DeepSeek_R1_0528_W8A8_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
+
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestModelLoaderExtraConfig(CustomTestCase):
@@ -107,8 +110,6 @@ class TestModelLoaderExtraConfig(CustomTestCase):
 
 
 class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
-    models = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
-    accuracy = 0.95
     other_args = [
         "--trust-remote-code",
         "--attention-backend",
