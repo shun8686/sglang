@@ -81,6 +81,10 @@ QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-
 QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-30B-A3B-Instruct")
 QWEN3_VL_235B_A22B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-235B-A22B-Instruct")
 
+QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")
+EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "sglang-EAGLE3-LLaMA3.1-Instruct-8B")
+DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "DeepSeek-R1-0528-w4a8-per-channel")
+
 # Embedding model weights path
 BGE_LARGE_EN_V1_5_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bge-large-en-v1.5")
 CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/clip-vit-large-patch14-336")
@@ -99,4 +103,3 @@ INTERNLM2_7B_REWARD_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Shanghai_AI_
 SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = "/root/.cache/huggingface/hub/models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1"
 QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach")
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
-QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")
