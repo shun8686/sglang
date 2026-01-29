@@ -4,6 +4,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_2_7B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -34,7 +35,7 @@ class TestNcclPort(CustomTestCase):
     [Test Target] --nccl-port
     """
 
-    model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-2-7B"
+    model = LLAMA_2_7B_WEIGHTS_PATH
 
     def test_nccl_port(self):
         """Test the --nccl-port argument."""
