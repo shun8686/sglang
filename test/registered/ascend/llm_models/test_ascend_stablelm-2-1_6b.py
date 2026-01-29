@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestStablelm(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the stabilityai/stablelm-2-1_6b model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the stabilityai/stablelm-2-1_6b model on the GSM8K dataset is no less than 0.195.
 
     [Test Category] Model
     [Test Target] stabilityai/stablelm-2-1_6b
