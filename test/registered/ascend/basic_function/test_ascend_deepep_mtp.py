@@ -82,6 +82,8 @@ class TestAscendDeepEP(CustomTestCase):
             "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
             "SGLANG_NPU_USE_MLAPO": "1",
             "SGLANG_NPU_USE_EINSUM_MM": "1",
+            "SLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         }
         os.environ.update(cls.extra_envs)
 
