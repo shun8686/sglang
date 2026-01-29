@@ -30,8 +30,6 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         )
-        #os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
-        #env = os.environ.copy()
 
         # Non blocking start servers
         cls.start_prefill()
