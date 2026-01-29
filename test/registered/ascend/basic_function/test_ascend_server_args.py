@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from sglang.srt.server_args import PortArgs, prepare_server_args
 from sglang.test.test_utils import CustomTestCase
 from sglang.test.ci.ci_register import register_npu_ci
-
+from sglang.test.ascend.test_ascend_utils import Meta_Llama_3_1_8B_Instruct 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
@@ -25,14 +25,14 @@ class TestPrepareServerArgs(CustomTestCase):
         server_args = prepare_server_args(
             [
                 "--model-path",
-                "/root/.cache/modelscope/hub/models/LLM-Research/Meta-Llama-3.1-8B-Instruct",
+                Meta_Llama_3_1_8B_Instruct
                 "--json-model-override-args",
                 '{"rope_scaling": {"factor": 2.0, "rope_type": "linear"}}',
             ]
         )
         
         # Verify model path is parsed correctly
-        expected_model_path = "/root/.cache/modelscope/hub/models/LLM-Research/Meta-Llama-3.1-8B-Instruct"
+        expected_model_path = Meta_Llama_3_1_8B_Instruct
         self.assertEqual(server_args.model_path, expected_model_path)
         
         # Verify JSON model override args are parsed correctly
