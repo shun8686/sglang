@@ -9,20 +9,21 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestEnableThinking(CustomTestCase):
     """Testcase: Test the basic functionality of the 'v1/completions' interface parameters.
-        
+
     [Test Category] Interface
     [Test Target] v1/completions
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
+        cls.model = QWEN3_30B_A3B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.other_args = [
             "--reasoning-parser",
@@ -75,7 +76,7 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        
+
         list_int = [1, 2, 3, 4]
         client1 = requests.post(
                 f"{self.base_url}/v1/completions",
@@ -140,7 +141,7 @@ class TestEnableThinking(CustomTestCase):
                 if line.startswith("data:") and not line.startswith("data: [DONE]"):
                     data = json.loads(line[6:])
                     if "choices" in data and len(data["choices"])>0:
-                        
+
                         if "text" in data["choices"][0]:
                             has_text = True
 
@@ -238,7 +239,7 @@ class TestEnableThinking(CustomTestCase):
         )
         print(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        self.assertEqual(client.json()['id'], '10086') 
+        self.assertEqual(client.json()['id'], '10086')
 
 
 if __name__ == "__main__":
