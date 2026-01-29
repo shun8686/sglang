@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestInternlm2(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the Shanghai_AI_Laboratory/internlm2-7b model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the Shanghai_AI_Laboratory/internlm2-7b model on the GSM8K dataset is no less than 0.585.
 
     [Test Category] Model
     [Test Target] Shanghai_AI_Laboratory/internlm2-7b
