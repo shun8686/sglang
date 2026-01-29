@@ -5,6 +5,7 @@ import unittest
 from typing import Any, List, Optional, Tuple
 
 from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -29,7 +30,7 @@ class TestPriorityScheduling(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = (
-            "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+            Llama_3_2_1B_Instruct_WEIGHTS_PATH
         )
         other_args=(
             (
@@ -243,7 +244,7 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+                Llama_3_2_1B_Instruct_WEIGHTS_PATH
             )
         other_args=(
             (

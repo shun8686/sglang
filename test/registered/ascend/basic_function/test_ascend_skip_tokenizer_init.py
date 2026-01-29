@@ -22,6 +22,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
+
 class TestSkipTokenizerInit(CustomTestCase):
     """Testcase：Verify set --skip_tokenizer_init parameter, the inference request is successful.
 
@@ -213,7 +214,7 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
-    model = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+    model2 = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -221,9 +222,7 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
         cls.image_url = ("https://gh.llkk.cc/" + image_path)
         response = requests.get(cls.image_url)
         cls.image = Image.open(BytesIO(response.content))
-
-        cls.model = model
-
+        cls.model = model2
         cls.tokenizer = AutoTokenizer.from_pretrained(cls.model, use_fast=False)
         cls.processor = AutoProcessor.from_pretrained(cls.model, trust_remote_code=True)
         cls.base_url = DEFAULT_URL_FOR_TEST

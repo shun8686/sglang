@@ -5,6 +5,7 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -15,7 +16,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel": {
+    DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH: {
         "latency": 1000,
         "output_throughput": 6,
     },
@@ -23,9 +24,9 @@ TEST_MODEL_MATRIX = {
 
 
 class TestAscendDistTimeout(CustomTestCase):
-    """Testcase: Enable MTP features 
+    """Testcase: Enable MTP features
     configuring '--speculative-draft-attention-backend' and '--speculative-moe-runner-backend' did not degrade inference accuracy.
-    
+
     [Test Category] Parameter
     [Test Target] --speculative-draft-attention-backend; --speculative-moe-runner-backend
     """
@@ -73,7 +74,7 @@ class TestAscendDistTimeout(CustomTestCase):
             "--speculative-moe-runner-backend",
             "auto",
             ]
-    
+
     def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
