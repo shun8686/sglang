@@ -1,8 +1,3 @@
-"""
-Unit-tests for the refactored completions-serving handler (no pytest).
-Run with:
-    python -m unittest tests.test_serving_completions_unit -v
-"""
 
 import unittest
 from typing import Optional
@@ -29,8 +24,8 @@ class _MockTemplateManager:
 class ServingCompletionTestCase(unittest.TestCase):
     """Testcase: Unit tests for OpenAIServingCompletion.
 
-    [Test Category] OpenAIServingCompletion 
-    [Test Target] Test OpenAIServingCompletion interface 
+    [Test Category] Interface
+    [Test Target] OpenAIServingCompletion
     """
 
     # ---------- shared test fixtures ----------

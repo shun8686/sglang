@@ -16,8 +16,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestTemplateContentFormatDetection(CustomTestCase):
     """Testcase: Test template content format detection functionality.
 
-    [Test Category] jinja_template
-    [Test Target] Check Jinja template content format
+    [Test Category] Interface
+    [Test Target] jinja_template
     """
 
     def test_detect_llama4_openai_format(self):

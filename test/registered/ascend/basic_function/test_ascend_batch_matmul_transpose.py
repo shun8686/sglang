@@ -16,7 +16,7 @@ torch.set_printoptions(threshold=float("inf"))
 class TestMatrixMultiplication(unittest.TestCase):
     """Testcase: Tests using the transpose+batch matmul fusion operator showed a 65% optimization for aingle operators.
 
-    [Test Category] transpose+batch matmul
+    [Test Category] Interface
     [Test Target] transpose+batch matmul
     """
 
