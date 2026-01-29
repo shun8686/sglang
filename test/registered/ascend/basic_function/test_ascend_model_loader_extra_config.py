@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import DeepSeek_R1_0528_W8A8_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -23,7 +24,7 @@ class TestModelLoaderExtraConfig(CustomTestCase):
     [Test Target] --model-loader-extra-config {"enable_multithread_load": True, "num_threads": 2}
     """
 
-    models = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
+    models = DeepSeek_R1_0528_W8A8_WEIGHTS_PATH
     accuracy = 0.95
     other_args = [
         "--trust-remote-code",

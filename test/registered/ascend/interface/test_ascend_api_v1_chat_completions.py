@@ -3,6 +3,7 @@ import json
 import requests
 import unittest
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -20,7 +21,7 @@ class TestChatCompletionsInterface(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
+        cls.model = QWEN3_30B_A3B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.other_args = [
             "--reasoning-parser",
