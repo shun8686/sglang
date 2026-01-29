@@ -26,7 +26,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def setUpClass(cls):
-         """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
+        # Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready
         super().setUpClass()
         cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
 
