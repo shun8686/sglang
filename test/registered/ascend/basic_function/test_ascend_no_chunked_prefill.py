@@ -47,15 +47,15 @@ class TestNoChunkedPrefill(CustomTestCase):
 
     def test_no_chunked_prefill_without_radix_cache(self):
     # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
-    args = SimpleNamespace(
-        base_url=self.base_url,
-        model=self.model,
-        eval_name="mmlu",
-        num_examples=64,
-        num_threads=32,
-    )
-    metrics = run_eval(args)
-    self.assertGreaterEqual(metrics["score"], 0.65)
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model,
+            eval_name="mmlu",
+            num_examples=64,
+            num_threads=32,
+        )
+        metrics = run_eval(args)
+        self.assertGreaterEqual(metrics["score"], 0.65)
 
 
 
