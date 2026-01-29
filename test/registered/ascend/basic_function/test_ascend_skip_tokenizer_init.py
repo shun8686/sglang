@@ -5,7 +5,8 @@ from io import BytesIO
 import requests
 from PIL import Image
 from transformers import AutoProcessor, AutoTokenizer
-
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
 from sglang.lang.chat_template import get_chat_template_by_model_path
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -20,18 +21,16 @@ from sglang.test.test_utils import (
 
 
 class TestSkipTokenizerInit(CustomTestCase):
-    """Testcase：Verify set --skip_tokenizer_init parameter, the inference request is successful
-                  [Test Category] Parameter
-                  [Test Target] --skip_tokenizer_init
-                  """
+    """Testcase：Verify set --skip_tokenizer_init parameter, the inference request is successful.
+
+        [Test Category] Parameter
+        [Test Target] --skip_tokenizer_init
+        """
+    model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
-
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-        )
-
+        cls.model = model
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -212,6 +211,8 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
+    model = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+
     @classmethod
     def setUpClass(cls):
         image_path = DEFAULT_IMAGE_URL
@@ -219,7 +220,7 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
         response = requests.get(cls.image_url)
         cls.image = Image.open(BytesIO(response.content))
 
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-VL-3B-Instruct"
+        cls.model = model
 
         cls.tokenizer = AutoTokenizer.from_pretrained(cls.model, use_fast=False)
         cls.processor = AutoProcessor.from_pretrained(cls.model, trust_remote_code=True)
