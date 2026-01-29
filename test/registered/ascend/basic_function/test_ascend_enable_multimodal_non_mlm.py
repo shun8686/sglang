@@ -4,6 +4,7 @@ from types import SimpleNamespace
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -18,12 +19,13 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMultimodalNonMlm(CustomTestCase):
-    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the mmlu accuracy not less than 0.2 and the inference request is successful
-           [Test Category] Parameter
-           [Test Target] --enable-multimodal
-           """
+    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the mmlu accuracy not less than 0.2 and the inference request is successful.
 
-    model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+        [Test Category] Parameter
+        [Test Target] --enable-multimodal
+        """
+
+    model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
 
     @classmethod
