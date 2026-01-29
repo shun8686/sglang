@@ -17,6 +17,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestScheduleConservativeness(CustomTestCase):
     """Testcase: Test the schedule policy.
+                 Test --schedule-conservativeness is configured, inference request successful.
 
     [Test Category] Parameter
     [Test Target] --schedule-conservativeness

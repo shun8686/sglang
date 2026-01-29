@@ -19,7 +19,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestInputEmbeds(CustomTestCase):
-    """Testcase: Test API allows for different input formats(text, embed, file).
+    """Testcase: Test API allows for different input formats(text, embed, file), and perform successful inference.
 
     [Test Category] Parameter
     [Test Target] API

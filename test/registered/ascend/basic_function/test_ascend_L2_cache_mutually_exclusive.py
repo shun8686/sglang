@@ -16,7 +16,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestSkipServerWarmup(CustomTestCase):
-    """Testcase: Test the L2 cache service will fail to start if L1 cache is not enabled
+    """Testcase: Test L1 cache is not enabled, if L2 cache is enabled, the service will fail to start
 
     [Test Category] Parameter
     [Test Target] --disable-radix-cache; --enable-hierarchical-cache

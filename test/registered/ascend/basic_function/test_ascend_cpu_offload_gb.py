@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAscendCpuOffloadGb(CustomTestCase):
-    """Testcase: Tests core functionality with --cpu-offload-gb configuration
+    """Testcase: Tests core functionality with --cpu-offload-gb configuration, inference requests successful.
 
     [Test Category] Parameter
     [Test Target] --cpu-offload-gb

@@ -15,7 +15,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestSleepOnIdle(CustomTestCase):
-    """Testcase: Test the basic functions of sleep-on-idle
+    """Testcase: Test configuration --sleep-on-idle, send request, interence successful.
 
     [Test Category] Parameter
     [Test Target] --sleep-on-idle

@@ -10,7 +10,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestHiddenState(CustomTestCase):
-    """Testcase: Testing sglang's ability to return hidden states when generating text.
+    """Testcase: Verify that sglang successfully return hidden states when generating text.
 
     [Test Category] Parameter
     [Test Target] hidden_states

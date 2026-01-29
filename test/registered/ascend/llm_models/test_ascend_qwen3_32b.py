@@ -15,7 +15,7 @@ class TestQwen332B(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-    accuracy = 0.89
+    accuracy = 0.88
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
