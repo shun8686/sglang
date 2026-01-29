@@ -8,7 +8,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestGemmaModels(TestVLMModels):
-    """Testcase:Test the accuracy of the google/gemma-3-4b-it model using the mmmu dataset.
+    """Testcase: Verify that the inference accuracy of the google/gemma-3-4b-it model on the MMMU dataset is no less than 0.2.
 
     [Test Category] Model
     [Test Target] google/gemma-3-4b-it
