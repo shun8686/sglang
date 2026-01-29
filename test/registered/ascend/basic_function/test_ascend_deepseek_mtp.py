@@ -16,24 +16,23 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=250, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct": {
-        "accuracy": 0.85,
-        "latency": 180,
-        "output_throughput": 20,
+    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8": {
+        "accuracy": 0.95,
+        "latency": 1000,
+        "output_throughput": 6,
     },
 }
 
 
-class TestAscendTp2Bf16(CustomTestCase):
+class TestAscendDeepSeekMTP(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is disabled,
-    tp-size is 2 and FIA acceleration is used.
+    Testcase：Verify the correctness and performance of DeepSeek Model when the MTP technology is used
 
     [Test Category] Parameter
-    [Test Target] --disable-cuda-graph, --tp-size 2, --disable-radix-cache, os.environ["ASCEND_USE_FIA"] = "true"
+    [Test Target] --scheduler-recv-interval 10
     """
 
     @classmethod
@@ -41,20 +40,38 @@ class TestAscendTp2Bf16(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
+
         cls.common_args = [
             "--trust-remote-code",
-            "--disable-cuda-graph",
-            "--mem-fraction-static",
-            0.8,
             "--attention-backend",
             "ascend",
-            "--tp-size",
-            2,
+            "--quantization",
+            "w8a8_int8",
+            "--mem-fraction-static",
+            0.8,
             "--disable-radix-cache",
+            "--chunked-prefill-size",
+            32768,
+            "--tp-size",
+            16,
+            "--speculative-algorithm",
+            "NEXTN",
+            "--speculative-num-steps",
+            1,
+            "--speculative-eagle-topk",
+            1,
+            "--speculative-num-draft-tokens",
+            2,
+            "--scheduler-recv-interval",
+            10,
         ]
 
+        cls.extra_envs = {
+            "SGLANG_NPU_USE_MLAPO": "1",
+        }
+        os.environ.update(cls.extra_envs)
+
     def test_a_gsm8k(self):
-        os.environ["ASCEND_USE_FIA"] = "true"
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
@@ -62,7 +79,7 @@ class TestAscendTp2Bf16(CustomTestCase):
                 process = popen_launch_server(
                     model,
                     self.base_url,
-                    timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                    timeout=1500,
                     other_args=[
                         *self.common_args,
                     ],

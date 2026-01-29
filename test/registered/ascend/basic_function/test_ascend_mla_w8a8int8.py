@@ -1,4 +1,3 @@
-import os
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -16,24 +15,24 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=250, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct": {
-        "accuracy": 0.85,
-        "latency": 180,
-        "output_throughput": 20,
+    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-V2-Lite-W8A8": {
+        "accuracy": 0.34,
+        "latency": 1000,
+        "output_throughput": 6,
     },
 }
 
 
-class TestAscendTp2Bf16(CustomTestCase):
+class TestAscendMlaW8A8Int8(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is disabled,
-    tp-size is 2 and FIA acceleration is used.
+    Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
+    DeepSeek model with W8A8 INT8 quantization
 
     [Test Category] Parameter
-    [Test Target] --disable-cuda-graph, --tp-size 2, --disable-radix-cache, os.environ["ASCEND_USE_FIA"] = "true"
+    [Test Target] --quantization modelslim
     """
 
     @classmethod
@@ -48,13 +47,16 @@ class TestAscendTp2Bf16(CustomTestCase):
             0.8,
             "--attention-backend",
             "ascend",
+            "--quantization",
+            "modelslim",
             "--tp-size",
             2,
             "--disable-radix-cache",
+            "--chunked-prefill-size",
+            32768,
         ]
 
     def test_a_gsm8k(self):
-        os.environ["ASCEND_USE_FIA"] = "true"
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")

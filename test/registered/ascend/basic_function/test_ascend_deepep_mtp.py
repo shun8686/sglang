@@ -16,24 +16,23 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=250, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct": {
-        "accuracy": 0.85,
-        "latency": 180,
-        "output_throughput": 20,
+    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8": {
+        "accuracy": 0.95,
+        "latency": 1000,
+        "output_throughput": 5,
     },
 }
 
 
-class TestAscendTp2Bf16(CustomTestCase):
+class TestAscendDeepEP(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is disabled,
-    tp-size is 2 and FIA acceleration is used.
+    Testcase：Verify the correctness and performance of DeepSeek Model when DEEPEP is enabled the MTP technology is used.
 
     [Test Category] Parameter
-    [Test Target] --disable-cuda-graph, --tp-size 2, --disable-radix-cache, os.environ["ASCEND_USE_FIA"] = "true"
+    [Test Target] --moe-a2a-backend deepep, --deepep-mode auto, --scheduler-recv-interval 10
     """
 
     @classmethod
@@ -41,20 +40,52 @@ class TestAscendTp2Bf16(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
+
         cls.common_args = [
             "--trust-remote-code",
-            "--disable-cuda-graph",
-            "--mem-fraction-static",
-            0.8,
             "--attention-backend",
             "ascend",
-            "--tp-size",
-            2,
+            "--quantization",
+            "modelslim",
+            "--mem-fraction-static",
+            0.8,
+            "--max-running-requests",
+            32,
             "--disable-radix-cache",
+            "--chunked-prefill-size",
+            32768,
+            "--disable-cuda-graph",
+            "--tp-size",
+            16,
+            "--dp-size",
+            1,
+            "--ep-size",
+            16,
+            "--moe-a2a-backend",
+            "deepep",
+            "--deepep-mode",
+            "auto",
+            "--speculative-algorithm",
+            "NEXTN",
+            "--speculative-num-steps",
+            1,
+            "--speculative-eagle-topk",
+            1,
+            "--speculative-num-draft-tokens",
+            2,
+            "--scheduler-recv-interval",
+            10,
         ]
 
+        cls.extra_envs = {
+            "HCCL_BUFFSIZE": "1024",
+            "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+            "SGLANG_NPU_USE_MLAPO": "1",
+            "SGLANG_NPU_USE_EINSUM_MM": "1",
+        }
+        os.environ.update(cls.extra_envs)
+
     def test_a_gsm8k(self):
-        os.environ["ASCEND_USE_FIA"] = "true"
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
@@ -62,7 +93,7 @@ class TestAscendTp2Bf16(CustomTestCase):
                 process = popen_launch_server(
                     model,
                     self.base_url,
-                    timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                    timeout=1500,
                     other_args=[
                         *self.common_args,
                     ],
@@ -72,7 +103,7 @@ class TestAscendTp2Bf16(CustomTestCase):
                     args = SimpleNamespace(
                         num_shots=5,
                         data_path=None,
-                        num_questions=1319,
+                        num_questions=200,
                         max_new_tokens=512,
                         parallel=128,
                         host=f"http://{self.url.hostname}",
@@ -86,26 +117,6 @@ class TestAscendTp2Bf16(CustomTestCase):
                     )
                 finally:
                     kill_process_tree(process.pid)
-
-    def test_b_throughput(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing throughput: {model} ===##")
-
-                output_throughput = run_bench_offline_throughput(
-                    model,
-                    [
-                        *self.common_args,
-                    ],
-                )
-
-                print(f"##=== {model} throughput: {output_throughput} ===##")
-
-                if is_in_ci():
-                    self.assertGreater(
-                        output_throughput,
-                        TEST_MODEL_MATRIX[model]["output_throughput"],
-                    )
 
 
 if __name__ == "__main__":
