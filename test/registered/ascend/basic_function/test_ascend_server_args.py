@@ -6,9 +6,6 @@ from sglang.srt.server_args import PortArgs, prepare_server_args
 from sglang.test.test_utils import CustomTestCase
 from sglang.test.ci.ci_register import register_npu_ci
 
-# Register test to NPU CI pipeline (nightly-1-npu-a3 suite)
-# est_time=400: estimated execution time (seconds)
-# nightly=True: run in nightly CI pipeline only
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
@@ -16,7 +13,7 @@ class TestPrepareServerArgs(CustomTestCase):
     """Testcase：Verify the correctness of server startup argument parsing logic in prepare_server_args function
 
     [Test Category] Parameter
-    [Test Target] prepare_server_args;--model-path;--json-model-override-args
+    [Test Target] --json-model-override-args
     """
 
     def test_prepare_server_args(self):
@@ -49,7 +46,7 @@ class TestPortArgs(unittest.TestCase):
     """Testcase：Verify the initialization logic and network address parsing correctness of PortArgs class
 
     [Test Category] Parameter
-    [Test Target] PortArgs.init_new;--port;--nccl-port;--enable-dp-attention;--nnodes;--dist-init-addr;--tokenizer-worker-num
+    [Test Target] --port;--nccl-port;--enable-dp-attention;--nnodes;--dist-init-addr;--tokenizer-worker-num
     """
     
     @patch("sglang.srt.server_args.is_port_available")
