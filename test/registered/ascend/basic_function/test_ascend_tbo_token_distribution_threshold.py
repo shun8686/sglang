@@ -77,7 +77,7 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
         self.assertEqual(
             response.json()["tbo_token_distribution_threshold"],
             self.tbo_token_distribution_threshold,
-            f"--tbo-token-distribution-threshold is not equal to {self.tbo_token_distribution_threshold}.",
+            f"--tbo-token-distribution-threshold is not equal to {self.tbo_token_distribution_threshold}."
         )
 
 
