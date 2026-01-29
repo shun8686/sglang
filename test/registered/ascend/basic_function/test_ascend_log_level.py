@@ -4,6 +4,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -21,6 +22,7 @@ class TestLogLevel(CustomTestCase):
        [Test Category] Parameter
        [Test Target] --log-level
        """
+    model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
 
     def test_log_level(self):
         other_args = (
@@ -37,7 +39,7 @@ class TestLogLevel(CustomTestCase):
         err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
         process = popen_launch_server(
             (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+                model
 
             ),
             DEFAULT_URL_FOR_TEST,
@@ -88,7 +90,7 @@ class TestLogLevel(CustomTestCase):
         err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
         process = popen_launch_server(
             (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+                model
 
             ),
             DEFAULT_URL_FOR_TEST,
