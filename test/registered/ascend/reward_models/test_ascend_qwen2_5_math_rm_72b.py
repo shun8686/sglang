@@ -23,6 +23,13 @@ CONVS = [
 
 
 class TestQwen25Math(CustomTestCase):
+    """Testcase:This test case verifies that the Qwen/Qwen2.5-Math-RM-72B model can successfully generate reward scores
+    for different conversational responses using the SGLang framework, without comparing to a reference implementation.
+
+    [Test Category] Model
+    [Test Target] Qwen/Qwen2.5-Math-RM-72B
+    """
+
     model_path = QWEN2_5_MATH_RM_72B_WEIGHTS_PATH
     torch_dtype = torch.float16
     tolerance = 4e-2

@@ -4,6 +4,7 @@ import unittest
 import requests
 
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
 from sglang.test.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -27,9 +28,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
     def setUpClass(cls):
          """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
         super().setUpClass()
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        )
+        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
 
         # Non blocking start servers
         cls.start_prefill()
@@ -43,7 +42,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def start_prefill(cls):
-        """Launch the Prefill service with disaggregation-decode-dp=2 configuration for Ascend NPU"""
+        # Launch the Prefill service with disaggregation-decode-dp=2 configuration for Ascend NPU
         prefill_args = (
             [
                 "--disaggregation-mode",
@@ -72,7 +71,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def start_decode(cls):
-        """Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)"""
+        # Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)
         decode_args = (
             [
                 "--disaggregation-mode",
@@ -125,7 +124,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def tearDownClass(cls):
-        """Test class cleanup: Remove the Ascend MF store environment variable and call parent class cleanup to terminate all processes"""
+        # Test class cleanup: Remove the Ascend MF store environment variable and call parent class cleanup to terminate all processes
         os.environ.pop("ASCEND_MF_STORE_URL")
         super().tearDownClass()
 

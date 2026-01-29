@@ -23,6 +23,13 @@ CONVS = [
 
 
 class TestQwen2(CustomTestCase):
+    """Testcase:This test case verifies that the Howeee/Qwen2.5-1.5B-apeach model can successfully generate reward scores
+    for different conversational responses using the SGLang framework, without comparing to a reference implementation.
+
+    [Test Category] Model
+    [Test Target] Howeee/Qwen2.5-1.5B-apeach
+    """
+
     model_path = QWEN2_5_1_5B_APEACH_WEIGHTS_PATH
     torch_dtype = torch.float16
     tolerance = 4e-2
