@@ -3,6 +3,7 @@ import unittest
 
 import torch
 
+from sglang.test.ascend.test_ascend_utils import SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase
@@ -10,7 +11,7 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2", 1, 4e-2),
+    (SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH, 1, 4e-2),
 ]
 TORCH_DTYPES = [torch.bfloat16]
 

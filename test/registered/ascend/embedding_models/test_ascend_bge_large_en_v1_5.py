@@ -5,6 +5,7 @@ from typing import Optional
 import torch
 from transformers import AutoConfig, AutoTokenizer
 
+from sglang.test.ascend.test_ascend_utils import BGE_LARGE_EN_V1_5_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase, get_similarities
@@ -23,7 +24,7 @@ DEFAULT_PROMPTS = [
 ]
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/bge-large-en-v1.5", 1, 1e-5),
+    (BGE_LARGE_EN_V1_5_WEIGHTS_PATH, 1, 1e-5),
 ]
 TORCH_DTYPES = [torch.float16]
 

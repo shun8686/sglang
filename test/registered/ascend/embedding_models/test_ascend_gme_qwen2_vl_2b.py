@@ -3,6 +3,7 @@ import unittest
 
 import torch
 
+from sglang.test.ascend.test_ascend_utils import GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase, get_similarities
@@ -18,7 +19,7 @@ TEXTS = "two Subway Series sandwiches with meats, cheese, lettuce, tomatoes, and
 IMAGES = "https://huggingface.co/datasets/liuhaotian/llava-bench-in-the-wild/resolve/main/images/023.jpg"
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/Alibaba-NLP/gme-Qwen2-VL-2B-Instruct", 1e-3),
+    (GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH, 1e-3),
 ]
 TORCH_DTYPES = [torch.float16]
 

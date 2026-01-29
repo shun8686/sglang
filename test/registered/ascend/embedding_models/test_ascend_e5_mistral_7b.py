@@ -4,6 +4,7 @@ import unittest
 import torch
 from transformers import AutoConfig, AutoTokenizer
 
+from sglang.test.ascend.test_ascend_utils import E5_MISTRAL_7B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import DEFAULT_PROMPTS, HFRunner, SRTRunner
 from sglang.test.test_utils import (
@@ -19,7 +20,7 @@ register_npu_ci(
 )
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/intfloat/e5-mistral-7b-instruct", 1, 1e-5),
+    (E5_MISTRAL_7B_INSTRUCT_WEIGHTS_PATH, 1, 1e-5),
 ]
 TORCH_DTYPES = [torch.float16]
 

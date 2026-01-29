@@ -3,6 +3,7 @@ import unittest
 
 import torch
 
+from sglang.test.ascend.test_ascend_utils import SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase
@@ -10,7 +11,7 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 MODELS = [
-    ("/root/.cache/huggingface/hub/models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1/",
+    (SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH,
      1, 4e-2),
 ]
 TORCH_DTYPES = [torch.float16]

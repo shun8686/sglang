@@ -3,6 +3,7 @@ import unittest
 
 import torch
 
+from sglang.test.ascend.test_ascend_utils import BGE_RERANKER_V2_M3_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import TEST_RERANK_QUERY_DOCS, HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase
@@ -15,7 +16,7 @@ register_npu_ci(
 )
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/BAAI/bge-reranker-v2-m3", 1, 1e-2),
+    (BGE_RERANKER_V2_M3_WEIGHTS_PATH, 1, 1e-2),
 ]
 ATTENTION_BACKEND = ["ascend"]
 TORCH_DTYPES = [torch.bfloat16]

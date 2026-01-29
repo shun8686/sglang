@@ -4,6 +4,7 @@ import unittest
 import torch
 from transformers import AutoConfig, AutoTokenizer
 
+from sglang.test.ascend.test_ascend_utils import CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import DEFAULT_PROMPTS, HFRunner, SRTRunner
 from sglang.test.test_utils import (
@@ -19,7 +20,7 @@ register_npu_ci(
 )
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/AI-ModelScope/clip-vit-large-patch14-336", 1, 0.22)
+    (CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH, 1, 0.22)
 ]
 TORCH_DTYPES = [torch.float16]
 
