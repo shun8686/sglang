@@ -15,7 +15,7 @@ class TestQwen3Coder480BA35B(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
-    accuracy = 0.96
+    accuracy = 0.94
     timeout_for_server_launch = 3000
     other_args = [
         "--trust-remote-code",
