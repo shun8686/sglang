@@ -1,13 +1,8 @@
-import json
 import os
-import time
 import unittest
-from types import SimpleNamespace
-
 import requests
 
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
-from sglang.test.registered.ascend.test_disaggregation_utils import TestDisaggregationBase
+from sglang.test.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -28,7 +23,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
 
     @classmethod
     def setUpClass(cls):
-         """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
+        """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
         super().setUpClass()
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
