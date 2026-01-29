@@ -17,7 +17,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRetractDecode(CustomTestCase):
-    """Testcase：Verify MMLU dataset accuracy of Llama-3.1-8B-Instruct model with retract decode feature enabled
+    """When retract decode feature is enabled, verify that the MMLU dataset accuracy of the Llama-3.1-8B-Instruct model is greater than 0.65.
 
     [Test Category] Parameter
     [Test Target] SGLANG_TEST_RETRACT
@@ -53,7 +53,7 @@ class TestRetractDecode(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        """Test MMLU dataset accuracy with retract decode enabled."""
+        # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
