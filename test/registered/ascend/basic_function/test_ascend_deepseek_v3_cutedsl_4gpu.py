@@ -3,6 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -16,16 +17,16 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
-    """Testcase: Enable MTP features 
+    """Testcase: Enable MTP features
        configuring '--enable-single-batch-overlap' did not degrade inference accuracy.
-                       
+
     [Test Category] Parameter
     [Test Target] --enable-single-batch-overlap
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.model =  "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+        cls.model =  QWEN3_32B_WEIGHTS_PATH
 
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
@@ -68,7 +69,7 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
     def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/tmp/test.jsonl",
+            data_path=None,
             num_questions=512,
             parallel=512,
             max_new_tokens=512,

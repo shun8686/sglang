@@ -21,8 +21,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestPenalty(CustomTestCase):
     """Testcase：Verify successful processing of inference requests with different penalty mechanism configurations by confirming that the status_code is 200.
 
-    [Test Category] Parameter
-    [Test Target] frequency_penalty;presence_penalty;min_new_tokens
+    [Test Category] Interface
+    [Test Target] /generate
     """
 
     @classmethod
@@ -48,10 +48,8 @@ class TestPenalty(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def run_decode(self, sampling_params):
-        """Send inference request with specified sampling/penalty parameters.
+        # Send inference request with specified sampling/penalty parameters.
 
-        Verifies request returns 200 status code (successful handling).
-        """
         return_logprob = True
         top_logprobs_num = 5
         return_text = True
@@ -90,7 +88,7 @@ class TestPenalty(CustomTestCase):
         self.run_decode({"presence_penalty": 2})
 
     def test_penalty_mixed(self):
-        """Test concurrent inference with mixed penalty parameter combinations."""
+        # Test concurrent inference with mixed penalty parameter combinations.
         args = [
             {},
             {},

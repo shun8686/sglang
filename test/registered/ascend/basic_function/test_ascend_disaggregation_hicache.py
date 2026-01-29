@@ -8,7 +8,7 @@ from typing import Dict
 import requests
 from types import SimpleNamespace
 from  sglang.test.few_shot_gsm8k import run_eval
-
+from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
 from sglang.bench_serving import get_tokenizer
 from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
@@ -23,7 +23,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Testcase: Vaildate Prefill/Decode disaggregated services with hicache write policy configuration
-                       
+
     [Test Category] Parameter
     [Test Target]  --hicache-write-policy
     """
@@ -32,7 +32,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
 
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.1-8B-Instruct"
+        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
 
         cls.tokenizer = get_tokenizer(cls.model)
         cls.temp_dir = tempfile.mkdtemp()

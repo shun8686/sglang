@@ -6,6 +6,7 @@ import openai
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -19,7 +20,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 MODEL = [
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-30B-A3B-Instruct"
+    QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
 ]
 
 
@@ -48,7 +49,7 @@ def popen_launch_server_wrapper(base_url, model, other_args):
 class TestVisionModel(CustomTestCase):
     """Testcase: Configuring '--limit-mm-data-per-request' to send different multimodal inference requests,
        each containing multiple multimodal input data, with verfication ensuring that only one data point is processed at a time
-            
+
     [Test Category] Parameter
     [Test Target] --limit-mm-data-per-request
     """
@@ -94,7 +95,7 @@ class TestVisionModel(CustomTestCase):
         response = requests.post(self.base_url+'/chat/completions',json={"messages": messages, "temperature": 0, "max_completion_tokens": 1024})
         assert response.status_code == 200
 
-    def _run_multi_turn_request1(self):    
+    def _run_multi_turn_request1(self):
         messages1 = [
                 {
                     "role": "user",
