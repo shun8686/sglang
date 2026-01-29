@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 class TestChatCompletionsInterface(CustomTestCase):
     """Testcase:The test is to verify whether the functions of each parameter of the v1/chat/completions interface are normal.
 
-    [Test Category] Model
+    [Test Category] Interface
     [Test Target] v1/chat/completions
     """
 

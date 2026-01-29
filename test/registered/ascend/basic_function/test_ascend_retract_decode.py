@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3.1_8B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -27,9 +27,7 @@ class TestRetractDecode(CustomTestCase):
         # Enable retract decode feature for test
         os.environ["SGLANG_TEST_RETRACT"] = "1"
 
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        )
+        cls.model = Llama_3.1_8B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
             [

@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
+from sglang.test.ascend.test_ascend_utils import Llama_3.1_8B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -24,7 +25,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # Start server: disable chunked prefill (-1) and cache
-        cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
+        cls.model = Llama_3.1_8B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
