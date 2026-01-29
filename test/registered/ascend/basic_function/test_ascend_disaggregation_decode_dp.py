@@ -1,19 +1,13 @@
-import json
 import os
-import time
 import unittest
-from types import SimpleNamespace
 
 import requests
 
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.registered.ascend.test_disaggregation_utils import TestDisaggregationBase
+from common.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    kill_process_tree,
     popen_launch_pd_server,
 )
 
@@ -67,7 +61,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
                 0.8,
             ]
         )
-        
+
         env = os.environ.copy()
 
         cls.process_prefill = popen_launch_pd_server(
