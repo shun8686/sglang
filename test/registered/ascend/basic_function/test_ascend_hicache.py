@@ -26,7 +26,7 @@ class TestHiCache(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        """Test class initialization: Launch the service with HiCache enabled and related NPU/HIP configurations"""
+        # Test class initialization: Launch the service with HiCache enabled and related NPU/HIP configurations
         cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
