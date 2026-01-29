@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMiMo7BRL(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the XiaomiMiMo/MiMo-7B-RL model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the XiaomiMiMo/MiMo-7B-RL model on the GSM8K dataset is no less than 0.75.
 
     [Test Category] Model
     [Test Target] XiaomiMiMo/MiMo-7B-RL
