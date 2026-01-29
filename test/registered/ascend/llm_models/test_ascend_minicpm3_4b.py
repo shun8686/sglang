@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import MINICPM3_4B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestMiniCPM3(GSM8KAscendMixin, CustomTestCase):
     [Test Target] OpenBMB/MiniCPM3-4B
     """
 
-    model = "/root/.cache/modelscope/hub/models/OpenBMB/MiniCPM3-4B"
+    model = MINICPM3_4B_WEIGHTS_PATH
     accuracy = 0.69
     other_args = [
         "--trust-remote-code",

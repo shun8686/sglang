@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestQwen3Coder480BA35B(GSM8KAscendMixin, CustomTestCase):
     [Test Target] Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot
     """
 
-    model = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+    model = QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH
     accuracy = 0.94
     timeout_for_server_launch = 3000
     other_args = [

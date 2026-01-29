@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import GRANITE_3_0_3B_A800M_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,9 +15,7 @@ class TestGranite(GSM8KAscendMixin, CustomTestCase):
     [Test Target] ibm-granite/granite-3.0-3b-a800m-instruct
     """
 
-    model = (
-        "/root/.cache/modelscope/hub/models/ibm-granite/granite-3.0-3b-a800m-instruct"
-    )
+    model = GRANITE_3_0_3B_A800M_INSTRUCT_WEIGHTS_PATH
     accuracy = 0.38
 
 

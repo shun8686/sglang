@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import QWEN3_235B_A22B_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestQwen3235BA22BW8A8(GSM8KAscendMixin, CustomTestCase):
     [Test Target] vllm-ascend/Qwen3-235B-A22B-W8A8
     """
 
-    model = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
+    model = QWEN3_235B_A22B_W8A8_WEIGHTS_PATH
     accuracy = 0.955
     other_args = [
         "--trust-remote-code",

@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import INTERNLM2_7B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestInternlm2(GSM8KAscendMixin, CustomTestCase):
     [Test Target] Shanghai_AI_Laboratory/internlm2-7b
     """
 
-    model = "/root/.cache/modelscope/hub/models/Shanghai_AI_Laboratory/internlm2-7b"
+    model = INTERNLM2_7B_WEIGHTS_PATH
     accuracy = 0.585
 
 

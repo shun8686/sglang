@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import AFM_4_5B_BASE_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestAFM(GSM8KAscendMixin, CustomTestCase):
     [Test Target] arcee-ai/AFM-4.5B-Base
     """
 
-    model = "/root/.cache/modelscope/hub/models/arcee-ai/AFM-4.5B-Base"
+    model = AFM_4_5B_BASE_WEIGHTS_PATH
     accuracy = 0.375
 
 

@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import EXAONE_3_5_7_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestEXAONE(GSM8KAscendMixin, CustomTestCase):
     [Test Target] LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct
     """
 
-    model = "/root/.cache/modelscope/hub/models/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct"
+    model = EXAONE_3_5_7_8B_INSTRUCT_WEIGHTS_PATH
     accuracy = 0.8
     other_args = [
         "--trust-remote-code",

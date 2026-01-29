@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import KIMI_K2_THINKING_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestKimiK2Thinking(GSM8KAscendMixin, CustomTestCase):
     [Test Target] Kimi/Kimi-K2-Thinking
     """
 
-    model = "/root/.cache/modelscope/hub/models/Kimi/Kimi-K2-Thinking"
+    model = KIMI_K2_THINKING_WEIGHTS_PATH
     accuracy = 0.95
     timeout_for_server_launch = 3000
     other_args = [

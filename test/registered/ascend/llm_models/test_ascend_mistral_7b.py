@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import MISTRAL_7B_INSTRUCT_V0_2_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     [Test Target] mistralai/Mistral-7B-Instruct-v0.2
     """
 
-    model = "/root/.cache/modelscope/hub/models/mistralai/Mistral-7B-Instruct-v0.2"
+    model = MISTRAL_7B_INSTRUCT_V0_2_WEIGHTS_PATH
     accuracy = 0.375
 
 

@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestPhi4(GSM8KAscendMixin, CustomTestCase):
     [Test Target] microsoft/Phi-4-multimodal-instruct
     """
 
-    model = "/root/.cache/modelscope/hub/models/microsoft/Phi-4-multimodal-instruct"
+    model = PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
     accuracy = 0.8
 
 
