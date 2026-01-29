@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestQwen332B(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the Qwen/Qwen3-32B model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the Qwen/Qwen3-32B model on the GSM8K dataset is no less than 0.88.
 
     [Test Category] Model
     [Test Target] Qwen/Qwen3-32B
