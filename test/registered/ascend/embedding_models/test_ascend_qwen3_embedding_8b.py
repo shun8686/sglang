@@ -5,6 +5,7 @@ from typing import Optional
 import torch
 from transformers import AutoConfig, AutoTokenizer
 
+from sglang.test.ascend.test_ascend_utils import QWEN3_EMBEDDING_8B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import DEFAULT_PROMPTS, HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase, get_similarities
@@ -17,7 +18,7 @@ register_npu_ci(
 )
 
 MODELS = [
-    ("/root/.cache/modelscope/hub/models/Qwen/Qwen3-Embedding-8B", 1, 1e-5),
+    (QWEN3_EMBEDDING_8B_WEIGHTS_PATH, 1, 1e-5),
 ]
 TORCH_DTYPES = [torch.float16]
 

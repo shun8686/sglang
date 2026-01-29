@@ -4,6 +4,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_URL_FOR_TEST,
@@ -24,15 +25,13 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestMatchedStop(CustomTestCase):
     """Testcase: Testing different input requests, the returned value of matched_stop was consistent with expectations.
 
-    [Test Category] Parameter
-    [Test Target] prompt
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions; /v1/completions
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        )
+        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.other_args = (
             [

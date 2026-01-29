@@ -4,6 +4,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -42,7 +43,7 @@ class TestSkipServerWarmup(CustomTestCase):
         try:
             process = popen_launch_server(
                 (
-                    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+                    QWEN3_32B_WEIGHTS_PATH
                 ),
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,

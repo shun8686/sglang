@@ -63,5 +63,21 @@ XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-Mo
 
 # VLM model weights path
 # Embedding model weights path
+BGE_LARGE_EN_V1_5_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bge-large-en-v1.5")
+CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/clip-vit-large-patch14-336")
+E5_MISTRAL_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "intfloat/e5-mistral-7b-instruct")
+GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Alibaba-NLP/gme-Qwen2-VL-2B-Instruct")
+GTE_QWEN2_1_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "iic/gte_Qwen2-1.5B-instruct")
+QWEN3_EMBEDDING_8B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-Embedding-8B")
+
 # Rerank model weights path
+BGE_RERANKER_V2_M3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "BAAI/bge-reranker-v2-m3")
+
 # Reward model weights path
+SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
+                                                            "AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2")
+INTERNLM2_7B_REWARD_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b-reward")
+SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = "/root/.cache/huggingface/hub/models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1"
+QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach")
+QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
+QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")

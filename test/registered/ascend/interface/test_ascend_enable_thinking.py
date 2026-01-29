@@ -7,6 +7,7 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_ENABLE_THINKING_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -22,13 +23,13 @@ class TestEnableThinking(CustomTestCase):
     """Testcase: Testing with the 'enable_thinking' feature enabled/disabled,
                  both streaming and non-streaming input requests successful
 
-    [Test Category] Parameter
-    [Test Target] enable_thinking
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions
     """
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B"
+        cls.model = QWEN3_30B_A3B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-1234"
         cls.other_args = (

@@ -3,6 +3,7 @@ import unittest
 
 import torch
 
+from sglang.test.ascend.test_ascend_utils import QWEN2_5_MATH_RM_72B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import SRTRunner
 from sglang.test.test_utils import CustomTestCase
@@ -22,7 +23,7 @@ CONVS = [
 
 
 class TestQwen25Math(CustomTestCase):
-    model_path = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-Math-RM-72B"
+    model_path = QWEN2_5_MATH_RM_72B_WEIGHTS_PATH
     torch_dtype = torch.float16
     tolerance = 4e-2
     tp_size = 4
