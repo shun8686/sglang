@@ -28,7 +28,7 @@ class TestNoChunkedPrefill(CustomTestCase):
 
     def test_no_chunked_prefill_without_radix_cache(self):
         res = run_bench_serving(
-            model=DEFAULT_MODEL_NAME_FOR_TEST,
+            model=Llama_3_1_8B_Instruct_WEIGHTS_PATH,
             num_prompts=10,
             request_rate=float("inf"),
             other_server_args=["--disable-radix-cache", "--chunked-prefill-size", "-1"],
