@@ -14,6 +14,12 @@ from sglang.test.test_utils import (
 
 
 class TestDeepEpLowLatencyQwen3235B(CustomTestCase):
+    """Testcase:Test the Qwen3-235B-A22B-W8A8 model with DeepEP's low_latency mode enabled, and verify that there is no drop in accuracy compared to when DeepEP is not enabled.
+
+    [Test Category] Parameter
+    [Test Target] --moe-a2a-backend deepep;--deepep-mode auto
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"

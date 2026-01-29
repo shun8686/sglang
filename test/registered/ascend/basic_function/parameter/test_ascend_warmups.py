@@ -5,14 +5,12 @@ import requests
 
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils import kill_process_tree
-from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
+from sglang.test.ascend.test_ascend_utils import MiniCPM_O_2_6_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
@@ -23,7 +21,7 @@ class TestAscendWarmups(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --warmups
     """
-    model = "/root/.cache/modelscope/hub/models/openbmb/MiniCPM-o-2_6"
+    model = MiniCPM_O_2_6_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
 
     @classmethod
@@ -63,7 +61,7 @@ class TestAscendWarmups(CustomTestCase):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual("voice_chat", response.json().get("warmups"))
-        
+
         # Verify the actual execution of the warm-up task.
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
