@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPersimmon8BChat(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the Howeee/persimmon-8b-chat model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the Howeee/persimmon-8b-chat model on the GSM8K dataset is no less than 0.17.
 
     [Test Category] Model
     [Test Target] Howeee/persimmon-8b-chat
