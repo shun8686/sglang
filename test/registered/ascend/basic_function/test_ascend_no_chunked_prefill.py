@@ -44,18 +44,19 @@ class TestNoChunkedPrefill(CustomTestCase):
     def tearDownClass(cls):
         # Stop server to release resources
         kill_process_tree(cls.process.pid)
-    
-    def test_no_chunked_prefill_without_radix_cache(cls):  
-        # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
-        args = SimpleNamespace(
-            base_url=cls.base_url,
-            model=cls.model,
-            eval_name="mmlu",
-            num_examples=64,
-            num_threads=32,
-        )
-        metrics = run_eval(args)
-        cls.assertGreaterEqual(metrics["score"], 0.65)
+
+    def test_no_chunked_prefill_without_radix_cache(self):
+    # Configure MMLU test parameters and evaluation returns accuracy ≥ 0.65
+    args = SimpleNamespace(
+        base_url=self.base_url,
+        model=self.model,
+        eval_name="mmlu",
+        num_examples=64,
+        num_threads=32,
+    )
+    metrics = run_eval(args)
+    self.assertGreaterEqual(metrics["score"], 0.65)
+
 
 
 if __name__ == "__main__":
