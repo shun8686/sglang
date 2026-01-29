@@ -8,7 +8,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -40,7 +39,7 @@ class TestOpenAIServerFunctionCalling(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # Replace with the model name needed for testing; if not required, reuse DEFAULT_SMALL_MODEL_NAME_FOR_TEST
+        # Replace with the model name needed for testing
         cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"

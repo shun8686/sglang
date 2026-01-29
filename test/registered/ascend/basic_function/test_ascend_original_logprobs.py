@@ -52,10 +52,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOriginalLogprob(unittest.TestCase):
-    """Testcase：Test the alignment of original log probabilities between SGLang and Hugging Face
+    """Testcase: Verify the behavior and log probability alignment of SGLang under two configurations of the environment variable `SGLANG_RETURN_ORIGINAL_LOGPROB` (True/False), 
+        by comparing SGLang's output with reference values from Hugging Face.
 
     [Test Category] Parameter
-    [Test Target] SGLANG_RETURN_ORIGINAL_LOGPROB;top_logprobs_num;token_ids_logprob
+    [Test Target] SGLANG_RETURN_ORIGINAL_LOGPROB
     """
     def setUp(self):
         # ----- HF side (float32 weights) -----
