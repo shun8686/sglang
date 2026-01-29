@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.test_ascend_utils import QWEN2_5_VL_72B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,7 +14,7 @@ class TestQwen25VL72B(TestVLMModels):
     [Test Target] Qwen/Qwen2.5-VL-72B-Instruct
     """
 
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-VL-72B-Instruct"
+    model = QWEN2_5_VL_72B_INSTRUCT_WEIGHTS_PATH
     mmmu_accuracy = 0.3
     other_args = [
         "--trust-remote-code",

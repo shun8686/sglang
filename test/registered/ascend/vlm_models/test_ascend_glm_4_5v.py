@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.test_ascend_utils import GLM_4_5V_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,7 +14,7 @@ class TestGLM4Models(TestVLMModels):
     [Test Target] ZhipuAI/GLM-4.5V
     """
 
-    model = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.5V"
+    model = GLM_4_5V_WEIGHTS_PATH
     mmmu_accuracy = 0.2
     other_args = [
         "--trust-remote-code",

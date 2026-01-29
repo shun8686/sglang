@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.test_ascend_utils import MIMO_VL_7B_RL_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,7 +14,7 @@ class TestMiMoModels(TestVLMModels):
     [Test Target] XiaomiMiMo/MiMo-VL-7B-RL
     """
 
-    model = "/root/.cache/modelscope/hub/models/XiaomiMiMo/MiMo-VL-7B-RL"
+    model = MIMO_VL_7B_RL_WEIGHTS_PATH
     mmmu_accuracy = 0.2
 
     def test_vlm_mmmu_benchmark(self):

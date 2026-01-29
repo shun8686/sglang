@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import KIMI_VL_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestKimiVLA3BInstruct(GSM8KAscendMixin, CustomTestCase):
     [Test Target] Kimi/Kimi-VL-A3B-Instruct
     """
 
-    model = "/root/.cache/modelscope/hub/models/Kimi/Kimi-VL-A3B-Instruct"
+    model = KIMI_VL_A3B_INSTRUCT_WEIGHTS_PATH
     accuracy = 0.66
     other_args = [
         "--trust-remote-code",

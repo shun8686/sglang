@@ -6,22 +6,19 @@ import os
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
 
 # LLM model weights path
-MiniCPM_O_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-o-2_6")
 Llama_3_1_8B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/Llama-3.1-8B-Instruct")
 
 Llama_3_2_1B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B")
 Llama_3_2_1B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct")
 Llama_3_2_1B_Instruct_Tool_Calling_Lora_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
                                                                     "codelion/Llama-3.2-1B-Instruct-tool-calling-lora")
-Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
-                                                          "LLM-Research/Llama-3.2-11B-Vision-Instruct")
+
 Meta_Llama_3_1_8B_Instruct = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Meta-Llama-3.1-8B-Instruct")
 
 DeepSeek_R1_0528_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-R1-0528-W8A8")
 DeepSeek_V2_Lite_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8")
 
 Qwen2_5_7B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct")
-Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "/Qwen/Qwen2.5-VL-3B-Instruct")
 
 AFM_4_5B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/AFM-4.5B-Base")
 BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "baichuan-inc/Baichuan2-13B-Chat")
@@ -62,6 +59,28 @@ STABLELM_2_1_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "stabilityai/stab
 XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-MoE-A36B")
 
 # VLM model weights path
+DEEPSEEK_VL2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-vl2")
+GLM_4_5V_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "ZhipuAI/GLM-4.5V")
+JANUS_PRO_1B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/Janus-Pro-1B")
+JANUS_PRO_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/Janus-Pro-7B")
+KIMI_VL_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Kimi/Kimi-VL-A3B-Instruct")
+Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
+                                                          "LLM-Research/Llama-3.2-11B-Vision-Instruct")
+LLAVA_NEXT_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "lmms-lab/llava-next-72b")
+LLAVA_ONEVISION_QWEN2_7B_OV_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "lmms-lab/llava-onevision-qwen2-7b-ov")
+LLAVA_V1_6_34B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b")
+MIMO_VL_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-VL-7B-RL")
+MiniCPM_O_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-o-2_6")
+MINICPM_V_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-V-2_6")
+MISTRAL_SMALL_3_1_24B_INSTRUCT_2503_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
+                                                                "mistralai/Mistral-Small-3.1-24B-Instruct-2503")
+Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-VL-3B-Instruct")
+QWEN2_5_VL_72B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-VL-72B-Instruct")
+QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-4B-Instruct")
+QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-8B-Instruct")
+QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-30B-A3B-Instruct")
+QWEN3_VL_235B_A22B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-235B-A22B-Instruct")
+
 # Embedding model weights path
 BGE_LARGE_EN_V1_5_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bge-large-en-v1.5")
 CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/clip-vit-large-patch14-336")
