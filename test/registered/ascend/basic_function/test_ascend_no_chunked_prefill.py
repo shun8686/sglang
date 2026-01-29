@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNoChunkedPrefill(CustomTestCase):
-    """Testcase：Verify service availability and request processing accuracy of Llama-3.1-8B-Instruct model when chunked prefill is disabled
+    """When chunked prefill is disabled, verify that the request processing accuracy of the Llama-3.1-8B-Instruct model is greater than 0.65.
 
     [Test Category] Parameter
     [Test Target] --chunked-prefill-size
