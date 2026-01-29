@@ -42,7 +42,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
 
     @classmethod
     def start_prefill(cls):
-        """Launch the Prefill service with --disaggregation-decode-tp=2 configuration for Ascend NPU"""
+        # Launch the Prefill service with --disaggregation-decode-tp=2 configuration for Ascend NPU
         prefill_args = (
             [
                 "--disaggregation-mode",
@@ -70,7 +70,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
 
     @classmethod
     def start_decode(cls):
-        """Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)"""
+        # Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)
         decode_args = (
             [
                 "--disaggregation-mode",
