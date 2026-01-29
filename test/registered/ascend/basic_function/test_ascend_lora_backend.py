@@ -18,8 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestLoraBackend(CustomTestCase):
     """Testcase: Test configuration of lora-backend parameters.
 
-    [Test Category] --lora-backend
-    [Test Target] Choose the kernel backend for multiLoRA serving
+    [Test Category] Parameter
+    [Test Target] --lora-backend
     """
 
     def test_lora_backend(self):

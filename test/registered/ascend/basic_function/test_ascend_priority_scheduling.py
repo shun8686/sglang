@@ -21,9 +21,9 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestPriorityScheduling(CustomTestCase):
     """Testcase: Tests core functionality with --enable-priority-scheduling configuration
-    
-    [Test Category] --enable-priority-scheduling
-    [Test Target] Enable priority scheduling
+
+    [Test Category] Parameter
+    [Test Target] --enable-priority-scheduling
     """
 
     @classmethod

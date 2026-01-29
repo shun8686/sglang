@@ -18,8 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestScheduleConservativeness(CustomTestCase):
     """Testcase: Test the schedule policy.
 
-    [Test Category] --schedule-conservativeness
-    [Test Target] How conservative the scheduler policy is
+    [Test Category] Parameter
+    [Test Target] --schedule-conservativeness
     """
 
     def test_schedule_conservativeness(self):
