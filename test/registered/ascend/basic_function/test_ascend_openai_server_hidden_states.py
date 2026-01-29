@@ -218,7 +218,7 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 class TestOpenAIServerWithHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
 
     [Test Category] --enable-return-hidden-states
     [Test Target] Enable returning hidden states with responses
