@@ -1,8 +1,3 @@
-"""
-python3 -m unittest test_skip_tokenizer_init.TestSkipTokenizerInit.test_parallel_sample
-python3 -m unittest test_skip_tokenizer_init.TestSkipTokenizerInit.run_decode_stream
-"""
-
 import json
 import unittest
 from io import BytesIO
