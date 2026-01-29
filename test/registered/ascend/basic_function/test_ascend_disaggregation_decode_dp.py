@@ -4,7 +4,7 @@ import unittest
 import requests
 
 from sglang.test.ci.ci_register import register_npu_ci
-from common.test_disaggregation_utils import TestDisaggregationBase
+from sglang.test.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
