@@ -65,8 +65,6 @@ class TestAscendWarmups(CustomTestCase):
         # Verify the actual execution of the warm-up task.
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
-        print(content)
-        self.assertTrue(len(content) > 0)
         self.assertIn("Running warmup voice_chat", content)
 
         # Verify that the inference API functions properly.
