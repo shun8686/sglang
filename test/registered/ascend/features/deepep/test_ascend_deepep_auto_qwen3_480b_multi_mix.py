@@ -1,6 +1,6 @@
 import unittest
 
-from utils.test_ascend_multi_mix_utils import launch_server, TestMultiNodePdMixTestCaseBase
+from common.test_ascend_multi_mix_utils import launch_server, TestMultiNodePdMixTestCaseBase
 from utils.test_ascend_deepep_mode_config import QWEN3_CODER_480B_A35B_W8A8_MODEL_PATH, NIC_NAME
 
 
