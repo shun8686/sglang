@@ -30,6 +30,7 @@ class TestQwen3VL235BA22B(TestVLMModels):
         "--tp-size",
         16,
     ]
+    timeout_for_server_launch = 3000
 
     def test_vlm_mmmu_benchmark(self):
         self._run_vlm_mmmu_test()
