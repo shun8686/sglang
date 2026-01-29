@@ -28,6 +28,7 @@ def run_command(cmd, shell=True):
 
 class TestNcclPort(CustomTestCase):
     """Testcase: Test the basic functions of nccl-port
+                 Test nccl-port configured, the inference request successful.
 
     [Test Category] Parameter
     [Test Target] --nccl-port

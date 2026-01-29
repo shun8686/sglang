@@ -14,7 +14,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL1Cache(CustomTestCase):
-    """Testcase: Test enable L2 cache, inputting different text inference requests.
+    """Testcase: Test enable L2 cache, inputting different text inference requests will not reuse the same text.
 
     [Test Category] Parameter
     [Test Target] --enable-hierarchical-cache
