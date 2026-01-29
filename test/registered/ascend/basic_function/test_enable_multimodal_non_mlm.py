@@ -18,10 +18,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMultimodalNonMlm(CustomTestCase):
-    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the inference request is successful ,and the accuracy not deteriorate
+    """Testcase：Verify use non-multimodal set --enable-multimodal parameter,the inference request is successful ,and the mmlu model accuracy not deteriorate 0.2
            [Test Category] Parameter
            [Test Target] --enable-multimodal
            """
+
     model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
     base_url = DEFAULT_URL_FOR_TEST
 
