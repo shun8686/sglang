@@ -23,7 +23,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     
     @classmethod
     def setUpClass(cls):
-        # Start server: disable chunked prefill (-1) and cache, adapt to NPU environment
+        # Start server: disable chunked prefill (-1) and cache
         cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
