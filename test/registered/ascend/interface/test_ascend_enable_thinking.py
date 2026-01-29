@@ -22,8 +22,8 @@ class TestEnableThinking(CustomTestCase):
     """Testcase: Testing with the 'enable_thinking' feature enabled/disabled,
                  both streaming and non-streaming input requests successful
 
-    [Test Category] Parameter
-    [Test Target] enable_thinking
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions
     """
 
     @classmethod

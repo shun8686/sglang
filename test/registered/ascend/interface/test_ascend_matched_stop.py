@@ -24,8 +24,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestMatchedStop(CustomTestCase):
     """Testcase: Testing different input requests, the returned value of matched_stop was consistent with expectations.
 
-    [Test Category] Parameter
-    [Test Target] prompt
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions; /v1/completions
     """
 
     @classmethod
