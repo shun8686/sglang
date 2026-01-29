@@ -20,3 +20,8 @@ DeepSeek_V2_Lite_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascen
 
 Qwen2_5_7B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct")
 Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-Instruct-2507")
+
+# VLM model weights path
+# Embedding model weights path
+# Rerank model weights path
+# Reward model weights path
