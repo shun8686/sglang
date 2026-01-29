@@ -1,6 +1,5 @@
 import os
 import unittest
-from types import SimpleNamespace
 
 import requests
 
