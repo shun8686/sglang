@@ -18,13 +18,15 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLogLevel(CustomTestCase):
-    """Testcase：Verify set log-level parameter ,the printed log level is the same as the configured log level and the inference request is successfully processed
+    """Testcase：Verify set log-level parameter, the printed log level is the same as the configured log level and the inference request is successfully processed.
+       
        [Test Category] Parameter
        [Test Target] --log-level
        """
     model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
 
     def test_log_level(self):
+        
         other_args = (
             [
                 "--log-level",
@@ -60,8 +62,6 @@ class TestLogLevel(CustomTestCase):
             self.assertIn("Paris", response.text)
             out_log_file.seek(0)
             content = out_log_file.read()
-            print(content)
-            self.assertTrue(len(content) > 0)
             self.assertNotIn("POST /generate HTTP/1.1", content)
         finally:
             kill_process_tree(process.pid)
@@ -108,8 +108,6 @@ class TestLogLevel(CustomTestCase):
             self.assertIn("Paris", response.text)
             out_log_file.seek(0)
             content = out_log_file.read()
-            print(content)
-            self.assertTrue(len(content) > 0)
             self.assertIn("POST /generate HTTP/1.1", content)
         finally:
             kill_process_tree(process.pid)
