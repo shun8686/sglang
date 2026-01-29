@@ -1,11 +1,15 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestPerformanceTestCaseBase,
+    NIC_NAME,
+    QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+)
+from sglang.test.ci.ci_register import register_npu_ci
 
-Qwen3_Next_80B_A3B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
+register_npu_ci(est_time=1800, suite="nightly-4-npu-a3", nightly=True)
 
-Qwen3_Next_80B_A3B_ENVS = {
-    # "SGLANG_SET_CPU_AFFINITY": "1",
+QWEN3_NEXT_80B_A3B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
@@ -16,7 +20,7 @@ Qwen3_Next_80B_A3B_ENVS = {
     "HCCL_BUFFSIZE": "2000",
 }
 
-Qwen3_Next_80B_A3B_OTHER_ARGS = [
+QWEN3_NEXT_80B_A3B_OTHER_ARGS = [
     "--trust-remote-code",
     "--attention-backend", "ascend",
     "--device", "npu",
@@ -34,10 +38,10 @@ Qwen3_Next_80B_A3B_OTHER_ARGS = [
     "--chunked-prefill-size", -1,
 ]
 
-class TestQwen3Next80BA3B(TestSingleNodeTestCaseBase):
-    model = Qwen3_Next_80B_A3B_MODEL_PATH
-    other_args = Qwen3_Next_80B_A3B_OTHER_ARGS
-    envs = Qwen3_Next_80B_A3B_ENVS
+class TestQwen3Next80BA3B(TestPerformanceTestCaseBase):
+    model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+    other_args = QWEN3_NEXT_80B_A3B_OTHER_ARGS
+    envs = QWEN3_NEXT_80B_A3B_ENVS
     dataset_name = "random"
     max_concurrency = 80
     num_prompts = 320

@@ -1,12 +1,13 @@
 import unittest
 
-from test_ascend_single_mix_utils import NIC_NAME
-from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
-
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestAscendMultiNodePdSepTestCaseBase,
+    NIC_NAME,
+    QWEN3_480B_W8A8_MODEL_PATH
+)
 
 MODEL_CONFIG = {
-    "model_path": MODEL_PATH,
+    "model_path": QWEN3_480B_W8A8_MODEL_PATH,
     "prefill_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",

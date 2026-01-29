@@ -1,16 +1,16 @@
 import unittest
 
-from test_ascend_single_mix_utils import (
-    TestSingleNodeTestCaseBase,
-    NIC_NAME
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestPerformanceTestCaseBase,
+    NIC_NAME, QWEN3_32B_EAGLE_MODEL_PATH,
+    QWEN3_32B_MODEL_PATH
 )
 
-QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-# https://huggingface.co/Zjcxy-SmartAI/Eagle3-Qwen3-32B-zh/tree/main
-QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(est_time=1800, suite="nightly-16-npu-a3", nightly=True)
 
 QWEN3_32B_ENVS = {
-    # "SGLANG_SET_CPU_AFFINITY": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "400",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
@@ -45,7 +45,7 @@ QWEN3_32B_OTHER_ARGS = (
 )
 
 
-class TestQwen32B(TestSingleNodeTestCaseBase):
+class TestQwen32B(TestPerformanceTestCaseBase):
     model = QWEN3_32B_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS

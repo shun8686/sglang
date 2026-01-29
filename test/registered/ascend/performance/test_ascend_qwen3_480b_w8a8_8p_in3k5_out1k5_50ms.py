@@ -1,12 +1,15 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase
-from test_ascend_single_mix_utils import NIC_NAME
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestPerformanceTestCaseBase,
+    QWEN3_480B_W8A8_MODEL_PATH,
+    NIC_NAME
+)
+from sglang.test.ci.ci_register import register_npu_ci
 
-Qwen3_480B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+register_npu_ci(est_time=1800, suite="nightly-16-npu-a3", nightly=True)
 
-Qwen3_480B_ENVS = {
-    # "SGLANG_SET_CPU_AFFINITY": "1",
+QWEN3_480B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "2100",
@@ -15,7 +18,7 @@ Qwen3_480B_ENVS = {
     "HCCL_OP_EXPANSION_MODE": "AIV",
 }
 
-Qwen3_480B_OTHER_ARGS = [
+QWEN3_480B_OTHER_ARGS = [
     "--trust-remote-code",
     "--nnodes", "1",
     "--node-rank", "0",
@@ -38,10 +41,10 @@ Qwen3_480B_OTHER_ARGS = [
     "--cuda-graph-bs", 16, 20, 24,
 ]
 
-class TestQwen480B(TestSingleNodeTestCaseBase):
-    model = Qwen3_480B_MODEL_PATH
-    other_args = Qwen3_480B_OTHER_ARGS
-    envs = Qwen3_480B_ENVS
+class TestQwen480B(TestPerformanceTestCaseBase):
+    model = QWEN3_480B_W8A8_MODEL_PATH
+    other_args = QWEN3_480B_OTHER_ARGS
+    envs = QWEN3_480B_ENVS
     dataset_name = "random"
     max_concurrency = 80
     num_prompts = int(max_concurrency) * 4

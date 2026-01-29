@@ -1,13 +1,16 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestPerformanceTestCaseBase,
+    NIC_NAME,
+    QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    QWEN3_235B_MODEL_PATH
+)
+from sglang.test.ci.ci_register import register_npu_ci
 
-QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B"
-
-QWEN3_235B_A22B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+register_npu_ci(est_time=1800, suite="nightly-16-npu-a3", nightly=True)
 
 QWEN3_235B_ENVS = {
-    # "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "1600",
@@ -16,7 +19,6 @@ QWEN3_235B_ENVS = {
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
-    # "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
 }
 
 QWEN3_235B_OTHER_ARGS = (
@@ -44,7 +46,7 @@ QWEN3_235B_OTHER_ARGS = (
     ]
 )
 
-class TestQwen3_235B(TestSingleNodeTestCaseBase):
+class TestQwen235B(TestPerformanceTestCaseBase):
     model = QWEN3_235B_MODEL_PATH
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS

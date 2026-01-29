@@ -1,8 +1,11 @@
 import unittest
 import os
 
-from test_ascend_single_mix_utils import NIC_NAME, run_command
-from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestAscendMultiNodePdSepTestCaseBase,
+    NIC_NAME,
+    run_command
+)
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 

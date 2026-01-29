@@ -53,7 +53,7 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               bash $SGLANG_SOURCE_PATH/test/registered/ascend/performance/run_ascend_testcase.sh {{ test_case }}
+               bash $SGLANG_SOURCE_PATH/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
           resources:
             requests:
               huawei.com/ascend-1980: {{ npu_num }}

@@ -1,12 +1,15 @@
 import unittest
 
-from test_ascend_single_mix_utils import TestSingleNodeTestCaseBase, NIC_NAME
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestPerformanceTestCaseBase,
+    NIC_NAME,
+    DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
+)
+from sglang.test.ci.ci_register import register_npu_ci
 
-
-MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
+register_npu_ci(est_time=1800, suite="nightly-16-npu-a3", nightly=True)
 
 MODEL_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
@@ -21,6 +24,7 @@ MODEL_ENVS = {
     "SGLANG_USE_FIA_NZ": "1",
     "ENABLE_MOE_NZ": "1",
 }
+
 MODEL_OTHER_ARGS = (
     [
         "--tp-size", 16,
@@ -50,8 +54,8 @@ MODEL_OTHER_ARGS = (
 )
 
 
-class TestAscendDeepSeekR1W4A8(TestSingleNodeTestCaseBase):
-    model = MODEL_PATH
+class TestAscendDeepSeekR1W4A8(TestPerformanceTestCaseBase):
+    model = DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"

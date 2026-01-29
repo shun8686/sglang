@@ -1,12 +1,13 @@
 import unittest
 
-from test_ascend_multi_mix_utils import TestMultiNodePdMixTestCaseBase
-from test_ascend_single_mix_utils import NIC_NAME
-
-MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestMultiNodePdMixTestCaseBase,
+    GLM_4_6_W8A8_MODEL_PATH,
+    NIC_NAME
+)
 
 MODEL_CONFIG = {
-    "model_path": MODEL_PATH,
+    "model_path": GLM_4_6_W8A8_MODEL_PATH,
     "node_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",

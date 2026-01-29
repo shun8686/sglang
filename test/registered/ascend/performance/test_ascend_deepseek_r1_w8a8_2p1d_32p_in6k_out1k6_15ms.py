@@ -1,13 +1,13 @@
 import unittest
 
-from test_ascend_single_mix_utils import NIC_NAME
-from test_ascend_disaggregation_utils import TestAscendMultiNodePdSepTestCaseBase
-
-
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestAscendMultiNodePdSepTestCaseBase,
+    DEEPSEEK_R1_W8A8_MODEL_PATH,
+    NIC_NAME
+)
 
 MODEL_CONFIG = {
-    "model_path": MODEL_PATH,
+    "model_path": DEEPSEEK_R1_W8A8_MODEL_PATH,
     "prefill_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -19,7 +19,6 @@ MODEL_CONFIG = {
         "TASK_QUEUE_ENABLE": "2",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-        # "ASCEND_MF_LOG_LEVEL": "1",
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
@@ -35,7 +34,6 @@ MODEL_CONFIG = {
         "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-        # "ASCEND_MF_LOG_LEVEL": "1",
     },
     "router_envs": {
         "SGLANG_DP_ROUND_ROBIN": "1",
@@ -93,7 +91,7 @@ MODEL_CONFIG = {
     ],
 }
 
-class Test_DeepSeek_R1_W8A8_2P1D_In6000_Out1600(TestAscendMultiNodePdSepTestCaseBase):
+class TestDeepSeekR1W8A8(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16

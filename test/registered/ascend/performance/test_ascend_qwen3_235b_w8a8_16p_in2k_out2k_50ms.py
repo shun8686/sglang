@@ -1,14 +1,14 @@
 import unittest
 
-from test_ascend_multi_mix_utils import TestMultiNodePdMixTestCaseBase
-from test_ascend_single_mix_utils import NIC_NAME
-
-QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
-
-QWEN3_235B_A22B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    TestMultiNodePdMixTestCaseBase,
+    NIC_NAME,
+    QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    QWEN3_235B_W8A8_MODEL_PATH
+)
 
 MODEL_CONFIG = {
-    "model_path": QWEN3_235B_MODEL_PATH,
+    "model_path": QWEN3_235B_W8A8_MODEL_PATH,
     "node_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -19,7 +19,6 @@ MODEL_CONFIG = {
         "HCCL_OP_EXPANSION_MODE": "AIV",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
-        # "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     },
     "other_args": [
         "--trust-remote-code",
