@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestTemplateContentFormatDetection(CustomTestCase):
     """Testcase: Test template content format detection functionality.
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] jinja_template
     """
 

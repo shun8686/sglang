@@ -1,19 +1,13 @@
-import json
 import os
-import time
 import unittest
-from types import SimpleNamespace
 
 import requests
 
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    kill_process_tree,
     popen_launch_pd_server,
 )
 
@@ -47,7 +41,7 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
 
     @classmethod
     def start_prefill(cls):
-         """Launch the Prefill service with specified configuration for Ascend NPU (disaggregated architecture)"""
+        """Launch the Prefill service with specified configuration for Ascend NPU (disaggregated architecture)"""
         prefill_args = (
             [
                 "--disaggregation-mode",
@@ -71,7 +65,7 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
 
     @classmethod
     def start_decode(cls):
-         """Launch the Decode service with --disaggregation-prefill-pp=2 configuration for Ascend NPU"""
+        """Launch the Decode service with --disaggregation-prefill-pp=2 configuration for Ascend NPU"""
         decode_args = (
             [
                 "--disaggregation-mode",

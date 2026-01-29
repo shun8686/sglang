@@ -12,7 +12,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestHiddenState(CustomTestCase):
     """Testcase: Testing sglang's ability to return hidden states when generating text.
 
-    [Test Category] Interface
+    [Test Category] Parameter
     [Test Target] hidden_states
     """
     def test_return_hidden_states(self):
