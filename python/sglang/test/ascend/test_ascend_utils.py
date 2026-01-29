@@ -10,8 +10,8 @@ MiniCPM_O_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-o-
 Llama_3_1_8B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/Llama-3.1-8B-Instruct")
 
 Llama_3_2_1B_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct")
-Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
-                                                          "LLM-Research/Llama-3.2-11B-Vision-Instruct")
+Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-11B-Vision-Instruct")
+Meta_Llama_3_1_8B_Instruct = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Meta-Llama-3.1-8B-Instruct")
 
 DeepSeek_R1_0528_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-R1-0528-W8A8")
 DeepSeek_V2_Lite_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8")
