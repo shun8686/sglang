@@ -56,7 +56,7 @@ class TestPortArgs(unittest.TestCase):
         - Verify IPC names use ipc:// protocol
         - Verify NCCL port is generated as integer
         """
-        # Mock dependencies
+
         mock_is_port_available.return_value = True
         mock_temp_file.return_value.name = "temp_file"
 
@@ -70,7 +70,6 @@ class TestPortArgs(unittest.TestCase):
         # Initialize PortArgs
         port_args = PortArgs.init_new(server_args)
 
-        # Verify IPC names use ipc:// protocol (local inter-process communication)
         self.assertTrue(port_args.tokenizer_ipc_name.startswith("ipc://"))
         self.assertTrue(port_args.scheduler_input_ipc_name.startswith("ipc://"))
         self.assertTrue(port_args.detokenizer_ipc_name.startswith("ipc://"))
