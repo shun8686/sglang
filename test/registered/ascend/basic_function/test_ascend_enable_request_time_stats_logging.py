@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
-    """Testcase：Verify the correctness of request time stats logging feature and related API availability with --enable-request-time-stats-logging enabled
+    """Testcase：With --enable-request-time-stats-logging enabled, verify the correctness of request time stats logging feature and related API availability 
 
     [Test Category] Parameter
     [Test Target] --enable-request-time-stats-logging
