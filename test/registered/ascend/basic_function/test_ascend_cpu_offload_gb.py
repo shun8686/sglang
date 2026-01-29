@@ -16,9 +16,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAscendCpuOffloadGb(CustomTestCase):
-    """Test class for Llama-3.2-1B with GBs of RAM to reserve for CPU offloading .
-    Tests core functionality with --cpu-offload-gb configuration:
-    --cpu-offload-gb: CPU offload memory size.
+    """Testcase: Tests core functionality with --cpu-offload-gb configuration
+
+    [Test Category] --cpu-offload-gb
+    [Test Target] CPU offload memory size
     """
 
     def test_cpu_offload_gb(self):

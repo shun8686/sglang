@@ -20,6 +20,7 @@ class TestOverlapSchedule(CustomTestCase):
     """
 
     def test_no_radix_attention_chunked_prefill(self):
+        """Test inference with radix cache disabled + chunked prefill enabled (size=128) & overlap scheduler disabled"""
         chunked_prefill_size = 128
         run_mmlu_test(
             disable_radix_cache=True,
@@ -28,11 +29,13 @@ class TestOverlapSchedule(CustomTestCase):
         )
 
     def test_no_radix_attention_no_chunked_prefill(self):
+         """Test inference with radix cache disabled + chunked prefill disabled & overlap scheduler disabled"""
         run_mmlu_test(
             disable_radix_cache=True, chunked_prefill_size=-1, disable_overlap=True
         )
 
     def test_radix_attention_chunked_prefill(self):
+        """Test inference with radix cache enabled + chunked prefill enabled (size=128) & overlap scheduler disabled"""
         chunked_prefill_size = 128
         run_mmlu_test(
             disable_radix_cache=False,
@@ -41,6 +44,7 @@ class TestOverlapSchedule(CustomTestCase):
         )
 
     def test_radix_attention_no_chunked_prefill(self):
+        """Test inference with radix cache enabled + chunked prefill disabled & overlap scheduler disabled"""
         run_mmlu_test(
             disable_radix_cache=False, chunked_prefill_size=-1, disable_overlap=True
         )

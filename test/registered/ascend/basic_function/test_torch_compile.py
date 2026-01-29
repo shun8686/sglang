@@ -20,10 +20,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestTorchCompile(CustomTestCase):
-    """Test class for Meta-Llama-3.1-8B-Instruct with torch compile enabled to optimize.
-    Tests core functionality with --enable-torch-compile configuration:
-    --enable-torch-compile: optimize the model with torch.compile
-    - mmlu: MMLU dataset accuracy verification (score ≥ 0.65)
+    """Testcase: Tests core functionality with --enable-torch-compile configuration
+                 MMLU dataset accuracy verification (score ≥ 0.65)
+
+    [Test Category] --enable-torch-compile
+    [Test Target] optimize the model with torch.compile
     """
 
     @classmethod
@@ -35,8 +36,8 @@ class TestTorchCompile(CustomTestCase):
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
-                "--enable-torch-compile", 
-                "--cuda-graph-max-bs", 
+                "--enable-torch-compile",
+                "--cuda-graph-max-bs",
                 "4",
                 "--attention-backend",
                 "ascend",

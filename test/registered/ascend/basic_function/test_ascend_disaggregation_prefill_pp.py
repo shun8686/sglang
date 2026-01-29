@@ -21,13 +21,10 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDisaggregationPrefillPp(TestDisaggregationBase):
-    """Test class for Prefill PP (Pipeline Parallelism) in disaggregated Prefill-Decode architecture (NPU CI version).
+    """Testcase：Verify the correctness of --disaggregation-prefill-pp=2 and Prefill/Decode disaggregated services availability on Ascend NPU backend.
 
-    Core Purpose:
-    - Verify disaggregation-prefill-pp=2 parameter functionality on Ascend NPU backend
-    - Validate Decode service correctly configures Prefill PP parallelism
-    - Ensure inference correctness and parameter configuration effectiveness
-    - Integrated with NPU CI pipeline for nightly regression testing
+    [Test Category] Parameter
+    [Test Target] --disaggregation-prefill-pp; --disaggregation-mode; --disaggregation-transfer-backend;
     """
     @classmethod
     def setUpClass(cls):
@@ -50,6 +47,7 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
 
     @classmethod
     def start_prefill(cls):
+         """Launch the Prefill service with specified configuration for Ascend NPU (disaggregated architecture)"""
         prefill_args = (
             [
                 "--disaggregation-mode",
@@ -73,6 +71,7 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
 
     @classmethod
     def start_decode(cls):
+         """Launch the Decode service with --disaggregation-prefill-pp=2 configuration for Ascend NPU"""
         decode_args = (
             [
                 "--disaggregation-mode",

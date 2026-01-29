@@ -15,9 +15,12 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL1Cache(CustomTestCase):
+    """Testcase: Test enable L1 cache, inputting different text inference requests.
+
+    [Test Category] --disable-radix-cache
+    [Test Target] enable L1 cache
     """
-    Test enable L1 cache, inputting different text inference requests.
-    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
@@ -54,7 +57,7 @@ class TestL1Cache(CustomTestCase):
         for text in texts:
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={  
+                json={
                         "text": text,
                         "sampling_params": {
                         "temperature": 0,

@@ -66,40 +66,6 @@ class TestRetractDecode(CustomTestCase):
         self.assertGreaterEqual(metrics["score"], 0.65)
 
 
-class TestRetractDecodeChunkCache(CustomTestCase):
-    """Testcase：Verify MMLU dataset accuracy of Llama-3.1-8B-Instruct model with retract decode + chunk cache enabled
-
-    [Test Category] Parameter|Model
-    [Test Target] SGLANG_TEST_RETRACT;--chunked-prefill-size
-    """
-    @classmethod
-    def setUpClass(cls):
-        # Enable retract decode feature for test
-        os.environ["SGLANG_TEST_RETRACT"] = "1"
-
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        )
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = (
-            [
-                "--disable-radix-cache",
-                "--chunked-prefill-size",
-                128,
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
-            ]
-        )
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-        )
-
 
 if __name__ == "__main__":
     unittest.main()

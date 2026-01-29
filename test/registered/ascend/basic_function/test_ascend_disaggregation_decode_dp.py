@@ -8,7 +8,7 @@ import requests
 
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.test_disaggregation_utils import TestDisaggregationBase
+from sglang.test.registered.ascend.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -23,16 +23,15 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDisaggregationDecodeDp(TestDisaggregationBase):
-    """Test class for Decode DP (Data Parallelism) in disaggregated Prefill-Decode architecture.
+    """Testcase：Verify the correctness of --disaggregation-decode-dp=2 and Prefill/Decode disaggregated services availability on Ascend NPU backend.
 
-    Core Purpose:
-    - Verify disaggregation-decode-dp=2 parameter functionality on Ascend NPU backend
-    - Validate Prefill/Decode disaggregated services with Decode DP configuration
-    - Ensure inference correctness and parameter configuration effectiveness
+    [Test Category] Parameter
+    [Test Target] --disaggregation-decode-dp; --disaggregation-mode; --disaggregation-transfer-backend
     """
 
     @classmethod
     def setUpClass(cls):
+         """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
         super().setUpClass()
         cls.model = (
             "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
@@ -52,6 +51,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def start_prefill(cls):
+        """Launch the Prefill service with disaggregation-decode-dp=2 configuration for Ascend NPU"""
         prefill_args = (
             [
                 "--disaggregation-mode",
@@ -80,6 +80,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def start_decode(cls):
+        """Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)"""
         decode_args = (
             [
                 "--disaggregation-mode",
@@ -107,6 +108,13 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
         )
 
     def test_disaggregation_decode_dp(self):
+        """Test core functionality of disaggregation-decode-tp parameter.
+
+        Test Steps:
+        1. Verify LB service health (basic availability check)
+        2. Validate inference correctness (France capital = Paris)
+        3. Confirm disaggregation_decode_dp=2 in Prefill server info (parameter validation)
+        """
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -125,6 +133,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
 
     @classmethod
     def tearDownClass(cls):
+        """Test class cleanup: Remove the Ascend MF store environment variable and call parent class cleanup to terminate all processes"""
         os.environ.pop("ASCEND_MF_STORE_URL")
         super().tearDownClass()
 
