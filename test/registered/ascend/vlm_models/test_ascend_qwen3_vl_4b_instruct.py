@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.test_ascend_utils import QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,7 +14,7 @@ class TestQwen3VL4B(TestVLMModels):
     [Test Target] Qwen/Qwen3-VL-4B-Instruct
     """
 
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-4B-Instruct"
+    model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
     mmmu_accuracy = 0.3
 
     def test_vlm_mmmu_benchmark(self):

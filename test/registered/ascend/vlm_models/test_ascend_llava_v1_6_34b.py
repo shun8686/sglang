@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import LLAVA_V1_6_34B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestLlava(GSM8KAscendMixin, CustomTestCase):
     [Test Target] AI-ModelScope/llava-v1.6-34b
     """
 
-    model = "/root/.cache/modelscope/hub/models/AI-ModelScope/llava-v1.6-34b"
+    model = LLAVA_V1_6_34B_WEIGHTS_PATH
     accuracy = 0.63
     other_args = [
         "--trust-remote-code",

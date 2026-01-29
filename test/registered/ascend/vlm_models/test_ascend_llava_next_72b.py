@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import LLAVA_NEXT_72B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -14,7 +15,7 @@ class TestLlavaNext72B(GSM8KAscendMixin, CustomTestCase):
     [Test Target] lmms-lab/llava-next-72b
     """
 
-    model = "/root/.cache/modelscope/hub/models/lmms-lab/llava-next-72b"
+    model = LLAVA_NEXT_72B_WEIGHTS_PATH
     accuracy = 0.79
     other_args = [
         "--trust-remote-code",

@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.test_ascend_utils import JANUS_PRO_7B_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,7 +14,7 @@ class TestJanusPro7B(TestVLMModels):
     [Test Target] deepseek-ai/Janus-Pro-7B
     """
 
-    model = "/root/.cache/modelscope/hub/models/deepseek-ai/Janus-Pro-7B"
+    model = JANUS_PRO_7B_WEIGHTS_PATH
     mmmu_accuracy = 0.2
 
     def test_vlm_mmmu_benchmark(self):

@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.test_ascend_utils import PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,7 +14,7 @@ class TestPhi4Multimodal(TestVLMModels):
     [Test Target] microsoft/Phi-4-multimodal-instruct
     """
 
-    model = "/root/.cache/modelscope/hub/models/microsoft/Phi-4-multimodal-instruct"
+    model = PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
     mmmu_accuracy = 0.2
 
     def test_vlm_mmmu_benchmark(self):
