@@ -55,19 +55,14 @@ class TestLogLevel(CustomTestCase):
             out_log_file.seek(0)
             return out_log_file.read()
         finally:
-            if process:
-                kill_process_tree(process.pid)
-            if out_log_file:
-                out_log_file.close()
-            if err_log_file:
-                err_log_file.close()
-            if os.path.exists(self.OUT_LOG_PATH):
-                os.remove(self.OUT_LOG_PATH)
-            if os.path.exists(self.ERR_LOG_PATH):
-                os.remove(self.ERR_LOG_PATH)
+            kill_process_tree(process.pid)
+            out_log_file.close()
+            err_log_file.close()
+            os.remove(self.OUT_LOG_PATH)
+            os.remove(self.ERR_LOG_PATH)
 
     def test_log_level(self):
-        """Verify set --log-level=warning, log level print warning info"""
+        # Verify set --log-level=warning and not set --log-level-http, logs print only warning level (no HTTP info)
         other_args = [
             "--log-level", "warning",
             "--attention-backend", "ascend",
@@ -77,7 +72,7 @@ class TestLogLevel(CustomTestCase):
         self.assertNotIn("POST /generate HTTP/1.1", log_content)
 
     def test_log_http_level(self):
-        """Verify set --log-level=warning and set --log-level-http=info, log level print http info"""
+        # Verify set --log-level=warning and set --log-level-http=info, log level print http info
         other_args = [
             "--log-level", "warning",
             "--log-level-http", "info",
