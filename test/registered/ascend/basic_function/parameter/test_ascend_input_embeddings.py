@@ -22,7 +22,7 @@ class TestInputEmbeds(CustomTestCase):
     """Testcase: Test API allows for different input formats(text, embed, file), and perform successful inference.
 
     [Test Category] Parameter
-    [Test Target] API
+    [Test Target] text
     """
 
     @classmethod
