@@ -23,7 +23,7 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --disable-radix-cache;--disable-overlap
     """
-    _disable_radix_cache = "False"
+    _disable_radix_cache = False
     _chunked_prefill_size = "128"
 
     @classmethod
@@ -65,19 +65,19 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
 
 class TestRadixCacheFalseChunkMinus1(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=False, chunked_prefill_size=-1
-    _disable_radix_cache = "False"
+    _disable_radix_cache = False
     _chunked_prefill_size = "-1"
 
 
 class TestRadixCacheTrueChunk128(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=True, chunked_prefill_size=128
-    _disable_radix_cache = "True"
+    _disable_radix_cache = True
     _chunked_prefill_size = "128"
 
 
 class TestRadixCacheTrueChunkMinus1(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=True, chunked_prefill_size=-1
-    _disable_radix_cache = "True"
+    _disable_radix_cache = True
     _chunked_prefill_size = "-1"
 
 
