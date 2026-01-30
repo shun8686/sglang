@@ -16,12 +16,12 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestAbortOnPriority(CustomTestCase):
-    """Test class for --abort-on-priority-when-disabled parameter with CUDA Graph disabled.
-    
-    Core Purpose:
-    - Verify abort behavior for high-priority requests when CUDA Graph is disabled
-    - Validate --abort-on-priority-when-disabled parameter configuration effectiveness
+    """Testcase: Verify the effectiveness of --abort-on-priority-when-disabled parameter with CUDA Graph disabled.
+
+    [Test Category] Parameter
+    [Test Target] --abort-on-priority-when-disabled;--disable-cuda-graph;--attention-backend
     """
+
     @classmethod
     def setUpClass(cls):
         other_args = (
