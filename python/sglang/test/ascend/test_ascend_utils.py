@@ -21,6 +21,7 @@ DEEPSEEK_CODER_1_3B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepsee
 DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8")
 
 QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct")
+QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2-0.5B-Instruct")
 
 AFM_4_5B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/AFM-4.5B-Base")
 BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "baichuan-inc/Baichuan2-13B-Chat")
