@@ -5,8 +5,8 @@ from io import BytesIO
 import requests
 from PIL import Image
 from transformers import AutoProcessor, AutoTokenizer
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-from sglang.test.ascend.test_ascend_utils import QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
 from sglang.lang.chat_template import get_chat_template_by_model_path
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -29,11 +29,10 @@ class TestSkipTokenizerInit(CustomTestCase):
         [Test Category] Parameter
         [Test Target] --skip_tokenizer_init
         """
-    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+    model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
-        cls.model = model
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -214,7 +213,7 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
-    model2 = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
+    model = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -222,7 +221,6 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
         cls.image_url = ("https://gh.llkk.cc/" + image_path)
         response = requests.get(cls.image_url)
         cls.image = Image.open(BytesIO(response.content))
-        cls.model = model2
         cls.tokenizer = AutoTokenizer.from_pretrained(cls.model, use_fast=False)
         cls.processor = AutoProcessor.from_pretrained(cls.model, trust_remote_code=True)
         cls.base_url = DEFAULT_URL_FOR_TEST
