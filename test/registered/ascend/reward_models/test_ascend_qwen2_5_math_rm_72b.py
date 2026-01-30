@@ -32,8 +32,6 @@ class TestQwen25Math(CustomTestCase):
 
     model_path = QWEN2_5_MATH_RM_72B_WEIGHTS_PATH
     torch_dtype = torch.float16
-    tolerance = 4e-2
-    tp_size = 4
 
     @classmethod
     def setUpClass(cls):
