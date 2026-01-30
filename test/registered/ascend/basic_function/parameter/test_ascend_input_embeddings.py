@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
-
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestInputEmbeds(CustomTestCase):
@@ -28,7 +28,7 @@ class TestInputEmbeds(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = (
-            "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+            Llama_3_2_1B_Instruct_WEIGHTS_PATH
         )
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.tokenizer = AutoTokenizer.from_pretrained(cls.model)

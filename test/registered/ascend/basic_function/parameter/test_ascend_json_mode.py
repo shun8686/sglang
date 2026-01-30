@@ -5,11 +5,12 @@ import openai
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    ,
+    popen_launch_server,
 )
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
@@ -88,13 +89,17 @@ class TestJSONModeMixin:
 
 
 class ServerWithGrammarBackend(CustomTestCase):
-    """Base class for tests requiring a grammar backend server"""
+    """Testcase: Base class for tests requiring a grammar backend server.
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
 
     backend = "xgrammar"
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+        cls.model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
 
         other_args = [
@@ -118,14 +123,30 @@ class ServerWithGrammarBackend(CustomTestCase):
 
 
 class TestJSONModeXGrammar(ServerWithGrammarBackend, TestJSONModeMixin):
+    """Testcase: Verify JSON mode functionality with xgrammar grammar backend (non-streaming and streaming).
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
     backend = "xgrammar"
 
 
 class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
+    """Testcase: Verify JSON mode functionality with outlines grammar backend (non-streaming and streaming).
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
+    
     backend = "outlines"
 
 
 class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
+    """Testcase: Verify JSON mode functionality with llguidance grammar backend (non-streaming and streaming).
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
     backend = "llguidance"
 
 
