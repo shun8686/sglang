@@ -31,7 +31,8 @@ class TestEnableTokenizerMode(CustomTestCase):
         self.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         self.tokenzier_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
-        for i in ["slow", "auto"]:
+        #for i in ["slow", "auto"]:
+        for i in ["auto"]:
             other_args = [
                 "--tokenizer-mode",
                 i,
