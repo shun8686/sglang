@@ -28,7 +28,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
     """
     @classmethod
     def setUpClass(cls):
-        cls.model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
       
         cls.stdout = open(STDOUT_FILENAME, "w")
