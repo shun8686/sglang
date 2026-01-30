@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestStreamInterval(CustomTestCase):
-    """Testcase：Verify set --stream-interval parameter, the inference request is successfully processed.
+    """Testcase：Verify set --stream-interval parameter,--stream-interval is taking effect and the inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --stream-interval
