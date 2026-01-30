@@ -9,7 +9,7 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    ,
+    popen_launch_server,
 )
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
@@ -88,7 +88,11 @@ class TestJSONModeMixin:
 
 
 class ServerWithGrammarBackend(CustomTestCase):
-    """Base class for tests requiring a grammar backend server"""
+    """Testcase: Base class for tests requiring a grammar backend server.
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
 
     backend = "xgrammar"
 
@@ -118,14 +122,30 @@ class ServerWithGrammarBackend(CustomTestCase):
 
 
 class TestJSONModeXGrammar(ServerWithGrammarBackend, TestJSONModeMixin):
+    """Testcase: Verify JSON mode functionality with xgrammar grammar backend (non-streaming and streaming).
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
     backend = "xgrammar"
 
 
 class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
+    """Testcase: Verify JSON mode functionality with outlines grammar backend (non-streaming and streaming).
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
+    
     backend = "outlines"
 
 
 class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
+    """Testcase: Verify JSON mode functionality with llguidance grammar backend (non-streaming and streaming).
+
+    [Test Category] Parameter
+    [Test Target] --grammar-backend
+    """
     backend = "llguidance"
 
 
