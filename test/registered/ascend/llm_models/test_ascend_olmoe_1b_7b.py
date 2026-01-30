@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOlMoe(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the allenai/OLMoE-1B-7B-0924 model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the allenai/OLMoE-1B-7B-0924 model on the GSM8K dataset is no less than 0.12.
 
     [Test Category] Model
     [Test Target] allenai/OLMoE-1B-7B-0924

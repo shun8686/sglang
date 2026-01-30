@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestGrok2(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the huihui-ai/grok-2 model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the huihui-ai/grok-2 model on the GSM8K dataset is no less than 0.91.
 
     [Test Category] Model
     [Test Target] huihui-ai/grok-2
