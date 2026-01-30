@@ -18,10 +18,12 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestHiCache(CustomTestCase):
-    """Testcase：Verify the correctness of --enable-hierarchical-cache (HiCache) and MMLU dataset accuracy meets the requirement (score ≥ 0.65).
+    """
+    Testcase：Verify the correctness of --enable-hierarchical-cache (HiCache) and MMLU dataset accuracy meets the
+    requirement (score ≥ 0.65).
 
     [Test Category] Parameter
-    [Test Target] --enable-hierarchical-cache
+    [Test Target] --enable-hierarchical-cache, --hicache-size 100
     """
 
     @classmethod
