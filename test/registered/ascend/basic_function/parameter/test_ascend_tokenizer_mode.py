@@ -4,6 +4,7 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST_BASE,
@@ -17,6 +18,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 
+
 class TestEnableTokenizerMode(CustomTestCase):
     """
     Testcase：Verify that the inference is successful when the tokenizer mode is set to slow or auto
@@ -26,20 +28,22 @@ class TestEnableTokenizerMode(CustomTestCase):
     """
 
     def test_tokenzier_mode(self):
-        self.model_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
+        self.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+        self.tokenzier_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
         for i in ["slow", "auto"]:
-            other_args = (
-                [
-                    "--tokenizer-mode",
-                    i,
-                    "--attention-backend",
-                    "ascend",
-                    "--disable-cuda-graph",
-                    "--tokenizer-path",
-                    self.model_path,
-                ]
-            )
+            other_args = [
+                "--tokenizer-mode",
+                i,
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+                "--tokenizer-path",
+                self.tokenzier_path,
+                "--tokenizer_worker_num",
+                4,
+            ]
+
             process = popen_launch_server(
                 self.model_path,
                 self.base_url,
