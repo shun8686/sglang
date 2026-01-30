@@ -23,8 +23,8 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --disable-radix-cache;--disable-overlap
     """
-    _disable_radix_cache = None
-    _chunked_prefill_size = None
+    _disable_radix_cache = "False"
+    _chunked_prefill_size = "128"
 
     @classmethod
     def setUpClass(cls):
@@ -62,13 +62,6 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
 
         metrics = run_eval(args)
         self.assertGreaterEqual(metrics["score"], 0.65)
-
-
-class TestRadixCacheFalseChunk128(BaseTestRadixCacheChunkedPrefill):
-    # Test class for disable_radix_cache=False, chunked_prefill_size=128
-    _disable_radix_cache = "False"
-    _chunked_prefill_size = "128"
-
 
 class TestRadixCacheFalseChunkMinus1(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=False, chunked_prefill_size=-1
