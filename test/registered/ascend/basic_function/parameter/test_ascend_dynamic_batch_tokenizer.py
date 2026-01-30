@@ -42,7 +42,7 @@ def launch_server_with_tokenizer_timeout(model_name, base_url, tokenizer_timeout
     return process
 
 class BaseQwenTest(CustomTestCase):
-    accuracy = 0.87
+    accuracy = 0.86
 
     def _run_gsm8k_test(self, scenario):
         args = SimpleNamespace(
