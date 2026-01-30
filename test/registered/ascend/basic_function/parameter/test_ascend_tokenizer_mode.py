@@ -3,7 +3,6 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -28,10 +27,8 @@ class TestEnableTokenizerMode(CustomTestCase):
     """
 
     def test_tokenzier_mode(self):
-        self.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        self.tokenzier_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
+        model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
-        #for i in ["slow", "auto"]:
         for i in ["slow", "auto"]:
             other_args = [
                 "--tokenizer-mode",
@@ -40,13 +37,13 @@ class TestEnableTokenizerMode(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
                 "--tokenizer-path",
-                self.tokenzier_path,
+                model_path,
                 "--tokenizer-worker-num",
                 4,
             ]
 
             process = popen_launch_server(
-                self.model_path,
+                model_path,
                 self.base_url,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=other_args,
@@ -72,7 +69,7 @@ class TestEnableTokenizerMode(CustomTestCase):
                 response = requests.get(self.base_url + "/get_server_info")
                 self.assertEqual(response.status_code, 200)
                 print(response.json())
-                self.assertEqual(response.json()["tokenizer_path"], tokenizer_path)
+                self.assertEqual(response.json()["tokenizer_path"], model_path)
                 self.assertEqual(response.json()["tokenizer_mode"], i)
             finally:
                 kill_process_tree(process.pid)
