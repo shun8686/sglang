@@ -72,6 +72,7 @@ LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
 LLAVA_NEXT_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "lmms-lab/llava-next-72b")
 LLAVA_ONEVISION_QWEN2_7B_OV_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "lmms-lab/llava-onevision-qwen2-7b-ov")
 LLAVA_V1_6_34B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b")
+LLAVA_V1_6_34B_TOKENIZER_PATH = os.path.join(MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b/llava-1.6v-34b-tokenizer")
 MIMO_VL_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-VL-7B-RL")
 MiniCPM_O_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-o-2_6")
 MINICPM_V_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-V-2_6")

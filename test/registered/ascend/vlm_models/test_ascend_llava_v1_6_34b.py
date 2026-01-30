@@ -1,6 +1,6 @@
 import unittest
 
-from sglang.test.ascend.test_ascend_utils import LLAVA_V1_6_34B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAVA_V1_6_34B_WEIGHTS_PATH, LLAVA_V1_6_34B_TOKENIZER_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -16,6 +16,23 @@ class TestLlava(TestVLMModels):
 
     model = LLAVA_V1_6_34B_WEIGHTS_PATH
     mmmu_accuracy = 0.2
+    other_args = [
+        "--trust-remote-code",
+        "--tp-size",
+        4,
+        "--max-running-requests",
+        2048,
+        "--mem-fraction-static",
+        "0.7",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--mm-per-request-timeout",
+        60,
+        "--enable-multimodal",
+        "--tokenizer-path",
+        LLAVA_V1_6_34B_TOKENIZER_PATH,
+    ]
 
     def test_vlm_mmmu_benchmark(self):
         self._run_vlm_mmmu_test()
