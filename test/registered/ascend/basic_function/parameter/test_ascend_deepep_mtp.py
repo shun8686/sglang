@@ -12,14 +12,6 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-TEST_MODEL_MATRIX = {
-    DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH: {
-        "accuracy": 0.95,
-        "latency": 1000,
-        "output_throughput": 5,
-    },
-}
-
 
 class TestAscendDeepEP(CustomTestCase):
     """
@@ -36,7 +28,7 @@ class TestAscendDeepEP(CustomTestCase):
         cls.accuracy = 0.95
 
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
+        cls.url = urlparse(cls.base_url)
 
         cls.common_args = [
             "--trust-remote-code",
@@ -70,6 +62,8 @@ class TestAscendDeepEP(CustomTestCase):
             1,
             "--speculative-num-draft-tokens",
             2,
+            "--scheduler-recv-interval",
+            10,
         ]
 
         cls.extra_envs = {
