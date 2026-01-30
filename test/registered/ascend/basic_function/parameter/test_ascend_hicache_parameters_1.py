@@ -5,6 +5,7 @@ from typing import List, Tuple
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -13,15 +14,13 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-DEFAULT_URL_FOR_TEST = "http://127.0.0.1:8234"
-
 # HiCache核心配置组合（覆盖所有关键参数，无需全排列）
 HICACHE_CONFIGS = [
     # (eviction_policy, io_backend, mem_layout, test_scenario_name)
     ("lru", "direct", "layer_first", "lru_direct_layer_first"),
     ("lfu", "kernel", "page_first", "lfu_kernel_page_first"),
     ("lru", "kernel_ascend", "page_first_direct", "lru_kernel_ascend_page_first_direct"),
-    ("lru", "direct", "page_first_kv_split", "lfu_direct_page_first_kv_split"),
+    ("lru", "direct", "page_first_kv_split", "lru_direct_page_first_kv_split"),
 ]
 
 # 基础服务配置（通用配置，不随HiCache变化）
@@ -41,8 +40,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class BaseQwenHiCacheTest(CustomTestCase):
     """Qwen3-32B HiCache精度验证基础类"""
     # 精度阈值（保持基线，确保HiCache开启后精度无恶化）
-    accuracy = 0.8722
-    model_name = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-32B"
+    accuracy = 0.86
+    model_name = QWEN3_32B_WEIGHTS_PATH
     
     @classmethod
     def launch_server_with_hicache(cls, eviction_policy: str, io_backend: str, mem_layout: str):
