@@ -86,7 +86,7 @@ MODEL_CONFIG = {
         "--enable-dp-lm-head",
         "--tokenizer-worker-num", 4,
         "--dtype", "bfloat16",
-        "--load-balance-method", "decode_round_robin",
+        "--load-balance-method", "round_robin",
     ],
     "router_args": [
         "--mini-lb",

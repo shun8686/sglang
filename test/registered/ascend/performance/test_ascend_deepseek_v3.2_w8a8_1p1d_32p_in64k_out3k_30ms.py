@@ -86,7 +86,7 @@ MODEL_CONFIG = {
         "--speculative-eagle-topk", 1,
         "--speculative-num-draft-tokens", 4,
         "--prefill-round-robin-balance",
-        "--load-balance-method", "decode_round_robin",
+        "--load-balance-method", "round_robin",
     ],
     "router_args": [
         "--mini-lb",

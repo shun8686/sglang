@@ -84,7 +84,7 @@ MODEL_CONFIG = {
         "--prefill-round-robin-balance",
         "--disable-shared-experts-fusion",
         "--dtype", "bfloat16",
-        "--load-balance-method", "decode_round_robin",
+        "--load-balance-method", "round_robin",
     ],
     "router_args": [
         "--mini-lb",

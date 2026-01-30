@@ -83,7 +83,7 @@ MODEL_CONFIG = {
         "--disable-shared-experts-fusion",
         "--dtype", "bfloat16",
         "--tokenizer-worker-num", 4,
-        "--load-balance-method", "decode_round_robin",
+        "--load-balance-method", "round_robin",
     ],
     "router_args": [
     ],
