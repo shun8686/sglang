@@ -32,7 +32,7 @@ class TestEnableTokenizerMode(CustomTestCase):
         self.tokenzier_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
         #for i in ["slow", "auto"]:
-        for i in ["auto"]:
+        for i in ["slow", "auto"]:
             other_args = [
                 "--tokenizer-mode",
                 i,
@@ -41,7 +41,7 @@ class TestEnableTokenizerMode(CustomTestCase):
                 "--disable-cuda-graph",
                 "--tokenizer-path",
                 self.tokenzier_path,
-                "--tokenizer_worker_num",
+                "--tokenizer-worker-num",
                 4,
             ]
 
