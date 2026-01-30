@@ -5,8 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST_BASE,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -16,6 +14,7 @@ from sglang.test.test_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestEnableTokenizerMode(CustomTestCase):
     """
@@ -29,17 +28,14 @@ class TestEnableTokenizerMode(CustomTestCase):
         self.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
         served_model_name = "Llama3.2"
-        other_args = (
-            [
-                "--served-model-name",
-                served_model_name,
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
-            if is_npu()
-            else ["--served-model-name", served_model_name]
-        )
+        other_args = [
+            "--served-model-name",
+            served_model_name,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+
         process = popen_launch_server(
             self.model_path,
             self.base_url,
