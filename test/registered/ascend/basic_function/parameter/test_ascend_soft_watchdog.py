@@ -22,7 +22,7 @@ class BaseTestSoftWatchdog:
     requests on GPU backend
 
     [Test Category] Parameter
-    [Test Target] --soft-watchdog-timeout, --skip-server-warmup
+    [Test Target] --soft-watchdog-timeout
     """
 
     env_override = None
