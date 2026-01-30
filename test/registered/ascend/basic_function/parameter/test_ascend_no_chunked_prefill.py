@@ -12,7 +12,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNoChunkedPrefill(CustomTestCase):
-    """Testcase: Verify Llama-3.1-8B-Instruct accuracy ≥ 0.65 and and serving normal with chunked prefill disabled.
+    """Testcase: Verify Llama-3.1-8B-Instruct accuracy ≥ 0.65 and serving normal with chunked prefill disabled.
 
     [Test Category] Parameter
     [Test Target] --chunked-prefill-size
