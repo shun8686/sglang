@@ -34,7 +34,7 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
     DeepSeek model with W8A8 INT8 quantization when the FIA acceleration is used.
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim, os.environ["ASCEND_USE_FIA"] = "true"
+    [Test Target] --quantization modelslim, ENV ASCEND_USE_FIA true
     """
 
     @classmethod
