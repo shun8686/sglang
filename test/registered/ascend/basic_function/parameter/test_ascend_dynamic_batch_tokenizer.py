@@ -1,9 +1,11 @@
 import unittest
-import requests  # 补充缺失的requests模块导入
+import requests  
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -11,21 +13,18 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-DEFAULT_URL_FOR_TEST = "http://127.0.0.1:8234"
-
 BASE_OTHER_ARGS = [
     "--chunked-prefill-size", "256",
     "--attention-backend", "ascend",
     "--disable-cuda-graph",
     "--mem-fraction-static", "0.8",
     "--tp-size", "4",
-    "--base-gpu-id", "4",
     "--enable-dynamic-batch-tokenizer",
     "--dynamic-batch-tokenizer-batch-size", "4",
     "--dynamic-batch-tokenizer-batch-timeout", "0", 
     "--log-level", "debug"
 ]
-MODEL_NAME = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-32B"
+MODEL_NAME = QWEN3_32B_WEIGHTS_PATH
 
 def launch_server_with_tokenizer_timeout(model_name, base_url, tokenizer_timeout, other_args_base):
     other_args = other_args_base.copy()
@@ -41,8 +40,12 @@ def launch_server_with_tokenizer_timeout(model_name, base_url, tokenizer_timeout
     )
     return process
 
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+
+
 class BaseQwenTest(CustomTestCase):
-    accuracy = 0.38
+    # Base test class for Qwen3-32B model accuracy validation on Ascend backend
+    accuracy = 0.86
 
     def _run_gsm8k_test(self, scenario):
         args = SimpleNamespace(
@@ -56,7 +59,7 @@ class BaseQwenTest(CustomTestCase):
         )
         metrics = run_eval(args)
 
-        self.assertGreater(
+        self.assertGreaterEqual(
             metrics["accuracy"],
             self.accuracy,
             f'accuracy {metrics["accuracy"]} < {self.accuracy}',
@@ -66,6 +69,11 @@ class BaseQwenTest(CustomTestCase):
         print(f"{scenario}: {server_info=}")
 
 class TestQwenPPTieWeightsAccuracyTokenizerTimeout0(BaseQwenTest):
+    """Testcase: Verify Qwen3-32B model accuracy on GSM8K with dynamic batch tokenizer timeout set to 0.
+
+    [Test Category] Parameter
+    [Test Target] --dynamic-batch-tokenizer-batch-timeout;--enable-dynamic-batch-tokenizer;--dynamic-batch-tokenizer-batch-size
+    """
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -81,6 +89,11 @@ class TestQwenPPTieWeightsAccuracyTokenizerTimeout0(BaseQwenTest):
         self._run_gsm8k_test("tokenizer_timeout=0")
 
 class TestQwenPPTieWeightsAccuracyTokenizerTimeout1(BaseQwenTest):
+    """Testcase: Verify Qwen3-32B model accuracy on GSM8K with dynamic batch tokenizer timeout set to 1.
+
+    [Test Category] Parameter
+    [Test Target] --dynamic-batch-tokenizer-batch-timeout;--enable-dynamic-batch-tokenizer;--dynamic-batch-tokenizer-batch-size;--chunked-prefill-size;--attention-backend;--tp-size
+    """
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
