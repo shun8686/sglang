@@ -14,7 +14,7 @@ register_npu_ci(
 
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the google/gemma-3-4b-it model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the google/gemma-3-4b-it model on the GSM8K dataset is no less than 0.7.
 
     [Test Category] Model
     [Test Target] google/gemma-3-4b-it

@@ -4,7 +4,7 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
-from sglang.test.ascend.test_ascend_utils import Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -18,7 +18,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH: {
+    QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH: {
         "accuracy": 0.90,
         "latency": 180,
         "output_throughput": 20,

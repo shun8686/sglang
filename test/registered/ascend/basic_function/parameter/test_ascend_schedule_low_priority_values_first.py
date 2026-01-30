@@ -7,7 +7,7 @@ from typing import Any, List, Optional, Tuple
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -26,10 +26,10 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --enable-priority-scheduling;--schedule-low-priority-values-first;--max-running-requests;--max-queued-requests
     """
-  
+
     @classmethod
     def setUpClass(cls):
-        cls.model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
 
         cls.stdout = open(STDOUT_FILENAME, "w")
@@ -65,7 +65,7 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
 
     def test_low_priority_value_first_ordering(self):
         """Test core scheduling logic: lower priority values execute first
-        
+
         Test Scenario:
         - Send 4 concurrent requests with priorities [0, 4, 2, 1]
         - Expected execution order: 0 (first) → 1 → 2 → 4 (last)
@@ -96,7 +96,7 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
 
     def test_low_priority_first_abortion_logic(self):
         """Test abortion logic: high-priority values abort lower-priority queued requests (reverse of execution order)
-        
+
         Test Scenario:
         - Send 7 concurrent requests with priorities [10, 9, 8, 7, 6, 5, 0]
         - --max-running-requests=1, --max-queued-requests=3: Only 1 running + 3 queued = 4 requests can be processed
@@ -147,7 +147,7 @@ def _verify_genereate_responses(
             f"expected_status:{expected_status}，actually:{got_status}"
 
         if got_status != 200:
-            assert got_json.get("object") == "error", 
+            assert got_json.get("object") == "error",
             assert got_json.get("message") == expected_err_msg, \
                 f"expected_err_msg:{expected_err_msg}，actually: {got_json.get('message')}"
         else:

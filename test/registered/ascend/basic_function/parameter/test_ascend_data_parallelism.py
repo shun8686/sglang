@@ -7,7 +7,7 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -19,7 +19,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDataParallelism(CustomTestCase):
-    """Testcase：With data parallelism (DP=2)  enabled, verify model accuracy is greater than 0.65 and related API availability of Llama-3.1-8B-Instruct 
+    """Testcase：With data parallelism (DP=2)  enabled, verify model accuracy is greater than 0.65 and related API availability of Llama-3.1-8B-Instruct
 
     [Test Category] Parameter
     [Test Target] --dp
@@ -27,7 +27,7 @@ class TestDataParallelism(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
             [
@@ -53,7 +53,7 @@ class TestDataParallelism(CustomTestCase):
 
     def test_mmlu(self):
         """Test MMLU accuracy with DP=2 enabled (core functionality validation)
-        
+
         Key Validations:
         1. MMLU score ≥ 0.65 (accuracy baseline)
         2. Ensure DP=2 does not degrade model accuracy

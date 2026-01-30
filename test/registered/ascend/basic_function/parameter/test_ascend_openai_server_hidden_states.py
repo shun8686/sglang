@@ -10,8 +10,8 @@ import openai
 import torch
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.test_ascend_utils import EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.test_utils import (
@@ -229,7 +229,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
 
     @classmethod
     def setUpClass(cls):
-        cls.model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
         cls.process = popen_launch_server(
@@ -246,7 +246,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
             env=ENV,
         )
         cls.base_url += "/v1"
-        cls.tokenizer = get_tokenizer(Llama_3_2_1B_Instruct_WEIGHTS_PATH)
+        cls.tokenizer = get_tokenizer(LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH)
         cls.return_hidden_states = [False, True]
         cls.use_list_input = [True, False]
         cls.parallel_sample_nums = [1, 2]
@@ -267,7 +267,7 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 
     @classmethod
     def setUpClass(cls):
-        cls.model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
         cls.process = popen_launch_server(
@@ -285,7 +285,7 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
             env=ENV,
         )
         cls.base_url += "/v1"
-        cls.tokenizer = get_tokenizer(Llama_3_2_1B_Instruct_WEIGHTS_PATH)
+        cls.tokenizer = get_tokenizer(LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH)
         cls.return_hidden_states = [False, True]
         cls.use_list_input = [True, False]
         cls.parallel_sample_nums = [1]
@@ -307,7 +307,7 @@ class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
 
     @classmethod
     def setUpClass(cls):
-        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
         cls.speculative_algorithm = "EAGLE3"

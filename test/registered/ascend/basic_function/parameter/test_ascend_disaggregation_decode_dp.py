@@ -4,7 +4,7 @@ import unittest
 import requests
 
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -28,7 +28,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
     def setUpClass(cls):
         # Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready
         super().setUpClass()
-        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 
         # Non blocking start servers
         cls.start_prefill()
