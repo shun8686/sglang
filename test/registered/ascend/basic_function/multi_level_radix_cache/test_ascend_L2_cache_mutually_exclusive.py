@@ -17,13 +17,14 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestSkipServerWarmup(CustomTestCase):
-    """Testcase: Test L1 cache is not enabled, if L2 cache is enabled, the service will fail to start
+    """Testcase: The test parameter disable-radix-cache and enable-hierarchical-cache
+                are mutually exclusive and connot be used simultaneously.
 
     [Test Category] Parameter
     [Test Target] --disable-radix-cache; --enable-hierarchical-cache
     """
 
-    def test_L2_cache_04(self):
+    def test_L2_cache_mutually_exclusive(self):
         error_message="The arguments enable-hierarchical-cache and disable-radix-cache are mutually exclusive and cannot be used at the same time. Please use only one of them."
         other_args = (
             [
@@ -55,6 +56,7 @@ class TestSkipServerWarmup(CustomTestCase):
         finally:
             err_log_file.seek(0)
             content = err_log_file.read()
+            """error_message information is recorded in the error log"""
             self.assertIn(error_message, content)
             out_log_file.close()
             err_log_file.close()
