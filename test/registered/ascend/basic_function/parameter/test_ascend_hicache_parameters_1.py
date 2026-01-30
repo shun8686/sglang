@@ -68,7 +68,6 @@ class BaseQwenHiCacheTest(CustomTestCase):
         self.assertGreater(
             metrics["accuracy"],
             self.accuracy,
-            f"[{scenario}] 精度恶化！实际: {metrics['accuracy']}, 阈值: {self.accuracy}",
         )
 
 for eviction_policy, io_backend, mem_layout, scenario in HICACHE_CONFIGS:
