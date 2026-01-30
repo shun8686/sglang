@@ -16,7 +16,6 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-# 封装通用父类，提取公共逻辑和可配置参数
 class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
     """Testcase: Verify that the model can successfully process inference requests and achieve an accuracy of ≥ 0.65 when the overlap scheduler is disabled,
     covering all combination scenarios of radix cache (enabled/disabled) and chunked prefill (enabled/disabled).
