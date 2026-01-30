@@ -4,8 +4,8 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -16,9 +16,14 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAscendApi(CustomTestCase):
+    """Testcase: Verify the availability and correctness of the /encode API on Ascend backend with GME_QWEN2_VL_2B_INSTRUCT model.
+
+    [Test Category] Interface
+    [Test Target] /encode
+    """
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/Alibaba-NLP/gme-Qwen2-VL-2B-Instruct"
+        cls.model = GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH
         other_args = (
             [
                 "--attention-backend",
@@ -41,6 +46,7 @@ class TestAscendApi(CustomTestCase):
         kill_process_tree(cls.process.pid)
         
     def test_api_encode_01(self):
+        # Test Scenario 1: Call /encode API with plain text parameter
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/encode",
             json={
@@ -50,8 +56,7 @@ class TestAscendApi(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 200,
                     "top_p": 1
-                },
-                
+                }       
             },
         )
         print(response.json().keys())
@@ -59,6 +64,7 @@ class TestAscendApi(CustomTestCase):
         self.assertEqual(response.json()['meta_info']['id'], "2")
 
     def test_api_encode_02(self):
+        # Test Scenario 2: Call /encode API with input_ids parameter
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/encode",
             json={
@@ -67,14 +73,14 @@ class TestAscendApi(CustomTestCase):
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 200    
-                },
-                
+                }
             },
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meta_info']['id'], "3")
 
     def test_api_encode_03(self):
+        # Test Scenario 3: Call /encode API with text and image parameters (multimodal capability verification)
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/encode",
             json={
@@ -84,8 +90,7 @@ class TestAscendApi(CustomTestCase):
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 200    
-                },
-                
+                }
             },
         )
         print(response.json().keys)
