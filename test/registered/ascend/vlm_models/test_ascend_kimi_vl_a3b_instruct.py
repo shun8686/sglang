@@ -8,14 +8,14 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestKimiVLA3BInstruct(TestVLMModels):
-    """Testcase: Verify that the inference accuracy of the Kimi/Kimi-VL-A3B-Instruct model on the MMMU dataset is no less than 0.2.
+    """Testcase: Verify that the inference accuracy of the Kimi/Kimi-VL-A3B-Instruct model on the MMMU dataset is no less than 0.3.
 
     [Test Category] Model
     [Test Target] Kimi/Kimi-VL-A3B-Instruct
     """
 
     model = KIMI_VL_A3B_INSTRUCT_WEIGHTS_PATH
-    mmmu_accuracy = 0.2
+    mmmu_accuracy = 0.3
 
     def test_vlm_mmmu_benchmark(self):
         self._run_vlm_mmmu_test()
