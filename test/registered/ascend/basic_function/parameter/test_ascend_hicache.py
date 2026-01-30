@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 
-from sglang.srt.utils import is_hip, kill_process_tree
+from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
@@ -11,8 +11,6 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
-_is_hip = is_hip()
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
@@ -43,7 +41,7 @@ class TestHiCache(CustomTestCase):
                 "--mem-fraction-static",
                 0.7,
                 "--hicache-size",
-                100 if not _is_hip else 200,
+                100,
             ],
         )
 
