@@ -1,39 +1,24 @@
 import unittest
 
-from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
 from sglang.test.ascend.test_ascend_utils import LLAVA_V1_6_34B_WEIGHTS_PATH
+from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestLlava(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the AI-ModelScope/llava-v1.6-34b model using the GSM8K dataset.
+class TestLlava(TestVLMModels):
+    """Testcase: Verify that the inference accuracy of the AI-ModelScope/llava-v1.6-34b model on the MMMU dataset is no less than 0.2.
 
     [Test Category] Model
     [Test Target] AI-ModelScope/llava-v1.6-34b
     """
 
     model = LLAVA_V1_6_34B_WEIGHTS_PATH
-    accuracy = 0.63
-    other_args = [
-        "--trust-remote-code",
-        "--tp-size",
-        4,
-        "--max-running-requests",
-        2048,
-        "--mem-fraction-static",
-        "0.7",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--mm-per-request-timeout",
-        60,
-        "--enable-multimodal",
-        "--tokenizer-path",
-        "/root/.cache/modelscope/hub/models/AI-ModelScope/llava-v1.6-34b/llava-1.6v-34b-tokenizer"
-    ]
+    mmmu_accuracy = 0.2
+
+    def test_vlm_mmmu_benchmark(self):
+        self._run_vlm_mmmu_test()
 
 
 if __name__ == "__main__":
