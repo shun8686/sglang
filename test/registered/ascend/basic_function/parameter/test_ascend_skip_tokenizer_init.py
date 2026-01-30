@@ -33,7 +33,6 @@ class TestSkipTokenizerInit(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = model
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -214,7 +213,7 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
-    model2 = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+    model = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -222,7 +221,6 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
         cls.image_url = ("https://gh.llkk.cc/" + image_path)
         response = requests.get(cls.image_url)
         cls.image = Image.open(BytesIO(response.content))
-        cls.model = model2
         cls.tokenizer = AutoTokenizer.from_pretrained(cls.model, use_fast=False)
         cls.processor = AutoProcessor.from_pretrained(cls.model, trust_remote_code=True)
         cls.base_url = DEFAULT_URL_FOR_TEST
