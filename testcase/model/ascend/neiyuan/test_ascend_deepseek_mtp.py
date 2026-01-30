@@ -56,6 +56,8 @@ class TestAscendDeepSeekMTP(CustomTestCase):
 
         cls.extra_envs = {
             "SGLANG_NPU_USE_MLAPO": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         }
         os.environ.update(cls.extra_envs)
 
