@@ -53,7 +53,7 @@ class TestNoChunkedPrefill(CustomTestCase):
 
         metrics = run_eval(args)
         self.assertGreaterEqual(metrics["score"], 0.65)
-        kill_process_tree(cls.process.pid)
+        kill_process_tree(self.process.pid)
 
     def test_no_chunked_prefill_without_radix_cache(self):
         res = run_bench_serving(
