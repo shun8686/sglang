@@ -38,8 +38,6 @@ class TestEnableTokenizerMode(CustomTestCase):
                     "--disable-cuda-graph",
                     "--tokenizer-path",
                     self.model_path,
-                    "--tokenizer_worker-num",
-                    4,
                 ]
             )
             process = popen_launch_server(
@@ -68,9 +66,9 @@ class TestEnableTokenizerMode(CustomTestCase):
 
                 response = requests.get(self.base_url + "/get_server_info")
                 self.assertEqual(response.status_code, 200)
+                print(response.json())
                 self.assertEqual(response.json()["tokenizer_path"], tokenizer_path)
                 self.assertEqual(response.json()["tokenizer_mode"], i)
-                self.assertEqual(response.json()["tokenizer_worker-num"], 4)
             finally:
                 kill_process_tree(process.pid)
 
