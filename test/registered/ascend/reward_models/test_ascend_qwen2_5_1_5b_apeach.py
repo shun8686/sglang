@@ -3,6 +3,7 @@ import unittest
 
 import torch
 
+from sglang.test.ascend.test_ascend_utils import QWEN2_5_1_5B_APEACH_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import SRTRunner
 from sglang.test.test_utils import CustomTestCase
@@ -22,7 +23,14 @@ CONVS = [
 
 
 class TestQwen2(CustomTestCase):
-    model_path = "/root/.cache/modelscope/hub/models/Howeee/Qwen2.5-1.5B-apeach"
+    """Testcase:This test case verifies that the Howeee/Qwen2.5-1.5B-apeach model can successfully generate reward scores
+    for different conversational responses using the SGLang framework, without comparing to a reference implementation.
+
+    [Test Category] Model
+    [Test Target] Howeee/Qwen2.5-1.5B-apeach
+    """
+
+    model_path = QWEN2_5_1_5B_APEACH_WEIGHTS_PATH
     torch_dtype = torch.float16
     tolerance = 4e-2
     tp_size = 4

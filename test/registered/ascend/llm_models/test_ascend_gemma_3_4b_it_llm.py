@@ -1,6 +1,7 @@
 import unittest
 
-from gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
+from sglang.test.ascend.test_ascend_utils import GEMMA_3_4B_IT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -13,7 +14,13 @@ register_npu_ci(
 
 
 class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
-    model = "/root/.cache/modelscope/hub/models/google/gemma-3-4b-it"
+    """Testcase: Verify that the inference accuracy of the google/gemma-3-4b-it model on the GSM8K dataset is no less than 0.7.
+
+    [Test Category] Model
+    [Test Target] google/gemma-3-4b-it
+    """
+
+    model = GEMMA_3_4B_IT_WEIGHTS_PATH
     accuracy = 0.7
     other_args = [
         "--trust-remote-code",
