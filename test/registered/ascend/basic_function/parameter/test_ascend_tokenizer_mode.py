@@ -29,10 +29,10 @@ class TestEnableTokenizerMode(CustomTestCase):
     def test_tokenzier_mode(self):
         model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
-        for i in ["slow", "auto"]:
+        for tokenizer_mode in ["slow", "auto"]:
             other_args = [
                 "--tokenizer-mode",
-                i,
+                tokenizer_mode,
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -70,7 +70,7 @@ class TestEnableTokenizerMode(CustomTestCase):
                 self.assertEqual(response.status_code, 200)
                 print(response.json())
                 self.assertEqual(response.json()["tokenizer_path"], model_path)
-                self.assertEqual(response.json()["tokenizer_mode"], i)
+                self.assertEqual(response.json()["tokenizer_mode"], tokenizer_mode)
             finally:
                 kill_process_tree(process.pid)
 
