@@ -92,7 +92,7 @@ class TestQwenPPTieWeightsAccuracyTokenizerTimeout1(BaseQwenTest):
     """Testcase: Verify Qwen3-32B model accuracy on GSM8K with dynamic batch tokenizer timeout set to 1.
 
     [Test Category] Parameter
-    [Test Target] --dynamic-batch-tokenizer-batch-timeout;--enable-dynamic-batch-tokenizer;--dynamic-batch-tokenizer-batch-size;--chunked-prefill-size;--attention-backend;--tp-size
+    [Test Target] --dynamic-batch-tokenizer-batch-timeout;--enable-dynamic-batch-tokenizer;--dynamic-batch-tokenizer-batch-size
     """
     @classmethod
     def setUpClass(cls):

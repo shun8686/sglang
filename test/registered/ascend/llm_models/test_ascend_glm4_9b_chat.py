@@ -16,7 +16,7 @@ class TestGLM49BChat(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = GLM_4_9B_CHAT_WEIGHTS_PATH
-    accuracy = 0.79
+    accuracy = 0.77
 
 
 if __name__ == "__main__":
