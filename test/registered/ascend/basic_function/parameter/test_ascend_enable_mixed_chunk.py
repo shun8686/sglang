@@ -22,23 +22,27 @@ class TestEnableMixedChunk(CustomTestCase):
     [Test Target] --enable-mixed-chunk
     """
 
-    def test_enable_mixed_chunk(self):
-        # Verify the availability of related APIs and the correctness of --enable-mixed-chunk parameter configuration
-        other_args = (
-            [
-                "--enable-mixed-chunk",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
-        )
-        # Launch the service with mixed chunk feature enabled
-        process = popen_launch_server(
+    @classmethod
+    def setUpClass(cls):
+        other_args = [
+            "--enable-mixed-chunk",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+        cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_enable_mixed_chunk(self):
+        # Verify the availability of related APIs and the correctness of --enable-mixed-chunk parameter configuration
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -60,7 +64,6 @@ class TestEnableMixedChunk(CustomTestCase):
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["enable_mixed_chunk"], True)
-        kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":
