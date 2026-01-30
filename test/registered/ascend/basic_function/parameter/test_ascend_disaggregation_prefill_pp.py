@@ -4,7 +4,7 @@ import unittest
 import requests
 
 from sglang.test.test_disaggregation_utils import TestDisaggregationBase
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -24,7 +24,7 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
+        cls.model = Llama_3_1_8B_INSTRUCT_WEIGHTS_PATH
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
         env = os.environ.copy()
 
