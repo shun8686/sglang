@@ -30,22 +30,25 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
     def setUpClass(cls):
         cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--chunked-prefill-size",
+            cls._chunked_prefill_size,
+            "--disable-overlap",
+        ]
+
+        if cls._disable_radix_cache:
+            other_args.append("--disable-radix-cache")
+        
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--disable-radix-cache",
-                cls._disable_radix_cache,  
-                "--chunked-prefill-size",
-                cls._chunked_prefill_size,
-                "--disable-overlap",
-                "True",
-            ],
+            other_args=other_args,
         )
+
 
     @classmethod
     def tearDownClass(cls):
