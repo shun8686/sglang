@@ -5,7 +5,7 @@ from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -24,7 +24,7 @@ BASE_OTHER_ARGS = [
     "--dynamic-batch-tokenizer-batch-timeout", "0", 
     "--log-level", "debug"
 ]
-MODEL_NAME = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-32B"
+MODEL_NAME = QWEN3_32B_WEIGHTS_PATH
 
 def launch_server_with_tokenizer_timeout(model_name, base_url, tokenizer_timeout, other_args_base):
     other_args = other_args_base.copy()
