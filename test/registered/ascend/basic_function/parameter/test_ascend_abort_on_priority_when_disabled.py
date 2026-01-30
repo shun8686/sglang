@@ -34,9 +34,7 @@ class TestAbortOnPriority(CustomTestCase):
         )
 
         cls.process = popen_launch_server(
-            (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            ),
+            Llama_3_2_1B_Instruct_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
