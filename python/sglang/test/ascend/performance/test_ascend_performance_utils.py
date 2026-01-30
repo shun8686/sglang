@@ -2,10 +2,8 @@ import os
 import subprocess
 import threading
 import time
-
 import psutil
 import socket
-
 import requests
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
@@ -82,7 +80,6 @@ def query_configmap(name, namespace):
 def discover_worker_nodes():
     try:
         config.load_incluster_config()
-        v1 = client.CoreV1Api()
 
         prefill_pods = v1.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-prefill"
@@ -94,6 +91,7 @@ def discover_worker_nodes():
         nodes_count = len(prefill_pods.items) + len(decode_pods.items)
         print(f"Discovered {nodes_count} worker nodes (prefill: {len(prefill_pods.items)}, decode: {len(decode_pods.items)})")
         return nodes_count
+
     except Exception as e:
         print(f"Unexpected error discovering worker nodes: {e}")
         return 0
@@ -101,6 +99,7 @@ def discover_worker_nodes():
 def set_environment_variables(env_vars):
     if not env_vars:
         return
+
     for key, value in env_vars.items():
         print(f"Setting ENV_VAR {key}={value}")
         os.environ[key] = value
@@ -111,6 +110,7 @@ def check_port_availability(host, port, timeout=3):
             sock.settimeout(timeout)
             result = sock.connect_ex((host, int(port)))
             return result == 0
+
     except (socket.error, ValueError) as e:
         print(f"Port check error for {host}:{port}: {e}")
         return False
@@ -137,11 +137,13 @@ def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT):
     return False
 
 # launch master/worker node
-def launch_node(config):
-    print(f"launch_node start ......")
+def launch_pd_mix_node(model_config):
+    print(f"Launch pd mix node start ......")
     node_ip = os.getenv("POD_IP")
     hostname = os.getenv("HOSTNAME")
     pod_index = int(hostname.rsplit("-", 1)[-1])
+    if not node_ip or not hostname:
+        raise RuntimeError(f"Missing required environment variables: POD_IP={node_ip}, HOSTNAME={hostname}")
 
     # monitor configmap to generate dist-init-addr and node-rank
     is_ready = False
@@ -168,22 +170,20 @@ def launch_node(config):
         is_ready = True
 
     special_args = [
-        "--dist-init-addr",
-        dist_init_addr,
-        "--node-rank",
-        pod_index,
+        "--dist-init-addr", dist_init_addr,
+        "--node-rank", pod_index,
     ]
-    other_args = config["other_args"]
+    other_args = model_config["other_args"]
     for sa in special_args:
         other_args.append(sa)
 
-    for key, value in config["node_envs"].items():
+    for key, value in model_config["node_envs"].items():
         print(f"ENV_VAR {key}:{value}")
         os.environ[key] = value
 
     print(f"Starting node, {node_ip=} {other_args=}")
     return popen_launch_server(
-        config["model_path"],
+        model_config["model_path"],
         f"http://{node_ip}:{SERVICE_PORT}",
         timeout=LOCAL_TIMEOUT,
         other_args=[
@@ -191,22 +191,23 @@ def launch_node(config):
         ],
     )
 
-# launch p/d node
-def launch_pd_node(config):
-    print(f"launch_node start ......")
+# launch p/d seperation node
+def launch_pd_seperation_node(model_config):
+    print(f"Launch pd seperation node start ......")
     node_ip = os.getenv("POD_IP")
     hostname = os.getenv("HOSTNAME")
+    pod_index = int(hostname.rsplit("-", 1)[-1])
     if not node_ip or not hostname:
         raise RuntimeError(f"Missing required environment variables: POD_IP={node_ip}, HOSTNAME={hostname}")
 
-    pod_index = int(hostname.rsplit("-", 1)[-1])
     role = "prefill" if "prefill" in hostname else "decode"
+
     bootstrap_init_port = 8995
     master_prefill_ip = None
     master_decode_ip = None
 
-    is_prefill_instance_multi_node = True if "--node-rank" not in config["prefill_args"] else False
-    is_decode_instance_multi_node = True if "--node-rank" not in config["decode_args"] else False
+    is_prefill_instance_multi_node = True if "--node-rank" not in model_config["prefill_args"] else False
+    is_decode_instance_multi_node = True if "--node-rank" not in model_config["decode_args"] else False
 
     # monitor configmap ready
     is_ready = False
@@ -253,9 +254,9 @@ def launch_pd_node(config):
         dist_init_addr = f"{master_prefill_ip}:5000"
         print(f"Launching prefill node with dist_init_addr={dist_init_addr}")
 
-        set_environment_variables(config.get("prefill_envs"))
+        set_environment_variables(model_config.get("prefill_envs"))
 
-        prefill_args = config["prefill_args"]
+        prefill_args = model_config["prefill_args"]
         if is_prefill_instance_multi_node:
             print("No node-rank specified - all prefill nodes will form a single instance.")
             prefill_args.extend(
@@ -277,14 +278,14 @@ def launch_pd_node(config):
         dist_init_addr = f"{master_decode_ip}:5000"
         print(f"Launching decode node with dist_init_addr={dist_init_addr}")
 
-        set_environment_variables(config.get("decode_envs"))
+        set_environment_variables(model_config.get("decode_envs"))
 
-        decode_args = config["decode_args"]
+        decode_args = model_config["decode_args"]
         if is_decode_instance_multi_node:
             print("No node-rank specified - all decode nodes will form a single instance.")
             decode_args.extend([
-                    "--dist-init-addr", dist_init_addr,
-                    "--node-rank", str(pod_index),
+                "--node-rank", str(pod_index),
+                "--dist-init-addr", dist_init_addr,
             ])
         else:
             print("Node-rank specified - each decode node is an instance.")
@@ -295,7 +296,7 @@ def launch_pd_node(config):
 
     try:
         process = popen_launch_server(
-            config["model_path"],
+            model_config["model_path"],
             f"http://{node_ip}:{LOCAL_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
@@ -562,7 +563,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
 
     def run_throughput(self, run_cycles=2):
         sglang_thread = threading.Thread(
-            target=launch_node, args=(self.model_config,)
+            target=launch_pd_mix_node, args=(self.model_config,)
         )
         sglang_thread.start()
 
@@ -686,7 +687,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         else:
             # launch p/d node
             sglang_thread = threading.Thread(
-                target=launch_pd_node, args=(self.model_config,)
+                target=launch_pd_seperation_node, args=(self.model_config,)
             )
             sglang_thread.start()
             keep_alive_time = LOCAL_TIMEOUT * 2
