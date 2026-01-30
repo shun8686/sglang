@@ -3,7 +3,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST_BASE,
@@ -26,7 +26,7 @@ class TestEnableTokenizerMode(CustomTestCase):
     """
 
     def test_tokenzier_mode(self):
-        self.model_path = Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH
+        self.model_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
         self.base_url = DEFAULT_URL_FOR_TEST
         for i in ["slow", "auto"]:
             other_args = (

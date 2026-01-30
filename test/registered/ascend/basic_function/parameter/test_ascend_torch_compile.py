@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import Meta_Llama_3_1_8B_Instruct
+from sglang.test.ascend.test_ascend_utils import META_LLAMA_3_1_8B_INSTRUCT
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_MODEL_NAME_FOR_TEST,
@@ -30,7 +30,7 @@ class TestTorchCompile(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = Meta_Llama_3_1_8B_Instruct
+        cls.model = META_LLAMA_3_1_8B_INSTRUCT
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,

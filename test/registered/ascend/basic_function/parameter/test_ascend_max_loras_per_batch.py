@@ -4,7 +4,7 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -21,7 +21,7 @@ class TestLoraPaths(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --max-loras-per-batch
     """
-    
+
     @classmethod
     def setUpClass(cls):
         other_args = (
@@ -34,7 +34,7 @@ class TestLoraPaths(CustomTestCase):
             ]
         )
         cls.process = popen_launch_server(
-            Llama_3_2_1B_WEIGHTS_PATH,
+            LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
@@ -61,7 +61,7 @@ class TestLoraPaths(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        
+
         # Verify max_loras_per_batch parameter is correctly set in server info
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)

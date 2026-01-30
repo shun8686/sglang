@@ -6,7 +6,7 @@ from transformers import AutoModelForCausalLM, AutoTokenizer
 import sglang as sgl
 from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST, CustomTestCase
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -18,7 +18,7 @@ class TestHiddenState(CustomTestCase):
     """
     def test_return_hidden_states(self):
         prompts = ["Today is", "Today is a sunny day and I like"]
-        model_path = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+        model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         input_ids = tokenizer(prompts).input_ids
 
@@ -95,7 +95,7 @@ class TestHiddenState(CustomTestCase):
 
     def test_repeatedly_changes_hidden_states(self):
         prompts = ["Today is", "Today is a sunny day and I like"]
-        model_path = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+        model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         tokenizer = AutoTokenizer.from_pretrained(model_path)
         input_ids = tokenizer(prompts).input_ids
 

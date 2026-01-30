@@ -1,6 +1,6 @@
 import unittest
 
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -14,7 +14,7 @@ class TestLlama3211BVisionInstruct(TestVLMModels):
     [Test Target] LLM-Research/Llama-3.2-11B-Vision-Instruct
     """
 
-    model = Llama_3_2_11B_Vision_Instruct_WEIGHTS_PATH
+    model = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
     mmmu_accuracy = 0.2
     other_args = [
         "--trust-remote-code",

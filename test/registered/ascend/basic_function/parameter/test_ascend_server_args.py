@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from sglang.srt.server_args import PortArgs, prepare_server_args
 from sglang.test.test_utils import CustomTestCase
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Meta_Llama_3_1_8B_Instruct 
+from sglang.test.ascend.test_ascend_utils import META_LLAMA_3_1_8B_INSTRUCT
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
@@ -25,16 +25,16 @@ class TestPrepareServerArgs(CustomTestCase):
         server_args = prepare_server_args(
             [
                 "--model-path",
-                Meta_Llama_3_1_8B_Instruct
+                META_LLAMA_3_1_8B_INSTRUCT
                 "--json-model-override-args",
                 '{"rope_scaling": {"factor": 2.0, "rope_type": "linear"}}',
             ]
         )
-        
+
         # Verify model path is parsed correctly
-        expected_model_path = Meta_Llama_3_1_8B_Instruct
+        expected_model_path = META_LLAMA_3_1_8B_INSTRUCT
         self.assertEqual(server_args.model_path, expected_model_path)
-        
+
         # Verify JSON model override args are parsed correctly
         self.assertEqual(
             json.loads(server_args.json_model_override_args),
@@ -48,7 +48,7 @@ class TestPortArgs(unittest.TestCase):
     [Test Category] Parameter
     [Test Target] --port;--nccl-port;--enable-dp-attention;--nnodes;--dist-init-addr;--tokenizer-worker-num
     """
-    
+
     @patch("sglang.srt.server_args.is_port_available")
     @patch("sglang.srt.server_args.tempfile.NamedTemporaryFile")
     def test_init_new_standard_case(self, mock_temp_file, mock_is_port_available):
@@ -73,7 +73,7 @@ class TestPortArgs(unittest.TestCase):
         self.assertTrue(port_args.tokenizer_ipc_name.startswith("ipc://"))
         self.assertTrue(port_args.scheduler_input_ipc_name.startswith("ipc://"))
         self.assertTrue(port_args.detokenizer_ipc_name.startswith("ipc://"))
-        
+
         # Verify NCCL port is generated as integer
         self.assertIsInstance(port_args.nccl_port, int)
 

@@ -3,7 +3,7 @@ import unittest
 import requests
 
 from sglang.test.test_disaggregation_utils import TestDisaggregationBase
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -26,7 +26,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
     def setUpClass(cls):
         """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
         super().setUpClass()
-        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
         env = os.environ.copy()
 
         # Non blocking start servers
@@ -102,7 +102,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
         2. Validate inference correctness (France capital = Paris)
         3. Confirm disaggregation_decode_tp=2 in Prefill server info (parameter validation)
         """
-        
+
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
