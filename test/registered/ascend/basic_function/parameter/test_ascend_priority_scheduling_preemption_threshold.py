@@ -6,6 +6,7 @@ from typing import Any, List, Optional, Tuple
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -19,10 +20,15 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
-class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):    
+class TestPrioritySchedulingPreemptionThreshold(CustomTestCase): 
+    """Testcase: Verify the priority scheduling preemption threshold mechanism and execution order by controlling the priority and sequence of sending requests..
+
+    [Test Category] Parameter
+    [Test Target] --priority-scheduling-preemption-threshold;--enable-priority-scheduling;--max-running-requests;--max-queued-requests
+    """
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
       
         cls.stdout = open(STDOUT_FILENAME, "w")
@@ -33,9 +39,9 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=(
-                "--max-running-requests", "1",
+                "--max-running-requests", "1",  # Limit concurrent running requests to 1
                 "--max-queued-requests", "10",
-                "--enable-priority-scheduling",
+                "--enable-priority-scheduling", # Enable priority scheduling (required for preemption)
                 "--priority-scheduling-preemption-threshold", "5",
                 "--disable-cuda-graph",
                 "--attention-backend", "ascend",
@@ -60,6 +66,14 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
             os.remove(STDERR_FILENAME)
     
     def test_preemption_threshold_execution_order(self):
+        """Test core preemption threshold logic (priority difference ≥ 5 triggers preemption / execution priority)
+        
+        Test Scenario:
+        1. Request A (priority=2, long-running: 2000 tokens) - starts first, occupies running slot
+        2. After 0.5s, Request C (priority=10, short: 100 tokens) - priority difference (10-2=8 ≥5) → preempts/executes first
+        3. After another 0.5s, Request B (priority=5, short: 100 tokens) - priority difference (5-2=3 <5) → no preemption, executes after C
+        Expected Execution Order: C → B → A (Expected Latency: C < B < A)
+        """
         request_a = {
             "priority": 2,
             "sampling_params": {"max_new_tokens": 2000}  
@@ -115,6 +129,14 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
             f"expected C<B<A，actually：C={latency_c}, A={latency_a}, B={latency_b}"
 
     def test_preemption_threshold_execution_order_exa(self):
+        """Test extended preemption threshold logic (same low priority → FIFO execution order)
+        
+        Test Scenario:
+        1. Request A (priority=2, long-running: 2000 tokens) - starts first, occupies running slot
+        2. After 0.5s, Request C (priority=10, short: 100 tokens) - priority difference ≥5 → executes first
+        3. After another 0.5s, Request B (priority=2, long-running: 2000 tokens) - same priority as A → FIFO order (A before B)
+        Expected Execution Order: C → A → B (Expected Latency: C < A < B)
+        """
         request_a = {
             "priority": 2,
             "sampling_params": {"max_new_tokens": 2000} 
@@ -173,6 +195,7 @@ def _verify_generate_responses(
     expected_code_and_error: Tuple[int, Any],
     e2e_latencies: List[Optional[float]],
 ):
+    # Verify generate request responses match expected status codes and extract valid e2e latencies (fix syntax/logic errors)
     e2e_latencies.clear() 
     for got, expected in zip(responses, expected_code_and_error):
         got_status, got_json = got
@@ -193,6 +216,7 @@ def _verify_generate_responses(
 def _verify_running_queued_requests(
     max_running_requests: int, max_queued_requests: int
 ):
+    # Verify server logs do not exceed max running/queued requests limits during test execution (Ascend log compatible)
     rr_pattern = re.compile(r"#running-req:\s*(\d+)")
     qr_pattern = re.compile(r"#queue-req:\s*(\d+)")
     

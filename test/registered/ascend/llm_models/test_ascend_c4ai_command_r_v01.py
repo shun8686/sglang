@@ -9,7 +9,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestC4AI(GSM8KAscendMixin, CustomTestCase):
-    """Testcase:Test the accuracy of the CohereForAI/c4ai-command-r-v01 model using the GSM8K dataset.
+    """Testcase: Verify that the inference accuracy of the CohereForAI/c4ai-command-r-v01 model on the GSM8K dataset is no less than 0.55.
 
     [Test Category] Model
     [Test Target] CohereForAI/c4ai-command-r-v01

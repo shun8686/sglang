@@ -10,7 +10,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -28,7 +28,7 @@ class TestNoChunkedPrefill(CustomTestCase):
 
     def test_no_chunked_prefill_without_radix_cache(self):
         res = run_bench_serving(
-            model=Llama_3_1_8B_Instruct_WEIGHTS_PATH,
+            model=LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH,
             num_prompts=10,
             request_rate=float("inf"),
             other_server_args=["--disable-radix-cache", "--chunked-prefill-size", "-1"],

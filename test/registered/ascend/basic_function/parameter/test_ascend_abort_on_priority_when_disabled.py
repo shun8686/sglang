@@ -4,8 +4,8 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -16,10 +16,10 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestAbortOnPriority(CustomTestCase):
-    """Testcase: Verify the effectiveness of --abort-on-priority-when-disabled parameter with CUDA Graph disabled.
+    """Testcase: Verify the effectiveness of --abort-on-priority-when-disabled parameter while sending request.
 
     [Test Category] Parameter
-    [Test Target] --abort-on-priority-when-disabled;--disable-cuda-graph;--attention-backend
+    [Test Target] --abort-on-priority-when-disabled
     """
 
     @classmethod
@@ -34,9 +34,7 @@ class TestAbortOnPriority(CustomTestCase):
         )
 
         cls.process = popen_launch_server(
-            (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
-            ),
+            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
@@ -59,10 +57,11 @@ class TestAbortOnPriority(CustomTestCase):
             },
         )
         print(response.text)
+        # Verify expected 500 status code (priority-based abort triggered)
         self.assertEqual(
             response.status_code, 500, "The request status code is not 500."
         )
-      
+
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
         print(response.json())
         self.assertEqual(

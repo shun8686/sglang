@@ -8,7 +8,7 @@ from typing import Dict
 import requests
 from types import SimpleNamespace
 from  sglang.test.few_shot_gsm8k import run_eval
-from sglang.test.ascend.test_ascend_utils import Llama_3_1_8B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.bench_serving import get_tokenizer
 from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
@@ -32,7 +32,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
 
-        cls.model = Llama_3_1_8B_Instruct_WEIGHTS_PATH
+        cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 
         cls.tokenizer = get_tokenizer(cls.model)
         cls.temp_dir = tempfile.mkdtemp()
