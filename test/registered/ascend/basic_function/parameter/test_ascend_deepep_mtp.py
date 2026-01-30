@@ -5,17 +5,15 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     popen_launch_server,
-    run_bench_offline_throughput,
 )
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8": {
+    DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH: {
         "accuracy": 0.95,
         "latency": 1000,
         "output_throughput": 5,
@@ -24,10 +22,19 @@ TEST_MODEL_MATRIX = {
 
 
 class TestAscendDeepEP(CustomTestCase):
+    """
+    Testcase：Verify the correctness and performance of DeepSeek Model when the MTP technology and deepep are used
+
+    [Test Category] Parameter
+    [Test Target] use MTP by test model DeepSeek R1, --scheduler-recv-interval 10, --moe-a2a-backend deepep,
+    --deepep-mode auto
+    """
 
     @classmethod
     def setUpClass(cls):
-        cls.models = TEST_MODEL_MATRIX.keys()
+        cls.model = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+        cls.accuracy = 0.95
+
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
 
@@ -70,41 +77,42 @@ class TestAscendDeepEP(CustomTestCase):
             "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
             "SGLANG_NPU_USE_MLAPO": "1",
             "SGLANG_NPU_USE_EINSUM_MM": "1",
+            "SLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         }
         os.environ.update(cls.extra_envs)
 
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=1500,
+            other_args=[
+                *cls.common_args,
+            ],
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
     def test_a_gsm8k(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
+        print(f"##=== Testing accuracy: {model} ===##")
 
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=1500,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
 
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=200,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
-
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
+        metrics = run_eval_few_shot_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            self.accuracy,
+        )
 
 
 if __name__ == "__main__":
