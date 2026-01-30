@@ -8,7 +8,6 @@ from typing import Any, List, Optional, Tuple
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     STDERR_FILENAME,
@@ -21,13 +20,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 class TestLowPriorityFirstScheduling(CustomTestCase):
-    """Test class for low-priority-first scheduling mechanism on Ascend backend.
-    
-    Core Purpose:
-    - Verify scheduling order: lower priority values execute first
-    - Validate abortion logic: high-priority requests abort lower-priority ones in queue
-    - Ensure max running/queued requests limits are enforced
-    - Test Ascend backend compatibility with priority scheduling
+    """Testcase: Verify the low-priority-first scheduling mechanism and its abortion logic by sending requests with different priorities and observing whether the behavior meets expectations, .
+
+    [Test Category] Parameter
+    [Test Target] --enable-priority-scheduling;--schedule-low-priority-values-first;--max-running-requests;--max-queued-requests
     """
   
     @classmethod
@@ -38,14 +34,15 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
         cls.stdout = open(STDOUT_FILENAME, "w")
         cls.stderr = open(STDERR_FILENAME, "w")
 
+
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=(
-                "--max-running-requests", "1",
-                "--max-queued-requests", "3", 
-                "--enable-priority-scheduling",
+                "--max-running-requests", "1", # Limit concurrent running requests to 1 (enforce queueing)
+                "--max-queued-requests", "3",  # Limit maximum queued requests to 3 (enforce request abortion when queue is full)
+                "--enable-priority-scheduling", # Enable priority-based request scheduling (prerequisite for priority features)
                 "--schedule-low-priority-values-first",
                 "--disable-cuda-graph",
                 "--attention-backend",
@@ -66,7 +63,14 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
             os.remove(STDERR_FILENAME)
 
     def test_low_priority_value_first_ordering(self):
-      """Test core scheduling logic: lower priority values execute first."""
+        """Test core scheduling logic: lower priority values execute first
+        
+        Test Scenario:
+        - Send 4 concurrent requests with priorities [0, 4, 2, 1]
+        - Expected execution order: 0 (first) → 1 → 2 → 4 (last)
+        - Validate via e2e latencies (earlier execution = lower latency value)
+        """
+
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -90,7 +94,15 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
         assert e2e_latencies[0] < e2e_latencies[3] < e2e_latencies[2] < e2e_latencies[1]
 
     def test_low_priority_first_abortion_logic(self):
-      """Test abortion logic: high-priority requests abort lower-priority queued requests."""
+        """Test abortion logic: high-priority values abort lower-priority queued requests (reverse of execution order)
+        
+        Test Scenario:
+        - Send 7 concurrent requests with priorities [10, 9, 8, 7, 6, 5, 0]
+        - --max-running-requests=1, --max-queued-requests=3: Only 1 running + 3 queued = 4 requests can be processed
+        - High priority values (for abortion: 10 > 9 > 8 > ...) → lower priority values in queue are aborted
+        - Expected: Priority 10 (running), 0/5/6 (queued, lower values = higher execution priority), 7/8/9 (aborted)
+        """
+
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -125,6 +137,7 @@ def _verify_genereate_responses(
     expected_code_and_error_message: Tuple[int, Any],
     e2e_latencies: List[Optional[float]],
 ):
+    # Verify generate request responses match expected status codes and error messages
     for got, expected in zip(responses, expected_code_and_error_message):
         got_status, got_json = got
         expected_status, expected_err_msg = expected
@@ -149,6 +162,7 @@ def _verify_genereate_responses(
 def _verify_max_running_requests_and_max_queued_request_validation(
     max_running_requests: int, max_queued_requests: int
 ):
+    # Verify server logs do not exceed max running/queued requests limits during test execution
     rr_pattern = re.compile(r"#running-req:\s*(\d+)")
     qr_pattern = re.compile(r"#queue-req:\s*(\d+)")
 
