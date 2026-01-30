@@ -1,9 +1,9 @@
 import unittest
 
 import openai
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_CODER_1_3B_BASE_WEIGHTS_PATH
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -11,24 +11,21 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
+from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestFimCompletion(CustomTestCase):
-    other_args = [
-        "--completion-template",
-        "deepseek_coder",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--mem-fraction-static",
-        0.8,
-    ]
+    """Testcase：Verify set --completion-template = deepseek_coder, the inference request is successfully processed.
 
+       [Test Category] Parameter
+       [Test Target] --completion-template
+       """
+    model = DEEPSEEK_CODER_1_3B_BASE_WEIGHTS_PATH
+    other_args = ["--completion-template", "deepseek_coder", "--attention-backend", "ascend", "--disable-cuda-graph", "--mem-fraction-static", 0.8]
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/deepseek-ai/deepseek-coder-1.3b-base"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
         cls.process = popen_launch_server(
@@ -81,15 +78,7 @@ class TestFimCompletion(CustomTestCase):
 
 
 class TestFimCompletionJson(TestFimCompletion):
-    other_args = [
-        "--completion-template",
-        "/__w/sglang/sglang/test/registered/ascend/basic_function/deepseek_coder.json",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--mem-fraction-static",
-        0.8,
-    ]
+    other_args = ["--completion-template", "./deepseek_coder.json", "--attention-backend", "ascend", "--disable-cuda-graph", "--mem-fraction-static", 0.8]
 
 
 if __name__ == "__main__":
