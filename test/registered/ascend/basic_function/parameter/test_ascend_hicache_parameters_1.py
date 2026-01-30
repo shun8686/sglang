@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
+# HiCache core configuration combinations (cover all key parameters)
 HICACHE_CONFIGS = [
     ("lru", "direct", "layer_first", "lru_direct_layer_first"),
     ("lfu", "kernel", "page_first", "lfu_kernel_page_first"),
@@ -34,6 +34,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class BaseQwenHiCacheTest(CustomTestCase):
+    """Testcase: Verify Qwen3-32B accuracy on GSM8K(>= 0.86) with different combinations of HICACHE_CONFIGS.
+
+        [Test Category] Parameter
+        [Test Target] --enable-hierarchical-cache;--radix-eviction-policy;--hicache-io-backend;--hicache-mem-layout
+    """
     accuracy = 0.86
     model_name = QWEN3_32B_WEIGHTS_PATH
 
@@ -70,6 +75,7 @@ class BaseQwenHiCacheTest(CustomTestCase):
             self.accuracy,
         )
 
+# Dynamically generate a test class for each HiCache configuration
 for eviction_policy, io_backend, mem_layout, scenario in HICACHE_CONFIGS:
     class TestQwenHiCache(BaseQwenHiCacheTest):
         @classmethod
