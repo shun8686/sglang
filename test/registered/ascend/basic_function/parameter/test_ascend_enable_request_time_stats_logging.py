@@ -1,6 +1,7 @@
 import unittest
 import requests
 import os
+import sys
 import time
 from datetime import datetime
 
@@ -13,14 +14,25 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-# 定义日志转储文件路径（重定向直接写入该文件）
+# 定义日志转储文件路径
 LOG_DUMP_FILE = f"server_request_stats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        # 基础参数（原有逻辑不变）
-        base_other_args = (
+        # 1. 保存原始stdout和stderr（用于后续恢复）
+        cls.original_stdout = sys.stdout
+        cls.original_stderr = sys.stderr
+
+        # 2. 打开日志文件，用于重定向输出（a+模式：可读可写，追加创建）
+        cls.log_file = open(LOG_DUMP_FILE, "a+", encoding="utf-8", buffering=1)  # buffering=1：行缓冲，实时写入
+
+        # 3. 关键：临时重定向全局stdout和stderr到日志文件
+        sys.stdout = cls.log_file
+        sys.stderr = cls.log_file
+
+        # 4. 启动服务器（完全不修改popen_launch_server，直接调用原有逻辑）
+        other_args = (
             [
                 "--attention-backend",
                 "ascend",
@@ -31,16 +43,6 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             else ["--enable-request-time-stats-logging"]
         )
 
-        # 关键修改1：添加命令行重定向，将所有输出写入日志文件（Linux/Mac 语法）
-        # 说明：> 表示将标准输出(stdout)写入文件（覆盖原有内容）
-        # 说明：2>&1 表示将标准错误(stderr)重定向到标准输出，最终一起写入文件
-        # Windows 环境需改为：> {LOG_DUMP_FILE} 2> {LOG_DUMP_FILE}
-        redirect_args = [f"> {LOG_DUMP_FILE} 2>&1"]
-
-        # 合并基础参数和重定向参数（注意：部分启动脚本需支持命令行拼接，此处直接传入即可）
-        cls.other_args = base_other_args + redirect_args
-
-        # 启动服务器（无需修改popen_launch_server，重定向已包含在命令参数中）
         cls.process = popen_launch_server(
             (
                 "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
@@ -49,25 +51,33 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             ),
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
+            other_args=other_args,
         )
 
-        # 给服务器预留启动时间，确保日志文件正常创建
+        # 5. 立即恢复原始stdout和stderr，不影响测试用例后续输出
+        sys.stdout = cls.original_stdout
+        sys.stderr = cls.original_stderr
+
+        # 6. 给服务器预留启动时间，确保日志文件正常写入内容
         time.sleep(DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH // 2)
 
     @classmethod
     def tearDownClass(cls):
-        # 终止服务器进程树
+        # 1. 终止服务器进程树
         kill_process_tree(cls.process.pid)
-        # 日志文件已通过重定向自动生成，无需额外处理，直接提示路径即可
-        print(f"服务器日志已通过命令行重定向转储到：{os.path.abspath(LOG_DUMP_FILE)}")
+
+        # 2. 关闭日志文件句柄，确保所有缓冲内容写入文件
+        cls.log_file.close()
+
+        # 3. 提示日志文件路径
+        print(f"服务器日志已完整转储到：{os.path.abspath(LOG_DUMP_FILE)}")
 
     def read_log_file(self):
-        """读取日志文件内容，返回完整字符串"""
-        # 确保日志文件存在（避免服务器启动失败导致文件缺失）
+        """读取日志文件完整内容，返回字符串"""
+        # 以只读模式打开，避免覆盖已有内容
         if not os.path.exists(LOG_DUMP_FILE):
             return ""
-        # 以utf-8编码读取文件，兼容中文日志（若有）
+        
         with open(LOG_DUMP_FILE, "r", encoding="utf-8", errors="ignore") as f:
             return f.read()
 
@@ -87,13 +97,13 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
         # 断言请求发送成功（先确保请求正常，再判断日志）
         self.assertEqual(response.status_code, 200, "请求生成接口失败")
 
-        # 2. 等待日志写入（服务端输出日志可能有延迟，避免读取不完整）
+        # 2. 等待日志写入（解决服务端输出缓冲延迟问题）
         time.sleep(3)
 
         # 3. 读取完整日志文件内容
         server_logs = self.read_log_file()
 
-        # 4. 关键：判断日志中是否包含 Req Time Stats
+        # 4. 断言日志中包含 Req Time Stats 关键字
         target_keyword = "Req Time Stats"
         self.assertIn(
             target_keyword,
