@@ -36,7 +36,6 @@ sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
-export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
 export SGLANG_SET_CPU_AFFINITY=1
 
 unset https_proxy
@@ -45,19 +44,8 @@ unset HTTPS_PROXY
 unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
-cann_version=$(cat /usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info | grep "^version=")
-echo "CANN: ${cann_version}"
-if [[ ${cann_version} == version=8.3.* ]];then
-    echo "Set env for CANN 8.3"
-    source /usr/local/Ascend/ascend-toolkit/set_env.sh
-    source /usr/local/Ascend/nnal/atb/set_env.sh
-    source /usr/local/Ascend/ascend-toolkit/latest/opp/vendors/customize/bin/set_env.bash
-    source /usr/local/Ascend/8.5.0/bisheng_toolkit/set_env.sh
-else
-    echo "Set env for CANN 8.5"
-    source /usr/local/Ascend/cann/set_env.sh
-    source /usr/local/Ascend/nnal/atb/set_env.sh
-fi
+. /usr/local/Ascend/cann/set_env.sh
+. /usr/local/Ascend/nnal/atb/set_env.sh
 
 echo "Running test case ${test_case}"
 python3 -u ${test_case}
