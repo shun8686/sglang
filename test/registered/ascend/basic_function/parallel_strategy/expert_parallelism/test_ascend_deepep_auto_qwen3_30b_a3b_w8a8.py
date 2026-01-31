@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_30B_A3B_W8A8_MODEL_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
