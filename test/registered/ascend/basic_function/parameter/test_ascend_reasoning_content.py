@@ -26,10 +26,17 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 
-
 MODEL_PATH = DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
 
+
 class TestReasoningContentAPI(CustomTestCase):
+    """
+    Testcase：Verify the correctness of reasoning content API under streaming/non-streaming, and stream_reasoning
+    configurations
+
+    [Test Category] Parameter
+    [Test Target] --reasoning-parser, separate_reasoning, stream_reasoning
+    """
     @classmethod
     def setUpClass(cls):
         cls.model = MODEL_PATH
