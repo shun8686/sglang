@@ -26,6 +26,7 @@ TEST_MODEL_MATRIX = {
     },
 }
 
+processid = 0
 
 class TestAscendTp1Bf16(CustomTestCase):
     """
@@ -50,15 +51,23 @@ class TestAscendTp1Bf16(CustomTestCase):
             "ascend",
         ]
         cls.process = None
+        print("setUpClass")
+        print(f"{cls.process=}")
+        prinrt(f"{processid=}")
 
     @classmethod
     def tearDownClass(cls):
-        print(cls.process)
+        print("tearDownClass")
+        print(f"{cls.process=}")
+        prinrt(f"{processid=}")
         # kill_process_tree(cls.process.pid)
 
     def test_a_gsm8k(self):
+        print("test_a_gsm8k")
         self.process = 1
-        print(self.process)
+        processid = 1
+        print(f"{self.process=}")
+        prinrt(f"{processid=}")
         # for model in self.models:
         #     with self.subTest(model=model):
         #         print(f"##=== Testing accuracy: {model} ===##")
@@ -92,8 +101,11 @@ class TestAscendTp1Bf16(CustomTestCase):
         #             kill_process_tree(process.pid)
 
     def test_b_throughput(self):
+        print("test_b_throughput")
         self.process = 2
-        print(self.process)
+        processid = 2
+        print(f"{self.process=}")
+        prinrt(f"{processid=}")
         # for model in self.models:
         #     with self.subTest(model=model):
         #         print(f"##=== Testing throughput: {model} ===##")
