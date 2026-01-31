@@ -14,19 +14,25 @@ import unittest
 import openai
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_REASONING_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
+
+
+MODEL_PATH = DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
 
 class TestReasoningContentAPI(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEFAULT_REASONING_MODEL_NAME_FOR_TEST
+        cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-1234"
         cls.process = popen_launch_server(
@@ -183,7 +189,7 @@ class TestReasoningContentAPI(CustomTestCase):
 class TestReasoningContentWithoutParser(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEFAULT_REASONING_MODEL_NAME_FOR_TEST
+        cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-1234"
         cls.process = popen_launch_server(
