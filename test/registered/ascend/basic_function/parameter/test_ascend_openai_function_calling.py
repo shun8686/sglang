@@ -18,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestOpenAIServerFunctionCalling(CustomTestCase):
-     """Testcase：Verify the correctness of full-scenario OpenAI-style function calling with llama3 parser for Llama-3.2-1B-Instruct model.
+    """Testcase：Verify the correctness of full-scenario OpenAI-style function calling with llama3 parser for Llama-3.2-1B-Instruct model.
         Cover: Single/multi-turn calls, streaming/non-streaming returns, multi-parameter verification of tool_choice, and JSON parsing validity of function parameters.
 
     [Test Category] Parameter
