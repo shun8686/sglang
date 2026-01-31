@@ -56,8 +56,8 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         ]
 
         cls.process = popen_launch_server(
-            self.model_path,
-            self.base_url,
+            cls.model_path,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
