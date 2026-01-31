@@ -64,10 +64,11 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+        kill_process_tree(cls.process[0].pid)
 
 
     def test_a_gsm8k(self):
+
         for model in self.models:
             args = SimpleNamespace(
                 num_shots=5,
