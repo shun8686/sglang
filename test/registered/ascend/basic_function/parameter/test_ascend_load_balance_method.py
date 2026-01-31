@@ -17,8 +17,10 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
+modes = ["round_robin", "queue", "minimum_tokens"]
 
-class TestDPAttentionMinimumTokenLoadBalance(CustomTestCase):
+
+class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     """
     Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, queue and minimum_tokens
 
@@ -26,61 +28,64 @@ class TestDPAttentionMinimumTokenLoadBalance(CustomTestCase):
     [Test Target] --load-balance-method round_robin/queue/minimum_tokens
     """
 
+    mode = "round_robin"
+
     @classmethod
     def setUpClass(cls):
         cls.model = DeepSeek_R1_0528_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.modes = ["round_robin", "queue", "minimum_tokens"]
-        cls.process = [None]
+        other_args = [
+            "--trust-remote-code",
+            "--tp",
+            "16",
+            "--enable-dp-attention",
+            "--dp",
+            "1",
+            "--enable-torch-compile",
+            "--torch-compile-max-bs",
+            "2",
+            "--load-balance-method",
+            cls.mode,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--quantization",
+            "modelslim",
+            "--mem-fraction-static",
+            "0.75",
+        ]
+
+        cls.process = popen_launch_server(
+            self.model_path,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process[0].pid)
+        kill_process_tree(cls.process.pid)
 
     def test_mgsm_en(self):
-        for mode in self.modes:
-            other_args = [
-                "--trust-remote-code",
-                "--tp",
-                "16",
-                "--enable-dp-attention",
-                "--dp",
-                "1",
-                "--enable-torch-compile",
-                "--torch-compile-max-bs",
-                "2",
-                "--load-balance-method",
-                mode,
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--quantization",
-                "modelslim",
-                "--mem-fraction-static",
-                "0.75",
-            ]
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model,
+            eval_name="mgsm_en",
+            num_examples=10,
+            num_threads=1024,
+        )
 
-            if (self.process[0] is not None):
-                kill_process_tree(self.process[0].pid)
+        metrics = run_eval(args)
+        print(f"{metrics=}")
+        self.assertGreater(metrics["score"], 0.5)
 
-            self.process[0] = popen_launch_server(
-                self.model_path,
-                self.base_url,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=other_args,
-            )
 
-            args = SimpleNamespace(
-                base_url=self.base_url,
-                model=self.model,
-                eval_name="mgsm_en",
-                num_examples=10,
-                num_threads=1024,
-            )
+class _TestDPAttentionQueueLoadBalance(TestDPAttentionRoundBinLoadBalance):
+    mode = "queue"
 
-            metrics = run_eval(args)
-            print(f"{metrics=}")
-            self.assertGreater(metrics["score"], 0.5)
+
+class _TestDPAttentionMinimumTokenLoadBalance(TestDPAttentionRoundBinLoadBalance):
+    mode = "minimum_tokens"
 
 
 if __name__ == "__main__":
