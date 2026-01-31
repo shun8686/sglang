@@ -21,7 +21,7 @@ class TestEnableTokenizerMode(CustomTestCase):
     Testcase：Verify that inference requests can be successfully processed after the --served-model-name parameter is set.
 
     [Test Category] Parameter
-    [Test Target] --served-model-name module_name
+    [Test Target] --served-model-name model_name
     """
 
     def test_tokenzier_mode(self):
