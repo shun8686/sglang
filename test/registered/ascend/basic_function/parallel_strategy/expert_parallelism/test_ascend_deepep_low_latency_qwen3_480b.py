@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_CODER_480B_A35B_W8A8_MODEL_PATH, NIC_NAME
+from sglang.test.ascend.test_ascend_utils import QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -14,10 +14,22 @@ from sglang.test.test_utils import (
 )
 
 
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
+
 class TestDeepEpQwen(CustomTestCase):
+    """
+    Testcase:Test the Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot model with DeepEP's low_latency mode enabled,
+    and verify that there is no drop in accuracy compared to when DeepEP is not enabled.
+
+    [Test Category] Parameter
+    [Test Target] --moe-a2a-backend deepep, --deepep-mode low_latency
+    """
+
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_CODER_480B_A35B_W8A8_MODEL_PATH
+        cls.model = QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -44,7 +56,6 @@ class TestDeepEpQwen(CustomTestCase):
                 "--enable-dp-lm-head",
                 "--mem-fraction-static", 0.7,
                 "--cuda-graph-bs", 16, 20, 24,
-                # "--disable-cuda-graph",
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -53,7 +64,6 @@ class TestDeepEpQwen(CustomTestCase):
                 "HCCL_SOCKET_IFNAME": NIC_NAME,
                 "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
-                # "ASCEND_LAUNCH_BLOCKING": "1",
                 **os.environ,
             },
         )
