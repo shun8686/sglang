@@ -1,7 +1,5 @@
-import os
 import subprocess
 import unittest
-
 import requests
 from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
@@ -14,6 +12,7 @@ from sglang.test.test_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 def run_command(cmd, shell=True):
     try:
@@ -33,6 +32,7 @@ class TestDownloadDir(CustomTestCase):
        [Test Target] --download-dir
        """
     model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+
     @classmethod
     def setUpClass(cls):
         run_command("mkdir ./weight")
