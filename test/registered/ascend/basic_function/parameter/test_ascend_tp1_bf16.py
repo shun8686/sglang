@@ -4,7 +4,7 @@ from sglang.test.ascend.test_ascend_gsm8k_and_throughput import TestAscendGsm8kA
 from sglang.test.ascend.test_ascend_utils import QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAscendTp1Bf16(TestAscendGsm8kAndThroughput):
