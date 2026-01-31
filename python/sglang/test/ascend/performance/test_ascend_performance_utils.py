@@ -24,6 +24,7 @@ QWEN3_480B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480
 QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
 
 def get_nic_name():
+    """ Return the network interface name corresponding to IP addresses starting with 172. or 192. """
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
             if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
@@ -31,10 +32,12 @@ def get_nic_name():
                 return nic
     return None
 
-NIC = get_nic_name()
-NIC_NAME = "lo" if NIC is None else NIC
+nic = get_nic_name()
+# The network interface name used to set the environment variable HCCL_SOCKET_IFNAME and GLOO_SOCKET_IFNAME
+NIC_NAME = "lo" if nic is None else nic
 
 def run_command(cmd, shell=True):
+    """Execute shell command."""
     try:
         result = subprocess.run(
             cmd, shell=shell, capture_output=True, text=True, check=False
@@ -47,6 +50,11 @@ def run_command(cmd, shell=True):
 def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_name=None, request_rate=None,
                       max_concurrency=None, num_prompts=None, input_len=None, output_len=None, random_range_ratio=1,
                       dataset_path=None):
+    """
+        Usage: Execute performance test by bench_serving tool and write metrics to a file.
+        Parameters: Refer to the bench_serving guide documentation.
+        Return: Metrics dictionary.
+    """
     cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
                 "--model", model_path, "--backend", backend]
 
@@ -67,6 +75,7 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
     if random_range_ratio:
         cmd_args.extend(["--random-range-ratio", str(random_range_ratio)])
 
+    # Write component version information and metrics to file
     result_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not result_file else result_file
     print(f"The metrics result file: {result_file}")
@@ -74,12 +83,13 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
     cann_info="/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
     run_command(f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}")
 
+    # Run bench_serving
     command = " " .join(cmd_args)
     print(f"Command: {command}")
-
     metrics = run_command(f"{command} | tee -a {result_file}")
     print(f"metrics is {metrics}")
 
+    # Extracting key performance indicator data
     mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
     mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
     total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
@@ -91,6 +101,7 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
     }
 
 class TestPerformanceTestCaseBase(CustomTestCase):
+    """ Performance test base class. """
     model = None
     backend = "sglang"
     dataset_name = None
@@ -111,6 +122,8 @@ class TestPerformanceTestCaseBase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
+
+        # Set environment variables for sglang server
         if cls.envs:
             for key, value in cls.envs.items():
                 print(f"ENV_VAR_CASE {key}:{value}")
@@ -119,6 +132,7 @@ class TestPerformanceTestCaseBase(CustomTestCase):
             print(f"ENV_VAR_OTHER {key}:{value}")
         env.update(cls.envs)
 
+        # Start the sglang server
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -129,9 +143,15 @@ class TestPerformanceTestCaseBase(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        # Stop the sglang server
         kill_process_tree(cls.process.pid)
 
     def run_throughput(self, run_cycles=2):
+        """
+            Usage: Run throughput test by benchmark tool.
+            Parameters:
+                run_cycles: Number of times to run throughput test, and get the last result.
+        """
         _, host, port = self.base_url.split(":")
         host = host[2:]
         bench_params = {

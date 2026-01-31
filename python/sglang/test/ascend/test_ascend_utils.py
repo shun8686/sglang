@@ -16,9 +16,11 @@ LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH = os.path.join(MODEL_WEIGHT
 
 META_LLAMA_3_1_8B_INSTRUCT = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Meta-Llama-3.1-8B-Instruct")
 
+DEEPSEEK_R1_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-R1-W8A8")
 DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-R1-0528-W8A8")
 DEEPSEEK_CODER_1_3B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base")
 DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8")
+DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")
 
 QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct")
 QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2-0.5B-Instruct")
@@ -42,6 +44,9 @@ KIMI_K2_THINKING_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Kimi/Kimi-K2-Th
 LING_LITE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "inclusionAI/Ling-lite")
 LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
                                                            "meta-llama/Llama-4-Scout-17B-16E-Instruct")
+LLAMA_4_MAVERICK_17B_128E_INSTRUCT_FP8 = os.path.join(MODEL_WEIGHTS_DIR,
+                                                           "LLM-Research/Llama-4-Maverick-17B-128E-Instruct-FP8")
+
 LLAMA_2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-2-7B")
 MIMO_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-7B-RL")
 MINICPM3_4B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "OpenBMB/MiniCPM3-4B")
@@ -56,6 +61,7 @@ QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
                                                                        "Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot")
 QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-Next-80B-A3B-Instruct")
+QWEN3_NEXT_80B_A3B_INSTRUCT_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-Next-80B-A3B-Instruct-W8A8")
 QWQ_32B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/QWQ-32B-W8A8")
 SMOLLM_1_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "HuggingFaceTB/SmolLM-1.7B")
 STABLELM_2_1_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "stabilityai/stablelm-2-1_6b")

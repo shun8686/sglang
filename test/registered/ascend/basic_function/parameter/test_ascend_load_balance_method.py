@@ -17,6 +17,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
+
 class TestDPAttentionMinimumTokenLoadBalance(CustomTestCase):
     """
     Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, queue and minimum_tokens
@@ -30,10 +31,11 @@ class TestDPAttentionMinimumTokenLoadBalance(CustomTestCase):
         cls.model = DeepSeek_R1_0528_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.modes = ["round_robin", "queue", "minimum_tokens"]
+        cls.process = [None]
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+        kill_process_tree(cls.process[0].pid)
 
     def test_mgsm_en(self):
         for mode in self.modes:
@@ -58,28 +60,27 @@ class TestDPAttentionMinimumTokenLoadBalance(CustomTestCase):
                 "0.75",
             ]
 
-            process = popen_launch_server(
+            if (self.process[0] is not None):
+                kill_process_tree(self.process[0].pid)
+
+            self.process[0] = popen_launch_server(
                 self.model_path,
                 self.base_url,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=other_args,
             )
 
-            try:
-                args = SimpleNamespace(
-                    base_url=self.base_url,
-                    model=self.model,
-                    eval_name="mgsm_en",
-                    num_examples=10,
-                    num_threads=1024,
-                )
+            args = SimpleNamespace(
+                base_url=self.base_url,
+                model=self.model,
+                eval_name="mgsm_en",
+                num_examples=10,
+                num_threads=1024,
+            )
 
-                metrics = run_eval(args)
-                print(f"{metrics=}")
-                self.assertGreater(metrics["score"], 0.5)
-            finally:
-                kill_process_tree(process.pid)
-
+            metrics = run_eval(args)
+            print(f"{metrics=}")
+            self.assertGreater(metrics["score"], 0.5)
 
 
 if __name__ == "__main__":

@@ -29,10 +29,11 @@ TEST_MODEL_MATRIX = {
 
 class TestAscendGraphTp1Bf16(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is enabled
+    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when cuda graph mode is enabled and
+    tp size is 1
 
     [Test Category] Parameter
-    [Test Target] Not set --disable-cuda-graph
+    [Test Target] enable cuda graph mode (default setting), --tp-size 1 (default setting)
     """
 
     @classmethod
@@ -63,10 +64,11 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+        kill_process_tree(cls.process[0].pid)
 
 
     def test_a_gsm8k(self):
+
         for model in self.models:
             args = SimpleNamespace(
                 num_shots=5,
