@@ -64,6 +64,12 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             "--attention-backend", "ascend",
             "--disable-cuda-graph",
             "--enable-request-time-stats-logging",
+            # 1. 开启请求日志总开关（必须添加，解决日志为空的核心）
+            "--log-requests",
+            # 2. 开启请求时间统计（原有配置，保留）
+            "--enable-request-time-stats-logging",
+            # 3. 可选：指定日志详细级别（使用默认 2 也可，显式配置更清晰）
+            "--log-requests-level", "2",
             "--log-requests-target", str(REQUEST_LOG_DIR)  # 单个目录目标，确保日志落地
         ]
 
