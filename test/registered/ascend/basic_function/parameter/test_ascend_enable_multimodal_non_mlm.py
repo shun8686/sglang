@@ -1,13 +1,10 @@
 import unittest
 from types import SimpleNamespace
-
 import requests
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -15,20 +12,25 @@ from sglang.test.test_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=800, suite="nightly-1-npu-a3", nightly=True)  # 评估两次，耗时翻倍
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMultimodalNonMlm(CustomTestCase):
-    """Testcase：Verify --enable-multimodal parameter, the mmlu accuracy of enable is not less than disable.
+    """Testcase：Verify set --enable-multimodal parameter, the mmlu accuracy greaterequal not set --enable-multimodal.
 
         [Test Category] Parameter
         [Test Target] --enable-multimodal
         """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    # 实例变量，存储两次评估的分数
+    # 修复1：定义为类变量（所有实例共享），用于跨测试方法传递分数
     score_with_param = None
     score_without_param = None
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # 修复2：规范实例变量定义（如果有其他实例变量，统一放这里）
+        # 本案例中核心是类变量，此处仅做规范示范
 
     def _launch_server(self, enable_multimodal: bool):
         """通用服务启动方法，根据参数决定是否添加--enable-multimodal"""
@@ -91,8 +93,8 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self._launch_server(enable_multimodal=True)
         # 验证推理功能
         self._verify_inference()
-        # 执行MMLU评估并保存分数
-        self.score_with_param = self._run_mmlu_eval()
+        # 修复3：通过类名赋值类变量，跨实例共享
+        TestEnableMultimodalNonMlm.score_with_param = self._run_mmlu_eval()
 
     def test_02_disable_multimodal(self):
         """测试2：不带--enable-multimodal参数，执行评估并保存分数"""
@@ -100,21 +102,22 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self._launch_server(enable_multimodal=False)
         # 验证推理功能
         self._verify_inference()
-        # 执行MMLU评估并保存分数
-        self.score_without_param = self._run_mmlu_eval()
+        # 修复3：通过类名赋值类变量，跨实例共享
+        TestEnableMultimodalNonMlm.score_without_param = self._run_mmlu_eval()
 
     def test_03_assert_score(self):
         """测试3：断言带参数的分数 ≥ 不带参数的分数"""
-        # 确保两次分数都已正确获取
-        self.assertIsNotNone(self.score_with_param, "带参数的MMLU分数未获取")
-        self.assertIsNotNone(self.score_without_param, "不带参数的MMLU分数未获取")
+        # 修复4：通过类名读取类变量，验证非空
+        self.assertIsNotNone(TestEnableMultimodalNonMlm.score_with_param, "带参数的MMLU分数未获取")
+        self.assertIsNotNone(TestEnableMultimodalNonMlm.score_without_param, "不带参数的MMLU分数未获取")
         # 核心断言：带--enable-multimodal的分数 ≥ 不带的分数
         self.assertGreaterEqual(
-            self.score_with_param,
-            self.score_without_param,
-            f"带--enable-multimodal的MMLU分数({self.score_with_param:.4f}) 小于 不带的分数({self.score_without_param:.4f})"
+            TestEnableMultimodalNonMlm.score_with_param,
+            TestEnableMultimodalNonMlm.score_without_param,
+            f"带--enable-multimodal的MMLU分数({TestEnableMultimodalNonMlm.score_with_param:.4f}) 小于 不带的分数({TestEnableMultimodalNonMlm.score_without_param:.4f})"
         )
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # 可选：添加verbosity=2，打印更详细的测试日志
+    unittest.main(verbosity=2)
