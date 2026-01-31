@@ -26,12 +26,6 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
     # 修复1：定义为类变量（所有实例共享），用于跨测试方法传递分数
     score_with_param = None
     score_without_param = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        # 修复2：规范实例变量定义（如果有其他实例变量，统一放这里）
-        # 本案例中核心是类变量，此处仅做规范示范
-
     def _launch_server(self, enable_multimodal: bool):
         """通用服务启动方法，根据参数决定是否添加--enable-multimodal"""
         other_args = [
