@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestTboTokenDistributionThresholdBase(CustomTestCase):
-   """Testcase：Verify the correctness of --tbo-token-distribution-threshold (0.8) and related(/generate /get_server_info) API availability.
+    """Testcase：Verify the correctness of --tbo-token-distribution-threshold (0.8) and related(/generate /get_server_info) API availability.
 
     [Test Category] Parameter
     [Test Target] --tbo-token-distribution-threshold;

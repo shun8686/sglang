@@ -3,7 +3,6 @@ import requests
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -27,8 +26,6 @@ class TestAllowAutoTruncateBase(CustomTestCase):
         ]
         if allow_auto_truncate:
             other_args.append("--allow-auto-truncate")
-
-        # 启动服务并赋值给类属性
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
@@ -69,6 +66,7 @@ class TestAllowAutoTruncate(TestAllowAutoTruncateBase):
             [Test Category] Parameter
             [Test Target] --allow-auto-truncate
             """
+
     @classmethod
     def setUpClass(cls):
         cls._launch_server(allow_auto_truncate=True)

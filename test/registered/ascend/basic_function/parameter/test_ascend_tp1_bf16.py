@@ -92,24 +92,24 @@ class TestAscendTp1Bf16(CustomTestCase):
 
     def test_b_throughput(self):
         self.process[0] = 2
-        # for model in self.models:
-        #     with self.subTest(model=model):
-        #         print(f"##=== Testing throughput: {model} ===##")
-        #
-        #         output_throughput = run_bench_offline_throughput(
-        #             model,
-        #             [
-        #                 *self.common_args,
-        #             ],
-        #         )
-        #
-        #         print(f"##=== {model} throughput: {output_throughput} ===##")
-        #
-        #         if is_in_ci():
-        #             self.assertGreater(
-        #                 output_throughput,
-        #                 TEST_MODEL_MATRIX[model]["output_throughput"],
-        #             )
+        for model in self.models:
+            with self.subTest(model=model):
+                print(f"##=== Testing throughput: {model} ===##")
+
+                output_throughput = run_bench_offline_throughput(
+                    model,
+                    [
+                        *self.common_args,
+                    ],
+                )
+
+                print(f"##=== {model} throughput: {output_throughput} ===##")
+
+                if is_in_ci():
+                    self.assertGreater(
+                        output_throughput,
+                        TEST_MODEL_MATRIX[model]["output_throughput"],
+                    )
 
 
 if __name__ == "__main__":

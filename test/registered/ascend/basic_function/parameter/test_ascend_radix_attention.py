@@ -24,7 +24,9 @@ class TestRadixCacheFCFS(CustomTestCase):
     Testcase：Verify the correctness and performance of the Radix Attention mechanism in the SGLang inference service
 
     [Test Category] Parameter
-    [Test Target] --schedule-policy fcfs/lpm, --disable-overlap-schedule
+    [Test Target] --chunked-prefill-size 128 (radix attention is enabled when chunk prefill is set),
+    --max-total-tokens 20000 (cache opimization enabled by default in large context scenarios),
+    --schedule-policy fcfs/lpm, --disable-overlap-schedule
     """
 
     @classmethod
