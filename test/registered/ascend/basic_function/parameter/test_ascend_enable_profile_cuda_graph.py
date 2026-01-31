@@ -17,6 +17,13 @@ register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableProfileCudaGraph(CustomTestCase):
+    """
+    Testcase：Verify that the --enable-profile-cuda-graph parameter is correctly configured and the inference result is correctly
+
+    [Test Category] Parameter
+    [Test Target] --enable-hierarchical-cache, --hicache-ratio 1.2
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
