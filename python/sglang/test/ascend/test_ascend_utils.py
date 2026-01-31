@@ -42,6 +42,9 @@ KIMI_K2_THINKING_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Kimi/Kimi-K2-Th
 LING_LITE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "inclusionAI/Ling-lite")
 LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
                                                            "meta-llama/Llama-4-Scout-17B-16E-Instruct")
+LLAMA_4_MAVERICK_17B_128E_INSTRUCT_FP8 = os.path.join(MODEL_WEIGHTS_DIR,
+                                                           "LLM-Research/Llama-4-Maverick-17B-128E-Instruct-FP8")
+
 LLAMA_2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-2-7B")
 MIMO_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-7B-RL")
 MINICPM3_4B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "OpenBMB/MiniCPM3-4B")
