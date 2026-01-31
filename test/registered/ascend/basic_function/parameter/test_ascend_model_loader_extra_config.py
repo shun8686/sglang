@@ -87,7 +87,7 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_loader_extra_config(self):
-        self.out_log_file.seek(0)
+        self.err_log_file.seek(0)
         content = self.err_log_file.read()
         self.assertIn(self.log_info, content)
 
