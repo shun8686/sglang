@@ -77,7 +77,7 @@ class TestRevisionDefault(CustomTestCase):
 
 class TestRevision(CustomTestCase):
     revision = "33e62acdd07cd7d6635badd529aa0a3467bb9c6a"
-
+    model = PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
     @classmethod
     def setUpClass(cls):
         other_args = (
