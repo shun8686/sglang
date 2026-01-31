@@ -1,6 +1,6 @@
 import unittest
 
-from .test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
+from test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
