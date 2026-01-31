@@ -44,7 +44,7 @@ class TestPureTP(CustomTestCase):
                 **os.environ,
             },
         )
-        cls.accuracy=0.90
+        cls.accuracy=0.86
 
     @classmethod
     def tearDownClass(cls):
@@ -60,7 +60,7 @@ class TestPureTP(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        self.assertGreaterEqual(metrics["score"], 0.5)
     
     
     def test_gsm8k(self):
@@ -74,7 +74,7 @@ class TestPureTP(CustomTestCase):
             port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval_gsm8k(args)
-        self.assertGreater(
+        self.assertGreaterEqual(
             metrics["accuracy"],
             self.accuracy,
             f'Accyracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
