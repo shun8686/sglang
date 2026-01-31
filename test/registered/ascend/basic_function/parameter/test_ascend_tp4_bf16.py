@@ -28,7 +28,8 @@ TEST_MODEL_MATRIX = {
 
 class TestAscendTp4Bf16(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen3-30B-A3B on gsm8k dataset when graph mode is disabled and tp-size is 4
+    Testcase：Verify the accuracy and throughput of Qwen3-30B-A3B on gsm8k dataset when cuda graph mode is disabled and
+    tp size is 4
 
     [Test Category] Parameter
     [Test Target] --disable-cuda-graph, --tp-size 4

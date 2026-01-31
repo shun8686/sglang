@@ -29,10 +29,11 @@ TEST_MODEL_MATRIX = {
 
 class TestAscendGraphTp2Bf16(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is enabled and tp-size is 2
+    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when cuda graph mode is enabled and
+    tp size is 2
 
     [Test Category] Parameter
-    [Test Target] Not set --disable-cuda-graph, --tp-size 2
+    [Test Target] enable cuda graph mode (default setting), --tp-size 2
     """
 
     @classmethod

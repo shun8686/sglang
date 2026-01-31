@@ -22,7 +22,7 @@ register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
 class TestEplbAlgorithm(CustomTestCase):
     """
-    Testcase：Verify the correctness and performance of DeepSeek Model when the MTP technology is used
+    Testcase：Verify the correctness of the inference service when --eplb-algorithm is set
 
     [Test Category] Parameter
     [Test Target] --eplb-algorithm deepseek
@@ -97,17 +97,13 @@ class TestEplbAlgorithm(CustomTestCase):
                 "text": "The capital of France is",
                 "sampling_params": {
                     "temperature": 0,
-                    "max_new_tokens": 32,
+                    "max_new_tokens": 64,
                 },
             },
         )
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-
-
-# class TestEplbAlgorithmStatic(TestEplbAlgorithm):
-#     eplb_algorithm = "static"
 
 
 if __name__ == "__main__":
