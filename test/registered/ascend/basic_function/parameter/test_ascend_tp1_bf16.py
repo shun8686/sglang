@@ -1,11 +1,9 @@
 import unittest
 
-from sglang.test.ascend.test_ascend_gsm8k_and_throughput import TestAscendGsm8kAndThroughput
-from sglang.test.ascend.test_ascend_utils import QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH
+import TestAscendGraphTp1Bf16
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
-
 
 class TestAscendTp1Bf16(TestAscendGsm8kAndThroughput):
     """
@@ -16,19 +14,10 @@ class TestAscendTp1Bf16(TestAscendGsm8kAndThroughput):
     [Test Target] --disable-cuda-graph, --tp-size 1 (default setting)
     """
 
-    TEST_MODEL_MATRIX = {
-        QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH: {
-            "accuracy": 0.85,
-            "latency": 150,
-            "output_throughput": 30,
-        },
-    }
-
     extra_args = [
-        "--disable-cuda-graph",
         "--mem-fraction-static", 0.8,
+        "--disable-cuda-graph",
     ]
-
 
 if __name__ == "__main__":
     unittest.main()

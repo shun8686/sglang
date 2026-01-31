@@ -17,23 +17,31 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
 
-TEST_MODEL_MATRIX = {
-    QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH: {
-        "accuracy": 0.90,
-        "latency": 180,
-        "output_throughput": 20,
-    },
-}
+
 
 
 class TestAscendTp4Bf16(CustomTestCase):
     """
-    Testcase：Verify the accuracy and throughput of Qwen3-30B-A3B on gsm8k dataset when cuda graph mode is disabled and
+    Testcase：Verify the accuracy on gsm8k dataset and throughput of Qwen3-30B-A3B when cuda graph mode is disabled and
     tp size is 4
 
     [Test Category] Parameter
     [Test Target] --disable-cuda-graph, --tp-size 4
     """
+
+    TEST_MODEL_MATRIX = {
+        QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH: {
+            "accuracy": 0.90,
+            "latency": 180,
+            "output_throughput": 20,
+        },
+    }
+
+    extra_args = [
+        "--mem-fraction-static", 0.8,
+        "--disable-cuda-graph",
+        "--tp-size", 4,
+    ]
 
     @classmethod
     def setUpClass(cls):
