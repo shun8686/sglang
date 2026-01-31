@@ -1,12 +1,8 @@
 import os
 import unittest
 
-import requests
-
-from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -18,14 +14,15 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestSkipServerWarmup(CustomTestCase):
     """Testcase: The test parameter disable-radix-cache and enable-hierarchical-cache
-                are mutually exclusive and connot be used simultaneously.
+                are mutually exclusive and cannot be used simultaneously.
 
     [Test Category] Parameter
     [Test Target] --disable-radix-cache; --enable-hierarchical-cache
     """
 
     def test_L2_cache_mutually_exclusive(self):
-        error_message="The arguments enable-hierarchical-cache and disable-radix-cache are mutually exclusive and cannot be used at the same time. Please use only one of them."
+        error_message=("The arguments enable-hierarchical-cache and disable-radix-cache are mutually exclusive and "
+                       "cannot be used at the same time. Please use only one of them.")
         other_args = (
             [
                 "--attention-backend",
@@ -56,7 +53,7 @@ class TestSkipServerWarmup(CustomTestCase):
         finally:
             err_log_file.seek(0)
             content = err_log_file.read()
-            """error_message information is recorded in the error log"""
+            # error_message information is recorded in the error log
             self.assertIn(error_message, content)
             out_log_file.close()
             err_log_file.close()

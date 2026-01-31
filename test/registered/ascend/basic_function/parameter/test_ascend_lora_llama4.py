@@ -2,7 +2,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import Llama_4_Maverick_17B_128E_Instruct_FP8
+from sglang.test.ascend.test_ascend_utils import LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 MODELS = [
     SimpleNamespace(
-        model=Llama_4_Maverick_17B_128E_Instruct_FP8,
+        model=LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH,
         tp_size=8,
     ),
 ]
@@ -24,7 +24,8 @@ MODELS = [
 
 @unittest.skipIf(is_in_ci(), "To reduce the CI execution time.")
 class TestLlama4LoRA(CustomTestCase):
-    """Testcase：Verify the successful launch and operation of Llama-4 model when LoRA function is enabled.
+    """
+    Testcase：Verify the successful launch and operation of Llama-4 model when LoRA function is enabled.
 
     [Test Category] Parameter
     [Test Target] --enable-lora, --max-lora-rank 64, --lora-target-modules all
