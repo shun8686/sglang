@@ -21,8 +21,8 @@ class TestOpenAIServerFunctionCalling(CustomTestCase):
     """Testcase：Verify the correctness of full-scenario OpenAI-style function calling with llama3 parser for Llama-3.2-1B-Instruct model.
         Cover: Single/multi-turn calls, streaming/non-streaming returns, multi-parameter verification of tool_choice, and JSON parsing validity of function parameters.
 
-    [Test Category] Parameter
-    [Test Target] --tool-call-parser;tool_choice
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions
     """
     # NOTE: this system_message is for Llama3.2 system prompt. Without this,
     # sometimes Llama3.2 gives a different tool call format such as:
@@ -792,8 +792,8 @@ class TestOpenAIPythonicFunctionCalling(CustomTestCase):
     """Testcase：Verify the functionality of Python-style list-format function calling with pythonic parser for Llama-3.2-1B-Instruct model on Ascend NPU backend.
     Cover: Explicit format prompt verification, streaming call index integrity, and return validity of parallel tool calls.
 
-    [Test Category] Parameter
-    [Test Target] --tool-call-parser
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions
     """
 
     PYTHONIC_TOOLS = [
