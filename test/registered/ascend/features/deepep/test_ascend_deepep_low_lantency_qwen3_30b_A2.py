@@ -33,8 +33,8 @@ class TestPureTP(CustomTestCase):
                 "--deepep-mode",
                 "low_latency",
                 "--disable-cuda-graph",
-               "--chunked-prefill-size",
-               "1024",
+                "--chunked-prefill-size",
+                "1024",
             ],
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
