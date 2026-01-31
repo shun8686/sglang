@@ -44,6 +44,7 @@ unset HTTPS_PROXY
 unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
+export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
 . /usr/local/Ascend/cann/set_env.sh
 . /usr/local/Ascend/nnal/atb/set_env.sh
 
