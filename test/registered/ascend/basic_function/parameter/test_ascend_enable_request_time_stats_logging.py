@@ -17,6 +17,9 @@ from sglang.test.test_utils import (
 # 定义日志转储文件路径
 LOG_DUMP_FILE = f"server_request_stats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 
+# 自定义合理的服务器启动等待时间
+CUSTOM_SERVER_WAIT_TIME = 15  # 推荐值：10-20秒
+
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
     @classmethod
     def setUpClass(cls):
@@ -54,12 +57,15 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             other_args=other_args,
         )
 
-        # 5. 立即恢复原始stdout和stderr，不影响测试用例后续输出
-        sys.stdout = cls.original_stdout
-        sys.stderr = cls.original_stderr
+        # 【关键修改1】：删除此处的立即IO恢复操作，保持重定向状态
+        # 注释掉原有恢复代码
+        # sys.stdout = cls.original_stdout
+        # sys.stderr = cls.original_stderr
 
-        # 6. 给服务器预留启动时间，确保日志文件正常写入内容
-        time.sleep(DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH // 2)
+        # 5. 自定义等待时间，等待服务器完全启动
+        print(f"等待服务器启动（{CUSTOM_SERVER_WAIT_TIME}秒）...")
+        # 注意：此处print的内容会被写入日志文件（因为IO还未恢复），属于正常现象
+        time.sleep(10)
 
     @classmethod
     def tearDownClass(cls):
@@ -69,7 +75,7 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
         # 2. 关闭日志文件句柄，确保所有缓冲内容写入文件
         cls.log_file.close()
 
-        # 3. 提示日志文件路径
+        # 3. 提示日志文件路径（此时IO已恢复，会输出到控制台）
         print(f"服务器日志已完整转储到：{os.path.abspath(LOG_DUMP_FILE)}")
 
     def read_log_file(self):
@@ -82,7 +88,7 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             return f.read()
 
     def test_enable_request_time_stats_logging(self):
-        # 1. 发送请求，触发服务端生成 Req Time Stats 日志
+        # 1. 发送请求，触发服务端生成 Req Time Stats 日志（此时IO仍处于重定向状态）
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -94,16 +100,20 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             },
         )
 
-        # 断言请求发送成功（先确保请求正常，再判断日志）
-        self.assertEqual(response.status_code, 200, "请求生成接口失败")
-
-        # 2. 等待日志写入（解决服务端输出缓冲延迟问题）
+        # 2. 等待日志写入（确保Req Time Stats被完整写入文件）
         time.sleep(3)
 
-        # 3. 读取完整日志文件内容
+        # 【关键修改2】：此时请求已处理完成，日志已生成，恢复原始IO
+        sys.stdout = self.original_stdout
+        sys.stderr = self.original_stderr
+
+        # 3. 断言请求发送成功（此时IO已恢复，断言失败信息会输出到控制台）
+        self.assertEqual(response.status_code, 200, "请求生成接口失败")
+
+        # 4. 读取完整日志文件内容
         server_logs = self.read_log_file()
 
-        # 4. 断言日志中包含 Req Time Stats 关键字
+        # 5. 断言日志中包含 Req Time Stats 关键字
         target_keyword = "Req Time Stats"
         self.assertIn(
             target_keyword,
