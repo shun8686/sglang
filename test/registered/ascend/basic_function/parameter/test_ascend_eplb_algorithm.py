@@ -106,9 +106,5 @@ class TestEplbAlgorithm(CustomTestCase):
         self.assertIn("Paris", response.text)
 
 
-# class TestEplbAlgorithmStatic(TestEplbAlgorithm):
-#     eplb_algorithm = "static"
-
-
 if __name__ == "__main__":
     unittest.main()
