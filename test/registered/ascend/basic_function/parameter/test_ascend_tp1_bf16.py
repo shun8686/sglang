@@ -1,11 +1,11 @@
 import unittest
 
-import TestAscendGraphTp1Bf16
+from .test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
 
-class TestAscendTp1Bf16(TestAscendGsm8kAndThroughput):
+class TestAscendTp1Bf16(TestAscendGraphTp1Bf16):
     """
     Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when cuda graph mode is disabled and
     tp size is 1
