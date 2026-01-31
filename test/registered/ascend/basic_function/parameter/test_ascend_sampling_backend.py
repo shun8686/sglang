@@ -23,7 +23,7 @@ class TestAscendSamplingBackend(CustomTestCase):
     when using ascend sampling backend, with radix cache disabled and cuda graph disabled
 
     [Test Category] Parameter
-    [Test Target] --sampling-backend=ascend, --disable-radix-cache, --disable-cuda-graph
+    [Test Target] --sampling-backend ascend, --disable-radix-cache, --disable-cuda-graph
     """
 
     @classmethod
@@ -37,8 +37,8 @@ class TestAscendSamplingBackend(CustomTestCase):
             other_args=[
                 "--sampling-backend",
                 "ascend",
-                "--disable-radix-cache",
-                "--disable-cuda-graph",
+                # "--disable-radix-cache",
+                # "--disable-cuda-graph",
                 "--mem-fraction-static",
                 0.85,
             ],

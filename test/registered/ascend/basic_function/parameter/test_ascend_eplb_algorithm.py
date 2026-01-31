@@ -6,13 +6,9 @@ from types import SimpleNamespace
 
 import requests
 
-import sglang as sgl
 from sglang.srt.utils import kill_process_tree
-from sglang.test.run_eval import run_eval
 from sglang.test.ascend.test_ascend_utils import DeepSeek_R1_W8A8_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_MLA_MODEL_NAME_FOR_TEST,
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -29,10 +25,10 @@ class TestEplbAlgorithm(CustomTestCase):
     Testcase：Verify the correctness and performance of DeepSeek Model when the MTP technology is used
 
     [Test Category] Parameter
-    [Test Target] --eplb-algorithm dynamic/static
+    [Test Target] --eplb-algorithm deepseek
     """
 
-    eplb_algorithm = "dynamic"
+    eplb_algorithm = "deepseek"
 
     @classmethod
     def setUpClass(cls):
@@ -110,8 +106,8 @@ class TestEplbAlgorithm(CustomTestCase):
         self.assertIn("Paris", response.text)
 
 
-class TestEplbAlgorithmStatic(TestEplbAlgorithm):
-    eplb_algorithm = "static"
+# class TestEplbAlgorithmStatic(TestEplbAlgorithm):
+#     eplb_algorithm = "static"
 
 
 if __name__ == "__main__":

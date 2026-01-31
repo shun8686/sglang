@@ -7,7 +7,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     is_in_ci,
@@ -33,7 +32,7 @@ class TestAscendDeepSeekMTP(CustomTestCase):
     Testcase：Verify the correctness and performance of DeepSeek Model when the MTP technology is used
 
     [Test Category] Parameter
-    [Test Target] --scheduler-recv-interval 10
+    [Test Target] use MTP by test model DeepSeek R1, --scheduler-recv-interval 10
     """
 
     @classmethod

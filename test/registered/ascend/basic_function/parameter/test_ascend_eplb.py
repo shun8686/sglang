@@ -9,7 +9,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ascend.test_ascend_utils import DeepSeek_R1_W8A8_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_MLA_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -21,6 +20,16 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
 class _BaseTestDynamicEPLB(CustomTestCase):
+    """
+    Testcase：Verify the correctness of the function when eplb is enabled and the accuracy of DeepSeek-R1-W8A8 on MMLU
+    dataset
+
+    [Test Category] Parameter
+    [Test Target] --enable-eplb， --ep-num-redundant-experts 16, --eplb-rebalance-num-iterations 50,
+    --expert-distribution-recorder-buffer-size 50, --enable-expert-distribution-metrics,
+    --expert-distribution-recorder-mode stat, --ep-dispatch-algorithm static
+    """
+
     extra_args = []
 
     @classmethod

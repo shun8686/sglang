@@ -48,12 +48,11 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
             "ascend",
         ]
 
-    def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
 
-                process = popen_launch_server(
+                cls.process = popen_launch_server(
                     model,
                     self.base_url,
                     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -62,24 +61,28 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
                     ],
                 )
 
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=1319,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
+
+    def test_a_gsm8k(self):
+        for model in self.models:
+            args = SimpleNamespace(
+                num_shots=5,
+                data_path=None,
+                num_questions=1319,
+                max_new_tokens=512,
+                parallel=128,
+                host=f"http://{self.url.hostname}",
+                port=int(self.url.port),
+            )
+
+            metrics = run_eval_few_shot_gsm8k(args)
+            self.assertGreaterEqual(
+                metrics["accuracy"],
+                TEST_MODEL_MATRIX[model]["accuracy"],
+            )
 
     def test_b_throughput(self):
         for model in self.models:

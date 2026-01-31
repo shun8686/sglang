@@ -28,13 +28,14 @@ TEST_MODEL_MATRIX = {
 }
 
 
+
 class TestAscendTp2Bf16(CustomTestCase):
     """
     Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when graph mode is disabled,
     tp-size is 2 and FIA acceleration is used.
 
     [Test Category] Parameter
-    [Test Target] --disable-cuda-graph, --tp-size 2, --disable-radix-cache, os.environ["ASCEND_USE_FIA"] = "true"
+    [Test Target] --tp-size 2, --disable-radix-cache, os.environ["ASCEND_USE_FIA"] = "true"
     """
 
     @classmethod

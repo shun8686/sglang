@@ -53,7 +53,7 @@ class TestL2Cache(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_L2_cache_01(self):
+    def test_L2_cache_resused(self):
         for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",

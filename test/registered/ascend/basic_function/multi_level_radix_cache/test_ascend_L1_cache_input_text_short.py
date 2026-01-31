@@ -51,7 +51,8 @@ class TestL1Cache(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_L2_cache_03(self):
+    def test_L1_cache(self):
+        # with two identical short text input requests, the token will not be reused.
         texts=["who am i?","who am i?"]
         for text in texts:
             response = requests.post(

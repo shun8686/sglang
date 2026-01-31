@@ -23,7 +23,7 @@ CONVS = [
 
 
 class TestInternlm2(CustomTestCase):
-    """Testcase:This test case verifies that the Shanghai_AI_Laboratory/internlm2-7b-reward model can successfully generate reward
+    """Testcase: This test case verifies that the Shanghai_AI_Laboratory/internlm2-7b-reward model can successfully generate reward
     scores for different conversational responses using the SGLang framework, without comparing to a reference implementation.
 
     [Test Category] Model
@@ -32,8 +32,6 @@ class TestInternlm2(CustomTestCase):
 
     model_path = INTERNLM2_7B_REWARD_WEIGHTS_PATH
     torch_dtype = torch.float16
-    tolerance = 4e-2
-    tp_size = 4
 
     @classmethod
     def setUpClass(cls):

@@ -15,6 +15,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
+
 class TestL1Cache(CustomTestCase):
     """Testcase: Test enabled L1 cache inference request reuse succeddfully
 
@@ -51,12 +52,29 @@ class TestL1Cache(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_L2_cache_02(self):
+    def test_L1_cache_resused(self):
         for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
                 json={
-                    "text": "What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?What is The capital of France?",
+                    "text": "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?What is The capital of France?"
+                            "What is The capital of France?What is The capital of France?",
                     "sampling_params": {
                         "temperature": 0,
                         "max_new_tokens": 10,

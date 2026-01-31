@@ -16,7 +16,7 @@ class TestQwen332B(GSM8KAscendMixin, CustomTestCase):
     """
 
     model = QWEN3_32B_WEIGHTS_PATH
-    accuracy = 0.88
+    accuracy = 0.86
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

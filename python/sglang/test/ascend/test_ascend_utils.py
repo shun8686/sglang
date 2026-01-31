@@ -17,9 +17,11 @@ LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH = os.path.join(MODEL_WEIGHT
 META_LLAMA_3_1_8B_INSTRUCT = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Meta-Llama-3.1-8B-Instruct")
 
 DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-R1-0528-W8A8")
+DEEPSEEK_CODER_1_3B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base")
 DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8")
 
 QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct")
+QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2-0.5B-Instruct")
 
 AFM_4_5B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/AFM-4.5B-Base")
 BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "baichuan-inc/Baichuan2-13B-Chat")
@@ -106,3 +108,4 @@ SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(HF_MODEL_WEIGHTS_DI
                                                              "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1")
 QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach")
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
+
