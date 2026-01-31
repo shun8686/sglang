@@ -19,11 +19,10 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendSamplingBackend(CustomTestCase):
     """
-    Testcase：Verify the function availability and related performance of sampling inference
-    when using ascend sampling backend, with radix cache disabled and cuda graph disabled
+    Testcase：Verify that the token sampling logic is greedy sampling when the --sampling-backend is set to ascend
 
     [Test Category] Parameter
-    [Test Target] --sampling-backend ascend, --disable-radix-cache, --disable-cuda-graph
+    [Test Target] --sampling-backend ascend
     """
 
     @classmethod
@@ -37,8 +36,6 @@ class TestAscendSamplingBackend(CustomTestCase):
             other_args=[
                 "--sampling-backend",
                 "ascend",
-                # "--disable-radix-cache",
-                # "--disable-cuda-graph",
                 "--mem-fraction-static",
                 0.85,
             ],
