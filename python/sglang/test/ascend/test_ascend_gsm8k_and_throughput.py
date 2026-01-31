@@ -15,8 +15,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
 
-TEST_MODEL_MATRIX = {}
-
 
 class TestAscendGsm8kAndThroughput(CustomTestCase):
     """
@@ -26,11 +24,12 @@ class TestAscendGsm8kAndThroughput(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --disable-cuda-graph, --tp-size 4
     """
+    TEST_MODEL_MATRIX = {}
     extra_args = []
 
     @classmethod
     def setUpClass(cls):
-        cls.models = TEST_MODEL_MATRIX.keys()
+        cls.models = cls.TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
@@ -68,7 +67,7 @@ class TestAscendGsm8kAndThroughput(CustomTestCase):
                     metrics = run_eval_few_shot_gsm8k(args)
                     self.assertGreaterEqual(
                         metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
+                        self.TEST_MODEL_MATRIX[model]["accuracy"],
                     )
                 finally:
                     kill_process_tree(process.pid)
@@ -90,7 +89,7 @@ class TestAscendGsm8kAndThroughput(CustomTestCase):
 
                 self.assertGreater(
                     output_throughput,
-                    TEST_MODEL_MATRIX[model]["output_throughput"],
+                    self.TEST_MODEL_MATRIX[model]["output_throughput"],
                 )
 
 
