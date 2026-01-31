@@ -3,6 +3,7 @@ import requests
 import time
 import importlib.util
 from io import StringIO
+from pathlib import Path  # 确保导入 Path，用于路径处理
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
@@ -18,12 +19,14 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 def get_ascend_test_dir():
-    """获取 sglang.test.ascend 包的绝对目录路径"""
+    """获取 sglang.test.ascend 包的绝对目录路径（修复路径类型错误）"""
     spec = importlib.util.find_spec("sglang.test.ascend")
     if spec and spec.origin:
-        return importlib.util.find_spec("sglang.test.ascend").origin.parent
+        # 核心修复：将字符串路径转换为 Path 对象，再获取 parent 目录
+        return Path(spec.origin).parent
+    # 备用方案：同样转换为 Path 对象
     from sglang.test import ascend
-    return ascend.__file__.parent
+    return Path(ascend.__file__).parent
 
 ASCEND_TEST_DIR = get_ascend_test_dir()
 
