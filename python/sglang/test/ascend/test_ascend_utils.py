@@ -109,4 +109,3 @@ SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(HF_MODEL_WEIGHTS_DI
 QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach")
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
 
-gte_Qwen2_1_5B_instruct_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "iic/gte_Qwen2-1.5B-instruct")
