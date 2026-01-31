@@ -4,6 +4,7 @@ import time
 from pathlib import Path
 import os
 import importlib.util
+from datetime import datetime
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
@@ -26,10 +27,11 @@ def get_ascend_test_dir():
     from sglang.test import ascend
     return Path(ascend.__file__).parent
 
-# 日志路径：sglang/test/ascend/logs/server.log
+# 日志路径：sglang/test/ascend/logs/server.log（本次会让服务端真的写入这个路径）
 ASCEND_TEST_DIR = get_ascend_test_dir()
 SGLANG_SERVER_LOG_PATH = ASCEND_TEST_DIR / "logs" / "server.log"
-
+# 转储日志目录：sglang/test/ascend/logs/backup/
+SGLANG_LOG_BACKUP_DIR = ASCEND_TEST_DIR / "logs" / "backup"
 
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
     """Testcase：Verify --enable-request-time-stats-logging writes core time stats to server log
@@ -41,45 +43,64 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # 核心新增：启动服务前，先清理原有日志文件（保证测试环境干净）
+        # 清理原有日志文件（保证测试环境干净）
         cls.clear_server_log()
         
-        # 启动服务，携带目标参数
+        # 核心修复：添加日志相关启动参数，告诉服务端日志写入路径和输出格式
         other_args = [
             "--attention-backend", "ascend",
             "--disable-cuda-graph",
-            "--enable-request-time-stats-logging"
+            "--enable-request-time-stats-logging",
+            # 新增：指定日志输出到文件（而非控制台）
+            "--log-file", str(SGLANG_SERVER_LOG_PATH),
+            # 新增：可选 - 指定日志级别（INFO 级别足够捕获 Req Time Stats）
+            "--log-level", "INFO"
         ]
 
-        # 启动模型服务
+        # 启动模型服务（此时服务端会读取 --log-file 参数，将日志写入我们指定的路径）
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
-        # 等待服务初始化和日志文件创建
-        time.sleep(2)
-        # 确保日志目录存在
-        SGLANG_SERVER_LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        # 等待服务初始化和日志文件创建（服务端会自动创建日志文件）
+        time.sleep(3)  # 稍延长一点，确保服务端完成日志文件初始化
+        # 确保转储目录存在（日志目录由服务端创建，转储目录手动创建）
+        SGLANG_LOG_BACKUP_DIR.mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def tearDownClass(cls):
         # 终止服务进程
         kill_process_tree(cls.process.pid)
-    
-    # 核心新增：定义清理日志文件的静态方法
+        # 测试结束后，自动转储本次日志
+        cls.dump_server_log()
+
     @staticmethod
     def clear_server_log():
         """清理服务端日志文件（删除原有文件，或清空文件内容）"""
-        # 方案1：直接删除日志文件（下次写入会自动创建，更简洁）
         if SGLANG_SERVER_LOG_PATH.exists():
             os.remove(SGLANG_SERVER_LOG_PATH)
+
+    @staticmethod
+    def dump_server_log():
+        """转储（备份）本次测试的日志文件，带时间戳避免重名"""
+        # 1. 若当前日志文件不存在，直接返回（无内容可转储）
+        if not SGLANG_SERVER_LOG_PATH.exists():
+            print("No server log file to dump, skip backup.")
+            return
         
-        # 方案2：清空文件内容（保留文件本身，按需选择）
-        # if SGLANG_SERVER_LOG_PATH.exists():
-        #     with open(SGLANG_SERVER_LOG_PATH, "w", encoding="utf-8") as f:
-        #         f.truncate(0)
+        # 2. 生成带时间戳的转储文件名（格式：server_YYYYMMDD_HHMMSS.log）
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        backup_log_path = SGLANG_LOG_BACKUP_DIR / f"server_{timestamp}.log"
+        
+        # 3. 核心：复制当前日志文件到转储目录（实现转储/备份）
+        try:
+            with open(SGLANG_SERVER_LOG_PATH, "rb") as src_file, open(backup_log_path, "wb") as dst_file:
+                dst_file.write(src_file.read())
+            print(f"Log dumped successfully: {backup_log_path}")
+        except Exception as e:
+            print(f"Failed to dump log: {e}")
 
     def read_server_log(self):
         """读取完整服务端日志（简化版，直接读取全部内容）"""
@@ -99,8 +120,8 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             },
         )
 
-        # Step 2: 等待日志异步落盘（短暂延迟，确保日志写入）
-        time.sleep(2)
+        # Step 2: 等待日志异步落盘（服务端写入文件有延迟，确保写入完成）
+        time.sleep(3)
 
         # Step 3: 核心校验1 - 服务端配置中参数已开启（简单校验）
         server_info_resp = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
