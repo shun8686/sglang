@@ -35,7 +35,7 @@ class TestReasoningContentAPI(CustomTestCase):
     configurations
 
     [Test Category] Parameter
-    [Test Target] --reasoning-parser, separate_reasoning, stream_reasoning
+    [Test Target] --reasoning-parser deepseek-r1, separate_reasoning, stream_reasoning
     """
     @classmethod
     def setUpClass(cls):
