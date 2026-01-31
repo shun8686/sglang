@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH, NIC_NAME
+from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_W8A8_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -13,11 +13,23 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(est_time=200, suite="nightly-8-npu-a3", nightly=True)
+
 
 class TestQwen3Next(CustomTestCase):
+    """
+    Testcase:Test the Qwen3-Next-80B-A3B-Instruct-W8A8 model with DeepEP's auto mode enabled, and verify that there is
+    no drop in accuracy compared to when DeepEP is not enabled.
+
+    [Test Category] Parameter
+    [Test Target] --moe-a2a-backend deepep, --deepep-mode auto
+    """
+
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+        cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -32,7 +44,6 @@ class TestQwen3Next(CustomTestCase):
                 "--max-running-requests", 80,
                 "--watchdog-timeout", 9000,
                 "--disable-radix-cache",
-                # "--cuda-graph-bs", 80,
                 "--disable-cuda-graph",
                 "--max-prefill-tokens", 28672,
                 "--max-total-tokens", 450560,
@@ -44,8 +55,6 @@ class TestQwen3Next(CustomTestCase):
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
-                "HCCL_SOCKET_IFNAME": NIC_NAME,
-                "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
                 "HCCL_ALGO": "level0:NA;level1:ring",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
@@ -59,7 +68,6 @@ class TestQwen3Next(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        # 0.625
         expect_score = 0.56
         args = SimpleNamespace(
             base_url=self.base_url,
@@ -73,7 +81,6 @@ class TestQwen3Next(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        # 0.945
         expect_accuracy = 0.9
         args = SimpleNamespace(
             num_shots=5,
@@ -91,7 +98,6 @@ class TestQwen3Next(CustomTestCase):
             expect_accuracy,
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
         )
-
 
 
 if __name__ == "__main__":
