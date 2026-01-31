@@ -9,10 +9,9 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 
 
-
-
 class TestAscendGraphTp1Bf16(TestAscendGsm8kAndThroughput):
     """
+    Testcase：Verify the accuracy on gsm8k dataset and throughput of models
     Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when cuda graph mode is enabled and
     tp size is 1
 
