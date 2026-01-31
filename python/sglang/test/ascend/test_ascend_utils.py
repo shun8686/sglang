@@ -19,6 +19,7 @@ META_LLAMA_3_1_8B_INSTRUCT = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Meta-
 DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-R1-0528-W8A8")
 DEEPSEEK_CODER_1_3B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base")
 DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8")
+DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B")
 
 QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct")
 QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2-0.5B-Instruct")

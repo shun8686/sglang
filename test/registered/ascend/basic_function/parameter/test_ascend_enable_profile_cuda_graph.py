@@ -2,37 +2,34 @@ import unittest
 
 import requests
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestEnableProfileCudaGraph(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        other_args = (
-            [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--enable-profile-cuda-graph",
-            ]
-            if is_npu()
-            else ["--enable-profile-cuda-graph"]
-        )
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--enable-profile-cuda-graph",
+        ]
 
         cls.process = popen_launch_server(
-            (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
-                if is_npu()
-                else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
-            ),
-            DEFAULT_URL_FOR_TEST,
+            LLAMA_3_2_1B_WEIGHTS_PATH,
+            self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
@@ -43,7 +40,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
 
     def test_enable_profile_cuda_graph(self):
         response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
+            f"{self.base_url}/generate",
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
@@ -60,7 +57,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
+        response = requests.get(f"{self.base_url}/get_server_info")
         print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
