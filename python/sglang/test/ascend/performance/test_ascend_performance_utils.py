@@ -5,6 +5,7 @@ import time
 import psutil
 import socket
 import requests
+from urllib.parse import urlparse
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
@@ -36,35 +37,120 @@ NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 
 LOCAL_TIMEOUT = 3600
-SERVICE_PORT = "6677"
-LOCAL_PORT = "8000"
+
+# Port numbers
+SERVICE_PORT = 6677
+PREFILL_DECODE_PORT = 8000
+BOOTSTRAP_INIT_PORT = 8995
+
+# Timeouts and delays
+ROUTER_CONFIGMAP_TIMEOUT = 300
+SERVER_INITIALIZATION_DELAY = 120
+
+# Test parameters
+DEFAULT_RUN_CYCLES = 2
+PROMPTS_MULTIPLIER = 4
+
+# Metrics thresholds
+TPOT_THRESHOLD = 50
+TPOT_TOLERANCE_LOW = 1.0  # +1 second
+TPOT_TOLERANCE_HIGH = 1.02  # +2%
+TTFT_TOLERANCE = 1.02  # +2%
+OUTPUT_TOKEN_THROUGHPUT_TOLERANCE = 0.98  # -2%
+
+# Network configuration
+NETWORK_ADDRESS_PREFIXES = ["172.", "192."]
+
+# Package filtering keywords
+PACKAGE_FILTER_KEYWORDS = ['sglang', 'sgl', 'torch', 'transformers', 'deep-ep', 'memfabric_hybrid']
 
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
 
 def get_nic_name():
+    """Get network interface name.
+    
+    Returns:
+        str: Network interface name, or None if not found.
+    """
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
-            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
-                print("The nic name matched is {}".format(nic))
+            if addr.family == socket.AF_INET and any(addr.address.startswith(prefix) for prefix in NETWORK_ADDRESS_PREFIXES):
+                print(f"The nic name matched is {nic}")
                 return nic
     return None
 
 nic = get_nic_name()
 NIC_NAME = "lo" if nic is None else nic
 
-def run_command(cmd, shell=True):
+def get_cann_version():
+    """Get CANN version info.
+    
+    Returns:
+        str: CANN version info string.
+    """
+    cann_info_file = "/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
+    cann_ver_num = None
+    
     try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=False
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"Command error: {e}")
-        return None
+        with open(cann_info_file, 'r', encoding='utf-8') as f:
+            for line in f:
+                if line.startswith('version='):
+                    cann_ver_num = line.strip()
+                    break
+        
+        if cann_ver_num:
+            cann_version_info = f"CANN\t{cann_ver_num}"
+            print(cann_version_info)
+            return cann_version_info
+        else:
+            print("CANN version not found")
+            return f"CANN\t{cann_ver_num}"
+            
+    except FileNotFoundError:
+        print(f"CANN info file not found: {cann_info_file}")
+        return f"CANN\t{cann_ver_num}"
+    except Exception as e:
+        print(f"Error reading CANN info: {e}")
+        return f"CANN\t{cann_ver_num}"
 
-# query configmap
+def write_pkg_info_to_file(result_file):
+    """Write package information to result file.
+    
+    Args:
+        result_file (str): Path to the result file.
+    """
+    try:
+        pip_output = subprocess.run(["pip", "list"], capture_output=True, text=True, check=False)
+        packages = pip_output.stdout
+        
+        # Filter relevant packages using list comprehension
+        filtered_packages = [
+            line for line in packages.split('\n')
+            if any(keyword in line for keyword in PACKAGE_FILTER_KEYWORDS)
+        ]
+        
+        # Write to result file
+        with open(result_file, 'w', encoding='utf-8') as f:
+            for pkg in filtered_packages:
+                f.write(pkg + '\n')
+                print(pkg)
+            f.write(get_cann_version() + '\n')
+
+    except Exception as e:
+        print(f"Error getting packages: {e}")
+
+# Query ConfigMap from Kubernetes
 def query_configmap(name, namespace):
+    """Query ConfigMap from Kubernetes.
+    
+    Args:
+        name (str): ConfigMap name.
+        namespace (str): Kubernetes namespace.
+        
+    Returns:
+        V1ConfigMap: ConfigMap object, or None if failed.
+    """
     try:
         configmap = v1.read_namespaced_config_map(name, namespace)
         print(f"Successfully queried ConfigMap {name} in namespace {namespace}")
@@ -76,11 +162,15 @@ def query_configmap(name, namespace):
         print(f"Unexpected error querying ConfigMap: {e}")
         return None
 
-# get node count from k8s
+# Get node count from Kubernetes
 def discover_worker_nodes():
+    """Discover worker nodes from Kubernetes.
+    
+    Returns:
+        int: Number of worker nodes, or 0 if failed.
+    """
     try:
-        config.load_incluster_config()
-
+        # Use existing config instead of loading incluster config again
         prefill_pods = v1.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-prefill"
         )
@@ -88,8 +178,11 @@ def discover_worker_nodes():
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-decode"
         )
 
-        nodes_count = len(prefill_pods.items) + len(decode_pods.items)
-        print(f"Discovered {nodes_count} worker nodes (prefill: {len(prefill_pods.items)}, decode: {len(decode_pods.items)})")
+        prefill_count = len(prefill_pods.items)
+        decode_count = len(decode_pods.items)
+        nodes_count = prefill_count + decode_count
+        
+        print(f"Discovered {nodes_count} worker nodes (prefill: {prefill_count}, decode: {decode_count})")
         return nodes_count
 
     except Exception as e:
@@ -97,46 +190,105 @@ def discover_worker_nodes():
         return 0
 
 def set_environment_variables(env_vars):
+    """Set environment variables.
+    
+    Args:
+        env_vars (dict): Environment variables dictionary.
+        
+    Returns:
+        dict: Updated environment variables.
+    """
     if not env_vars:
-        return
+        return {}
 
     for key, value in env_vars.items():
         print(f"Setting ENV_VAR {key}={value}")
         os.environ[key] = value
+    
+    return env_vars
 
 def check_port_availability(host, port, timeout=3):
+    """Check if the port is available.
+    
+    Args:
+        host (str): Host IP address.
+        port (int): Port number.
+        timeout (int): Connection timeout in seconds.
+        
+    Returns:
+        bool: True if port is available, False otherwise.
+    """
     try:
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
             sock.settimeout(timeout)
             result = sock.connect_ex((host, int(port)))
-            return result == 0
+            if result == 0:
+                return True
+            else:
+                print(f"Port check failed for {host}:{port} - socket error code: {result}")
+                return False
 
-    except (socket.error, ValueError) as e:
-        print(f"Port check error for {host}:{port}: {e}")
+    except socket.timeout:
+        print(f"Port check timeout for {host}:{port} after {timeout}s")
+        return False
+    except socket.gaierror as e:
+        print(f"Port check address resolution error for {host}:{port}: {e}")
+        return False
+    except socket.error as e:
+        print(f"Port check socket error for {host}:{port}: {e}")
+        return False
+    except ValueError as e:
+        print(f"Port check invalid value for {host}:{port}: {e}")
+        return False
+    except Exception as e:
+        print(f"Port check unexpected error for {host}:{port}: {e}")
         return False
 
-def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT):
+def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15):
+    """Wait for all nodes' ports to be ready.
+    
+    Args:
+        ips (list): List of IP addresses.
+        port (int): Port number to check.
+        timeout (int): Total timeout in seconds.
+        check_interval (int): Interval between checks in seconds.
+        
+    Returns:
+        bool: True if all ports are ready, False if timeout.
+    """
     start_time = time.time()
+    node_status = {ip: False for ip in ips}
+    
     while time.time() - start_time < timeout:
         ready_nodes = 0
+        status_changed = False
+        
         for ip in ips:
-            if check_port_availability(ip, port):
-                print(f"Node {ip}:{port} is ready")
+            is_ready = check_port_availability(ip, port)
+            if is_ready != node_status[ip]:
+                node_status[ip] = is_ready
+                status_changed = True
+                if is_ready:
+                    print(f"Node {ip}:{port} is ready")
+                else:
+                    print(f"Node {ip}:{port} is not ready yet")
+            if is_ready:
                 ready_nodes += 1
-            else:
-                print(f"Node {ip}:{port} is not ready yet")
 
         if ready_nodes == len(ips):
             print(f"All {len(ips)} nodes' ports are ready!")
             return True
 
-        print(f"Waiting for {len(ips) - ready_nodes} more nodes to be ready...")
-        time.sleep(15)
+        if status_changed:
+            remaining_nodes = len(ips) - ready_nodes
+            print(f"Waiting for {remaining_nodes} more nodes to be ready...")
+        
+        time.sleep(check_interval)
 
     print(f"Timeout: Not all nodes are ready after {timeout} seconds")
     return False
 
-# launch master/worker node
+# Launch master/worker node
 def launch_pd_mix_node(model_config):
     print(f"Launch pd mix node start ......")
     node_ip = os.getenv("POD_IP")
@@ -145,10 +297,11 @@ def launch_pd_mix_node(model_config):
     if not node_ip or not hostname:
         raise RuntimeError(f"Missing required environment variables: POD_IP={node_ip}, HOSTNAME={hostname}")
 
-    # monitor configmap to generate dist-init-addr and node-rank
+    # Monitor ConfigMap to generate dist-init-addr and node-rank
     is_ready = False
     dist_init_addr = None
-    while not is_ready:
+    start_time = time.time()
+    while not is_ready and time.time() - start_time < LOCAL_TIMEOUT:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
         if configmap.data is None:
             print(f"configmap is None, wait for 15s ......")
@@ -163,15 +316,19 @@ def launch_pd_mix_node(model_config):
                 break
         if master_node_ip is None:
             print(f"Can not find master node in configmap: {configmap.data=}")
+            time.sleep(15)
             continue
 
         dist_init_addr = f"{master_node_ip}:5000"
         print(f"launch_node {dist_init_addr=}")
         is_ready = True
+    
+    if not is_ready:
+        raise RuntimeError(f"Timeout: Failed to get master node information from ConfigMap after {LOCAL_TIMEOUT} seconds")
 
     special_args = [
         "--dist-init-addr", dist_init_addr,
-        "--node-rank", pod_index,
+        "--node-rank", str(pod_index),
     ]
     other_args = model_config["other_args"]
     for sa in special_args:
@@ -191,7 +348,7 @@ def launch_pd_mix_node(model_config):
         ],
     )
 
-# launch p/d seperation node
+# Launch prefill/decode separation node
 def launch_pd_seperation_node(model_config):
     print(f"Launch pd seperation node start ......")
     node_ip = os.getenv("POD_IP")
@@ -202,14 +359,14 @@ def launch_pd_seperation_node(model_config):
 
     role = "prefill" if "prefill" in hostname else "decode"
 
-    bootstrap_init_port = 8995
+    bootstrap_init_port = BOOTSTRAP_INIT_PORT
     master_prefill_ip = None
     master_decode_ip = None
 
-    is_prefill_instance_multi_node = True if "--node-rank" not in model_config["prefill_args"] else False
-    is_decode_instance_multi_node = True if "--node-rank" not in model_config["decode_args"] else False
+    is_prefill_instance_multi_node = "--node-rank" not in model_config["prefill_args"]
+    is_decode_instance_multi_node = "--node-rank" not in model_config["decode_args"]
 
-    # monitor configmap ready
+    # Monitor ConfigMap ready
     is_ready = False
     start_time = time.time()
     while not is_ready and time.time() - start_time < LOCAL_TIMEOUT:
@@ -236,7 +393,7 @@ def launch_pd_seperation_node(model_config):
     if not is_ready:
         raise RuntimeError(f"Timeout: Failed to get master node information from ConfigMap")
 
-    # generate p/d run command
+    # Generate prefill/decode run command
     common_args = [
         "--trust-remote-code",
         "--attention-backend", "ascend",
@@ -297,7 +454,7 @@ def launch_pd_seperation_node(model_config):
     try:
         process = popen_launch_server(
             model_config["model_path"],
-            f"http://{node_ip}:{LOCAL_PORT}",
+            f"http://{node_ip}:{PREFILL_DECODE_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *service_args,
@@ -307,24 +464,24 @@ def launch_pd_seperation_node(model_config):
         raise RuntimeError(f"Failed to start {role} node on {node_ip}: {e}")
     return process
 
-# launch router node
+# Launch router node
 def launch_router(config):
     print(f"launch_router start ......")
     nodes_count = discover_worker_nodes()
     print(f"Discovered {nodes_count} worker nodes")
 
-    # monitor  to generate p/d url
+    # Monitor to generate prefill/decode URL
     prefill_url = []
     decode_url = []
     bootstrap_ports = []
     node_ip_list = []
-    is_prefill_instance_multi_node = True if "--node-rank" not in config["prefill_args"] else False
-    is_decode_instance_multi_node = True if "--node-rank" not in config["decode_args"] else False
+    is_prefill_instance_multi_node = "--node-rank" not in config["prefill_args"]
+    is_decode_instance_multi_node = "--node-rank" not in config["decode_args"]
 
     is_ready = False
-    bootstrap_init_port = 8995
+    bootstrap_init_port = BOOTSTRAP_INIT_PORT
     start_time = time.time()
-    while not is_ready and time.time() - start_time < 300:
+    while not is_ready and time.time() - start_time < ROUTER_CONFIGMAP_TIMEOUT:
         configmap = query_configmap(CONFIGMAP_NAME, NAMESPACE)
         if not configmap or not configmap.data:
             print(f"ConfigMap data is not available yet, waiting for 15s...")
@@ -335,13 +492,13 @@ def launch_router(config):
             pod_index = int(pod_name.rsplit("-", 1)[-1])
             prefill_keyword = "prefill-0" if is_prefill_instance_multi_node else "prefill"
             if prefill_keyword in pod_name:
-                prefill_url.append(f"{pod_ip}:{LOCAL_PORT}")
+                prefill_url.append(f"{pod_ip}:{PREFILL_DECODE_PORT}")
                 bootstrap_port = (bootstrap_init_port if is_prefill_instance_multi_node else bootstrap_init_port + pod_index)
                 bootstrap_ports.append(str(bootstrap_port))
                 node_ip_list.append(pod_ip)
             decode_keyword = "decode-0" if is_decode_instance_multi_node else "decode"
             if decode_keyword in pod_name:
-                decode_url.append(f"{pod_ip}:{LOCAL_PORT}")
+                decode_url.append(f"{pod_ip}:{PREFILL_DECODE_PORT}")
                 node_ip_list.append(pod_ip)
         if prefill_url and decode_url:
             is_ready = True
@@ -356,67 +513,84 @@ def launch_router(config):
         f"bootstrap_ports={bootstrap_ports}, node_ip_list={node_ip_list}"
     )
 
-    # checkout all node port ready
-    if not wait_for_all_ports_ready(ips=node_ip_list, port=LOCAL_PORT, timeout=LOCAL_TIMEOUT):
+    # Check all node port ready
+    if not wait_for_all_ports_ready(ips=node_ip_list, port=PREFILL_DECODE_PORT, timeout=LOCAL_TIMEOUT):
         raise RuntimeError("Failed to wait for all nodes to be ready")
 
-    # set env var
+    # Set environment variables
     set_environment_variables(config.get("router_envs"))
 
     router_args = config["router_args"]
-    # router server params
+    # Router server params
     router_command = [
-        "python3",
-        "-u",
-        "-m",
-        "sglang_router.launch_router",
-        "--host",
-        "127.0.0.1",
-        "--port",
-        SERVICE_PORT,
+        "python3", "-u", "-m", "sglang_router.launch_router",
+        "--host", "127.0.0.1",
+        "--port", SERVICE_PORT,
         "--pd-disaggregation",
-        "--policy",
-        "cache_aware",
+        "--policy", "cache_aware",
         *[str(x) for x in router_args],
     ]
 
     for index, url in enumerate(prefill_url):
-        router_command.append("--prefill")
-        router_command.append(f"http://{url}")
-        router_command.append(f"{bootstrap_ports[index]}")
+        router_command.extend(["--prefill", f"http://{url}", f"{bootstrap_ports[index]}"])
 
     for url in decode_url:
-        router_command.append("--decode")
-        router_command.append("http://" + url)
-    router_command_str = " ".join(router_command)
-    print(f"Starting router with command: {router_command_str}")
+        router_command.extend(["--decode", f"http://{url}"])
+    
+    print(f"Starting router with command: {' '.join(router_command)}")
     try:
-        router_process = subprocess.Popen(router_command_str, shell=True)
+        router_process = subprocess.Popen(router_command)
         print(f"Router process started with PID: {router_process.pid}")
     except Exception as e:
         raise RuntimeError(f"Failed to start router process: {e}")
 
 def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
-    print(f"Waiting for the server to start...")
+    """Wait for the server to be ready.
+    
+    Args:
+        url (str): Server URL to check.
+        timeout (int): Timeout in seconds.
+        
+    Raises:
+        RuntimeError: If server fails to start within timeout.
+    """
+    print(f"Waiting for the server to start at {url}...")
     start_time = time.perf_counter()
+    check_interval = 10
+    
     while True:
         try:
-            response = requests.get(url)
+            response = requests.get(url, timeout=5)
             if response.status_code == 200:
                 print(f"Server {url} is ready!")
                 return
-        except Exception:
-            pass
+            else:
+                print(f"Server {url} returned status code: {response.status_code}")
+        except requests.exceptions.Timeout:
+            print(f"Server {url} request timeout, retrying...")
+        except requests.exceptions.ConnectionError as e:
+            print(f"Server {url} connection error: {e}, retrying...")
+        except requests.exceptions.RequestException as e:
+            print(f"Server {url} request error: {e}, retrying...")
+        except Exception as e:
+            print(f"Server {url} unexpected error: {e}, retrying...")
 
-        if time.perf_counter() - start_time > timeout:
-            raise RuntimeError(f"Server {url} failed to start in {timeout}s")
-        time.sleep(10)
+        elapsed_time = time.perf_counter() - start_time
+        if elapsed_time > timeout:
+            raise RuntimeError(f"Server {url} failed to start in {timeout}s (elapsed: {elapsed_time:.2f}s)")
+        
+        print(f"Waiting... ({elapsed_time:.2f}s elapsed, {timeout - elapsed_time:.2f}s remaining)")
+        time.sleep(check_interval)
 
 def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_name=None, request_rate=None,
-                      max_concurrency=None, num_prompts=None, input_len=None, output_len=None, random_range_ratio=1,
-                      dataset_path=None):
-    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
-                "--model", model_path, "--backend", backend]
+                      max_concurrency=None, num_prompts=None, input_len=None, output_len=None, random_range_ratio=1, dataset_path=None):
+    metrics_file = os.getenv("METRICS_DATA_FILE")
+    result_file = "./bench_log.txt" if not metrics_file else metrics_file
+    print(f"The metrics result file: {result_file}")
+    
+    write_pkg_info_to_file(result_file)
+
+    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port), "--model", model_path, "--backend", backend]
 
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
@@ -434,29 +608,48 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
         cmd_args.extend(["--random-output-len", str(output_len)])
     if random_range_ratio:
         cmd_args.extend(["--random-range-ratio", str(random_range_ratio)])
+    print(f"Command: {' '.join(cmd_args)}")
 
-    result_file = os.getenv("METRICS_DATA_FILE")
-    result_file = "./bench_log.txt" if not result_file else result_file
-    print(f"The metrics result file: {result_file}")
-    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep|memfabric_hybrid' | tee {result_file}")
-    cann_info="/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
-    run_command(f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}")
-
-    command = " " .join(cmd_args)
-    print(f"Command: {command}")
-
-    metrics = run_command(f"{command} | tee -a {result_file}")
-    print(f"metrics is {metrics}")
-
-    mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
-    mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
-    total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
-
-    return {
-        'mean_ttft': mean_ttft,
-        'mean_tpot': mean_tpot,
-        'total_tps': total_tps
+    # Run benchmark command and capture output
+    metrics = {
+        'mean_ttft': None,
+        'mean_tpot': None,
+        'total_tps': None
     }
+    
+    try:
+        process = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+        
+        # Read output line by line
+        with open(result_file, 'a', encoding='utf-8') as f:
+            for line in process.stdout:
+                f.write(line)
+                stripped_line = line.strip()
+                print(stripped_line)
+
+                # Extract metrics
+                if 'Mean TTFT' in stripped_line:
+                    parts = stripped_line.split()
+                    if len(parts) >= 4:
+                        metrics['mean_ttft'] = parts[3]
+                elif 'Mean TPOT' in stripped_line:
+                    parts = stripped_line.split()
+                    if len(parts) >= 4:
+                        metrics['mean_tpot'] = parts[3]
+                elif 'Output token throughput' in stripped_line:
+                    parts = stripped_line.split()
+                    if len(parts) >= 5:
+                        metrics['total_tps'] = parts[4]
+        
+        process.wait()
+        
+        if process.returncode != 0:
+            print(f"Benchmark command failed with return code: {process.returncode}")
+            
+    except Exception as e:
+        print(f"Error running benchmark: {e}")
+
+    return metrics
 
 class TestPerformanceTestCaseBase(CustomTestCase):
     model = None
@@ -468,7 +661,7 @@ class TestPerformanceTestCaseBase(CustomTestCase):
     envs = None
     request_rate = None
     max_concurrency = 8
-    num_prompts = int(max_concurrency) * 4
+    num_prompts = int(max_concurrency) * PROMPTS_MULTIPLIER
     input_len = None
     output_len = None
     random_range_ratio = None
@@ -479,13 +672,11 @@ class TestPerformanceTestCaseBase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
+        env = os.environ.copy()
         if cls.envs:
             for key, value in cls.envs.items():
-                print(f"ENV_VAR_CASE {key}:{value}")
-        env = os.environ.copy()
-        for key, value in cls.envs.items():
-            print(f"ENV_VAR_OTHER {key}:{value}")
-        env.update(cls.envs)
+                print(f"ENV_VAR {key}:{value}")
+                env[key] = value
 
         cls.process = popen_launch_server(
             cls.model,
@@ -497,11 +688,47 @@ class TestPerformanceTestCaseBase(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+        if hasattr(cls, 'process') and cls.process:
+            try:
+                kill_process_tree(cls.process.pid)
+            except Exception as e:
+                print(f"Error during tearDown: {e}")
+
+    def _assert_metrics(self, metrics):
+        """Assert benchmark metrics against expected values.
+        
+        Args:
+            metrics (dict): Benchmark metrics dictionary.
+        """
+        if not metrics:
+            self.fail("No metrics obtained from benchmark")
+            
+        if self.tpot:
+            if self.tpot < TPOT_THRESHOLD:
+                self.assertLessEqual(
+                    float(metrics['mean_tpot']),
+                    self.tpot + TPOT_TOLERANCE_LOW,
+                )
+            else:
+                self.assertLessEqual(
+                    float(metrics['mean_tpot']),
+                    self.tpot * TPOT_TOLERANCE_HIGH,
+                )
+        if self.output_token_throughput:
+            self.assertGreaterEqual(
+                float(metrics['total_tps']),
+                self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
+            )
+        if self.ttft:
+            self.assertLessEqual(
+                float(metrics['mean_ttft']),
+                self.ttft * TTFT_TOLERANCE,
+            )
 
     def run_throughput(self, run_cycles=2):
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
+        parsed_url = urlparse(self.base_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
         bench_params = {
             'host': host,
             'port': port,
@@ -523,21 +750,7 @@ class TestPerformanceTestCaseBase(CustomTestCase):
             print(f"Running benchmark, {i + 1}/{run_cycles}")
             metrics = run_bench_serving(**bench_params)
 
-        if self.tpot:
-            self.assertLessEqual(
-                float(metrics['mean_tpot']),
-                self.tpot + 1 if self.tpot < 50 else self.tpot * 1.02,
-            )
-        if self.output_token_throughput:
-            self.assertGreaterEqual(
-                float(metrics['total_tps']),
-                self.output_token_throughput * 0.98,
-            )
-        if self.ttft:
-            self.assertLessEqual(
-                float(metrics['mean_ttft']),
-                self.ttft * 1.02,
-            )
+        self._assert_metrics(metrics)
 
 class TestMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
@@ -561,6 +774,41 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
         cls.role = "master" if hostname.endswith("sglang-node-0") else "worker"
         print(f"Init {cls.local_ip} {cls.role=}!")
 
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def _assert_metrics(self, metrics):
+        """Assert benchmark metrics against expected values.
+        
+        Args:
+            metrics (dict): Benchmark metrics dictionary.
+        """
+        if not metrics:
+            self.fail("No metrics obtained from benchmark")
+            
+        if self.tpot:
+            if self.tpot < TPOT_THRESHOLD:
+                self.assertLessEqual(
+                    float(metrics['mean_tpot']),
+                    self.tpot + TPOT_TOLERANCE_LOW,
+                )
+            else:
+                self.assertLessEqual(
+                    float(metrics['mean_tpot']),
+                    self.tpot * TPOT_TOLERANCE_HIGH,
+                )
+        if self.output_token_throughput:
+            self.assertGreaterEqual(
+                float(metrics['total_tps']),
+                self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
+            )
+        if self.ttft:
+            self.assertLessEqual(
+                float(metrics['mean_ttft']),
+                self.ttft * TTFT_TOLERANCE,
+            )
+
     def run_throughput(self, run_cycles=2):
         sglang_thread = threading.Thread(
             target=launch_pd_mix_node, args=(self.model_config,)
@@ -570,8 +818,8 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
         if self.role == "master":
             master_node_ip = os.getenv("POD_IP")
             wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
-            print(f"Wait 120s, starting run benchmark ......")
-            time.sleep(120)
+            print(f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......")
+            time.sleep(SERVER_INITIALIZATION_DELAY)
 
             bench_params = {
                 'host': master_node_ip,
@@ -593,21 +841,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
                 print(f"Running benchmark, {i+1}/{run_cycles}")
                 metrics = run_bench_serving(**bench_params)
 
-            if self.tpot:
-                self.assertLessEqual(
-                    float(metrics['mean_tpot']),
-                    self.tpot + 1 if self.tpot < 50 else self.tpot * 1.02,
-                )
-            if self.output_token_throughput:
-                self.assertGreaterEqual(
-                    float(metrics['total_tps']),
-                    self.output_token_throughput * 0.98,
-                )
-            if self.ttft:
-                self.assertLessEqual(
-                    float(metrics['mean_ttft']),
-                    self.ttft * 1.02,
-                )
+            self._assert_metrics(metrics)
         else:
             print("Worker node is running.")
             time.sleep(LOCAL_TIMEOUT)
@@ -634,6 +868,45 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.role = "router" if "router" in hostname else "prefill" if "prefill" in hostname else "decode"
         print(f"Init {cls.local_ip} {cls.role=}!")
 
+    @classmethod
+    def tearDownClass(cls):
+        if cls.process:
+            try:
+                kill_process_tree(cls.process.pid)
+            except Exception as e:
+                print(f"Error during tearDown: {e}")
+
+    def _assert_metrics(self, metrics):
+        """Assert benchmark metrics against expected values.
+        
+        Args:
+            metrics (dict): Benchmark metrics dictionary.
+        """
+        if not metrics:
+            self.fail("No metrics obtained from benchmark")
+            
+        if self.tpot:
+            if self.tpot < TPOT_THRESHOLD:
+                self.assertLessEqual(
+                    float(metrics['mean_tpot']),
+                    self.tpot + TPOT_TOLERANCE_LOW,
+                )
+            else:
+                self.assertLessEqual(
+                    float(metrics['mean_tpot']),
+                    self.tpot * TPOT_TOLERANCE_HIGH,
+                )
+        if self.output_token_throughput:
+            self.assertGreaterEqual(
+                float(metrics['total_tps']),
+                self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
+            )
+        if self.ttft:
+            self.assertLessEqual(
+                float(metrics['mean_ttft']),
+                self.ttft * TTFT_TOLERANCE,
+            )
+
     def run_throughput(self, run_cycles=2):
         if self.role == "router":
             print(f"Starting router in thread...")
@@ -646,8 +919,8 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             print(f"Waiting for router to be ready at {health_check_url}")
             wait_server_ready(health_check_url)
 
-            print(f"Waiting 120 seconds for the server to fully initialize...")
-            time.sleep(120)
+            print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
+            time.sleep(SERVER_INITIALIZATION_DELAY)
 
             bench_params = {
                 'host': "127.0.0.1",
@@ -669,21 +942,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
                 print(f"Running benchmark, {i+1}/{run_cycles}")
                 metrics = run_bench_serving(**bench_params)
 
-            if self.tpot:
-                self.assertLessEqual(
-                    float(metrics['mean_tpot']),
-                    self.tpot + 1 if self.tpot < 50 else self.tpot * 1.02,
-                )
-            if self.output_token_throughput:
-                self.assertGreaterEqual(
-                    float(metrics['total_tps']),
-                    self.output_token_throughput * 0.98,
-                )
-            if self.ttft:
-                self.assertLessEqual(
-                    float(metrics['mean_ttft']),
-                    self.ttft * 1.02,
-                )
+            self._assert_metrics(metrics)
         else:
             # launch p/d node
             sglang_thread = threading.Thread(
