@@ -27,7 +27,7 @@ class TestHiddenState(CustomTestCase):
             "max_new_tokens": 8,
         }
 
-        engine = sgl.Engine(
+        self.engine = sgl.Engine(
             model_path=model_path,
             random_seed=42,
             skip_tokenizer_init=True,
@@ -40,7 +40,7 @@ class TestHiddenState(CustomTestCase):
             sampling_params=sampling_params,
             return_hidden_states=True,
         )
-        engine.shutdown()
+        self.engine.shutdown()
 
         for output in outputs:
             self.assertEqual(len(output["meta_info"]["hidden_states"]), 8)
@@ -104,7 +104,7 @@ class TestHiddenState(CustomTestCase):
             "max_new_tokens": 8,
         }
 
-        engine = sgl.Engine(
+        self.engine = sgl.Engine(
             model_path=model_path,
             random_seed=42,
             skip_tokenizer_init=True,
@@ -128,7 +128,7 @@ class TestHiddenState(CustomTestCase):
             sampling_params=sampling_params,
             return_hidden_states=True,
         )
-        engine.shutdown()
+        self.engine.shutdown()
 
         for (
             output_completion_first_round,
@@ -146,6 +146,10 @@ class TestHiddenState(CustomTestCase):
             self.assertEqual(
                 len(output_completion_last_round["meta_info"]["hidden_states"]), 8
             )
+
+    @classmethod
+    def tearDownClass(self):
+        self.engine.shutdown()
 
 
 if __name__ == "__main__":
