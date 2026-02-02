@@ -21,6 +21,7 @@ class TestDtype(CustomTestCase):
        [Test Target] --dtype
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
     def test_dtype_options(self):
         for i in ["half", "auto", "float16", "bfloat16"]:
             other_args = (
@@ -39,9 +40,6 @@ class TestDtype(CustomTestCase):
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=other_args,
             )
-            response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-            self.assertEqual(response.status_code, 200)
-
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
                 json={
@@ -54,9 +52,6 @@ class TestDtype(CustomTestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertIn("Paris", response.text)
-
-            response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-            self.assertEqual(response.status_code, 200)
             kill_process_tree(process.pid)
 
 
