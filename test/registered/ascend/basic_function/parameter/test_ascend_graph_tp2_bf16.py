@@ -1,13 +1,12 @@
 import unittest
 
-from sglang.test.ascend.base_test_ascend_gsm8k_and_throughput import BaseTestAscendGsm8kAndThroughput
-from sglang.test.ascend.test_ascend_utils import QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH
+from test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-2-npu-a3", nightly=True)
 
 
-class TestAscendGraphTp2Bf16(BaseTestAscendGsm8kAndThroughput):
+class TestAscendGraphTp2Bf16(TestAscendGraphTp1Bf16):
     """
     Testcase：Verify the accuracy on gsm8k dataset and throughput of Qwen2.5-7B when cuda graph mode is enabled and
     tp size is 2
@@ -16,14 +15,6 @@ class TestAscendGraphTp2Bf16(BaseTestAscendGsm8kAndThroughput):
     [Test Target] enable cuda graph mode (default setting), --tp-size 2
     """
 
-    TEST_MODEL_MATRIX = {
-        QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH: {
-            "accuracy": 0.85,
-            "latency": 180,
-            "output_throughput": 20,
-        },
-    }
-
     extra_args = [
         "--mem-fraction-static", 0.8,
         "--tp-size", 2,
@@ -31,4 +22,8 @@ class TestAscendGraphTp2Bf16(BaseTestAscendGsm8kAndThroughput):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendGraphTp2Bf16))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)

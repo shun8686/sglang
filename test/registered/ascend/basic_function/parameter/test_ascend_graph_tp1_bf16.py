@@ -34,7 +34,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
         },
     }
     extra_args = ["--mem-fraction-static", 0.8, ]
-    envs = []
+    envs = {}
 
     @classmethod
     def setUpClass(cls):
@@ -46,6 +46,8 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
             "--attention-backend",
             "ascend",
         ]
+
+        # basic testcase, reserved for setting environment
         for env in cls.envs.keys():
             os.environ[env] = cls.envs[env]
 
