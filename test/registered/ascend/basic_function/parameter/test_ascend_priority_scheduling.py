@@ -244,9 +244,7 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = (
-                LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-            )
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         other_args=(
             (
                 "--max-running-requests",  # Enforce max request concurrency is 2
