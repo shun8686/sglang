@@ -26,8 +26,7 @@ class TestSoftWatchdog(CustomTestCase):
     """
 
     env_override = None
-    expected_message = Watchdog
-    timeout
+    expected_message = "Watchdog timeout"
 
     @classmethod
     def setUpClass(cls):
