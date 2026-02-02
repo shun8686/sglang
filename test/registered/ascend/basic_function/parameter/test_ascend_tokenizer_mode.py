@@ -32,7 +32,7 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--tokenizer-mode",
-            tokenizer_mode,
+            cls.tokenizer_mode,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",

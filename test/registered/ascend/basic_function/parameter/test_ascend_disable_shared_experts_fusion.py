@@ -50,6 +50,10 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
             ],
         )
 
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
     def test_disable_shared_experts_fusion(self):
         response = requests.get(f"{self.base_url}/health_generate")
         self.assertEqual(response.status_code, 200)
@@ -69,10 +73,6 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
         response = requests.get(self.base_url + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["disable_shared_experts_fusion"], True)
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
 
 
 if __name__ == "__main__":
