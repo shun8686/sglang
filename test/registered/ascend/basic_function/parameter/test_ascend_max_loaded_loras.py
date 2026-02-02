@@ -5,7 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import META_LLAMA_3_1_8B_INSTRUCT
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -65,7 +64,10 @@ class TestMaxLoadedLoras(CustomTestCase):
             response.json()["max_loaded_loras"],
             1,
         )
-        kill_process_tree(process.pid)
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
 
 if __name__ == "__main__":
