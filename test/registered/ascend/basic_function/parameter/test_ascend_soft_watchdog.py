@@ -16,7 +16,7 @@ from sglang.test.test_utils import (
 register_cuda_ci(est_time=120, suite="nightly-1-gpu", nightly=True)
 
 
-class BaseTestSoftWatchdog:
+class TestSoftWatchdog(CustomTestCase):
     """
     Testcase：Verify that the correctness and stability of --soft-watchdog mechanism under long-running generation
     requests on GPU backend
@@ -26,7 +26,7 @@ class BaseTestSoftWatchdog:
     """
 
     env_override = None
-    expected_message = None
+    expected_message = "Watchdog timeout"
 
     @classmethod
     def setUpClass(cls):
@@ -36,18 +36,17 @@ class BaseTestSoftWatchdog:
         cls.stdout = io.StringIO()
         cls.stderr = io.StringIO()
 
-        with cls.env_override():
-            cls.process = popen_launch_server(
-                cls.model_path,
-                cls.base_url,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=[
-                    "--soft-watchdog-timeout",
-                    "20",
-                    "--skip-server-warmup",
-                ],
-                return_stdout_stderr=(cls.stdout, cls.stderr),
-            )
+        cls.process = popen_launch_server(
+            cls.model_path,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=[
+                "--soft-watchdog-timeout",
+                "20",
+                "--skip-server-warmup",
+            ],
+            return_stdout_stderr=(cls.stdout, cls.stderr),
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -73,9 +72,6 @@ class BaseTestSoftWatchdog:
         combined_output = self.stdout.getvalue() + self.stderr.getvalue()
         self.assertIn(self.expected_message, combined_output)
 
-
-class TestSoftWatchdog(BaseTestSoftWatchdog, CustomTestCase):
-    expected_message = "Watchdog timeout"
 
 if __name__ == "__main__":
     unittest.main()

@@ -57,7 +57,10 @@ class TestSleepOnIdle(CustomTestCase):
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["sleep_on_idle"], True)
-        kill_process_tree(process.pid)
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
 
 if __name__ == "__main__":
