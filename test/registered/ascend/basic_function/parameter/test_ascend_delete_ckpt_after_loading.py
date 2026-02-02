@@ -1,5 +1,6 @@
 import os
 import shutil
+import requests
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -57,8 +58,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        if os.path.exists(cls.model_back_up_path):
-            shutil.rmtree(cls.model_back_up_path)
+        if os.path.exists(cls.back_up_model_path):
+            shutil.rmtree(cls.back_up_model_path)
 
     def test_delete_ckpt_after_loading(self):
         response = requests.post(
