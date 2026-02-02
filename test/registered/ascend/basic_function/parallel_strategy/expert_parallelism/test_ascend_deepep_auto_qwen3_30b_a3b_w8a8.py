@@ -18,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDeepepAutoQwen3(CustomTestCase):
-    """Testcase: Verify the accuracy of Qwen3-30B model on MMLU and GSM8K tasks with DeepEP low latency mode on Ascend backend.
+    """Testcase: Verify the accuracy of Qwen3-30B model on MMLU and GSM8K tasks with DeepEP auto mode on Ascend backend.
 
     [Test Category] Parameter
     [Test Target] --moe-a2a-backend;--deepep-mode
