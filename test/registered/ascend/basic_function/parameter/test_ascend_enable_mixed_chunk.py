@@ -17,11 +17,16 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
-# 配置项
-LOG_DUMP_FILE = f"test_mixed_chunk_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+# 配置项：使用/tmp绝对路径（确保权限，避免日志创建失败），保留日志不删除
+LOG_DUMP_FILE = f"/tmp/test_mixed_chunk_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
 CUSTOM_SERVER_WAIT_TIME = 30  # 超长token输入，服务器启动时间适当延长
 MODEL_TRUNK_SIZE = 2048  # Llama-3.2-1B 原生trunk size
 TARGET_TOKEN_COUNT = 2500  # 目标输入token数，超过原生trunk size触发mixed chunk
+
+# 提前创建空日志文件，确保日志能正常写入（避免IO重定向失败）
+with open(LOG_DUMP_FILE, "w", encoding="utf-8") as f:
+    f.write(f"=== 日志文件创建成功，时间：{datetime.now()} ===\n")
+    f.write(f"=== 本次测试删除无效参数：--max-seq-length 3072 ===\n")
 
 def build_long_input_text_for_token():
     """
@@ -61,12 +66,12 @@ class TestEnableMixedChunk(CustomTestCase):
         os.dup2(cls.log_fd, sys.stdout.fileno())
         os.dup2(cls.log_fd, sys.stderr.fileno())
 
-        # 4. 启动服务器（开启enable-mixed-chunk，保留NPU相关参数）
+        # 4. 启动服务器（删除无效参数 --max-seq-length "3072"，保留其他NPU相关参数）
         other_args = [
             "--enable-mixed-chunk",
             "--attention-backend",
             "ascend",
-            "--disable-cuda-graph",
+            "--disable-cuda-graph"  # 已删除 --max-seq-length "3072"
         ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
@@ -88,50 +93,45 @@ class TestEnableMixedChunk(CustomTestCase):
         os.dup2(cls.original_stdout_fd, sys.stdout.fileno())
         os.dup2(cls.original_stderr_fd, sys.stderr.fileno())
 
-        # 3. 关闭所有文件句柄和文件对象（释放文件占用，避免删除失败）
+        # 3. 关闭所有文件句柄和文件对象（释放文件占用，确保日志完整写入）
         os.close(cls.log_fd)
         os.close(cls.original_stdout_fd)
         os.close(cls.original_stderr_fd)
         cls.log_file.close()
 
-        # 4. 打印完整日志到控制台（方便排查问题）
+        # 4. 打印完整日志到控制台（方便排查报错问题）
         cls.print_full_log()
 
-        # 5. 删除日志文件（清理冗余，避免文件堆积）
-        cls.delete_log_file()
+        # 5. 注释删除日志文件的逻辑（保留日志，方便后续排查）
+        print(f"\n=== 日志文件已保留，路径：{os.path.abspath(LOG_DUMP_FILE)} ===")
+        print(f"=== 可通过命令查看完整日志：cat {os.path.abspath(LOG_DUMP_FILE)} ===")
 
     @classmethod
     def print_full_log(cls):
-        """打印完整服务端日志，方便查看mixed chunk相关内容"""
+        """打印完整服务端日志，方便查看报错信息和mixed chunk相关内容"""
         if not os.path.exists(LOG_DUMP_FILE):
             print("\n【日志提示】日志文件不存在，无内容可打印")
             return
         
         print("\n" + "="*80)
-        print("完整服务端日志（验证prefill和decode同batch）：")
+        print("完整服务端日志（含报错信息，日志文件已保留）：")
         print("="*80)
         with open(LOG_DUMP_FILE, "r", encoding="utf-8", errors="ignore") as f:
             full_log = f.read()
-            # 日志过长时仅打印最后8000字符，避免控制台刷屏，同时保留关键内容
-            if len(full_log) <= 8000:
+            # 日志过长时仅打印最后10000字符，避免控制台刷屏，同时保留完整报错信息
+            if len(full_log) <= 10000:
                 print(full_log)
             else:
-                print(f"【日志过长（总长度{len(full_log)}），仅展示最后8000字符】")
-                print(full_log[-8000:])
+                print(f"【日志过长（总长度{len(full_log)}字符），仅展示最后10000字符】")
+                print(full_log[-10000:])
         print("="*80)
         print("日志打印完毕")
 
-    @classmethod
-    def delete_log_file(cls):
-        """删除已生成的日志文件，清理冗余文件"""
-        try:
-            if os.path.exists(LOG_DUMP_FILE):
-                os.remove(LOG_DUMP_FILE)
-                print(f"\n日志文件已成功删除：{os.path.abspath(LOG_DUMP_FILE)}")
-            else:
-                print("\n【删除提示】日志文件不存在，无需执行删除操作")
-        except Exception as e:
-            print(f"\n【删除警告】日志文件删除失败，可能被其他进程占用：{e}")
+    # 注释删除日志的方法，确保日志保留
+    # @classmethod
+    # def delete_log_file(cls):
+    #     """删除已生成的日志文件，清理冗余文件"""
+    #     ... 原有逻辑已注释，不再执行
 
     def read_log_file(self):
         """读取日志文件完整内容，返回字符串格式，用于断言判断"""
