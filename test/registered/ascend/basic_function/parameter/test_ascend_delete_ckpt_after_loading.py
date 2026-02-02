@@ -28,7 +28,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        cls.back_up_model_path = Qwen2_5_7B_Instruct_WEIGHTS_PATH + "-back-up"
+        cls.back_up_model_path = cls.model + "-back-up"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
