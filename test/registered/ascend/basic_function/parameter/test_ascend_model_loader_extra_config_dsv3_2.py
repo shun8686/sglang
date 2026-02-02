@@ -17,10 +17,10 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-MULTITHREAD_OUT_LOG = "./multi_thread_out_log.txt"
-MULTITHREAD_ERR_LOG = "./multi_thread_err_log.txt"
-CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
-CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
+MULTITHREAD_OUT_LOG = "./tmp/multi_thread_out_log.txt"
+MULTITHREAD_ERR_LOG = "./tmp/multi_thread_err_log.txt"
+CHECKPOINT_OUT_LOG = "./tmp/checkpoint_out_log.txt"
+CHECKPOINT_ERR_LOG = "./tmp/checkpoint_err_log.txt"
 
 
 class BaseModelLoaderTest(ABC):
@@ -86,21 +86,6 @@ class BaseModelLoaderTest(ABC):
             cls.out_file.close()
         if hasattr(cls, 'err_file') and cls.err_file:
             cls.err_file.close()
-
-        # 删除日志文件
-        log_files = [
-            MULTITHREAD_OUT_LOG,
-            MULTITHREAD_ERR_LOG,
-            CHECKPOINT_OUT_LOG,
-            CHECKPOINT_ERR_LOG
-        ]
-
-        for log_file in log_files:
-            if os.path.exists(log_file):
-                try:
-                    os.remove(log_file)
-                except Exception as e:
-                    print(f"Warning: Failed to remove log file {log_file}: {e}")
 
 
 class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
