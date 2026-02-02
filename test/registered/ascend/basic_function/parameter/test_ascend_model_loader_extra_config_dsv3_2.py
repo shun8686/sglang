@@ -1,12 +1,12 @@
 import json
 import os
-import subprocess
 import unittest
+from abc import ABC
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH, run_command
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
@@ -17,28 +17,13 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
+MULTITHREAD_OUT_LOG = "./multi_thread_out_log.txt"
+MULTITHREAD_ERR_LOG = "./multi_thread_err_log.txt"
+CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
+CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
 
-class TestModelLoaderExtraConfig(CustomTestCase):
-    """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
-    and verify that the startup log contains "Multi-thread".
-    Without configuring this parameter, the startup log should contain "Loading safetensors".
-    After configuring the parameter, the model loading time should be reduced.
-
-    [Test Category] Parameter
-    [Test Target] --model-loader-extra-config {"enable_multithread_load": True, "num_threads": 2}
-    """
-
+class BaseModelLoaderTest(ABC):
     models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
     accuracy = 0.5
     other_args = [
@@ -53,12 +38,9 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         "--quantization",
         "modelslim",
         "--disable-radix-cache",
-        "--model-loader-extra-config",
-        json.dumps({"enable_multithread_load": True, "num_threads": 2}),
     ]
-    out_log_file = open("./multi_thread_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./multi_thread_err_log.txt", "w+", encoding="utf-8")
-    log_info = "Multi-thread"
+    out_file = None
+    err_file = None
 
     @classmethod
     def setUpClass(cls):
@@ -92,23 +74,76 @@ class TestModelLoaderExtraConfig(CustomTestCase):
             timeout=3000,
             other_args=cls.other_args,
             env=env,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+            return_stdout_stderr=(cls.out_file, cls.err_file),
         )
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
+        # 关闭文件句柄
+        if hasattr(cls, 'out_file') and cls.out_file:
+            cls.out_file.close()
+        if hasattr(cls, 'err_file') and cls.err_file:
+            cls.err_file.close()
+
+        # 删除日志文件
+        log_files = [
+            MULTITHREAD_OUT_LOG,
+            MULTITHREAD_ERR_LOG,
+            CHECKPOINT_OUT_LOG,
+            CHECKPOINT_ERR_LOG
+        ]
+
+        for log_file in log_files:
+            if os.path.exists(log_file):
+                try:
+                    os.remove(log_file)
+                except Exception as e:
+                    print(f"Warning: Failed to remove log file {log_file}: {e}")
+
+
+class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
+    """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
+    and verify that the startup log contains "Multi-thread".
+    Without configuring this parameter, the startup log should contain "Loading safetensors".
+    After configuring the parameter, the model loading time should be reduced.
+
+    [Test Category] Parameter
+    [Test Target] --model-loader-extra-config {"enable_multithread_load": True, "num_threads": 2}
+    """
+
+    models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
+    accuracy = 0.5
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.9",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        "16",
+        "--quantization",
+        "modelslim",
+        "--disable-radix-cache",
+        "--model-loader-extra-config",
+        json.dumps({"enable_multithread_load": True, "num_threads": 2}),
+    ]
+    log_info = "Multi-thread"
+    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
+
     def test_model_loader_extra_config(self):
-        self.err_log_file.seek(0)
-        content = self.err_log_file.read()
+        self.err_file.seek(0)
+        content = self.err_file.read()
         self.assertIn(self.log_info, content)
 
-    def _test_gsm8k(self):
+    def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
-            num_questions=1319,
+            num_questions=200,
             max_new_tokens=512,
             parallel=128,
             host=f"http://{self.url.hostname}",
@@ -122,44 +157,45 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         )
 
 
-class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
-    other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.9",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        "16",
-        "--quantization",
-        "modelslim",
-        "--disable-radix-cache",
-    ]
-    out_log_file = open("./checkpoint_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./checkpoint_err_log.txt", "w+", encoding="utf-8")
+class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     log_info = "Loading safetensors"
+    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
-    def test_time(self):
-        # 提取时间函数
+    def test_model_loader_extra_config(self):
+        self.err_file.seek(0)
+        content = self.err_file.read()
+        self.assertIn(self.log_info, content)
+
+    def test_model_loading_time_reduced(self):
+        # Helper function to extract loading time
         def get_loading_seconds(filename, pattern):
             cmd = f"grep '{pattern}' ./{filename} | tail -1"
-            line = run_command(cmd).strip()
-            print(f"{pattern}：{line}")
+            line = run_command(cmd)
+            if not line:
+                return 0
+            line = line.strip()
+            print(f"{pattern}: {line}")
             if not line:
                 return 0
             mm_ss = line.split('[')[1].split('<')[0]
             m, s = map(int, mm_ss.split(':'))
             return m * 60 + s
 
-        # 获取时间
-        multi_thread_seconds = get_loading_seconds("multi_thread_err_log.txt", "Multi-thread loading shards")
-        checkpoint_seconds = get_loading_seconds("checkpoint_err_log.txt", "Loading safetensors checkpoint shards")
+        # Get loading times
+        multi_thread_seconds = get_loading_seconds(
+            MULTITHREAD_ERR_LOG,
+            "Multi-thread loading shards"
+        )
+        checkpoint_seconds = get_loading_seconds(
+            CHECKPOINT_ERR_LOG,
+            "Loading safetensors checkpoint shards"
+        )
 
-        # 打印信息
+        # Print information
         print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
 
-        # 断言
+        # Assert
         self.assertGreater(checkpoint_seconds, multi_thread_seconds)
 
 

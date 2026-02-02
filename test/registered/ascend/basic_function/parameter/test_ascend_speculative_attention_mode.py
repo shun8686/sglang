@@ -7,28 +7,32 @@ from urllib.parse import urlparse
 
 import requests
 
-from sglang.test.run_eval import run_eval
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_EAGLE3_WEIGHTS_PATH, QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    kill_process_tree,
     popen_launch_pd_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3"
-
 
 class TestNumReservedDecodeTokens(TestDisaggregationBase):
+    """Testcase: Verify that in the PD disaggregation + MTP scenario, the model inference accuracy remains
+    uncompromised when the Prefill service is launched with the parameter --speculative-attention-mode decode
+    and the Decode service is configured with --speculative-attention-mode prefill.
+
+    [Test Category] Parameter
+    [Test Target] --num-reserved-decode-tokens; --disaggregation-decode-polling-interval
+    """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+        cls.model = QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH
         cls.accuracy = 0.81
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
@@ -69,7 +73,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "--speculative-algorithm",
                 "EAGLE3",
                 "--speculative-draft-model-path",
-                QWEN3_32B_EAGLE_MODEL_PATH,
+                QWEN3_32B_EAGLE3_WEIGHTS_PATH,
                 "--speculative-num-steps",
                 "4",
                 "--speculative-eagle-topk",
@@ -126,7 +130,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "--speculative-algorithm",
                 "EAGLE3",
                 "--speculative-draft-model-path",
-                QWEN3_32B_EAGLE_MODEL_PATH,
+                QWEN3_32B_EAGLE3_WEIGHTS_PATH,
                 "--speculative-num-steps",
                 "4",
                 "--speculative-eagle-topk",
@@ -156,7 +160,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
             other_args=decode_args,
         )
 
-    def test_a_gsm8k(self):
+    def test_gsm8k(self):
         print(f"##=== Testing accuracy: {self.model} ===##")
         args = SimpleNamespace(
             num_shots=5,

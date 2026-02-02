@@ -1,15 +1,13 @@
-import time
 import os
 import unittest
 from types import SimpleNamespace
 
-from utils.test_ascend_deepep_mode_config import NIC_NAME
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
@@ -17,10 +15,14 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-class TestDeepEpDeepseek(CustomTestCase):
+class TestDeepEpDeepseekV32(CustomTestCase):
+    """Testcase: Verify that for the DeepSeek V3.2 model in the single-machine colocation scenario,
+    its inference accuracy on the MMLU and GSM8K dataset meets the preset standard when the parameter --deepep-mode low_latency is configured.
+
+    """
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
+        cls.model = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -47,8 +49,6 @@ class TestDeepEpDeepseek(CustomTestCase):
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
-                "HCCL_SOCKET_IFNAME": NIC_NAME,
-                "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
                 "HCCL_BUFFSIZE": "2048",
                 "HCCL_OP_EXPANSION_MODE": "AIV",

@@ -6,28 +6,33 @@ from types import SimpleNamespace
 
 import requests
 
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
-from test_disaggregation_utils import TestDisaggregationBase
+from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    kill_process_tree,
     popen_launch_pd_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestNumReservedDecodeTokens(TestDisaggregationBase):
+    """Testcase: Verify that in the PD disaggregation scenario, the model accuracy remains
+    uncompromised when the Decode service is launched with the parameters --num-reserved-decode-tokens 128
+    and --disaggregation-decode-polling-interval 2 configured.
+
+    [Test Category] Parameter
+    [Test Target] --num-reserved-decode-tokens; --disaggregation-decode-polling-interval
+    """
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = (
-            "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        )    
+        cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
-        env = os.environ.copy()
 
         # Non blocking start servers
         cls.start_prefill()
