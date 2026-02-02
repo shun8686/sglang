@@ -26,8 +26,8 @@ class TestNcclPort(CustomTestCase):
 
     model = LLAMA_2_7B_WEIGHTS_PATH
 
-    def test_nccl_port(self):
-        """Test the --nccl-port argument."""
+    @classmethod
+    def setUpClass(cls):
         other_args = (
             [
                 "--nccl-port",
@@ -39,35 +39,37 @@ class TestNcclPort(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
-        process = popen_launch_server(
-            self.model,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
+        cls.process = popen_launch_server(
+        cls.model,
+        DEFAULT_URL_FOR_TEST,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
         )
 
-        try:
-            response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-            self.assertEqual(response.status_code, 200)
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
-            response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": "The capital of France is",
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 32,
-                    },
+    def test_nccl_port(self):
+        """Test the --nccl-port argument."""
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        self.assertEqual(response.status_code, 200)
+
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
                 },
-            )
+            },
+        )
 
-            self.assertEqual(response.status_code, 200)
-            print(response.text)
-            result = run_command("lsof -i:8111")
-            self.assertIn("*:8111 (LISTEN)", result)
-
-        finally:
-            kill_process_tree(process.pid)
+        self.assertEqual(response.status_code, 200)
+        print(response.text)
+        result = run_command("lsof -i:8111")
+        self.assertIn("*:8111 (LISTEN)", result)
 
 
 if __name__ == "__main__":
