@@ -44,8 +44,9 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     def tearDownClass(cls):
         pass
 
-    def test_c_mem_fraction_static_too_small(self):
+    def test_c_mem_fraction_static(self):
         mem_fraction_static_values = [0.1, 0.9]
+        model = self.TEST_MODEL_MATRIX.keys()[0]
         for mem_fraction_static_value in mem_fraction_static_values:
             with self.subTest(mem_fraction_static_value=mem_fraction_static_value):
                 print(f"##=== Testing --mem-fraction-static: {mem_fraction_static_value} ===##")

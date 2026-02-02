@@ -5,8 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST_BASE,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -18,13 +16,42 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestEnableTokenizerMode(CustomTestCase):
+class TestEnableTokenizerModeSlow(CustomTestCase):
     """
     Testcase：Verify that the inference is successful when the tokenizer mode is set to slow or auto
 
     [Test Category] Parameter
     [Test Target] --tokenizer-mode slow/auto
     """
+
+
+    tokenizer_mode = "slow"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--tokenizer-mode",
+            tokenizer_mode,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--tokenizer-path",
+            model_path,
+            "--tokenizer-worker-num",
+            4,
+        ]
+        cls.process = popen_launch_server(
+            cls.model_path,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
     def test_tokenzier_mode(self):
         model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
