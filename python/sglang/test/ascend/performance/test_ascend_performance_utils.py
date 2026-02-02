@@ -69,7 +69,7 @@ v1 = client.CoreV1Api()
 
 def get_nic_name():
     """Get network interface name.
-    
+
     Returns:
         str: Network interface name, or None if not found.
     """
@@ -85,20 +85,20 @@ NIC_NAME = "lo" if nic is None else nic
 
 def get_cann_version():
     """Get CANN version info.
-    
+
     Returns:
         str: CANN version info string.
     """
     cann_info_file = "/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
     cann_ver_num = None
-    
+
     try:
         with open(cann_info_file, 'r', encoding='utf-8') as f:
             for line in f:
                 if line.startswith('version='):
                     cann_ver_num = line.strip()
                     break
-        
+
         if cann_ver_num:
             cann_version_info = f"CANN\t{cann_ver_num}"
             print(cann_version_info)
@@ -106,7 +106,7 @@ def get_cann_version():
         else:
             print("CANN version not found")
             return f"CANN\t{cann_ver_num}"
-            
+
     except FileNotFoundError:
         print(f"CANN info file not found: {cann_info_file}")
         return f"CANN\t{cann_ver_num}"
@@ -116,20 +116,20 @@ def get_cann_version():
 
 def write_pkg_info_to_file(result_file):
     """Write package information to result file.
-    
+
     Args:
         result_file (str): Path to the result file.
     """
     try:
         pip_output = subprocess.run(["pip", "list"], capture_output=True, text=True, check=False)
         packages = pip_output.stdout
-        
+
         # Filter relevant packages using list comprehension
         filtered_packages = [
             line for line in packages.split('\n')
             if any(keyword in line for keyword in PACKAGE_FILTER_KEYWORDS)
         ]
-        
+
         # Write to result file
         with open(result_file, 'w', encoding='utf-8') as f:
             for pkg in filtered_packages:
@@ -143,11 +143,11 @@ def write_pkg_info_to_file(result_file):
 # Query ConfigMap from Kubernetes
 def query_configmap(name, namespace):
     """Query ConfigMap from Kubernetes.
-    
+
     Args:
         name (str): ConfigMap name.
         namespace (str): Kubernetes namespace.
-        
+
     Returns:
         V1ConfigMap: ConfigMap object, or None if failed.
     """
@@ -165,7 +165,7 @@ def query_configmap(name, namespace):
 # Get node count from Kubernetes
 def discover_worker_nodes():
     """Discover worker nodes from Kubernetes.
-    
+
     Returns:
         int: Number of worker nodes, or 0 if failed.
     """
@@ -181,7 +181,7 @@ def discover_worker_nodes():
         prefill_count = len(prefill_pods.items)
         decode_count = len(decode_pods.items)
         nodes_count = prefill_count + decode_count
-        
+
         print(f"Discovered {nodes_count} worker nodes (prefill: {prefill_count}, decode: {decode_count})")
         return nodes_count
 
@@ -191,10 +191,10 @@ def discover_worker_nodes():
 
 def set_environment_variables(env_vars):
     """Set environment variables.
-    
+
     Args:
         env_vars (dict): Environment variables dictionary.
-        
+
     Returns:
         dict: Updated environment variables.
     """
@@ -204,17 +204,17 @@ def set_environment_variables(env_vars):
     for key, value in env_vars.items():
         print(f"Setting ENV_VAR {key}={value}")
         os.environ[key] = value
-    
+
     return env_vars
 
 def check_port_availability(host, port, timeout=3):
     """Check if the port is available.
-    
+
     Args:
         host (str): Host IP address.
         port (int): Port number.
         timeout (int): Connection timeout in seconds.
-        
+
     Returns:
         bool: True if port is available, False otherwise.
     """
@@ -246,23 +246,23 @@ def check_port_availability(host, port, timeout=3):
 
 def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15):
     """Wait for all nodes' ports to be ready.
-    
+
     Args:
         ips (list): List of IP addresses.
         port (int): Port number to check.
         timeout (int): Total timeout in seconds.
         check_interval (int): Interval between checks in seconds.
-        
+
     Returns:
         bool: True if all ports are ready, False if timeout.
     """
     start_time = time.time()
     node_status = {ip: False for ip in ips}
-    
+
     while time.time() - start_time < timeout:
         ready_nodes = 0
         status_changed = False
-        
+
         for ip in ips:
             is_ready = check_port_availability(ip, port)
             if is_ready != node_status[ip]:
@@ -282,7 +282,7 @@ def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15
         if status_changed:
             remaining_nodes = len(ips) - ready_nodes
             print(f"Waiting for {remaining_nodes} more nodes to be ready...")
-        
+
         time.sleep(check_interval)
 
     print(f"Timeout: Not all nodes are ready after {timeout} seconds")
@@ -322,7 +322,7 @@ def launch_pd_mix_node(model_config):
         dist_init_addr = f"{master_node_ip}:5000"
         print(f"launch_node {dist_init_addr=}")
         is_ready = True
-    
+
     if not is_ready:
         raise RuntimeError(f"Timeout: Failed to get master node information from ConfigMap after {LOCAL_TIMEOUT} seconds")
 
@@ -525,7 +525,7 @@ def launch_router(config):
     router_command = [
         "python3", "-u", "-m", "sglang_router.launch_router",
         "--host", "127.0.0.1",
-        "--port", SERVICE_PORT,
+        "--port", str(SERVICE_PORT),
         "--pd-disaggregation",
         "--policy", "cache_aware",
         *[str(x) for x in router_args],
@@ -536,7 +536,7 @@ def launch_router(config):
 
     for url in decode_url:
         router_command.extend(["--decode", f"http://{url}"])
-    
+
     print(f"Starting router with command: {' '.join(router_command)}")
     try:
         router_process = subprocess.Popen(router_command)
@@ -546,18 +546,18 @@ def launch_router(config):
 
 def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
     """Wait for the server to be ready.
-    
+
     Args:
         url (str): Server URL to check.
         timeout (int): Timeout in seconds.
-        
+
     Raises:
         RuntimeError: If server fails to start within timeout.
     """
     print(f"Waiting for the server to start at {url}...")
     start_time = time.perf_counter()
     check_interval = 10
-    
+
     while True:
         try:
             response = requests.get(url, timeout=5)
@@ -578,7 +578,7 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time > timeout:
             raise RuntimeError(f"Server {url} failed to start in {timeout}s (elapsed: {elapsed_time:.2f}s)")
-        
+
         print(f"Waiting... ({elapsed_time:.2f}s elapsed, {timeout - elapsed_time:.2f}s remaining)")
         time.sleep(check_interval)
 
@@ -587,7 +587,7 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
     print(f"The metrics result file: {result_file}")
-    
+
     write_pkg_info_to_file(result_file)
 
     cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port), "--model", model_path, "--backend", backend]
@@ -616,10 +616,10 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
         'mean_tpot': None,
         'total_tps': None
     }
-    
+
     try:
         process = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
-        
+
         # Read output line by line
         with open(result_file, 'a', encoding='utf-8') as f:
             for line in process.stdout:
@@ -640,12 +640,12 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
                     parts = stripped_line.split()
                     if len(parts) >= 5:
                         metrics['total_tps'] = parts[4]
-        
+
         process.wait()
-        
+
         if process.returncode != 0:
             print(f"Benchmark command failed with return code: {process.returncode}")
-            
+
     except Exception as e:
         print(f"Error running benchmark: {e}")
 
@@ -696,13 +696,13 @@ class TestPerformanceTestCaseBase(CustomTestCase):
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
-        
+
         Args:
             metrics (dict): Benchmark metrics dictionary.
         """
         if not metrics:
             self.fail("No metrics obtained from benchmark")
-            
+
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
@@ -780,13 +780,13 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
-        
+
         Args:
             metrics (dict): Benchmark metrics dictionary.
         """
         if not metrics:
             self.fail("No metrics obtained from benchmark")
-            
+
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
@@ -823,7 +823,7 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
 
             bench_params = {
                 'host': master_node_ip,
-                'port': SERVICE_PORT,
+                'port': str(SERVICE_PORT),
                 'model_path': self.model_config.get("model_path"),
                 'backend': self.backend,
                 'dataset_name': self.dataset_name,
@@ -878,13 +878,13 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
-        
+
         Args:
             metrics (dict): Benchmark metrics dictionary.
         """
         if not metrics:
             self.fail("No metrics obtained from benchmark")
-            
+
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
@@ -924,7 +924,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
 
             bench_params = {
                 'host': "127.0.0.1",
-                'port': SERVICE_PORT,
+                'port': str(SERVICE_PORT),
                 'model_path': self.model_config.get("model_path"),
                 'backend': self.backend,
                 'dataset_name': self.dataset_name,
