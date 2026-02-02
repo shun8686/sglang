@@ -37,8 +37,8 @@ class TestSkipServerWarmup(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
-        out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
-        err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
+        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
+        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
         cls.process = popen_launch_server(
             cls.model_path,
             cls.base_url,
@@ -50,8 +50,8 @@ class TestSkipServerWarmup(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        out_log_file.close()
-        err_log_file.close()
+        cls.out_log_file.close()
+        cls.err_log_file.close()
         os.remove("./warmup_out_log.txt")
         os.remove("./warmup_err_log.txt")
 
