@@ -166,70 +166,6 @@ class TestMixedChunkEnabled(CustomTestCase):
         # Print current test result
         self._print_test_result("Mixed Chunk ENABLED", request_results, statistics)
 
-    def _print_test_result(self, test_name, request_results, statistics):
-        """Helper function: Format and print test results (in English)"""
-        print(f"\n=== [{test_name}] All requests completed ===")
-        
-        if not statistics:
-            print(f"=== [{test_name}] No successful requests, cannot calculate detailed statistics ===")
-            return
-        
-        print(f"=== [{test_name}] Statistics Summary ===")
-        print(f"  Successful requests: {statistics['success_count']} / {statistics['total_count']}")
-        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
-        print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
-        print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
-
-class TestMixedChunkDisabled(CustomTestCase):
-    """Test Class 2: Disable --enable-mixed-chunk"""
-    @classmethod
-    def setUpClass(cls):
-        """Start server (with mixed chunk disabled)"""
-        print("\n" + "="*60)
-        print("=== Starting Server (--enable-mixed-chunk DISABLED) ===")
-        cls.process = start_server(with_mixed=False)
-
-    @classmethod
-    def tearDownClass(cls):
-        """Stop server and wait 10 seconds"""
-        kill_process_tree(cls.process.pid)
-        print("=== Server Stopped (--enable-mixed-chunk DISABLED) ===")
-        print(f"=== Waiting 10 seconds after process termination ===")
-        time.sleep(10)
-        print("="*60 + "\n")
-
-    def test_mixed_chunk_with_multi_requests(self):
-        """Multi-request test (mixed chunk disabled), collect statistics"""
-        request_results = []
-        
-        # Print test start information
-        print(f"\n=== [Mixed Chunk DISABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
-        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
-        
-        # Create and start multiple threads
-        threads = []
-        for task_id in range(CONFIG["REQUEST_COUNT"]):
-            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
-            threads.append(t)
-        
-        for t in threads:
-            t.start()
-        
-        # Wait for all threads to complete
-        for t in threads:
-            t.join()
-        
-        # Calculate statistics
-        statistics = calculate_statistics(request_results)
-        
-        # Store final statistics
-        FINAL_STATISTICS["mixed_disabled"] = {
-            "detail": statistics
-        }
-        
-        # Print current test result
-        self._print_test_result("Mixed Chunk DISABLED", request_results, statistics)
-        
         # Add assertGreater after both tests are completed (verify optimization effect)
         self._run_performance_assertions()
 
@@ -288,6 +224,74 @@ class TestMixedChunkDisabled(CustomTestCase):
         print("✅ Assertion Passed: Long-tail Effect Alleviation Verified")
         
         print("\n=== All Performance Assertions Passed Successfully ===")
+
+class TestMixedChunkDisabled(CustomTestCase):
+    """Test Class 2: Disable --enable-mixed-chunk"""
+    @classmethod
+    def setUpClass(cls):
+        """Start server (with mixed chunk disabled)"""
+        print("\n" + "="*60)
+        print("=== Starting Server (--enable-mixed-chunk DISABLED) ===")
+        cls.process = start_server(with_mixed=False)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Stop server and wait 10 seconds"""
+        kill_process_tree(cls.process.pid)
+        print("=== Server Stopped (--enable-mixed-chunk DISABLED) ===")
+        print(f"=== Waiting 10 seconds after process termination ===")
+        time.sleep(10)
+        print("="*60 + "\n")
+
+    def test_mixed_chunk_with_multi_requests(self):
+        """Multi-request test (mixed chunk disabled), collect statistics"""
+        request_results = []
+        
+        # Print test start information
+        print(f"\n=== [Mixed Chunk DISABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
+        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
+        
+        # Create and start multiple threads
+        threads = []
+        for task_id in range(CONFIG["REQUEST_COUNT"]):
+            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
+            threads.append(t)
+        
+        for t in threads:
+            t.start()
+        
+        # Wait for all threads to complete
+        for t in threads:
+            t.join()
+        
+        # Calculate statistics
+        statistics = calculate_statistics(request_results)
+        
+        # Store final statistics
+        FINAL_STATISTICS["mixed_disabled"] = {
+            "detail": statistics
+        }
+        
+        # Print current test result
+        self._print_test_result("Mixed Chunk DISABLED", request_results, statistics)
+        
+
+
+    def _print_test_result(self, test_name, request_results, statistics):
+        """Helper function: Format and print test results (in English)"""
+        print(f"\n=== [{test_name}] All requests completed ===")
+        
+        if not statistics:
+            print(f"=== [{test_name}] No successful requests, cannot calculate detailed statistics ===")
+            return
+        
+        print(f"=== [{test_name}] Statistics Summary ===")
+        print(f"  Successful requests: {statistics['success_count']} / {statistics['total_count']}")
+        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
+        print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
+        print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
+
+
 
 if __name__ == "__main__":
     # Execute all test cases with detailed output
