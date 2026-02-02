@@ -17,10 +17,10 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-MULTITHREAD_OUT_LOG = "./tmp/multi_thread_out_log.txt"
-MULTITHREAD_ERR_LOG = "./tmp/multi_thread_err_log.txt"
-CHECKPOINT_OUT_LOG = "./tmp/checkpoint_out_log.txt"
-CHECKPOINT_ERR_LOG = "./tmp/checkpoint_err_log.txt"
+MULTITHREAD_OUT_LOG = "./multi_thread_out_log.txt"
+MULTITHREAD_ERR_LOG = "./multi_thread_err_log.txt"
+CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
+CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
 
 class BaseModelLoaderTest(ABC):
@@ -155,7 +155,7 @@ class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     def test_model_loading_time_reduced(self):
         # Helper function to extract loading time
         def get_loading_seconds(filename, pattern):
-            cmd = f"grep '{pattern}' ./{filename} | tail -1"
+            cmd = f"grep '{pattern}' {filename} | tail -1"
             line = run_command(cmd)
             if not line:
                 return 0
