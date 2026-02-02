@@ -61,7 +61,6 @@ class TestEnableTokenizerBatchEncode(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
         print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
