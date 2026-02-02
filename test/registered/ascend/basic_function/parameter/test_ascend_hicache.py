@@ -64,6 +64,7 @@ class TestHiCache(CustomTestCase):
         self.assertGreaterEqual(metrics["score"], 0.65)
 
     def test_gsm8k(self):
+        # Verify gsm8k dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65) with HiCache enabled
         expect_accuracy = 0.65
         args = SimpleNamespace(
             num_shots=5,

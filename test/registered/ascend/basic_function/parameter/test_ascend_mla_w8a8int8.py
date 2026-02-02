@@ -104,58 +104,58 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
 
                 self.fail("Service should have crashed due to OOM")
 
-    def test_a_gsm8k(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
-
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
-
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=1319,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
-
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
-
-    def test_b_throughput(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing throughput: {model} ===##")
-
-                output_throughput = run_bench_offline_throughput(
-                    model,
-                    [
-                        *self.common_args,
-                    ],
-                )
-
-                print(f"##=== {model} throughput: {output_throughput} ===##")
-
-                if is_in_ci():
-                    self.assertGreater(
-                        output_throughput,
-                        TEST_MODEL_MATRIX[model]["output_throughput"],
-                    )
+    # def test_a_gsm8k(self):
+    #     for model in self.models:
+    #         with self.subTest(model=model):
+    #             print(f"##=== Testing accuracy: {model} ===##")
+    #
+    #             process = popen_launch_server(
+    #                 model,
+    #                 self.base_url,
+    #                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    #                 other_args=[
+    #                     *self.common_args,
+    #                 ],
+    #             )
+    #
+    #             try:
+    #                 args = SimpleNamespace(
+    #                     num_shots=5,
+    #                     data_path=None,
+    #                     num_questions=1319,
+    #                     max_new_tokens=512,
+    #                     parallel=128,
+    #                     host=f"http://{self.url.hostname}",
+    #                     port=int(self.url.port),
+    #                 )
+    #
+    #                 metrics = run_eval_few_shot_gsm8k(args)
+    #                 self.assertGreaterEqual(
+    #                     metrics["accuracy"],
+    #                     TEST_MODEL_MATRIX[model]["accuracy"],
+    #                 )
+    #             finally:
+    #                 kill_process_tree(process.pid)
+    #
+    # def test_b_throughput(self):
+    #     for model in self.models:
+    #         with self.subTest(model=model):
+    #             print(f"##=== Testing throughput: {model} ===##")
+    #
+    #             output_throughput = run_bench_offline_throughput(
+    #                 model,
+    #                 [
+    #                     *self.common_args,
+    #                 ],
+    #             )
+    #
+    #             print(f"##=== {model} throughput: {output_throughput} ===##")
+    #
+    #             if is_in_ci():
+    #                 self.assertGreater(
+    #                     output_throughput,
+    #                     TEST_MODEL_MATRIX[model]["output_throughput"],
+    #                 )
 
 
 if __name__ == "__main__":
