@@ -140,7 +140,7 @@ class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
     err_log_file = open("./checkpoint_err_log.txt", "w+", encoding="utf-8")
     log_info = "Loading safetensors"
 
-    def test_time(self):
+    def test_model_loading_time_reduced(self):
         # 提取时间函数
         def get_loading_seconds(filename, pattern):
             cmd = f"grep '{pattern}' ./{filename} | tail -1"
