@@ -41,7 +41,7 @@ class TestSkipServerWarmup(CustomTestCase):
         err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
         cls.process = popen_launch_server(
             cls.model_path,
-            self.base_url,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
             return_stdout_stderr=(out_log_file, err_log_file),
