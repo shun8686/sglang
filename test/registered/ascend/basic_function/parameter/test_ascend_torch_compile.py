@@ -8,7 +8,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import META_LLAMA_3_1_8B_INSTRUCT
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -43,8 +42,6 @@ class TestTorchCompile(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                2,
                 ],
             )
 
@@ -78,10 +75,8 @@ class TestTorchCompile(CustomTestCase):
         )
         return response.json()
 
-    def _throughput(self):
+    def test_throughput(self):
         # Warmup
-        res = self.run_decode(16)
-
         max_tokens = 256
         tic = time.perf_counter()
         res = self.run_decode(max_tokens)
@@ -89,11 +84,7 @@ class TestTorchCompile(CustomTestCase):
         print(f"{res=}")
         throughput = max_tokens / (tok - tic)
         print(f"Throughput: {throughput} tokens/s")
-
-        if is_in_amd_ci():
-            self.assertGreaterEqual(throughput, 145)
-        else:
-            self.assertGreaterEqual(throughput, 152)
+        self.assertGreaterEqual(throughput, 152)
 
 
 if __name__ == "__main__":

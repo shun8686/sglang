@@ -1,13 +1,11 @@
 import random
-from concurrent.futures import ThreadPoolExecutor
-from types import SimpleNamespace
-
+import unittest
 import openai
 import requests
+import multiprocessing as mp
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
-from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
