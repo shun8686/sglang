@@ -52,9 +52,8 @@ class BaseModelLoaderTest(CustomTestCase):
         "--disable-radix-cache",
     ]
     # Define log file names as class variables
-
-    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
+    out_file = None
+    err_file = None
 
     @classmethod
     def setUpClass(cls):
@@ -94,8 +93,27 @@ class BaseModelLoaderTest(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        cls.out_file.close()
-        cls.err_file.close()
+
+        # 关闭文件句柄
+        if hasattr(cls, 'out_file') and cls.out_file:
+            cls.out_file.close()
+        if hasattr(cls, 'err_file') and cls.err_file:
+            cls.err_file.close()
+
+        # 删除日志文件
+        log_files = [
+            MULTITHREAD_OUT_LOG,
+            MULTITHREAD_ERR_LOG,
+            CHECKPOINT_OUT_LOG,
+            CHECKPOINT_ERR_LOG
+        ]
+
+        for log_file in log_files:
+            if os.path.exists(log_file):
+                try:
+                    os.remove(log_file)
+                except Exception as e:
+                    print(f"Warning: Failed to remove log file {log_file}: {e}")
 
 
 class TestModelLoaderExtraConfig(BaseModelLoaderTest):
