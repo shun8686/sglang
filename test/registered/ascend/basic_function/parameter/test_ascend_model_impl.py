@@ -14,7 +14,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestModeImpl(CustomTestCase):
-    """Testcase：Verify set --model-impl = transformers and set --prefill-max-requests = 5, the mmlu accuracy greater than 0.65 and the gsm8k accuracy more than 0.65.
+    """Testcase：Verify Llama-3.2-1B-Instruct model set --model-impl = transformers and set --prefill-max-requests = 5, the mmlu accuracy greater than 0.65 and the gsm8k accuracy more than 0.65.
 
        [Test Category] Parameter
        [Test Target] --model-impl, --prefill-max-requests
