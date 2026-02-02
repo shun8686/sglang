@@ -51,7 +51,7 @@ class TestEnableThinking(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_parameters_model(self):
-        """Test model parameter"""
+        # Test model parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -67,7 +67,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(data["model"], self.model)
 
     def test_model_parameters_prompt(self):
-        """Test prompt parameter"""
+        # Test prompt parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -100,7 +100,7 @@ class TestEnableThinking(CustomTestCase):
         client3 = requests.post(
                 f"{self.base_url}/v1/completions",
                 json={
-                    "prompt": list_str
+                    "prompt": list_list_int
                     },
                 )
         print(f"client3.json:{client3.json()}")
@@ -108,7 +108,7 @@ class TestEnableThinking(CustomTestCase):
 
 
     def test_model_parameters_max_tokens(self):
-        """Test max_tokens parameter"""
+        # Test max_tokens parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -122,7 +122,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(client.json()['choices'][0]['finish_reason'], 'length')
 
     def test_model_parameters_stream(self):
-        """Test stream parameter"""
+        # Test stream parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -151,7 +151,7 @@ class TestEnableThinking(CustomTestCase):
         )
 
     def test_model_parameters_temperature(self):
-        """Test temperature parameter"""
+        # Test temperature parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -174,7 +174,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
 
     def test_model_parameters_hidden_states(self):
-        """Test hidden_states parameter"""
+        # Test hidden_states parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -187,7 +187,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertIn("hidden_states", client.json()['choices'][0] )
 
     def test_model_parameters_top_k(self):
-        """Test top_k parameter"""
+        # Test top_k parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -212,7 +212,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
 
     def test_model_parameters_stop_token_ids(self):
-        """Test stop_token_ids parameter"""
+        # Test stop_token_ids parameter
         list_ids = [1, 13]
         client = requests.post(
             f"{self.base_url}/v1/completions",
@@ -229,7 +229,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
 
     def test_model_parameters_rid(self):
-        """Test rid parameter"""
+        # Test rid parameter
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
