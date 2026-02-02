@@ -617,9 +617,8 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
         'total_tps': None
     }
 
+    process = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
     try:
-        process = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
-
         # Read output line by line
         with open(result_file, 'a', encoding='utf-8') as f:
             for line in process.stdout:
@@ -640,16 +639,14 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
                     parts = stripped_line.split()
                     if len(parts) >= 5:
                         metrics['total_tps'] = parts[4]
-
         process.wait()
-
         if process.returncode != 0:
             print(f"Benchmark command failed with return code: {process.returncode}")
-
-        process.stdout.close()
-        process.stderr.close()
     except Exception as e:
         print(f"Error running benchmark: {e}")
+    finally:
+        if process.stdout is not None and not process.stdout.closed:
+            process.stdout.close()
 
     return metrics
 
