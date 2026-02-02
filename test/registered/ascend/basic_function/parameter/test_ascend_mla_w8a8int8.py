@@ -43,21 +43,21 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
-        cls.common_args = [
-            "--trust-remote-code",
-            "--disable-cuda-graph",
-            "--mem-fraction-static",
-            0.8,
-            "--attention-backend",
-            "ascend",
-            "--quantization",
-            "modelslim",
-            "--tp-size",
-            2,
-            "--disable-radix-cache",
-            "--chunked-prefill-size",
-            32768,
-        ]
+        # cls.common_args = [
+        #     "--trust-remote-code",
+        #     "--disable-cuda-graph",
+        #     "--mem-fraction-static",
+        #     0.8,
+        #     "--attention-backend",
+        #     "ascend",
+        #     "--quantization",
+        #     "modelslim",
+        #     "--tp-size",
+        #     2,
+        #     "--disable-radix-cache",
+        #     "--chunked-prefill-size",
+        #     32768,
+        # ]
 
         # basic testcase, reserved for setting environment
         for env in cls.envs.keys():
@@ -99,7 +99,7 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
 
                 try:
                     requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
-                except:
+                except requests.exceptions.RequestException:
                     return
 
                 self.fail("Service should have crashed due to OOM")
