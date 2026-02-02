@@ -57,7 +57,7 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         json.dumps({"enable_multithread_load": True, "num_threads": 2}),
     ]
     out_log_file = open("./multi_thread_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./multi_thread_log.txt", "w+", encoding="utf-8")
+    err_log_file = open("./multi_thread_err_log.txt", "w+", encoding="utf-8")
     log_info = "Multi-thread"
 
     @classmethod
@@ -143,7 +143,7 @@ class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
             return m * 60 + s
 
         # 获取时间
-        multi_thread_seconds = get_loading_seconds("multi_thread_out_log.txt", "Multi-thread loading shards")
+        multi_thread_seconds = get_loading_seconds("multi_thread_err_log.txt", "Multi-thread loading shards")
         checkpoint_seconds = get_loading_seconds("checkpoint_err_log.txt", "Loading safetensors checkpoint shards")
 
         # 打印信息

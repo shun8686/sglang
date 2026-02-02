@@ -17,56 +17,59 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
-# 配置项
-LOG_DUMP_FILE = f"test_mixed_chunk_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
-CUSTOM_SERVER_WAIT_TIME = 30  # 超长token输入，服务器启动时间适当延长
+# 配置项：使用/tmp绝对路径保留日志，方便排查
+LOG_DUMP_FILE = f"/tmp/test_mixed_chunk_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+CUSTOM_SERVER_WAIT_TIME = 35  # 分块预填充初始化耗时更长，延长启动等待时间
 MODEL_TRUNK_SIZE = 2048  # Llama-3.2-1B 原生trunk size
-TARGET_TOKEN_COUNT = 2500  # 目标输入token数，超过原生trunk size触发mixed chunk
+TARGET_TOKEN_COUNT = 2500  # 目标输入token数，超过原生trunk size
+CHUNK_SIZE = 1024  # 分块预填充的每个chunk大小（<2048，与--chunked-prefill-size配置一致）
+
+# 提前创建日志文件，记录参数配置
+with open(LOG_DUMP_FILE, "w", encoding="utf-8") as f:
+    f.write(f"=== 日志文件创建成功，时间：{datetime.now()} ===\n")
+    f.write(f"=== 配置参数：--enable-mixed-chunk，--chunked-prefill-size {CHUNK_SIZE} ===\n")
 
 def build_long_input_text_for_token():
     """
     构造足够token数的输入文本（确保#new-token超过MODEL_TRUNK_SIZE）
     每个base_sentence约10个token，重复后确保总token数达标
     """
-    # 基础短句（约10个token，避免无意义字符，保证token统计准确）
     base_sentence = "This is a test sentence to generate enough tokens. "
-    # 计算重复次数，确保总token数超过TARGET_TOKEN_COUNT
-    repeat_times = (TARGET_TOKEN_COUNT // 10) + 20  # 每个短句约10个token，额外加20次兜底
-    # 拼接超长文本，末尾保留查询句（确保最终返回Paris，兼容原有断言）
-    long_input_text = (base_sentence * repeat_times) + "The capital of France is"
-    return long_input_text
+    repeat_times = (TARGET_TOKEN_COUNT // 10) + 20
+    return (base_sentence * repeat_times) + "The capital of France is"
 
 class TestEnableMixedChunk(CustomTestCase):
-    """Testcase：Verify the correctness of --enable-mixed-chunk feature and related APIs (health/generate/server-info) availability.
+    """Testcase：Verify the correctness of --enable-mixed-chunk feature (depend on --chunked-prefill-size).
 
     [Test Category] Parameter
-    [Test Target] --enable-mixed-chunk
+    [Test Target] --enable-mixed-chunk & --chunked-prefill-size
     """
 
     @classmethod
     def setUpClass(cls):
-        # 1. 保存操作系统层面的原始stdout/stderr文件句柄（捕获子进程日志核心）
+        # 1. 保存原始IO句柄
         cls.original_stdout_fd = os.dup(sys.stdout.fileno())
         cls.original_stderr_fd = os.dup(sys.stderr.fileno())
 
-        # 2. 打开日志文件（操作系统层面句柄，支持重定向）
+        # 2. 打开日志文件句柄
         cls.log_fd = os.open(
             LOG_DUMP_FILE,
             os.O_WRONLY | os.O_CREAT | os.O_APPEND,
-            0o644  # 文件权限：可读可写，避免权限不足
+            0o644
         )
-        cls.log_file = open(LOG_DUMP_FILE, "a+", encoding="utf-8")  # 用于后续读取和关闭
+        cls.log_file = open(LOG_DUMP_FILE, "a+", encoding="utf-8")
 
-        # 3. 操作系统层面重定向stdout/stderr到日志文件（子进程会继承该句柄）
+        # 3. 重定向IO到日志文件
         os.dup2(cls.log_fd, sys.stdout.fileno())
         os.dup2(cls.log_fd, sys.stderr.fileno())
 
-        # 4. 启动服务器（开启enable-mixed-chunk，保留NPU相关参数）
+        # 4. 启动服务器（核心：添加 --chunked-prefill-size {CHUNK_SIZE} 启用分块预填充）
         other_args = [
             "--enable-mixed-chunk",
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
+            "--chunked-prefill-size", str(CHUNK_SIZE)  # 启用分块预填充，每个chunk最大1024个token
         ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
@@ -75,66 +78,55 @@ class TestEnableMixedChunk(CustomTestCase):
             other_args=other_args,
         )
 
-        # 5. 等待服务器完全启动（超长token处理需更多初始化时间）
+        # 5. 等待服务器完全启动（分块预填充初始化+模型加载，耗时更长）
         print(f"等待服务器启动（{CUSTOM_SERVER_WAIT_TIME}秒）...")
+        print(f"分块预填充配置：--chunked-prefill-size {CHUNK_SIZE}（< 模型trunk size {MODEL_TRUNK_SIZE}）")
         time.sleep(CUSTOM_SERVER_WAIT_TIME)
 
     @classmethod
     def tearDownClass(cls):
-        # 1. 终止服务器进程树，释放NPU资源
+        # 1. 终止服务器进程
         kill_process_tree(cls.process.pid)
 
-        # 2. 恢复操作系统层面的stdout/stderr（确保后续打印输出到控制台）
+        # 2. 恢复IO
         os.dup2(cls.original_stdout_fd, sys.stdout.fileno())
         os.dup2(cls.original_stderr_fd, sys.stderr.fileno())
 
-        # 3. 关闭所有文件句柄和文件对象（释放文件占用，避免删除失败）
+        # 3. 关闭文件句柄
         os.close(cls.log_fd)
         os.close(cls.original_stdout_fd)
         os.close(cls.original_stderr_fd)
         cls.log_file.close()
 
-        # 4. 打印完整日志到控制台（方便排查问题）
+        # 4. 打印完整日志
         cls.print_full_log()
 
-        # 5. 删除日志文件（清理冗余，避免文件堆积）
-        cls.delete_log_file()
+        # 5. 保留日志文件提示
+        print(f"\n=== 日志文件已保留，路径：{os.path.abspath(LOG_DUMP_FILE)} ===")
+        print(f"=== 查看分块/混合批次日志：cat {os.path.abspath(LOG_DUMP_FILE)} | grep -E 'Chunk|Prefill|Decode' ===")
 
     @classmethod
     def print_full_log(cls):
-        """打印完整服务端日志，方便查看mixed chunk相关内容"""
+        """打印完整日志，重点展示分块预填充和mixed chunk相关内容"""
         if not os.path.exists(LOG_DUMP_FILE):
-            print("\n【日志提示】日志文件不存在，无内容可打印")
+            print("\n【日志提示】日志文件不存在")
             return
         
         print("\n" + "="*80)
-        print("完整服务端日志（验证prefill和decode同batch）：")
+        print(f"完整日志（含分块预填充/{CHUNK_SIZE} & mixed chunk 内容）：")
         print("="*80)
         with open(LOG_DUMP_FILE, "r", encoding="utf-8", errors="ignore") as f:
             full_log = f.read()
-            # 日志过长时仅打印最后8000字符，避免控制台刷屏，同时保留关键内容
-            if len(full_log) <= 8000:
+            if len(full_log) <= 12000:
                 print(full_log)
             else:
-                print(f"【日志过长（总长度{len(full_log)}），仅展示最后8000字符】")
-                print(full_log[-8000:])
+                print(f"【日志过长（{len(full_log)}字符），展示最后12000字符】")
+                print(full_log[-12000:])
         print("="*80)
         print("日志打印完毕")
 
-    @classmethod
-    def delete_log_file(cls):
-        """删除已生成的日志文件，清理冗余文件"""
-        try:
-            if os.path.exists(LOG_DUMP_FILE):
-                os.remove(LOG_DUMP_FILE)
-                print(f"\n日志文件已成功删除：{os.path.abspath(LOG_DUMP_FILE)}")
-            else:
-                print("\n【删除提示】日志文件不存在，无需执行删除操作")
-        except Exception as e:
-            print(f"\n【删除警告】日志文件删除失败，可能被其他进程占用：{e}")
-
     def read_log_file(self):
-        """读取日志文件完整内容，返回字符串格式，用于断言判断"""
+        """读取日志文件内容"""
         if not os.path.exists(LOG_DUMP_FILE):
             return ""
         
@@ -142,97 +134,100 @@ class TestEnableMixedChunk(CustomTestCase):
             return f.read()
 
     def test_enable_mixed_chunk(self):
-        # 验证1：检查health_generate API 可用性（服务是否正常启动）
+        # 验证1：health_generate API 可用性
         health_response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(
             health_response.status_code, 200,
-            f"health_generate API 请求失败，响应状态码：{health_response.status_code}"
+            f"health_generate API 失败，状态码：{health_response.status_code}"
         )
 
-        # 验证2：构造超长token输入，调用/generate接口，触发mixed chunk功能
+        # 验证2：超长token输入调用/generate接口
         long_input_text = build_long_input_text_for_token()
-        print(f"\n构造的输入文本字符长度：{len(long_input_text)}（目标token数：{TARGET_TOKEN_COUNT}，超过模型原生trunk size {MODEL_TRUNK_SIZE}）")
+        print(f"\n构造输入字符长度：{len(long_input_text)}（目标token数：{TARGET_TOKEN_COUNT}，分块大小：{CHUNK_SIZE}）")
         
         generate_response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": long_input_text,
                 "sampling_params": {
-                    "temperature": 0,  # 温度设为0，确保输出结果稳定
-                    "max_new_tokens": 32,  # 生成32个新token，确保返回Paris
+                    "temperature": 0,
+                    "max_new_tokens": 32,
                 },
             },
-            timeout=60  # 超长token输入处理耗时较长，延长请求超时时间
+            timeout=70  # 分块处理耗时更长，延长请求超时
         )
 
-        # 验证2.1：/generate 接口响应状态码是否为200
+        # 验证2.1：/generate 接口状态码
         self.assertEqual(
             generate_response.status_code, 200,
-            f"/generate 接口请求失败，响应状态码：{generate_response.status_code}，响应内容：{generate_response.text[:500]}"
+            f"/generate 接口失败，状态码：{generate_response.status_code}"
         )
 
-        # 验证2.2：/generate 接口返回结果是否包含预期值Paris
+        # 验证2.2：返回结果包含Paris
         self.assertIn(
             "Paris", generate_response.text,
-            f"/generate 接口返回结果不包含预期值'Paris'，响应内容预览：{generate_response.text[:1000]}"
+            f"/generate 未返回Paris，预览：{generate_response.text[:1000]}"
         )
 
-        # 验证3：检查server_info API，确认enable_mixed_chunk 参数是否正确开启（替换废弃的/get_server_info）
+        # 验证3：server_info 确认参数配置正确
         server_info_response = requests.get(f"{DEFAULT_URL_FOR_TEST}/server_info")
-        self.assertEqual(
-            server_info_response.status_code, 200,
-            f"server_info API 请求失败，响应状态码：{server_info_response.status_code}（注意：/get_server_info 已废弃，需使用/server_info）"
-        )
-
+        self.assertEqual(server_info_response.status_code, 200)
         server_info_json = server_info_response.json()
+
         self.assertEqual(
             server_info_json.get("enable_mixed_chunk"), True,
-            f"enable_mixed_chunk 参数未正确开启，当前配置值：{server_info_json.get('enable_mixed_chunk')}"
+            f"enable_mixed_chunk 未开启，当前值：{server_info_json.get('enable_mixed_chunk')}"
         )
 
-        # 关键：等待日志写入完成（超长token处理后，服务端输出日志有延迟，延长至10秒）
-        print("\n等待服务端输出mixed chunk相关日志（10秒）...")
-        time.sleep(10)
+        # 验证3.1：额外确认 chunked_prefill_size 配置（若接口返回该参数）
+        if "chunked_prefill_size" in server_info_json:
+            self.assertEqual(
+                server_info_json.get("chunked_prefill_size"), CHUNK_SIZE,
+                f"chunked_prefill_size 配置不匹配，当前值：{server_info_json.get('chunked_prefill_size')}"
+            )
+            print(f"\n✅ chunked_prefill_size 配置验证通过：{server_info_json.get('chunked_prefill_size')}")
 
-        # 恢复操作系统层面的stdout/stderr（确保后续断言信息输出到控制台）
+        # 关键：等待分块/混合批次日志写入（延长至12秒）
+        print("\n等待服务端输出分块/混合批次日志（12秒）...")
+        time.sleep(12)
+
+        # 恢复IO
         os.dup2(self.original_stdout_fd, sys.stdout.fileno())
         os.dup2(self.original_stderr_fd, sys.stderr.fileno())
 
-        # 验证4：核心断言 - prefill和decode在同一个batch内执行（mixed chunk功能生效）
+        # 验证4：核心 - 分块预填充已启用，且mixed chunk功能生效
         server_logs = self.read_log_file()
 
-        # 定义mixed chunk合并批次的目标关键字（适配sglang不同版本的日志格式）
-        mixed_chunk_target_keywords = [
+        # 定义关键字
+        chunked_prefill_keywords = [
+            "chunked prefill",
+            f"chunked-prefill-size {CHUNK_SIZE}",
+            "Chunk [0-9]+/[0-9]+ prefill"
+        ]
+        mixed_chunk_keywords = [
             "Prefill + Decode batch",
             "Mixed chunk batch",
-            "prefill and decode in the same batch",
-            "mixed chunk: prefill & decode in one batch"
+            "prefill and decode in the same batch"
         ]
+        independent_batch_keywords = ["Prefill batch", "Decode batch"]
 
-        # 判断是否存在任意一个目标关键字，确认mixed chunk功能生效
-        is_mixed_chunk_activated = any(keyword in server_logs for keyword in mixed_chunk_target_keywords)
+        # 判断状态
+        is_chunked_activated = any(kw in server_logs for kw in chunked_prefill_keywords)
+        is_mixed_activated = any(kw in server_logs for kw in mixed_chunk_keywords)
+        has_independent_batch = all(kw in server_logs for kw in independent_batch_keywords)
 
-        # 备用判断：若日志无明确合并标识，判断是否不存在独立的Prefill/Decode batch
-        has_independent_prefill = "Prefill batch" in server_logs
-        has_independent_decode = "Decode batch" in server_logs
-        is_separate_batch = has_independent_prefill and has_independent_decode
+        # 输出状态提示
+        print("\n" + "-"*65)
+        print("分块预填充 & Mixed Chunk 功能最终验证结果：")
+        print("-"*65)
+        print(f"1. 分块预填充启用状态：{'✅ 已启用' if is_chunked_activated else '❌ 未启用'}")
+        print(f"2. Mixed Chunk 功能生效状态：{'✅ 已生效' if is_mixed_activated else '❌ 未生效'}")
+        print(f"3. 独立批次存在状态：{'❌ 无独立批次' if not has_independent_batch else '✅ 存在独立批次'}")
+        print("-"*65)
 
-        # 执行核心断言（优先使用合并关键字判断，备用非独立批次判断）
-        self.assertTrue(
-            is_mixed_chunk_activated,
-            f"未在服务端日志中找到mixed chunk合并批次标识，prefill和decode为独立批次！\n"
-            f"目标关键字列表：{mixed_chunk_target_keywords}\n"
-            f"日志内容预览（最后3000字符）：\n{server_logs[-3000:] if len(server_logs) > 3000 else '日志内容为空'}"
-        )
+        # 核心断言（先分块，后混合）
+        self.assertTrue(is_chunked_activated, f"断言失败：未启用分块预填充，无法触发Mixed Chunk！")
+        self.assertTrue(is_mixed_activated, f"断言失败：分块预填充已启用，但Mixed Chunk未生效！")
+        self.assertFalse(has_independent_batch, f"断言失败：Mixed Chunk已生效，但仍存在独立Prefill/Decode批次！")
 
-        # 可选：启用备用断言（注释掉上方断言，启用下方断言，适配无明确合并标识的日志）
-        # self.assertFalse(
-        #     is_separate_batch,
-        #     f"prefill和decode为独立批次，未触发mixed chunk功能！\n"
-        #     f"日志内容预览（最后3000字符）：\n{server_logs[-3000:] if len(server_logs) > 3000 else '日志内容为空'}"
-        # )
-
-        print("\n✅ 所有验证通过！--enable-mixed-chunk 功能生效，prefill和decode在同一个batch内执行。")
-
-if __name__ == "__main__":
-    unittest.main()
+        print("\n🎉 所有核心验证通过！--enable-mixed-chunk 功能完全生效，prefill和decode在同一个batch内执行！")
