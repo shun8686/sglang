@@ -72,7 +72,7 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                     "--trust-remote-code",
                     "--disable-cuda-graph",
                     "--mem-fraction-static",
-                    0.2,
+                    0.1,
                     "--attention-backend",
                     "ascend",
                     "--quantization",
@@ -95,11 +95,13 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
 
                 # check if service is alive
                 if process.poll() is not None:
+                    print("##=== Service have crashed due to OOM ===##")
                     return
 
                 try:
                     requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
                 except requests.exceptions.RequestException:
+                    print("##=== Service have crashed due to OOM ===##")
                     return
 
                 self.fail("Service should have crashed due to OOM")
