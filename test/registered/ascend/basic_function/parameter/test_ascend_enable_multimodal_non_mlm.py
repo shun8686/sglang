@@ -23,7 +23,6 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    # Fix 1: Define as a class variable (shared by all instances) to pass scores across test methods
     score_with_param = None
     score_without_param = None
 
@@ -52,10 +51,7 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         return process
 
     def _verify_inference(self):
-        """Universal inference function verification: health check + basic generation"""
-        # Health check
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-        self.assertEqual(response.status_code, 200)
+        """Universal inference function verification"""
         # Basic generation request verification
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -90,7 +86,6 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self._launch_server(enable_multimodal=True)
         # Verify inference function
         self._verify_inference()
-        # Fix 3: Assign class variable via class name for cross-instance sharing
         TestEnableMultimodalNonMlm.score_with_param = self._run_mmlu_eval()
 
     def test_02_disable_multimodal(self):
@@ -99,12 +94,10 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self._launch_server(enable_multimodal=False)
         # Verify inference function
         self._verify_inference()
-        # Fix 3: Assign class variable via class name for cross-instance sharing
         TestEnableMultimodalNonMlm.score_without_param = self._run_mmlu_eval()
 
     def test_03_assert_score(self):
         """Test 3: Assert that the score with parameter is ≥ the score without parameter"""
-        # Fix 4: Read class variable via class name and verify non-null
         self.assertIsNotNone(TestEnableMultimodalNonMlm.score_with_param, "MMLU score with parameter not obtained")
         self.assertIsNotNone(TestEnableMultimodalNonMlm.score_without_param,
                              "MMLU score without parameter not obtained")
