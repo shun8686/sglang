@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -15,16 +16,18 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8": {
+    DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH: {
         "accuracy": 0.95,
-        "latency": 1000,
-        "output_throughput": 6,
     },
 }
 
 
 class TestAscendDistTimeout(CustomTestCase):
+    """Testcase: Verify that when --dist-timeout is set to 3600, no timeout is triggered during service startup and the model accuracy remains uncompromised.
 
+    [Test Category] Parameter
+    [Test Target] --dist-timeout
+    """
     @classmethod
     def setUpClass(cls):
         cls.models = TEST_MODEL_MATRIX.keys()
@@ -49,15 +52,15 @@ class TestAscendDistTimeout(CustomTestCase):
             "--disable-cuda-graph",
         ]
 
-    
-    def test_a_gsm8k(self):
+
+    def test_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
                 process = popen_launch_server(
                     model,
                     self.base_url,
-                    timeout=1500,
+                    timeout=3600,
                     other_args=[
                         *self.common_args,
                     ],

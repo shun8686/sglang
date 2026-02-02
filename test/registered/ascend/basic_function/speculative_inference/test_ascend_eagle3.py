@@ -4,28 +4,31 @@ from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_EAGLE3_WEIGHTS_PATH, QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     popen_launch_server,
-    run_bench_offline_throughput,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
-QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3"
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE": {
+    QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH: {
         "accuracy": 0.81,
     },
 }
 
 
-class TestAscendDeepEP(CustomTestCase):
+class TestAscendEagle3(CustomTestCase):
+    """Testcase: Verify GSM8K inference accuracy ≥0.81 for model with specified EAGLE3 speculative inference parameters.
+
+    [Test Category] Parameter
+    [Test Target] --speculative-draft-model-quantization; --speculative-algorithm; --speculative-draft-model-path; --speculative-num-steps; --speculative-eagle-topk; --speculative-num-draft-tokens; --speculative-attention-mode
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -37,8 +40,6 @@ class TestAscendDeepEP(CustomTestCase):
             "--trust-remote-code",
             "--attention-backend",
             "ascend",
-            "--device",
-            "npu",
             "--quantization",
             "modelslim",
             "--disable-radix-cache",
@@ -47,7 +48,7 @@ class TestAscendDeepEP(CustomTestCase):
             "--speculative-algorithm",
             "EAGLE3",
             "--speculative-draft-model-path",
-            QWEN3_32B_EAGLE_MODEL_PATH,
+            QWEN3_32B_EAGLE3_WEIGHTS_PATH,
             "--speculative-num-steps",
             "4",
             "--speculative-eagle-topk",
@@ -71,7 +72,7 @@ class TestAscendDeepEP(CustomTestCase):
         }
         os.environ.update(cls.extra_envs)
 
-    def test_a_gsm8k(self):
+    def test_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")

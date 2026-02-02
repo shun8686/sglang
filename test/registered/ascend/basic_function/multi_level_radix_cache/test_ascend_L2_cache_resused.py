@@ -15,10 +15,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestL2Cache(CustomTestCase):
-    """Testcase: Test enabled L2 cache inference request reuse succeddfully
-
-    [Test Category] Parameter
-    [Test Target] --enable-hierarchical-cache
+    """Testcase: Test enabled L2 cache (enable-hierarchical-cache) inference request reuse succeddfully
     """
 
     @classmethod

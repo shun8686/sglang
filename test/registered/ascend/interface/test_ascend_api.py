@@ -5,8 +5,8 @@ import requests
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -17,9 +17,14 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendApi(CustomTestCase):
+    """Testcase: Verify that the basic functions of the API interfaces work properly and the returned parameters are consistent with the configurations.
+
+    [Test Category] Interface
+    [Test Target] /health; /health_generate; /ping; /model_info; /server_info; /get_load; /v1/models; /v1/models/{model:path}; /generate
+    """
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         other_args = (
             [
                 "--attention-backend",
@@ -37,7 +42,7 @@ class TestAscendApi(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        
+
     def test_api_health(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health")
         self.assertEqual(response.status_code, 200)
@@ -53,7 +58,6 @@ class TestAscendApi(CustomTestCase):
     def test_api_model_info(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/model_info")
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertEqual(response.json()['model_path'], self.model)
         self.assertEqual(response.json()['tokenizer_path'], self.model)
         self.assertTrue(response.json()['is_generation'])
@@ -67,14 +71,12 @@ class TestAscendApi(CustomTestCase):
     def test_api_server_info(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/server_info")
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertEqual(response.json()['model_path'], self.model)
         self.assertEqual(response.json()['tokenizer_path'], self.model)
 
     def test_api_get_load(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_load")
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertIsNone(response.json()[0]['rid'])
         self.assertIsNone(response.json()[0]['http_worker_ipc'])
         self.assertIsNone(response.json()[0]['dp_rank'])
@@ -85,7 +87,6 @@ class TestAscendApi(CustomTestCase):
     def test_api_v1_models(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/v1/models")
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertEqual(response.json()['data'][0]['id'], self.model)
         self.assertEqual(response.json()['data'][0]['object'], "model")
         self.assertEqual(response.json()['data'][0]['owned_by'], "sglang")
@@ -95,7 +96,6 @@ class TestAscendApi(CustomTestCase):
     def test_api_v1_models_path(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/v1/models/{self.model}")
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertEqual(response.json()['id'], self.model)
         self.assertEqual(response.json()['object'], "model")
         self.assertEqual(response.json()['owned_by'], "sglang")
@@ -103,6 +103,7 @@ class TestAscendApi(CustomTestCase):
         self.assertEqual(response.json()['max_model_len'], 131072)
 
     def test_api_generate_single_text(self):
+        # Verify that inference succeeds with single text input.
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -118,8 +119,6 @@ class TestAscendApi(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        print(response.json().keys())
-        print(response.json()['meta_info'].keys())
         meta_info_keys = response.json()['meta_info'].keys()
         self.assertEqual("req_001", response.json()['meta_info']['id'])
         self.assertIn("Paris", response.json()['text'])
@@ -129,6 +128,7 @@ class TestAscendApi(CustomTestCase):
         self.assertIn("hidden_states", meta_info_keys)
 
     def test_api_generate_batch_texts(self):
+        # Verify that inference succeeds with batch text inputs.
         rids = ["req_1", "req_2"]
         texts = [
         "The capital of France is",
@@ -149,14 +149,14 @@ class TestAscendApi(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertEqual("req_1", response.json()[0]['meta_info']['id'])
         self.assertIn("Paris", response.json()[0]['text'])
         self.assertEqual("req_2", response.json()[1]['meta_info']['id'])
         self.assertIn("Japan", response.json()[1]['text'])
-        
+
 
     def test_api_generate_temperature(self):
+        # Verify the randomness of inference results at high temperature.
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -168,7 +168,6 @@ class TestAscendApi(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         text1 = response.json()['text']
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -181,15 +180,14 @@ class TestAscendApi(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         text2 = response.json()['text']
         self.assertNotEqual(text2, text1)
-        
+
     def test_api_generate_input_ids(self):
+        # Verify that inference succeeds when using input_ids instead of text input with streaming output enabled.
         text = "The capital of France is"
         tokenizer = AutoTokenizer.from_pretrained(self.model)
         input_ids = tokenizer(text, return_tensors="pt")["input_ids"][0].tolist()
-        print("input_ids: ", input_ids)
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -205,14 +203,10 @@ class TestAscendApi(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        print(response.text)
         lines = response.text.strip().split('\n')
-        print("lines: ", lines)
         self.assertGreaterEqual(len(lines), 10)
         json_data = lines[-3][6:]
         data = json.loads(json_data)
-        print(data.keys())
-        print(data['meta_info'].keys())
         meta_info_keys = data['meta_info'].keys()
         self.assertEqual("req_002", data['meta_info']['id'])
         self.assertIn("Paris", data['text'])
