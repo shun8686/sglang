@@ -88,6 +88,10 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                     32768,
                 ]
 
+                excepted_message = "Server process exited with code -9. Check server logs for errors."
+                exception_message = None
+
+
                 try:
                     process = popen_launch_server(
                         model,
@@ -97,24 +101,26 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                             *self.common_args,
                         ],
                     )
-
-                    # check if service is alive
-                    if process.poll() is not None:
-                        print("##=== Service have crashed due to OOM ===##")
-                        return
-
-
-                    requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
-
-                    self.fail("Service should have crashed due to OOM")
-                except requests.exceptions.RequestException:
-                    print("##=== Service have crashed due to OOM ===##")
+                #
+                #     # check if service is alive
+                #     if process.poll() is not None:
+                #         print("##=== Service have crashed due to OOM ===##")
+                #         return
+                #
+                #
+                #     requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
+                #
+                #     self.fail("Service should have crashed due to OOM")
+                # except requests.exceptions.RequestException:
+                #     print("##=== Service have crashed due to OOM ===##")
                 except Exception as e:
-                    print("##=== Service have crashed due to OOM ===##")
-                    print(e)
+                    print("##=== Service have crashed due to OOM - Server process exited with code -9 ===##")
+                    exception_message = e
                 finally:
-                    if process is not None and process.poll() is not None:
+                    self.assertEqual(exception_message, excepted_message)
+                    if (exception_message is not None):
                         kill_process_tree(process.pid)
+
 
     # def test_a_gsm8k(self):
     #     for model in self.models:
