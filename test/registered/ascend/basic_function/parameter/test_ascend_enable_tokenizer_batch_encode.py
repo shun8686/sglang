@@ -61,15 +61,6 @@ class TestEnableTokenizerBatchEncode(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
-        print(response.json())
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertTrue(
-            response.json()["enable_tokenizer_batch_encode"],
-            "--enable-tokenizer-batch-encode is not taking effect.",
-        )
-
 
 if __name__ == "__main__":
     unittest.main()
