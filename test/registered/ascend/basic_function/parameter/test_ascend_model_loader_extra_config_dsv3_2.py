@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -15,6 +16,17 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+
+
+def run_command(cmd, shell=True):
+    try:
+        result = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, check=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"execute command error: {e}")
+        return None
 
 
 class TestModelLoaderExtraConfig(CustomTestCase):
@@ -44,8 +56,8 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         "--model-loader-extra-config",
         json.dumps({"enable_multithread_load": True, "num_threads": 2}),
     ]
-    out_log_file = open("./enable_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./enable_err_log.txt", "w+", encoding="utf-8")
+    out_log_file = open("./multi_thread_out_log.txt", "w+", encoding="utf-8")
+    err_log_file = open("./multi_thread_log.txt", "w+", encoding="utf-8")
     log_info = "Multi-thread"
 
     @classmethod
@@ -114,9 +126,31 @@ class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
         "modelslim",
         "--disable-radix-cache",
     ]
-    out_log_file = open("./no_enable_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./no_enable_err_log.txt", "w+", encoding="utf-8")
+    out_log_file = open("./checkpoint_out_log.txt", "w+", encoding="utf-8")
+    err_log_file = open("./checkpoint_err_log.txt", "w+", encoding="utf-8")
     log_info = "Loading safetensors"
+
+    def test_time(self):
+        # 提取时间函数
+        def get_loading_seconds(filename, pattern):
+            cmd = f"grep '{pattern}' ./{filename} | tail -1"
+            line = run_command(cmd).strip()
+            print(f"{pattern}：{line}")
+            if not line:
+                return 0
+            mm_ss = line.split('[')[1].split('<')[0]
+            m, s = map(int, mm_ss.split(':'))
+            return m * 60 + s
+
+        # 获取时间
+        multi_thread_seconds = get_loading_seconds("enable_err_log.txt", "Multi-thread loading shards")
+        checkpoint_seconds = get_loading_seconds("no_enable_err_log.txt", "Loading safetensors checkpoint shards")
+
+        # 打印信息
+        print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
+
+        # 断言
+        self.assertGreater(checkpoint_seconds, multi_thread_seconds)
 
 
 if __name__ == "__main__":
