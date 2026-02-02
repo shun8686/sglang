@@ -103,6 +103,7 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                     return
 
                 self.fail("Service should have crashed due to OOM")
+                kill_process_tree(process.pid)
 
     # def test_a_gsm8k(self):
     #     for model in self.models:
