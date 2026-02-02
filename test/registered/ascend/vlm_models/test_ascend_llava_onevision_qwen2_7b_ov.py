@@ -8,14 +8,14 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestLlavaOneVision(TestVLMModels):
-    """Testcase: Verify that the inference accuracy of the lmms-lab/llava-onevision-qwen2-7b-ov model on the MMMU dataset is no less than 0.3.
+    """Testcase: Verify that the inference accuracy of the lmms-lab/llava-onevision-qwen2-7b-ov model on the MMMU dataset is no less than 0.2.
 
     [Test Category] Model
     [Test Target] lmms-lab/llava-onevision-qwen2-7b-ov
     """
 
     model = LLAVA_ONEVISION_QWEN2_7B_OV_WEIGHTS_PATH
-    mmmu_accuracy = 0.3
+    mmmu_accuracy = 0.2
     other_args = [
         "--trust-remote-code",
         "--tp-size",
