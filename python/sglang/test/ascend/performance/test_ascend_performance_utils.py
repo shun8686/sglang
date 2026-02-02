@@ -815,13 +815,13 @@ class TestMultiNodePdMixTestCaseBase(CustomTestCase):
         sglang_thread.start()
 
         if self.role == "master":
-            master_node_ip = os.getenv("POD_IP")
-            wait_server_ready(f"http://{master_node_ip}:{SERVICE_PORT}" + "/health")
+            wait_server_ready(f"http://{self.local_ip}:{SERVICE_PORT}" + "/health")
+
             print(f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......")
             time.sleep(SERVER_INITIALIZATION_DELAY)
 
             bench_params = {
-                'host': master_node_ip,
+                'host': self.local_ip,
                 'port': str(SERVICE_PORT),
                 'model_path': self.model_config.get("model_path"),
                 'backend': self.backend,
