@@ -34,6 +34,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
         },
     }
     extra_args = ["--mem-fraction-static", 0.8, ]
+    envs = []
 
     @classmethod
     def setUpClass(cls):
@@ -45,6 +46,8 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
             "--attention-backend",
             "ascend",
         ]
+        for env in cls.envs.keys():
+            os.environ[env] = cls.envs[env]
 
     def test_a_gsm8k(self):
         for model in self.models:
