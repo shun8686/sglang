@@ -43,7 +43,6 @@ class TestLlama(CustomTestCase):
         self,
         convs,
         model_path,
-        tp_size,
         torch_dtype,
         tolerance,
     ) -> None:

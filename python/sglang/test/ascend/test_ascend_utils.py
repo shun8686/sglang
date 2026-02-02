@@ -58,6 +58,8 @@ PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "micros
 QWEN3_0_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B")
 QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-Instruct-2507")
 QWEN3_32B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B")
+QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-Eagle3")
+QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "aleoyang/Qwen3-32B-w8a8-MindIE")
 QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/Qwen3-235B-A22B-W8A8")
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
                                                                        "Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot")
