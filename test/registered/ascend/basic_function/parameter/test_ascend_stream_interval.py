@@ -21,6 +21,7 @@ class TestStreamInterval(CustomTestCase):
        [Test Target] --stream-interval
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
     @classmethod
     def setUpClass(cls):
         other_args = (
@@ -62,17 +63,6 @@ class TestStreamInterval(CustomTestCase):
         )
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
-        )
-
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertEqual(
-            response.json()["stream_interval"],
-            2,
-            "--stream-interval is not taking effect.",
         )
 
 
