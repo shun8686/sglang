@@ -43,21 +43,21 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
         cls.models = TEST_MODEL_MATRIX.keys()
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
-        # cls.common_args = [
-        #     "--trust-remote-code",
-        #     "--disable-cuda-graph",
-        #     "--mem-fraction-static",
-        #     0.8,
-        #     "--attention-backend",
-        #     "ascend",
-        #     "--quantization",
-        #     "modelslim",
-        #     "--tp-size",
-        #     2,
-        #     "--disable-radix-cache",
-        #     "--chunked-prefill-size",
-        #     32768,
-        # ]
+        cls.common_args = [
+            "--trust-remote-code",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            0.8,
+            "--attention-backend",
+            "ascend",
+            "--quantization",
+            "modelslim",
+            "--tp-size",
+            2,
+            "--disable-radix-cache",
+            "--chunked-prefill-size",
+            32768,
+        ]
 
         # basic testcase, reserved for setting environment
         for env in cls.envs.keys():
@@ -91,7 +91,6 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                 excepted_message = "Server process exited with code -9. Check server logs for errors."
                 exception_message = None
 
-
                 try:
                     process = popen_launch_server(
                         model,
@@ -101,26 +100,13 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                             *self.common_args,
                         ],
                     )
-                #
-                #     # check if service is alive
-                #     if process.poll() is not None:
-                #         print("##=== Service have crashed due to OOM ===##")
-                #         return
-                #
-                #
-                #     requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
-                #
-                #     self.fail("Service should have crashed due to OOM")
-                # except requests.exceptions.RequestException:
-                #     print("##=== Service have crashed due to OOM ===##")
                 except Exception as e:
-                    print("##=== Service have crashed due to OOM - Server process exited with code -9 ===##")
-                    exception_message = e
+                    print("##=== Service have correctly crashed due to OOM===##")
+                    exception_message = str(e)
                 finally:
                     self.assertEqual(exception_message, excepted_message)
-                    if (exception_message is not None):
+                    if exception_message is None:
                         kill_process_tree(process.pid)
-
 
     # def test_a_gsm8k(self):
     #     for model in self.models:
