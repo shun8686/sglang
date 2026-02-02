@@ -14,6 +14,12 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAllowAutoTruncateBase(CustomTestCase):
+    """Testcase：Verify set --allow-auto-truncate parameter, request exceeding the service's context-length setting is sent without excessive length error
+        and inference request is successful.
+
+        [Test Category] Parameter
+        [Test Target] --allow-auto-truncate
+        """
     process = None
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
@@ -61,12 +67,10 @@ class TestAllowAutoTruncateBase(CustomTestCase):
 
 
 class TestAllowAutoTruncate(TestAllowAutoTruncateBase):
-    """Testcase：Verify set --allow-auto-truncate parameter, send length longer than --context-length inference request is successful.
-
-            [Test Category] Parameter
-            [Test Target] --allow-auto-truncate
-            """
-
+    """
+    Test case for allow-auto-truncate=True
+    Verify over-length request is success when auto truncate is enabled
+    """
     @classmethod
     def setUpClass(cls):
         cls._launch_server(allow_auto_truncate=True)
@@ -87,6 +91,11 @@ class TestAllowAutoTruncate(TestAllowAutoTruncateBase):
 
 
 class TestNoAllowAutoTruncate(TestAllowAutoTruncateBase):
+    """
+    Test case for allow-auto-truncate=False
+    Verify over-length request is rejected when auto truncate is disabled
+    """
+
     @classmethod
     def setUpClass(cls):
         cls._launch_server(allow_auto_truncate=False)
