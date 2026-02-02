@@ -72,9 +72,9 @@ class TestSkipServerWarmup(CustomTestCase):
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
         self.assertNotIn("GET /get_model_info HTTP/1.1", content)
-        self.assertIn("Warmup", content)
-        self.assertIn("Graph captured", content)
-        self.assertIn("Prefill warmup", content)
+        self.assertNotIn("Warmup", content)
+        self.assertNotIn("Graph captured", content)
+        self.assertNotIn("Prefill warmup", content)
 
 
 if __name__ == "__main__":
