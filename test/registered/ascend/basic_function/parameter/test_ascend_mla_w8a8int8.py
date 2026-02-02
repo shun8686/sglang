@@ -101,13 +101,12 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                         ],
                     )
                 except Exception as e:
-                    print("##=== Service have crashed due to OOM===##")
-                    exception_message = e
+                    print("##=== Service have correctly crashed due to OOM===##")
+                    exception_message = str(e)
                 finally:
                     self.assertEqual(exception_message, excepted_message)
                     if exception_message is None:
                         kill_process_tree(process.pid)
-
 
     # def test_a_gsm8k(self):
     #     for model in self.models:
