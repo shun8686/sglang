@@ -36,6 +36,11 @@ KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 
+LOCAL_HOST_IP = os.getenv("POD_IP")
+LOCAL_HOST_NAME = os.getenv("HOSTNAME")
+if not LOCAL_HOST_IP or not LOCAL_HOST_NAME:
+    raise RuntimeError(f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}")
+
 LOCAL_TIMEOUT = 3600
 
 # Port numbers
@@ -291,11 +296,7 @@ def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15
 # Launch master/worker node
 def launch_pd_mix_node(model_config):
     print(f"Launch pd mix node start ......")
-    node_ip = os.getenv("POD_IP")
-    hostname = os.getenv("HOSTNAME")
-    pod_index = int(hostname.rsplit("-", 1)[-1])
-    if not node_ip or not hostname:
-        raise RuntimeError(f"Missing required environment variables: POD_IP={node_ip}, HOSTNAME={hostname}")
+    pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
 
     # Monitor ConfigMap to generate dist-init-addr and node-rank
     is_ready = False
@@ -338,26 +339,26 @@ def launch_pd_mix_node(model_config):
         print(f"ENV_VAR {key}:{value}")
         os.environ[key] = value
 
-    print(f"Starting node, {node_ip=} {other_args=}")
-    return popen_launch_server(
-        model_config["model_path"],
-        f"http://{node_ip}:{SERVICE_PORT}",
-        timeout=LOCAL_TIMEOUT,
-        other_args=[
-            *other_args,
-        ],
-    )
+    print(f"Starting node, {LOCAL_HOST_IP=} {other_args=}")
+    try:
+        process = popen_launch_server(
+            model_config["model_path"],
+            f"http://{LOCAL_HOST_IP}:{SERVICE_PORT}",
+            timeout=LOCAL_TIMEOUT,
+            other_args=[
+                *other_args,
+            ],
+        )
+    except Exception as e:
+        raise RuntimeError(f"Failed to start node on {LOCAL_HOST_IP}: {e}")
+
+    return process
 
 # Launch prefill/decode separation node
 def launch_pd_seperation_node(model_config):
     print(f"Launch pd seperation node start ......")
-    node_ip = os.getenv("POD_IP")
-    hostname = os.getenv("HOSTNAME")
-    pod_index = int(hostname.rsplit("-", 1)[-1])
-    if not node_ip or not hostname:
-        raise RuntimeError(f"Missing required environment variables: POD_IP={node_ip}, HOSTNAME={hostname}")
-
-    role = "prefill" if "prefill" in hostname else "decode"
+    pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
+    role = "prefill" if "prefill" in LOCAL_HOST_NAME else "decode"
 
     bootstrap_init_port = BOOTSTRAP_INIT_PORT
     master_prefill_ip = None
@@ -449,23 +450,24 @@ def launch_pd_seperation_node(model_config):
 
         service_args.extend(decode_args)
 
-    print(f"Starting {role} node on {node_ip} with args: {service_args}")
+    print(f"Starting {role} node on {LOCAL_HOST_IP} with args: {service_args}")
 
     try:
         process = popen_launch_server(
             model_config["model_path"],
-            f"http://{node_ip}:{PREFILL_DECODE_PORT}",
+            f"http://{LOCAL_HOST_IP}:{PREFILL_DECODE_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *service_args,
             ],
         )
     except Exception as e:
-        raise RuntimeError(f"Failed to start {role} node on {node_ip}: {e}")
+        raise RuntimeError(f"Failed to start {role} node on {LOCAL_HOST_IP}: {e}")
+
     return process
 
 # Launch router node
-def launch_router(config):
+def launch_router(model_config):
     print(f"launch_router start ......")
     nodes_count = discover_worker_nodes()
     print(f"Discovered {nodes_count} worker nodes")
@@ -475,8 +477,8 @@ def launch_router(config):
     decode_url = []
     bootstrap_ports = []
     node_ip_list = []
-    is_prefill_instance_multi_node = "--node-rank" not in config["prefill_args"]
-    is_decode_instance_multi_node = "--node-rank" not in config["decode_args"]
+    is_prefill_instance_multi_node = "--node-rank" not in model_config["prefill_args"]
+    is_decode_instance_multi_node = "--node-rank" not in model_config["decode_args"]
 
     is_ready = False
     bootstrap_init_port = BOOTSTRAP_INIT_PORT
@@ -518,9 +520,9 @@ def launch_router(config):
         raise RuntimeError("Failed to wait for all nodes to be ready")
 
     # Set environment variables
-    set_environment_variables(config.get("router_envs"))
+    set_environment_variables(model_config.get("router_envs"))
 
-    router_args = config["router_args"]
+    router_args = model_config["router_args"]
     # Router server params
     router_command = [
         "python3", "-u", "-m", "sglang_router.launch_router",
