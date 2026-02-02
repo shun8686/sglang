@@ -63,6 +63,10 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
         for env in cls.envs.keys():
             os.environ[env] = cls.envs[env]
 
+    @classmethod
+    def tearDownClass(cls):
+        print("##=== Service have crashed due to OOM ===##")
+
     def test_c_mem(self):
         for model in self.models:
             with self.subTest(model=model):
@@ -84,28 +88,29 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                     32768,
                 ]
 
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
-
-                # check if service is alive
-                if process.poll() is not None:
-                    print("##=== Service have crashed due to OOM ===##")
-                    return
-
                 try:
+                    process = popen_launch_server(
+                        model,
+                        self.base_url,
+                        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                        other_args=[
+                            *self.common_args,
+                        ],
+                    )
+
+                    # check if service is alive
+                    if process.poll() is not None:
+                        print("##=== Service have crashed due to OOM ===##")
+                        return
+
+
                     requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
+
+                    self.fail("Service should have crashed due to OOM")
                 except requests.exceptions.RequestException:
                     print("##=== Service have crashed due to OOM ===##")
-                    return
-
-                self.fail("Service should have crashed due to OOM")
-                kill_process_tree(process.pid)
+                finally:
+                    kill_process_tree(process.pid)
 
     # def test_a_gsm8k(self):
     #     for model in self.models:
