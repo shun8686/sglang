@@ -105,14 +105,14 @@ def get_cann_version():
             return cann_version_info
         else:
             print("CANN version not found")
-            return f"CANN\t{cann_ver_num}"
+            return f"CANN: {cann_ver_num}"
 
     except FileNotFoundError:
         print(f"CANN info file not found: {cann_info_file}")
-        return f"CANN\t{cann_ver_num}"
+        return f"CANN: {cann_ver_num}"
     except Exception as e:
         print(f"Error reading CANN info: {e}")
-        return f"CANN\t{cann_ver_num}"
+        return f"CANN: {cann_ver_num}"
 
 def write_pkg_info_to_file(result_file):
     """Write package information to result file.
