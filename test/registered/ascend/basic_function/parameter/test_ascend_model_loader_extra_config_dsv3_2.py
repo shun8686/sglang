@@ -98,7 +98,7 @@ class BaseModelLoaderTest(CustomTestCase):
         cls.err_file.close()
 
 
-class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
+class TestModelLoaderExtraConfig(BaseModelLoaderTest):
     """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
     and verify that the startup log contains "Multi-thread".
     Without configuring this parameter, the startup log should contain "Loading safetensors".
@@ -152,7 +152,7 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
         )
 
 
-class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig, CustomTestCase):
+class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
     log_info = "Loading safetensors"
 
     def test_model_loader_extra_config(self):
