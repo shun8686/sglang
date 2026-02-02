@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_W8A8_MODEL_PATH
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.test_utils import (
@@ -13,7 +14,10 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-class TestPureTP(CustomTestCase):
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+
+
+class TestDeepepLowlatencyQwen3(CustomTestCase):
     """Testcase: Verify the accuracy of Qwen3-30B model on MMLU and GSM8K tasks with DeepEP low latency mode on Ascend backend.
 
     [Test Category] Parameter
@@ -71,7 +75,7 @@ class TestPureTP(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's mathematical reasoning accuracy on the GSM8K dataset
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,

@@ -5,6 +5,7 @@ from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -16,7 +17,10 @@ from sglang.test.test_utils import (
 
 MODEL_PATH = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
 
-class TestPureTP(CustomTestCase):
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
+
+class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
     """Testcase: Verify the accuracy of DeepSeek-R1 model on MMLU and GSM8K tasks with --deepep-mode low_latency on Ascend NPU backend.
 
     [Test Category] Parameter
@@ -117,7 +121,7 @@ class TestPureTP(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's mathematical reasoning accuracy on the GSM8K dataset
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=128,
