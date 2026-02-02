@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
-
+import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
@@ -62,6 +62,47 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
         # basic testcase, reserved for setting environment
         for env in cls.envs.keys():
             os.environ[env] = cls.envs[env]
+
+    def test_c_mem(self):
+        for model in self.models:
+            with self.subTest(model=model):
+                print(f"##=== Testing mem: {model} ===##")
+                # set a small value to --mem-fraction-static
+                self.common_args = [
+                    "--trust-remote-code",
+                    "--disable-cuda-graph",
+                    "--mem-fraction-static",
+                    0.2,
+                    "--attention-backend",
+                    "ascend",
+                    "--quantization",
+                    "modelslim",
+                    "--tp-size",
+                    2,
+                    "--disable-radix-cache",
+                    "--chunked-prefill-size",
+                    32768,
+                ]
+
+                process = popen_launch_server(
+                    model,
+                    self.base_url,
+                    timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                    other_args=[
+                        *self.common_args,
+                    ],
+                )
+
+                # check if service is alive
+                if process.poll() is not None:
+                    return
+
+                try:
+                    requests.get(f"{self.base_url}/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
+                except:
+                    return
+
+                self.fail("Service should have crashed due to OOM")
 
     def test_a_gsm8k(self):
         for model in self.models:
