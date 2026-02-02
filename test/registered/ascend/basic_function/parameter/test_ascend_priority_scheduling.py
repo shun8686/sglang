@@ -30,9 +30,7 @@ class TestPriorityScheduling(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = (
-            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        )
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         other_args=(
             (
                 "--max-running-requests",  # Enforce max request concurrency is 1
@@ -100,7 +98,6 @@ class TestPriorityScheduling(CustomTestCase):
 
     def test_priority_scheduling_existing_requests_abortion_validation(self):
         # Verify lower priority requests are aborted when incoming requests have higher priority.
-
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -137,7 +134,6 @@ class TestPriorityScheduling(CustomTestCase):
 
     def test_priority_scheduling_incoming_request_rejection_validation(self):
         # Verify incoming requests are rejected when existing requests have higher priority
-
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -174,7 +170,6 @@ class TestPriorityScheduling(CustomTestCase):
 
     def test_priority_scheduling_preemption_meeting_threshold_validation(self):
         # Verify running requests are preempted by requests with priorities meeting the preemption threshold
-
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -210,7 +205,6 @@ class TestPriorityScheduling(CustomTestCase):
 
     def test_priority_scheduling_preemption_below_threshold_validation(self):
         # Verify running requests are not preempted by requests with priorities below preemption threshold
-
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,

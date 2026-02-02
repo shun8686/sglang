@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_W8A8_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -25,7 +25,7 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model =  DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+        cls.model =  DEEPSEEK_R1_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
