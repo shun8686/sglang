@@ -2,6 +2,8 @@ import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
 import requests
+
+from docs.advanced_features.vlm_query import model_path
 from sglang.srt.utils import kill_process_tree
 from test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
@@ -24,8 +26,9 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     [Test Target] --quantization modelslim, --disable-cuda-graph, --mem-fraction-static 0.8(normal)/0.1(too small)/0.9(too large)
     """
 
+    model_path = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
     TEST_MODEL_MATRIX = {
-        DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH: {
+        model_path: {
             "accuracy": 0.34,
             "latency": 1000,
             "output_throughput": 6,
@@ -46,7 +49,6 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
 
     def test_c_mem_fraction_static(self):
         mem_fraction_static_values = [0.1, 0.9]
-        model = self.TEST_MODEL_MATRIX.keys()[0]
         for mem_fraction_static_value in mem_fraction_static_values:
             with self.subTest(mem_fraction_static_value=mem_fraction_static_value):
                 print(f"##=== Testing --mem-fraction-static: {mem_fraction_static_value} ===##")
@@ -71,7 +73,7 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
 
                 try:
                     process = popen_launch_server(
-                        model,
+                        self.model_path,
                         self.base_url,
                         timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                         other_args=[

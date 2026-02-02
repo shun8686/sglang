@@ -2,7 +2,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -17,10 +17,10 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestEnableTokenizerModeSlow(CustomTestCase):
     """
-    Testcase：Verify that the inference is successful when the tokenizer mode is set to slow or auto
+    Testcase：Verify that the inference is successful when tokenizer is modified and the tokenizer mode is set
 
     [Test Category] Parameter
-    [Test Target] --tokenizer-mode slow/auto
+    [Test Target] --tokenizer-path, --tokenizer-mode slow/auto
     """
 
     tokenizer_mode = "slow"
@@ -28,6 +28,7 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+        cls.tokenizer_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--tokenizer-mode",
@@ -36,7 +37,7 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--tokenizer-path",
-            model_path,
+            cls.tokenizer_path,
             "--tokenizer-worker-num",
             4,
         ]
@@ -71,8 +72,8 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
         response = requests.get(self.base_url + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         print(response.json())
-        self.assertEqual(response.json()["tokenizer_path"], model_path)
-        self.assertEqual(response.json()["tokenizer_mode"], tokenizer_mode)
+        self.assertEqual(response.json()["tokenizer_path"], self.tokenizer_path)
+        self.assertEqual(response.json()["tokenizer_mode"], self.tokenizer_mode)
 
 
 class TestEnableTokenizerModeAuto(TestEnableTokenizerModeSlow):
