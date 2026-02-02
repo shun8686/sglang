@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 GSM_DATASET_PATH = None
 
@@ -113,6 +113,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
             response.json()["internal_states"][0]["attention_backend"],
             "ascend",
         )
+
 
 
 if __name__ == "__main__":
