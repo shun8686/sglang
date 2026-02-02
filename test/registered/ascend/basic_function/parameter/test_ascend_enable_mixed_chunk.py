@@ -67,7 +67,6 @@ class TestEnableMixedChunk(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
-            "--max-seq-length", "3072"  # 适配超长token输入，避免序列长度超限
         ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
