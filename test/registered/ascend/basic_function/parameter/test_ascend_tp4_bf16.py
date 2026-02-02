@@ -9,11 +9,11 @@ register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
 
 class TestAscendTp4Bf16(TestAscendGraphTp1Bf16):
     """
-    Testcase：Verify the accuracy on gsm8k dataset and throughput of Qwen3-30B-A3B when cuda graph mode is disabled and
-    tp size is 4
+    Testcase：Verify the correctness and performance when kernels for attention layers are chosen, cuda graph max bs is
+    set and tp size is 4
 
     [Test Category] Parameter
-    [Test Target] --disable-cuda-graph, --tp-size 4
+    [Test Target] --cuda-graph-max-bs 32, --tp-size 4
     """
 
     TEST_MODEL_MATRIX = {
@@ -26,7 +26,7 @@ class TestAscendTp4Bf16(TestAscendGraphTp1Bf16):
 
     extra_args = [
         "--mem-fraction-static", 0.8,
-        "--disable-cuda-graph",
+        "--cuda-graph-max-bs", 32,
         "--tp-size", 4,
     ]
 

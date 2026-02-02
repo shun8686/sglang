@@ -14,16 +14,15 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestAscendGraphTp1Bf16(CustomTestCase):
     """
-    Testcase：Verify the accuracy on gsm8k dataset and throughput of Qwen2.5-7B when cuda graph mode is enabled and
-    tp size is 1
+    Testcase：Verify the correctness and performance when kernels for attention layers are chosen
 
     [Test Category] Parameter
-    [Test Target] enable cuda graph mode (default setting), --tp-size 1 (default setting)
+    [Test Target] --attention-backend ascend
     """
 
     TEST_MODEL_MATRIX = {

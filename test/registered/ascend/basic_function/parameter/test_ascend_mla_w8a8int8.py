@@ -36,6 +36,8 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
     [Test Target] --quantization modelslim
     """
 
+    envs = {}
+
     @classmethod
     def setUpClass(cls):
         cls.models = TEST_MODEL_MATRIX.keys()
@@ -56,6 +58,10 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
             "--chunked-prefill-size",
             32768,
         ]
+
+        # basic testcase, reserved for setting environment
+        for env in cls.envs.keys():
+            os.environ[env] = cls.envs[env]
 
     def test_a_gsm8k(self):
         for model in self.models:
