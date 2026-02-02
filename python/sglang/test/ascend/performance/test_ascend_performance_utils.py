@@ -646,6 +646,8 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
         if process.returncode != 0:
             print(f"Benchmark command failed with return code: {process.returncode}")
 
+        process.stdout.close()
+        process.stderr.close()
     except Exception as e:
         print(f"Error running benchmark: {e}")
 
