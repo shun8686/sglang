@@ -3,7 +3,6 @@ from types import SimpleNamespace
 from urllib.parse import urlparse
 import requests
 
-from docs.advanced_features.vlm_query import model_path
 from sglang.srt.utils import kill_process_tree
 from test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
