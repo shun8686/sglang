@@ -47,7 +47,7 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
         pass
 
     def test_c_mem_fraction_static(self):
-        mem_fraction_static_values = [0.1, 0.9]
+        mem_fraction_static_values = [0.1, 0.99]
         for mem_fraction_static_value in mem_fraction_static_values:
             with self.subTest(mem_fraction_static_value=mem_fraction_static_value):
                 print(f"##=== Testing --mem-fraction-static: {mem_fraction_static_value} ===##")
