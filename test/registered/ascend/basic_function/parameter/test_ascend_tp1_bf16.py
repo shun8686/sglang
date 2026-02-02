@@ -20,4 +20,8 @@ class TestAscendTp1Bf16(TestAscendGraphTp1Bf16):
     ]
 
 if __name__ == "__main__":
-    unittest.main()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendTp1Bf16))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)

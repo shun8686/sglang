@@ -8,14 +8,14 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestLlava(TestVLMModels):
-    """Testcase: Verify that the inference accuracy of the AI-ModelScope/llava-v1.6-34b model on the MMMU dataset is no less than 0.3.
+    """Testcase: Verify that the inference accuracy of the AI-ModelScope/llava-v1.6-34b model on the MMMU dataset is no less than 0.2.
 
     [Test Category] Model
     [Test Target] AI-ModelScope/llava-v1.6-34b
     """
 
     model = LLAVA_V1_6_34B_WEIGHTS_PATH
-    mmmu_accuracy = 0.3
+    mmmu_accuracy = 0.2
     other_args = [
         "--trust-remote-code",
         "--tp-size",

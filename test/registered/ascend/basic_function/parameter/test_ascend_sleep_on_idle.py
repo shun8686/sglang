@@ -5,7 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -22,7 +21,8 @@ class TestSleepOnIdle(CustomTestCase):
     [Test Target] --sleep-on-idle
     """
 
-    def test_sleep_on_idle(self):
+    @classmethod
+    def setUpClass(cls):
         other_args = (
             [
                 "--sleep-on-idle",
@@ -31,7 +31,7 @@ class TestSleepOnIdle(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             (
                 LLAMA_3_2_1B_WEIGHTS_PATH
             ),
@@ -39,6 +39,12 @@ class TestSleepOnIdle(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_sleep_on_idle(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -58,11 +64,6 @@ class TestSleepOnIdle(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["sleep_on_idle"], True)
 
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
 
 if __name__ == "__main__":
-
     unittest.main()
