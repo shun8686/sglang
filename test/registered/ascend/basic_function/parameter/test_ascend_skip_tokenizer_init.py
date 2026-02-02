@@ -166,13 +166,10 @@ class TestSkipTokenizerInit(CustomTestCase):
         assert output_ids == out_stream_ids
 
     def test_simple_decode(self):
-
         # Basic non-streaming inference validation, Verify normal generation for simple prompt with default parameters
-
         self.run_decode()
 
     def test_parallel_sample(self):
-
         # Parallel sample multiple candidates validation, Verify server can generate 3 candidate outputs for single request
         self.run_decode(n=3)
 
