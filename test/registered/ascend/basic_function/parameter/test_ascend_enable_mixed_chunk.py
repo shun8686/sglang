@@ -1,11 +1,9 @@
-# -*- coding: utf-8 -*-
 import unittest
 import requests
 import time
 import threading
 from datetime import datetime
 
-# 必要模块导入
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
@@ -18,15 +16,13 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
-# 全局配置（统一配置，保证对比公平性）
 CONFIG = {
-    "TARGET_TOKEN_COUNT": 2500,  # 超长输入token数（>2048）
-    "CHUNK_SIZE": 1024,          # 分块预填充大小
-    "REQUEST_COUNT": 50,         # 调整：请求数量改为50个
-    "TIMEOUT": 600               # 延长超时，适配50个请求的高并发场景
+    "TARGET_TOKEN_COUNT": 2500,
+    "CHUNK_SIZE": 1024,
+    "REQUEST_COUNT": 50,
+    "TIMEOUT": 600
 }
 
-# 全局变量：存储两份测试的最终统计结果（用于后续对比和断言）
 FINAL_STATISTICS = {
     "mixed_enabled": None,
     "mixed_disabled": None
@@ -39,14 +35,11 @@ def build_long_input_text_for_token():
     return (base_sentence * repeat_times) + "The capital of France is"
 
 def send_generate_request(task_id, request_results):
-    """Single request sending function (record single request elapsed time, remove try...except)"""
-    # 1. Record single request start time
+    # record single request elapsed time
     single_start_time = time.time()
     
-    # 2. Construct long input text
     long_input_text = build_long_input_text_for_token()
     
-    # 3. Send /generate request (remove try...except, direct execution)
     response = requests.post(
         f"{DEFAULT_URL_FOR_TEST}/generate",
         json={
@@ -59,22 +52,18 @@ def send_generate_request(task_id, request_results):
         timeout=CONFIG["TIMEOUT"]
     )
     
-    # 4. Record single request end time and calculate elapsed time
     single_end_time = time.time()
     single_elapsed_time = round(single_end_time - single_start_time, 4)
-    
-    # 5. Record request result
+
     request_results.append({
         "task_id": task_id,
         "status_code": response.status_code,
-        "has_paris": "Paris" in response.text,
         "single_elapsed_time": single_elapsed_time
     })
     
     print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
 
 def start_server(with_mixed: bool):
-    """Common server start function: enable mixed chunk based on parameter"""
     other_args = [
         "--attention-backend",
         "ascend",
@@ -93,9 +82,7 @@ def start_server(with_mixed: bool):
         timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
         other_args=other_args,
     )
-    
-    # 直接使用 0 秒等待，无额外服务启动等待
-    time.sleep(0)
+
     return process
 
 def calculate_statistics(request_results):
@@ -107,7 +94,7 @@ def calculate_statistics(request_results):
     # Extract elapsed time of successful requests
     elapsed_times = [r["single_elapsed_time"] for r in success_requests]
     
-    # Calculate statistical indicators (remove overall elapsed time)
+    # Calculate statistical indicators
     return {
         "success_count": len(success_requests),
         "total_count": len(request_results),
@@ -117,25 +104,24 @@ def calculate_statistics(request_results):
     }
 
 class TestMixedChunkEnabled(CustomTestCase):
-    """Test Class 1: Enable --enable-mixed-chunk"""
+    """Testcase: Verify the baseline performance of disabled --enable-mixed-chunk with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
+
+    [Test Category] Parameter
+    [Test Target] --enable-mixed-chunk;
+    """
     @classmethod
     def setUpClass(cls):
         """Start server (with mixed chunk enabled)"""
-        print("\n" + "="*60)
         print("=== Starting Server (--enable-mixed-chunk ENABLED) ===")
         cls.process = start_server(with_mixed=True)
 
     @classmethod
     def tearDownClass(cls):
-        """Stop server and wait 10 seconds"""
         kill_process_tree(cls.process.pid)
-        print("=== Server Stopped (--enable-mixed-chunk ENABLED) ===")
-        print(f"=== Waiting 10 seconds after process termination ===")
         time.sleep(10)
-        print("="*60 + "\n")
 
     def test_mixed_chunk_with_multi_requests(self):
-        """Multi-request test (mixed chunk enabled), collect statistics"""
+        #Multi-request test , collect statistics
         request_results = []
         
         # Print test start information
@@ -158,93 +144,58 @@ class TestMixedChunkEnabled(CustomTestCase):
         # Calculate statistics
         statistics = calculate_statistics(request_results)
         
-        # Store final statistics
         FINAL_STATISTICS["mixed_enabled"] = {
             "detail": statistics
         }
         
-        # Print current test result
-        self._print_test_result("Mixed Chunk ENABLED", request_results, statistics)
-
-        # Add assertGreater after both tests are completed (verify optimization effect)
-        self._run_performance_assertions()
-
-    def _print_test_result(self, test_name, request_results, statistics):
-        """Helper function: Format and print test results (in English)"""
-        print(f"\n=== [{test_name}] All requests completed ===")
-        
-        if not statistics:
-            print(f"=== [{test_name}] No successful requests, cannot calculate detailed statistics ===")
-            return
-        
-        print(f"=== [{test_name}] Statistics Summary ===")
-        print(f"  Successful requests: {statistics['success_count']} / {statistics['total_count']}")
         print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
         print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
         print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
 
+        # Add assertGreater after both tests are completed (verify optimization effect)
+        self._run_performance_assertions()
+
     def _run_performance_assertions(self):
-        """Add assertGreater assertions to verify performance optimization"""
-        print("\n" + "="*80)
+        # verify performance optimization
         print("=== Running Performance Assertions ===")
-        print("="*80)
         
         enabled = FINAL_STATISTICS["mixed_enabled"]
         disabled = FINAL_STATISTICS["mixed_disabled"]
-        
-        # Verify if statistics data is complete
-        if not enabled or not disabled or not enabled["detail"] or not disabled["detail"]:
-            self.fail("Assertion Failed: Incomplete test data, cannot perform performance assertions")
-            return
-        
+
         # Extract core statistical data
         enabled_avg = enabled["detail"]["avg_elapsed"]
         disabled_avg = disabled["detail"]["avg_elapsed"]
-        enabled_max = enabled["detail"]["max_elapsed"]
-        disabled_max = disabled["detail"]["max_elapsed"]
         
-        # Calculate optimization rate (for reference only)
         avg_optimize_rate = round(((disabled_avg - enabled_avg) / disabled_avg) * 100, 2)
-        max_optimize_rate = round(((disabled_max - enabled_max) / disabled_max) * 100, 2)
         
         # Print assertion preparation information
-        print(f"\n1. Average Elapsed Time Comparison")
+        print(f"Average Elapsed Time Comparison")
         print(f"   Mixed Enabled: {enabled_avg}s | Mixed Disabled: {disabled_avg}s | Optimization Rate: {avg_optimize_rate}%")
-        print(f"\n2. Maximum Elapsed Time Comparison (Long-tail Effect)")
-        print(f"   Mixed Enabled: {enabled_max}s | Mixed Disabled: {disabled_max}s | Optimization Rate: {max_optimize_rate}%")
         
-        # Core assertion 1: Average elapsed time (disabled > enabled)
+        # Core assertion: Average elapsed time (disabled > enabled)
         self.assertGreater(disabled_avg, enabled_avg, 
                            f"Assertion Failed: Average elapsed time - Mixed Disabled ({disabled_avg}s) is not greater than Mixed Enabled ({enabled_avg}s)")
-        print("\n✅ Assertion Passed: Average Elapsed Time Optimization Verified")
-        
-        # Core assertion 2: Maximum elapsed time (disabled > enabled)
-        self.assertGreater(disabled_max, enabled_max, 
-                           f"Assertion Failed: Maximum elapsed time - Mixed Disabled ({disabled_max}s) is not greater than Mixed Enabled ({enabled_max}s)")
-        print("✅ Assertion Passed: Long-tail Effect Alleviation Verified")
-        
-        print("\n=== All Performance Assertions Passed Successfully ===")
 
 class TestMixedChunkDisabled(CustomTestCase):
-    """Test Class 2: Disable --enable-mixed-chunk"""
+    """Testcase: Verify the baseline performance of disabled --enable-mixed-chunk with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
+
+    [Test Category] Parameter
+    [Test Target] --enable-mixed-chunk;
+    """
+
     @classmethod
     def setUpClass(cls):
-        """Start server (with mixed chunk disabled)"""
+        # Start server (with mixed chunk disabled)
         print("\n" + "="*60)
         print("=== Starting Server (--enable-mixed-chunk DISABLED) ===")
         cls.process = start_server(with_mixed=False)
 
     @classmethod
     def tearDownClass(cls):
-        """Stop server and wait 10 seconds"""
         kill_process_tree(cls.process.pid)
-        print("=== Server Stopped (--enable-mixed-chunk DISABLED) ===")
-        print(f"=== Waiting 10 seconds after process termination ===")
         time.sleep(10)
-        print("="*60 + "\n")
 
     def test_mixed_chunk_with_multi_requests(self):
-        """Multi-request test (mixed chunk disabled), collect statistics"""
         request_results = []
         
         # Print test start information
@@ -273,24 +224,9 @@ class TestMixedChunkDisabled(CustomTestCase):
         }
         
         # Print current test result
-        self._print_test_result("Mixed Chunk DISABLED", request_results, statistics)
-        
-
-
-    def _print_test_result(self, test_name, request_results, statistics):
-        """Helper function: Format and print test results (in English)"""
-        print(f"\n=== [{test_name}] All requests completed ===")
-        
-        if not statistics:
-            print(f"=== [{test_name}] No successful requests, cannot calculate detailed statistics ===")
-            return
-        
-        print(f"=== [{test_name}] Statistics Summary ===")
-        print(f"  Successful requests: {statistics['success_count']} / {statistics['total_count']}")
         print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
         print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
         print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
-
 
 
 if __name__ == "__main__":

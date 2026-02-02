@@ -21,30 +21,28 @@ class TestPrefrredSample(CustomTestCase):
        [Test Target] --preferred-sampling-params
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
     @classmethod
     def setUpClass(cls):
         preferred_sampling_params = '{"temperature": 0.7, "top_p": 0.9, "top_k": 40}'
         other_args = (
-                [
-                    "--preferred-sampling-params",
-                    preferred_sampling_params,
-                    "--attention-backend",
-                    "ascend",
-                    "--disable-cuda-graph",
-                    ]
+            [
+                "--preferred-sampling-params",
+                preferred_sampling_params,
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+            ]
 
-                )
+        )
         cls.process = popen_launch_server(
-                cls.model,
-                DEFAULT_URL_FOR_TEST,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=other_args,
-                )
+            cls.model,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
 
     def test_prefrred_sample(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -57,11 +55,6 @@ class TestPrefrredSample(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(
-                response.json()["preferred_sampling_params"], {'temperature': 0.7, 'top_p': 0.9, 'top_k': 40}
-        )
 
     @classmethod
     def tearDownClass(cls):

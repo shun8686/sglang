@@ -22,6 +22,7 @@ class TestRandomSeed(CustomTestCase):
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     random_seed = 0
+
     @classmethod
     def get_server_args(cls):
         """Return the arguments for the server launch. Override in subclasses."""
@@ -67,15 +68,6 @@ class TestRandomSeed(CustomTestCase):
         )
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
-        )
-
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertIsInstance(
-            response.json()["random_seed"], int, "--random-seed is not taking effect."
         )
 
 

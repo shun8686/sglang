@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
     run_bench_offline_throughput,
 )
-
+from test_ascend_mla_w8a8int8 import TestAscendMlaW8A8Int8
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
@@ -28,7 +28,7 @@ TEST_MODEL_MATRIX = {
 }
 
 
-class TestAscendMlaW8A8Int8(CustomTestCase):
+class TestAscendMlaW8A8Int8(TestAscendMlaW8A8Int8):
     """
     Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
     DeepSeek model with W8A8 INT8 quantization when the FIA acceleration is used.
@@ -36,6 +36,8 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --quantization modelslim, ENV ASCEND_USE_FIA true
     """
+
+    envs = {"ASCEND_USE_FIA": "true"}
 
     @classmethod
     def setUpClass(cls):

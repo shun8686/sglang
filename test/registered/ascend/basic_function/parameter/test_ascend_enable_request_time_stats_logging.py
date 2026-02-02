@@ -25,7 +25,7 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
     """Testcase: Verify the functionality of --enable-request-time-stats-logging to generate Req Time Stats logs on Ascend backend with Llama-3.2-1B-Instruct model.
 
     [Test Category] Parameter
-    [Test Target] --enable-request-time-stats-logging;--attention-backend;/generate
+    [Test Target] --enable-request-time-stats-logging
     """
     @classmethod
     def setUpClass(cls):
