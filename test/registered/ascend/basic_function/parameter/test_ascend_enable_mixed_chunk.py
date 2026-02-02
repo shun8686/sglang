@@ -159,3 +159,7 @@ class TestEnableMixedChunk(CustomTestCase):
         if success_requests:
             avg_single_time = round(sum([r["single_elapsed_time"] for r in success_requests]) / len(success_requests), 4)
             print(f"\n=== 成功请求平均耗时：{avg_single_time} 秒 ===")
+
+if __name__ == "__main__":
+
+    unittest.main()
