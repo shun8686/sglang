@@ -15,8 +15,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
-
-
 class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     """
     Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
@@ -41,7 +39,6 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
         "--disable-radix-cache",
         "--chunked-prefill-size", 32768,
     ]
-
 
     @classmethod
     def tearDownClass(cls):
@@ -80,6 +77,7 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
                             *self.common_args,
                         ],
                     )
+                    self.fail("##=== Service should have crashed due to OOM===##")
                 except Exception as e:
                     print("##=== Service have correctly crashed due to OOM===##")
                     exception_message = str(e)
@@ -87,6 +85,7 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
                     self.assertEqual(exception_message, excepted_message)
                     if exception_message is None:
                         kill_process_tree(process.pid)
+
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
