@@ -18,11 +18,10 @@ TEST_MODEL_MATRIX = {
 
 class TestAscendMlaFiaW8A8Int8(TestAscendGraphTp1Bf16):
     """
-    Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
-    DeepSeek model with W8A8 INT8 quantization when the FIA acceleration is used.
+    Testcase：Verify the correctness and performance when quantization model is modelslim and FIA acceleration is used。
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim, ENV ASCEND_USE_FIA true
+    [Test Target] --quantization modelslim
     """
 
     TEST_MODEL_MATRIX = {

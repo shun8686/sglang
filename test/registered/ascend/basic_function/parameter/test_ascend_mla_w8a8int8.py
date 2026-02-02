@@ -17,11 +17,11 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     """
-    Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
-    DeepSeek model with W8A8 INT8 quantization
+    Testcase：Verify the correctness and performance when quantization model is modelslim and cuda graph mode is
+    disabled, and verify that a memory error occurs when --mem-fraction-static is too large or too small.
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim, --mem-fraction-static 0.1
+    [Test Target] --quantization modelslim, --disable-cuda-graph, --mem-fraction-static 0.8(normal)/0.1(too small)/0.9(too large)
     """
 
     TEST_MODEL_MATRIX = {
@@ -44,16 +44,16 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     def tearDownClass(cls):
         pass
 
-    def test_c_mem(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing mem: {model} ===##")
-                # set a small value to --mem-fraction-static
+    def test_c_mem_fraction_static_too_small(self):
+        mem_fraction_static_values = [0.1, 0.9]
+        for mem_fraction_static_value in mem_fraction_static_values:
+            with self.subTest(mem_fraction_static_value=mem_fraction_static_value):
+                print(f"##=== Testing --mem-fraction-static: {mem_fraction_static_value} ===##")
                 self.common_args = [
                     "--trust-remote-code",
                     "--disable-cuda-graph",
                     "--mem-fraction-static",
-                    0.1,
+                    mem_fraction_static_value,
                     "--attention-backend",
                     "ascend",
                     "--quantization",
