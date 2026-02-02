@@ -1,7 +1,7 @@
 import json
 import os
-import subprocess
 import unittest
+from abc import ABC
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
@@ -23,7 +23,7 @@ CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
 CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
 
-class BaseModelLoaderTest(CustomTestCase):
+class BaseModelLoaderTest(ABC):
     models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
     accuracy = 0.5
     other_args = [
@@ -39,7 +39,6 @@ class BaseModelLoaderTest(CustomTestCase):
         "modelslim",
         "--disable-radix-cache",
     ]
-    # Define log file names as class variables
     out_file = None
     err_file = None
 
@@ -104,7 +103,7 @@ class BaseModelLoaderTest(CustomTestCase):
                     print(f"Warning: Failed to remove log file {log_file}: {e}")
 
 
-class TestModelLoaderExtraConfig(BaseModelLoaderTest):
+class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
     and verify that the startup log contains "Multi-thread".
     Without configuring this parameter, the startup log should contain "Loading safetensors".
@@ -158,8 +157,10 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest):
         )
 
 
-class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
+class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     log_info = "Loading safetensors"
+    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
         self.err_file.seek(0)
