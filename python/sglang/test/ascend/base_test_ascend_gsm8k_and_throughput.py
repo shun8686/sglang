@@ -20,6 +20,9 @@ class BaseTestAscendGsm8kAndThroughput(CustomTestCase):
     """
     Testcase：Base test class for Verifying the accuracy on gsm8k dataset and throughput of models
     """
+
+    __test__ = False
+
     TEST_MODEL_MATRIX = {}
     extra_args = []
 
