@@ -35,7 +35,7 @@ class TestHiddenState(CustomTestCase):
             attention_backend="ascend",
             disable_cuda_graph=True,
         )
-        outputs = engine.generate(
+        outputs = self.engine.generate(
             input_ids=input_ids,
             sampling_params=sampling_params,
             return_hidden_states=True,
@@ -112,18 +112,18 @@ class TestHiddenState(CustomTestCase):
             attention_backend="ascend",
             disable_cuda_graph=True,
         )
-        outputs_completion_first_round = engine.generate(
+        outputs_completion_first_round = self.engine.generate(
             input_ids=input_ids,
             sampling_params=sampling_params,
             return_hidden_states=True,
         )
-        outputs_hidden_state = engine.generate(
+        outputs_hidden_state = self.engine.generate(
             input_ids=input_ids,
             sampling_params=sampling_params,
             return_hidden_states=False,
         )
 
-        outputs_completion_last_round = engine.generate(
+        outputs_completion_last_round = self.engine.generate(
             input_ids=input_ids,
             sampling_params=sampling_params,
             return_hidden_states=True,
