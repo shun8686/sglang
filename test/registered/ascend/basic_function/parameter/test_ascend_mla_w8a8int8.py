@@ -91,6 +91,6 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
 if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendGraphTp1Bf16))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendMlaW8A8Int8))
     runner = unittest.TextTestRunner()
     runner.run(suite)
