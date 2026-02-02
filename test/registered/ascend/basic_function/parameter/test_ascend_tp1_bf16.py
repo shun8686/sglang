@@ -7,11 +7,10 @@ register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendTp1Bf16(TestAscendGraphTp1Bf16):
     """
-    Testcase：Verify the accuracy and throughput of Qwen2.5-7B on gsm8k dataset when cuda graph mode is disabled and
-    tp size is 1
+    Testcase：Verify the correctness and performance when kernels for attention layers are chosen and cuda graph mode is disabled
 
     [Test Category] Parameter
-    [Test Target] --disable-cuda-graph, --tp-size 1 (default setting)
+    [Test Target] --attention-backend ascend (set in TestAscendGraphTp1Bf16), --disable-cuda-graph
     """
 
     extra_args = [

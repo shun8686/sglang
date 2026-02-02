@@ -87,21 +87,6 @@ class BaseModelLoaderTest(ABC):
         if hasattr(cls, 'err_file') and cls.err_file:
             cls.err_file.close()
 
-        # 删除日志文件
-        log_files = [
-            MULTITHREAD_OUT_LOG,
-            MULTITHREAD_ERR_LOG,
-            CHECKPOINT_OUT_LOG,
-            CHECKPOINT_ERR_LOG
-        ]
-
-        for log_file in log_files:
-            if os.path.exists(log_file):
-                try:
-                    os.remove(log_file)
-                except Exception as e:
-                    print(f"Warning: Failed to remove log file {log_file}: {e}")
-
 
 class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
@@ -139,38 +124,10 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
         content = self.err_file.read()
         self.assertIn(self.log_info, content)
 
-    def test_gsm8k(self):
-        args = SimpleNamespace(
-            num_shots=5,
-            data_path=None,
-            num_questions=200,
-            max_new_tokens=512,
-            parallel=128,
-            host=f"http://{self.url.hostname}",
-            port=int(self.url.port),
-        )
-        metrics = run_eval_few_shot_gsm8k(args)
-        self.assertGreaterEqual(
-            metrics["accuracy"],
-            self.accuracy,
-            f'Accuracy of {self.models} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
-        )
-
-
-class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
-    log_info = "Loading safetensors"
-    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
-
-    def test_model_loader_extra_config(self):
-        self.err_file.seek(0)
-        content = self.err_file.read()
-        self.assertIn(self.log_info, content)
-
     def test_model_loading_time_reduced(self):
         # Helper function to extract loading time
         def get_loading_seconds(filename, pattern):
-            cmd = f"grep '{pattern}' ./{filename} | tail -1"
+            cmd = f"grep '{pattern}' {filename} | tail -1"
             line = run_command(cmd)
             if not line:
                 return 0
@@ -198,6 +155,40 @@ class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
         # Assert
         self.assertGreater(checkpoint_seconds, multi_thread_seconds)
 
+    def test_gsm8k(self):
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
+        metrics = run_eval_few_shot_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            self.accuracy,
+            f'Accuracy of {self.models} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+        )
+
+
+class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
+    log_info = "Loading safetensors"
+    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
+
+    def test_model_loader_extra_config(self):
+        self.err_file.seek(0)
+        content = self.err_file.read()
+        self.assertIn(self.log_info, content)
+
 
 if __name__ == "__main__":
-    unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(TestNOModelLoaderExtraConfig("test_model_loader_extra_config"))
+    suite.addTest(TestModelLoaderExtraConfig("test_model_loader_extra_config"))
+    suite.addTest(TestModelLoaderExtraConfig("test_model_loading_time_reduced"))
+    suite.addTest(TestModelLoaderExtraConfig("test_gsm8k"))
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
