@@ -159,8 +159,8 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
 
 class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     log_info = "Loading safetensors"
-    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
+    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
         self.err_file.seek(0)
