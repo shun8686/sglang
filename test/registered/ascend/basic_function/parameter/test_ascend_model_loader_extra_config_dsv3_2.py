@@ -29,67 +29,37 @@ def run_command(cmd, shell=True):
         return None
 
 
-class BaseModelLoaderTest(CustomTestCase):
-    """Base class for model loader tests"""
+MULTITHREAD_OUT_LOG = "./multi_thread_out_log.txt"
+MULTITHREAD_ERR_LOG = "./multi_thread_err_log.txt"
+CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
+CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
+
+class BaseModelLoaderTest(CustomTestCase):
     models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
     accuracy = 0.5
-    other_args = None
-    out_log_file = None
-    err_log_file = None
-    log_info = None
-
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.9",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        "16",
+        "--quantization",
+        "modelslim",
+        "--disable-radix-cache",
+    ]
     # Define log file names as class variables
-    MULTITHREAD_OUT_LOG = "./multi_thread_out_log.txt"
-    MULTITHREAD_ERR_LOG = "./multi_thread_err_log.txt"
-    CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
-    CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
-    # Cache for service instances
-    _service_instances = {}
+    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
 
     @classmethod
-    def get_server_key(cls, use_multithread):
-        """Generate a unique key for server configuration"""
-        return f"{cls.models}_{use_multithread}"
-
-    @classmethod
-    def start_server(cls, use_multithread=True):
-        """Start server with given configuration"""
-        server_key = cls.get_server_key(use_multithread)
-
-        # If already started, return cached instance
-        if server_key in cls._service_instances:
-            return cls._service_instances[server_key]
-
-        # Build arguments
-        base_args = [
-            "--trust-remote-code",
-            "--mem-fraction-static",
-            "0.9",
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--tp-size",
-            "16",
-            "--quantization",
-            "modelslim",
-            "--disable-radix-cache",
-        ]
-
-        if use_multithread:
-            other_args = base_args + [
-                "--model-loader-extra-config",
-                json.dumps({"enable_multithread_load": True, "num_threads": 2}),
-            ]
-            out_file = open(cls.MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
-            err_file = open(cls.MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
-        else:
-            other_args = base_args
-            out_file = open(cls.CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
-            err_file = open(cls.CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
-
-        # Set environment variables
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         os.environ["PYTORCH_NPU_ALLOC_CONF"] = "expandable_segments:True"
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
         os.environ["HCCL_BUFFSIZE"] = "200"
@@ -102,48 +72,34 @@ class BaseModelLoaderTest(CustomTestCase):
         os.environ["P2P_HCCL_BUFFSIZE"] = "20"
         env = os.environ.copy()
 
-        # Start service once for warm-up to prevent cache affecting model load time
-        process = popen_launch_server(
+        # Start the service first to prevent caching from affecting model load time.
+        cls.process = popen_launch_server(
             cls.models,
-            DEFAULT_URL_FOR_TEST,
+            cls.base_url,
             timeout=3000,
-            other_args=other_args,
+            other_args=cls.other_args,
             env=env,
         )
-        kill_process_tree(process.pid)
+        kill_process_tree(cls.process.pid)
 
-        # Start the actual service for testing
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             cls.models,
-            DEFAULT_URL_FOR_TEST,
+            cls.base_url,
             timeout=3000,
-            other_args=other_args,
+            other_args=cls.other_args,
             env=env,
-            return_stdout_stderr=(out_file, err_file),
+            return_stdout_stderr=(cls.out_file, cls.err_file),
         )
-
-        # Cache service instance
-        cls._service_instances[server_key] = {
-            'process': process,
-            'out_file': out_file,
-            'err_file': err_file,
-            'use_multithread': use_multithread
-        }
-
-        return cls._service_instances[server_key]
 
     @classmethod
     def tearDownClass(cls):
-        """Clean up all servers"""
-        for server_key, instance in cls._service_instances.items():
-            kill_process_tree(instance['process'].pid)
-            instance['out_file'].close()
-            instance['err_file'].close()
-        cls._service_instances.clear()
+        kill_process_tree(cls.process.pid)
+        cls.out_file.close()
+        cls.err_file.close()
 
 
-class TestModelLoaderExtraConfig(BaseModelLoaderTest):
-    """Testcase: Configure the --model-loader-extra-config parameter to ensure no degradation in accuracy,
+class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
+    """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
     and verify that the startup log contains "Multi-thread".
     Without configuring this parameter, the startup log should contain "Loading safetensors".
     After configuring the parameter, the model loading time should be reduced.
@@ -152,20 +108,30 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest):
     [Test Target] --model-loader-extra-config {"enable_multithread_load": True, "num_threads": 2}
     """
 
-    @classmethod
-    def setUpClass(cls):
-        # Start server with multithread configuration
-        cls.server_instance = cls.start_server(use_multithread=True)
-        cls.process = cls.server_instance['process']
-        cls.out_log_file = cls.server_instance['out_file']
-        cls.err_log_file = cls.server_instance['err_file']
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        cls.log_info = "Multi-thread"
+    models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
+    accuracy = 0.5
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.9",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        "16",
+        "--quantization",
+        "modelslim",
+        "--disable-radix-cache",
+        "--model-loader-extra-config",
+        json.dumps({"enable_multithread_load": True, "num_threads": 2}),
+    ]
+    log_info = "Multi-thread"
+    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
-        self.err_log_file.seek(0)
-        content = self.err_log_file.read()
+        self.err_file.seek(0)
+        content = self.err_file.read()
         self.assertIn(self.log_info, content)
 
     def test_gsm8k(self):
@@ -186,23 +152,12 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest):
         )
 
 
-class TestNOModelLoaderExtraConfig(BaseModelLoaderTest):
-    """Test without model loader extra config"""
-
-    @classmethod
-    def setUpClass(cls):
-        # Start server without multithread configuration
-        cls.server_instance = cls.start_server(use_multithread=False)
-        cls.process = cls.server_instance['process']
-        cls.out_log_file = cls.server_instance['out_file']
-        cls.err_log_file = cls.server_instance['err_file']
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        cls.log_info = "Loading safetensors"
+class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig, CustomTestCase):
+    log_info = "Loading safetensors"
 
     def test_model_loader_extra_config(self):
-        self.err_log_file.seek(0)
-        content = self.err_log_file.read()
+        self.err_file.seek(0)
+        content = self.err_file.read()
         self.assertIn(self.log_info, content)
 
     def test_model_loading_time_reduced(self):
@@ -222,11 +177,11 @@ class TestNOModelLoaderExtraConfig(BaseModelLoaderTest):
 
         # Get loading times
         multi_thread_seconds = get_loading_seconds(
-            self.MULTITHREAD_ERR_LOG,
+            MULTITHREAD_ERR_LOG,
             "Multi-thread loading shards"
         )
         checkpoint_seconds = get_loading_seconds(
-            self.CHECKPOINT_ERR_LOG,
+            CHECKPOINT_ERR_LOG,
             "Loading safetensors checkpoint shards"
         )
 
