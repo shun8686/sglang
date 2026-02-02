@@ -5,33 +5,47 @@ import sys
 import time
 from datetime import datetime
 
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
-# 定义日志转储文件路径
 LOG_DUMP_FILE = f"server_request_stats_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+CUSTOM_SERVER_WAIT_TIME = 20 
+
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestEnableRequestTimeStatsLogging(CustomTestCase):
+    """Testcase: Verify the functionality of --enable-request-time-stats-logging to generate Req Time Stats logs on Ascend backend with Llama-3.2-1B-Instruct model.
+
+    [Test Category] Parameter
+    [Test Target] --enable-request-time-stats-logging;--attention-backend;/generate
+    """
     @classmethod
     def setUpClass(cls):
-        # 1. 保存原始stdout和stderr（用于后续恢复）
-        cls.original_stdout = sys.stdout
-        cls.original_stderr = sys.stderr
+        # 1. Save the original stdout/stderr file descriptors at the operating system level
+        cls.original_stdout_fd = os.dup(sys.stdout.fileno())
+        cls.original_stderr_fd = os.dup(sys.stderr.fileno())
 
-        # 2. 打开日志文件，用于重定向输出（a+模式：可读可写，追加创建）
-        cls.log_file = open(LOG_DUMP_FILE, "a+", encoding="utf-8", buffering=1)  # buffering=1：行缓冲，实时写入
+        # 2. Open the log file (OS-level file descriptor for redirection)
+        cls.log_fd = os.open(
+            LOG_DUMP_FILE,
+            os.O_WRONLY | os.O_CREAT | os.O_APPEND,
+            0o644
+        )
+        cls.log_file = open(LOG_DUMP_FILE, "a+", encoding="utf-8")
 
-        # 3. 关键：临时重定向全局stdout和stderr到日志文件
-        sys.stdout = cls.log_file
-        sys.stderr = cls.log_file
+        # 3. Redirect stdout and stderr to the log file descriptor at the operating system level
+        os.dup2(cls.log_fd, sys.stdout.fileno())
+        os.dup2(cls.log_fd, sys.stderr.fileno())
 
-        # 4. 启动服务器（完全不修改popen_launch_server，直接调用原有逻辑）
+        # 4. Launch the model server with specified configuration
         other_args = (
             [
                 "--attention-backend",
@@ -39,42 +53,67 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
                 "--disable-cuda-graph",
                 "--enable-request-time-stats-logging",
             ]
-            if is_npu()
-            else ["--enable-request-time-stats-logging"]
         )
 
         cls.process = popen_launch_server(
-            (
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
-                if is_npu()
-                else DEFAULT_SMALL_MODEL_NAME_FOR_TEST
-            ),
+            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
 
-        # 5. 立即恢复原始stdout和stderr，不影响测试用例后续输出
-        sys.stdout = cls.original_stdout
-        sys.stderr = cls.original_stderr
-
-        # 6. 给服务器预留启动时间，确保日志文件正常写入内容
-        time.sleep(DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH // 2)
+        print(f"Waiting for server to start ({CUSTOM_SERVER_WAIT_TIME} seconds)...")
+        time.sleep(CUSTOM_SERVER_WAIT_TIME)
 
     @classmethod
     def tearDownClass(cls):
-        # 1. 终止服务器进程树
+        # 1. Terminate the server process tree
         kill_process_tree(cls.process.pid)
 
-        # 2. 关闭日志文件句柄，确保所有缓冲内容写入文件
+        # 2. Restore the original stdout/stderr at the operating system level (for subsequent log printing and prompts)
+        os.dup2(cls.original_stdout_fd, sys.stdout.fileno())
+        os.dup2(cls.original_stderr_fd, sys.stderr.fileno())
+
+        # 3. Close all file descriptors and file objects (release file occupation)
+        os.close(cls.log_fd)
+        os.close(cls.original_stdout_fd)
+        os.close(cls.original_stderr_fd)
         cls.log_file.close()
 
-        # 3. 提示日志文件路径
-        print(f"服务器日志已完整转储到：{os.path.abspath(LOG_DUMP_FILE)}")
+        # 4. Print the full log content to the console
+        cls.print_full_log()
+
+        # 5. Delete the log file (clean up redundant files)
+        cls.delete_log_file()
+
+    @classmethod
+    def print_full_log(cls):
+        if not os.path.exists(LOG_DUMP_FILE):
+            print("\n[Log Tip] Log file does not exist, no content to print")
+            return
+        
+        print("\n" + "="*80)
+        print("Full Server Log Content:")
+        print("="*80)
+        with open(LOG_DUMP_FILE, "r", encoding="utf-8", errors="ignore") as f:
+            full_log = f.read()
+            # Print full log (if the log is too large, only print the last 5000 characters to avoid console flooding)
+            print(full_log if len(full_log) <= 5000 else f"[Log Too Long, Only Showing Last 5000 Characters]\n{full_log[-5000:]}")
+        print("="*80)
+        print("Log printing completed")
+
+    @classmethod
+    def delete_log_file(cls):
+        try:
+            if os.path.exists(LOG_DUMP_FILE):
+                os.remove(LOG_DUMP_FILE)
+                print(f"\nLog file deleted: {os.path.abspath(LOG_DUMP_FILE)}")
+            else:
+                print("\n[Deletion Tip] Log file does not exist, no need to delete")
+        except Exception as e:
+            print(f"\n[Deletion Warning] Failed to delete log file: {e}")
 
     def read_log_file(self):
-        """读取日志文件完整内容，返回字符串"""
-        # 以只读模式打开，避免覆盖已有内容
         if not os.path.exists(LOG_DUMP_FILE):
             return ""
         
@@ -82,7 +121,7 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             return f.read()
 
     def test_enable_request_time_stats_logging(self):
-        # 1. 发送请求，触发服务端生成 Req Time Stats 日志
+        # 1. Send a request to trigger the server to generate Req Time Stats logs
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -94,21 +133,25 @@ class TestEnableRequestTimeStatsLogging(CustomTestCase):
             },
         )
 
-        # 断言请求发送成功（先确保请求正常，再判断日志）
-        self.assertEqual(response.status_code, 200, "请求生成接口失败")
+        # 2. Extend the log writing waiting time to ensure Req Time Stats is fully written
+        time.sleep(5)
 
-        # 2. 等待日志写入（解决服务端输出缓冲延迟问题）
-        time.sleep(3)
+        # 3. Restore IO to facilitate subsequent assertion information output to the console
+        os.dup2(self.original_stdout_fd, sys.stdout.fileno())
+        os.dup2(self.original_stderr_fd, sys.stderr.fileno())
 
-        # 3. 读取完整日志文件内容
+        # 4. Assert that the request was sent successfully
+        self.assertEqual(response.status_code, 200, "Failed to call generate API")
+
+        # 5. Read the full content of the log file
         server_logs = self.read_log_file()
 
-        # 4. 断言日志中包含 Req Time Stats 关键字
+        # 6. Assert that the log contains the Req Time Stats keyword
         target_keyword = "Req Time Stats"
         self.assertIn(
             target_keyword,
             server_logs,
-            f"未在服务端日志中找到关键字：{target_keyword}\n日志文件路径：{os.path.abspath(LOG_DUMP_FILE)}\n日志内容预览（最后1000字符）：\n{server_logs[-1000:] if len(server_logs) > 1000 else server_logs}",
+            f"Keyword not found in server logs: {target_keyword}\nLog file path: {os.path.abspath(LOG_DUMP_FILE)}\nLog content preview (last 2000 characters):\n{server_logs[-2000:] if len(server_logs) > 2000 else server_logs}",
         )
 
 if __name__ == "__main__":

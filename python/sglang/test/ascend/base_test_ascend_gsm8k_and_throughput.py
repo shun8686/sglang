@@ -16,9 +16,9 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestAscendGsm8kAndThroughput(CustomTestCase):
+class BaseTestAscendGsm8kAndThroughput(CustomTestCase):
     """
-    Testcase：Verify the accuracy on gsm8k dataset and throughput of models
+    Testcase：Base test class for Verifying the accuracy on gsm8k dataset and throughput of models
     """
     TEST_MODEL_MATRIX = {}
     extra_args = []
