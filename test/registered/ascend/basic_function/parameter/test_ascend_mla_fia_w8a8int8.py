@@ -1,20 +1,8 @@
-import os
 import unittest
-from types import SimpleNamespace
 from urllib.parse import urlparse
 
-from sglang.srt.utils import kill_process_tree
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
-from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
-    CustomTestCase,
-    is_in_ci,
-    popen_launch_server,
-    run_bench_offline_throughput,
-)
-from test_ascend_mla_w8a8int8 import TestAscendMlaW8A8Int8
+from test_ascend_graph_tp1_bf16 import TestAscendGraphTp1Bf16
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
@@ -28,90 +16,34 @@ TEST_MODEL_MATRIX = {
 }
 
 
-class TestAscendMlaW8A8Int8(TestAscendMlaW8A8Int8):
+class TestAscendMlaFiaW8A8Int8(TestAscendGraphTp1Bf16):
     """
-    Testcase：Verify the correctness and performance of the function of combining the MLA attention mechanism of the
-    DeepSeek model with W8A8 INT8 quantization when the FIA acceleration is used.
+    Testcase：Verify the correctness and performance when quantization model is modelslim and FIA acceleration is used。
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim, ENV ASCEND_USE_FIA true
+    [Test Target] --quantization modelslim
     """
 
+    TEST_MODEL_MATRIX = {
+        DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH: {
+            "accuracy": 0.34,
+            "latency": 1000,
+            "output_throughput": 6,
+        },
+    }
+    extra_args = [
+        "--mem-fraction-static", 0.8,
+        "--disable-cuda-graph",
+        "--quantization", "modelslim",
+        "--tp-size", 2,
+        "--disable-radix-cache",
+    ]
     envs = {"ASCEND_USE_FIA": "true"}
-
-    @classmethod
-    def setUpClass(cls):
-        cls.models = TEST_MODEL_MATRIX.keys()
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        cls.common_args = [
-            "--trust-remote-code",
-            "--disable-cuda-graph",
-            "--mem-fraction-static",
-            0.8,
-            "--attention-backend",
-            "ascend",
-            "--quantization",
-            "modelslim",
-            "--tp-size",
-            2,
-            "--disable-radix-cache",
-        ]
-
-    def test_a_gsm8k(self):
-        os.environ["ASCEND_USE_FIA"] = "true"
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
-
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
-
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=1319,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
-
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
-
-    def test_b_throughput(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing throughput: {model} ===##")
-
-                output_throughput = run_bench_offline_throughput(
-                    model,
-                    [
-                        *self.common_args,
-                    ],
-                )
-
-                print(f"##=== {model} throughput: {output_throughput} ===##")
-
-                if is_in_ci():
-                    self.assertGreater(
-                        output_throughput,
-                        TEST_MODEL_MATRIX[model]["output_throughput"],
-                    )
 
 
 if __name__ == "__main__":
-    unittest.main()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendMlaFiaW8A8Int8))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)

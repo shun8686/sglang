@@ -1,9 +1,11 @@
+import os
+import shutil
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import Qwen2_5_7B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -27,8 +29,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = Qwen2_5_7B_Instruct_WEIGHTS_PATH
-        cls.back_up_model_path = Qwen2_5_7B_Instruct_WEIGHTS_PATH + "-back_up"
+        cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        cls.back_up_model_path = cls.model + "-back-up"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
@@ -40,8 +42,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading"
         ]
 
-        if (not os.path.exists(back_up_model_path)):
-            shutil.copytree(model, back_up_model_path)
+        if (not os.path.exists(cls.back_up_model_path)):
+            shutil.copytree(cls.model, cls.back_up_model_path)
 
         cls.process = popen_launch_server(
             cls.back_up_model_path,
@@ -55,6 +57,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        if os.path.exists(cls.model_back_up_path):
+            shutil.rmtree(cls.model_back_up_path)
 
     def test_delete_ckpt_after_loading(self):
         response = requests.post(
@@ -85,7 +89,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading is not taking effect.",
         )
 
-        self.assertNotTrue(os.path.exists(back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
+        self.assertNotTrue(os.path.exists(self.back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,4 @@
 import unittest
-
 import requests
 
 from sglang.srt.utils import kill_process_tree
@@ -24,9 +23,10 @@ class TestEnableTokenizerMode(CustomTestCase):
     [Test Target] --served-model-name model_name
     """
 
-    def test_tokenzier_mode(self):
-        self.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        self.base_url = DEFAULT_URL_FOR_TEST
+    @classmethod
+    def setUpClass(cls):
+        cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+        cls.base_url = DEFAULT_URL_FOR_TEST
         served_model_name = "Llama3.2"
         other_args = [
             "--served-model-name",
@@ -36,12 +36,18 @@ class TestEnableTokenizerMode(CustomTestCase):
             "--disable-cuda-graph",
         ]
 
-        process = popen_launch_server(
-            self.model_path,
-            self.base_url,
+        cls.process = popen_launch_server(
+            cls.model_path,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_tokenzier_mode(self):
         response = requests.get(f"{self.base_url}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -60,7 +66,6 @@ class TestEnableTokenizerMode(CustomTestCase):
         response = requests.get(self.base_url + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["served_model_name"], served_model_name)
-        kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":

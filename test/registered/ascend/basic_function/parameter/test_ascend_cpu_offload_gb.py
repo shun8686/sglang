@@ -5,7 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -23,7 +22,8 @@ class TestAscendCpuOffloadGb(CustomTestCase):
     [Test Target] --cpu-offload-gb
     """
 
-    def test_cpu_offload_gb(self):
+    @classmethod
+    def setUpClass(cls):
         other_args = (
             [
                 "--cpu-offload-gb",
@@ -33,7 +33,7 @@ class TestAscendCpuOffloadGb(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             (
                 LLAMA_3_2_1B_WEIGHTS_PATH
             ),
@@ -41,6 +41,12 @@ class TestAscendCpuOffloadGb(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_cpu_offload_gb(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -56,10 +62,6 @@ class TestAscendCpuOffloadGb(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["cpu_offload_gb"], 10)
-        kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":

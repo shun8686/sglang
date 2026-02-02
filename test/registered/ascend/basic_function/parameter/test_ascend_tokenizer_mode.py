@@ -1,12 +1,9 @@
 import unittest
-
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST_BASE,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -18,61 +15,69 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestEnableTokenizerMode(CustomTestCase):
+class TestEnableTokenizerModeSlow(CustomTestCase):
     """
-    Testcase：Verify that the inference is successful when the tokenizer mode is set to slow or auto
+    Testcase：Verify that the inference is successful when tokenizer is modified and the tokenizer mode is set
 
     [Test Category] Parameter
-    [Test Target] --tokenizer-mode slow/auto
+    [Test Target] --tokenizer-path, --tokenizer-mode slow/auto
     """
 
+    tokenizer_mode = "slow"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+        cls.tokenizer_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--tokenizer-mode",
+            cls.tokenizer_mode,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--tokenizer-path",
+            cls.tokenizer_path,
+            "--tokenizer-worker-num",
+            4,
+        ]
+        cls.process = popen_launch_server(
+            cls.model_path,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
     def test_tokenzier_mode(self):
-        model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        self.base_url = DEFAULT_URL_FOR_TEST
-        for tokenizer_mode in ["slow", "auto"]:
-            other_args = [
-                "--tokenizer-mode",
-                tokenizer_mode,
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--tokenizer-path",
-                model_path,
-                "--tokenizer-worker-num",
-                4,
-            ]
+        response = requests.get(f"{self.base_url}/health_generate")
+        self.assertEqual(response.status_code, 200)
 
-            process = popen_launch_server(
-                model_path,
-                self.base_url,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=other_args,
-            )
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
 
-            try:
-                response = requests.get(f"{self.base_url}/health_generate")
-                self.assertEqual(response.status_code, 200)
+        response = requests.get(self.base_url + "/get_server_info")
+        self.assertEqual(response.status_code, 200)
+        print(response.json())
+        self.assertEqual(response.json()["tokenizer_path"], self.tokenizer_path)
+        self.assertEqual(response.json()["tokenizer_mode"], self.tokenizer_mode)
 
-                response = requests.post(
-                    f"{self.base_url}/generate",
-                    json={
-                        "text": "The capital of France is",
-                        "sampling_params": {
-                            "temperature": 0,
-                            "max_new_tokens": 32,
-                        },
-                    },
-                )
-                self.assertEqual(response.status_code, 200)
-                self.assertIn("Paris", response.text)
 
-                response = requests.get(self.base_url + "/get_server_info")
-                self.assertEqual(response.status_code, 200)
-                print(response.json())
-                self.assertEqual(response.json()["tokenizer_path"], model_path)
-                self.assertEqual(response.json()["tokenizer_mode"], tokenizer_mode)
-            finally:
-                kill_process_tree(process.pid)
+class TestEnableTokenizerModeAuto(TestEnableTokenizerModeSlow):
+    tokenizer_mode = "auto"
 
 
 if __name__ == "__main__":
