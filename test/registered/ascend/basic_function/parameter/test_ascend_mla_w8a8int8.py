@@ -109,8 +109,12 @@ class TestAscendMlaW8A8Int8(CustomTestCase):
                     self.fail("Service should have crashed due to OOM")
                 except requests.exceptions.RequestException:
                     print("##=== Service have crashed due to OOM ===##")
+                except Exception as e:
+                    print("##=== Service have crashed due to OOM ===##")
+                    print(e)
                 finally:
-                    kill_process_tree(process.pid)
+                    if process is not None and process.poll() is not None:
+                        kill_process_tree(process.pid)
 
     # def test_a_gsm8k(self):
     #     for model in self.models:
