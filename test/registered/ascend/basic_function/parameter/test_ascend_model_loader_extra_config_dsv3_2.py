@@ -56,8 +56,8 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         "--model-loader-extra-config",
         json.dumps({"enable_multithread_load": True, "num_threads": 2}),
     ]
-    out_log_file = open("./enable_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./enable_err_log.txt", "w+", encoding="utf-8")
+    out_log_file = open("./multi_thread_out_log.txt", "w+", encoding="utf-8")
+    err_log_file = open("./multi_thread_log.txt", "w+", encoding="utf-8")
     log_info = "Multi-thread"
 
     @classmethod
@@ -126,8 +126,8 @@ class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
         "modelslim",
         "--disable-radix-cache",
     ]
-    out_log_file = open("./no_enable_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./no_enable_err_log.txt", "w+", encoding="utf-8")
+    out_log_file = open("./checkpoint_out_log.txt", "w+", encoding="utf-8")
+    err_log_file = open("./checkpoint_err_log.txt", "w+", encoding="utf-8")
     log_info = "Loading safetensors"
 
     def test_time(self):
