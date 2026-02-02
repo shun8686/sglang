@@ -15,13 +15,13 @@ from sglang.test.test_utils import (
 
 MODEL_PATH = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
 
-class TestPureTP(CustomTestCase):
+class TestDeepEpAutoDeepseekR1(CustomTestCase):
     """Testcase: Verify the accuracy of DeepSeek-R1 model on MMLU and GSM8K tasks with --deepep-mode auto on Ascend backend.
 
     [Test Category] Parameter
     [Test Target] --moe-a2a-backend; --deepep-mode
     """
-    accuracy = 0.9
+    accuracy = 0.96
     @classmethod
     def setUpClass(cls):
         cls.model = MODEL_PATH
@@ -116,7 +116,7 @@ class TestPureTP(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's accuracy on GSM8K dataset (mathematical reasoning evaluation)
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
@@ -126,7 +126,7 @@ class TestPureTP(CustomTestCase):
         )
         # Execute GSM8K evaluation and get metrics
         metrics = run_eval_gsm8k(args)
-        # Assertion: The GSM8K accuracy is not lower than the preset threshold (0.9)
+        # Assertion: The GSM8K accuracy is not lower than the preset threshold (0.96)
         self.assertGreaterEqual(
             metrics["accuracy"],
             self.accuracy,

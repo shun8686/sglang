@@ -21,7 +21,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPriorityScheduling(CustomTestCase):
-    """Testcase: Tests core functionality with --enable-priority-scheduling configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-priority-scheduling configuration,
+                 the inference service can correctly implement priority scheduling
 
     [Test Category] Parameter
     [Test Target] --enable-priority-scheduling
@@ -29,9 +30,7 @@ class TestPriorityScheduling(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = (
-            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        )
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         other_args=(
             (
                 "--max-running-requests",  # Enforce max request concurrency is 1
@@ -68,8 +67,7 @@ class TestPriorityScheduling(CustomTestCase):
         os.remove(STDERR_FILENAME)
 
     def test_priority_scheduling_request_ordering_validation(self):
-        """Verify pending requests are ordered by priority and received timestamp."""
-
+        # Verify pending requests are ordered by priority and received timestamp.
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -99,8 +97,7 @@ class TestPriorityScheduling(CustomTestCase):
         assert e2e_latencies[0] < e2e_latencies[3] < e2e_latencies[1] < e2e_latencies[2]
 
     def test_priority_scheduling_existing_requests_abortion_validation(self):
-        """Verify lower priority requests are aborted when incoming requests have higher priority"""
-
+        # Verify lower priority requests are aborted when incoming requests have higher priority.
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -136,8 +133,7 @@ class TestPriorityScheduling(CustomTestCase):
         assert e2e_latencies[0] < e2e_latencies[6] < e2e_latencies[5] < e2e_latencies[4]
 
     def test_priority_scheduling_incoming_request_rejection_validation(self):
-        """Verify incoming requests are rejected when existing requests have higher priority"""
-
+        # Verify incoming requests are rejected when existing requests have higher priority
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -173,8 +169,7 @@ class TestPriorityScheduling(CustomTestCase):
         assert e2e_latencies[0] < e2e_latencies[1] < e2e_latencies[2] < e2e_latencies[3]
 
     def test_priority_scheduling_preemption_meeting_threshold_validation(self):
-        """Verify running requests are preempted by requests with priorities meeting the preemption threshold"""
-
+        # Verify running requests are preempted by requests with priorities meeting the preemption threshold
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -209,8 +204,7 @@ class TestPriorityScheduling(CustomTestCase):
         assert e2e_latencies[2] < e2e_latencies[1] < e2e_latencies[0]
 
     def test_priority_scheduling_preemption_below_threshold_validation(self):
-        """Verify running requests are not preempted by requests with priorities below preemption threshold"""
-
+        # Verify running requests are not preempted by requests with priorities below preemption threshold
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -241,6 +235,13 @@ class TestPriorityScheduling(CustomTestCase):
 
 
 class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
+    """Testcase: Tests core functionality with --enable-priority-scheduling configuration,
+    and multiple concurrent requests,the inference service can correctly implement priority scheduling
+
+    [Test Category] Parameter
+    [Test Target] --enable-priority-scheduling
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = (
@@ -283,8 +284,7 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
         os.remove(STDERR_FILENAME)
 
     def test_priority_scheduling_with_multiple_running_requests_preemption(self):
-        """Verify preempting a subset of running requests is safe."""
-
+        # Verify preempting a subset of running requests is safe.
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -315,39 +315,6 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
         _verify_genereate_responses(responses, expected_status_and_error_messages, [])
 
     def test_priority_scheduling_preemption_token_offset_calculation(self):
-        """
-        Verify correct token offset calculation during preemption.
-
-        This test specifically targets the bug where rem_total_token_offset was incorrectly
-        calculated using the incoming request's tokens instead of the preempted request's tokens
-        (related to issue #13111 and PR #13201).
-
-        THE BUG:
-        In schedule_policy.py line 700, the code was using:
-            self.rem_total_token_offset -= self._get_running_request_total_token_offset(req)
-        Instead of:
-            self.rem_total_token_offset -= self._get_running_request_total_token_offset(running_req)
-
-        WHY THIS TEST CATCHES THE BUG:
-        - Request 1 (preempted): 8000 tokens - This is what SHOULD be freed
-        - Request 3 (incoming):  1000 tokens - This is what WAS freed (bug)
-        - Token difference: 8000 - 1000 = 7000 tokens incorrectly accounted
-
-        With the bug, the system thinks it only freed 1000 tokens instead of 8000 tokens.
-        This causes incorrect memory accounting and can lead to:
-        1. Scheduler believes less memory is available than actually is
-        2. Subsequent requests (like Request 4) may fail to schedule or cause issues
-        3. Memory calculations become increasingly inaccurate with each preemption
-
-        The test creates a scenario where:
-        1. A low-priority request with many tokens (8000) starts running
-        2. A high-priority request with few tokens (1000) arrives and triggers preemption
-        3. The system must correctly free 8000 tokens from the preempted request
-        4. Additional requests can be scheduled only if tokens were correctly freed
-        5. Execution order validates priority-based scheduling works correctly
-
-        The large token difference (8x) makes the bug's impact obvious and testable.
-        """
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
@@ -392,10 +359,6 @@ def _verify_genereate_responses(
     expected_code_and_error_message: Tuple[int, Any],
     e2e_latencies: List[Optional[float]],
 ):
-    """
-    Verify generate response results are as expected based on status code and response json object content.
-    In addition, collects e2e latency info to verify scheduling and processing ordering.
-    """
     for got, expected in zip(responses, expected_code_and_error_message):
         got_status, got_json = got
         expected_status, expected_err_msg = expected
@@ -420,7 +383,7 @@ def _verify_genereate_responses(
 def _verify_max_running_requests_and_max_queued_request_validation(
     max_running_requests: int, max_queued_requests: int
 ):
-    """Verify running request and queued request numbers based on server logs."""
+    # Verify running request and queued request numbers based on server logs.
     rr_pattern = re.compile(r"#running-req:\s*(\d+)")
     qr_pattern = re.compile(r"#queue-req:\s*(\d+)")
 
