@@ -166,39 +166,27 @@ class TestSkipTokenizerInit(CustomTestCase):
         assert output_ids == out_stream_ids
 
     def test_simple_decode(self):
-        """
-        Test Case 1: Basic non-streaming inference validation
-        Verify normal generation for simple prompt with default parameters
-        """
+
+        # Basic non-streaming inference validation, Verify normal generation for simple prompt with default parameters
+
         self.run_decode()
 
     def test_parallel_sample(self):
-        """
-        Test Case 2: Parallel sample multiple candidates validation
-        Verify server can generate 3 candidate outputs for single request
-        """
+
+        # Parallel sample multiple candidates validation, Verify server can generate 3 candidate outputs for single request
         self.run_decode(n=3)
 
     def test_logprob(self):
-        """
-        Test Case 3: Log probability return validation
-        Verify logprob return with top_logprobs_num=0 and top_logprobs_num=3
-        """
+        # Log probability return validation, Verify logprob return with top_logprobs_num=0 and top_logprobs_num=3
         for top_logprobs_num in [0, 3]:
             self.run_decode(return_logprob=True, top_logprobs_num=top_logprobs_num)
 
     def test_eos_behavior(self):
-        """
-        Test Case 4: EOS token behavior validation in long text generation
-        Verify model can trigger EOS token correctly when generating 256 tokens
-        """
+        # EOS token behavior validation in long text generation, Verify model can trigger EOS token correctly when generating 256 tokens
         self.run_decode(max_new_tokens=256)
 
     def test_simple_decode_stream(self):
-        """
-        Test Case 5: Basic streaming inference validation
-        Verify stream inference works and is consistent with non-stream inference
-        """
+        # Basic streaming inference validation, Verify stream inference works and is consistent with non-stream inference
         self.run_decode_stream()
 
     def get_input_ids(self, prompt_text) -> list[int]:
