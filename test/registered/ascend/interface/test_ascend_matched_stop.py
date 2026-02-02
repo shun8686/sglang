@@ -6,7 +6,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
@@ -23,7 +22,8 @@ The story should span multiple events, challenges, and character developments ov
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestMatchedStop(CustomTestCase):
-    """Testcase: Testing different input requests, the returned value of matched_stop was consistent with expectations.
+    """Testcase: Test configuring 'matched_stop' to different values(string, EOS token, length) correctly identifies
+                 it as a stop signal.
 
     [Test Category] Interface
     [Test Target] /v1/chat/completions; /v1/completions
@@ -60,6 +60,8 @@ class TestMatchedStop(CustomTestCase):
         finish_reason=None,
         matched_stop=None,
     ):
+        # Configure matched_stop to None, and use the '/v1/completions' interface
+        # verify that the actual termination reason matches the configured value.
         payload = {
             "prompt": prompt,
             "model": self.model,
@@ -91,6 +93,8 @@ class TestMatchedStop(CustomTestCase):
         finish_reason=None,
         matched_stop=None,
     ):
+        # Configure matched_stop to None, and use the '/v1/chat/completions' interface
+        # verify that the actual termination reason matches the configured value.
         chat_payload = {
             "model": self.model,
             "messages": [
@@ -116,6 +120,7 @@ class TestMatchedStop(CustomTestCase):
         assert response_chat.json()["choices"][0]["matched_stop"] == matched_stop
 
     def test_finish_stop_str(self):
+        # Setting finish_reason="stop",'matched_stop="\n"' allows for correct termination
         self.run_completions_generation(
             max_tokens=1000, stop="\n", finish_reason="stop", matched_stop="\n"
         )
@@ -124,6 +129,7 @@ class TestMatchedStop(CustomTestCase):
         )
 
     def test_finish_stop_eos(self):
+        # Setting matched_stop is a specific EOS end flagallows for correct identification and termination of signal
         llama_format_prompt = """
         <|begin_of_text|><|start_header_id|>system<|end_header_id|>
         You are a helpful assistant.<|eot_id|><|start_header_id|>user<|end_header_id|>
@@ -145,6 +151,7 @@ class TestMatchedStop(CustomTestCase):
         )
 
     def test_finish_length(self):
+        # Setting finish_reason="length",'matched_stop="\n"' allows for correct termination
         self.run_completions_generation(
             max_tokens=5, finish_reason="length", matched_stop=None
         )
