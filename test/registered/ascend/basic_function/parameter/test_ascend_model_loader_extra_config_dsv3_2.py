@@ -76,6 +76,16 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         os.environ["P2P_HCCL_BUFFSIZE"] = "20"
         env = os.environ.copy()
 
+        # Start the service first to prevent caching from affecting model load time.
+        cls.process = popen_launch_server(
+            cls.models,
+            cls.base_url,
+            timeout=3000,
+            other_args=cls.other_args,
+            env=env,
+        )
+        kill_process_tree(cls.process.pid)
+
         cls.process = popen_launch_server(
             cls.models,
             cls.base_url,
