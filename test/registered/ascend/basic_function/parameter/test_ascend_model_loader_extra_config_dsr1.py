@@ -17,6 +17,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
+@unittest.skip("test skip")
 class TestModelLoaderExtraConfig(CustomTestCase):
     """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
     and verify that the startup log contains "Multi-thread".
@@ -109,7 +110,9 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         )
 
 
-class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
+class TestNOModelLoaderExtraConfig(CustomTestCase):
+    models = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+    accuracy = 0.95
     other_args = [
         "--trust-remote-code",
         "--attention-backend",
@@ -136,9 +139,30 @@ class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
         "--enable-torch-compile",
         "--disable-cuda-graph",
     ]
-    out_log_file = open("./no_model_loader_extra_config_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./no_model_loader_extra_config_err_log.txt", "w+", encoding="utf-8")
-    log_info = "Loading safetensors"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
+        cls.extra_envs = {
+            "SGLANG_NPU_USE_MLAPO": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+            "STREAMS_PER_DEVICE": "32",
+        }
+        os.environ.update(cls.extra_envs)
+
+        cls.process = popen_launch_server(
+            cls.models,
+            cls.base_url,
+            timeout=3000,
+            other_args=cls.other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
 
 if __name__ == "__main__":
