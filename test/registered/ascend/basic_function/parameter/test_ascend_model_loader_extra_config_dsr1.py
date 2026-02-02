@@ -164,6 +164,8 @@ class TestNOModelLoaderExtraConfig(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
+    def test_gsm8k(self):
+        print("11111111111111111111")
 
 if __name__ == "__main__":
     unittest.main()
