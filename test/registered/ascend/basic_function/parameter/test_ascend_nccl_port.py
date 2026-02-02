@@ -27,7 +27,6 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 #         print(f"execute command error: {e}")
 #         return None
 
-
 class TestNcclPort(CustomTestCase):
     """Testcase: Test the basic functions of nccl-port
                  Test nccl-port configured, the inference request successful.
