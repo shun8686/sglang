@@ -27,6 +27,7 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model_path = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+        cls.model_back_up_path = DEEPSEEK_R1_0528_WEIGHTS_PATH + "-back-up"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.common_args = [
             "--disable-shared-experts-fusion",
@@ -42,7 +43,7 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
         ]
 
         cls.process = popen_launch_server(
-            cls.model_path,
+            cls.model_back_up_path,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
@@ -53,6 +54,8 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        if os.path.exists(cls.model_back_up_path):
+            shutil.rmtree(cls.model_back_up_path)
 
     def test_disable_shared_experts_fusion(self):
         response = requests.get(f"{self.base_url}/health_generate")
