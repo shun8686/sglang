@@ -24,7 +24,6 @@ CONFIG = {
     "CHUNK_SIZE": 1024,          # 分块预填充大小
     "REQUEST_COUNT": 50,         # 调整：请求数量改为50个
     "TIMEOUT": 600               # 延长超时，适配50个请求的高并发场景
-    # 已删除：SERVER_WAIT_TIME 和 PROCESS_KILL_WAIT_TIME
 }
 
 # 全局变量：存储两份测试的最终统计结果（用于后续对比和断言）
@@ -40,50 +39,39 @@ def build_long_input_text_for_token():
     return (base_sentence * repeat_times) + "The capital of France is"
 
 def send_generate_request(task_id, request_results):
-    """Single request sending function (record single request elapsed time)"""
-    try:
-        # 1. Record single request start time
-        single_start_time = time.time()
-        
-        # 2. Construct long input text
-        long_input_text = build_long_input_text_for_token()
-        
-        # 3. Send /generate request
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": long_input_text,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
+    """Single request sending function (record single request elapsed time, remove try...except)"""
+    # 1. Record single request start time
+    single_start_time = time.time()
+    
+    # 2. Construct long input text
+    long_input_text = build_long_input_text_for_token()
+    
+    # 3. Send /generate request (remove try...except, direct execution)
+    response = requests.post(
+        f"{DEFAULT_URL_FOR_TEST}/generate",
+        json={
+            "text": long_input_text,
+            "sampling_params": {
+                "temperature": 0,
+                "max_new_tokens": 32,
             },
-            timeout=CONFIG["TIMEOUT"]
-        )
-        
-        # 4. Record single request end time and calculate elapsed time
-        single_end_time = time.time()
-        single_elapsed_time = round(single_end_time - single_start_time, 4)
-        
-        # 5. Record request result
-        request_results.append({
-            "task_id": task_id,
-            "status_code": response.status_code,
-            "has_paris": "Paris" in response.text,
-            "single_elapsed_time": single_elapsed_time
-        })
-        
-        print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
-    except Exception as e:
-        single_end_time = time.time()
-        single_elapsed_time = round(single_end_time - time.time(), 4)
-        request_results.append({
-            "task_id": task_id,
-            "status_code": -1,
-            "error": str(e),
-            "single_elapsed_time": single_elapsed_time
-        })
-        print(f"[Task {task_id}] Request failed, error: {e}, elapsed time: {single_elapsed_time} seconds")
+        },
+        timeout=CONFIG["TIMEOUT"]
+    )
+    
+    # 4. Record single request end time and calculate elapsed time
+    single_end_time = time.time()
+    single_elapsed_time = round(single_end_time - single_start_time, 4)
+    
+    # 5. Record request result
+    request_results.append({
+        "task_id": task_id,
+        "status_code": response.status_code,
+        "has_paris": "Paris" in response.text,
+        "single_elapsed_time": single_elapsed_time
+    })
+    
+    print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
 
 def start_server(with_mixed: bool):
     """Common server start function: enable mixed chunk based on parameter"""
@@ -106,7 +94,7 @@ def start_server(with_mixed: bool):
         other_args=other_args,
     )
     
-    # 直接使用 0 秒等待，删除配置变量依赖
+    # 直接使用 0 秒等待，无额外服务启动等待
     time.sleep(0)
     return process
 
@@ -139,13 +127,58 @@ class TestMixedChunkEnabled(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """Stop server and wait 10 seconds (直接使用 10 秒，删除配置变量依赖)"""
+        """Stop server and wait 10 seconds"""
         kill_process_tree(cls.process.pid)
         print("=== Server Stopped (--enable-mixed-chunk ENABLED) ===")
         print(f"=== Waiting 10 seconds after process termination ===")
-        # 直接使用 10 秒等待，删除配置变量依赖
         time.sleep(10)
         print("="*60 + "\n")
+
+    def test_mixed_chunk_with_multi_requests(self):
+        """Multi-request test (mixed chunk enabled), collect statistics"""
+        request_results = []
+        
+        # Print test start information
+        print(f"\n=== [Mixed Chunk ENABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
+        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
+        
+        # Create and start multiple threads
+        threads = []
+        for task_id in range(CONFIG["REQUEST_COUNT"]):
+            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
+            threads.append(t)
+        
+        for t in threads:
+            t.start()
+        
+        # Wait for all threads to complete
+        for t in threads:
+            t.join()
+        
+        # Calculate statistics
+        statistics = calculate_statistics(request_results)
+        
+        # Store final statistics
+        FINAL_STATISTICS["mixed_enabled"] = {
+            "detail": statistics
+        }
+        
+        # Print current test result
+        self._print_test_result("Mixed Chunk ENABLED", request_results, statistics)
+
+    def _print_test_result(self, test_name, request_results, statistics):
+        """Helper function: Format and print test results (in English)"""
+        print(f"\n=== [{test_name}] All requests completed ===")
+        
+        if not statistics:
+            print(f"=== [{test_name}] No successful requests, cannot calculate detailed statistics ===")
+            return
+        
+        print(f"=== [{test_name}] Statistics Summary ===")
+        print(f"  Successful requests: {statistics['success_count']} / {statistics['total_count']}")
+        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
+        print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
+        print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
 
 class TestMixedChunkDisabled(CustomTestCase):
     """Test Class 2: Disable --enable-mixed-chunk"""
@@ -158,16 +191,15 @@ class TestMixedChunkDisabled(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        """Stop server and wait 10 seconds (直接使用 10 秒，删除配置变量依赖)"""
+        """Stop server and wait 10 seconds"""
         kill_process_tree(cls.process.pid)
         print("=== Server Stopped (--enable-mixed-chunk DISABLED) ===")
         print(f"=== Waiting 10 seconds after process termination ===")
-        # 直接使用 10 秒等待，删除配置变量依赖
         time.sleep(10)
         print("="*60 + "\n")
 
     def test_mixed_chunk_with_multi_requests(self):
-        """Multi-request test (mixed chunk disabled), collect statistics (remove overall elapsed time)"""
+        """Multi-request test (mixed chunk disabled), collect statistics"""
         request_results = []
         
         # Print test start information
@@ -187,7 +219,7 @@ class TestMixedChunkDisabled(CustomTestCase):
         for t in threads:
             t.join()
         
-        # Calculate statistics (remove overall elapsed time calculation)
+        # Calculate statistics
         statistics = calculate_statistics(request_results)
         
         # Store final statistics
@@ -216,7 +248,7 @@ class TestMixedChunkDisabled(CustomTestCase):
         print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
 
     def _run_performance_assertions(self):
-        """Add assertGreater assertions to verify performance optimization (core adjustment)"""
+        """Add assertGreater assertions to verify performance optimization"""
         print("\n" + "="*80)
         print("=== Running Performance Assertions ===")
         print("="*80)
@@ -245,24 +277,15 @@ class TestMixedChunkDisabled(CustomTestCase):
         print(f"\n2. Maximum Elapsed Time Comparison (Long-tail Effect)")
         print(f"   Mixed Enabled: {enabled_max}s | Mixed Disabled: {disabled_max}s | Optimization Rate: {max_optimize_rate}%")
         
-        # Core assertion: assertGreater (verify that disabled time > enabled time, i.e., mixed chunk has optimization effect)
-        # Assertion 1: Average elapsed time (disabled > enabled → mixed chunk optimizes average time)
-        try:
-            self.assertGreater(disabled_avg, enabled_avg, 
-                               f"Assertion Failed: Average elapsed time - Mixed Disabled ({disabled_avg}s) is not greater than Mixed Enabled ({enabled_avg}s)")
-            print("\n✅ Assertion Passed: Average Elapsed Time Optimization Verified")
-        except AssertionError as e:
-            print(f"\n❌ {e}")
-            raise
+        # Core assertion 1: Average elapsed time (disabled > enabled)
+        self.assertGreater(disabled_avg, enabled_avg, 
+                           f"Assertion Failed: Average elapsed time - Mixed Disabled ({disabled_avg}s) is not greater than Mixed Enabled ({enabled_avg}s)")
+        print("\n✅ Assertion Passed: Average Elapsed Time Optimization Verified")
         
-        # Assertion 2: Maximum elapsed time (disabled > enabled → mixed chunk alleviates long-tail effect)
-        try:
-            self.assertGreater(disabled_max, enabled_max, 
-                               f"Assertion Failed: Maximum elapsed time - Mixed Disabled ({disabled_max}s) is not greater than Mixed Enabled ({enabled_max}s)")
-            print("✅ Assertion Passed: Long-tail Effect Alleviation Verified")
-        except AssertionError as e:
-            print(f"\n❌ {e}")
-            raise
+        # Core assertion 2: Maximum elapsed time (disabled > enabled)
+        self.assertGreater(disabled_max, enabled_max, 
+                           f"Assertion Failed: Maximum elapsed time - Mixed Disabled ({disabled_max}s) is not greater than Mixed Enabled ({enabled_max}s)")
+        print("✅ Assertion Passed: Long-tail Effect Alleviation Verified")
         
         print("\n=== All Performance Assertions Passed Successfully ===")
 
