@@ -22,11 +22,11 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestSkipTokenizerInit(CustomTestCase):
-    """Testcase：Verify set --skip_tokenizer_init parameter, the streaming or non-streaming, parallel sample,
-    log probability return and eos token behavior successful.
+    """Testcase：Verify set --skip-tokenizer-init parameter, the streaming or non-streaming, parallel sample,
+    log probability return and eos token behavior execute normally.
 
         [Test Category] Parameter
-        [Test Target] --skip_tokenizer_init
+        [Test Target] --skip-tokenizer-init
         """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
@@ -202,9 +202,7 @@ class TestSkipTokenizerInit(CustomTestCase):
         self.run_decode_stream()
 
     def get_input_ids(self, prompt_text) -> list[int]:
-        input_ids = self.tokenizer(prompt_text, return_tensors="pt")["input_ids"][
-            0
-        ].tolist()
+        input_ids = self.tokenizer(prompt_text, return_tensors="pt")["input_ids"][0].tolist()
         return input_ids
 
     def get_request_json(
@@ -232,6 +230,10 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
+    """
+    Test class for --skip-tokenizer-init parameter of VLM model
+    Inherits from the LLM test class and rewrites image-related initialization and data processing methods
+    """
     model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
 
     @classmethod
