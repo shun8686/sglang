@@ -9,7 +9,6 @@ from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
-    try_cached_model,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
