@@ -22,7 +22,8 @@ class TestLoraBackend(CustomTestCase):
     [Test Target] --lora-backend
     """
 
-    def test_lora_backend(self):
+    @classmethod
+    def setUpClass(cls):
         other_args = (
             [
                 "--lora-backend",
@@ -34,7 +35,7 @@ class TestLoraBackend(CustomTestCase):
                 0.8,
             ]
         )
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             (
                 META_LLAMA_3_1_8B_INSTRUCT
             ),
@@ -42,6 +43,12 @@ class TestLoraBackend(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_lora_backend(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -65,11 +72,6 @@ class TestLoraBackend(CustomTestCase):
             "triton",
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
 
 if __name__ == "__main__":
-
     unittest.main()
