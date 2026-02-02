@@ -25,6 +25,7 @@ class BaseTestAscendGsm8kAndThroughput(CustomTestCase):
 
     TEST_MODEL_MATRIX = {}
     extra_args = []
+    env = []
 
     @classmethod
     def setUpClass(cls):
