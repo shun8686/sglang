@@ -33,7 +33,7 @@ class TestHicacheIoBackend(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
