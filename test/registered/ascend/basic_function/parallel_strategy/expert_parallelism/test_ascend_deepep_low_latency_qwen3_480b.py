@@ -61,8 +61,6 @@ class TestDeepEpQwen(CustomTestCase):
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
                 "HCCL_BUFFSIZE": "2100",
-                "HCCL_SOCKET_IFNAME": NIC_NAME,
-                "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
                 **os.environ,
             },

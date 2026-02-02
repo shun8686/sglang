@@ -5,7 +5,6 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -24,7 +23,8 @@ class TestScheduleConservativeness(CustomTestCase):
     [Test Target] --schedule-conservativeness
     """
 
-    def test_schedule_conservativeness(self):
+    @classmethod
+    def setUpClass(cls):
         other_args = (
             [
                 "--schedule-conservativeness",
@@ -34,7 +34,7 @@ class TestScheduleConservativeness(CustomTestCase):
                 "--disable-cuda-graph",
             ]
         )
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             (
                 LLAMA_3_2_1B_WEIGHTS_PATH
             ),
@@ -42,6 +42,12 @@ class TestScheduleConservativeness(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_schedule_conservativeness(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -60,7 +66,6 @@ class TestScheduleConservativeness(CustomTestCase):
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["schedule_conservativeness"], 1.0)
-        kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":

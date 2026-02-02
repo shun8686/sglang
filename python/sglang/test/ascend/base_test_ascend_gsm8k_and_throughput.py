@@ -3,7 +3,6 @@ from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -17,24 +16,16 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=500, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestAscendGraphTp1Bf16(CustomTestCase):
+class BaseTestAscendGsm8kAndThroughput(CustomTestCase):
     """
-    Testcase：Verify the accuracy on gsm8k dataset and throughput of Qwen2.5-7B when cuda graph mode is enabled and
-    tp size is 1
-
-    [Test Category] Parameter
-    [Test Target] enable cuda graph mode (default setting), --tp-size 1 (default setting)
+    Testcase：Base test class for Verifying the accuracy on gsm8k dataset and throughput of models
     """
 
-    TEST_MODEL_MATRIX = {
-        QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH: {
-            "accuracy": 0.85,
-            "latency": 150,
-            "output_throughput": 30,
-        },
-    }
-    extra_args = ["--mem-fraction-static", 0.8, ]
-    envs = {}
+    __test__ = False
+
+    TEST_MODEL_MATRIX = {}
+    extra_args = []
+    env = []
 
     @classmethod
     def setUpClass(cls):
@@ -46,10 +37,6 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
             "--attention-backend",
             "ascend",
         ]
-
-        # basic testcase, reserved for setting environment
-        for env in cls.envs.keys():
-            os.environ[env] = cls.envs[env]
 
     def test_a_gsm8k(self):
         for model in self.models:

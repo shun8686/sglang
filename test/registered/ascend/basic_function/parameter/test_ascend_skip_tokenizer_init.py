@@ -5,8 +5,8 @@ from io import BytesIO
 import requests
 from PIL import Image
 from transformers import AutoProcessor, AutoTokenizer
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
-from sglang.test.ascend.test_ascend_utils import Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
 from sglang.lang.chat_template import get_chat_template_by_model_path
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -22,12 +22,13 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestSkipTokenizerInit(CustomTestCase):
-    """Testcase：Verify set --skip_tokenizer_init parameter, the inference request is successful.
+    """Testcase：Verify set --skip_tokenizer_init parameter, the streaming or non-streaming, parallel sample,
+    log probability return and eos token behavior successful.
 
         [Test Category] Parameter
         [Test Target] --skip_tokenizer_init
         """
-    model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -165,19 +166,39 @@ class TestSkipTokenizerInit(CustomTestCase):
         assert output_ids == out_stream_ids
 
     def test_simple_decode(self):
+        """
+        Test Case 1: Basic non-streaming inference validation
+        Verify normal generation for simple prompt with default parameters
+        """
         self.run_decode()
 
     def test_parallel_sample(self):
+        """
+        Test Case 2: Parallel sample multiple candidates validation
+        Verify server can generate 3 candidate outputs for single request
+        """
         self.run_decode(n=3)
 
     def test_logprob(self):
+        """
+        Test Case 3: Log probability return validation
+        Verify logprob return with top_logprobs_num=0 and top_logprobs_num=3
+        """
         for top_logprobs_num in [0, 3]:
             self.run_decode(return_logprob=True, top_logprobs_num=top_logprobs_num)
 
     def test_eos_behavior(self):
+        """
+        Test Case 4: EOS token behavior validation in long text generation
+        Verify model can trigger EOS token correctly when generating 256 tokens
+        """
         self.run_decode(max_new_tokens=256)
 
     def test_simple_decode_stream(self):
+        """
+        Test Case 5: Basic streaming inference validation
+        Verify stream inference works and is consistent with non-stream inference
+        """
         self.run_decode_stream()
 
     def get_input_ids(self, prompt_text) -> list[int]:
@@ -211,7 +232,7 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
-    model = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+    model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -255,10 +276,6 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
             -1
         )  # Do not try to calculate logprobs of image embeddings.
         return ret
-
-    def test_simple_decode_stream(self):
-        # TODO mick
-        pass
 
 
 if __name__ == "__main__":

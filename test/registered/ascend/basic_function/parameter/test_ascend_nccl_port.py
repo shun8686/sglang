@@ -4,6 +4,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import run_command
 from sglang.test.ascend.test_ascend_utils import LLAMA_2_7B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -14,18 +15,6 @@ from sglang.test.test_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
-
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
-
 
 class TestNcclPort(CustomTestCase):
     """Testcase: Test the basic functions of nccl-port
@@ -73,7 +62,6 @@ class TestNcclPort(CustomTestCase):
             )
 
             self.assertEqual(response.status_code, 200)
-           # self.assertIn("Paris", response.text)
             print(response.text)
             result = run_command("lsof -i:8111")
             self.assertIn("*:8111 (LISTEN)", result)

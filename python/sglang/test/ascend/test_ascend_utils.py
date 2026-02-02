@@ -1,6 +1,7 @@
 """Common utilities for testing and benchmarking on NPU"""
 
 import os
+import subprocess
 
 # Model weights storage directory
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
@@ -61,7 +62,7 @@ QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
                                                                        "Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot")
 QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-Next-80B-A3B-Instruct")
-QWEN3_NEXT_80B_A3B_INSTRUCT_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-Next-80B-A3B-Instruct-W8A8")
+QWEN3_NEXT_80B_A3B_INSTRUCT_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8")
 QWQ_32B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/QWQ-32B-W8A8")
 SMOLLM_1_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "HuggingFaceTB/SmolLM-1.7B")
 STABLELM_2_1_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "stabilityai/stablelm-2-1_6b")
@@ -114,4 +115,14 @@ SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(HF_MODEL_WEIGHTS_DI
                                                              "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1")
 QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach")
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
+
+def run_command(cmd, shell=True):
+    try:
+        result = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, check=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"execute command error: {e}")
+        return None
 
