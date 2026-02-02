@@ -144,7 +144,7 @@ class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
 
         # 获取时间
         multi_thread_seconds = get_loading_seconds("multi_thread_out_log.txt", "Multi-thread loading shards")
-        checkpoint_seconds = get_loading_seconds("checkpoint_out_log.txt", "Loading safetensors checkpoint shards")
+        checkpoint_seconds = get_loading_seconds("checkpoint_err_log.txt", "Loading safetensors checkpoint shards")
 
         # 打印信息
         print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
