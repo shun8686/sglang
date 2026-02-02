@@ -1,6 +1,6 @@
 import unittest
 
-from sglang.test.ascend.test_ascend_gsm8k_and_throughput import TestAscendGsm8kAndThroughput
+from sglang.test.ascend.base_test_ascend_gsm8k_and_throughput import TestAscendGsm8kAndThroughput
 from sglang.test.ascend.test_ascend_utils import QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
