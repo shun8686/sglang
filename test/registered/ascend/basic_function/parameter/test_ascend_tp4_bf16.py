@@ -25,9 +25,11 @@ class TestAscendTp4Bf16(TestAscendGraphTp1Bf16):
     }
 
     extra_args = [
-        "--mem-fraction-static", 0.8,
+        "--mem-fraction-static", 0.7,
         "--cuda-graph-max-bs", 32,
         "--tp-size", 4,
+        "--disable-radix-cache",
+        "--max-running-requests", 32,
     ]
 
 
