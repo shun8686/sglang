@@ -5,8 +5,8 @@ from io import BytesIO
 import requests
 from PIL import Image
 from transformers import AutoProcessor, AutoTokenizer
-from sglang.test.ascend.test_ascend_utils import Llama_3_2_1B_Instruct_WEIGHTS_PATH
-from sglang.test.ascend.test_ascend_utils import Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
 from sglang.lang.chat_template import get_chat_template_by_model_path
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -27,7 +27,7 @@ class TestSkipTokenizerInit(CustomTestCase):
         [Test Category] Parameter
         [Test Target] --skip_tokenizer_init
         """
-    model = Llama_3_2_1B_Instruct_WEIGHTS_PATH
+    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -211,7 +211,7 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
-    model = Qwen2_5_VL_3B_Instruct_WEIGHTS_PATH
+    model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -255,10 +255,6 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
             -1
         )  # Do not try to calculate logprobs of image embeddings.
         return ret
-
-    def test_simple_decode_stream(self):
-        # TODO mick
-        pass
 
 
 if __name__ == "__main__":
