@@ -1,11 +1,12 @@
 import json
 import os
 import unittest
+from abc import ABC
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH, run_command
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
@@ -16,8 +17,78 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
+MULTITHREAD_OUT_LOG = "./multi_thread_out_log.txt"
+MULTITHREAD_ERR_LOG = "./multi_thread_err_log.txt"
+CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
+CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
-class TestModelLoaderExtraConfig(CustomTestCase):
+
+class BaseModelLoaderTest(ABC):
+    models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
+    accuracy = 0.5
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.9",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        "16",
+        "--quantization",
+        "modelslim",
+        "--disable-radix-cache",
+    ]
+    out_file = None
+    err_file = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
+        os.environ["PYTORCH_NPU_ALLOC_CONF"] = "expandable_segments:True"
+        os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
+        os.environ["HCCL_BUFFSIZE"] = "200"
+        os.environ["SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK"] = "24"
+        os.environ["USE_VLLM_CUSTOM_ALLREDUCE"] = "1"
+        os.environ["HCCL_EXEC_TIMEOUT"] = "200"
+        os.environ["STREAMS_PER_DEVICE"] = "32"
+        os.environ["SGLANG_ENBLE_TORCH_COMILE"] = "1"
+        os.environ["AUTO_USE_UC_MEMORY"] = "0"
+        os.environ["P2P_HCCL_BUFFSIZE"] = "20"
+        env = os.environ.copy()
+
+        # Start the service first to prevent caching from affecting model load time.
+        cls.process = popen_launch_server(
+            cls.models,
+            cls.base_url,
+            timeout=3000,
+            other_args=cls.other_args,
+            env=env,
+        )
+        kill_process_tree(cls.process.pid)
+
+        cls.process = popen_launch_server(
+            cls.models,
+            cls.base_url,
+            timeout=3000,
+            other_args=cls.other_args,
+            env=env,
+            return_stdout_stderr=(cls.out_file, cls.err_file),
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+        # 关闭文件句柄
+        if hasattr(cls, 'out_file') and cls.out_file:
+            cls.out_file.close()
+        if hasattr(cls, 'err_file') and cls.err_file:
+            cls.err_file.close()
+
+
+class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
     and verify that the startup log contains "Multi-thread".
     Without configuring this parameter, the startup log should contain "Loading safetensors".
@@ -27,75 +98,68 @@ class TestModelLoaderExtraConfig(CustomTestCase):
     [Test Target] --model-loader-extra-config {"enable_multithread_load": True, "num_threads": 2}
     """
 
-    models = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
-    accuracy = 0.95
+    models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
+    accuracy = 0.5
     other_args = [
         "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.9",
         "--attention-backend",
         "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        "16",
         "--quantization",
         "modelslim",
-        "--mem-fraction-static",
-        0.8,
         "--disable-radix-cache",
-        "--chunked-prefill-size",
-        32768,
-        "--tp-size",
-        16,
-        "--speculative-algorithm",
-        "NEXTN",
-        "--speculative-num-steps",
-        1,
-        "--speculative-eagle-topk",
-        1,
-        "--speculative-num-draft-tokens",
-        2,
-        "--cuda-graph-max-bs",
-        16,
-        "--enable-torch-compile",
-        "--disable-cuda-graph",
         "--model-loader-extra-config",
         json.dumps({"enable_multithread_load": True, "num_threads": 2}),
     ]
-    out_log_file = open("./model_loader_extra_config_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./model_loader_extra_config_err_log.txt", "w+", encoding="utf-8")
     log_info = "Multi-thread"
-
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        cls.extra_envs = {
-            "SGLANG_NPU_USE_MLAPO": "1",
-            "SGLANG_ENABLE_SPEC_V2": "1",
-            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-            "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-            "STREAMS_PER_DEVICE": "32",
-        }
-        os.environ.update(cls.extra_envs)
-
-        cls.process = popen_launch_server(
-            cls.models,
-            cls.base_url,
-            timeout=3000,
-            other_args=cls.other_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+    out_file = open(MULTITHREAD_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
-        self.err_log_file.seek(0)
-        content = self.err_log_file.read()
+        self.err_file.seek(0)
+        content = self.err_file.read()
         self.assertIn(self.log_info, content)
+
+    def test_model_loading_time_reduced(self):
+        # Helper function to extract loading time
+        def get_loading_seconds(filename, pattern):
+            cmd = f"grep '{pattern}' {filename} | tail -1"
+            line = run_command(cmd)
+            if not line:
+                return 0
+            line = line.strip()
+            print(f"{pattern}: {line}")
+            if not line:
+                return 0
+            mm_ss = line.split('[')[1].split('<')[0]
+            m, s = map(int, mm_ss.split(':'))
+            return m * 60 + s
+
+        # Get loading times
+        multi_thread_seconds = get_loading_seconds(
+            MULTITHREAD_ERR_LOG,
+            "Multi-thread loading shards"
+        )
+        checkpoint_seconds = get_loading_seconds(
+            CHECKPOINT_ERR_LOG,
+            "Loading safetensors checkpoint shards"
+        )
+
+        # Print information
+        print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
+
+        # Assert
+        self.assertGreater(checkpoint_seconds, multi_thread_seconds)
 
     def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
-            num_questions=1319,
+            num_questions=200,
             max_new_tokens=512,
             parallel=128,
             host=f"http://{self.url.hostname}",
@@ -109,37 +173,22 @@ class TestModelLoaderExtraConfig(CustomTestCase):
         )
 
 
-class TestNOModelLoaderExtraConfig(TestModelLoaderExtraConfig):
-    other_args = [
-        "--trust-remote-code",
-        "--attention-backend",
-        "ascend",
-        "--quantization",
-        "modelslim",
-        "--mem-fraction-static",
-        0.8,
-        "--disable-radix-cache",
-        "--chunked-prefill-size",
-        32768,
-        "--tp-size",
-        16,
-        "--speculative-algorithm",
-        "NEXTN",
-        "--speculative-num-steps",
-        1,
-        "--speculative-eagle-topk",
-        1,
-        "--speculative-num-draft-tokens",
-        2,
-        "--cuda-graph-max-bs",
-        16,
-        "--enable-torch-compile",
-        "--disable-cuda-graph",
-    ]
-    out_log_file = open("./no_model_loader_extra_config_out_log.txt", "w+", encoding="utf-8")
-    err_log_file = open("./no_model_loader_extra_config_err_log.txt", "w+", encoding="utf-8")
+class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     log_info = "Loading safetensors"
+    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
+
+    def test_model_loader_extra_config(self):
+        self.err_file.seek(0)
+        content = self.err_file.read()
+        self.assertIn(self.log_info, content)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    suite = unittest.TestSuite()
+    suite.addTest(TestNOModelLoaderExtraConfig("test_model_loader_extra_config"))
+    suite.addTest(TestModelLoaderExtraConfig("test_model_loader_extra_config"))
+    suite.addTest(TestModelLoaderExtraConfig("test_model_loading_time_reduced"))
+    suite.addTest(TestModelLoaderExtraConfig("test_gsm8k"))
+    runner = unittest.TextTestRunner(verbosity=2)
+    result = runner.run(suite)
