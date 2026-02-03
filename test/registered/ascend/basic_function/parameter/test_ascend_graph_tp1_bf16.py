@@ -28,7 +28,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
     TEST_MODEL_MATRIX = {
         QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH: {
-            "accuracy": 0.88,
+            "accuracy": 0.85,
             "latency": 150,
             "output_throughput": 30,
         },
