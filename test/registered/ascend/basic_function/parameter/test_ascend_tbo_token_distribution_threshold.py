@@ -156,7 +156,7 @@ class TestTboEnabled08(CustomTestCase):
         
         
         print(f"Average Elapsed Time Comparison")
-        print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s | Optimization Rate: {avg_optimize_rate}%")
+        print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s ")
  
         self.assertGreater(
             tbo_08_avg, tbo_0_avg, 
