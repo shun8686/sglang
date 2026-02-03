@@ -21,7 +21,7 @@ class TestLlama4LoRA(CustomTestCase):
     Testcase：Verify the successful launch and operation of Llama-4 model when LoRA function is enabled.
 
     [Test Category] Parameter
-    [Test Target] --enable-lora, --max-lora-rank 64, --lora-target-modules all
+    [Test Target] --enable-lora, --max-lora-rank, --lora-target-modules
     """
 
     @classmethod
