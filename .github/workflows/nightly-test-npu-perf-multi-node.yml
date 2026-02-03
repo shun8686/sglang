@@ -15,7 +15,7 @@ on:
         required: false
         type: string
         description: image for pods
-        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.3.rc1-a3"
+        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
       test_config_name:
         required: true
         type: string
@@ -65,9 +65,12 @@ jobs:
         run: |
           # prepare for output data
           current_date=$(date +%Y%m%d)
-          commit_id=${{ github.sha }}
-          test_data_output_path=/data/.cache/tests/output/${current_date}/${commit_id}
+          test_data_output_path=/data/.cache/tests/output/perf/${current_date}
           mkdir -p ${test_data_output_path}
+
+          commit_id=${{ github.sha }}
+          echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
+
           test_case="${{ inputs.test_case }}"
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
@@ -116,7 +119,6 @@ jobs:
         timeout-minutes: 300
         env:
           SGLANG_USE_MODELSCOPE: true
-          SGLANG_IS_IN_CI: true
           HF_ENDPOINT: https://hf-mirror.com
         run: |
 
