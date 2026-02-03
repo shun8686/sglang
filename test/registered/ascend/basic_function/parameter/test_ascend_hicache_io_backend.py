@@ -2,8 +2,11 @@ import unittest
 
 import requests
 
+from types import SimpleNamespace
+
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -22,6 +25,7 @@ class TestHicacheIoBackend(CustomTestCase):
     [Test Target] --hicache-io-backend
     """
 
+    accuracy = 0.86
     @classmethod
     def setUpClass(cls):
         other_args = (
@@ -34,7 +38,7 @@ class TestHicacheIoBackend(CustomTestCase):
             ]
         )
         cls.process = popen_launch_server(
-            LLAMA_3_2_1B_WEIGHTS_PATH,
+            QWEN3_32B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
@@ -60,6 +64,20 @@ class TestHicacheIoBackend(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
+    def test_gsm8k(self):
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        metrics = run_eval_few_shot_gsm8k(args)
+        print(f"Eval accuracy of GSM8K: {metrics=}")
+        self.assertGreaterEqual(metrics["accuracy"], self.accuracy)
 
 
 if __name__ == "__main__":
