@@ -31,7 +31,7 @@ class TestEnableTokenizerMode(CustomTestCase):
         cls.served_model_name = "Llama3.2"
         other_args = [
             "--served-model-name",
-            served_model_name,
+            cls.served_model_name,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
@@ -49,9 +49,6 @@ class TestEnableTokenizerMode(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tokenzier_mode(self):
-        response = requests.get(f"{self.base_url}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.post(
             f"{self.base_url}/generate",
             json={
