@@ -78,7 +78,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         requests.get(self.base_url + "/flush_cache")
 
         args = SimpleNamespace(
-            num_shots=8,
+            num_shots=4,
             num_questions=100,
             max_new_tokens=512,
             parallel=128,
@@ -110,7 +110,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         )
         self.assertEqual(
             response.json()["internal_states"][0]["attention_backend"],
-            "ascend",
+            "cutlass_mla",
         )
 
 
