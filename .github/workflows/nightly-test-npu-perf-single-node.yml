@@ -20,11 +20,6 @@ on:
         required: true
         type: string
         description: path of test case file
-      is_in_ci:
-        required: true
-        type: boolean
-        default: false
-        description: run in ci workflow or not
 
 concurrency:
   group: ascend-nightly-performance-singlenode-${{ github.workflow_ref }}-${{ github.ref }}--${{ inputs.test_config_name }}
@@ -55,10 +50,6 @@ jobs:
           # prepare for output data
           current_date=$(date +%Y%m%d)
           test_data_output_path=/root/.cache/tests/output/perf/${current_date}
-          is_in_ci=${{ inputs.is_in_ci }}
-          if [ "${is_in_ci}" = "true" ];then
-            test_data_output_path=/root/.cache/tests/output/ci/${current_date}
-          fi
           mkdir -p ${test_data_output_path}
 
           commit_id=${{ github.sha }}
