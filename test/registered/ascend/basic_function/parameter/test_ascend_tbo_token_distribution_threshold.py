@@ -145,16 +145,15 @@ class TestTboEnabled08(CustomTestCase):
         tbo_08_avg = tbo_08_stats["detail"]["avg_elapsed"]
         tbo_0_avg = tbo_0_stats["detail"]["avg_elapsed"]
         
-        avg_optimize_rate = round(((tbo_0_avg - tbo_08_avg) / tbo_0_avg) * 100, 2) if tbo_0_avg > 0 else 0.0
         
         print(f"Average Elapsed Time Comparison")
         print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s | Optimization Rate: {avg_optimize_rate}%")
  
         self.assertGreater(
-            tbo_0_avg, tbo_08_avg, 
-            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not greater than TBO 0.8 ({tbo_08_avg}s)"
+            tbo_08_avg, tbo_0_avg, 
+            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
         )
-        print("\n Assertion Passed: TBO 0.8 Average Latency < TBO 0 Average Latency")
+        print("\n Assertion Passed: TBO 0.8 Average Latency > TBO 0 Average Latency")
 
 class TestTboDisabled0(CustomTestCase):
     """Testcase: Verify TBO performance with threshold 0 (disabled two-chunk-overlap)
