@@ -110,7 +110,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         )
         self.assertEqual(
             response.json()["internal_states"][0]["attention_backend"],
-            "ascend",
+            "cutlass_mla",
         )
 
 
