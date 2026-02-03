@@ -29,7 +29,7 @@ class TestAllowAutoTruncate(CustomTestCase):
         other_args = [
             "--attention-backend", "ascend",
             "--disable-cuda-graph",
-            "--context-length", "2000",
+            "--context-length", "1000",
         ]
         if cls.allow_auto_truncate:
             other_args.append("--allow-auto-truncate")
