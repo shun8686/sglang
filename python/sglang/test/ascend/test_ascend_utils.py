@@ -153,15 +153,26 @@ def get_device_ids(index=None):
     cmd = "npu-smi info | awk 'BEGIN {OFS=\"\"} /Process id/ {exit} /Phy-ID/ {next} {print $3}' | grep -E '^[0-9]+$'"
     output = run_command(cmd)
 
-    if output is None or output.strip() == "":
-        device_ids = []
-    else:
-        device_ids = [int(line.strip()) for line in output.strip().split('\n') if line.strip()]
+    device_ids = []
+    if output and output.strip():
+        lines = output.strip().split('\n')
+        for line in lines:
+            line = line.strip()
+            if line and line.isdigit():
+                try:
+                    device_id = int(line)
+                    device_ids.append(device_id)
+                except ValueError:
+                    print(f"Device ID '{line}' cannot be converted to an integer and has been skipped")
 
     if index is not None:
-        if isinstance(index, int) and 0 <= index < len(device_ids):
+        if not isinstance(index, int):
+            print(f"Index {index} must be an integer type")
+            return None
+        if 0 <= index < len(device_ids):
             return device_ids[index]
         else:
             print(f"Index {index} is invalid, the length of device ID list is {len(device_ids)}")
             return None
+
     return device_ids
