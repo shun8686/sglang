@@ -137,3 +137,31 @@ def run_command(cmd, shell=True):
         print(f"execute command error: {e}")
         return None
 
+
+def get_device_ids(index=None):
+    """Get list of NPU device IDs or a single device ID by specified index
+
+    Parameters:
+        index: Optional, integer type, the index value of the device ID list;
+               returns the complete list if not passed in
+    Returns:
+        If index is passed in: returns the integer-type device ID corresponding to the index
+                               (returns None if the index is invalid)
+        If index is not passed in: returns the list of device IDs (integer type),
+                                   returns an empty list if acquisition fails
+    """
+    cmd = "npu-smi info | awk 'BEGIN {OFS=\"\"} /Process id/ {exit} /Phy-ID/ {next} {print $3}' | grep -E '^[0-9]+$'"
+    output = run_command(cmd)
+
+    if output is None or output.strip() == "":
+        device_ids = []
+    else:
+        device_ids = [int(line.strip()) for line in output.strip().split('\n') if line.strip()]
+
+    if index is not None:
+        if isinstance(index, int) and 0 <= index < len(device_ids):
+            return device_ids[index]
+        else:
+            print(f"Index {index} is invalid, the length of device ID list is {len(device_ids)}")
+            return None
+    return device_ids
