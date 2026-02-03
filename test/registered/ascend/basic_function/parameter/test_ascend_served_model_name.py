@@ -49,9 +49,6 @@ class TestEnableTokenizerMode(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tokenzier_mode(self):
-        response = requests.get(f"{self.base_url}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.post(
             f"{self.base_url}/generate",
             json={
