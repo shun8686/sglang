@@ -39,7 +39,6 @@ class TestRadixCacheFCFS(CustomTestCase):
                 "128",
                 "--max-total-tokens",
                 "20000",
-                "--schedule-policy",
                 *cls.extra_args,
             ],
         )
