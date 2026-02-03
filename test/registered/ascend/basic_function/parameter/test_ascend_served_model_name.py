@@ -59,9 +59,12 @@ class TestEnableTokenizerMode(CustomTestCase):
                 },
             },
         )
+        # Verify that the inference request is successfully processed when --served-model-name parameter is set
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
         response = requests.get(self.base_url + "/get_server_info")
+        # Verify that the model name is override by setting --served-model-name parameter
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["served_model_name"], self.served_model_name)
 
