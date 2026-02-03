@@ -84,14 +84,14 @@ class TestDeepEpQwen(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.9
+        expect_accuracy = 0.91
 
         print("Starting gsm8k test...")
         host = "http://127.0.0.1"
         port = int(self.base_url.split(":")[-1])
         print(f"{host=}, {port=}")
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
