@@ -21,7 +21,7 @@ class TestEnableTokenizerMode(CustomTestCase):
     endpoint in OpenAI API server
 
     [Test Category] Parameter
-    [Test Target] --served-model-name model_name
+    [Test Target] --served-model-name
     """
 
     @classmethod

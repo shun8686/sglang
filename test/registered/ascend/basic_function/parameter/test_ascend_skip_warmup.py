@@ -53,7 +53,7 @@ class TestSkipServerWarmup(CustomTestCase):
         cls.out_log_file.close()
         cls.err_log_file.close()
         # os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
+        # os.remove("./warmup_err_log.txt")
 
     def test_skip_server_warmup(self):
         response = requests.post(
