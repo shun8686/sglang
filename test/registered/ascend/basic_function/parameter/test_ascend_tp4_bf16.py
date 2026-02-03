@@ -18,6 +18,7 @@ class TestAscendTp4Bf16(TestAscendGraphTp1Bf16):
 
     TEST_MODEL_MATRIX = {
         QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH: {
+            # 0.953
             "accuracy": 0.90,
             "latency": 180,
             "output_throughput": 20,
