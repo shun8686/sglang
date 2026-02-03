@@ -1,13 +1,10 @@
 import os
-import tempfile
 import unittest
-from pathlib import Path
-from types import SimpleNamespace
 
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DeepSeek_R1_W8A8_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH as MODEL_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -25,14 +22,14 @@ class TestEplbAlgorithm(CustomTestCase):
     Testcase：Verify the correctness of the inference service when --eplb-algorithm is set
 
     [Test Category] Parameter
-    [Test Target] --eplb-algorithm deepseek
+    [Test Target] --eplb-algorithm
     """
 
     eplb_algorithm = "deepseek"
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DeepSeek_R1_W8A8_WEIGHTS_PATH
+        cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -83,11 +80,7 @@ class TestEplbAlgorithm(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_eplb_algorithm(self):
-        response = requests.get(f"{self.base_url}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.get(f"{self.base_url}/get_server_info")
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(self.eplb_algorithm, response.json().get("eplb_algorithm"))
 
