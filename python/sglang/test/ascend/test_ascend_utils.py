@@ -181,13 +181,22 @@ BGE_RERANKER_V2_M3_WEIGHTS_PATH = os.path.join(
 )
 
 # Reward model weights path
-SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR,
-                                                            "AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2")
-INTERNLM2_7B_REWARD_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b-reward")
-SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(HF_MODEL_WEIGHTS_DIR,
-                                                             "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1")
-QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach")
-QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
+SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2"
+)
+INTERNLM2_7B_REWARD_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b-reward"
+)
+SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(
+    HF_MODEL_WEIGHTS_DIR,
+    "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1",
+)
+QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach"
+)
+QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
+)
 
 def run_command(cmd, shell=True):
     """Execute system command and return stdout
@@ -246,19 +255,4 @@ def get_device_ids(index=None):
             return None
 
     return device_ids
-SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2"
-)
-INTERNLM2_7B_REWARD_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b-reward"
-)
-SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(
-    HF_MODEL_WEIGHTS_DIR,
-    "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1",
-)
-QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach"
-)
-QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
-)
+
