@@ -21,7 +21,7 @@ class TestEnableTokenizerMode(CustomTestCase):
     endpoint in OpenAI API server
 
     [Test Category] Parameter
-    [Test Target] --served-model-name model_name
+    [Test Target] --served-model-name
     """
 
     @classmethod
@@ -31,7 +31,7 @@ class TestEnableTokenizerMode(CustomTestCase):
         cls.served_model_name = "Llama3.2"
         other_args = [
             "--served-model-name",
-            served_model_name,
+            cls.served_model_name,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
@@ -49,9 +49,6 @@ class TestEnableTokenizerMode(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tokenzier_mode(self):
-        response = requests.get(f"{self.base_url}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -62,9 +59,12 @@ class TestEnableTokenizerMode(CustomTestCase):
                 },
             },
         )
+        # Verify that the inference request is successfully processed when --served-model-name parameter is set
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
         response = requests.get(self.base_url + "/get_server_info")
+        # Verify that the model name is override by setting --served-model-name parameter
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["served_model_name"], self.served_model_name)
 

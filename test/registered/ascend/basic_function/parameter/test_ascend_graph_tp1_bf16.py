@@ -28,13 +28,14 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
     TEST_MODEL_MATRIX = {
         QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH: {
-            "accuracy": 0.85,
+            "accuracy": 0.88,
             "latency": 150,
             "output_throughput": 30,
         },
     }
     extra_args = ["--mem-fraction-static", 0.8, ]
     envs = {}
+    num_shots = 5
 
     @classmethod
     def setUpClass(cls):
@@ -68,7 +69,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
                 try:
                     args = SimpleNamespace(
-                        num_shots=8,
+                        num_shots=self.num_shots,
                         data_path=None,
                         num_questions=1319,
                         max_new_tokens=512,

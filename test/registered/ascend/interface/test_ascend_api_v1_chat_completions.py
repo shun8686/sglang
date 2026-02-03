@@ -59,7 +59,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "messages": [{"role": "user", "content": "Hello"}],
             },
         )
-        print(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         data = response.json()
         self.assertEqual(data["model"], self.model)
@@ -71,7 +70,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "messages": [{"role": "user", "content": "Hello"}],
             },
         )
-        print(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         data = response.json()
         self.assertEqual(data["model"], "default")
@@ -86,7 +84,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "max_completion_tokens": 1,
             },
         )
-        print(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         self.assertEqual(response.json()["choices"][0]["finish_reason"], "length")
 
@@ -100,12 +97,10 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "stream": True,
             },
         )
-        print(f"response.text:{response.text}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         has_reasoning = False
         has_content = False
 
-        print("\n=== Stream With Reasoning ===")
         for line in response.iter_lines():
             if line:
                 line = line.decode("utf-8")
@@ -138,7 +133,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "temperature": 0,
             },
         )
-        print(f"response1.json:{response1.json()}")
         self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
         content1 = response1.json()["choices"][0]["message"]["content"]
 
@@ -150,7 +144,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "temperature": 0,
             },
         )
-        print(f"response2.json:{response2.json()}")
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
         content2 = response2.json()["choices"][0]["message"]["content"]
         self.assertEqual(content1, content2)
@@ -163,7 +156,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "temperature": 2,
             },
         )
-        print(f"response3.json:{response3.json()}")
         self.assertEqual(response3.status_code, 200, f"Failed with: {response3.text}")
         content3 = response3.json()["choices"][0]["message"]["content"]
 
@@ -175,7 +167,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "temperature": 2,
             },
         )
-        print(f"response4.json:{response4.json()}")
         self.assertEqual(response4.status_code, 200, f"Failed with: {response4.text}")
         content4 = response4.json()["choices"][0]["message"]["content"]
         self.assertNotEqual(content3, content4)
@@ -190,7 +181,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "return_hidden_states": True,
             },
         )
-        print(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         self.assertIn("hidden_states", response.json()["choices"][0])
 
@@ -201,7 +191,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "messages": [{"role": "user", "content": "Hello"}],
             },
         )
-        print(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         self.assertNotIn("hidden_states", response.json()["choices"][0])
 
@@ -215,7 +204,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "top_k": 20,
             },
         )
-        print(f"response1.json:{response1.json()}")
         self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
         content1 = response1.json()["choices"][0]["message"]["content"]
 
@@ -227,7 +215,6 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "top_k": 20,
             },
         )
-        print(f"response2.json:{response2.json()}")
         self.assertEqual(response2.status_code, 200, f"Failed with: {response2.text}")
         content2 = response2.json()["choices"][0]["message"]["content"]
         self.assertNotEqual(content1, content2)
@@ -242,13 +229,12 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "stop_token_ids": [1, 13],
             },
         )
-        print(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
         self.assertEqual(response.json()['choices'][0]['matched_stop'], 13)
 
     def test_rid(self):
         # Test rid parameter; verify response ID matches the requested rid value 'sssss'
-        response1 = requests.post(
+        response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
@@ -256,9 +242,8 @@ class TestChatCompletionsInterface(CustomTestCase):
                 "rid": "sssss",
             },
         )
-        print(f"response1.json:{response1.json()}")
-        self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-        self.assertEqual(response1.json()['id'], 'sssss')
+        self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
+        self.assertEqual(response.json()['id'], 'sssss')
 
 
 if __name__ == "__main__":

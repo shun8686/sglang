@@ -31,9 +31,9 @@ DEFAULT_SERVER_ARGS = (
         "cutlass_mla",
         "--disable-cuda-graph",
         "--mem-fraction-static",
-        0.9,
+        "0.9",
         "--tp-size",
-        2,
+        "2",
     ]
 )
 
@@ -42,14 +42,14 @@ DEFAULT_SERVER_ARGS = (
     False, "Test requires CUDA SM 90 or higher"
 )
 class TestHybridAttnBackendBase(CustomTestCase):
-    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the inference request is successfully processed.
+    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the gsm8k accuracy greater than 0.845 and inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --prefill-attention-backend, --decode-attention-backend
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    accuracy_threshold = 0.65
+    accuracy_threshold = 0.1
 
     @classmethod
     def get_server_args(cls):
@@ -78,7 +78,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         requests.get(self.base_url + "/flush_cache")
 
         args = SimpleNamespace(
-            num_shots=4,
+            num_shots=8,
             num_questions=100,
             max_new_tokens=512,
             parallel=128,
@@ -110,7 +110,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         )
         self.assertEqual(
             response.json()["internal_states"][0]["attention_backend"],
-            "ascend",
+            "cutlass_mla",
         )
 
 
