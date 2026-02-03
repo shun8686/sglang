@@ -233,14 +233,14 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=(
-                [
-                    "--skip-tokenizer-init",
-                    "--attention-backend",
-                    "ascend",
-                    "--disable-cuda-graph",
-                ]
-            ),
+            other_args=
+            [
+                "--skip-tokenizer-init",
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+            ]
+
         )
         cls.eos_token_id = [cls.tokenizer.eos_token_id]
 
@@ -259,7 +259,7 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
         ret = super().get_request_json(*args, **kwargs)
         ret["image_data"] = [self.image_url]
         # Do not try to calculate logprobs of image embeddings.
-        ret["logprob_start_len"] = (-1)
+        ret["logprob_start_len"] = -1
         return ret
 
 
