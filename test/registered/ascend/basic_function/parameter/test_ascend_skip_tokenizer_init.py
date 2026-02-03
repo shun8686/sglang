@@ -262,6 +262,5 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
         ret["logprob_start_len"] = (-1)
         return ret
 
-
 if __name__ == "__main__":
     unittest.main()
