@@ -10,7 +10,7 @@ class TestAscendTp2FIABf16(TestAscendGraphTp1Bf16):
     disabled, tp size is 2 and FIA acceleration is used， and defaults to auto-detection the device to use if not specified
 
     [Test Category] Parameter
-    [Test Target] --attention-backend, --disable-cuda-graph, --tp-size
+    [Test Target] --attention-backend, --disable-cuda-graph, --tp-size, --disable-radix-cache
     """
 
     extra_args = [
