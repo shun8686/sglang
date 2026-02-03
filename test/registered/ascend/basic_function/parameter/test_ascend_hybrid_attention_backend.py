@@ -49,11 +49,11 @@ class TestHybridAttnBackendBase(CustomTestCase):
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    accuracy_threshold = 0.65  # derived tests need to override this
+    accuracy_threshold = 0.65
 
     @classmethod
     def get_server_args(cls):
-        """Return the arguments for the server launch. Override in subclasses."""
+        # Return the arguments for the server launch. Override in subclasses.
         return DEFAULT_SERVER_ARGS
 
     @classmethod
@@ -112,7 +112,6 @@ class TestHybridAttnBackendBase(CustomTestCase):
             response.json()["internal_states"][0]["attention_backend"],
             "ascend",
         )
-
 
 
 if __name__ == "__main__":
