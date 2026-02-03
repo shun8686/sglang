@@ -59,8 +59,6 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
     def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
-
                 process = popen_launch_server(
                     model,
                     self.base_url,
@@ -93,8 +91,6 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
     def test_b_throughput(self):
         for model in self.models:
             with self.subTest(model=model):
-                print(f"##=== Testing throughput: {model} ===##")
-
                 output_throughput = run_bench_offline_throughput(
                     model,
                     [
@@ -102,8 +98,6 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
                         *self.extra_args,
                     ],
                 )
-
-                print(f"##=== {model} throughput: {output_throughput} ===##")
 
                 self.assertGreater(
                     output_throughput,
