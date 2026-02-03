@@ -19,7 +19,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHicacheIoBackend(CustomTestCase):
-    """Testcase: Tests core functionality with --hicache-io-backend configuration, inference requests successful.
+    """Testcase: Tests configuration --hicache-io-backend, intference request sent successfully.
+    and the ingerence accuracy using the GSM8K dataset is no less than 0.86.
 
     [Test Category] Parameter
     [Test Target] --hicache-io-backend
@@ -28,6 +29,7 @@ class TestHicacheIoBackend(CustomTestCase):
     accuracy = 0.86
     @classmethod
     def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
             [
                 "--hicache-io-backend",
@@ -35,6 +37,10 @@ class TestHicacheIoBackend(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
+                "--tp-size",
+                2,
+                "--mem-fraction-static",
+                0.8,
             ]
         )
         cls.process = popen_launch_server(
