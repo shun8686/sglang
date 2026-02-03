@@ -31,7 +31,7 @@ class TestEnableTokenizerMode(CustomTestCase):
         cls.served_model_name = "Llama3.2"
         other_args = [
             "--served-model-name",
-            served_model_name,
+            cls.served_model_name,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
