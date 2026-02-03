@@ -35,6 +35,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
     }
     extra_args = ["--mem-fraction-static", 0.8, ]
     envs = {}
+    num_shots = 5
 
     @classmethod
     def setUpClass(cls):
@@ -68,7 +69,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
                 try:
                     args = SimpleNamespace(
-                        num_shots=5,
+                        num_shots=self.num_shots,
                         data_path=None,
                         num_questions=1319,
                         max_new_tokens=512,
