@@ -40,9 +40,9 @@ class TestDownloadDir(CustomTestCase):
     def setUpClass(cls):
         run_command(f"mkdir -p {cls.download_dir}")
         if not os.path.exists(cls.download_dir):
-            raise FileNotFoundError(f"--download-dir{cls.download_dir}not exist")
+            raise FileNotFoundError(f"--download-dir {cls.download_dir} not exist")
         if not os.path.isdir(cls.download_dir):
-            raise NotADirectoryError(f"--download-dir{cls.download_dir}not directory")
+            raise NotADirectoryError(f"--download-dir {cls.download_dir} not a directory")
         other_args = (
             [
                 "--download-dir",
@@ -88,7 +88,7 @@ class TestDownloadDir(CustomTestCase):
         self.assertGreater(
             len(weight_files),
             0,
-            msg=f"--download-dir{self.download_dir}No model weight"
+            msg=f"--download-dir {self.download_dir} No model weight"
         )
 
 
