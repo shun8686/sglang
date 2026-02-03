@@ -17,7 +17,8 @@ register_npu_ci(est_time=50, suite="nightly-1-npu-a3", nightly=True)
 
 class TestEnableTokenizerMode(CustomTestCase):
     """
-    Testcase：Verify that inference requests can be successfully processed after the --served-model-name parameter is set.
+    Testcase：Verify that the --served-model-name parameter is used to override the model name returned by the v1/models
+    endpoint in OpenAI API server
 
     [Test Category] Parameter
     [Test Target] --served-model-name model_name
