@@ -75,7 +75,7 @@ def calculate_latency_stats(request_results):
     }
 
 
-class TestTboTokenDistributionThresholdBase(CustomTestCase):
+class TestTboTokenDistributionThresholdBase08(CustomTestCase):
     """Testcase: Verify the baseline performance of disabled --enable-mixed-chunk with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
 
     [Test Category] Parameter
@@ -156,7 +156,7 @@ class TestTboTokenDistributionThresholdBase(CustomTestCase):
         print(f"  Avg Elapsed Time: {stats['avg_elapsed']}s")
 
 
-class TestDisableTboTokenDistributionThreshold(TestTboTokenDistributionThresholdBase):
+class TestTboTokenDistributionThresholdBase0(TestTboTokenDistributionThresholdBase08):
     """Testcase: Verify the baseline performance of disabled --enable-mixed-chunk with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
 
     [Test Category] Parameter
