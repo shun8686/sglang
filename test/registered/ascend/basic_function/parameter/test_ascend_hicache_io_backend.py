@@ -28,6 +28,7 @@ class TestHicacheIoBackend(CustomTestCase):
     accuracy = 0.86
     @classmethod
     def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
             [
                 "--hicache-io-backend",
@@ -35,6 +36,10 @@ class TestHicacheIoBackend(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
+                "--tp-size",
+                2,
+                "--mem-fraction-static",
+                0.8,
             ]
         )
         cls.process = popen_launch_server(
