@@ -28,18 +28,26 @@ FINAL_STATISTICS: Dict[str, Dict[str, Any]] = {
     "tbo_disabled_0": {}
 }
 
+def build_long_input_text_for_token():
+    """Construct long input text with enough tokens (common function for consistent input)"""
+    base_sentence = "This is a test sentence to generate enough tokens. "
+    repeat_times = (CONFIG["TARGET_TOKEN_COUNT"] // 10) + 20
+    return (base_sentence * repeat_times) + "The capital of France is"
+
 def send_generate_request(task_id, request_results):
     single_start_time = time.time()
     
     request_text = "The capital of France is"
+
+    long_input_text = build_long_input_text_for_token()
     
     response = requests.post(
         f"{DEFAULT_URL_FOR_TEST}/generate",
         json={
-            "text": request_text,
+            "text": long_input_text,
             "sampling_params": {
                 "temperature": 0,
-                "max_new_tokens": CONFIG["MAX_NEW_TOKENS"],
+                "max_new_tokens": 32,
             },
         },
         timeout=CONFIG["TIMEOUT"]
