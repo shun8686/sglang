@@ -31,9 +31,9 @@ DEFAULT_SERVER_ARGS = (
         "cutlass_mla",
         "--disable-cuda-graph",
         "--mem-fraction-static",
-        "0.9",
+        0.9,
         "--tp-size",
-        "2",
+        2,
     ]
 )
 
