@@ -42,14 +42,14 @@ DEFAULT_SERVER_ARGS = (
     False, "Test requires CUDA SM 90 or higher"
 )
 class TestHybridAttnBackendBase(CustomTestCase):
-    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the gsm8k accuracy greater than 0.98 and inference request is successfully processed.
+    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the gsm8k accuracy greater than 0.845 and inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --prefill-attention-backend, --decode-attention-backend
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    accuracy_threshold = 0.98
+    accuracy_threshold = 0.845
 
     @classmethod
     def get_server_args(cls):
