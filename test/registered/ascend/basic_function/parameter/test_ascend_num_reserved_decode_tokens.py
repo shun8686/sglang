@@ -1,12 +1,8 @@
-import json
 import os
-import time
 import unittest
 from types import SimpleNamespace
 
-import requests
-
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH, get_device_ids
 from sglang.test.run_eval import run_eval
 from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
@@ -16,7 +12,7 @@ from sglang.test.test_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestNumReservedDecodeTokens(TestDisaggregationBase):
@@ -76,7 +72,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "--disaggregation-mode",
                 "decode",
                 "--base-gpu-id",
-                "2",
+                get_device_ids(1),
                 "--disaggregation-transfer-backend",
                 "ascend",
                 "--disable-cuda-graph",
