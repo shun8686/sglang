@@ -77,7 +77,7 @@ class TestDeepEpDeepseekV32(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.565
+        expect_accuracy = 0.95
         args = SimpleNamespace(
             num_shots=8,
             data_path=None,
