@@ -56,17 +56,11 @@ class TestEnableProfileCudaGraph(CustomTestCase):
                 },
             },
         )
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertIn(
-            "Paris", response.text, "The inference result does not include Paris."
-        )
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
         response = requests.get(f"{self.base_url}/get_server_info")
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
+        self.assertEqual( response.status_code, 200, "The request status code is not 200.")
         self.assertTrue(
             response.json()["enable_profile_cuda_graph"],
             "--enable-profile-cuda-graph is not taking effect.",
