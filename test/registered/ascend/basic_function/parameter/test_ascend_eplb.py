@@ -25,9 +25,9 @@ class _BaseTestDynamicEPLB(CustomTestCase):
     dataset
 
     [Test Category] Parameter
-    [Test Target] --enable-eplb， --ep-num-redundant-experts 16, --eplb-rebalance-num-iterations 50,
-    --expert-distribution-recorder-buffer-size 50, --enable-expert-distribution-metrics,
-    --expert-distribution-recorder-mode stat, --ep-dispatch-algorithm static
+    [Test Target] --enable-eplb， --ep-num-redundant-experts, --eplb-rebalance-num-iterations,
+    --expert-distribution-recorder-buffer-size, --enable-expert-distribution-metrics,
+    --expert-distribution-recorder-mode, --ep-dispatch-algorithm
     """
 
     extra_args = []

@@ -42,7 +42,7 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
         ]
 
         cls.process = popen_launch_server(
-            cls.model_back_up_path,
+            cls.model_path,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
