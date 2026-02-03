@@ -18,7 +18,6 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 GSM_DATASET_PATH = None
 
-# Default server arguments shared across all tests
 DEFAULT_SERVER_ARGS = (
     [
         "--trust-remote-code",
@@ -32,9 +31,9 @@ DEFAULT_SERVER_ARGS = (
         "cutlass_mla",
         "--disable-cuda-graph",
         "--mem-fraction-static",
-        0.9,
+        "0.9",
         "--tp-size",
-        2,
+        "2",
     ]
 )
 
