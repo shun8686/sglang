@@ -1,5 +1,4 @@
 import unittest
-from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH
@@ -21,7 +20,7 @@ class TestLlama4LoRA(CustomTestCase):
     Testcase：Verify the successful launch and operation of Llama-4 model when LoRA function is enabled.
 
     [Test Category] Parameter
-    [Test Target] --enable-lora, --max-lora-rank, --lora-target-modules
+    [Test Target] --enable-lora, --max-lora-rank
     """
 
     @classmethod
