@@ -51,7 +51,7 @@ class TestHiCache(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        # Verify MMLU dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65) with HiCache enabled
+        # Verify MMLU dataset evaluation accuracy meets the minimum requirement (score ≥ 0.694) with HiCache enabled
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -61,13 +61,13 @@ class TestHiCache(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        self.assertGreaterEqual(metrics["score"], 0.65)
+        self.assertGreaterEqual(metrics["score"], 0.694)
 
     def test_gsm8k(self):
-        # Verify gsm8k dataset evaluation accuracy meets the minimum requirement (score ≥ 0.65) with HiCache enabled
-        expect_accuracy = 0.65
+        # Verify gsm8k dataset evaluation accuracy meets the minimum requirement (score ≥ 0.845) with HiCache enabled
+        expect_accuracy = 0.845
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
