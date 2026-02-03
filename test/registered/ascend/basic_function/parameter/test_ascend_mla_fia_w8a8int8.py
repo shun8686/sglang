@@ -7,21 +7,13 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
-TEST_MODEL_MATRIX = {
-    DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH: {
-        "accuracy": 0.34,
-        "latency": 1000,
-        "output_throughput": 6,
-    },
-}
-
 
 class TestAscendMlaFiaW8A8Int8(TestAscendGraphTp1Bf16):
     """
     Testcase：Verify the correctness and performance when quantization model is modelslim and FIA acceleration is used。
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim
+    [Test Target] --quantization
     """
 
     TEST_MODEL_MATRIX = {

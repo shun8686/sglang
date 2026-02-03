@@ -52,6 +52,10 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
         for env in cls.envs.keys():
             os.environ[env] = cls.envs[env]
 
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):

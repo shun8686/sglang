@@ -22,7 +22,7 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     disabled, and verify that a memory error occurs when --mem-fraction-static is too large or too small.
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim, --disable-cuda-graph, --mem-fraction-static 0.8(normal)/0.1(too small)/0.9(too large)
+    [Test Target] --quantization, --disable-cuda-graph, --mem-fraction-static
     """
 
     model_path = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH

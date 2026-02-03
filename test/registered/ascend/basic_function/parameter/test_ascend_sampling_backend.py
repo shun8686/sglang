@@ -22,7 +22,7 @@ class TestAscendSamplingBackend(CustomTestCase):
     Testcase：Verify that the token sampling logic is greedy sampling when the --sampling-backend is set to ascend
 
     [Test Category] Parameter
-    [Test Target] --sampling-backend ascend
+    [Test Target] --sampling-backend
     """
 
     @classmethod
