@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -25,7 +25,8 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model =  DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+        cls.model = QWEN3_32B_WEIGHTS_PATH
+
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
@@ -67,7 +68,7 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
     def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
-            data_path=None,
+            data_path="None",
             num_questions=512,
             parallel=512,
             max_new_tokens=512,
@@ -76,7 +77,7 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
         )
         metrics = run_eval_few_shot_gsm8k(args)
         print(f"Eval accuracy of GSM8K: {metrics=}")
-        # self.assertGreaterEqual(metrics["accuracy"],0.95)
+        self.assertGreaterEqual(metrics["accuracy"], 0.86)
 
 if __name__ == "__main__":
     unittest.main()
