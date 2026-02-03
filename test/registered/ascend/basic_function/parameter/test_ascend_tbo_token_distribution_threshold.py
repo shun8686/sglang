@@ -128,7 +128,6 @@ class TestTboEnabled08(CustomTestCase):
         for t in threads:
             t.start()
         
-        # 等待所有线程执行完成
         for t in threads:
             t.join()
         
@@ -159,10 +158,10 @@ class TestTboEnabled08(CustomTestCase):
         print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s ")
  
         self.assertGreater(
-            tbo_08_avg, tbo_0_avg, 
-            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
+            tbo_0_avg, tbo_08_avg, 
+            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not greater than TBO 0.8 ({tbo_08_avg}s)"
         )
-        print("\n Assertion Passed: TBO 0.8 Average Latency > TBO 0 Average Latency")
+        print("\n Assertion Passed: TBO 0 Average Latency > TBO 0.8 Average Latency")
 
 class TestTboDisabled0(CustomTestCase):
     """Testcase: Verify TBO performance with threshold 0 (disabled two-chunk-overlap)

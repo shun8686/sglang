@@ -120,6 +120,14 @@ QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Howeee/Qwen2
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B")
 
 def run_command(cmd, shell=True):
+    """Execute system command and return stdout
+
+    parameter:
+        cmd: command to execute
+        shell: Execute command in shell
+    return:
+        The result of executing the command
+    """
     try:
         result = subprocess.run(
             cmd, shell=shell, capture_output=True, text=True, check=True
