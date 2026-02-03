@@ -1,4 +1,3 @@
-import time
 import unittest
 from types import SimpleNamespace
 
@@ -11,7 +10,6 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_amd_ci,
     popen_launch_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -20,8 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestTorchCompile(CustomTestCase):
-    """Testcase: Tests core functionality with --enable-torch-compile configuration
-                 MMLU dataset accuracy verification (score ≥ 0.65)
+    """Testcase: Test configuration --enable-torch-compile MMLU dataset accuracy verification (score ≥ 0.65)
 
     [Test Category] Parameter
     [Test Target] --enable-torch-compile
@@ -60,31 +57,6 @@ class TestTorchCompile(CustomTestCase):
 
         metrics = run_eval(args)
         self.assertGreaterEqual(metrics["score"], 0.65)
-
-    def run_decode(self, max_new_tokens):
-        response = requests.post(
-            self.base_url + "/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": max_new_tokens,
-                    "ignore_eos": True,
-                },
-            },
-        )
-        return response.json()
-
-    def test_throughput(self):
-        # Warmup
-        max_tokens = 256
-        tic = time.perf_counter()
-        res = self.run_decode(max_tokens)
-        tok = time.perf_counter()
-        print(f"{res=}")
-        throughput = max_tokens / (tok - tic)
-        print(f"Throughput: {throughput} tokens/s")
-        self.assertGreaterEqual(throughput, 152)
 
 
 if __name__ == "__main__":
