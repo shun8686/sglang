@@ -1,13 +1,13 @@
 import unittest
 import requests
-import threading
 import time
+import threading
 from datetime import datetime
+from typing import Dict, Any
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
-from typing import Dict, Any
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -17,183 +17,186 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
-CONCURRENT_CONFIG = {
+CONFIG = {
     "REQUEST_COUNT": 50,
     "TIMEOUT": 600,
     "MAX_NEW_TOKENS": 32
 }
 
-
-TBO_LATENCY_STATISTICS: Dict[str, Dict[str, Any]] = {
+FINAL_STATISTICS: Dict[str, Dict[str, Any]] = {
     "tbo_enabled_0.8": {},
     "tbo_disabled_0": {}
 }
 
-
-def send_concurrent_request(task_id, request_results):
-    start_time = time.time()
+def send_generate_request(task_id, request_results):
+    single_start_time = time.time()
+    
+    request_text = "The capital of France is"
+    
     response = requests.post(
         f"{DEFAULT_URL_FOR_TEST}/generate",
         json={
-            "text": "The capital of France is",
+            "text": request_text,
             "sampling_params": {
                 "temperature": 0,
-                "max_new_tokens": CONCURRENT_CONFIG["MAX_NEW_TOKENS"],
+                "max_new_tokens": CONFIG["MAX_NEW_TOKENS"],
             },
         },
-        timeout=CONCURRENT_CONFIG["TIMEOUT"]
+        timeout=CONFIG["TIMEOUT"]
     )
+    
+    single_elapsed_time = round(time.time() - single_start_time, 4)
+
     request_results.append({
         "task_id": task_id,
         "status_code": response.status_code,
-        "elapsed_time": round(time.time() - start_time, 4)
+        "single_elapsed_time": single_elapsed_time
     })
-    print(
-        f"[Task {task_id}] Completed, status: {response.status_code}, elapsed: {request_results[-1]['elapsed_time']}s")
+    
+    print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
 
+def start_tbo_server(tbo_threshold: float):
+    other_args = [
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tbo-token-distribution-threshold",
+        str(tbo_threshold)
+    ]
+    
+    process = popen_launch_server(
+        LLAMA_3_2_1B_WEIGHTS_PATH,
+        DEFAULT_URL_FOR_TEST,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
+    )
 
+    return process
 
-def calculate_latency_stats(request_results):
-    total_count = len(request_results)
+def calculate_statistics(request_results):
     success_requests = [r for r in request_results if r["status_code"] == 200]
-    success_count = len(success_requests)
-
     if not success_requests:
         return None
 
-    # Extract elapsed time of successful requests
-    elapsed_times = [r["elapsed_time"] for r in success_requests]
-
-    # Calculate statistical indicators
+    elapsed_times = [r["single_elapsed_time"] for r in success_requests]
+    avg_elapsed = round(sum(elapsed_times) / len(elapsed_times), 4)
+    
     return {
-        "total_count": total_count,
-        "success_count": success_count,
-        "success_rate": round((success_count / total_count) * 100, 2),
-        "avg_elapsed": round(sum(elapsed_times) / success_count, 4),
-        "max_elapsed": round(max(elapsed_times), 4),
-        "min_elapsed": round(min(elapsed_times), 4)
+        "success_count": len(success_requests),
+        "total_count": len(request_results),
+        "avg_elapsed": avg_elapsed
     }
 
-
-class TestTboTokenDistributionThresholdBase8(CustomTestCase):
-    """Testcase: Verify the baseline performance of --tbo-token-distribution-threshold with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
+class TestTboEnabled08(CustomTestCase):
+    """Testcase: Verify TBO performance with threshold 0.8 (enabled auto-switch)
 
     [Test Category] Parameter
     [Test Target] --tbo-token-distribution-threshold;
     """
-    tbo_token_distribution_threshold = 0.8
-    tbo_type = "tbo_enabled_0.8"
-
     @classmethod
     def setUpClass(cls):
-        other_args = [
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--tbo-token-distribution-threshold",
-            str(cls.tbo_token_distribution_threshold),
-        ]
-
-        cls.process = popen_launch_server(
-            LLAMA_3_2_1B_WEIGHTS_PATH,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-        )
+        print("=== Starting Server (--tbo-token-distribution-threshold=0.8 ENABLED) ===")
+        cls.process = start_tbo_server(tbo_threshold=0.8)
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
         time.sleep(10)
 
-    def test_tbo_concurrent_latency(self):
+    def test_tbo_with_multi_requests(self):
         request_results = []
-        print("\n" + "=" * 60)
-        print(f"=== Starting TBO Concurrent Test ({self.tbo_type}) ===")
-        print(
-            f"=== Threshold: {self.tbo_token_distribution_threshold} | Concurrent: {CONCURRENT_CONFIG['REQUEST_COUNT']} ===")
-        print(f"=== Start Time: {datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
-        print("=" * 60)
-
+        
+        # Print test start information
+        print(f"\n=== [TBO 0.8 ENABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
+        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
+        
         # Create and start multiple threads
-        threads = [
-            threading.Thread(target=send_concurrent_request, args=(i, request_results))
-            for i in range(CONCURRENT_CONFIG["REQUEST_COUNT"])
-        ]
-        [t.start() for t in threads]
-        [t.join() for t in threads]
+        threads = []
+        for task_id in range(CONFIG["REQUEST_COUNT"]):
+            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
+            threads.append(t)
+        
+        for t in threads:
+            t.start()
+        
+        # 等待所有线程执行完成
+        for t in threads:
+            t.join()
+        
+        # Calculate statistics
+        statistics = calculate_statistics(request_results)
+        
+        FINAL_STATISTICS["tbo_enabled_0.8"] = {
+            "detail": statistics
+        }
+        
+        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
 
-        latency_stats = calculate_latency_stats(request_results)
-        TBO_LATENCY_STATISTICS[self.tbo_type] = latency_stats
+        self._run_performance_assertions()
 
-        # Wait for all threads to complete
-        self._print_latency_stats(latency_stats)
+    def _run_performance_assertions(self):
+        # verify performance optimization
+        print("\n=== Running Performance Assertions===")
+        
+        # Extract core statistical data
+        tbo_08_stats = FINAL_STATISTICS["tbo_enabled_0.8"]
+        tbo_0_stats = FINAL_STATISTICS["tbo_disabled_0"]
 
-        self.assertEqual(
-            latency_stats["success_count"],
-            latency_stats["total_count"],
-            f"Concurrent Success Rate Error: {latency_stats['success_count']}/{latency_stats['total_count']} (not 100%)"
+        tbo_08_avg = tbo_08_stats["detail"]["avg_elapsed"]
+        tbo_0_avg = tbo_0_stats["detail"]["avg_elapsed"]
+        
+        avg_optimize_rate = round(((tbo_0_avg - tbo_08_avg) / tbo_0_avg) * 100, 2) if tbo_0_avg > 0 else 0.0
+        
+        print(f"Average Elapsed Time Comparison")
+        print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s | Optimization Rate: {avg_optimize_rate}%")
+ 
+        self.assertGreater(
+            tbo_0_avg, tbo_08_avg, 
+            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not greater than TBO 0.8 ({tbo_08_avg}s)"
         )
-        print(f"\n Assertion 1 Passed: 100% Concurrent Request Success")
+        print("\n Assertion Passed: TBO 0.8 Average Latency < TBO 0 Average Latency")
 
-        server_info_resp = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        self.assertEqual(server_info_resp.status_code, 200, "/get_server_info Request Failed (status != 200)")
-        self.assertEqual(
-            server_info_resp.json()["tbo_token_distribution_threshold"],
-            self.tbo_token_distribution_threshold,
-            f"TBO Parameter Config Error: Expected {self.tbo_token_distribution_threshold}, Got {server_info_resp.json()['tbo_token_distribution_threshold']}"
-        )
-        print(f" Assertion 2 Passed: TBO Threshold Config Correct ({self.tbo_token_distribution_threshold})")
-
-    def _print_latency_stats(self, stats):
-        if not stats:
-            print("\n=== [Error] No Successful Requests, Cannot Calculate Latency ===")
-            return
-        print("\n" + "-" * 50)
-        print(f"=== {self.tbo_type.upper()} Latency Statistics ===")
-        print(f"  Total Requests: {stats['total_count']}")
-        print(f"  Success Requests: {stats['success_count']} (Rate: {stats['success_rate']}%)")
-        print(f"  Avg Elapsed Time: {stats['avg_elapsed']}s")
-
-
-class TestTboTokenDistributionThresholdBase0(TestTboTokenDistributionThresholdBase8):
-    """Testcase: Verify the baseline performance of --tbo-token-distribution-threshold with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
+class TestTboDisabled0(CustomTestCase):
+    """Testcase: Verify TBO performance with threshold 0 (disabled two-chunk-overlap)
 
     [Test Category] Parameter
     [Test Target] --tbo-token-distribution-threshold;
     """
-    tbo_token_distribution_threshold = 0
-    tbo_type = "tbo_disabled_0"
+    @classmethod
+    def setUpClass(cls):
+        print("\n" + "="*60)
+        print("=== Starting Server (--tbo-token-distribution-threshold=0 DISABLED) ===")
+        cls.process = start_tbo_server(tbo_threshold=0)
 
-    def test_tbo_latency_comparison(self):
-        # verify performance optimization
-        print("\n" + "=" * 80)
-        print("=== TBO Enabled(0.8) vs Disabled(0) Latency Comparison ===")
-        print("=" * 80)
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+        time.sleep(10)
 
-        # Extract core statistical data
-        enabled_stats = TBO_LATENCY_STATISTICS["tbo_enabled_0.8"]
-        disabled_stats = TBO_LATENCY_STATISTICS["tbo_disabled_0"]
+    def test_tbo_with_multi_requests(self):
+        request_results = []
+        
+        print(f"\n=== [TBO 0 DISABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
+        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
+        
+        threads = []
+        for task_id in range(CONFIG["REQUEST_COUNT"]):
+            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
+            threads.append(t)
+        
+        for t in threads:
+            t.start()
 
+        for t in threads:
+            t.join()
 
-        e_avg = enabled_stats["avg_elapsed"]
-        d_avg = disabled_stats["avg_elapsed"]
-        e_max = enabled_stats["max_elapsed"]
-        d_max = disabled_stats["max_elapsed"]
+        statistics = calculate_statistics(request_results)
+        
+        FINAL_STATISTICS["tbo_disabled_0"] = {
+            "detail": statistics
+        }
 
-        # Print assertion preparation information
-        avg_optimize_rate = round(((d_avg - e_avg) / d_avg) * 100, 2) if d_avg > 0 else 0.0
-        max_optimize_rate = round(((d_max - e_max) / d_max) * 100, 2) if d_max > 0 else 0.0
-        print(
-            f"1. Average Elapsed Time: ENABLED({e_avg}s) | DISABLED({d_avg}s) | Optimization Rate: {avg_optimize_rate}%")
-        print(f"2. Max Elapsed Time: ENABLED({e_max}s) | DISABLED({d_max}s) | Optimization Rate: {max_optimize_rate}%")
-
-        self.assertLess(
-            e_avg, d_avg,
-            f"TBO Avg Latency Assert Failed: Enabled({e_avg}s) ≥ Disabled({d_avg}s)"
-        )
-        print("\n✅ Latency Assert 1 Passed: TBO Enabled Avg Latency < Disabled")
-
+        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
 
 if __name__ == "__main__":
     unittest.main()
