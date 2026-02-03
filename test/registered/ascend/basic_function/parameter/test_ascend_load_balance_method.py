@@ -17,7 +17,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
-modes = ["round_robin", "queue", "minimum_tokens"]
 
 
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
@@ -81,12 +80,17 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
 
 
 class _TestDPAttentionQueueLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "queue"
+    mode = "auto"
 
 
 class _TestDPAttentionMinimumTokenLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "minimum_tokens"
+    mode = "follow_bootstrap_room"
 
+class _TestDPAttentionMinimumTokenLoadBalance1(TestDPAttentionRoundBinLoadBalance):
+    mode = "total_requests"
+
+class _TestDPAttentionMinimumTokenLoadBalance2(TestDPAttentionRoundBinLoadBalance):
+    mode = "total_tokens"
 
 if __name__ == "__main__":
     unittest.main()
