@@ -82,7 +82,7 @@ class TestAllowAutoTruncate(CustomTestCase):
 
 class TestNoAllowAutoTruncate(TestAllowAutoTruncate):
     """
-    Verify --allow-auto-truncate = False over-length request is rejected
+    Verify --allow-auto-truncate = False over --context-length request is rejected
     """
     allow_auto_truncate = False
 
