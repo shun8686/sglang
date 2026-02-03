@@ -12,8 +12,7 @@ class TestAscendTp2Bf16(TestAscendGraphTp1Bf16):
     disabled, and tp size is 2, and defaults to auto-detection the device to use if not specified
 
     [Test Category] Parameter
-    [Test Target] --device (auto-detection if not specified), --attention-backend ascend (set in TestAscendGraphTp1Bf16),
-    --disable-cuda-graph, --tp-size 2
+    [Test Target] --device, --attention-backend, --disable-cuda-graph, --tp-size
     """
 
     extra_args = [

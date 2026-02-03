@@ -13,7 +13,7 @@ class TestAscendTp4Bf16(TestAscendGraphTp1Bf16):
     set and tp size is 4
 
     [Test Category] Parameter
-    [Test Target] --attention-backend ascend (set in TestAscendGraphTp1Bf16), --cuda-graph-max-bs 32, --tp-size 4
+    [Test Target] --attention-backend, --cuda-graph-max-bs, --tp-size
     """
 
     TEST_MODEL_MATRIX = {
