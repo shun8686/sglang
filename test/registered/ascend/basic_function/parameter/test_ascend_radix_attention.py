@@ -12,13 +12,10 @@ from sglang.test.test_utils import (
     kill_process_tree,
     popen_launch_server,
 )
-
-# RadixAttention server integration tests
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
-
 MODEL_PATH = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
-
+# RadixAttention server integration tests
 class TestRadixCacheFCFS(CustomTestCase):
     """
     Testcase：Verify the correctness and performance of the Radix Attention mechanism in the SGLang inference service
@@ -28,6 +25,8 @@ class TestRadixCacheFCFS(CustomTestCase):
     --max-total-tokens 20000 (cache opimization enabled by default in large context scenarios),
     --schedule-policy fcfs/lpm, --disable-overlap-schedule
     """
+
+    schedule_policy = "fcfs"
 
     @classmethod
     def setUpClass(cls):
@@ -43,7 +42,7 @@ class TestRadixCacheFCFS(CustomTestCase):
                 "--max-total-tokens",
                 "20000",
                 "--schedule-policy",
-                "fcfs",
+                cls.schedule_policy,
             ],
         )
 
