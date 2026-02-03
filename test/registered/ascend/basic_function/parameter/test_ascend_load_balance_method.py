@@ -25,7 +25,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, queue and minimum_tokens
 
     [Test Category] Parameter
-    [Test Target] --load-balance-method round_robin/queue/minimum_tokens
+    [Test Target] --load-balance-method
     """
 
     mode = "round_robin"
