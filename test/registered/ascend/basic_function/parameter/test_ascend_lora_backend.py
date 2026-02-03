@@ -26,6 +26,7 @@ class TestLoraBackend(CustomTestCase):
     def setUpClass(cls):
         other_args = (
             [
+                "--enable-lora",
                 "--lora-backend",
                 "triton",
                 "--attention-backend",

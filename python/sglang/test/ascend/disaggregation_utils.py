@@ -35,22 +35,18 @@ class TestDisaggregationBase(CustomTestCase):
         cls.process_lb, cls.process_decode, cls.process_prefill = None, None, None
 
         # config transfer backend and rdma devices
-        if is_in_ci():
-            cls.transfer_backend = ["--disaggregation-transfer-backend", "mooncake"]
-            cls.rdma_devices = ["--disaggregation-ib-device", get_rdma_devices_args()]
-        else:
-            cls.transfer_backend = [
-                "--disaggregation-transfer-backend",
-                envs.SGLANG_TEST_PD_DISAGG_BACKEND.get(),
-            ]
-            cls.rdma_devices = [
-                "--disaggregation-ib-device",
-                envs.SGLANG_TEST_PD_DISAGG_DEVICES.get(),
-            ]
-            if cls.rdma_devices[1] is None:
-                cls.rdma_devices = []
-                msg = "No RDMA devices specified for disaggregation test, using default settings."
-                warnings.warn(msg)
+        cls.transfer_backend = [
+            "--disaggregation-transfer-backend",
+            envs.SGLANG_TEST_PD_DISAGG_BACKEND.get(),
+        ]
+        cls.rdma_devices = [
+            "--disaggregation-ib-device",
+            envs.SGLANG_TEST_PD_DISAGG_DEVICES.get(),
+        ]
+        if cls.rdma_devices[1] is None:
+            cls.rdma_devices = []
+            msg = "No RDMA devices specified for disaggregation test, using default settings."
+            warnings.warn(msg)
 
     @classmethod
     def launch_lb(cls):
@@ -59,7 +55,7 @@ class TestDisaggregationBase(CustomTestCase):
             "-m",
             "sglang_router.launch_router",
             "--pd-disaggregation",
-            "--mini-lb",  # FIXME: remove this
+            "--mini-lb",
             "--prefill",
             cls.prefill_url,
             "--decode",
