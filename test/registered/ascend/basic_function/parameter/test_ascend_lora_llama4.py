@@ -30,7 +30,7 @@ class TestLlama4LoRA(CustomTestCase):
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
-            timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--enable-lora",
                 "--max-lora-rank",
