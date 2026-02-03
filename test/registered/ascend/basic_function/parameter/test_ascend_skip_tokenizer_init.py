@@ -258,9 +258,8 @@ class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
     def get_request_json(self, *args, **kwargs):
         ret = super().get_request_json(*args, **kwargs)
         ret["image_data"] = [self.image_url]
-        ret["logprob_start_len"] = (
-            -1
-        )  # Do not try to calculate logprobs of image embeddings.
+        # Do not try to calculate logprobs of image embeddings.
+        ret["logprob_start_len"] = (-1)
         return ret
 
 
