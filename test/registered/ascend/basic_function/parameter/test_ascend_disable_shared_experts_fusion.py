@@ -56,9 +56,6 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
 
 
     def test_disable_shared_experts_fusion(self):
-        response = requests.get(f"{self.base_url}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -69,9 +66,12 @@ class TestDisableSharedExpertsFusion(CustomTestCase):
                 },
             },
         )
+        # Verify that the inference request is successfully processed when --disable-shared-experts-fusion parameter is set
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
         response = requests.get(self.base_url + "/get_server_info")
+        # Verify that --disable-shared-experts-fusion parameter takes effect
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["disable_shared_experts_fusion"], True)
 
