@@ -7,11 +7,6 @@ on:
         required: true
         type: string
         default: linux-aarch64-a3-16
-      image:
-        required: false
-        type: string
-        description: image for pods
-        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
       test_config_name:
         required: true
         type: string
@@ -20,6 +15,16 @@ on:
         required: true
         type: string
         description: path of test case file
+      image:
+        required: false
+        type: string
+        description: image for pods
+        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
+      install_sglang_from_source:
+        required: false
+        type: string
+        default: true
+        description: use sglang from source code or from image
 
 concurrency:
   group: ascend-nightly-performance-singlenode-${{ github.workflow_ref }}-${{ github.ref }}--${{ inputs.test_config_name }}
@@ -79,7 +84,14 @@ jobs:
           sysctl -w kernel.sched_migration_cost_ns=50000
 
           # export SGLANG_SET_CPU_AFFINITY=1
-          export PYTHONPATH=${current_path}/python:$PYTHONPATH
+
+          install_sglang_from_source=${{ inputs.install_sglang_from_source }}
+          if [ "${install_sglang_from_source}" = "true" ];then
+            echo "Install sglang from source"
+            export PYTHONPATH=${current_path}/python:$PYTHONPATH
+          fi
+
+          # Set environment of cann
           . /usr/local/Ascend/cann/set_env.sh || true
           . /usr/local/Ascend/nnal/atb/set_env.sh || true
 

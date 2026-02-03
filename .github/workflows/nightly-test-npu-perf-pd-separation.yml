@@ -11,11 +11,6 @@ on:
         required: false
         type: string
         default: linux-amd64-cpu-0
-      image:
-        required: false
-        type: string
-        description: image for pods
-        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
       test_config_name:
         required: true
         type: string
@@ -36,6 +31,16 @@ on:
         required: true
         type: string
         description: path of test case file
+      image:
+        required: false
+        type: string
+        description: image for pods
+        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
+      install_sglang_from_source:
+        required: false
+        type: string
+        default: true
+        description: use sglang from source code or from image
 
 concurrency:
   group: ascend-nightly-pd-separation-${{ github.ref }}-${{ inputs.soc_version }}
@@ -95,17 +100,19 @@ jobs:
           prefill_size="${{ inputs.prefill_size }}"
           decode_size="${{ inputs.decode_size }}"
           router_size="${{ inputs.router_size }}"
-          echo "{ \"image\": $image,                                        \
-                  \"name_space\": \"$NAMESPACE\",                           \
-                  \"kube_job_name\": \"$KUBE_JOB_NAME\",                    \
-                  \"kube_config\": \"$KUBECONFIG\",                         \
-                  \"kube_config_map\": \"$KUBE_CONFIG_MAP\",                \
-                  \"prefill_size\": $prefill_size,                          \
-                  \"decode_size\": $decode_size,                            \
-                  \"router_size\": $router_size,                            \
-                  \"sglang_source_path\": \"$sglang_source_path\",          \
-                  \"metrics_data_file\": \"$metrics_data_file\",            \
-                  \"test_case\": \"$test_case\" }"                         |\
+          install_sglang_from_source="${{ inputs.install_sglang_from_source }}"
+          echo "{ \"image\": $image,                                                  \
+                  \"name_space\": \"$NAMESPACE\",                                     \
+                  \"kube_job_name\": \"$KUBE_JOB_NAME\",                              \
+                  \"kube_config\": \"$KUBECONFIG\",                                   \
+                  \"kube_config_map\": \"$KUBE_CONFIG_MAP\",                          \
+                  \"prefill_size\": $prefill_size,                                    \
+                  \"decode_size\": $decode_size,                                      \
+                  \"router_size\": $router_size,                                      \
+                  \"sglang_source_path\": \"$sglang_source_path\",                    \
+                  \"metrics_data_file\": \"$metrics_data_file\",                      \
+                  \"test_case\": \"$test_case\",                                      \
+                  \"install_sglang_from_source\": \"$install_sglang_from_source\" }" |\
               jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml
           echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_pd_separation.yaml"
 

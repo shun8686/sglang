@@ -9,11 +9,11 @@ echo "NPU info:"
 npu-smi info
 
 # set dns
-cp /etc/resolv.conf /etc/resolv.conf_bak
-echo -e "nameserver 223.5.5.5\nnameserver 223.6.6.6" > /etc/resolv.conf
-cat /etc/resolv.conf_bak >> /etc/resolv.conf
-echo "DNS info:"
-cat /etc/resolv.conf
+#cp /etc/resolv.conf /etc/resolv.conf_bak
+#echo -e "nameserver 223.5.5.5\nnameserver 223.6.6.6" > /etc/resolv.conf
+#cat /etc/resolv.conf_bak >> /etc/resolv.conf
+#echo "DNS info:"
+#cat /etc/resolv.conf
 
 # speed up by using infra cache services
 #CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
@@ -44,7 +44,13 @@ unset HTTPS_PROXY
 unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
-export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
+# use sglang from source or from image
+if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "true" ];then
+    echo "Use sglang from source: ${SGLANG_SOURCE_PATH}/python"
+    export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
+fi
+
+# set environment of cann
 . /usr/local/Ascend/cann/set_env.sh
 . /usr/local/Ascend/nnal/atb/set_env.sh
 

@@ -1,9 +1,8 @@
 name: 'ascend test / nightly-test-npu-perf-a3'
 
 on:
-  schedule:
-      # Run test at 24:00 Beijing time (UTC+8)
-      - cron: "0 0 * * *"
+#  schedule:
+#    - cron: "0 0 * * *"
   pull_request:
     branches:
       - 'main'
@@ -78,12 +77,13 @@ jobs:
     with:
       soc_version: a3
       runner: linux-aarch64-a3-0
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.3.rc1-a3'
       test_config_name: ${{ matrix.test_config.name }}
       prefill_size: ${{ matrix.test_config.prefill_size }}
       decode_size: ${{ matrix.test_config.decode_size }}
       router_size: ${{ matrix.test_config.router_size }}
       test_case: ${{ matrix.test_config.test_case }}
+      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
+      install_sglang_from_source: true
 
   nightly-performance-multi-node-tests:
     name: multi-node
@@ -104,10 +104,11 @@ jobs:
     with:
       soc_version: a3
       runner: linux-aarch64-a3-0
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.3.rc1-a3'
       test_config_name: ${{ matrix.test_config.name }}
       node_size: ${{ matrix.test_config.node_size }}
       test_case: ${{ matrix.test_config.test_case }}
+      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
+      install_sglang_from_source: true
 
   nightly-performance-single-node-tests:
     name: single-node
@@ -163,6 +164,7 @@ jobs:
     uses: nightly-test-npu-perf-single-node.yml
     with:
       runner: ${{ matrix.test_config.runner }}
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
       test_config_name: ${{ matrix.test_config.name }}
       test_case: ${{ matrix.test_config.test_case }}
+      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
+      install_sglang_from_source: true
