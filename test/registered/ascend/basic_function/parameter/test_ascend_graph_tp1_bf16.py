@@ -23,7 +23,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
     Testcase：Verify the correctness and performance when kernels for attention layers are chosen
 
     [Test Category] Parameter
-    [Test Target] --attention-backend ascend
+    [Test Target] --attention-backend
     """
 
     TEST_MODEL_MATRIX = {
@@ -68,7 +68,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
                 try:
                     args = SimpleNamespace(
-                        num_shots=5,
+                        num_shots=8,
                         data_path=None,
                         num_questions=1319,
                         max_new_tokens=512,

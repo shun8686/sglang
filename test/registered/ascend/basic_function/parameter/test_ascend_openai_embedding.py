@@ -22,7 +22,7 @@ class TestOpenAIEmbedding(CustomTestCase):
     when client.embeddings.create API of openai is called for different inputs
 
     [Test Category] Parameter
-    [Test Target] --scheduler-recv-interval 10
+    [Test Target] --is-embedding
     """
 
     @classmethod

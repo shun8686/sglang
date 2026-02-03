@@ -10,7 +10,7 @@ class TestAscendTp1Bf16(TestAscendGraphTp1Bf16):
     Testcase：Verify the correctness and performance when kernels for attention layers are chosen and cuda graph mode is disabled
 
     [Test Category] Parameter
-    [Test Target] --attention-backend ascend (set in TestAscendGraphTp1Bf16), --disable-cuda-graph
+    [Test Target] --disable-cuda-graph
     """
 
     extra_args = [

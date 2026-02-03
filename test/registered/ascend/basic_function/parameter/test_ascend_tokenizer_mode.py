@@ -17,10 +17,10 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestEnableTokenizerModeSlow(CustomTestCase):
     """
-    Testcase：Verify that the inference is successful when tokenizer is modified and the tokenizer mode is set
+    Testcase：Verify that the inference is successful when tokenizer path is modified and the tokenizer mode is set
 
     [Test Category] Parameter
-    [Test Target] --tokenizer-path, --tokenizer-mode
+    [Test Target] --tokenizer-path, --tokenizer-mode, --tokenizer-worker-num
     """
 
     tokenizer_mode = "slow"
@@ -29,6 +29,7 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
     def setUpClass(cls):
         cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.tokenizer_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
+        cls.tokenizer_worker_num = 4
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--tokenizer-mode",
@@ -39,7 +40,7 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
             "--tokenizer-path",
             cls.tokenizer_path,
             "--tokenizer-worker-num",
-            4,
+            cls.tokenizer_worker_num,
         ]
         cls.process = popen_launch_server(
             cls.model_path,
@@ -53,9 +54,6 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tokenzier_mode(self):
-        response = requests.get(f"{self.base_url}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -71,9 +69,9 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
 
         response = requests.get(self.base_url + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-        print(response.json())
         self.assertEqual(response.json()["tokenizer_path"], self.tokenizer_path)
         self.assertEqual(response.json()["tokenizer_mode"], self.tokenizer_mode)
+        self.assertEqual(response.json()["tokenizer_worker_num"], self.tokenizer_worker_num)
 
 
 class TestEnableTokenizerModeAuto(TestEnableTokenizerModeSlow):
