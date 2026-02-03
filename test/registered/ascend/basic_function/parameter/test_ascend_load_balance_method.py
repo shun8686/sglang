@@ -32,7 +32,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_R1_W8A8_WEIGHTS_PATH
+        cls.model_path = DEEPSEEK_R1_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
@@ -69,7 +69,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     def test_mgsm_en(self):
         args = SimpleNamespace(
             base_url=self.base_url,
-            model=self.model,
+            model=self.model_path,
             eval_name="mgsm_en",
             num_examples=10,
             num_threads=1024,
