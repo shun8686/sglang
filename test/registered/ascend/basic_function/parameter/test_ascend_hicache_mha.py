@@ -11,7 +11,7 @@ class TestAscendHicacheMha(TestAscendGraphTp1Bf16):
     Testcase：Verify the correctness and performance of the hierarchical cache in multi-head attention operator
 
     [Test Category] Parameter
-    [Test Target] --enable-hierarchical-cache, --hicache-ratio 1.2
+    [Test Target] --enable-hierarchical-cache, --hicache-ratio
     """
 
     extra_args = [

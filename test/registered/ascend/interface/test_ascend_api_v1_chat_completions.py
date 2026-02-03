@@ -1,5 +1,4 @@
 import json
-
 import requests
 import unittest
 from sglang.srt.utils import kill_process_tree
@@ -16,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestChatCompletionsInterface(CustomTestCase):
-    """Testcase:The test is to verify whether the functions of each parameter of the v1/chat/completions interface are normal.
+    """Testcase: The test is to verify whether the functions of each parameter of the v1/chat/completions interface are normal.
 
     [Test Category] Interface
     [Test Target] v1/chat/completions
@@ -52,6 +51,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_and_messages(self):
+        # Test model and messages parameter; configured model returns correct name, unconfigured defaults to "default", reasoning works
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -78,6 +78,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
     def test_max_completion_tokens(self):
+        # Test max_completion_tokens parameter; setting to 1 token forces immediate truncation, verify finish_reason is "length"
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -90,6 +91,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertEqual(response.json()["choices"][0]["finish_reason"], "length")
 
     def test_stream(self):
+        # Test stream parameter; verify streaming response contains both reasoning_content and normal content chunks
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -127,6 +129,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         )
 
     def test_temperature(self):
+        # Test temperature parameter; temperature=0 yields identical outputs across requests, temperature=2 yields varied outputs
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -178,6 +181,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertNotEqual(content3, content4)
 
     def test_return_hidden_states(self):
+        # Test return_hidden_states parameter; verify hidden_states field appears when enabled and is absent when disabled
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -202,6 +206,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertNotIn("hidden_states", response.json()["choices"][0])
 
     def test_top_k(self):
+        # Test top_k parameter; with k=20, outputs vary between identical requests due to token sampling
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -228,6 +233,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertNotEqual(content1, content2)
 
     def test_stop_token_ids(self):
+        # Test stop_token_ids parameter; verify response stops at specified token ID (13) and matched_stop field is correct
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -241,6 +247,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertEqual(response.json()['choices'][0]['matched_stop'], 13)
 
     def test_rid(self):
+        # Test rid parameter; verify response ID matches the requested rid value 'sssss'
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={

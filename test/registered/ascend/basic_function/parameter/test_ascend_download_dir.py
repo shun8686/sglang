@@ -1,6 +1,8 @@
 import subprocess
 import unittest
 import requests
+import os
+import glob
 from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -26,20 +28,25 @@ def run_command(cmd, shell=True):
 
 
 class TestDownloadDir(CustomTestCase):
-    """Testcase：Verify set --download-dir, the inference request is successfully processed.
+    """Testcase：Verify set --download-dir parameter, the parameter take effect and the inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --download-dir
        """
     model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+    download_dir = "./weight"
 
     @classmethod
     def setUpClass(cls):
-        run_command("mkdir ./weight")
+        run_command(f"mkdir -p {cls.download_dir}")
+        if not os.path.exists(cls.download_dir):
+            raise FileNotFoundError(f"--download-dir {cls.download_dir} not exist")
+        if not os.path.isdir(cls.download_dir):
+            raise NotADirectoryError(f"--download-dir {cls.download_dir} not a directory")
         other_args = (
             [
                 "--download-dir",
-                "./weight",
+                cls.download_dir,
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -56,6 +63,7 @@ class TestDownloadDir(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        run_command(f"rm -rf {cls.download_dir}")
 
     def test_download_dir(self):
         response = requests.post(
@@ -67,9 +75,21 @@ class TestDownloadDir(CustomTestCase):
                     "max_new_tokens": 32,
                 },
             },
+            timeout=30
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
+        # check model weight
+        weight_suffixes = ("*.safetensors", "*.bin", "*.pth")
+        weight_files = []
+        for suffix in weight_suffixes:
+            weight_files.extend(glob.glob(os.path.join(self.download_dir, "**", suffix), recursive=True))
+        self.assertGreater(
+            len(weight_files),
+            0,
+            msg=f"--download-dir {self.download_dir} No model weight"
+        )
 
 
 if __name__ == "__main__":

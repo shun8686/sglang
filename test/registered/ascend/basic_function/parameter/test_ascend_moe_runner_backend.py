@@ -25,7 +25,7 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
 
     @classmethod
     def get_server_args(cls):
-        """Return the arguments for the server launch. Override in subclasses."""
+        #Return the arguments for the server launch. Override in subclasses.
         other_args = (
             [
                 "--attention-backend",
@@ -87,7 +87,7 @@ class TestMoreRunnerBackendTritonDefault(TestMoreRunnerBackendTriton):
 
     @classmethod
     def get_server_args(cls):
-        """Return the arguments for the server launch. Override in subclasses."""
+        #Return the arguments for the server launch. Override in subclasses.
         other_args = (
             [
                 "--attention-backend",
