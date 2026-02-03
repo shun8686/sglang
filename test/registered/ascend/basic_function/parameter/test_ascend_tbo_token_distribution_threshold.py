@@ -75,7 +75,7 @@ def calculate_latency_stats(request_results):
     }
 
 
-class TestTboTokenDistributionThresholdBase08(CustomTestCase):
+class TestTboTokenDistributionThresholdBase8(CustomTestCase):
     """Testcase: Verify the baseline performance of --tbo-token-distribution-threshold with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
 
     [Test Category] Parameter
@@ -156,7 +156,7 @@ class TestTboTokenDistributionThresholdBase08(CustomTestCase):
         print(f"  Avg Elapsed Time: {stats['avg_elapsed']}s")
 
 
-class TestTboTokenDistributionThresholdBase0(TestTboTokenDistributionThresholdBase08):
+class TestTboTokenDistributionThresholdBase0(TestTboTokenDistributionThresholdBase8):
     """Testcase: Verify the baseline performance of --tbo-token-distribution-threshold with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
 
     [Test Category] Parameter
