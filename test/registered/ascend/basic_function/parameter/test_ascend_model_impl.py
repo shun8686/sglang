@@ -66,7 +66,7 @@ class TestModeImpl(CustomTestCase):
 
     def test_gsm8k(self):
         args = SimpleNamespace(
-            num_shots=6,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
