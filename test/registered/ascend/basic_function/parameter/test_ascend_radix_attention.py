@@ -8,25 +8,23 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     kill_process_tree,
     popen_launch_server,
 )
+
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 MODEL_PATH = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
 
 # RadixAttention server integration tests
 class TestRadixCacheFCFS(CustomTestCase):
     """
-    Testcase：Verify the correctness and performance of the Radix Attention mechanism in the SGLang inference service
+    Testcase：Verify the scheduling policy works correctly which is set by --schedule-policy parameter.
 
     [Test Category] Parameter
-    [Test Target] --chunked-prefill-size 128 (radix attention is enabled when chunk prefill is set),
-    --max-total-tokens 20000 (cache opimization enabled by default in large context scenarios),
-    --schedule-policy fcfs/lpm, --disable-overlap-schedule
+    [Test Target] --schedule-policy
     """
-
-    schedule_policy = "fcfs"
+    extra_args = ["--schedule-policy", "fcfs", ]
 
     @classmethod
     def setUpClass(cls):
@@ -42,7 +40,7 @@ class TestRadixCacheFCFS(CustomTestCase):
                 "--max-total-tokens",
                 "20000",
                 "--schedule-policy",
-                cls.schedule_policy,
+                *cls.extra_args,
             ],
         )
 
@@ -54,46 +52,15 @@ class TestRadixCacheFCFS(CustomTestCase):
         run_radix_attention_test(self.base_url)
 
 
-@unittest.skipIf(is_in_ci(), "To reduce the CI execution time.")
 class TestRadixCacheLPM(TestRadixCacheFCFS):
-    @classmethod
-    def setUpClass(cls):
-        cls.model = DEFAULT_SMALL_MODEL_NAME_FOR_TEST
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--chunked-prefill-size",
-                "128",
-                "--max-total-tokens",
-                "20000",
-                "--schedule-policy",
-                "lpm",
-            ],
-        )
+    extra_args = ["--schedule-policy", "lpm", ]
 
 
 class TestRadixCacheNonOverlapLPM(TestRadixCacheFCFS):
-    @classmethod
-    def setUpClass(cls):
-        cls.model = MODEL_PATH
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--disable-overlap-schedule",
-                "--chunked-prefill-size",
-                "128",
-                "--max-total-tokens",
-                "20000",
-                "--schedule-policy",
-                "lpm",
-            ],
-        )
+    extra_args = [
+        "--schedule-policy", "lpm",
+        "--disable-overlap-schedule",
+    ]
 
 
 if __name__ == "__main__":
