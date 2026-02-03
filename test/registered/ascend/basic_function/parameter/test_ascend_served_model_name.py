@@ -66,7 +66,7 @@ class TestEnableTokenizerMode(CustomTestCase):
         self.assertIn("Paris", response.text)
         response = requests.get(self.base_url + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["served_model_name"], served_model_name)
+        self.assertEqual(response.json()["served_model_name"], self.served_model_name)
 
 
 if __name__ == "__main__":
