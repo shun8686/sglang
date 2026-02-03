@@ -49,7 +49,7 @@ class TestDeepEpDeepseekV32(CustomTestCase):
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
-                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "128",
                 "HCCL_BUFFSIZE": "2048",
                 "HCCL_OP_EXPANSION_MODE": "AIV",
                 "TASK_QUEUE_ENABLE": "0",
