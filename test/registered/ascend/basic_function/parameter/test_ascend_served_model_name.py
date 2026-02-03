@@ -28,7 +28,7 @@ class TestEnableTokenizerMode(CustomTestCase):
     def setUpClass(cls):
         cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
-        served_model_name = "Llama3.2"
+        cls.served_model_name = "Llama3.2"
         other_args = [
             "--served-model-name",
             served_model_name,
