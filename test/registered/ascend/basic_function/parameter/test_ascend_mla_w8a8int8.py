@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=500, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
@@ -81,7 +81,6 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
                     )
                     self.fail("##=== Service should have crashed due to OOM===##")
                 except Exception as e:
-                    print("##=== Service have correctly crashed due to OOM===##")
                     exception_message = str(e)
                 finally:
                     self.assertEqual(exception_message, excepted_message)
