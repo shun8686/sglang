@@ -19,6 +19,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 CONFIG = {
     "REQUEST_COUNT": 50,
+    "TARGET_TOKEN_COUNT": 2500,
     "TIMEOUT": 600,
     "MAX_NEW_TOKENS": 32
 }
