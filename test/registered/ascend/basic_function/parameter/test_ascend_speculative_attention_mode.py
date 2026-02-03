@@ -1,11 +1,7 @@
-import json
 import os
-import time
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
-
-import requests
 
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_EAGLE3_WEIGHTS_PATH, QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
@@ -17,16 +13,16 @@ from sglang.test.test_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
-class TestNumReservedDecodeTokens(TestDisaggregationBase):
+class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
     """Testcase: Verify that in the PD disaggregation + MTP scenario, the model inference accuracy remains
     uncompromised when the Prefill service is launched with the parameter --speculative-attention-mode decode
     and the Decode service is configured with --speculative-attention-mode prefill.
 
     [Test Category] Parameter
-    [Test Target] --num-reserved-decode-tokens; --disaggregation-decode-polling-interval
+    [Test Target] --speculative-attention-mode
     """
 
     @classmethod
@@ -37,7 +33,6 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
-        env = os.environ.copy()
 
         # Non blocking start servers
         cls.start_prefill()

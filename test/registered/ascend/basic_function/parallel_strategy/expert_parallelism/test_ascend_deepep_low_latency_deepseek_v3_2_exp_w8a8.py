@@ -77,7 +77,7 @@ class TestDeepEpDeepseekV32(CustomTestCase):
     def test_gsm8k(self):
         expect_accuracy = 0.565
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             timeout=60000,
             num_questions=200,
