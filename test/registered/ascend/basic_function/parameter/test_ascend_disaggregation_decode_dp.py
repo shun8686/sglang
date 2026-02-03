@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 
 os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
-register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestDisaggregationDecodeDp(TestDisaggregationBase):
