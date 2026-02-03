@@ -88,7 +88,7 @@ class TestDownloadDir(CustomTestCase):
         self.assertGreater(
             len(weight_files),
             0,
-            msg=f"--download-dir{self.download_dir}No model weight"
+            msg=f"--download-dir {self.download_dir} No model weight"
         )
 
 
