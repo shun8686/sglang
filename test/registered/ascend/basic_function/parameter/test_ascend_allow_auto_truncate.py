@@ -13,7 +13,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestAllowAutoTruncateBase(CustomTestCase):
+class TestAllowAutoTruncate(CustomTestCase):
     """Testcase：Verify set --allow-auto-truncate parameter, request exceeding the service's context-length setting is sent without excessive length error
     and inference request is successful.
 
@@ -22,15 +22,16 @@ class TestAllowAutoTruncateBase(CustomTestCase):
         """
     process = None
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+    allow_auto_truncate = True
 
     @classmethod
-    def _launch_server(cls, allow_auto_truncate: bool):
+    def _launch_server(cls):
         other_args = [
             "--attention-backend", "ascend",
             "--disable-cuda-graph",
-            "--context-length", "1000"
+            "--context-length", "1000",
         ]
-        if allow_auto_truncate:
+        if cls.allow_auto_truncate:
             other_args.append("--allow-auto-truncate")
         cls.process = popen_launch_server(
             cls.model,
@@ -40,7 +41,11 @@ class TestAllowAutoTruncateBase(CustomTestCase):
         )
 
     @classmethod
-    def _shutdown_server(cls):
+    def setUpClass(cls):
+        cls._launch_server()
+
+    @classmethod
+    def tearDownClass(cls):
         if cls.process:
             kill_process_tree(cls.process.pid)
             cls.process = None
@@ -65,52 +70,26 @@ class TestAllowAutoTruncateBase(CustomTestCase):
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertEqual(response.json()["allow_auto_truncate"], expected)
 
-
-class TestAllowAutoTruncate(TestAllowAutoTruncateBase):
-    """
-    Test case for allow-auto-truncate=True
-    Verify over-length request is success when auto truncate is enabled
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        cls._launch_server(allow_auto_truncate=True)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._shutdown_server()
-
     def test_allow_auto_truncate(self):
+
         response = self._send_long_text_request()
         print(response.text)
 
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertNotIn("is longer than the model's context length", response.text)
         self._check_server_info_allow_truncate(expected=True)
 
 
-class TestNoAllowAutoTruncate(TestAllowAutoTruncateBase):
+class TestNoAllowAutoTruncate(TestAllowAutoTruncate):
     """
-    Test case for allow-auto-truncate=False
-    Verify over-length request is rejected when auto truncate is disabled
+    Verify --allow-auto-truncate = False over-length request is rejected
     """
+    allow_auto_truncate = False
 
-    @classmethod
-    def setUpClass(cls):
-        cls._launch_server(allow_auto_truncate=False)
-
-    @classmethod
-    def tearDownClass(cls):
-        cls._shutdown_server()
-
-    def test_no_allow_auto_truncate(self):
+    def test_allow_auto_truncate(self):
         response = self._send_long_text_request()
         print(response.json())
-        self.assertNotEqual(
-            response.status_code, 200, "The request status code is 200."
-        )
+        self.assertNotEqual(response.status_code, 200, "The request status code is 200.")
         self.assertIn("is longer than the model's context length", str(response.json()))
         self._check_server_info_allow_truncate(expected=False)
 
