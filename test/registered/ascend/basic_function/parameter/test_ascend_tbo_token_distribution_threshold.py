@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 CONFIG = {
     "REQUEST_COUNT": 30,
@@ -203,7 +203,7 @@ class TestTboDisabled(CustomTestCase):
             tbo_08_avg, tbo_0_avg, 
             f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
         )
-        print("\n Assertion Passed: TBO 0 Average Latency > TBO 0.8 Average Latency")
+        print("\n Assertion Passed: TBO 0 Average Latency < TBO 0.8 Average Latency")
 
 
 if __name__ == "__main__":
