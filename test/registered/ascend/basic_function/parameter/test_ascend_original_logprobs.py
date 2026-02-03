@@ -17,13 +17,11 @@ import os
 import random
 import unittest
 
-import numpy as np
 import torch
 import torch.nn.functional as F
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sglang as sgl
-from sglang.test.test_utils import DEFAULT_SMALL_MODEL_NAME_FOR_TEST
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -58,6 +56,7 @@ class TestOriginalLogprob(unittest.TestCase):
     [Test Category] Parameter
     [Test Target] SGLANG_RETURN_ORIGINAL_LOGPROB
     """
+
     def setUp(self):
         # ----- HF side (float32 weights) -----
         self.tokenizer = AutoTokenizer.from_pretrained(MODEL_ID, padding_side="right")
@@ -148,7 +147,6 @@ class TestOriginalLogprob(unittest.TestCase):
                     attention_backend="ascend",
                     disable_cuda_graph=True,
                 )
-
 
                 for prompt in PROMPTS:
                     random_token_ids = sorted(

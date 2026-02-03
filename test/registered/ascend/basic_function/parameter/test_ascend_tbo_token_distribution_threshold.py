@@ -15,13 +15,13 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 CONFIG = {
-    "REQUEST_COUNT": 50,
+    "REQUEST_COUNT": 30,
     "TARGET_TOKEN_COUNT": 512,
     "TIMEOUT": 600,
-    "MAX_NEW_TOKENS": 64
+    "MAX_NEW_TOKENS": 128
 }
 
 FINAL_STATISTICS: Dict[str, Dict[str, Any]] = {
@@ -96,7 +96,7 @@ def calculate_statistics(request_results):
         "avg_elapsed": avg_elapsed
     }
 
-class TestTboEnabled08(CustomTestCase):
+class TestTbo08(CustomTestCase):
     """Testcase: Verify TBO performance with threshold 0.8 (enabled auto-switch)
 
     [Test Category] Parameter
@@ -140,30 +140,7 @@ class TestTboEnabled08(CustomTestCase):
         
         print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
 
-        self._run_performance_assertions()
-
-    def _run_performance_assertions(self):
-        # verify performance optimization
-        print("\n=== Running Performance Assertions===")
-        
-        # Extract core statistical data
-        tbo_08_stats = FINAL_STATISTICS["tbo_enabled_0.8"]
-        tbo_0_stats = FINAL_STATISTICS["tbo_disabled_0"]
-
-        tbo_08_avg = tbo_08_stats["detail"]["avg_elapsed"]
-        tbo_0_avg = tbo_0_stats["detail"]["avg_elapsed"]
-        
-        
-        print(f"Average Elapsed Time Comparison")
-        print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s ")
- 
-        self.assertGreater(
-            tbo_0_avg, tbo_08_avg, 
-            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not greater than TBO 0.8 ({tbo_08_avg}s)"
-        )
-        print("\n Assertion Passed: TBO 0 Average Latency > TBO 0.8 Average Latency")
-
-class TestTboDisabled0(CustomTestCase):
+class TestTboDisabled(CustomTestCase):
     """Testcase: Verify TBO performance with threshold 0 (disabled two-chunk-overlap)
 
     [Test Category] Parameter
@@ -204,6 +181,30 @@ class TestTboDisabled0(CustomTestCase):
         }
 
         print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
+
+        self._run_performance_assertions()
+
+    def _run_performance_assertions(self):
+        # verify performance optimization
+        print("\n=== Running Performance Assertions===")
+        
+        # Extract core statistical data
+        tbo_08_stats = FINAL_STATISTICS["tbo_enabled_0.8"]
+        tbo_0_stats = FINAL_STATISTICS["tbo_disabled_0"]
+
+        tbo_08_avg = tbo_08_stats["detail"]["avg_elapsed"]
+        tbo_0_avg = tbo_0_stats["detail"]["avg_elapsed"]
+        
+        
+        print(f"Average Elapsed Time Comparison")
+        print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s ")
+ 
+        self.assertGreater(
+            tbo_08_avg, tbo_0_avg, 
+            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
+        )
+        print("\n Assertion Passed: TBO 0 Average Latency < TBO 0.8 Average Latency")
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -41,7 +41,7 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
 
         if cls._disable_radix_cache:
             other_args.append("--disable-radix-cache")
-        
+
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
