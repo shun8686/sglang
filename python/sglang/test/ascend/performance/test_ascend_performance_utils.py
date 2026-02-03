@@ -105,7 +105,7 @@ def get_cann_version():
                     break
 
         if cann_ver_num:
-            cann_version_info = f"CANN\t{cann_ver_num}"
+            cann_version_info = f"CANN: {cann_ver_num}"
             print(cann_version_info)
             return cann_version_info
         else:
