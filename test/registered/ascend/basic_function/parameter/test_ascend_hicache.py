@@ -41,6 +41,8 @@ class TestHiCache(CustomTestCase):
                 "--enable-hierarchical-cache",
                 "--hicache-size",
                 100,
+                "--tp-size",
+                2,
             ],
         )
 
