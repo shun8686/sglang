@@ -52,6 +52,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_and_messages(self):
+        # Test model and messages parameter.
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -78,6 +79,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertIsNotNone(data["choices"][0]["message"]["reasoning_content"])
 
     def test_max_completion_tokens(self):
+        # Test max_completion_tokens parameter.
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -90,6 +92,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertEqual(response.json()["choices"][0]["finish_reason"], "length")
 
     def test_stream(self):
+        # Test test_stream parameter.
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -127,6 +130,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         )
 
     def test_temperature(self):
+        # Test temperature parameter.
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -178,6 +182,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertNotEqual(content3, content4)
 
     def test_return_hidden_states(self):
+        # Test return_hidden_states parameter.
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -202,6 +207,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertNotIn("hidden_states", response.json()["choices"][0])
 
     def test_top_k(self):
+        # Test top_k parameter.
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -228,6 +234,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertNotEqual(content1, content2)
 
     def test_stop_token_ids(self):
+        # Test stop_token_ids parameter.
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -241,6 +248,7 @@ class TestChatCompletionsInterface(CustomTestCase):
         self.assertEqual(response.json()['choices'][0]['matched_stop'], 13)
 
     def test_rid(self):
+        # Test rid parameter.
         response1 = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
