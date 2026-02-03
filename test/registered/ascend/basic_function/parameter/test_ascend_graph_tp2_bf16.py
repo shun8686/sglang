@@ -11,7 +11,7 @@ class TestAscendGraphTp2Bf16(TestAscendGraphTp1Bf16):
     Testcase：Verify the correctness and performance when kernels for attention layers are chosen and tp size is 2
 
     [Test Category] Parameter
-    [Test Target] --tp-size
+    [Test Target] --attention-backend, --tp-size
     """
 
     extra_args = [
