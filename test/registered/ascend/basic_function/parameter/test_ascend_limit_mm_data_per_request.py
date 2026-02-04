@@ -61,7 +61,7 @@ class TestVisionModel(CustomTestCase):
 
 
     def _run_multi_turn_request(self):
-        print(f"************base_url={self.base_url}")
+        # Input video and image respectively
         messages = [
                 {
                     "role": "user",
@@ -94,6 +94,7 @@ class TestVisionModel(CustomTestCase):
         assert response.status_code == 200
 
     def _run_multi_turn_request1(self):
+        # Input video and image
         messages1 = [
                 {
                     "role": "user",
@@ -119,6 +120,7 @@ class TestVisionModel(CustomTestCase):
         assert response1.status_code == 400
 
     def _run_multi_turn_request2(self):
+        # Enter two images
         messages2 = [
                 {
                     "role": "user",
