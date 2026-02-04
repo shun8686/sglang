@@ -29,10 +29,9 @@ class TestRevision(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
                 "--trust-remote-code",
-                "--revision",
             ]
         if cls.revision:
-            other_args.append(cls.revision)
+            other_args.extend(["--revision", cls.revision])
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
@@ -81,7 +80,7 @@ class TestNoRevision(TestRevision):
     """
     unset --revision parameter
     """
-    revision = False
+    revision = None
     def test_revision(self):
         response = self._send_request()
         self.assertEqual(
