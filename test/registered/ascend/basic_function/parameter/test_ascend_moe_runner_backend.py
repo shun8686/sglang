@@ -24,27 +24,18 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
     moe_runner_backend = "triton"
 
     @classmethod
-    def get_server_args(cls):
-        #Return the arguments for the server launch. Override in subclasses.
-        other_args = (
-            [
+    def setUpClass(cls):
+        cls.process = popen_launch_server(
+            cls.model,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=[
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
                 "--moe-runner-backend",
                 cls.moe_runner_backend,
             ]
-
-        )
-        return other_args
-
-    @classmethod
-    def setUpClass(cls):
-        cls.process = popen_launch_server(
-            cls.model,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.get_server_args(),
         )
 
     @classmethod
@@ -62,16 +53,13 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
                 },
             },
         )
-        print(response.text)
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
         )
-
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -87,14 +75,12 @@ class TestMoreRunnerBackendTritonDefault(TestMoreRunnerBackendTriton):
 
     @classmethod
     def get_server_args(cls):
-        #Return the arguments for the server launch. Override in subclasses.
         other_args = (
             [
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
             ]
-
         )
         return other_args
 
