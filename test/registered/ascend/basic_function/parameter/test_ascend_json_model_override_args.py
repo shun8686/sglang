@@ -64,6 +64,7 @@ class TestJsonModelOverrideArgs(CustomTestCase):
                 },
             },
         )
+
         self.assertEqual(response.status_code, 400)
         self.assertIn("longer than the model's context length 50 tokens", response.text)
 
