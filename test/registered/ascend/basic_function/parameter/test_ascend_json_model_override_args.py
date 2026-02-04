@@ -69,11 +69,7 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             response.status_code, 200, "The request status code is not 200."
         )
 
-        self.assertEqual(
-            response.json()["max_position_embeddings"],
-            "50",
-            "--json-model-override-args is not taking effect.",
-        )
+        self.assertIn("50 tokens", response.text)
         self.assertEqual(response.status_code, 400)
         self.assertIn("longer than the model's context length", response.text)
 
