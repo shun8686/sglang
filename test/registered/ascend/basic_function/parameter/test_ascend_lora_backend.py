@@ -1,4 +1,5 @@
 import unittest
+from abc import ABC
 
 import requests
 
@@ -16,7 +17,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestLoraBackendTriton(CustomTestCase):
+class TestLoraBackend(ABC):
     """Testcase: Test configuration of lora-backend parameters, and inference request successful.
 
     [Test Category] Parameter
@@ -71,17 +72,19 @@ class TestLoraBackendTriton(CustomTestCase):
         self.assertEqual(response.json()["lora_backend"], f"{self.lora}")
 
 
-class TestLoraBackendCsgmv(TestLoraBackendTriton):
+class TestLoraBackendCsgmv(TestLoraBackend, CustomTestCase):
     lora = "csgmv"
 
 
-class TestLoraBackendAscend(TestLoraBackendTriton):
+class TestLoraBackendAscend(TestLoraBackend, CustomTestCase):
     lora = "ascend"
 
 
-class TestLoraBackendTorchNative(TestLoraBackendTriton):
+class TestLoraBackendTorchNative(TestLoraBackend, CustomTestCase):
     lora = "torch_native"
 
+class TestLoraBackendTorchTriton(TestLoraBackend, CustomTestCase):
+    lora = "triton"
 
 if __name__ == "__main__":
     unittest.main()
