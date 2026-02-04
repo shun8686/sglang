@@ -3,7 +3,8 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import META_LLAMA_3_1_8B_INSTRUCT
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH, \
+    LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -25,16 +26,19 @@ class TestMaxLoadedLoras(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         other_args = [
-                "--max-loaded-loras",
-                1,
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
-            ]
+            "--enable-lora",
+            "--max-loaded-loras",
+            3,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            0.8,
+            "--lora-path",
+            f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH,}",
+        ]
         cls.process = popen_launch_server(
-            META_LLAMA_3_1_8B_INSTRUCT,
+            LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
@@ -65,7 +69,7 @@ class TestMaxLoadedLoras(CustomTestCase):
 
         self.assertEqual(
             response.json()["max_loaded_loras"],
-            1,
+            3,
         )
 
 
