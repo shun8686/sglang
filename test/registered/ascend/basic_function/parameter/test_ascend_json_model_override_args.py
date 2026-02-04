@@ -35,7 +35,7 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--json-model-override-args",
-            '{"max_position_embeddings": 100}',
+            '{"max_position_embeddings": 50}',
         ]
         cls.process = popen_launch_server(
             cls.model,
