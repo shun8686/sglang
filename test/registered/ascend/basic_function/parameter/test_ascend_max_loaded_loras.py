@@ -1,11 +1,8 @@
 import os
 import unittest
-from types import SimpleNamespace
-
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH, \
     LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -86,6 +83,7 @@ class TestMaxLoadedLorasError(TestMaxLoadedLoras):
     [Test Category] --lora-backend
     [Test Target] --max-loaded-loras
     """
+
     def test_max_loaded_loras_error(self):
         error_message = ("The number of LoRA paths should not exceed max_loaded_loras.")
         other_args = [
@@ -108,7 +106,7 @@ class TestMaxLoadedLorasError(TestMaxLoadedLoras):
         out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
         err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
         try:
-            process = popen_launch_server(
+            popen_launch_server(
                 LLAMA_3_2_1B_WEIGHTS_PATH,
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -124,8 +122,6 @@ class TestMaxLoadedLorasError(TestMaxLoadedLoras):
             self.assertIn(error_message, content)
             out_log_file.close()
             err_log_file.close()
-            os.remove("./cache_out_log.txt")
-            os.remove("./cache_err_log.txt")
 
 
 if __name__ == "__main__":
