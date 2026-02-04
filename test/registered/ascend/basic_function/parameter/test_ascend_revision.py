@@ -30,7 +30,7 @@ class TestRevision(CustomTestCase):
                 "--disable-cuda-graph",
                 "--trust-remote-code",
             ]
-        if cls.revision:
+        if cls.revision is not None:
             other_args.extend(["--revision", cls.revision])
         cls.process = popen_launch_server(
             cls.model,
