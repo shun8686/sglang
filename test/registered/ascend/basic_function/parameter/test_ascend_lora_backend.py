@@ -83,8 +83,10 @@ class TestLoraBackendAscend(TestLoraBackend, CustomTestCase):
 class TestLoraBackendTorchNative(TestLoraBackend, CustomTestCase):
     lora = "torch_native"
 
+
 class TestLoraBackendTorchTriton(TestLoraBackend, CustomTestCase):
     lora = "triton"
+
 
 if __name__ == "__main__":
     unittest.main()
