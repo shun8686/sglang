@@ -35,7 +35,7 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--json-model-override-args",
-            '{"max_position_embeddings": 50}',
+            '{"max_position_embeddings": 100}',
         ]
         cls.process = popen_launch_server(
             cls.model,
@@ -64,11 +64,6 @@ class TestJsonModelOverrideArgs(CustomTestCase):
                 },
             },
         )
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_model_info")
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-
         self.assertIn("50 tokens", response.text)
         self.assertEqual(response.status_code, 400)
         self.assertIn("longer than the model's context length", response.text)
