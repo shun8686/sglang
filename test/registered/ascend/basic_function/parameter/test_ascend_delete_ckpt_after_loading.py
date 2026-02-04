@@ -20,8 +20,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     """
-    Testcase：Verify the weight directory is deleted after loading (you need to back up the directory in advance)
-    and the accuracy does not decrease when --delete-ckpt-after-loading is set
+    Testcase：Verify the weight directory is deleted after loading and when --delete-ckpt-after-loading is set
 
     [Test Category] Parameter
     [Test Target] --delete-ckpt-after-loading
