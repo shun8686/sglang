@@ -71,7 +71,7 @@ class TestSkipServerWarmup(CustomTestCase):
         # warm up will send a GET /get_model_info request and a generate request to warm up server.
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
-        self.assertNotIn("GET /get_model_info HTTP/1.1", content)
+        self.assertNotIn("GET /model_info HTTP/1.1", content)
 
 
 if __name__ == "__main__":

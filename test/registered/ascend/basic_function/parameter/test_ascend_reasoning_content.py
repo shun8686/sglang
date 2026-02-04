@@ -1,7 +1,5 @@
 import unittest
-
 import openai
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
 from sglang.test.test_utils import (
@@ -10,12 +8,9 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
-
-MODEL_PATH = DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
 
 
 class TestReasoningContentAPI(CustomTestCase):
@@ -26,9 +21,10 @@ class TestReasoningContentAPI(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --reasoning-parser
     """
+
     @classmethod
     def setUpClass(cls):
-        cls.model = MODEL_PATH
+        cls.model = DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-1234"
         cls.process = popen_launch_server(
@@ -48,7 +44,6 @@ class TestReasoningContentAPI(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_streaming_separate_reasoning_false(self):
-        # Test streaming with separate_reasoning=False, reasoning_content should be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -76,7 +71,6 @@ class TestReasoningContentAPI(CustomTestCase):
         assert len(content) > 0
 
     def test_streaming_separate_reasoning_true(self):
-        # Test streaming with separate_reasoning=True, reasoning_content should not be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -104,7 +98,6 @@ class TestReasoningContentAPI(CustomTestCase):
         assert len(content) > 0
 
     def test_streaming_separate_reasoning_true_stream_reasoning_false(self):
-        # Test streaming with separate_reasoning=True, reasoning_content should not be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -141,7 +134,6 @@ class TestReasoningContentAPI(CustomTestCase):
         assert len(content) > 0
 
     def test_nonstreaming_separate_reasoning_false(self):
-        # Test non-streaming with separate_reasoning=False, reasoning_content should be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -163,7 +155,6 @@ class TestReasoningContentAPI(CustomTestCase):
         assert len(response.choices[0].message.content) > 0
 
     def test_nonstreaming_separate_reasoning_true(self):
-        # Test non-streaming with separate_reasoning=True, reasoning_content should not be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -185,7 +176,7 @@ class TestReasoningContentAPI(CustomTestCase):
 class TestReasoningContentWithoutParser(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = MODEL_PATH
+        cls.model = DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-1234"
         cls.process = popen_launch_server(
@@ -202,7 +193,6 @@ class TestReasoningContentWithoutParser(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_streaming_separate_reasoning_false(self):
-        # Test streaming with separate_reasoning=False, reasoning_content should be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -230,7 +220,6 @@ class TestReasoningContentWithoutParser(CustomTestCase):
         assert len(content) > 0
 
     def test_streaming_separate_reasoning_true(self):
-        # Test streaming with separate_reasoning=True, reasoning_content should not be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -258,7 +247,6 @@ class TestReasoningContentWithoutParser(CustomTestCase):
         assert len(content) > 0
 
     def test_streaming_separate_reasoning_true_stream_reasoning_false(self):
-        # Test streaming with separate_reasoning=True, reasoning_content should not be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -295,7 +283,6 @@ class TestReasoningContentWithoutParser(CustomTestCase):
         assert len(content) > 0
 
     def test_nonstreaming_separate_reasoning_false(self):
-        # Test non-streaming with separate_reasoning=False, reasoning_content should be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
@@ -317,7 +304,6 @@ class TestReasoningContentWithoutParser(CustomTestCase):
         assert len(response.choices[0].message.content) > 0
 
     def test_nonstreaming_separate_reasoning_true(self):
-        # Test non-streaming with separate_reasoning=True, reasoning_content should not be empty
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)
         payload = {
             "model": self.model,
