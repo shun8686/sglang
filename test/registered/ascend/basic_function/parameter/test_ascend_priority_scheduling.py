@@ -6,6 +6,7 @@ from typing import Any, List, Optional, Tuple
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -15,7 +16,6 @@ from sglang.test.test_utils import (
     popen_launch_server,
     send_concurrent_generate_requests_with_custom_params,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -31,7 +31,7 @@ class TestPriorityScheduling(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        other_args=(
+        other_args = (
             (
                 "--max-running-requests",  # Enforce max request concurrency is 1
                 "1",
@@ -245,7 +245,7 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        other_args=(
+        other_args = (
             (
                 "--max-running-requests",  # Enforce max request concurrency is 2
                 "2",
@@ -255,8 +255,8 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-             )
             )
+        )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
 
@@ -351,6 +351,7 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
         _verify_genereate_responses(
             responses, expected_status_and_error_messages, e2e_latencies
         )
+
 
 def _verify_genereate_responses(
     responses: Tuple[int, Any, float],

@@ -6,12 +6,12 @@ from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
@@ -35,6 +35,7 @@ class TestAscendDistTimeout(CustomTestCase):
     os.environ["SGLANG_ENABLE_OVERLAP_PLAN_SITEAM"] = "1"
     os.environ["SGLANG_ENABLE_SPEC_V2"] = "1"
     env = os.environ.copy()
+
     @classmethod
     def setUpClass(cls):
         cls.models = TEST_MODEL_MATRIX.keys()
@@ -73,22 +74,22 @@ class TestAscendDistTimeout(CustomTestCase):
             "ascend",
             "--speculative-moe-runner-backend",
             "auto",
-            ]
+        ]
 
     def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
                 print(f"##=== Testing accuracy: {model} ===##")
-                other_args =  self.common_args
+                other_args = self.common_args
                 process = popen_launch_server(
                     model,
                     self.base_url,
                     timeout=1500,
                     other_args=[
-                         *other_args,
-                     ],
+                        *other_args,
+                    ],
                     env=self.env,
-                  )
+                )
 
                 try:
                     args = SimpleNamespace(
@@ -104,8 +105,8 @@ class TestAscendDistTimeout(CustomTestCase):
                     metrics = run_eval_few_shot_gsm8k(args)
                     print(f"metrics['accuracy']=")
                     self.assertGreaterEqual(
-                    metrics["accuracy"],
-                    TEST_MODEL_MATRIX[model]["accuracy"],
+                        metrics["accuracy"],
+                        TEST_MODEL_MATRIX[model]["accuracy"],
                     )
                 finally:
                     kill_process_tree(process.pid)
