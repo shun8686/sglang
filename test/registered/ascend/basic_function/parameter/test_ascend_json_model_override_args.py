@@ -28,15 +28,15 @@ class TestJsonModelOverrideArgs(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         other_args = [
-                "--trust-remote-code",
-                "--mem-fraction-static",
-                "0.8",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--json-model-override-args",
-                '{"max_position_embeddings": 50}',
-            ]
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--json-model-override-args",
+            '{"max_position_embeddings": 50}',
+        ]
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -53,18 +53,17 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": "The ancient Romans made significant contributions to various fields, "
-                "including law, philosophy, science, and literature. They were known "
-                "for their engineering achievements, such as the construction of the Colosseum and the Pantheon. "
-                "Their art and architecture were also highly esteemed, with the Colosseum being a symbol of their power"
-                "and influence. In science, they made important contributions to astronomy and mathematics. "
-                "Literature was also a major part of their culture, ",
+                        "including law, philosophy, science, and literature. They were known "
+                        "for their engineering achievements, such as the construction of the Colosseum and the Pantheon. "
+                        "Their art and architecture were also highly esteemed, with the Colosseum being a symbol of "
+                        "their power and influence. In science, they made important contributions to astronomy "
+                        "and mathematics. Literature was also a major part of their culture, ",
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
             },
         )
-        self.assertEqual(response.status_code, 400)
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
@@ -74,6 +73,7 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             '{"max_position_embeddings": 50}',
             "--moe-runner-backend is not taking effect.",
         )
+        self.assertEqual(response.status_code, 400)
         self.assertIn("longer than the model's context length", response.text)
 
 
