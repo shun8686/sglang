@@ -1,4 +1,5 @@
 import unittest
+from abc import ABC
 
 import requests
 
@@ -16,36 +17,35 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestLoraBackend(CustomTestCase):
+class TestLoraBackend(ABC):
     """Testcase: Test configuration of lora-backend parameters, and inference request successful.
 
     [Test Category] Parameter
     [Test Target] --lora-backend
     """
 
-    lora_backend_list = ["triton", "csgmv", "ascend", "torch_native"]
+    lora = "triton"
 
     @classmethod
     def setUpClass(cls):
-        for cls.lora in cls.lora_backend_list:
-            other_args = [
-                "--enable-lora",
-                "--lora-backend",
-                f"{cls.lora}",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
-                "--lora-path",
-                f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
-            ]
-            cls.process = popen_launch_server(
-                LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-                DEFAULT_URL_FOR_TEST,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=other_args,
-            )
+        other_args = [
+            "--enable-lora",
+            "--lora-backend",
+            f"{cls.lora}",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            0.8,
+            "--lora-path",
+            f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
+        ]
+        cls.process = popen_launch_server(
+            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -71,6 +71,20 @@ class TestLoraBackend(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["lora_backend"], f"{self.lora}")
 
+
+class TestLoraBackendCsgmv(TestLoraBackend, CustomTestCase):
+    lora = "csgmv"
+
+
+class TestLoraBackendAscend(TestLoraBackend, CustomTestCase):
+    lora = "ascend"
+
+
+class TestLoraBackendTorchNative(TestLoraBackend, CustomTestCase):
+    lora = "torch_native"
+
+class TestLoraBackendTorchTriton(TestLoraBackend, CustomTestCase):
+    lora = "triton"
 
 if __name__ == "__main__":
     unittest.main()
