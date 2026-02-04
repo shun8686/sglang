@@ -74,7 +74,7 @@ class TestNoAllowAutoTruncate(TestAllowAutoTruncate):
 
     def test_allow_auto_truncate(self):
         response = self.send_long_text_request()
-        self.assertEqual(response.status_code, 400, "The request status code is 200.")
+        self.assertEqual(response.status_code, 400, "The request status code is not 400.")
         self.assertIn("is longer than the model's context length", str(response.json()))
 
 
