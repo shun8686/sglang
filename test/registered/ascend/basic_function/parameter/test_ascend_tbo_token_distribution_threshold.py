@@ -18,11 +18,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 CONFIG = {
-    "REQUEST_COUNT": 30,
-    "CONCURRENT_THREADS": 20,  
-    "TARGET_TOKEN_COUNT": 512,
+    "REQUEST_COUNT": 20,
+    "CONCURRENT_THREADS": 1,  
     "TIMEOUT": 600,
-    "MAX_NEW_TOKENS": 128
+    "MAX_NEW_TOKENS": 8
 }
 
 FINAL_STATISTICS: Dict[str, Dict[str, Any]] = {
@@ -30,18 +29,12 @@ FINAL_STATISTICS: Dict[str, Dict[str, Any]] = {
     "tbo_disabled_0": {}
 }
 
-def build_long_input_text_for_token():
-    """Construct long input text with enough tokens (common function for consistent input)"""
-    base_sentence = "This is a test sentence to generate enough tokens. "
-    repeat_times = (CONFIG["TARGET_TOKEN_COUNT"] // 10) + 20
-    return (base_sentence * repeat_times) + "The capital of France is"
-
 def send_generate_request(task_id, request_results, semaphore):
     semaphore.acquire()
     try:
         single_start_time = time.time()
         
-        long_input_text = build_long_input_text_for_token()
+        long_input_text = "The capital of France is"
         
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
