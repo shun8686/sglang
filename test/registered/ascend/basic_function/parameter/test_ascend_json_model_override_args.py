@@ -16,7 +16,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestJsonModelOverrideArgs(CustomTestCase):
-    """Testcase：Verify set --json-model-override-args = {"max_position_embeddings": 50}, send tokens more than 50 the inference request is fail.
+    """Testcase：Verify set --json-model-override-args = {"max_position_embeddings": 50},
+    send tokens more than 50 the inference request is fail.
 
        [Test Category] Parameter
        [Test Target] --json-model-override-args
@@ -64,6 +65,15 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 400)
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
+        self.assertEqual(
+            response.status_code, 200, "The request status code is not 200."
+        )
+        self.assertEqual(
+            response.json()["--json-model-override-args"],
+            '{"max_position_embeddings": 50}',
+            "--moe-runner-backend is not taking effect.",
+        )
         self.assertIn("longer than the model's context length", response.text)
 
 
