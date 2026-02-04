@@ -4,14 +4,15 @@ Unit tests for Jinja chat template utils.
 
 import unittest
 
+from sglang.test.test_utils import CustomTestCase
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.parser.jinja_template_utils import (
     detect_jinja_template_content_format,
     process_content_for_template_format,
 )
-from sglang.test.test_utils import CustomTestCase
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestTemplateContentFormatDetection(CustomTestCase):
     """Testcase: Test template content format detection functionality.

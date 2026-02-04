@@ -4,13 +4,13 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import META_LLAMA_3_1_8B_INSTRUCT
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -24,8 +24,7 @@ class TestLoraBackend(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        other_args = (
-            [
+        other_args = [
                 "--enable-lora",
                 "--lora-backend",
                 "triton",
@@ -35,11 +34,8 @@ class TestLoraBackend(CustomTestCase):
                 "--mem-fraction-static",
                 0.8,
             ]
-        )
         cls.process = popen_launch_server(
-            (
-                META_LLAMA_3_1_8B_INSTRUCT
-            ),
+            META_LLAMA_3_1_8B_INSTRUCT,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
