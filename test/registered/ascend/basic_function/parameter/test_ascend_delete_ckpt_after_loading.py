@@ -3,7 +3,6 @@ import shutil
 import requests
 import unittest
 from urllib.parse import urlparse
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
@@ -86,6 +85,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading is not taking effect.",
         )
 
+        # Verify the weight directory is deleted after loading
         self.assertFalse(os.path.exists(self.back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
 
 

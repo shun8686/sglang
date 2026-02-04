@@ -1,7 +1,5 @@
 import unittest
-
 import openai
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import GTE_QWEN2_1_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
@@ -10,7 +8,6 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=50, suite="nightly-1-npu-a3", nightly=True)
