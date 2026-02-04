@@ -20,7 +20,6 @@ class TestAllowAutoTruncate(CustomTestCase):
         [Test Category] Parameter
         [Test Target] --allow-auto-truncate
         """
-    process = None
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     allow_auto_truncate = True
 
