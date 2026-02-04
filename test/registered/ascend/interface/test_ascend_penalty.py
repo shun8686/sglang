@@ -88,8 +88,6 @@ class TestPenalty(CustomTestCase):
         self.run_decode({"presence_penalty": 2})
 
     def test_penalty_mixed(self):
-        # Send concurrent inference requests with various mixed combinations of the three specific mechanisms (frequency_penalty, presence_penalty, min_new_tokens) 
-        # to verify the correction of the /generate  under mixed combinations
         args = [
             {},
             {},
