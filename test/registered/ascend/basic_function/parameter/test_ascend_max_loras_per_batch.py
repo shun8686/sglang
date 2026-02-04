@@ -34,10 +34,7 @@ class TestLoraPaths(CustomTestCase):
                 "ascend",
                 "--disable-cuda-graph",
                 "--lora-path",
-                f"lora_1={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
-                f"lora_2={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
-                f"lora_3={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
-                f"lora_4={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
+                f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
             ]
         )
         cls.process = popen_launch_server(
