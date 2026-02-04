@@ -39,7 +39,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             0.8,
             "--attention-backend",
             "ascend",
-            "--delete-ckpt-after-loading"
+            "--delete-ckpt-after-loading",
         ]
 
         if not os.path.exists(cls.back_up_model_path):
@@ -87,7 +87,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading is not taking effect.",
         )
 
-        self.assertFasle(os.path.exists(self.back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
+        self.assertFalse(os.path.exists(self.back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
 
 
 if __name__ == "__main__":
