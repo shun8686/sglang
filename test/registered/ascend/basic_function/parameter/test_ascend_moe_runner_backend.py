@@ -14,7 +14,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMoreRunnerBackendTriton(CustomTestCase):
-    """Testcase：Verify set --moe-runner-backend = triton, the inference request is successfully processed.
+    """Testcase：Verify set --moe-runner-backend, the inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --moe-runner-backend
