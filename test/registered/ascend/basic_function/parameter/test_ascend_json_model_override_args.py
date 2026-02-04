@@ -64,10 +64,12 @@ class TestJsonModelOverrideArgs(CustomTestCase):
                 },
             },
         )
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_model_info")
+        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
+
         self.assertEqual(
             response.json()["max_position_embeddings"],
             "50",

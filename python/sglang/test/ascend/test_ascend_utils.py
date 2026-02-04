@@ -2,6 +2,7 @@
 
 import os
 import subprocess
+from typing import Optional, NamedTuple
 
 # Model weights storage directory
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
@@ -213,56 +214,48 @@ QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
 )
 
 
-def create_test_config(
-    path: str,
-    mmlu: float = None,
-    gsm8k: float = None,
-    mmmu: float = None
-) -> dict:
+class ModelTestConfig(NamedTuple):
     """
-    Create a configuration dictionary for model testing.
+    Configuration for model testing.
 
-    Args:
-        path: Path to the model weights directory
-        mmlu: Weight for MMLU (Massive Multitask Language Understanding) benchmark score
-        gsm8k: Weight for GSM8K (Grade School Math 8K) benchmark score
-        mmmu: Weight for MMMU (Multi-discipline Multi-modal Understanding) benchmark score
-
-    Returns:
-        Dictionary containing model path and benchmark test weights
+    Attributes:
+        model_path: Path to the model weights directory
+        mmlu_score: Weight for MMLU benchmark score
+        gsm8k_accuracy: Weight for GSM8K benchmark score
+        mmmu_accuracy: Weight for MMMU benchmark score
     """
-    return {
-        "path": path,
-        "mmlu": mmlu,
-        "gsm8k": gsm8k,
-        "mmmu": mmmu,
-    }
+    model_path: str
+    mmlu_score: Optional[float] = None
+    gsm8k_accuracy: Optional[float] = None
+    mmmu_accuracy: Optional[float] = None
 
 
-LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST = create_test_config(
-    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-    mmlu=0.2
+LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+    mmlu_score=0.2
 )
 
-QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_FOR_TEST = create_test_config(
-    QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
-    gsm8k=0.9
+QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
+    gsm8k_accuracy=0.9
 )
 
-QWEN3_32B_WEIGHTS_FOR_TEST = create_test_config(
-    QWEN3_32B_WEIGHTS_PATH,
-    gsm8k=0.82
+QWEN3_32B_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWEN3_32B_WEIGHTS_PATH,
+    gsm8k_accuracy=0.82
 )
 
-QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST = create_test_config(
-    QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
-    gsm8k=0.92
-)
-QWQ_32B_W8A8_WEIGHTS_FOR_TEST = create_test_config(
-    QWQ_32B_W8A8_WEIGHTS_PATH,
-    gsm8k=0.59
+QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
+    gsm8k_accuracy=0.92
 )
 
+QWQ_32B_W8A8_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWQ_32B_W8A8_WEIGHTS_PATH,
+    gsm8k_accuracy=0.59
+)
+
+# Default configuration for testing
 DEFAULT_WEIGHTS_FOR_TEST = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST
 
 
