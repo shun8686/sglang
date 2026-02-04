@@ -1,9 +1,9 @@
-import subprocess
 import unittest
 import requests
 import os
 import glob
-#from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+# from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import run_command
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -14,17 +14,6 @@ from sglang.test.test_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
-
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
 
 
 class TestDownloadDir(CustomTestCase):
@@ -40,12 +29,12 @@ class TestDownloadDir(CustomTestCase):
     def setUpClass(cls):
         run_command(f"mkdir -p {cls.download_dir}")
         other_args = [
-                "--download-dir",
-                cls.download_dir,
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
+            "--download-dir",
+            cls.download_dir,
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
