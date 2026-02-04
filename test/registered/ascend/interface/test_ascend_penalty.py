@@ -89,7 +89,7 @@ class TestPenalty(CustomTestCase):
 
     def test_penalty_mixed(self):
         # Send concurrent inference requests with various mixed combinations of the three specific mechanisms (frequency_penalty, presence_penalty, min_new_tokens) 
-        # to verify the stability of the /generate endpoint under mixed configuration loads
+        # to verify the correction of the /generate endpoint under mixed combinations
         args = [
             {},
             {},
