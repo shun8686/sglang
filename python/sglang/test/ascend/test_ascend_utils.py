@@ -211,7 +211,9 @@ def run_command(cmd, shell=True):
 
     parameter:
         cmd: command to execute
-        shell: Execute command in shell
+        shell:
+        True, Execute command in shell
+        False, Commands are invoked directly without shell parsing
     return:
         The result of executing the command
     """
