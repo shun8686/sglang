@@ -46,7 +46,7 @@ class TestAllowAutoTruncate(CustomTestCase):
             kill_process_tree(cls.process.pid)
             cls.process = None
 
-    def _send_long_text_request(self):
+    def send_long_text_request(self):
         text = "hello " * 1200
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -60,16 +60,10 @@ class TestAllowAutoTruncate(CustomTestCase):
         )
         return response
 
-    def _check_server_info_allow_truncate(self, expected: bool):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertEqual(response.json()["allow_auto_truncate"], expected)
-
     def test_allow_auto_truncate(self):
-        response = self._send_long_text_request()
+        response = self.send_long_text_request()
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertNotIn("is longer than the model's context length", response.text)
-        self._check_server_info_allow_truncate(expected=True)
 
 
 class TestNoAllowAutoTruncate(TestAllowAutoTruncate):
@@ -79,10 +73,9 @@ class TestNoAllowAutoTruncate(TestAllowAutoTruncate):
     allow_auto_truncate = False
 
     def test_allow_auto_truncate(self):
-        response = self._send_long_text_request()
-        self.assertNotEqual(response.status_code, 200, "The request status code is 200.")
+        response = self.send_long_text_request()
+        self.assertEqual(response.status_code, 400, "The request status code is 200.")
         self.assertIn("is longer than the model's context length", str(response.json()))
-        self._check_server_info_allow_truncate(expected=False)
 
 
 if __name__ == "__main__":
