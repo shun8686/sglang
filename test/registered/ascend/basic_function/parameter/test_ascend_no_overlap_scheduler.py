@@ -23,8 +23,8 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --disable-radix-cache;--disable-overlap
     """
-    _disable_radix_cache = False
-    _chunked_prefill_size = "128"
+    disable_radix_cache = False
+    chunked_prefill_size = "128"
 
     @classmethod
     def setUpClass(cls):
@@ -35,11 +35,11 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--chunked-prefill-size",
-            cls._chunked_prefill_size,
+            cls.chunked_prefill_size,
             "--disable-overlap",
         ]
 
-        if cls._disable_radix_cache:
+        if cls.disable_radix_cache:
             other_args.append("--disable-radix-cache")
 
         cls.process = popen_launch_server(
@@ -68,20 +68,20 @@ class BaseTestRadixCacheChunkedPrefill(CustomTestCase):
 
 class TestRadixCacheFalseChunkMinus1(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=False, chunked_prefill_size=-1
-    _disable_radix_cache = False
-    _chunked_prefill_size = "-1"
+    disable_radix_cache = False
+    chunked_prefill_size = "-1"
 
 
 class TestRadixCacheTrueChunk128(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=True, chunked_prefill_size=128
-    _disable_radix_cache = True
-    _chunked_prefill_size = "128"
+    disable_radix_cache = True
+    chunked_prefill_size = "128"
 
 
 class TestRadixCacheTrueChunkMinus1(BaseTestRadixCacheChunkedPrefill):
     # Test class for disable_radix_cache=True, chunked_prefill_size=-1
-    _disable_radix_cache = True
-    _chunked_prefill_size = "-1"
+    disable_radix_cache = True
+    chunked_prefill_size = "-1"
 
 
 if __name__ == "__main__":
