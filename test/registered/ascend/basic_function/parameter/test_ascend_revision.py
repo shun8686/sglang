@@ -16,24 +16,23 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 class TestRevision(CustomTestCase):
     """Testcase：Verify set --revision parameter, the inference request is successfully processed.
 
-           [Test Category] Parameter
-           [Test Target] --revision
-           """
+       [Test Category] Parameter
+       [Test Target] --revision
+       """
     revision = "33e62acdd07cd7d6635badd529aa0a3467bb9c6a"
     model = PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
-        other_args = (
-            [
+        other_args = [
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
                 "--trust-remote-code",
                 "--revision",
-                cls.revision,
             ]
-        )
+        if cls.revision:
+            other_args.append(cls.revision)
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
@@ -45,7 +44,7 @@ class TestRevision(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_revision(self):
+    def _send_request(self):
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -56,7 +55,11 @@ class TestRevision(CustomTestCase):
                 },
             },
         )
-        print(response.text)
+        return response
+
+
+    def test_revision(self):
+        response = self._send_request()
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -64,7 +67,6 @@ class TestRevision(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -75,41 +77,13 @@ class TestRevision(CustomTestCase):
         )
 
 
-class TestRevisionDefault(CustomTestCase):
-    @classmethod
-    def setUpClass(cls):
-        other_args = (
-            [
-                "--attention-backend",
-                "ascend",
-                "--weight-loader-disable-mmap",
-                "--disable-cuda-graph",
-                "--trust-remote-code",
-            ]
-        )
-        cls.process = popen_launch_server(
-            cls.model,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def test_revision_default(self):
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        print(response.text)
+class TestRevisionDefault(TestRevision):
+    """
+    unset --revision parameter
+    """
+    revision = False
+    def test_revision(self):
+        response = self._send_request()
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -117,7 +91,6 @@ class TestRevisionDefault(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
