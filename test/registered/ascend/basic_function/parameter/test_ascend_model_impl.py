@@ -57,11 +57,11 @@ class TestModeImpl(CustomTestCase):
             eval_name="mmlu",
             num_examples=64,
             num_threads=32,
+            num_shots=5,
         )
         from sglang.test.run_eval import run_eval
 
         metrics = run_eval(args)
-        print(f"{metrics=}")
         self.assertGreaterEqual(metrics["score"], self.mmlu_lower_bound)
 
     def test_gsm8k(self):
@@ -77,7 +77,6 @@ class TestModeImpl(CustomTestCase):
         from sglang.test.few_shot_gsm8k import run_eval
 
         metrics = run_eval(args)
-        print(f"{metrics=}")
         self.assertGreater(metrics["accuracy"], self.gsm8k_lower_bound)
 
 
