@@ -72,7 +72,7 @@ class TestRequestLengthValidation(CustomTestCase):
                 temperature=0,
             )
 
-        self.assertIn("is longer than the model's context length", str(cm.exception))
+        self.assertIn("max_completion_tokens is too large", str(cm.exception))
 
     def test_max_tokens_validation(self):
         # The request is rejected if the number of tokens to be generated (max_tokens) specified request exceeds the total token limit configured on the server.
