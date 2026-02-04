@@ -37,7 +37,7 @@ class TestAscendSamplingBackend(CustomTestCase):
                 "--sampling-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--disable-radix_cache"
+                "--disable-radix_cache",
                 "--mem-fraction-static",
                 0.85,
             ],
