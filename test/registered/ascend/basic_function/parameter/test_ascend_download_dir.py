@@ -2,7 +2,6 @@ import unittest
 import requests
 import os
 import glob
-# from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.test_ascend_utils import run_command
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -35,16 +34,8 @@ class TestDownloadDir(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
         ]
-        # cls.process = popen_launch_server(
-        #     cls.model,
-        #     DEFAULT_URL_FOR_TEST,
-        #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-        #     other_args=cls.other_args,
-        # )
-
     @classmethod
     def tearDownClass(cls):
-        # kill_process_tree(cls.process.pid)
         run_command(f"rm -rf {cls.download_dir}")
 
     def test_download_dir(self):
@@ -74,7 +65,6 @@ class TestDownloadDir(CustomTestCase):
                         "max_new_tokens": 32,
                     },
                 },
-                timeout=30
             )
             self.assertEqual(response.status_code, 200)
             self.assertIn("Paris", response.text)
