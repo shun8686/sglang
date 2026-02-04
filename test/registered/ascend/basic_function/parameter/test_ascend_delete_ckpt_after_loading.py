@@ -2,7 +2,6 @@ import os
 import shutil
 import requests
 import unittest
-from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
@@ -72,7 +71,6 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
                 },
             },
         )
-        print(response.text)
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -81,7 +79,6 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
         )
 
         response = requests.get(f"{self.base_url}/get_server_info")
-        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )

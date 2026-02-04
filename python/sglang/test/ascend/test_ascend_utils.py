@@ -154,8 +154,15 @@ QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 QWEN3_VL_235B_A22B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-235B-A22B-Instruct"
 )
+QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen2-0.5B-Instruct"
+)
 
 QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")
+
+DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+)
 
 # Embedding model weights path
 BGE_LARGE_EN_V1_5_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bge-large-en-v1.5")
@@ -198,12 +205,15 @@ QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
 
+
 def run_command(cmd, shell=True):
     """Execute system command and return stdout
 
     parameter:
         cmd: command to execute
-        shell: Execute command in shell
+        shell:
+        True, Execute command in shell
+        False, Commands are invoked directly without shell parsing
     return:
         The result of executing the command
     """
@@ -255,4 +265,3 @@ def get_device_ids(index=None):
             return None
 
     return device_ids
-
