@@ -97,7 +97,6 @@ class TestL2Cache(CustomTestCase):
                     },
                 },
             )
-            print(f"#####{text=}")
             self.assertEqual(response.status_code, 200)
             # cached_tokens: Number of tokens cached in KV Cache
             self.assertTrue(int(response.json()["meta_info"]["cached_tokens"]) == 0)
