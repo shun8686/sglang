@@ -19,6 +19,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 CONFIG = {
     "REQUEST_COUNT": 30,
+    "CONCURRENT_THREADS": 20,  
     "TARGET_TOKEN_COUNT": 512,
     "TIMEOUT": 600,
     "MAX_NEW_TOKENS": 128
@@ -35,34 +36,36 @@ def build_long_input_text_for_token():
     repeat_times = (CONFIG["TARGET_TOKEN_COUNT"] // 10) + 20
     return (base_sentence * repeat_times) + "The capital of France is"
 
-def send_generate_request(task_id, request_results):
-    single_start_time = time.time()
-    
-    request_text = "The capital of France is"
-
-    long_input_text = build_long_input_text_for_token()
-    
-    response = requests.post(
-        f"{DEFAULT_URL_FOR_TEST}/generate",
-        json={
-            "text": long_input_text,
-            "sampling_params": {
-                "temperature": 0,
-                "max_new_tokens": 32,
+def send_generate_request(task_id, request_results, semaphore):
+    semaphore.acquire()
+    try:
+        single_start_time = time.time()
+        
+        long_input_text = build_long_input_text_for_token()
+        
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": long_input_text,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
             },
-        },
-        timeout=CONFIG["TIMEOUT"]
-    )
-    
-    single_elapsed_time = round(time.time() - single_start_time, 4)
+            timeout=CONFIG["TIMEOUT"]
+        )
+        
+        single_elapsed_time = round(time.time() - single_start_time, 4)
 
-    request_results.append({
-        "task_id": task_id,
-        "status_code": response.status_code,
-        "single_elapsed_time": single_elapsed_time
-    })
-    
-    print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
+        request_results.append({
+            "task_id": task_id,
+            "status_code": response.status_code,
+            "single_elapsed_time": single_elapsed_time
+        })
+        
+        print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
+    finally:
+        semaphore.release()
 
 def start_tbo_server(tbo_threshold: float):
     other_args = [
@@ -117,21 +120,24 @@ class TestTbo08(CustomTestCase):
         
         # Print test start information
         print(f"\n=== [TBO 0.8 ENABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
-        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
+        print(f"=== Starting continuous concurrency test: {CONFIG['CONCURRENT_THREADS']} concurrent threads, total {CONFIG['REQUEST_COUNT']} requests ===")
         
-        # Create and start multiple threads
+
+        semaphore = threading.Semaphore(CONFIG["CONCURRENT_THREADS"])
+        
         threads = []
-        for task_id in range(CONFIG["REQUEST_COUNT"]):
-            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
-            threads.append(t)
         
-        for t in threads:
+        for task_id in range(CONFIG["REQUEST_COUNT"]):
+            t = threading.Thread(
+                target=send_generate_request,
+                args=(task_id, request_results, semaphore)
+            )
+            threads.append(t)
             t.start()
         
         for t in threads:
             t.join()
         
-        # Calculate statistics
         statistics = calculate_statistics(request_results)
         
         FINAL_STATISTICS["tbo_enabled_0.8"] = {
@@ -161,16 +167,21 @@ class TestTboDisabled(CustomTestCase):
         request_results = []
         
         print(f"\n=== [TBO 0 DISABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
-        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
+        print(f"=== Starting continuous concurrency test: {CONFIG['CONCURRENT_THREADS']} concurrent threads, total {CONFIG['REQUEST_COUNT']} requests ===")
         
-        threads = []
-        for task_id in range(CONFIG["REQUEST_COUNT"]):
-            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
-            threads.append(t)
-        
-        for t in threads:
-            t.start()
 
+        semaphore = threading.Semaphore(CONFIG["CONCURRENT_THREADS"])
+    
+        threads = []
+        
+        for task_id in range(CONFIG["REQUEST_COUNT"]):
+            t = threading.Thread(
+                target=send_generate_request,
+                args=(task_id, request_results, semaphore)
+            )
+            threads.append(t)
+            t.start()
+        
         for t in threads:
             t.join()
 
@@ -204,7 +215,6 @@ class TestTboDisabled(CustomTestCase):
             f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
         )
         print("\n Assertion Passed: TBO 0 Average Latency < TBO 0.8 Average Latency")
-
 
 if __name__ == "__main__":
     unittest.main()
