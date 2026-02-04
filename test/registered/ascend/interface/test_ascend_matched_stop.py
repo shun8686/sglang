@@ -5,12 +5,12 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 MANY_NEW_TOKENS_PROMPT = """
 Please write an extremely detailed and vivid fantasy story, set in a world full of intricate magic systems, political intrigue, and complex characters.
@@ -20,6 +20,7 @@ The story should span multiple events, challenges, and character developments ov
 """
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestMatchedStop(CustomTestCase):
     """Testcase: Test configuring 'matched_stop' to different values(string, EOS token, length) correctly identifies
