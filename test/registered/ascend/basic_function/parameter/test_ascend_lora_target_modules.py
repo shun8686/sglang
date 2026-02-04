@@ -98,7 +98,7 @@ class TestLoraTargetModulesQProj(CustomTestCase):
                 "--lora-path",
                 f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
                 "--lora-target-modules",
-                "o_proj",
+                "down_proj",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -142,7 +142,7 @@ class TestLoraTargetModulesQProj(CustomTestCase):
 
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-        expected_modules = ["o_proj"]  
+        expected_modules = ["down_proj"]  
         actual_modules = response.json()["lora_target_modules"]
 
         self.assertEqual(actual_modules, expected_modules)  
