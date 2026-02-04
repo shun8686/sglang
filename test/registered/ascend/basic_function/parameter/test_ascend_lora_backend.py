@@ -23,26 +23,29 @@ class TestLoraBackend(CustomTestCase):
     [Test Target] --lora-backend
     """
 
+    lora_backend_list = ["triton", "csgmv", "ascend", "torch_native"]
+
     @classmethod
     def setUpClass(cls):
-        other_args = [
-            "--enable-lora",
-            "--lora-backend",
-            "triton",
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--mem-fraction-static",
-            0.8,
-            "--lora-path",
-            f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
-        ]
-        cls.process = popen_launch_server(
-            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-        )
+        for cls.lora in cls.lora_backend_list:
+            other_args = [
+                "--enable-lora",
+                "--lora-backend",
+                f"{cls.lora}",
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+                "--mem-fraction-static",
+                0.8,
+                "--lora-path",
+                f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
+            ]
+            cls.process = popen_launch_server(
+                LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+                DEFAULT_URL_FOR_TEST,
+                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                other_args=other_args,
+            )
 
     @classmethod
     def tearDownClass(cls):
@@ -66,11 +69,7 @@ class TestLoraBackend(CustomTestCase):
         self.assertIn("Paris", response.text)
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-
-        self.assertEqual(
-            response.json()["lora_backend"],
-            "triton",
-        )
+        self.assertEqual(response.json()["lora_backend"], f"{self.lora}")
 
 
 if __name__ == "__main__":
