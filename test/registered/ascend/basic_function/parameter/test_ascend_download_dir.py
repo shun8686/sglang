@@ -1,4 +1,3 @@
-#export SGLANG_USE_MODELSCOPE=True
 import subprocess
 import unittest
 import requests
