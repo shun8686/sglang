@@ -72,7 +72,6 @@ class TestDeepEpQwen(CustomTestCase):
     def test_mmlu(self):
         expect_score = 0.61
 
-        print("Starting mmlu test...")
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -86,10 +85,8 @@ class TestDeepEpQwen(CustomTestCase):
     def test_gsm8k(self):
         expect_accuracy = 0.91
 
-        print("Starting gsm8k test...")
         host = "http://127.0.0.1"
         port = int(self.base_url.split(":")[-1])
-        print(f"{host=}, {port=}")
         args = SimpleNamespace(
             num_shots=8,
             data_path=None,

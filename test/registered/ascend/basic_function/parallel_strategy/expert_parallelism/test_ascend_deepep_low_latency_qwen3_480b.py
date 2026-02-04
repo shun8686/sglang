@@ -79,7 +79,6 @@ class TestDeepEpQwen(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-        print("Starting mmlu test...")
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], expect_score)
 
@@ -94,7 +93,6 @@ class TestDeepEpQwen(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
-        print("Starting gsm8k test...")
         metrics = run_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],

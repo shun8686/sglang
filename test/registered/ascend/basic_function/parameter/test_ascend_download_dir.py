@@ -3,7 +3,7 @@ import unittest
 import requests
 import os
 import glob
-from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+#from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -33,26 +33,19 @@ class TestDownloadDir(CustomTestCase):
        [Test Category] Parameter
        [Test Target] --download-dir
        """
-    model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+    model = "Qwen/Qwen2-0.5B-Instruct"
     download_dir = "./weight"
 
     @classmethod
     def setUpClass(cls):
         run_command(f"mkdir -p {cls.download_dir}")
-        if not os.path.exists(cls.download_dir):
-            raise FileNotFoundError(f"--download-dir {cls.download_dir} not exist")
-        if not os.path.isdir(cls.download_dir):
-            raise NotADirectoryError(f"--download-dir {cls.download_dir} not a directory")
-        other_args = (
-            [
+        other_args = [
                 "--download-dir",
                 cls.download_dir,
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
             ]
-        )
-
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
