@@ -81,7 +81,6 @@ class BaseModelLoaderTest(ABC):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-        # 关闭文件句柄
         if hasattr(cls, 'out_file') and cls.out_file:
             cls.out_file.close()
         if hasattr(cls, 'err_file') and cls.err_file:
@@ -95,7 +94,7 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     After configuring the parameter, the model loading time should be reduced.
 
     [Test Category] Parameter
-    [Test Target] --model-loader-extra-config {"enable_multithread_load": True, "num_threads": 2}
+    [Test Target] --model-loader-extra-config
     """
 
     models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
@@ -149,7 +148,6 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
             "Loading safetensors checkpoint shards"
         )
 
-        # Print information
         print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
 
         # Assert
