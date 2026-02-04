@@ -7,7 +7,7 @@ from typing import Dict, Any
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -19,7 +19,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 CONFIG = {
     "REQUEST_COUNT": 20,
-    "CONCURRENT_THREADS": 1,  
+    "CONCURRENT_THREADS": 1,
     "TIMEOUT": 600,
     "MAX_NEW_TOKENS": 8
 }
@@ -33,9 +33,9 @@ def send_generate_request(task_id, request_results, semaphore):
     semaphore.acquire()
     try:
         single_start_time = time.time()
-        
+
         long_input_text = "The capital of France is"
-        
+
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -47,7 +47,7 @@ def send_generate_request(task_id, request_results, semaphore):
             },
             timeout=CONFIG["TIMEOUT"]
         )
-        
+
         single_elapsed_time = round(time.time() - single_start_time, 4)
 
         request_results.append({
@@ -55,7 +55,7 @@ def send_generate_request(task_id, request_results, semaphore):
             "status_code": response.status_code,
             "single_elapsed_time": single_elapsed_time
         })
-        
+
         print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
     finally:
         semaphore.release()
@@ -68,9 +68,9 @@ def start_tbo_server(tbo_threshold: float):
         "--tbo-token-distribution-threshold",
         str(tbo_threshold)
     ]
-    
+
     process = popen_launch_server(
-        Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH,
+        QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
         DEFAULT_URL_FOR_TEST,
         timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
         other_args=other_args,
@@ -85,7 +85,7 @@ def calculate_statistics(request_results):
 
     elapsed_times = [r["single_elapsed_time"] for r in success_requests]
     avg_elapsed = round(sum(elapsed_times) / len(elapsed_times), 4)
-    
+
     return {
         "success_count": len(success_requests),
         "total_count": len(request_results),
@@ -110,16 +110,16 @@ class TestTbo08(CustomTestCase):
 
     def test_tbo_with_multi_requests(self):
         request_results = []
-        
+
         # Print test start information
         print(f"\n=== [TBO 0.8 ENABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
         print(f"=== Starting continuous concurrency test: {CONFIG['CONCURRENT_THREADS']} concurrent threads, total {CONFIG['REQUEST_COUNT']} requests ===")
-        
+
 
         semaphore = threading.Semaphore(CONFIG["CONCURRENT_THREADS"])
-        
+
         threads = []
-        
+
         for task_id in range(CONFIG["REQUEST_COUNT"]):
             t = threading.Thread(
                 target=send_generate_request,
@@ -127,16 +127,16 @@ class TestTbo08(CustomTestCase):
             )
             threads.append(t)
             t.start()
-        
+
         for t in threads:
             t.join()
-        
+
         statistics = calculate_statistics(request_results)
-        
+
         FINAL_STATISTICS["tbo_enabled_0.8"] = {
             "detail": statistics
         }
-        
+
         print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
 
 class TestTboDisabled(CustomTestCase):
@@ -158,15 +158,15 @@ class TestTboDisabled(CustomTestCase):
 
     def test_tbo_with_multi_requests(self):
         request_results = []
-        
+
         print(f"\n=== [TBO 0 DISABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
         print(f"=== Starting continuous concurrency test: {CONFIG['CONCURRENT_THREADS']} concurrent threads, total {CONFIG['REQUEST_COUNT']} requests ===")
-        
+
 
         semaphore = threading.Semaphore(CONFIG["CONCURRENT_THREADS"])
-    
+
         threads = []
-        
+
         for task_id in range(CONFIG["REQUEST_COUNT"]):
             t = threading.Thread(
                 target=send_generate_request,
@@ -174,12 +174,12 @@ class TestTboDisabled(CustomTestCase):
             )
             threads.append(t)
             t.start()
-        
+
         for t in threads:
             t.join()
 
         statistics = calculate_statistics(request_results)
-        
+
         FINAL_STATISTICS["tbo_disabled_0"] = {
             "detail": statistics
         }
@@ -191,20 +191,20 @@ class TestTboDisabled(CustomTestCase):
     def _run_performance_assertions(self):
         # verify performance optimization
         print("\n=== Running Performance Assertions===")
-        
+
         # Extract core statistical data
         tbo_08_stats = FINAL_STATISTICS["tbo_enabled_0.8"]
         tbo_0_stats = FINAL_STATISTICS["tbo_disabled_0"]
 
         tbo_08_avg = tbo_08_stats["detail"]["avg_elapsed"]
         tbo_0_avg = tbo_0_stats["detail"]["avg_elapsed"]
-        
-        
+
+
         print(f"Average Elapsed Time Comparison")
         print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s ")
- 
+
         self.assertGreater(
-            tbo_08_avg, tbo_0_avg, 
+            tbo_08_avg, tbo_0_avg,
             f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
         )
         print("\n Assertion Passed: TBO 0 Average Latency < TBO 0.8 Average Latency")
