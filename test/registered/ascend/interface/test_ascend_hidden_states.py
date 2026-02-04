@@ -44,8 +44,8 @@ class TestHiddenState(CustomTestCase):
         )
 
     @classmethod
-    def tearDownClass(self):
-        self.engine.shutdown()
+    def tearDownClass(cls):
+        cls.engine.shutdown()
 
     def test_return_hidden_states(self):
         for output in self.outputs:
@@ -99,61 +99,70 @@ class TestHiddenState(CustomTestCase):
                 )
             )
 
-# class TestChangeHiddenState(CustomTestCase):
-#     def test_repeatedly_changes_hidden_states(self):
-#         prompts = ["Today is", "Today is a sunny day and I like"]
-#         model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-#         tokenizer = AutoTokenizer.from_pretrained(model_path)
-#         input_ids = tokenizer(prompts).input_ids
-#
-#         sampling_params = {
-#             "temperature": 0,
-#             "max_new_tokens": 8,
-#         }
-#
-#         self.engine1 = sgl.Engine(
-#             model_path=model_path,
-#             random_seed=42,
-#             skip_tokenizer_init=True,
-#             enable_return_hidden_states=True,
-#             attention_backend="ascend",
-#             disable_cuda_graph=True,
-#         )
-#         outputs_completion_first_round = self.engine1.generate(
-#             input_ids=input_ids,
-#             sampling_params=sampling_params,
-#             return_hidden_states=True,
-#         )
-#         outputs_hidden_state = self.engine1.generate(
-#             input_ids=input_ids,
-#             sampling_params=sampling_params,
-#             return_hidden_states=False,
-#         )
-#
-#         outputs_completion_last_round = self.engine1.generate(
-#             input_ids=input_ids,
-#             sampling_params=sampling_params,
-#             return_hidden_states=True,
-#         )
-#
-#         self.engine1.shutdown()
-#
-#         for (
-#             output_completion_first_round,
-#             output_hidden_state,
-#             output_completion_last_round,
-#         ) in zip(
-#             outputs_completion_first_round,
-#             outputs_hidden_state,
-#             outputs_completion_last_round,
-#         ):
-#             self.assertEqual(
-#                 len(output_completion_first_round["meta_info"]["hidden_states"]), 8
-#             )
-#             self.assertNotIn("hidden_states", output_hidden_state["meta_info"])
-#             self.assertEqual(
-#                 len(output_completion_last_round["meta_info"]["hidden_states"]), 8
-#             )
+class TestChangeHiddenState(CustomTestCase):
+    """Testcase: Test in multiple consecutive requests, the enable_return_hidden_states parameter correctly returns the hidden state.
+
+    [Test Category] Interface
+    [Test Target] generate
+    """
+    @classmethod
+    def setUpClass(cls):
+        prompts = ["Today is", "Today is a sunny day and I like"]
+        cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+        cls.tokenizer = AutoTokenizer.from_pretrained(cls.model_path)
+        cls.input_ids = cls.tokenizer(prompts).input_ids
+
+        sampling_params = {
+            "temperature": 0,
+            "max_new_tokens": 8,
+        }
+
+        cls.engine1 = sgl.Engine(
+            model_path=cls.model_path,
+            random_seed=42,
+            skip_tokenizer_init=True,
+            enable_return_hidden_states=True,
+            attention_backend="ascend",
+            disable_cuda_graph=True,
+        )
+        cls.outputs_completion_first_round = cls.engine1.generate(
+            input_ids=cls.input_ids,
+            sampling_params=sampling_params,
+            return_hidden_states=True,
+        )
+        cls.outputs_hidden_state = cls.engine1.generate(
+            input_ids=cls.input_ids,
+            sampling_params=sampling_params,
+            return_hidden_states=False,
+        )
+
+        cls.outputs_completion_last_round = cls.engine1.generate(
+            input_ids=cls.input_ids,
+            sampling_params=sampling_params,
+            return_hidden_states=True,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.engine1.shutdown()
+
+    def test_repeatedly_changes_hidden_states(self):
+        for (
+            output_completion_first_round,
+            output_hidden_state,
+            output_completion_last_round,
+        ) in zip(
+            self.outputs_completion_first_round,
+            self.outputs_hidden_state,
+            self.outputs_completion_last_round,
+        ):
+            self.assertEqual(
+                len(output_completion_first_round["meta_info"]["hidden_states"]), 8
+            )
+            self.assertNotIn("hidden_states", output_hidden_state["meta_info"])
+            self.assertEqual(
+                len(output_completion_last_round["meta_info"]["hidden_states"]), 8
+            )
 
 
 if __name__ == "__main__":
