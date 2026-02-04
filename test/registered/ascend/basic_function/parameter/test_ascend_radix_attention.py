@@ -1,5 +1,4 @@
 import unittest
-
 from sglang.srt.environ import envs
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.kits.radix_cache_server_kit import run_radix_attention_test

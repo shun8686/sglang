@@ -66,8 +66,9 @@ class TestReasoningContentAPI(CustomTestCase):
                 content += chunk.choices[0].delta.content
             elif chunk.choices[0].delta.reasoning_content:
                 reasoning_content += chunk.choices[0].delta.reasoning_content
-
+        # the reasoning_content of chunk should not have a value when separate reasoning is false
         assert len(reasoning_content) == 0
+        # the content of chunk should have a value when streaming is true
         assert len(content) > 0
 
     def test_streaming_separate_reasoning_true(self):
@@ -94,7 +95,9 @@ class TestReasoningContentAPI(CustomTestCase):
             elif chunk.choices[0].delta.reasoning_content:
                 reasoning_content += chunk.choices[0].delta.reasoning_content
 
+        # the reasoning_content of chunk should have a value when separate reasoning is true
         assert len(reasoning_content) > 0
+        # the content of chunk should have a value when streaming is true
         assert len(content) > 0
 
     def test_streaming_separate_reasoning_true_stream_reasoning_false(self):
@@ -127,10 +130,13 @@ class TestReasoningContentAPI(CustomTestCase):
                 first_chunk = True
             if not first_chunk:
                 assert (
+                    # Only the first reasoning_content of chunk should have a value when stream reasoning is false
                     not chunk.choices[0].delta.reasoning_content
                     or len(chunk.choices[0].delta.reasoning_content) == 0
                 )
+        # the reasoning_content of chunk should have a value when separate reasoning is true
         assert len(reasoning_content) > 0
+        # the content of chunk should have a value when streaming is true
         assert len(content) > 0
 
     def test_nonstreaming_separate_reasoning_false(self):
@@ -148,10 +154,12 @@ class TestReasoningContentAPI(CustomTestCase):
         }
         response = client.chat.completions.create(**payload)
 
+        # Response should not have content when separate reasoning is false
         assert (
             not response.choices[0].message.reasoning_content
             or len(response.choices[0].message.reasoning_content) == 0
         )
+        # Response should have content when nonstreaming
         assert len(response.choices[0].message.content) > 0
 
     def test_nonstreaming_separate_reasoning_true(self):
@@ -169,7 +177,9 @@ class TestReasoningContentAPI(CustomTestCase):
         }
         response = client.chat.completions.create(**payload)
 
+        # Response should have content when separate reasoning is true
         assert len(response.choices[0].message.reasoning_content) > 0
+        # Response should have content when nonstreaming
         assert len(response.choices[0].message.content) > 0
 
 
