@@ -7,8 +7,9 @@ from typing import Dict
 
 import requests
 from types import SimpleNamespace
-from  sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.bench_serving import get_tokenizer
 from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
@@ -17,9 +18,9 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_pd_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Testcase: Vaildate Prefill/Decode disaggregated services with hicache write policy configuration
@@ -73,7 +74,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:26666",
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:26666",
         }
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
@@ -151,7 +152,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:26666",
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:26666",
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,
@@ -170,23 +171,24 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         response1 = self.send_request(repeated_prompt, max_tokens=100)
         print(f"response1 = {response1}")
         # Flush cache
-        #self.trigger_offloading_and_flush()
+        # self.trigger_offloading_and_flush()
 
         # Second request - should hit cache (faster)
         response2 = self.send_request(repeated_prompt, max_tokens=100)
         print(f"response2 = {response2}")
         # Assert cached tokens cnt
         self.assertGreater(response2["meta_info"]["cached_tokens"], 700)
+
     def test_gsm8k(self):
         args = SimpleNamespace(
-                num_shots=5,
-                data_path="/tmp/test.jsonl",
-                num_questions=200,
-                max_new_tokens=512,
-                parallel=128,
-                host="http://127.0.0.1",
-                port=21000,
-            )
+            num_shots=5,
+            data_path="/tmp/test.jsonl",
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=21000,
+        )
         metrics = run_eval(args)
         print(f"*************metrics={metrics['accuracy']}")
         self.assertGreater(metrics['accuracy'], 0.86)

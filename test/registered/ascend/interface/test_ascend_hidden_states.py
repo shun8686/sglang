@@ -4,11 +4,12 @@ import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import sglang as sgl
-from sglang.test.test_utils import  CustomTestCase
+from sglang.test.test_utils import CustomTestCase
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestHiddenState(CustomTestCase):
     """Testcase: Verify that sglang successfully return hidden states when generating text.
@@ -99,12 +100,14 @@ class TestHiddenState(CustomTestCase):
                 )
             )
 
+
 class TestChangeHiddenState(CustomTestCase):
     """Testcase: Test in multiple consecutive requests, the enable_return_hidden_states parameter correctly returns the hidden state.
 
     [Test Category] Interface
     [Test Target] generate
     """
+
     @classmethod
     def setUpClass(cls):
         prompts = ["Today is", "Today is a sunny day and I like"]
@@ -148,9 +151,9 @@ class TestChangeHiddenState(CustomTestCase):
 
     def test_repeatedly_changes_hidden_states(self):
         for (
-            output_completion_first_round,
-            output_hidden_state,
-            output_completion_last_round,
+                output_completion_first_round,
+                output_hidden_state,
+                output_completion_last_round,
         ) in zip(
             self.outputs_completion_first_round,
             self.outputs_hidden_state,
