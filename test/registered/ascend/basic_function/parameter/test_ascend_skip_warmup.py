@@ -31,7 +31,7 @@ class TestSkipServerWarmup(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = (
             [
-                # "--skip-server-warmup",
+                "--skip-server-warmup",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -52,8 +52,8 @@ class TestSkipServerWarmup(CustomTestCase):
         kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
         cls.err_log_file.close()
-        # os.remove("./warmup_out_log.txt")
-        # os.remove("./warmup_err_log.txt")
+        os.remove("./warmup_out_log.txt")
+        os.remove("./warmup_err_log.txt")
 
     def test_skip_server_warmup(self):
         response = requests.post(
@@ -63,15 +63,15 @@ class TestSkipServerWarmup(CustomTestCase):
                 "sampling_params": {"temperature": 0, "max_new_tokens": 32},
             },
         )
+        # Verify that inference is correct when warming up is skipped
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
         self.out_log_file.seek(0)
+
+        # warm up will send a GET /get_model_info request and a generate request to warm up server.
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
         self.assertNotIn("GET /get_model_info HTTP/1.1", content)
-        # self.assertNotIn("Warmup", content)
-        # self.assertNotIn("Graph captured", content)
-        # self.assertNotIn("Prefill warmup", content)
 
 
 if __name__ == "__main__":

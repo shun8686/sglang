@@ -16,19 +16,21 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestLoraBackend(CustomTestCase):
+class TestLoraBackendTriton(CustomTestCase):
     """Testcase: Test configuration of lora-backend parameters, and inference request successful.
 
     [Test Category] Parameter
     [Test Target] --lora-backend
     """
 
+    lora = "triton"
+
     @classmethod
     def setUpClass(cls):
         other_args = [
             "--enable-lora",
             "--lora-backend",
-            "triton",
+            f"{cls.lora}",
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
@@ -66,11 +68,19 @@ class TestLoraBackend(CustomTestCase):
         self.assertIn("Paris", response.text)
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["lora_backend"], f"{self.lora}")
 
-        self.assertEqual(
-            response.json()["lora_backend"],
-            "triton",
-        )
+
+class TestLoraBackendCsgmv(TestLoraBackendTriton):
+    lora = "csgmv"
+
+
+class TestLoraBackendAscend(TestLoraBackendTriton):
+    lora = "ascend"
+
+
+class TestLoraBackendTorchNative(TestLoraBackendTriton):
+    lora = "torch_native"
 
 
 if __name__ == "__main__":
