@@ -2,7 +2,7 @@ import os
 import unittest
 
 import numpy
-
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -26,7 +26,7 @@ class TestDebugTensorInputFile(CustomTestCase):
         err_log_file = open("./tensor_input_err_log.txt", "w+", encoding="utf-8")
         try:
             popen_launch_server(
-                "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct",
+                LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=other_args,
