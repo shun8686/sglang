@@ -10,6 +10,7 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.test_ascend_utils import EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils.hf_transformers_utils import get_tokenizer
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -17,7 +18,6 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -25,6 +25,8 @@ os.environ["SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN"] = "1"
 os.environ["SGLANG_ENABLE_OVERLAP_PLAN_SITEAM"] = "1"
 os.environ["SGLANG_ENABLE_SPEC_V2"] = "1"
 ENV = os.environ.copy()
+
+
 class BaseTestOpenAIServerWithHiddenStates(ABC):
 
     @classmethod
@@ -234,12 +236,14 @@ class TestOpenAIServerWithHiddenStatesEnabled(
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            other_args=["--enable-return-hidden-states",
+            other_args=[
+                "--enable-return-hidden-states",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
                 "--base-gpu-id",
-                8,],
+                8,
+            ],
             env=ENV,
         )
         cls.base_url += "/v1"
@@ -278,7 +282,8 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
                 "ascend",
                 "--disable-cuda-graph",
                 "--base-gpu-id",
-                8,],
+                8,
+            ],
             env=ENV,
         )
         cls.base_url += "/v1"
@@ -290,7 +295,6 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-
 
 
 class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(

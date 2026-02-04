@@ -6,6 +6,7 @@ import multiprocessing as mp
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -13,14 +14,10 @@ from sglang.test.test_utils import (
     is_in_ci,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-MODEL = [
-    QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
-]
-
+MODEL = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
 
 # image
 IMAGE_MAN_IRONING_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/man_ironing_on_back_of_suv.png"
@@ -59,62 +56,63 @@ class TestVisionModel(CustomTestCase):
         cls.base_url += "/v1"
         cls.api_key = "sk-123456"
 
-
     def _run_multi_turn_request(self):
         # Input video and image respectively
         messages = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "video_url",
-                            "video_url": {"url": VIDEO_JOBS_URL},
-                        },
-                        {
-                            "type": "text",
-                            "text": "Describe this video in a sentence.",
-                        },
-                    ],
-                },
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                           "image_url": {"url": IMAGE_MAN_IRONING_URL},
-                        },
-                        {
-                            "type": "text",
-                            "text": "Describe this image in a sentence.",
-                        },
-                    ],
-                },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "video_url",
+                        "video_url": {"url": VIDEO_JOBS_URL},
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe this video in a sentence.",
+                    },
+                ],
+            },
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe this image in a sentence.",
+                    },
+                ],
+            },
         ]
-        response = requests.post(self.base_url+'/chat/completions',json={"messages": messages, "temperature": 0, "max_completion_tokens": 1024})
+        response = requests.post(self.base_url + '/chat/completions',
+                                 json={"messages": messages, "temperature": 0, "max_completion_tokens": 1024})
         assert response.status_code == 200
 
     def _run_multi_turn_request1(self):
         # Input video and image
         messages1 = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": IMAGE_MAN_IRONING_URL},
-                        },
-                        {
-                            "type": "vedio_url",
-                            "vedio_url": {"url": VIDEO_JOBS_URL},
-                        },
-                        {
-                            "type": "text",
-                            "text": "Describe this video in a sentence.",
-                        },
-                    ],
-                },
-            ]
-        response1 = requests.post(self.base_url+'/chat/completions',json={"messages": messages1, "temperature": 0, "max_completion_tokens": 1024})
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                    },
+                    {
+                        "type": "vedio_url",
+                        "vedio_url": {"url": VIDEO_JOBS_URL},
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe this video in a sentence.",
+                    },
+                ],
+            },
+        ]
+        response1 = requests.post(self.base_url + '/chat/completions',
+                                  json={"messages": messages1, "temperature": 0, "max_completion_tokens": 1024})
         print(f"*****{response1.status_code=}")
         print(f"*****{response1.text=}")
         assert response1.status_code == 400
@@ -122,25 +120,26 @@ class TestVisionModel(CustomTestCase):
     def _run_multi_turn_request2(self):
         # Enter two images
         messages2 = [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": IMAGE_MAN_IRONING_URL},
-                        },
-                        {
-                            "type": "image_url",
-                            "image_url": {"url": IMAGE_SGL_LOGO_URL},
-                        },
-                        {
-                            "type": "text",
-                            "text": "Describe this video in a sentence.",
-                        },
-                    ],
-                },
-            ]
-        response2 = requests.post(self.base_url+'/chat/completions',json={"messages": messages2, "temperature": 0, "max_completion_tokens": 1024})
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": IMAGE_MAN_IRONING_URL},
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": IMAGE_SGL_LOGO_URL},
+                    },
+                    {
+                        "type": "text",
+                        "text": "Describe this video in a sentence.",
+                    },
+                ],
+            },
+        ]
+        response2 = requests.post(self.base_url + '/chat/completions',
+                                  json={"messages": messages2, "temperature": 0, "max_completion_tokens": 1024})
         print(f"*****{response2.status_code=}")
         print(f"*****{response2.text=}")
         assert response2.status_code == 400

@@ -1,5 +1,4 @@
 import unittest
-
 import requests
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
@@ -15,7 +14,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMoreRunnerBackendTriton(CustomTestCase):
-    """Testcase：Verify set --moe-runner-backend = triton, the inference request is successfully processed.
+    """Testcase：Verify set --moe-runner-backend, the inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --moe-runner-backend
@@ -24,27 +23,18 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
     moe_runner_backend = "triton"
 
     @classmethod
-    def get_server_args(cls):
-        #Return the arguments for the server launch. Override in subclasses.
-        other_args = (
-            [
+    def setUpClass(cls):
+        cls.process = popen_launch_server(
+            cls.model,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=[
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
                 "--moe-runner-backend",
                 cls.moe_runner_backend,
             ]
-
-        )
-        return other_args
-
-    @classmethod
-    def setUpClass(cls):
-        cls.process = popen_launch_server(
-            cls.model,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.get_server_args(),
         )
 
     @classmethod
@@ -62,16 +52,13 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
                 },
             },
         )
-        print(response.text)
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
         )
-
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -87,14 +74,12 @@ class TestMoreRunnerBackendTritonDefault(TestMoreRunnerBackendTriton):
 
     @classmethod
     def get_server_args(cls):
-        #Return the arguments for the server launch. Override in subclasses.
         other_args = (
             [
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
             ]
-
         )
         return other_args
 

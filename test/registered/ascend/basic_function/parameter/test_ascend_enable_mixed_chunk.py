@@ -1,13 +1,14 @@
-import unittest
-import requests
-import time
 import threading
+import time
+import unittest
 from datetime import datetime
+from typing import Any, Dict
+
+import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
-from typing import Dict,Any
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -21,13 +22,9 @@ CONFIG = {
     "TARGET_TOKEN_COUNT": 2500,
     "CHUNK_SIZE": 1024,
     "REQUEST_COUNT": 50,
-    "TIMEOUT": 600
+    "TIMEOUT": 600,
 }
 
-FINAL_STATISTICS: Dict[str, Dict[str, Any]] = {
-    "mixed_enabled": {},
-    "mixed_disabled": {}
-}
 
 def build_long_input_text_for_token():
     """Construct long input text with enough tokens (common function for consistent input)"""
@@ -35,12 +32,13 @@ def build_long_input_text_for_token():
     repeat_times = (CONFIG["TARGET_TOKEN_COUNT"] // 10) + 20
     return (base_sentence * repeat_times) + "The capital of France is"
 
+
 def send_generate_request(task_id, request_results):
     # record single request elapsed time
     single_start_time = time.time()
-    
+
     long_input_text = build_long_input_text_for_token()
-    
+
     response = requests.post(
         f"{DEFAULT_URL_FOR_TEST}/generate",
         json={
@@ -50,32 +48,38 @@ def send_generate_request(task_id, request_results):
                 "max_new_tokens": 32,
             },
         },
-        timeout=CONFIG["TIMEOUT"]
+        timeout=CONFIG["TIMEOUT"],
     )
-    
+
     single_end_time = time.time()
     single_elapsed_time = round(single_end_time - single_start_time, 4)
 
-    request_results.append({
-        "task_id": task_id,
-        "status_code": response.status_code,
-        "single_elapsed_time": single_elapsed_time
-    })
-    
-    print(f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds")
+    request_results.append(
+        {
+            "task_id": task_id,
+            "status_code": response.status_code,
+            "single_elapsed_time": single_elapsed_time,
+        }
+    )
+
+    print(
+        f"[Task {task_id}] Request completed, status code: {response.status_code}, elapsed time: {single_elapsed_time} seconds"
+    )
+
 
 def start_server(with_mixed: bool):
     other_args = [
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--chunked-prefill-size", str(CONFIG["CHUNK_SIZE"])
+        "--chunked-prefill-size",
+        str(CONFIG["CHUNK_SIZE"]),
     ]
-    
+
     # Add --enable-mixed-chunk parameter if needed
     if with_mixed:
         other_args.insert(0, "--enable-mixed-chunk")
-    
+
     # Start server
     process = popen_launch_server(
         LLAMA_3_2_1B_WEIGHTS_PATH,
@@ -86,148 +90,136 @@ def start_server(with_mixed: bool):
 
     return process
 
+
 def calculate_statistics(request_results):
     """Common statistics function: calculate average, max, min elapsed time (remove overall elapsed time)"""
     success_requests = [r for r in request_results if r["status_code"] == 200]
     if not success_requests:
-        return None
-    
+        return {
+            "success_count": 0,
+            "total_count": len(request_results),
+            "avg_elapsed": 0.0,
+            "max_elapsed": 0.0,
+            "min_elapsed": 0.0,
+        }
+
     # Extract elapsed time of successful requests
     elapsed_times = [r["single_elapsed_time"] for r in success_requests]
-    
+
     # Calculate statistical indicators
     return {
         "success_count": len(success_requests),
         "total_count": len(request_results),
         "avg_elapsed": round(sum(elapsed_times) / len(elapsed_times), 4),
         "max_elapsed": round(max(elapsed_times), 4),
-        "min_elapsed": round(min(elapsed_times), 4)
+        "min_elapsed": round(min(elapsed_times), 4),
     }
 
-class TestMixedChunkEnabled(CustomTestCase):
-    """Testcase: Verify the baseline performance of disabled --enable-mixed-chunk with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
+
+class TestMixedChunkPerformanceComparison(CustomTestCase):
+    """Testcase: Compare performance between --enable-mixed-chunk ON/OFF with 50 concurrent long-token requests.
 
     [Test Category] Parameter
     [Test Target] --enable-mixed-chunk;
     """
-    @classmethod
-    def setUpClass(cls):
-        """Start server (with mixed chunk enabled)"""
-        print("=== Starting Server (--enable-mixed-chunk ENABLED) ===")
-        cls.process = start_server(with_mixed=True)
+
+    test_results: Dict[str, Dict[str, Any]] = {
+        "mixed_enabled": {},
+        "mixed_disabled": {},
+    }
 
     @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        time.sleep(10)
+    def _run_concurrent_tests(cls, with_mixed: bool) -> Dict[str, Any]:
+        process = start_server(with_mixed=with_mixed)
+        time.sleep(5)
 
-    def test_mixed_chunk_with_multi_requests(self):
-        #Multi-request test , collect statistics
         request_results = []
-        
-        # Print test start information
-        print(f"\n=== [Mixed Chunk ENABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
-        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
-        
-        # Create and start multiple threads
+        mixed_status = "ENABLED" if with_mixed else "DISABLED"
+        print(
+            f"\n=== [Mixed Chunk {mixed_status}] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ==="
+        )
+        print(
+            f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ==="
+        )
+
         threads = []
         for task_id in range(CONFIG["REQUEST_COUNT"]):
-            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
+            t = threading.Thread(
+                target=send_generate_request, args=(task_id, request_results)
+            )
             threads.append(t)
-        
+
         for t in threads:
             t.start()
-        
-        # Wait for all threads to complete
         for t in threads:
             t.join()
-        
-        # Calculate statistics
+
         statistics = calculate_statistics(request_results)
-        
-        FINAL_STATISTICS["mixed_enabled"] = {
-            "detail": statistics
-        }
-        
-        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
-        print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
-        print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
+
+        kill_process_tree(process.pid)
+        time.sleep(10)
+
+        print(f"\n=== [Mixed Chunk {mixed_status}] Test Results ===")
+        print(
+            f"  Success count / Total count: {statistics['success_count']} / {statistics['total_count']}"
+        )
+        print(
+            f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds"
+        )
+        print(
+            f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds"
+        )
+        print(
+            f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds"
+        )
+
+        return statistics
+
+    def test_1_mixed_chunk_disabled(self):
+        statistics = self._run_concurrent_tests(with_mixed=False)
+        self.__class__.test_results["mixed_disabled"] = {"detail": statistics}
+
+    def test_2_mixed_chunk_enabled(self):
+        statistics = self._run_concurrent_tests(with_mixed=True)
+        self.__class__.test_results["mixed_enabled"] = {"detail": statistics}
 
         # Add assertGreater after both tests are completed (verify optimization effect)
         self._run_performance_assertions()
 
     def _run_performance_assertions(self):
         # verify performance optimization
+        print("\n" + "=" * 60)
         print("=== Running Performance Assertions ===")
-        
-        enabled = FINAL_STATISTICS["mixed_enabled"]
-        disabled = FINAL_STATISTICS["mixed_disabled"]
+
+        enabled = self.__class__.test_results["mixed_enabled"]["detail"]
+        disabled = self.__class__.test_results["mixed_disabled"]["detail"]
 
         # Extract core statistical data
-        enabled_avg = enabled["detail"]["avg_elapsed"]
-        disabled_avg = disabled["detail"]["avg_elapsed"]
-        
-        avg_optimize_rate = round(((disabled_avg - enabled_avg) / disabled_avg) * 100, 2)
-        
-        # Print assertion preparation information
-        print(f"Average Elapsed Time Comparison")
-        print(f"   Mixed Enabled: {enabled_avg}s | Mixed Disabled: {disabled_avg}s | Optimization Rate: {avg_optimize_rate}%")
-        
+        enabled_avg = enabled["avg_elapsed"]
+        disabled_avg = disabled["avg_elapsed"]
+
+        self.assertNotEqual(
+            disabled_avg, 0.0, "Disabled mode average elapsed time is 0, invalid data"
+        )
+        self.assertNotEqual(
+            enabled_avg, 0.0, "Enabled mode average elapsed time is 0, invalid data"
+        )
+
+        avg_optimize_rate = round(
+            ((disabled_avg - enabled_avg) / disabled_avg) * 100, 2
+        )
+
+        print(f"\nAverage Elapsed Time Comparison")
+        print(
+            f"   Mixed Enabled: {enabled_avg}s | Mixed Disabled: {disabled_avg}s | Optimization Rate: {avg_optimize_rate}%"
+        )
+
         # Core assertion: Average elapsed time (disabled > enabled)
-        self.assertGreater(disabled_avg, enabled_avg, 
-                           f"Assertion Failed: Average elapsed time - Mixed Disabled ({disabled_avg}s) is not greater than Mixed Enabled ({enabled_avg}s)")
-
-class TestMixedChunkDisabled(CustomTestCase):
-    """Testcase: Verify the baseline performance of disabled --enable-mixed-chunk with 50 concurrent long-token requests (TARGET_TOKEN_COUNT=2500).
-
-    [Test Category] Parameter
-    [Test Target] --enable-mixed-chunk;
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        # Start server (with mixed chunk disabled)
-        print("\n" + "="*60)
-        print("=== Starting Server (--enable-mixed-chunk DISABLED) ===")
-        cls.process = start_server(with_mixed=False)
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        time.sleep(10)
-
-    def test_mixed_chunk_with_multi_requests(self):
-        request_results = []
-        
-        # Print test start information
-        print(f"\n=== [Mixed Chunk DISABLED] Test started, timestamp: {datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S.%f')} ===")
-        print(f"=== Starting {CONFIG['REQUEST_COUNT']} request threads to create queue scenario ===")
-        
-        # Create and start multiple threads
-        threads = []
-        for task_id in range(CONFIG["REQUEST_COUNT"]):
-            t = threading.Thread(target=send_generate_request, args=(task_id, request_results))
-            threads.append(t)
-        
-        for t in threads:
-            t.start()
-        
-        # Wait for all threads to complete
-        for t in threads:
-            t.join()
-        
-        # Calculate statistics
-        statistics = calculate_statistics(request_results)
-        
-        # Store final statistics
-        FINAL_STATISTICS["mixed_disabled"] = {
-            "detail": statistics
-        }
-        
-        # Print current test result
-        print(f"  Average elapsed time per request: {statistics['avg_elapsed']} seconds")
-        print(f"  Maximum elapsed time per request: {statistics['max_elapsed']} seconds")
-        print(f"  Minimum elapsed time per request: {statistics['min_elapsed']} seconds")
+        self.assertGreater(
+            disabled_avg,
+            enabled_avg,
+            f"Assertion Failed: Average elapsed time - Mixed Disabled ({disabled_avg}s) is not greater than Mixed Enabled ({enabled_avg}s)",
+        )
 
 
 if __name__ == "__main__":

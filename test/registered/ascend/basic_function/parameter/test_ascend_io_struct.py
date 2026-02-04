@@ -2,14 +2,15 @@ import copy
 import unittest
 
 from sglang.srt.managers.io_struct import GenerateReqInput
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestGenerateReqInputNormalization(CustomTestCase):
     """Testcase: Test the basic functionality of io_struct.

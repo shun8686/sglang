@@ -86,7 +86,7 @@ PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "microsoft/Phi-4-multimodal-instruct"
 )
 QWEN3_0_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B")
-Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH = os.path.join(
+QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-Instruct-2507"
 )
 QWEN3_32B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B")
@@ -133,6 +133,9 @@ LLAVA_ONEVISION_QWEN2_7B_OV_WEIGHTS_PATH = os.path.join(
 )
 LLAVA_V1_6_34B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b"
+)
+LLAVA_V1_6_34B_TOKENIZER_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b/llava-1.6v-34b-tokenizer"
 )
 MIMO_VL_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-VL-7B-RL")
 MINICPM_O_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-o-2_6")
@@ -208,6 +211,60 @@ QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
+
+
+def create_test_config(
+    path: str,
+    mmlu: float = None,
+    gsm8k: float = None,
+    mmmu: float = None
+) -> dict:
+    """
+    Create a configuration dictionary for model testing.
+
+    Args:
+        path: Path to the model weights directory
+        mmlu: Weight for MMLU (Massive Multitask Language Understanding) benchmark score
+        gsm8k: Weight for GSM8K (Grade School Math 8K) benchmark score
+        mmmu: Weight for MMMU (Multi-discipline Multi-modal Understanding) benchmark score
+
+    Returns:
+        Dictionary containing model path and benchmark test weights
+    """
+    return {
+        "path": path,
+        "mmlu": mmlu,
+        "gsm8k": gsm8k,
+        "mmmu": mmmu,
+    }
+
+
+LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST = create_test_config(
+    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+    mmlu=0.2
+)
+
+QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_FOR_TEST = create_test_config(
+    QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
+    gsm8k=0.9
+)
+
+QWEN3_VL_8B_INSTRUCT_WEIGHTS_FOR_TEST = create_test_config(
+    QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH,
+    mmmu=0.2
+)
+
+QWEN3_32B_WEIGHTS_FOR_TEST = create_test_config(
+    QWEN3_32B_WEIGHTS_PATH,
+    gsm8k=0.82
+)
+
+QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST = create_test_config(
+    QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
+    gsm8k=0.92
+)
+
+DEFAULT_WEIGHTS_FOR_TEST = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST
 
 
 def run_command(cmd, shell=True):
