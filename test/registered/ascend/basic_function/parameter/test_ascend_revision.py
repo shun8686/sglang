@@ -77,7 +77,7 @@ class TestRevision(CustomTestCase):
         )
 
 
-class TestRevisionDefault(TestRevision):
+class TestNoRevision(TestRevision):
     """
     unset --revision parameter
     """
