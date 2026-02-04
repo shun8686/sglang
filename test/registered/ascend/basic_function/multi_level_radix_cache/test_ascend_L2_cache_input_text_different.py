@@ -18,6 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestL2Cache(CustomTestCase):
     """Testcase: Test enable L2 cache(--enable-hierarchical-cache), inputting different text inference requests
                  will not reuse the same text.
+       [Test Category] Parameter
+       [Test Target] --enable-hierarchical-cache
     """
 
     @classmethod
@@ -95,7 +97,9 @@ class TestL2Cache(CustomTestCase):
                     },
                 },
             )
+            print(f"#####{text=}")
             self.assertEqual(response.status_code, 200)
+            # cached_tokens: Number of tokens cached in KV Cache
             self.assertTrue(int(response.json()["meta_info"]["cached_tokens"]) == 0)
 
 
