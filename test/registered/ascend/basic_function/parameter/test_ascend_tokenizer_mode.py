@@ -20,7 +20,7 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
     Testcase：Verify that the inference is successful when tokenizer path is modified and the tokenizer mode is set
 
     [Test Category] Parameter
-    [Test Target] --tokenizer-path, --tokenizer-mode, --tokenizer-worker-num
+    [Test Target] --tokenizer-path; --tokenizer-mode; --tokenizer-worker-num
     """
 
     tokenizer_mode = "slow"

@@ -13,7 +13,6 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
-MODEL_PATH = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
 
 # RadixAttention server integration tests
@@ -28,7 +27,7 @@ class TestRadixCacheFCFS(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = MODEL_PATH
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
