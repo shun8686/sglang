@@ -77,7 +77,7 @@ class TestMaxLoadedLoras(CustomTestCase):
         )
 
 
-class TestMaxLoadedLorasError(TestMaxLoadedLoras):
+class TestMaxLoadedLorasError(CustomTestCase):
     """Testcase: Test The number of LoRA paths should exceed max_loaded_loras
 
     [Test Category] --lora-backend
