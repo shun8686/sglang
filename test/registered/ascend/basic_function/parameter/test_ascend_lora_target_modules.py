@@ -74,7 +74,13 @@ class TestLoraTargetModules(CustomTestCase):
         # Verify lora_target_modules parameter is correctly set in server info
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["lora_target_modules"], ["all"])
+        expected_modules = ['k_proj', 'down_proj', 'gate_up_proj', 'o_proj', 'qkv_proj', 'gate_proj', 'v_proj', 'q_proj', 'up_proj']
+        actual_modules = response.json()["lora_target_modules"]
+
+        self.assertEqual(len(actual_modules), len(expected_modules))
+
+        for module in expected_modules:
+            self.assertIn(module, actual_modules)
 
 
 if __name__ == "__main__":
