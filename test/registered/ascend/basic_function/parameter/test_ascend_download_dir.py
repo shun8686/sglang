@@ -1,3 +1,4 @@
+#export SGLANG_USE_MODELSCOPE=True
 import subprocess
 import unittest
 import requests
@@ -39,20 +40,13 @@ class TestDownloadDir(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         run_command(f"mkdir -p {cls.download_dir}")
-        if not os.path.exists(cls.download_dir):
-            raise FileNotFoundError(f"--download-dir {cls.download_dir} not exist")
-        if not os.path.isdir(cls.download_dir):
-            raise NotADirectoryError(f"--download-dir {cls.download_dir} not a directory")
-        other_args = (
-            [
+        other_args = [
                 "--download-dir",
                 cls.download_dir,
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
             ]
-        )
-
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
