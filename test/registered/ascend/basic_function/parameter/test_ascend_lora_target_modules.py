@@ -4,7 +4,7 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH,  LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH, LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -97,8 +97,8 @@ class TestLoraTargetModulesQProj(CustomTestCase):
                 "--enable-lora",
                 "--lora-path",
                 f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
-                "--lora-target-modules",  # 修改：目标模块设为q_proj
-                "q_proj",
+                "--lora-target-modules",
+                "o_proj",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -142,7 +142,7 @@ class TestLoraTargetModulesQProj(CustomTestCase):
 
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-        expected_modules = ["q_proj"]  
+        expected_modules = ["o_proj"]  
         actual_modules = response.json()["lora_target_modules"]
 
         self.assertEqual(actual_modules, expected_modules)  
