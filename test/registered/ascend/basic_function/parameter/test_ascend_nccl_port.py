@@ -1,4 +1,3 @@
-import subprocess
 import unittest
 
 import requests
@@ -30,19 +29,19 @@ class TestNcclPort(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         other_args = [
-                "--nccl-port",
-                "8111",
-                "--tp-size",
-                "2",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
+            "--nccl-port",
+            "8111",
+            "--tp-size",
+            "2",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
         cls.process = popen_launch_server(
-        cls.model,
-        DEFAULT_URL_FOR_TEST,
-        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-        other_args=other_args,
+            cls.model,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
         )
 
     @classmethod

@@ -60,7 +60,7 @@ class TestEnableThinking(CustomTestCase):
                 "prompt": 'who are you?'
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
         # Assertion model configuration successful
@@ -75,7 +75,7 @@ class TestEnableThinking(CustomTestCase):
                 "prompt": 'who are you?'
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
         # The input is in list[int] format
@@ -86,7 +86,7 @@ class TestEnableThinking(CustomTestCase):
                 "prompt": list_int
             },
         )
-        logging.warning(f"client1.json:{client1.json()}")
+        logging.info(f"client1.json:{client1.json()}")
         self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
 
         # The input is in list[str] format
@@ -97,7 +97,7 @@ class TestEnableThinking(CustomTestCase):
                 "prompt": list_str
             },
         )
-        logging.warning(f"client2.json:{client2.json()}")
+        logging.info(f"client2.json:{client2.json()}")
         self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
 
         # The input is in list[list[int]] format
@@ -108,7 +108,7 @@ class TestEnableThinking(CustomTestCase):
                 "prompt": list_list_int
             },
         )
-        logging.warning(f"client3.json:{client3.json()}")
+        logging.info(f"client3.json:{client3.json()}")
         self.assertEqual(client3.status_code, 200, f"Failed with: {client3.text}")
 
     def test_model_parameters_max_tokens(self):
@@ -120,9 +120,9 @@ class TestEnableThinking(CustomTestCase):
                 'max_tokens': 1
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        logging.warning(f"client.json_choices:{client.json()['choices'][0]['finish_reason']}")
+        logging.info(f"client.json_choices:{client.json()['choices'][0]['finish_reason']}")
         # Assertion output includes length
         self.assertEqual(client.json()['choices'][0]['finish_reason'], 'length')
 
@@ -135,12 +135,12 @@ class TestEnableThinking(CustomTestCase):
                 "stream": True
             },
         )
-        logging.warning(f"client.text:{client.text}")
+        logging.info(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
         # Decompose the response and determine if the output format is stream
         has_text = False
-        logging.warning("\n=== Stream With Reasoning ===")
+        logging.info("\n=== Stream With Reasoning ===")
         for line in client.iter_lines():
             if line:
                 line = line.decode("utf-8")
@@ -164,7 +164,7 @@ class TestEnableThinking(CustomTestCase):
                 "temperature": 1
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
         client1 = requests.post(
@@ -174,7 +174,7 @@ class TestEnableThinking(CustomTestCase):
                 "temperature": 1
             },
         )
-        logging.warning(f"client1.json:{client.json()}")
+        logging.info(f"client1.json:{client.json()}")
         self.assertEqual(client1.status_code, 200, f"Failed with: {client.text}")
         # Asser that the configuration temperature is the same and the output response is the same
         self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
@@ -188,7 +188,7 @@ class TestEnableThinking(CustomTestCase):
                 "return_hidden_states": True
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         # Assert the output response contains hidden_states
         self.assertIn("hidden_states", client.json()['choices'][0])
@@ -202,8 +202,8 @@ class TestEnableThinking(CustomTestCase):
                 "top_k": 5
             },
         )
-        logging.warning(f"client.json:{client.json()}")
-        logging.warning(f"client.text:{client.text}")
+        logging.info(f"client.json:{client.json()}")
+        logging.info(f"client.text:{client.text}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
 
         client1 = requests.post(
@@ -213,8 +213,8 @@ class TestEnableThinking(CustomTestCase):
                 "top_k": 5
             },
         )
-        logging.warning(f"client1.json:{client1.json()}")
-        logging.warning(f"client1.text:{client1.text}")
+        logging.info(f"client1.json:{client1.json()}")
+        logging.info(f"client1.text:{client1.text}")
         self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
         # Asser that the configuration top_k is the same and the output response is the same
         self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
@@ -230,7 +230,7 @@ class TestEnableThinking(CustomTestCase):
                 "max_tokens": 1024
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         # Asser can terminate the token according to the configured stop_token_ids
         self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
@@ -244,7 +244,7 @@ class TestEnableThinking(CustomTestCase):
                 "rid": "10086"
             },
         )
-        logging.warning(f"client.json:{client.json()}")
+        logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         # Assert the output response to include the configured rid
         self.assertEqual(client.json()['id'], '10086')

@@ -18,6 +18,8 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 class TestL2Cache(CustomTestCase):
     """Testcase: Test enable L2 cache(--enable-hierarchical-cache), inputting different text inference requests
                  will not reuse the same text.
+       [Test Category] Parameter
+       [Test Target] --enable-hierarchical-cache
     """
 
     @classmethod
@@ -25,17 +27,15 @@ class TestL2Cache(CustomTestCase):
         cls.model = QWEN3_32B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
-                "--tp-size",
-                2,
-                "--enable-hierarchical-cache",
-                "--base-gpu-id",
-                4,
-            ]
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            0.8,
+            "--tp-size",
+            2,
+            "--enable-hierarchical-cache",
+        ]
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -84,7 +84,8 @@ class TestL2Cache(CustomTestCase):
             "pairs of shoes. One pair of shorts costs $16.50. One pair of pants costs $22.50 and one pair of shoes "
             "costs $42. How many dollars did Mishka spend on all the clothing items?Mishka bought 3 pairs of shorts,"
             " 3 pairs of pants, and 3 pairs of shoes. One pair of shorts costs $16.50. One pair of pants costs "
-            "$22.50 and one pair of shoes costs $42. How many dollars did Mishka spend on all the clothing items?"]
+            "$22.50 and one pair of shoes costs $42. How many dollars did Mishka spend on all the clothing items?"
+        ]
         for text in texts:
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -97,6 +98,7 @@ class TestL2Cache(CustomTestCase):
                 },
             )
             self.assertEqual(response.status_code, 200)
+            # cached_tokens: Number of tokens cached in KV Cache
             self.assertTrue(int(response.json()["meta_info"]["cached_tokens"]) == 0)
 
 
