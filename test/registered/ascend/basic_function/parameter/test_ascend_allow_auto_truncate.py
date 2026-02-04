@@ -42,9 +42,7 @@ class TestAllowAutoTruncate(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if cls.process:
-            kill_process_tree(cls.process.pid)
-            cls.process = None
+        kill_process_tree(cls.process.pid)
 
     def send_long_text_request(self):
         text = "hello " * 1200
