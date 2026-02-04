@@ -77,7 +77,7 @@ class TestMaxLoadedLoras(CustomTestCase):
         )
 
 
-class TestMaxLoadedLorasError(TestMaxLoadedLoras):
+class TestMaxLoadedLorasError(CustomTestCase):
     """Testcase: Test The number of LoRA paths should exceed max_loaded_loras
 
     [Test Category] --lora-backend
@@ -122,6 +122,8 @@ class TestMaxLoadedLorasError(TestMaxLoadedLoras):
             self.assertIn(error_message, content)
             out_log_file.close()
             err_log_file.close()
+            os.remove("./cache_out_log.txt")
+            os.remove("./cache_err_log.txt")
 
 
 if __name__ == "__main__":
