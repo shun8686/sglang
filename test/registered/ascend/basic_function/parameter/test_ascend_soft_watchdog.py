@@ -1,5 +1,6 @@
 import io
 import unittest
+from sys import exception
 
 import requests
 
@@ -55,8 +56,21 @@ class TestSoftWatchdog(CustomTestCase):
         cls.stderr.close()
 
     def test_watchdog_triggers(self):
-        print("Start call /generate API", flush=True)
-        try:
+        # print("Start call /generate API", flush=True)
+        # try:
+        #     requests.post(
+        #         self.base_url + "/generate",
+        #         json={
+        #             "text": "Hello, please repeat this sentence for 1000 times.",
+        #             "sampling_params": {"max_new_tokens": 100, "temperature": 0},
+        #         },
+        #         timeout=30,
+        #     )
+        # except requests.exceptions.ReadTimeout as e:
+        #     print(f"requests.post timeout (but expected): {e}")
+        # print("End call /generate API", flush=True)
+
+        with self.assertRaises(requests.exceptions.ReadTimeout) as cm:
             requests.post(
                 self.base_url + "/generate",
                 json={
@@ -65,12 +79,15 @@ class TestSoftWatchdog(CustomTestCase):
                 },
                 timeout=30,
             )
-        except requests.exceptions.ReadTimeout as e:
-            print(f"requests.post timeout (but expected): {e}")
-        print("End call /generate API", flush=True)
+
+        e = cm.exception
 
         combined_output = self.stdout.getvalue() + self.stderr.getvalue()
         self.assertIn(self.expected_message, combined_output)
+        self.assertIn(self.expected_message, str(e))
+        self.assertEqual(e.request.method, "POST")
+        self.assertIn("/generate", e.request.url)
+        self.assertEqual(e.timeout, 1)
 
 
 if __name__ == "__main__":

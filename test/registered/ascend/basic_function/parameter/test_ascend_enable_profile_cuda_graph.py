@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=50, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableProfileCudaGraph(CustomTestCase):
@@ -21,7 +21,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
     Testcase：Verify that the --enable-profile-cuda-graph parameter is correctly configured and the inference result is correctly
 
     [Test Category] Parameter
-    [Test Target] --enable-hierarchical-cache, --hicache-ratio 1.2
+    [Test Target] --enable-profile-cuda-graph
     """
 
     @classmethod
@@ -36,7 +36,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
-            self.base_url,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
@@ -56,19 +56,11 @@ class TestEnableProfileCudaGraph(CustomTestCase):
                 },
             },
         )
-        print(response.text)
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertIn(
-            "Paris", response.text, "The inference result does not include Paris."
-        )
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
         response = requests.get(f"{self.base_url}/get_server_info")
-        print(response.json())
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
+        self.assertEqual( response.status_code, 200, "The request status code is not 200.")
         self.assertTrue(
             response.json()["enable_profile_cuda_graph"],
             "--enable-profile-cuda-graph is not taking effect.",

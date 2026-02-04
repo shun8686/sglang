@@ -18,10 +18,10 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
 
-
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     """
-    Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, queue and minimum_tokens
+    Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
+    follow_bootstrap_room, total_requests, total_tokens
 
     [Test Category] Parameter
     [Test Target] --load-balance-method
@@ -79,18 +79,21 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         self.assertGreater(metrics["score"], 0.5)
 
 
-class _TestDPAttentionQueueLoadBalance(TestDPAttentionRoundBinLoadBalance):
+class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "auto"
 
 
-class _TestDPAttentionMinimumTokenLoadBalance(TestDPAttentionRoundBinLoadBalance):
+class _TestDPAttentionFollowBootstrapRoomLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "follow_bootstrap_room"
 
-class _TestDPAttentionMinimumTokenLoadBalance1(TestDPAttentionRoundBinLoadBalance):
+
+class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_requests"
 
-class _TestDPAttentionMinimumTokenLoadBalance2(TestDPAttentionRoundBinLoadBalance):
+
+class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_tokens"
+
 
 if __name__ == "__main__":
     unittest.main()
