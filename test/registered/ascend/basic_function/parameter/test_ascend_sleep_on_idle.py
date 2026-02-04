@@ -14,6 +14,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
+
 class TestSleepOnIdle(CustomTestCase):
     """Testcase: Test configuration --sleep-on-idle, send request, interence successful.
 
@@ -24,11 +25,11 @@ class TestSleepOnIdle(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         other_args = [
-                "--sleep-on-idle",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
+            "--sleep-on-idle",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,

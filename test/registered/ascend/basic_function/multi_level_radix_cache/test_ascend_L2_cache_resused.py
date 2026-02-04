@@ -29,8 +29,6 @@ class TestL2Cache(CustomTestCase):
             0.8,
             "--tp-size",
             2,
-            "--base-gpu-id",
-            4,
         ]
         other_args = common_args + (
             [

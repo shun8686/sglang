@@ -25,17 +25,15 @@ class TestL2Cache(CustomTestCase):
         cls.model = QWEN3_32B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
-                "--tp-size",
-                2,
-                "--enable-hierarchical-cache",
-                "--base-gpu-id",
-                4,
-            ]
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            0.8,
+            "--tp-size",
+            2,
+            "--enable-hierarchical-cache",
+        ]
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -84,7 +82,8 @@ class TestL2Cache(CustomTestCase):
             "pairs of shoes. One pair of shorts costs $16.50. One pair of pants costs $22.50 and one pair of shoes "
             "costs $42. How many dollars did Mishka spend on all the clothing items?Mishka bought 3 pairs of shorts,"
             " 3 pairs of pants, and 3 pairs of shoes. One pair of shorts costs $16.50. One pair of pants costs "
-            "$22.50 and one pair of shoes costs $42. How many dollars did Mishka spend on all the clothing items?"]
+            "$22.50 and one pair of shoes costs $42. How many dollars did Mishka spend on all the clothing items?"
+        ]
         for text in texts:
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
