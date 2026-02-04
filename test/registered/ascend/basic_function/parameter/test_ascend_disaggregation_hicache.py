@@ -23,6 +23,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Testcase: Vaildate Prefill/Decode disaggregated services with hicache write policy configuration
+                 on the GSM8K dataset is no less than 0.86
 
     [Test Category] Parameter
     [Test Target]  --hicache-write-policy
