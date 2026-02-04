@@ -69,8 +69,8 @@ class TestJsonModelOverrideArgs(CustomTestCase):
             response.status_code, 200, "The request status code is not 200."
         )
         self.assertEqual(
-            response.json()["max_position_embeddings"],
-            "50",
+            response.json()["--mem-fraction-static"],
+            "0.8",
             "--json-model-override-args is not taking effect.",
         )
         self.assertEqual(response.status_code, 400)
