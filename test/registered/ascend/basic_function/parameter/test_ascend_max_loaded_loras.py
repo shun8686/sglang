@@ -34,8 +34,13 @@ class TestMaxLoadedLoras(CustomTestCase):
             "--disable-cuda-graph",
             "--mem-fraction-static",
             0.8,
+            "--max-loras-per-batch",
+            1,
             "--lora-path",
-            f"tool_calling={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH,}",
+            f"lora_1={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
+            f"lora_2={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
+            f"lora_3={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
+            f"lora_4={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
         ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
