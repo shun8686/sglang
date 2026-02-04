@@ -33,7 +33,7 @@ class TestDownloadDir(CustomTestCase):
        [Test Category] Parameter
        [Test Target] --download-dir
        """
-    model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+    model = "Qwen/Qwen2-0.5B-Instruct"
     download_dir = "./weight"
 
     @classmethod
