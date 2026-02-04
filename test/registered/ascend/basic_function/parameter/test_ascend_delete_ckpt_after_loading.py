@@ -2,7 +2,6 @@ import os
 import shutil
 import requests
 import unittest
-from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
@@ -21,8 +20,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     """
-    Testcase：Verify the weight directory is deleted after loading (you need to back up the directory in advance)
-    and the accuracy does not decrease when --delete-ckpt-after-loading is set
+    Testcase：Verify the weight directory is deleted after loading and when --delete-ckpt-after-loading is set
 
     [Test Category] Parameter
     [Test Target] --delete-ckpt-after-loading
@@ -40,10 +38,10 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             0.8,
             "--attention-backend",
             "ascend",
-            "--delete-ckpt-after-loading"
+            "--delete-ckpt-after-loading",
         ]
 
-        if (not os.path.exists(cls.back_up_model_path)):
+        if not os.path.exists(cls.back_up_model_path):
             shutil.copytree(cls.model, cls.back_up_model_path)
 
         cls.process = popen_launch_server(
@@ -72,7 +70,6 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
                 },
             },
         )
-        print(response.text)
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -81,7 +78,6 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
         )
 
         response = requests.get(f"{self.base_url}/get_server_info")
-        print(response.json())
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -90,7 +86,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading is not taking effect.",
         )
 
-        self.assertFasle(os.path.exists(self.back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
+        self.assertFalse(os.path.exists(self.back_up_model_path), "--delete-ckpt-after-loading is not taking effect.")
 
 
 if __name__ == "__main__":

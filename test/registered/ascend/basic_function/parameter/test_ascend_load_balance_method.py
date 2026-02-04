@@ -17,22 +17,21 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=200, suite="nightly-16-npu-a3", nightly=True)
 
-modes = ["round_robin", "queue", "minimum_tokens"]
-
 
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     """
-    Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, queue and minimum_tokens
+    Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
+    follow_bootstrap_room, total_requests, total_tokens
 
     [Test Category] Parameter
-    [Test Target] --load-balance-method round_robin/queue/minimum_tokens
+    [Test Target] --load-balance-method
     """
 
     mode = "round_robin"
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_R1_W8A8_WEIGHTS_PATH
+        cls.model_path = DEEPSEEK_R1_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
@@ -69,7 +68,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     def test_mgsm_en(self):
         args = SimpleNamespace(
             base_url=self.base_url,
-            model=self.model,
+            model=self.model_path,
             eval_name="mgsm_en",
             num_examples=10,
             num_threads=1024,
@@ -80,12 +79,20 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         self.assertGreater(metrics["score"], 0.5)
 
 
-class _TestDPAttentionQueueLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "queue"
+class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
+    mode = "auto"
 
 
-class _TestDPAttentionMinimumTokenLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "minimum_tokens"
+class _TestDPAttentionFollowBootstrapRoomLoadBalance(TestDPAttentionRoundBinLoadBalance):
+    mode = "follow_bootstrap_room"
+
+
+class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
+    mode = "total_requests"
+
+
+class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance):
+    mode = "total_tokens"
 
 
 if __name__ == "__main__":

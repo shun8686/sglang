@@ -1,4 +1,3 @@
-import os
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -15,12 +14,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-TEST_MODEL_MATRIX = {
-    DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH: {
-        "accuracy": 0.95,
-    },
-}
-
 
 class TestAscendDistTimeout(CustomTestCase):
     """Testcase: Verify that when --dist-timeout is set to 3600, no timeout is triggered during service startup and the model accuracy remains uncompromised.
@@ -30,7 +23,8 @@ class TestAscendDistTimeout(CustomTestCase):
     """
     @classmethod
     def setUpClass(cls):
-        cls.models = TEST_MODEL_MATRIX.keys()
+        cls.models = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+        cls.accuracy = 0.95
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
 
@@ -54,36 +48,33 @@ class TestAscendDistTimeout(CustomTestCase):
 
 
     def test_gsm8k(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=3600,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
+        process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=3600,
+            other_args=[
+                *self.common_args,
+            ],
+        )
 
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=1319,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
+        try:
+            args = SimpleNamespace(
+                num_shots=5,
+                data_path=None,
+                num_questions=1319,
+                max_new_tokens=512,
+                parallel=128,
+                host=f"http://{self.url.hostname}",
+                port=int(self.url.port),
+            )
 
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
+            metrics = run_eval_few_shot_gsm8k(args)
+            self.assertGreaterEqual(
+                metrics["accuracy"],
+                self.accuracy,
+            )
+        finally:
+            kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":

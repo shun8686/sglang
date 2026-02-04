@@ -16,13 +16,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-TEST_MODEL_MATRIX = {
-    QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH: {
-        "accuracy": 0.81,
-    },
-}
-
-
 class TestAscendEagle3(CustomTestCase):
     """Testcase: Verify GSM8K inference accuracy ≥0.81 for model with specified EAGLE3 speculative inference parameters.
 
@@ -32,7 +25,8 @@ class TestAscendEagle3(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.models = TEST_MODEL_MATRIX.keys()
+        cls.models = QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH
+        cls.accuracy= 0.81
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
 
@@ -73,37 +67,33 @@ class TestAscendEagle3(CustomTestCase):
         os.environ.update(cls.extra_envs)
 
     def test_gsm8k(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
+        process = popen_launch_server(
+            self.models,
+            self.base_url,
+            timeout=1500,
+            other_args=[
+                *self.common_args,
+            ],
+        )
 
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=1500,
-                    other_args=[
-                        *self.common_args,
-                    ],
-                )
+        try:
+            args = SimpleNamespace(
+                num_shots=5,
+                data_path=None,
+                num_questions=1319,
+                max_new_tokens=512,
+                parallel=128,
+                host=f"http://{self.url.hostname}",
+                port=int(self.url.port),
+            )
 
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=1319,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
-
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
+            metrics = run_eval_few_shot_gsm8k(args)
+            self.assertGreaterEqual(
+                metrics["accuracy"],
+                self.accuracy,
+            )
+        finally:
+            kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":

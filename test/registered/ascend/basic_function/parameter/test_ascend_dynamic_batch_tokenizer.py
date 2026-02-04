@@ -40,7 +40,7 @@ def launch_server_with_tokenizer_timeout(model_name, base_url, tokenizer_timeout
     )
     return process
 
-register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class BaseQwenTest(CustomTestCase):

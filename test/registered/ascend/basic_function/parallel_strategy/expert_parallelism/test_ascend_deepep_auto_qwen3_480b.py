@@ -23,7 +23,7 @@ class TestDeepEpQwen(CustomTestCase):
     and verify that there is no drop in accuracy compared to when DeepEP is not enabled.
 
     [Test Category] Parameter
-    [Test Target] --moe-a2a-backend deepep, --deepep-mode auto
+    [Test Target] --moe-a2a-backend, --deepep-mode
     """
 
     @classmethod

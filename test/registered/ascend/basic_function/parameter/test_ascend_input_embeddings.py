@@ -5,18 +5,18 @@ import unittest
 
 import requests
 from transformers import AutoModelForCausalLM, AutoTokenizer
-
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import  kill_process_tree
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestInputEmbeds(CustomTestCase):
     """Testcase: Test API allows for different input formats(text, embed, file), and perform successful inference.

@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=500, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
@@ -22,7 +22,7 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
     disabled, and verify that a memory error occurs when --mem-fraction-static is too large or too small.
 
     [Test Category] Parameter
-    [Test Target] --quantization modelslim, --disable-cuda-graph, --mem-fraction-static 0.8(normal)/0.1(too small)/0.9(too large)
+    [Test Target] --quantization, --disable-cuda-graph, --mem-fraction-static
     """
 
     model_path = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
@@ -81,7 +81,6 @@ class TestAscendMlaW8A8Int8(TestAscendGraphTp1Bf16):
                     )
                     self.fail("##=== Service should have crashed due to OOM===##")
                 except Exception as e:
-                    print("##=== Service have correctly crashed due to OOM===##")
                     exception_message = str(e)
                 finally:
                     self.assertEqual(exception_message, excepted_message)

@@ -21,8 +21,9 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestSkipTokenizerInit(CustomTestCase):
-    """Testcase：Verify set --skip-tokenizer-init parameter, the streaming or non-streaming, parallel sample,
-    log probability return and eos token behavior execute normally.
+    """Testcase：Verify that for LLM models with the --skip-tokenizer-init parameter configured,
+    the streaming/non-streaming inference, parallel sampling, log probability return functions,
+    and EOS Token termination trigger function all work properly.
 
         [Test Category] Parameter
         [Test Target] --skip-tokenizer-init
@@ -165,24 +166,24 @@ class TestSkipTokenizerInit(CustomTestCase):
         assert output_ids == out_stream_ids
 
     def test_simple_decode(self):
-        # Basic non-streaming inference validation, Verify normal generation for simple prompt with default parameters
+        # Verify successful text generation for non-streaming inference with default parameters
         self.run_decode()
 
     def test_parallel_sample(self):
-        # Parallel sample multiple candidates validation, Verify server can generate 3 candidate outputs for single request
+        # Verify successful text generation for non-streaming inference with default parameters
         self.run_decode(n=3)
 
     def test_logprob(self):
-        # Log probability return validation, Verify logprob return with top_logprobs_num=0 and top_logprobs_num=3
+        # Verify logprob return content matches the configuration
         for top_logprobs_num in [0, 3]:
             self.run_decode(return_logprob=True, top_logprobs_num=top_logprobs_num)
 
     def test_eos_behavior(self):
-        # EOS token behavior validation in long text generation, Verify model can trigger EOS token correctly when generating 256 tokens
+        # Verify that the EOS Token function is triggered when the number of generated tokens reaches max_new_tokens
         self.run_decode(max_new_tokens=256)
 
     def test_simple_decode_stream(self):
-        # Basic streaming inference validation, Verify stream inference works and is consistent with non-stream inference
+        # Verify that the results of streaming inference are consistent with those of non-streaming inference.
         self.run_decode_stream()
 
     def get_input_ids(self, prompt_text) -> list[int]:
@@ -214,9 +215,9 @@ class TestSkipTokenizerInit(CustomTestCase):
 
 
 class TestSkipTokenizerInitVLM(TestSkipTokenizerInit):
-    """
-    Test class for --skip-tokenizer-init parameter of VLM model
-    Inherits from the LLM test class and rewrites image-related initialization and data processing methods
+    """Testcase：Verify that for LLM models with the --skip-tokenizer-init parameter configured,
+    the streaming/non-streaming inference, parallel sampling, log probability return functions,
+    and EOS Token termination trigger function all work properly.
     """
     model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
 

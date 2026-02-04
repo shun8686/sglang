@@ -1,14 +1,3 @@
-"""
-Usage:
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentAPI.test_streaming_separate_reasoning_false
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentAPI.test_streaming_separate_reasoning_true
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentAPI.test_streaming_separate_reasoning_true_stream_reasoning_false
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentAPI.test_nonstreaming_separate_reasoning_false
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentAPI.test_nonstreaming_separate_reasoning_true
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentStartup.test_nonstreaming
-python3 -m unittest openai_server.features.test_reasoning_content.TestReasoningContentStartup.test_streaming
-"""
-
 import unittest
 
 import openai
@@ -31,11 +20,11 @@ MODEL_PATH = DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH
 
 class TestReasoningContentAPI(CustomTestCase):
     """
-    Testcase：Verify the correctness of reasoning content API under streaming/non-streaming, and stream_reasoning
-    configurations
+    Testcase：Verify the correctness of reasoning content API under both streaming and non-streaming, and separate
+    reasoning is set to  true or false
 
     [Test Category] Parameter
-    [Test Target] --reasoning-parser deepseek-r1, separate_reasoning, stream_reasoning
+    [Test Target] --reasoning-parser
     """
     @classmethod
     def setUpClass(cls):

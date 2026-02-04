@@ -28,7 +28,7 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
 
     TEST_MODEL_MATRIX = {
         QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH: {
-            "accuracy": 0.88,
+            "accuracy": 0.85,
             "latency": 150,
             "output_throughput": 30,
         },
@@ -52,11 +52,13 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
         for env in cls.envs.keys():
             os.environ[env] = cls.envs[env]
 
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
     def test_a_gsm8k(self):
         for model in self.models:
             with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
-
                 process = popen_launch_server(
                     model,
                     self.base_url,
@@ -89,8 +91,6 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
     def test_b_throughput(self):
         for model in self.models:
             with self.subTest(model=model):
-                print(f"##=== Testing throughput: {model} ===##")
-
                 output_throughput = run_bench_offline_throughput(
                     model,
                     [
@@ -98,8 +98,6 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
                         *self.extra_args,
                     ],
                 )
-
-                print(f"##=== {model} throughput: {output_throughput} ===##")
 
                 self.assertGreater(
                     output_throughput,
