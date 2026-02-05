@@ -1,5 +1,7 @@
 test_case=$1
-cd $SGLANG_SOURCE_PATH
+
+sglang_source_path=/root/sglang
+cd ${sglang_source_path}
 if [ ! -f "${test_case}" ];then
   echo "The test case file is not exist: $test_case"
   exit 0
@@ -40,8 +42,8 @@ unset ASCEND_LAUNCH_BLOCKING
 
 # use sglang from source or from image
 if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "true" ];then
-    echo "Use sglang from source: ${SGLANG_SOURCE_PATH}/python"
-    export PYTHONPATH=$SGLANG_SOURCE_PATH/python:$PYTHONPATH
+    echo "Use sglang from source: ${sglang_source_path}"
+    export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
 fi
 
 # set environment of cann

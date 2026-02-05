@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  nightly-performance-pd-separation-tests:
-    name: pd-separation
+  nightly-performance-multi-node-pd-separation-tests:
+    name: multi-node-pd-separation
     if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     strategy:
       fail-fast: false
@@ -73,22 +73,21 @@ jobs:
             decode_size: 2
             router_size: 1
             test_case: test/manual/ascend/performance/test_ascend_qwen3_480b_w8a8_1p1d_24p_in3k5_out1k5_50ms.py
-    uses: nightly-test-npu-perf-pd-separation.yml
+    uses: nightly-test-npu-perf-multi-node-pd-separation.yml
     with:
-      soc_version: a3
       runner: linux-aarch64-a3-0
       test_config_name: ${{ matrix.test_config.name }}
       prefill_size: ${{ matrix.test_config.prefill_size }}
       decode_size: ${{ matrix.test_config.decode_size }}
       router_size: ${{ matrix.test_config.router_size }}
       test_case: ${{ matrix.test_config.test_case }}
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
+      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:v0.5.6-ascend-a3'
       install_sglang_from_source: true
 
-  nightly-performance-multi-node-tests:
-    name: multi-node
+  nightly-performance-multi-node-pd-mix-tests:
+    name: multi-node-pd-mix
     if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
-    needs: nightly-performance-pd-separation-tests
+    needs: nightly-performance-multi-node-pd-separation-tests
     strategy:
       fail-fast: false
       max-parallel: 1
@@ -100,20 +99,19 @@ jobs:
           - name: test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms
             node_size: 2
             test_case: test/manual/ascend/performance/test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms.py
-    uses: nightly-test-npu-perf-multi-node.yml
+    uses: nightly-test-npu-perf-multi-node-pd-mix.yml
     with:
-      soc_version: a3
       runner: linux-aarch64-a3-0
       test_config_name: ${{ matrix.test_config.name }}
       node_size: ${{ matrix.test_config.node_size }}
       test_case: ${{ matrix.test_config.test_case }}
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
+      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:v0.5.6-ascend-a3'
       install_sglang_from_source: true
 
   nightly-performance-single-node-tests:
     name: single-node
     if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
-    needs: nightly-performance-multi-node-tests
+    needs: nightly-performance-multi-node-pd-mix-tests
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -166,5 +164,5 @@ jobs:
       runner: ${{ matrix.test_config.runner }}
       test_config_name: ${{ matrix.test_config.name }}
       test_case: ${{ matrix.test_config.test_case }}
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5-a3-release20260121'
+      image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:v0.5.6-ascend-a3'
       install_sglang_from_source: true

@@ -24,7 +24,7 @@ MONITOR_POD_NAME = "{}-pod-0".format(os.environ.get('KUBE_JOB_NAME')) if KUBE_JO
     "{}-sglang-router-0".format(os.environ.get('KUBE_JOB_NAME'))
 KUBE_YAML_FILE = os.environ.get('KUBE_YAML_FILE')
 if not KUBE_YAML_FILE:
-    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "k8s_multi.yaml" if KUBE_JOB_TYPE == "multi" else "k8s_pd_separation.yaml"
+    KUBE_YAML_FILE = "k8s_single.yaml" if KUBE_JOB_TYPE == "single" else "k8s_multi_pd_mix.yaml" if KUBE_JOB_TYPE == "multi" else "k8s_multi_pd_separation.yaml"
 
 def create_pod(yaml_file=KUBE_YAML_FILE, namespace=KUBE_NAME_SPACE):
     with open(yaml_file, "r", encoding="utf-8") as f:

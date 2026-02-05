@@ -19,12 +19,12 @@ on:
         required: false
         type: string
         description: image for pods
-        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
+        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:v0.5.6-ascend-a3"
       install_sglang_from_source:
         required: false
-        type: string
+        type: boolean
         default: true
-        description: use sglang from source code or from image
+        description: use sglang from source code or from docker image
 
 concurrency:
   group: ascend-nightly-performance-singlenode-${{ github.workflow_ref }}-${{ github.ref }}--${{ inputs.test_config_name }}
@@ -50,15 +50,13 @@ jobs:
           SGLANG_USE_MODELSCOPE: true
           HF_ENDPOINT: https://hf-mirror.com
         run: |
-          current_path=$(pwd)
+          sglang_source_path=$(pwd)
+          echo "Source code path: ${sglang_source_path}"
 
           # prepare for output data
           current_date=$(date +%Y%m%d)
           test_data_output_path=/root/.cache/tests/output/perf/${current_date}
           mkdir -p ${test_data_output_path}
-
-          commit_id=${{ github.sha }}
-          echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
 
           test_case=${{ inputs.test_case }}
           tc_name=${test_case##*/}
@@ -88,12 +86,14 @@ jobs:
           install_sglang_from_source=${{ inputs.install_sglang_from_source }}
           if [ "${install_sglang_from_source}" = "true" ];then
             echo "Install sglang from source"
-            export PYTHONPATH=${current_path}/python:$PYTHONPATH
+            commit_id=${{ github.sha }}
+            echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
+            export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
           fi
 
           # Set environment of cann
-          . /usr/local/Ascend/cann/set_env.sh || true
-          . /usr/local/Ascend/nnal/atb/set_env.sh || true
+          . /usr/local/Ascend/cann/set_env.sh
+          . /usr/local/Ascend/nnal/atb/set_env.sh
 
           echo "Running test case ${test_case}"
           python3 -u ${test_case}

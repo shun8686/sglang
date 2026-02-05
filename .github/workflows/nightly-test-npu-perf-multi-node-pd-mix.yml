@@ -3,14 +3,10 @@ name: 'e2e nightly test multi-node (Ascend NPU)'
 on:
   workflow_call:
     inputs:
-      soc_version:
-        required: true
-        type: string
-        description: use a2 or a3
       runner:
         required: false
         type: string
-        default: linux-amd64-cpu-0
+        default: linux-aarch64-a3-0
       test_config_name:
         required: true
         type: string
@@ -27,15 +23,15 @@ on:
         required: false
         type: string
         description: image for pods
-        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5-a3-release20260121"
+        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:v0.5.6-ascend-a3"
       install_sglang_from_source:
         required: false
-        type: string
+        type: boolean
         default: true
-        description: use sglang from source code or from image
+        description: use sglang from source code or from docker image
 
 concurrency:
-  group: ascend-nightly-multi-node-${{ github.ref }}-${{ inputs.soc_version }}
+  group: ascend-nightly-multi-node-pd-mix-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -48,7 +44,7 @@ jobs:
         KUBECONFIG: /data/.cache/kb.yaml
         KUBECTL: /data/.cache/kubectl
         NAMESPACE: ascend-sglang
-        ASCEND_TEST_CASE_PATH: test/registered/ascend/performance
+        ASCEND_PERF_TEST_CONFIG_PATH: python/sglang/test/ascend/performance
         KUBE_JOB_TYPE: multi
         KUBE_JOB_NAME: ascend-sglang-multi
         KUBE_CONFIG_MAP: ascend-sglang-info
@@ -68,29 +64,31 @@ jobs:
 
       - name: Prepare scripts
         run: |
-          # prepare for output data
+          sglang_source_path=$(pwd)
+          echo "Source code path: ${sglang_source_path}"
+
+          # mkdir for output data
           current_date=$(date +%Y%m%d)
           test_data_output_path=/data/.cache/tests/output/perf/${current_date}
           mkdir -p ${test_data_output_path}
 
-          commit_id=${{ github.sha }}
-          echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
+          install_sglang_from_source="${{ inputs.install_sglang_from_source }}"
+          if [ "${install_sglang_from_source}" = "true" ];then
+            echo "Install sglang from source, record the commit ID."
+            commit_id=${{ github.sha }}
+            echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
+          fi
 
+          # make a metrics data file
           test_case="${{ inputs.test_case }}"
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
           metrics_data_file=${test_data_output_path}/${tc_name}.txt
           echo "Metrics file: ${metrics_data_file}"
 
-          # prepare for test code
-          rm -rf /data/.cache/tests/sglang/*
-          cp -r * /data/.cache/tests/sglang/
-          sglang_source_path=/data/.cache/tests/sglang
-
-          # prepare for k8s_multi.yaml
+          # prepare a k8s yaml for creating pods
           image="${{ inputs.image }}"
           node_size="${{ inputs.node_size }}"
-          install_sglang_from_source="${{ inputs.install_sglang_from_source }}"
           echo "{ \"image\": $image,                                                  \
                   \"name_space\": \"$NAMESPACE\",                                     \
                   \"kube_job_name\": \"$KUBE_JOB_NAME\",                              \
@@ -101,13 +99,14 @@ jobs:
                   \"metrics_data_file\": \"$metrics_data_file\",                      \
                   \"test_case\": \"$test_case\",                                      \
                   \"install_sglang_from_source\": \"$install_sglang_from_source\" }" |\
-              jinja2 ${ASCEND_TEST_CASE_PATH}/k8s_multi.yaml.jinja2 -o ${ASCEND_TEST_CASE_PATH}/k8s_multi.yaml
-          echo "Kubelete config file is generated: ${ASCEND_TEST_CASE_PATH}/k8s_multi.yaml"
+              jinja2 ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml.jinja2 -o         \
+                     ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml
+          echo "Kubelete config file is generated: ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml"
 
       - name: Clear resources
         run: |
-          cd $ASCEND_TEST_CASE_PATH
-          kubectl delete -f ./k8s_multi.yaml --ignore-not-found=true || true
+          cd ${ASCEND_PERF_TEST_CONFIG_PATH}
+          kubectl delete -f ./k8s_multi_pd_mix.yaml --ignore-not-found=true || true
 
           pod_name_prefix="${KUBE_JOB_NAME}-sglang"
           echo "kube name space: $NAMESPACE, pod name prefix: ${pod_name_prefix}"
@@ -129,12 +128,12 @@ jobs:
           HF_ENDPOINT: https://hf-mirror.com
         run: |
 
-          cd $ASCEND_TEST_CASE_PATH
+          cd ${ASCEND_PERF_TEST_CONFIG_PATH}
           python3 -u run_ascend_ci.py
 
       - name: Post process
         if: always()
         run: |
           kubectl get pods -n $NAMESPACE
-          cd $ASCEND_TEST_CASE_PATH
-          kubectl delete -f ./k8s_multi.yaml --ignore-not-found=true || true
+          cd ${ASCEND_PERF_TEST_CONFIG_PATH}
+          kubectl delete -f ./k8s_multi_pd_mix.yaml --ignore-not-found=true || true

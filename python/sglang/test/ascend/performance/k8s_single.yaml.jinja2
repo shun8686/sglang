@@ -40,8 +40,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: metadata.annotations['huawei.com/ascend-1980']
-          - name: SGLANG_SOURCE_PATH
-            value: "{{ sglang_source_path }}"
           - name: INSTALL_SGLANG_FROM_SOURCE
             value: "{{ install_sglang_from_source }}"
           - name: METRICS_DATA_FILE
@@ -55,7 +53,7 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               bash $SGLANG_SOURCE_PATH/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
+               bash /root/sglang/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
           resources:
             requests:
               huawei.com/ascend-1980: {{ npu_num }}
@@ -74,6 +72,8 @@ spec:
             mountPath: /data
           - name: cache
             mountPath: /root/.cache
+          - name: sglang-source-code
+            mountPath: /root/sglang
         volumes:
         - name: kube-config
           hostPath:
@@ -90,6 +90,9 @@ spec:
         - name: localtime
           hostPath:
             path: /etc/localtime
+        - name: sglang-source-code
+          hostPath:
+            path: "{{ sglang_source_path }}"
         nodeSelector:
           accelerator/huawei-npu: ascend-snt9c
         restartPolicy: OnFailure
