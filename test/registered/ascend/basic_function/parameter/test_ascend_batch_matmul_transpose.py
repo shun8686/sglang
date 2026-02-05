@@ -68,6 +68,32 @@ class TestMatrixMultiplication(unittest.TestCase):
         self.assertLessEqual(
             max_diff, atol, f"Absolute error too large: {max_diff} > {atol}"
         )
+    
+    def _run_with_repetition(self, func, repetition_times: int):
+        """
+        Run the target function multiple times and return the average execution time.
+        Skip the first run for warm-up to avoid initialization overhead.
+        Args:
+            func: Target function to execute (no parameters)
+            repetition_times: Number of times to repeat the function execution (for average calculation)
+        Returns:
+            float: Average execution time of the target function (seconds)
+        """
+        # Warm-up: first run is not included in timing statistics
+        func()
+        torch.npu.synchronize()
+        
+        # Collect time for multiple runs
+        total_time = 0.0
+        for _ in range(repetition_times):
+            torch.npu.synchronize()
+            start_time = time.time()
+            func()
+            torch.npu.synchronize()
+            total_time += (time.time() - start_time)
+        
+        # Return average time
+        return total_time / repetition_times
 
     def test_boundary_conditions(self):
         """Test boundary conditions"""
@@ -88,10 +114,12 @@ class TestMatrixMultiplication(unittest.TestCase):
         dtypes = [torch.float16, torch.bfloat16]
         # Performance assertion threshold: fused operator should be at least 60% faster than native operator
         performance_speedup_threshold = 0.6
-
-        # Initialize lists to collect timing results of all test cases
-        all_golden_times = []
-        all_fused_times = []
+        # Number of repetitions per test case (adjustable based on stability requirement)
+        repetition_times_per_case = 5
+        
+        # Initialize lists to collect average timing results of all test cases
+        all_golden_avg_times = []
+        all_fused_avg_times = []
 
         for dtype in dtypes:
             for b, m, k, n in test_cases:
@@ -101,44 +129,50 @@ class TestMatrixMultiplication(unittest.TestCase):
                     res1 = torch.empty((b, m * n), dtype=dtype, device="npu")
                     res2 = torch.empty((b, m, n), dtype=dtype, device="npu")
 
-                    # Measure time for golden (native) computation
-                    torch.npu.synchronize()
-                    start_time = time.time()
-                    self.compute_golden(a, b_tensor, res1, m, n)
-                    torch.npu.synchronize()
-                    golden_time = time.time() - start_time
-
-                    # Measure time for fused computation
-                    torch.npu.synchronize()
-                    start_time = time.time()
-                    torch.ops.npu.batch_matmul_transpose(a, b_tensor, res2)
-                    torch.npu.synchronize()
-                    fused_time = time.time() - start_time
+                    # Define native (golden) computation function for repetition
+                    def golden_compute_func():
+                        self.compute_golden(a, b_tensor, res1, m, n)
+                    
+                    # Define fused computation function for repetition
+                    def fused_compute_func():
+                        torch.ops.npu.batch_matmul_transpose(a, b_tensor, res2)
+                    
+                    # Get average time for native computation (multiple runs)
+                    golden_avg_time = self._run_with_repetition(
+                        golden_compute_func, repetition_times_per_case
+                    )
+                    
+                    # Get average time for fused computation (multiple runs)
+                    fused_avg_time = self._run_with_repetition(
+                        fused_compute_func, repetition_times_per_case
+                    )
 
                     # Verify result correctness for current test case
                     self.assert_tensors_almost_equal(res1.view(-1, m, n), res2, dtype)
 
-                    # Collect timing results of current test case
-                    all_golden_times.append(golden_time)
-                    all_fused_times.append(fused_time)
+                    # Collect average timing results of current test case
+                    all_golden_avg_times.append(golden_avg_time)
+                    all_fused_avg_times.append(fused_avg_time)
 
-                    # Log current test case result
+                    # Log current test case's average result
                     logger.info(
-                        f"Shape: ({b}, {m}, {k}, {n}), dtype: {dtype}, Golden time: {golden_time:.6f}s, Fused time: {fused_time:.6f}s"
+                        f"Shape: ({b}, {m}, {k}, {n}), dtype: {dtype}, "
+                        f"Golden avg time (x{repetition_times_per_case}): {golden_avg_time:.6f}s, "
+                        f"Fused avg time (x{repetition_times_per_case}): {fused_avg_time:.6f}s"
                     )
 
         # Calculate overall average time after all test cases are executed
-        if all_golden_times and all_fused_times:
-            avg_golden_time = sum(all_golden_times) / len(all_golden_times)
-            avg_fused_time = sum(all_fused_times) / len(all_fused_times)
+        if all_golden_avg_times and all_fused_avg_times:
+            overall_avg_golden = sum(all_golden_avg_times) / len(all_golden_avg_times)
+            overall_avg_fused = sum(all_fused_avg_times) / len(all_fused_avg_times)
 
             # Calculate overall speedup ratio and assert (avoid division by zero)
-            if avg_golden_time > 1e-9:
-                overall_speedup_ratio = (avg_golden_time - avg_fused_time) / avg_golden_time
+            if overall_avg_golden > 1e-9:
+                overall_speedup_ratio = (overall_avg_golden - overall_avg_fused) / overall_avg_golden
                 logger.info(
                     f"\n===== Test Boundary Conditions Overall Result ====="
-                    f"\nAverage Golden time: {avg_golden_time:.6f}s"
-                    f"\nAverage Fused time: {avg_fused_time:.6f}s"
+                    f"\nOverall Average Golden time: {overall_avg_golden:.6f}s"
+                    f"\nOverall Average Fused time: {overall_avg_fused:.6f}s"
                     f"\nOverall Speedup Ratio: {overall_speedup_ratio:.4f}"
                 )
 
@@ -149,9 +183,9 @@ class TestMatrixMultiplication(unittest.TestCase):
                     f"Overall performance optimization not meet requirement! Overall speedup ratio: {overall_speedup_ratio:.4f} < {performance_speedup_threshold}"
                 )
             else:
-                logger.warning("Golden average time is too small to calculate valid speedup ratio")
+                logger.warning("Golden overall average time is too small to calculate valid speedup ratio")
         else:
-            logger.warning("No valid timing results collected for boundary conditions test")
+            logger.warning("No valid average timing results collected for boundary conditions test")
 
     def test_random_shapes(self):
         """Test randomly generated shapes"""
@@ -159,10 +193,12 @@ class TestMatrixMultiplication(unittest.TestCase):
         dtypes = [torch.float16, torch.bfloat16]
         # Performance assertion threshold: fused operator should be at least 60% faster than native operator
         performance_speedup_threshold = 0.6
-
-        # Initialize lists to collect timing results of all test cases
-        all_golden_times = []
-        all_fused_times = []
+        # Number of repetitions per test case (adjustable based on stability requirement)
+        repetition_times_per_case = 5
+        
+        # Initialize lists to collect average timing results of all test cases
+        all_golden_avg_times = []
+        all_fused_avg_times = []
 
         for dtype in dtypes:
             for _ in range(num_tests):
@@ -178,44 +214,50 @@ class TestMatrixMultiplication(unittest.TestCase):
                     res1 = torch.empty((b, m * n), dtype=dtype, device="npu")
                     res2 = torch.empty((b, m, n), dtype=dtype, device="npu")
 
-                    # Measure time for golden (native) computation
-                    torch.npu.synchronize()
-                    start_time = time.time()
-                    self.compute_golden(a, b_tensor, res1, m, n)
-                    torch.npu.synchronize()
-                    golden_time = time.time() - start_time
-
-                    # Measure time for fused computation
-                    torch.npu.synchronize()
-                    start_time = time.time()
-                    torch.ops.npu.batch_matmul_transpose(a, b_tensor, res2)
-                    torch.npu.synchronize()
-                    fused_time = time.time() - start_time
+                    # Define native (golden) computation function for repetition
+                    def golden_compute_func():
+                        self.compute_golden(a, b_tensor, res1, m, n)
+                    
+                    # Define fused computation function for repetition
+                    def fused_compute_func():
+                        torch.ops.npu.batch_matmul_transpose(a, b_tensor, res2)
+                    
+                    # Get average time for native computation (multiple runs)
+                    golden_avg_time = self._run_with_repetition(
+                        golden_compute_func, repetition_times_per_case
+                    )
+                    
+                    # Get average time for fused computation (multiple runs)
+                    fused_avg_time = self._run_with_repetition(
+                        fused_compute_func, repetition_times_per_case
+                    )
 
                     # Verify result correctness for current test case
                     self.assert_tensors_almost_equal(res1.view(-1, m, n), res2, dtype)
 
-                    # Collect timing results of current test case
-                    all_golden_times.append(golden_time)
-                    all_fused_times.append(fused_time)
+                    # Collect average timing results of current test case
+                    all_golden_avg_times.append(golden_avg_time)
+                    all_fused_avg_times.append(fused_avg_time)
 
-                    # Log current test case result
+                    # Log current test case's average result
                     logger.info(
-                        f"Shape: Random ({b}, {m}, {k}, {n}), dtype: {dtype}, Golden time: {golden_time:.6f}s, Fused time: {fused_time:.6f}s"
+                        f"Shape: Random ({b}, {m}, {k}, {n}), dtype: {dtype}, "
+                        f"Golden avg time (x{repetition_times_per_case}): {golden_avg_time:.6f}s, "
+                        f"Fused avg time (x{repetition_times_per_case}): {fused_avg_time:.6f}s"
                     )
 
         # Calculate overall average time after all test cases are executed
-        if all_golden_times and all_fused_times:
-            avg_golden_time = sum(all_golden_times) / len(all_golden_times)
-            avg_fused_time = sum(all_fused_times) / len(all_fused_times)
+        if all_golden_avg_times and all_fused_avg_times:
+            overall_avg_golden = sum(all_golden_avg_times) / len(all_golden_avg_times)
+            overall_avg_fused = sum(all_fused_avg_times) / len(all_fused_avg_times)
 
             # Calculate overall speedup ratio and assert (avoid division by zero)
-            if avg_golden_time > 1e-9:
-                overall_speedup_ratio = (avg_golden_time - avg_fused_time) / avg_golden_time
+            if overall_avg_golden > 1e-9:
+                overall_speedup_ratio = (overall_avg_golden - overall_avg_fused) / overall_avg_golden
                 logger.info(
                     f"\n===== Test Random Shapes Overall Result ====="
-                    f"\nAverage Golden time: {avg_golden_time:.6f}s"
-                    f"\nAverage Fused time: {avg_fused_time:.6f}s"
+                    f"\nOverall Average Golden time: {overall_avg_golden:.6f}s"
+                    f"\nOverall Average Fused time: {overall_avg_fused:.6f}s"
                     f"\nOverall Speedup Ratio: {overall_speedup_ratio:.4f}"
                 )
 
@@ -226,9 +268,9 @@ class TestMatrixMultiplication(unittest.TestCase):
                     f"Overall performance optimization not meet requirement! Overall speedup ratio: {overall_speedup_ratio:.4f} < {performance_speedup_threshold}"
                 )
             else:
-                logger.warning("Golden average time is too small to calculate valid speedup ratio")
+                logger.warning("Golden overall average time is too small to calculate valid speedup ratio")
         else:
-            logger.warning("No valid timing results collected for random shapes test")
+            logger.warning("No valid average timing results collected for random shapes test")
 
     def test_zero_values(self):
         """Test zero input values"""
@@ -236,10 +278,12 @@ class TestMatrixMultiplication(unittest.TestCase):
         b, m, k, n = 5, 4, 3, 2
         # Performance assertion threshold: fused operator should be at least 60% faster than native operator
         performance_speedup_threshold = 0.6
-
-        # Initialize lists to collect timing results of all test cases
-        all_golden_times = []
-        all_fused_times = []
+        # Number of repetitions per test case (adjustable based on stability requirement)
+        repetition_times_per_case = 5
+        
+        # Initialize lists to collect average timing results of all test cases
+        all_golden_avg_times = []
+        all_fused_avg_times = []
 
         for dtype in dtypes:
             with self.subTest(dtype=dtype):
@@ -248,45 +292,51 @@ class TestMatrixMultiplication(unittest.TestCase):
                 res1 = torch.empty((b, m * n), dtype=dtype, device="npu")
                 res2 = torch.empty((b, m, n), dtype=dtype, device="npu")
 
-                # Measure time for golden (native) computation
-                torch.npu.synchronize()
-                start_time = time.time()
-                self.compute_golden(a, b_tensor, res1, m, n)
-                torch.npu.synchronize()
-                golden_time = time.time() - start_time
-
-                # Measure time for fused computation
-                torch.npu.synchronize()
-                start_time = time.time()
-                torch.ops.npu.batch_matmul_transpose(a, b_tensor, res2)
-                torch.npu.synchronize()
-                fused_time = time.time() - start_time
+                # Define native (golden) computation function for repetition
+                def golden_compute_func():
+                    self.compute_golden(a, b_tensor, res1, m, n)
+                
+                # Define fused computation function for repetition
+                def fused_compute_func():
+                    torch.ops.npu.batch_matmul_transpose(a, b_tensor, res2)
+                
+                # Get average time for native computation (multiple runs)
+                golden_avg_time = self._run_with_repetition(
+                    golden_compute_func, repetition_times_per_case
+                )
+                
+                # Get average time for fused computation (multiple runs)
+                fused_avg_time = self._run_with_repetition(
+                    fused_compute_func, repetition_times_per_case
+                )
 
                 # Verify result correctness for current test case
                 self.assert_tensors_almost_equal(res1.view(-1, m, n), res2, dtype)
                 self.assertTrue(torch.all(res2 == 0))
 
-                # Collect timing results of current test case
-                all_golden_times.append(golden_time)
-                all_fused_times.append(fused_time)
+                # Collect average timing results of current test case
+                all_golden_avg_times.append(golden_avg_time)
+                all_fused_avg_times.append(fused_avg_time)
 
-                # Log current test case result
+                # Log current test case's average result
                 logger.info(
-                    f"Shape: ({b}, {m}, {k}, {n}), dtype: {dtype}, Golden time: {golden_time:.6f}s, Fused time: {fused_time:.6f}s"
+                    f"Shape: ({b}, {m}, {k}, {n}), dtype: {dtype}, "
+                    f"Golden avg time (x{repetition_times_per_case}): {golden_avg_time:.6f}s, "
+                    f"Fused avg time (x{repetition_times_per_case}): {fused_avg_time:.6f}s"
                 )
 
         # Calculate overall average time after all test cases are executed
-        if all_golden_times and all_fused_times:
-            avg_golden_time = sum(all_golden_times) / len(all_golden_times)
-            avg_fused_time = sum(all_fused_times) / len(all_fused_times)
+        if all_golden_avg_times and all_fused_avg_times:
+            overall_avg_golden = sum(all_golden_avg_times) / len(all_golden_avg_times)
+            overall_avg_fused = sum(all_fused_avg_times) / len(all_fused_avg_times)
 
             # Calculate overall speedup ratio and assert (avoid division by zero)
-            if avg_golden_time > 1e-9:
-                overall_speedup_ratio = (avg_golden_time - avg_fused_time) / avg_golden_time
+            if overall_avg_golden > 1e-9:
+                overall_speedup_ratio = (overall_avg_golden - overall_avg_fused) / overall_avg_golden
                 logger.info(
                     f"\n===== Test Zero Values Overall Result ====="
-                    f"\nAverage Golden time: {avg_golden_time:.6f}s"
-                    f"\nAverage Fused time: {avg_fused_time:.6f}s"
+                    f"\nOverall Average Golden time: {overall_avg_golden:.6f}s"
+                    f"\nOverall Average Fused time: {overall_avg_fused:.6f}s"
                     f"\nOverall Speedup Ratio: {overall_speedup_ratio:.4f}"
                 )
 
@@ -297,9 +347,9 @@ class TestMatrixMultiplication(unittest.TestCase):
                     f"Overall performance optimization not meet requirement! Overall speedup ratio: {overall_speedup_ratio:.4f} < {performance_speedup_threshold}"
                 )
             else:
-                logger.warning("Golden average time is too small to calculate valid speedup ratio")
+                logger.warning("Golden overall average time is too small to calculate valid speedup ratio")
         else:
-            logger.warning("No valid timing results collected for zero values test")
+            logger.warning("No valid average timing results collected for zero values test")
 
 
 if __name__ == "__main__":
