@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-from sglang.test.ascend.performance.test_ascend_performance_utils import NIC_NAME
+# from sglang.test.ascend.performance.test_ascend_performance_utils import NIC_NAME
 
 
 class TestAscendQwenEagle3(TestDisaggregationBase):
@@ -76,8 +76,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
             "HCCL_BUFFSIZE": "400",
-            "HCCL_SOCKET_IFNAME": NIC_NAME,
-            "GLOO_SOCKET_IFNAME": NIC_NAME,
+            # "HCCL_SOCKET_IFNAME": NIC_NAME,
+            # "GLOO_SOCKET_IFNAME": NIC_NAME,
             "HCCL_OP_EXPANSION_MODE": "AIV",
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
@@ -134,8 +134,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
             "HCCL_BUFFSIZE": "400",
-            "HCCL_SOCKET_IFNAME": NIC_NAME,
-            "GLOO_SOCKET_IFNAME": NIC_NAME,
+            # "HCCL_SOCKET_IFNAME": NIC_NAME,
+            # "GLOO_SOCKET_IFNAME": NIC_NAME,
             "HCCL_OP_EXPANSION_MODE": "AIV",
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
