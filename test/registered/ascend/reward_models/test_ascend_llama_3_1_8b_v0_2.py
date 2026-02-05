@@ -43,6 +43,7 @@ class TestLlama(CustomTestCase):
         self,
         convs,
         model_path,
+        tp_size,
         torch_dtype,
         tolerance,
     ) -> None:
@@ -55,6 +56,7 @@ class TestLlama(CustomTestCase):
 
         with SRTRunner(
             model_path,
+            tp_size=tp_size,
             torch_dtype=torch_dtype,
             model_type="reward",
         ) as srt_runner:
