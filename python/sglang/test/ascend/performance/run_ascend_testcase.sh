@@ -44,6 +44,12 @@ unset ASCEND_LAUNCH_BLOCKING
 if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "true" ];then
     echo "Use sglang from source: ${sglang_source_path}"
     export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
+else
+    sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
+    ascend_test_util_path=${sglang_pkg_path}/sglang/test/ascend
+    mkdir -p ${ascend_test_util_path}
+    mv ${ascend_test_util_path} ${ascend_test_util_path}_bak
+    cp -r ${sglang_source_path}/python/sglang/test/ascend ${ascend_test_util_path}
 fi
 
 # set environment of cann
