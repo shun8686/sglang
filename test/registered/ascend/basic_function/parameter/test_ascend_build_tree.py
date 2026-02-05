@@ -13,6 +13,12 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 logger = logging.getLogger(__name__)
+# Configure logging basic settings (ensure log messages are formatted properly)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
 
 
 def build_tree_kernel_efficient_preprocess(
@@ -126,6 +132,12 @@ def build_tree_kernel_efficient(
         positions = torch.empty(
             (bs * num_verify_tokens,), device=device, dtype=torch.long
         )
+    
+    # Initialize lists to collect timing results of two implementations
+    native_tree_times = []
+    kernel_tree_times = []
+    
+    # Execute native implementation and collect timing
     torch.npu.synchronize()
     start_time = time.time()
     (
@@ -147,10 +159,12 @@ def build_tree_kernel_efficient(
         tree_mask_mode,
         bs,
     )
+    torch.npu.synchronize()
+    native_time = time.time() - start_time
+    native_tree_times.append(native_time)  # Collect single timing result
 
-    fused_time = time.time() - start_time
-    print(f'native_tree_time is {fused_time}')
-    
+    # Execute NPU kernel implementation and collect timing
+    torch.npu.synchronize()
     start_time = time.time()    
     torch.ops.npu.build_tree_kernel_efficient( 
         parent_list,
@@ -166,8 +180,30 @@ def build_tree_kernel_efficient(
         num_verify_tokens,
         tree_mask_mode,  
     )
-    fused_time = time.time() - start_time
-    print(f'kernel_tree_time is {fused_time}')
+    torch.npu.synchronize()
+    kernel_time = time.time() - start_time
+    kernel_tree_times.append(kernel_time)  # Collect single timing result
+    
+    # Log single timing results (replace print with logging)
+    logger.info(f'native_tree_time is {native_time}')
+    logger.info(f'kernel_tree_time is {kernel_time}')
+    
+    # Calculate average times (single result here, extendable for multiple runs)
+    avg_native_time = sum(native_tree_times) / len(native_tree_times)
+    avg_kernel_time = sum(kernel_tree_times) / len(kernel_tree_times)
+    
+    # Performance assertion: kernel implementation should be faster than native implementation
+    # Threshold: kernel time should be at least 10% faster than native time (adjustable as needed)
+    performance_threshold = 0.1  # 10% speedup requirement
+    if avg_native_time > 1e-9:  # Avoid division by zero
+        speedup_ratio = (avg_native_time - avg_kernel_time) / avg_native_time
+        logger.info(f'Average native tree time: {avg_native_time}, Average kernel tree time: {avg_kernel_time}')
+        logger.info(f'Performance speedup ratio: {speedup_ratio}')
+        
+        # Assert the speedup meets the requirement
+        assert speedup_ratio >= performance_threshold, \
+            f"Performance requirement not met! Speedup ratio {speedup_ratio:.4f} < {performance_threshold}"
+    
     return (
         tree_mask,
         positions,
@@ -410,13 +446,16 @@ def test_build_tree_kernel_efficient():
         num_verify_tokens=num_draft_token,
     )
 
-    print("=========== build tree kernel efficient ==========")
-    print(f"{tree_mask=}")
-    print(f"{position=}")
-    print(f"{retrive_index=}")
-    print(f"{retrive_next_token=}")
-    print(f"{retrive_next_sibling=}")
-    print(f"{draft_tokens=}")
+    # Replace print with logging for result output
+    logger.info("=========== build tree kernel efficient ==========")
+    logger.info(f"{tree_mask=}")
+    logger.info(f"{position=}")
+    logger.info(f"{retrive_index=}")
+    logger.info(f"{retrive_next_token=}")
+    logger.info(f"{retrive_next_sibling=}")
+    logger.info(f"{draft_tokens=}")
+    
+    # Original correctness assertions (kept unchanged)
     assert position.tolist() == [5, 6, 6, 7, 7, 8, 8, 9, 10, 11, 12, 12, 12, 12, 13, 14]
     assert retrive_index.tolist() == [
         [0, 1, 2, 3, 4, 5, 6, 7],
