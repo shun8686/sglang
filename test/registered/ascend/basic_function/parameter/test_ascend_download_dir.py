@@ -27,49 +27,40 @@ class TestDownloadDir(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         run_command(f"mkdir -p {cls.download_dir}")
-        cls.other_args = [
+        other_args = [
             "--download-dir",
             cls.download_dir,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
         ]
+        cls.process = popen_launch_server(
+            cls.model,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
     @classmethod
     def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
         run_command(f"rm -rf {cls.download_dir}")
 
     def test_download_dir(self):
-        try:
-            self.process = popen_launch_server(
-                self.model,
-                DEFAULT_URL_FOR_TEST,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=self.other_args,
-            )
-        finally:
-            kill_process_tree(self.process.pid)
-
-        try:
-            self.process = popen_launch_server(
-                self.model,
-                DEFAULT_URL_FOR_TEST,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=self.other_args,
-            )
-            response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": "The capital of France is",
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 32,
-                    },
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
                 },
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertIn("Paris", response.text)
-        finally:
-            kill_process_tree(self.process.pid)
+            },
+            timeout=30
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
+
         # check model weight
         weight_suffixes = ("*.safetensors", "*.bin", "*.pth")
         weight_files = []
