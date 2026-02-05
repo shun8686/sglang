@@ -52,7 +52,7 @@ class TestQwen32B(TestPerformanceTestCaseBase):
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
     max_concurrency = 120
-    num_prompts = 120
+    num_prompts = 480
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
