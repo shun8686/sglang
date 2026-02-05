@@ -112,10 +112,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
-          - name: ASCEND_REAL_RAW
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.annotations['huawei.com/AscendReal']
           - name: INSTALL_SGLANG_FROM_SOURCE
             value: "{{ install_sglang_from_source }}"
           - name: KUBECONFIG
@@ -129,9 +125,6 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               ASCEND_DEVICES=$(echo $ASCEND_REAL_RAW | sed 's/Ascend910-//g')
-               export ASCEND_RT_VISIBLE_DEVICES=$ASCEND_DEVICES
-               echo "ASCEND_RT_VISIBLE_DEVICES: $ASCEND_RT_VISIBLE_DEVICES"
                bash /root/sglang/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
           resources:
             requests:
@@ -202,10 +195,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
-          - name: ASCEND_REAL_RAW
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.annotations['huawei.com/AscendReal']
           - name: INSTALL_SGLANG_FROM_SOURCE
             value: "{{ install_sglang_from_source }}"
           - name: KUBECONFIG
@@ -219,9 +208,6 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               ASCEND_DEVICES=$(echo $ASCEND_REAL_RAW | sed 's/Ascend910-//g')
-               export ASCEND_RT_VISIBLE_DEVICES=$ASCEND_DEVICES
-               echo "ASCEND_RT_VISIBLE_DEVICES: $ASCEND_RT_VISIBLE_DEVICES"
                bash /root/sglang/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
           resources:
             requests:
@@ -292,10 +278,6 @@ spec:
             valueFrom:
               fieldRef:
                 fieldPath: status.hostIP
-          - name: ASCEND_REAL_RAW
-            valueFrom:
-              fieldRef:
-                fieldPath: metadata.annotations['huawei.com/AscendReal']
           - name: INSTALL_SGLANG_FROM_SOURCE
             value: "{{ install_sglang_from_source }}"
           - name: METRICS_DATA_FILE
@@ -311,9 +293,6 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               ASCEND_DEVICES=$(echo $ASCEND_REAL_RAW | sed 's/Ascend910-//g')
-               export ASCEND_RT_VISIBLE_DEVICES=$ASCEND_DEVICES
-               echo "ASCEND_RT_VISIBLE_DEVICES: $ASCEND_RT_VISIBLE_DEVICES"
                bash /root/sglang/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
           resources:
             requests:
