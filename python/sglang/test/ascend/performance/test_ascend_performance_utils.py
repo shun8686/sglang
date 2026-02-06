@@ -675,10 +675,10 @@ class TestPerformanceTestCaseBase(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
         for key, value in env.items():
-            print(f"ENV_VAR_OTHER {key}:{value}")
+            print(f"ENV_VAR_SYS {key}:{value}")
         if cls.envs:
             for key, value in cls.envs.items():
-                print(f"ENV_VAR {key}:{value}")
+                print(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
 
         cls.process = popen_launch_server(
