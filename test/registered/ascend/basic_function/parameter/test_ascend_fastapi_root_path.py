@@ -1,5 +1,4 @@
 import os
-
 import requests
 import unittest
 from urllib.parse import urlparse
@@ -19,7 +18,8 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendFastapiRootPath(CustomTestCase):
     """
-    Testcase：
+    Testcase：Verify that the system correctly processes the root path prefix when configuring the root path prefix and
+    correctly performs the route redirection behavior.
 
     [Test Category] Parameter
     [Test Target] --fastapi-root-path
