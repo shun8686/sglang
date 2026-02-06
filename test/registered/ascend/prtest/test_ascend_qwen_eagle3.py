@@ -38,6 +38,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
     def start_prefill(cls):
         prefill_args = [
             "--disaggregation-mode", "prefill",
+            "--disaggregation-transfer-backend",
+            "ascend",
             "--watchdog-timeout", 9000,
             "--moe-a2a-backend", "deepep",
             "--deepep-mode", "normal",
@@ -58,7 +60,6 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
-            "--tokenizer-worker-num", 4,
             "--tp-size", 8,
             "--mem-fraction-static", 0.86,
             "--disable-cuda-graph",
@@ -93,6 +94,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
     def start_decode(cls):
         decode_args = [
             "--disaggregation-mode", "decode",
+            "--disaggregation-transfer-backend",
+            "ascend",
             "--moe-dense-tp-size", 1,
             "--enable-dp-attention",
             "--enable-dp-lm-head",
@@ -117,6 +120,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
+            "--tokenizer-worker-num", 4,
             "--tp-size", 8,
             "--base-gpu-id", 8,
             "--mem-fraction-static", 0.86,
@@ -134,8 +138,6 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
             "HCCL_BUFFSIZE": "2000",
-            # "HCCL_SOCKET_IFNAME": NIC_NAME,
-            # "GLOO_SOCKET_IFNAME": NIC_NAME,
             "HCCL_OP_EXPANSION_MODE": "AIV",
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
@@ -169,8 +171,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
         )
         metrics = run_gsm8k(args)
         achieved_accuracy = metrics["accuracy"]
