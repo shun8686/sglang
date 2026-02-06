@@ -4,7 +4,7 @@ import subprocess
 import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -19,7 +19,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 class TestAscendGrpcMode(CustomTestCase):
     """
-    Testcase：
+    Testcase：Verify that gRPC requests are correctly received and process when gRPC mode is enabled.
 
     [Test Category] Parameter
     [Test Target] --grpc-mode
@@ -28,7 +28,7 @@ class TestAscendGrpcMode(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        cls.model = "Qwen/Qwen2-0.5B-Instruct"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.grpc_base_url = f"grpc://127.0.0.1:20000"
@@ -51,7 +51,6 @@ class TestAscendGrpcMode(CustomTestCase):
             "--model-path", cls.model,
             "--reasoning-parser", "deepseek-r1",
             "--tool-call-parser", "json",
-            # "--host", "0.0.0.0", "--port", "8080",
             "--host", cls.url.hostname, "--port", str(cls.url.port),
         ]
         cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
