@@ -336,7 +336,7 @@ def launch_pd_mix_node(model_config):
         other_args.append(sa)
 
     for key, value in model_config["node_envs"].items():
-        print(f"ENV_VAR {key}:{value}")
+        print(f"ENV_VAR_CASE {key}:{value}")
         os.environ[key] = value
 
     print(f"Starting node, {LOCAL_HOST_IP=} {other_args=}")
