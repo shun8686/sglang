@@ -30,7 +30,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
-        cls.fastapi_root_path = "v2"
+        cls.fastapi_root_path = "test_fastapi_root_path"
         cls.common_args = [
             "--trust-remote-code",
             "--mem-fraction-static", 0.8,

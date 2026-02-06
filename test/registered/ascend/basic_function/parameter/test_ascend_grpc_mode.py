@@ -44,8 +44,6 @@ class TestAscendGrpcMode(CustomTestCase):
             other_args=worker_args,
         )
 
-
-
         router_command = [
             "python3",
             "-m", "sglang_router.launch_router",
