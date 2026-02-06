@@ -170,7 +170,7 @@ class TestMatrixMultiplication(unittest.TestCase):
                         self.global_all_golden_times.append(golden_time)
                         self.global_all_fused_times.append(fused_time)
                         logger.info(
-                            f"[Random] Test {test_idx}, Shape: Random ({b}, {m}, {k}, {n}), dtype: {dtype}, "
+                            f"[Random], Shape: Random ({b}, {m}, {k}, {n}), dtype: {dtype}, "
                             f"Golden time: {golden_time:.6f}s, Fused time: {fused_time:.6f}s (Valid, collected)"
                         )
 
