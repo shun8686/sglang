@@ -36,7 +36,7 @@ class TestAscendGrpcMode(CustomTestCase):
             "python3",
             "-m", "sglang.launch_server",
             "--model", cls.model,
-            "--grpc-mode", "--port", str(cls.grpc_url.port),
+            "--grpc-mode", "--port", "20000",
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
@@ -47,7 +47,8 @@ class TestAscendGrpcMode(CustomTestCase):
             "--model-path", cls.model,
             "--reasoning-parser", "deepseek-r1",
             "--tool-call-parser", "json",
-            "--host", "0.0.0.0", "--port", "8080",
+            # "--host", "0.0.0.0", "--port", "8080",
+            "--host", "127.0.0.1", "--port", "30088",
         ]
         cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
