@@ -1,6 +1,7 @@
 import requests
 import unittest
 import subprocess
+import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
@@ -32,13 +33,17 @@ class TestAscendGrpcMode(CustomTestCase):
         cls.grpc_base_url = f"grpc://127.0.0.1:20000"
         cls.grpc_url = urlparse(cls.grpc_base_url)
 
-        worker_command = [
-            "python3",
-            "-m", "sglang.launch_server",
-            "--model", cls.model,
+        worker_args = [
             "--grpc-mode", "--port", "20000",
         ]
-        cls.worker_process = subprocess.Popen(worker_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=worker_args,
+        )
+
+
 
         router_command = [
             "python3",
@@ -48,16 +53,37 @@ class TestAscendGrpcMode(CustomTestCase):
             "--reasoning-parser", "deepseek-r1",
             "--tool-call-parser", "json",
             # "--host", "0.0.0.0", "--port", "8080",
-            "--host", "127.0.0.1", "--port", "30088",
+            "--host", cls.url.hostname, "--port", str(cls.url.port),
         ]
         cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        cls.wait_server_ready(
+            cls.base_url + "/health", timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+        )
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.worker_process.pid)
         kill_process_tree(cls.router_process.pid)
 
-    def test_delete_grpc_mode(self):
+    @classmethod
+    def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
+        start_time = time.perf_counter()
+        while True:
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    print(f"Server {url} is ready")
+                    return
+            except Exception:
+                pass
+
+            if time.perf_counter() - start_time > timeout:
+                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
+
+            time.sleep(1)
+
+    def test_grpc_mode(self):
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -78,7 +104,7 @@ class TestAscendGrpcMode(CustomTestCase):
         )
         self.assertEqual(
             response.json()['grpc_mode'], True, "The Grpc mode is not started."
-            "The fastapi root path is not correct."
+                                                "The fastapi root path is not correct."
         )
 
         response = requests.post(
@@ -94,8 +120,6 @@ class TestAscendGrpcMode(CustomTestCase):
 
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-
-
 
 
 if __name__ == "__main__":
