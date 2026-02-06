@@ -674,6 +674,8 @@ class TestPerformanceTestCaseBase(CustomTestCase):
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
+        for key, value in env.items():
+            print(f"ENV_VAR_OTHER {key}:{value}")
         if cls.envs:
             for key, value in cls.envs.items():
                 print(f"ENV_VAR {key}:{value}")
