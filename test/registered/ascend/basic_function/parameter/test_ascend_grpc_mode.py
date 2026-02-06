@@ -36,7 +36,7 @@ class TestAscendGrpcMode(CustomTestCase):
             "python3",
             "-m", "sglang.launch_server",
             "--model", cls.model,
-            "--grpc-mode", "--port", cls.grpc_url.port,
+            "--grpc-mode", "--port", str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
