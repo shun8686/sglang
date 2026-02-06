@@ -33,7 +33,7 @@ sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
 export SGLANG_SET_CPU_AFFINITY=1
-export ASCEND_RT_VISIBLE_DEVICES=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15
+export ASCEND_RT_VISIBLE_DEVICES=$(echo $ASCEND_VISIBLE_DEVICES | tr ',' '\n' | sort -n | tr '\n' ',')
 export ASCEND_VISIBLE_DEVICES=""
 
 unset https_proxy
