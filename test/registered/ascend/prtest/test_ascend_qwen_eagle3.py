@@ -13,8 +13,6 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-# from sglang.test.ascend.performance.test_ascend_performance_utils import NIC_NAME
-
 
 class TestAscendQwenEagle3(TestDisaggregationBase):
 
@@ -60,9 +58,10 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
-            "--tp-size", 2,
+            "--tokenizer-worker-num", 4,
+            "--tp-size", 8,
             "--mem-fraction-static", 0.86,
-            "--cuda-graph-bs", 42, 88, 96, 132, 144, 156, 172, 178, 192,
+            "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
         cls.extra_envs = {
@@ -76,11 +75,11 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
             "HCCL_BUFFSIZE": "400",
-            # "HCCL_SOCKET_IFNAME": NIC_NAME,
-            # "GLOO_SOCKET_IFNAME": NIC_NAME,
             "HCCL_OP_EXPANSION_MODE": "AIV",
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
+            "TASK_QUEUE_ENABLE": "2",
+            "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         }
         os.environ.update(cls.extra_envs)
         cls.process_prefill = popen_launch_pd_server(
@@ -118,7 +117,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
-            "--tp-size", 2,
+            "--tp-size", 8,
+            "--base-gpu-id", 8,
             "--mem-fraction-static", 0.86,
             "--cuda-graph-bs", 42, 88, 96, 132, 144, 156, 172, 178, 192,
             "--dtype", "bfloat16",
@@ -130,15 +130,16 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_NPU_USE_MULTI_STREAM": "1",
             "SGLANG_NPU_USE_MLAPO": "1",
             "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
-            "TASK_QUEUE_ENABLE": "0",
-            "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
+            "TASK_QUEUE_ENABLE": "1",
+            "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-            "HCCL_BUFFSIZE": "400",
+            "HCCL_BUFFSIZE": "2000",
             # "HCCL_SOCKET_IFNAME": NIC_NAME,
             # "GLOO_SOCKET_IFNAME": NIC_NAME,
             "HCCL_OP_EXPANSION_MODE": "AIV",
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
+            "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         }
         os.environ.update(cls.extra_envs)
         cls.process_decode = popen_launch_pd_server(
