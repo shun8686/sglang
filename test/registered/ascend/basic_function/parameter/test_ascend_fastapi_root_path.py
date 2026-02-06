@@ -44,9 +44,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                *cls.common_args,
-            ],
+            other_args=cls.common_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
     @classmethod
@@ -54,8 +53,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
         kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
         cls.err_log_file.close()
-        # os.remove("./warmup_out_log.txt")
-        # os.remove("./warmup_err_log.txt")
+        os.remove("./warmup_out_log.txt")
+        os.remove("./warmup_err_log.txt")
 
     def test_delete_fastapi_root_path(self):
         response = requests.post(
@@ -86,11 +85,10 @@ class TestAscendFastapiRootPath(CustomTestCase):
 
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
-        print(content)
-        # self.assertTrue(len(content) > 0)
-        # # request should be redirected to fastapi_root_path.
-        # self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
-        # self.assertIn(f"GET {self.fastapi_root_path}/model_info HTTP/1.1", content)
+        self.assertTrue(len(content) > 0)
+        # request should be redirected to fastapi_root_path.
+        self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
+        self.assertIn(f"GET {self.fastapi_root_path}/model_info HTTP/1.1", content)
 
 
 if __name__ == "__main__":
