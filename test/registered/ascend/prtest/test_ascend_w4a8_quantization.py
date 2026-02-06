@@ -47,7 +47,7 @@ class TestAscendW4A8Quantization(CustomTestCase):
             ],
             env={
                 "STREAMS_PER_DEVICE": "32",
-                "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "2",
+                "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
                 "HCCL_BUFFSIZE": "1600",
                 "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
