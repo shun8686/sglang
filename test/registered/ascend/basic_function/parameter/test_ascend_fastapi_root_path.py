@@ -74,8 +74,10 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
-        print(response.json())
-        print(response.json()["delete_ckpt_after_loading"])
+        print(f"{response.text=}")
+        print(f"{response.json()['fastapi_root_path']=}")
+        print(f"{response.url=}")
+
 
 
 if __name__ == "__main__":

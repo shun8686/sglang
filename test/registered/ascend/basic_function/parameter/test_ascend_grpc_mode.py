@@ -33,7 +33,7 @@ class TestAscendGrpcMode(CustomTestCase):
             "--trust-remote-code",
             "--mem-fraction-static", 0.8,
             "--attention-backend", "ascend",
-            "--grpc-mode",
+            "--grpc-mode", "--port", 20000,
         ]
 
 
