@@ -53,10 +53,10 @@ spec:
           resources:
             requests:
               huawei.com/ascend-1980: {{ npu_num }}
-              cpu: "4"
+              cpu: "76"
             limits:
               huawei.com/ascend-1980: {{ npu_num }}
-              cpu: "4"
+              cpu: "76"
           volumeMounts:
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver
