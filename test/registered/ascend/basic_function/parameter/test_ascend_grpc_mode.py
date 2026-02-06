@@ -15,29 +15,30 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestAscendFastapiRootPath(CustomTestCase):
+class TestAscendGrpcMode(CustomTestCase):
     """
     Testcase：
 
     [Test Category] Parameter
-    [Test Target] --fastapi-root-path
+    [Test Target] --grpc-mode
     """
 
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        cls.back_up_model_path = cls.model + "-back-up"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
             "--trust-remote-code",
             "--mem-fraction-static", 0.8,
             "--attention-backend", "ascend",
-            "--fastapi-root-path", "v2",
+            "--grpc-mode",
         ]
 
 
         cls.process = popen_launch_server(
-            cls.model,
+            cls.back_up_model_path,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
@@ -75,7 +76,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
             response.status_code, 200, "The request status code is not 200."
         )
         print(response.json())
-        print(response.json()["delete_ckpt_after_loading"])
+        print(response.json()["--grpc-mode"])
 
 
 if __name__ == "__main__":
