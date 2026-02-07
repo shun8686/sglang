@@ -106,10 +106,11 @@ class TestAscendApi(CustomTestCase):
         self.assertEqual(response.json()['meta_info']['id'], "4")
     def test_api_encode_04(self):
         # Test Scenario 4: Call /encode API with list of rids (multiple requests) - text input
+        request_rids = ["5", "6", "7"]
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/encode",
             json={
-                "rid": ["5", "6", "7"],
+                "rid": request_rids,
                 "text": [
                     "what is the capital of UK",
                     "what is the capital of Germany",
@@ -122,8 +123,15 @@ class TestAscendApi(CustomTestCase):
                 }
             },
         )
+        response_json = response.json()
+        logger.info("Test 04 response type: %s, first item meta_info: %s", 
+                    type(response_json), response_json[0].get('meta_info', {}))
+        
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()['meta_info']['id'], ["5", "6", "7"])
+        self.assertEqual(len(response_json), len(request_rids))
+        for idx, result in enumerate(response_json):
+            self.assertEqual(result['meta_info']['id'], request_rids[idx])
+
 
 if __name__ == "__main__":
     unittest.main()
