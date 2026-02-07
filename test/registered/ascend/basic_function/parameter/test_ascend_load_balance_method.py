@@ -20,10 +20,13 @@ RUN_FLAG = (
     "all"
     if is_in_ci()
     else
-    random.choice(["round_robin", "auto", "follow_bootstrap_room", "total_requests", "total_tokens"])
+    "round_robin"
+    # random.choice(["round_robin", "auto", "follow_bootstrap_room", "total_requests", "total_tokens"])
 )
 print(RUN_FLAG)
 print(RUN_FLAG != "all")
+print(RUN_FLAG != "round_robin")
+print(RUN_FLAG != "all" and RUN_FLAG != "round_robin")
 
 
 @unittest.skipIf(RUN_FLAG != "all" and RUN_FLAG != "round_robin", "To reduce the CI execution time.")
