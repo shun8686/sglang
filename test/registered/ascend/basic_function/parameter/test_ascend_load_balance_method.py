@@ -16,20 +16,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=500, suite="nightly-16-npu-a3", nightly=True)
 
-RUN_FLAG = (
-    "all"
-    if is_in_ci()
-    else
-    "round_robin"
-    # random.choice(["round_robin", "auto", "follow_bootstrap_room", "total_requests", "total_tokens"])
-)
-print(RUN_FLAG)
-print(RUN_FLAG != "all")
-print(RUN_FLAG != "round_robin")
-print(RUN_FLAG != "all" and RUN_FLAG != "round_robin")
 
-
-@unittest.skipIf(RUN_FLAG != "all" and RUN_FLAG != "round_robin", "To reduce the CI execution time.")
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     """
     Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
@@ -90,25 +77,35 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         self.assertGreater(metrics["score"], 0.5)
 
 
-@unittest.skipIf(RUN_FLAG != "all" and RUN_FLAG != "auto", "To reduce the CI execution time.")
 class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "auto"
 
 
-@unittest.skipIf(RUN_FLAG != "all" and RUN_FLAG != "follow_bootstrap_room", "To reduce the CI execution time.")
 class _TestDPAttentionFollowBootstrapRoomLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "follow_bootstrap_room"
 
 
-@unittest.skipIf(RUN_FLAG != "all" and RUN_FLAG != "total_requests", "To reduce the CI execution time.")
 class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_requests"
 
 
-@unittest.skipIf(RUN_FLAG != "all" and RUN_FLAG != "total_tokens", "To reduce the CI execution time.")
 class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_tokens"
 
 
 if __name__ == "__main__":
-    unittest.main()
+    if is_in_ci():
+        loader = unittest.TestLoader()
+        suite = unittest.TestSuite()
+        RUN_FLAG = [
+            TestDPAttentionRoundBinLoadBalance,
+            _TestDPAttentionAutoLoadBalance,
+            _TestDPAttentionFollowBootstrapRoomLoadBalance,
+            _TestDPAttentionTotalRequestsLoadBalance,
+            _TestDPAttentionTotalTokensLoadBalance,
+        ]
+        suite.addTests(loader.loadTestsFromTestCase(random.choice(RUN_FLAG)))
+        runner = unittest.TextTestRunner()
+        runner.run(suite)
+    else:
+        unittest.main()
