@@ -24,6 +24,8 @@ CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
 
 
 class BaseModelLoaderTest(ABC):
+    """Test base class"""
+
     models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
     accuracy = 0.5
     other_args = [
