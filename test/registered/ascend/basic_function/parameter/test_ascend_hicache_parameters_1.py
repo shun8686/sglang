@@ -58,7 +58,7 @@ class BaseQwenHiCacheTest(CustomTestCase):
 
     def run_gsm8k_accuracy_test(self, scenario):
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
