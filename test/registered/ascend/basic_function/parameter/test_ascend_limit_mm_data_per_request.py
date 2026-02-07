@@ -1,6 +1,5 @@
 import random
 import unittest
-import openai
 import requests
 import multiprocessing as mp
 

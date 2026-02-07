@@ -1,8 +1,6 @@
 import os
 import unittest
 from abc import ABC
-
-import numpy as np
 import openai
 import torch
 
