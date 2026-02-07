@@ -10,7 +10,6 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     popen_launch_server,
 )
 
@@ -40,8 +39,8 @@ def popen_launch_server_wrapper(base_url, model, other_args):
     return process
 
 
-class TestVisionModel(CustomTestCase):
-    """Testcase: Configuring '--limit-mm-data-per-request' to send different multimodal inference requests,
+class TestLimitMMDatePerRequest(CustomTestCase):
+    """Testcase: Configuring '--limit-mm-data-per-request {"image":1, "video":1}' to send different multimodal inference requests,
        each containing multiple multimodal input data, with verfication ensuring that only one data point is processed at a time
 
     [Test Category] Parameter
@@ -112,8 +111,6 @@ class TestVisionModel(CustomTestCase):
         ]
         response1 = requests.post(self.base_url + '/chat/completions',
                                   json={"messages": messages1, "temperature": 0, "max_completion_tokens": 1024})
-        print(f"*****{response1.status_code=}")
-        print(f"*****{response1.text=}")
         assert response1.status_code == 400
 
     def _run_multi_turn_request2(self):
@@ -139,41 +136,33 @@ class TestVisionModel(CustomTestCase):
         ]
         response2 = requests.post(self.base_url + '/chat/completions',
                                   json={"messages": messages2, "temperature": 0, "max_completion_tokens": 1024})
-        print(f"*****{response2.status_code=}")
-        print(f"*****{response2.text=}")
         assert response2.status_code == 400
 
     def test_vlm(self):
-        models_to_test = MODEL
-
-        if is_in_ci():
-            models_to_test = [random.choice(MODEL)]
         limit_mm = '{"image":1, "video":1}'
-        for model in models_to_test:
-            with self.subTest(model=model):
-                other_args = [
-                    "--mem-fraction-static",
-                    "0.5",
-                    "--enable-multimodal",
-                    "--limit-mm-data-per-request",
-                    limit_mm,
-                    "--attention-backend",
-                    "ascend",
-                    "--device",
-                    "npu",
-                    "--tp-size",
-                    "16",
-                    "--disable-cuda-graph",
-                ]
-                try:
-                    process = popen_launch_server_wrapper(
-                        DEFAULT_URL_FOR_TEST, model, other_args
-                    )
-                    self._run_multi_turn_request()
-                    self._run_multi_turn_request1()
-                    self._run_multi_turn_request2()
-                finally:
-                    kill_process_tree(process.pid)
+        other_args = [
+            "--mem-fraction-static",
+            "0.5",
+            "--enable-multimodal",
+            "--limit-mm-data-per-request",
+            limit_mm,
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
+            "--tp-size",
+            "16",
+            "--disable-cuda-graph",
+        ]
+        try:
+            process = popen_launch_server_wrapper(
+                DEFAULT_URL_FOR_TEST, MODEL, other_args
+            )
+            self._run_multi_turn_request()
+            self._run_multi_turn_request1()
+            self._run_multi_turn_request2()
+        finally:
+            kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":
