@@ -1,5 +1,5 @@
 import unittest
-
+import logging
 import requests
 
 from sglang.srt.utils import kill_process_tree
@@ -12,6 +12,13 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
@@ -21,6 +28,7 @@ class TestAscendApi(CustomTestCase):
     [Test Category] Interface
     [Test Target] /encode
     """
+
     @classmethod
     def setUpClass(cls):
         cls.model = GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH
@@ -44,7 +52,7 @@ class TestAscendApi(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        
+
     def test_api_encode_01(self):
         # Test Scenario 1: Call /encode API with plain text parameter
         response = requests.post(
@@ -56,10 +64,10 @@ class TestAscendApi(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 200,
                     "top_p": 1
-                }       
+                }
             },
         )
-        print(response.json().keys())
+        logger.info("Test 01 response keys: %s", response.json().keys())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meta_info']['id'], "2")
 
@@ -72,7 +80,7 @@ class TestAscendApi(CustomTestCase):
                 "input_ids": [101, 7592, 2088, 102],
                 "sampling_params": {
                     "temperature": 0,
-                    "max_new_tokens": 200    
+                    "max_new_tokens": 200
                 }
             },
         )
@@ -89,15 +97,33 @@ class TestAscendApi(CustomTestCase):
                 "image_data": "https://miaobi-lite.bj.bcebos.com/miaobi/5mao/b%27b2Ny6K%2BG5Yir5Luj56CBXzE3MzQ2MzcyNjAuMzgxNDk5NQ%3D%3D%27/0.png",
                 "sampling_params": {
                     "temperature": 0,
-                    "max_new_tokens": 200    
+                    "max_new_tokens": 200
                 }
             },
         )
-        print(response.json().keys)
+        logger.info("Test 03 response keys: %s", response.json().keys())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['meta_info']['id'], "4")
-
+    def test_api_encode_04(self):
+        # Test Scenario 4: Call /encode API with list of rids (multiple requests) - text input
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/encode",
+            json={
+                "rid": ["5", "6", "7"],
+                "text": [
+                    "what is the capital of UK",
+                    "what is the capital of Germany",
+                    "what is the capital of Japan"
+                ],
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 200,
+                    "top_p": 1
+                }
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['meta_info']['id'], ["5", "6", "7"])
 
 if __name__ == "__main__":
-
     unittest.main()

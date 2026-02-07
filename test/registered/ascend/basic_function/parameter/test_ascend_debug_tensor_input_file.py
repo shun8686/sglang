@@ -1,6 +1,5 @@
 import os
 import unittest
-
 import numpy
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
@@ -34,6 +33,10 @@ class TestDebugTensorInputFile(CustomTestCase):
             )
         except Exception as e:
             print("process is killed")
+        print("----------------------------out==0----------------------------")
+        print(out_log_file)
+        print("----------------------------err==0----------------------------")
+        print(err_log_file)
         err_log_file.seek(0)
         content = err_log_file.read()
         self.assertTrue(len(content) > 0)

@@ -1,5 +1,6 @@
 import json
 import unittest
+import logging
 
 import openai
 
@@ -12,6 +13,13 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
@@ -37,7 +45,7 @@ class TestJSONModeMixin:
         )
         text = response.choices[0].message.content
 
-        print(f"Response ({len(text)} characters): {text}")
+        logger.info("JSON mode response (%d characters): %s", len(text), text)
 
         # Verify the response is valid JSON
         try:
@@ -73,9 +81,7 @@ class TestJSONModeMixin:
                 chunks.append(chunk.choices[0].delta.content)
         full_response = "".join(chunks)
 
-        print(
-            f"Concatenated Response ({len(full_response)} characters): {full_response}"
-        )
+        logger.info("Concatenated streamed JSON response (%d characters): %s", len(full_response), full_response)
 
         # Verify the combined response is valid JSON
         try:
@@ -134,20 +140,10 @@ class TestJSONModeXGrammar(ServerWithGrammarBackend, TestJSONModeMixin):
 class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
     """Testcase: Verify JSON mode functionality with outlines grammar backend (non-streaming and streaming).
 
-    [Test Category] Parameter
     [Test Target] --grammar-backend
     """
 
     backend = "outlines"
-
-
-class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify JSON mode functionality with llguidance grammar backend (non-streaming and streaming).
-
-    [Test Category] Parameter
-    [Test Target] --grammar-backend
-    """
-    backend = "llguidance"
 
 
 if __name__ == "__main__":

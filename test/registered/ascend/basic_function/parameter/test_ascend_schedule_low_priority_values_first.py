@@ -40,7 +40,7 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args= = [
+            other_args = [
                 "--max-running-requests", "1", # Limit concurrent running requests to 1 (enforce queueing)
                 "--max-queued-requests", "3",  # Limit maximum queued requests to 3 (enforce request abortion when queue is full)
                 "--enable-priority-scheduling", # Enable priority-based request scheduling (prerequisite for priority features)
@@ -48,7 +48,7 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
                 "--disable-cuda-graph",
                 "--attention-backend",
                 "ascend",
-            ]
+            ],
             return_stdout_stderr=(cls.stdout, cls.stderr),
         )
 
@@ -147,7 +147,8 @@ def _verify_genereate_responses(
             f"expected_status:{expected_status}，actually:{got_status}"
 
         if got_status != 200:
-            assert got_json.get("object") == "error",
+            assert got_json.get("object") == "error", \
+                f"expected object 'error', actually: {got_json.get('object')}"
             assert got_json.get("message") == expected_err_msg, \
                 f"expected_err_msg:{expected_err_msg}，actually: {got_json.get('message')}"
         else:

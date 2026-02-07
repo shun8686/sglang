@@ -18,13 +18,11 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 TEST_MODEL_MATRIX = {
     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH: {
         "accuracy": 0.90,
-        "latency": 1000,
-        "output_throughput": 6,
     },
 }
 
 
-class TestAscendDistTimeout(CustomTestCase):
+class TestAscendSpeculativeAcceptThreshold(CustomTestCase):
     """Testcase: Test configuration '--speculative-draft-attention-backend' and '--speculative-moe-runner-backend' on the GSM8K dataset is no less than 0.9.
 
     [Test Category] Parameter
@@ -76,40 +74,34 @@ class TestAscendDistTimeout(CustomTestCase):
             "auto",
         ]
 
+        cls.process = popen_launch_server(
+            DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
+            cls.base_url,
+            timeout=1500,
+            other_args=cls.common_args,
+            env=cls.env,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
     def test_a_gsm8k(self):
-        for model in self.models:
-            with self.subTest(model=model):
-                print(f"##=== Testing accuracy: {model} ===##")
-                other_args = self.common_args
-                process = popen_launch_server(
-                    model,
-                    self.base_url,
-                    timeout=1500,
-                    other_args=[
-                        *other_args,
-                    ],
-                    env=self.env,
-                )
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=1319,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
 
-                try:
-                    args = SimpleNamespace(
-                        num_shots=5,
-                        data_path=None,
-                        num_questions=1319,
-                        max_new_tokens=512,
-                        parallel=128,
-                        host=f"http://{self.url.hostname}",
-                        port=int(self.url.port),
-                    )
-
-                    metrics = run_eval_few_shot_gsm8k(args)
-                    print(f"metrics['accuracy']=")
-                    self.assertGreaterEqual(
-                        metrics["accuracy"],
-                        TEST_MODEL_MATRIX[model]["accuracy"],
-                    )
-                finally:
-                    kill_process_tree(process.pid)
+        metrics = run_eval_few_shot_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            TEST_MODEL_MATRIX[DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH]["accuracy"],
+        )
 
 
 if __name__ == "__main__":
