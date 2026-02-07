@@ -46,7 +46,6 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
-        # Automatically register cleanup method, no manual tearDown required
         self.addCleanup(kill_process_tree, process.pid)
         return process
 
@@ -81,23 +80,16 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         return metrics["score"]
 
     def test_01_enable_multimodal(self):
-        """Test 1: With --enable-multimodal parameter, execute evaluation and save the score"""
-        # Launch server
         self._launch_server(enable_multimodal=True)
-        # Verify inference function
         self._verify_inference()
         TestEnableMultimodalNonMlm.score_with_param = self._run_mmlu_eval()
 
     def test_02_disable_multimodal(self):
-        """Test 2: Without --enable-multimodal parameter, execute evaluation and save the score"""
-        # Launch server
         self._launch_server(enable_multimodal=False)
-        # Verify inference function
         self._verify_inference()
         TestEnableMultimodalNonMlm.score_without_param = self._run_mmlu_eval()
 
     def test_03_assert_score(self):
-        """Test 3: Assert that the score with parameter is ≥ the score without parameter"""
         self.assertIsNotNone(TestEnableMultimodalNonMlm.score_with_param, "MMLU score with parameter not obtained")
         self.assertIsNotNone(TestEnableMultimodalNonMlm.score_without_param,
                              "MMLU score without parameter not obtained")
@@ -110,5 +102,4 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
 
 
 if __name__ == "__main__":
-    # Optional: Add verbosity=2 to print more detailed test logs
     unittest.main(verbosity=2)
