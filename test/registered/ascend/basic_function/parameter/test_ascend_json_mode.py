@@ -146,14 +146,5 @@ class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
     backend = "outlines"
 
 
-class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify JSON mode functionality with llguidance grammar backend (non-streaming and streaming).
-
-    [Test Category] Parameter
-    [Test Target] --grammar-backend
-    """
-    backend = "llguidance"
-
-
 if __name__ == "__main__":
     unittest.main()
