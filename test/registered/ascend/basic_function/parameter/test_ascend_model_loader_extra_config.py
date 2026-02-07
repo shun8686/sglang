@@ -87,11 +87,22 @@ class BaseModelLoaderTest(ABC):
             cls.err_file.close()
 
 
+class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
+    """Get the model loading time when the --model-loader-extra-config parameter is not configured."""
+
+    log_info = "Loading safetensors"
+    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
+
+    def test_model_loader_extra_config(self):
+        # Check if the startup log contains the string "Loading safetensors".
+        self.err_file.seek(0)
+        content = self.err_file.read()
+        self.assertIn(self.log_info, content)
+
+
 class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
-    """Testcase: Configure the --model-loader-extra-configparameter to ensure no degradation in accuracy,
-    and verify that the startup log contains "Multi-thread".
-    Without configuring this parameter, the startup log should contain "Loading safetensors".
-    After configuring the parameter, the model loading time should be reduced.
+    """Testcase: After configuring the --model-loader-extra-config parameter, the model loading time will be shortened.
 
     [Test Category] Parameter
     [Test Target] --model-loader-extra-config
@@ -119,13 +130,15 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
+        # Check if the startup log contains the string "Multi-thread".
         self.err_file.seek(0)
         content = self.err_file.read()
         self.assertIn(self.log_info, content)
 
     def test_model_loading_time_reduced(self):
-        # Helper function to extract loading time
+        # Verify that configuring this parameter reduces the model's loading time.
         def get_loading_seconds(filename, pattern):
+            # Helper function to extract loading time
             cmd = f"grep '{pattern}' {filename} | tail -1"
             line = run_command(cmd)
             if not line:
@@ -150,10 +163,11 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
 
         print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
 
-        # Assert
+        # Assert that parameter configuration reduces model loading time.
         self.assertGreater(checkpoint_seconds, multi_thread_seconds)
 
     def test_gsm8k(self):
+        # Verify that the model's accuracy does not decrease after configuring this parameter.
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -169,17 +183,6 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
             self.accuracy,
             f'Accuracy of {self.models} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
         )
-
-
-class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
-    log_info = "Loading safetensors"
-    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
-
-    def test_model_loader_extra_config(self):
-        self.err_file.seek(0)
-        content = self.err_file.read()
-        self.assertIn(self.log_info, content)
 
 
 if __name__ == "__main__":
