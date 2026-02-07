@@ -54,7 +54,6 @@ class TestDisableCudaGraphPadding(CustomTestCase):
                 },
             },
         )
-        print(response.text)
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
