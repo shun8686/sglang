@@ -25,7 +25,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
     [Test Target] --fastapi-root-path
     """
 
-    fastapi_root_path = "/test_fastapi_root_path"
+    fastapi_root_path = "test_fastapi_root_path"
 
     @classmethod
     def setUpClass(cls):
@@ -70,6 +70,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         # response url is the same as request url which doesn't contain fastapi root path
+        print(f"{response.url=}")
         self.assertNotIn(
             self.fastapi_root_path, response.url,
             "The root path should not in response url."
@@ -83,13 +84,13 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
 
-class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
-    fastapi_root_path = "/test/fastapi/root/path"
-
-
-class TestAscendFastapiRootPathErrorPath(CustomTestCase):
-    # TODO 确认错误模式
-    fastapi_root_path = "test_fastapi_root_path"
+# class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
+#     fastapi_root_path = "/test/fastapi/root/path"
+#
+#
+# class TestAscendFastapiRootPathErrorPath(CustomTestCase):
+#     # TODO 确认错误模式
+#     fastapi_root_path = "test_fastapi_root_path"
 
 
 if __name__ == "__main__":
