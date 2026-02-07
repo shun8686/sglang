@@ -47,7 +47,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
                 "--attention-backend", "ascend",
                 "--tp-size", "1",
                 "--mem-fraction-static", "0.8",
-            ]
+            ],
             return_stdout_stderr=(cls.stdout, cls.stderr),
         )
     
