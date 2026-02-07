@@ -98,7 +98,6 @@ class TestAscendSpeculativeAcceptThreshold(CustomTestCase):
         )
 
         metrics = run_eval_few_shot_gsm8k(args)
-        print(f"metrics['accuracy']=")
         self.assertGreaterEqual(
             metrics["accuracy"],
             TEST_MODEL_MATRIX[DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH]["accuracy"],
