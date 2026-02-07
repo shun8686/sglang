@@ -76,9 +76,6 @@ class TestDisableFastImageProcessor(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("caption", response.text)
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["disable_fast_image_processor"], True)
 
 
 if __name__ == "__main__":

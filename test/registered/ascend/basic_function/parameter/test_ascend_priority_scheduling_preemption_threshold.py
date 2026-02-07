@@ -1,6 +1,7 @@
 import asyncio
 import os
 import re
+import time
 import unittest
 from typing import Any, List, Optional, Tuple
 
@@ -74,7 +75,10 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         3. After another 0.5s, Request B (priority=5, short: 100 tokens) - priority difference (5-2=3 <5) → no preemption, executes after C
         Expected Execution Order: C → B → A (Expected Latency: C < B < A)
         """
+
+        time.sleep(5)
         request_a = {
+            "text":"repeat the words France",
             "priority": 2,
             "sampling_params": {"max_new_tokens": 2000}  
         }
@@ -91,6 +95,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         loop.run_until_complete(asyncio.sleep(0.5))
         
         request_c = {
+            "text":"repeat the words France",
             "priority": 10,
             "sampling_params": {"max_new_tokens": 100}
         }
@@ -102,6 +107,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         
         loop.run_until_complete(asyncio.sleep(0.5))
         request_b = {
+            "text":"repeat the words France",
             "priority": 5,
             "sampling_params": {"max_new_tokens": 100} 
         }
@@ -137,7 +143,10 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         3. After another 0.5s, Request B (priority=2, long-running: 2000 tokens) - same priority as A → FIFO order (A before B)
         Expected Execution Order: C → A → B (Expected Latency: C < A < B)
         """
+
+        time.sleep(5)
         request_a = {
+            "text":"repeat the words France",
             "priority": 2,
             "sampling_params": {"max_new_tokens": 2000} 
         }
@@ -154,6 +163,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         loop.run_until_complete(asyncio.sleep(0.5))
         
         request_c = {
+            "text":"repeat the words France",
             "priority": 10,
             "sampling_params": {"max_new_tokens": 100}  
         }
@@ -164,6 +174,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
         )
         loop.run_until_complete(asyncio.sleep(0.5))
         request_b = {
+            "text":"repeat the words France",
             "priority": 2,
             "sampling_params": {"max_new_tokens": 2000} 
         }
