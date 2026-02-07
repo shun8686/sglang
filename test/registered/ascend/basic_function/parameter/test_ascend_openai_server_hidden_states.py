@@ -2,7 +2,6 @@ import os
 import unittest
 from abc import ABC
 import openai
-import torch
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -34,7 +33,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
         cls.parallel_sample_nums = [1, 2]
 
     def test_completion(self):
-        print("----------------------testcase1")
         for return_hidden_states in self.return_hidden_states:
             for use_list_input in self.use_list_input:
                 for parallel_sample_num in self.parallel_sample_nums:
@@ -45,7 +43,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
                     )
 
     def test_comptetion_stream(self):
-        print("----------------------testcase2")
         # parallel sampling and list input are not supported in streaming mode
         for return_hidden_states in self.return_hidden_states:
             for use_list_input in self.use_list_input:
@@ -57,7 +54,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
                     )
 
     def test_chat_completion(self):
-        print("----------------------testcase3")
         for return_hidden_states in self.return_hidden_states:
             for (
                 parallel_sample_num
@@ -67,7 +63,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
                 self.run_chat_completion(parallel_sample_num, return_hidden_states)
 
     def test_chat_completion_stream(self):
-        print("----------------------testcase4")
         for return_hidden_states in self.return_hidden_states:
             for (
                 parallel_sample_num
@@ -90,10 +85,8 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 
         if use_list_input:
             prompt_arg = [prompt_input, prompt_input]
-            num_choices = len(prompt_arg)
         else:
             prompt_arg = prompt_input
-            num_choices = 1
 
         response = client.completions.create(
             model=self.model,
@@ -195,7 +188,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
             extra_body=dict(return_hidden_states=return_hidden_states),
         )
 
-        is_firsts = {}
         hidden_states_list = []
 
         for response in generator:
