@@ -22,7 +22,7 @@ TEST_MODEL_MATRIX = {
 }
 
 
-class TestAscendDistTimeout(CustomTestCase):
+class TestAscendSpeculativeAcceptThreshold(CustomTestCase):
     """Testcase: Test configuration '--speculative-draft-attention-backend' and '--speculative-moe-runner-backend' on the GSM8K dataset is no less than 0.9.
 
     [Test Category] Parameter

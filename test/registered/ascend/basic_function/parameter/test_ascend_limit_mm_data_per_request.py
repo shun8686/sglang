@@ -54,6 +54,29 @@ class TestLimitMMDatePerRequest(CustomTestCase):
         cls.base_url += "/v1"
         cls.api_key = "sk-123456"
 
+        limit_mm = '{"image":1, "video":1}'
+        other_args = [
+            "--mem-fraction-static",
+            "0.5",
+            "--enable-multimodal",
+            "--limit-mm-data-per-request",
+            limit_mm,
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
+            "--tp-size",
+            "16",
+            "--disable-cuda-graph",
+        ]
+        cls.process = popen_launch_server_wrapper(
+            DEFAULT_URL_FOR_TEST, MODEL, other_args
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
     def _run_multi_turn_request(self):
         # Input video and image respectively
         messages = [
@@ -139,30 +162,9 @@ class TestLimitMMDatePerRequest(CustomTestCase):
         assert response2.status_code == 400
 
     def test_vlm(self):
-        limit_mm = '{"image":1, "video":1}'
-        other_args = [
-            "--mem-fraction-static",
-            "0.5",
-            "--enable-multimodal",
-            "--limit-mm-data-per-request",
-            limit_mm,
-            "--attention-backend",
-            "ascend",
-            "--device",
-            "npu",
-            "--tp-size",
-            "16",
-            "--disable-cuda-graph",
-        ]
-        try:
-            process = popen_launch_server_wrapper(
-                DEFAULT_URL_FOR_TEST, MODEL, other_args
-            )
-            self._run_multi_turn_request()
-            self._run_multi_turn_request1()
-            self._run_multi_turn_request2()
-        finally:
-            kill_process_tree(process.pid)
+        self._run_multi_turn_request()
+        self._run_multi_turn_request1()
+        self._run_multi_turn_request2()
 
 
 if __name__ == "__main__":
