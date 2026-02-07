@@ -21,10 +21,10 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMaxQueuedRequests(CustomTestCase):
-    """Testcase：Verify the correctness of request throttling functionality with configured max running&queued requests limits, return 503
+    """Testcase：Verify the correctness of request throttling functionality with configured max running&queued requests limits
 
     [Test Category] Parameter
-    [Test Target] --max-queued-requests
+    [Test Target] --max-running-requests; --max-queued-requests
     """
 
     @classmethod
