@@ -168,21 +168,16 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         repeated_prompt = self.gen_prompt(800)
 
         # First request - should miss cache
-        response1 = self.send_request(repeated_prompt, max_tokens=100)
-        print(f"response1 = {response1}")
         # Flush cache
-        # self.trigger_offloading_and_flush()
-
         # Second request - should hit cache (faster)
         response2 = self.send_request(repeated_prompt, max_tokens=100)
-        print(f"response2 = {response2}")
         # Assert cached tokens cnt
         self.assertGreater(response2["meta_info"]["cached_tokens"], 700)
 
     def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/tmp/test.jsonl",
+            data_path=None,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
@@ -190,7 +185,6 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
             port=21000,
         )
         metrics = run_eval(args)
-        print(f"*************metrics={metrics['accuracy']}")
         self.assertGreater(metrics['accuracy'], 0.86)
 
 

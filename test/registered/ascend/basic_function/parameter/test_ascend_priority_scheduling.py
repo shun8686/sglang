@@ -33,11 +33,11 @@ class TestPriorityScheduling(CustomTestCase):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         other_args = (
             (
-                "--max-running-requests",  # Enforce max request concurrency is 1
+                "--max-running-requests",
                 "1",
-                "--max-queued-requests",  # Enforce max queued request number is 3
+                "--max-queued-requests",
                 "3",
-                "--enable-priority-scheduling",  # Enable priority scheduling
+                "--enable-priority-scheduling",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
