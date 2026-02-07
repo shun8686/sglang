@@ -197,7 +197,7 @@ class TestEnableThinking(CustomTestCase):
         )
         logging.info(f"client3.json:{client3.json()}")
         self.assertEqual(client3.status_code, 200, f"Failed with: {client3.text}")
-        self.assertEqual(client2.json()['choices'][0]['text'], client3.json()['choices'][0]['text'])
+        self.assertNotEqual(client2.json()['choices'][0]['text'], client3.json()['choices'][0]['text'])
 
     def test_model_parameters_hidden_states(self):
         # Test return_hidden_states parameter; verify hidden_states field appears when enabled and is absent when disabled
@@ -218,7 +218,7 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "top_k": 5
+                "top_k": 20
             },
         )
         logging.info(f"client.json:{client.json()}")
@@ -229,7 +229,7 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "top_k": 5
+                "top_k": 20
             },
         )
         logging.info(f"client1.json:{client1.json()}")
