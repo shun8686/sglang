@@ -68,19 +68,23 @@ class TestAscendFastapiRootPath(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-
-        response = requests.get(f"{self.base_url}/get_server_info")
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertEqual(
-            response.json()['fastapi_root_path'], self.fastapi_root_path,
-            "The fastapi root path is not correct."
-        )
         # response url is the same as request url which doesn't contain fastapi root path
         self.assertNotIn(
             self.fastapi_root_path, response.url,
             "The root path should not in response url."
+        )
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+
+        response = requests.get(f"{self.base_url}/get_server_info")
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        # response url is the same as request url which doesn't contain fastapi root path
+        self.assertNotIn(
+            self.fastapi_root_path, response.url,
+            "The root path should not in response url."
+        )
+        self.assertEqual(
+            response.json()['fastapi_root_path'], self.fastapi_root_path,
+            "The fastapi root path is not correct."
         )
 
         self.out_log_file.seek(0)
