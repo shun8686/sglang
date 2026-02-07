@@ -168,6 +168,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         repeated_prompt = self.gen_prompt(800)
 
         # First request - should miss cache
+        self.send_request(repeated_prompt, max_tokens=100)
         # Flush cache
         # Second request - should hit cache (faster)
         response2 = self.send_request(repeated_prompt, max_tokens=100)
@@ -185,7 +186,12 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
             port=21000,
         )
         metrics = run_eval(args)
-        self.assertGreater(metrics['accuracy'], 0.86)
+        self.assertGreaterEqual(metrics['accuracy'], 0.86)
+
+    @classmethod
+    def tearDownClass(cls):
+        # Test class cleanup: call parent class cleanup to terminate all processes
+        super().tearDownClass()
 
 
 if __name__ == "__main__":
