@@ -1,4 +1,5 @@
 import unittest
+import logging
 
 import requests
 
@@ -12,6 +13,13 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
@@ -24,14 +32,12 @@ class TestAbortOnPriority(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        other_args = (
-            [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--abort-on-priority-when-disabled",
-            ]
-        )
+        other_args = [
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--abort-on-priority-when-disabled",
+        ]
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
@@ -56,14 +62,15 @@ class TestAbortOnPriority(CustomTestCase):
                 },
             },
         )
-        print(response.text)
-        # Verify expected 500 status code (priority-based abort triggered)
+        logger.info(response.text)
+
         self.assertEqual(
             response.status_code, 500, "The request status code is not 500."
         )
 
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(response.json())
+        logger.info(response.json())
+
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
