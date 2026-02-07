@@ -48,7 +48,7 @@ class TestLowPriorityFirstScheduling(CustomTestCase):
                 "--disable-cuda-graph",
                 "--attention-backend",
                 "ascend",
-            ]
+            ],
             return_stdout_stderr=(cls.stdout, cls.stderr),
         )
 
