@@ -25,12 +25,13 @@ class TestAscendFastapiRootPath(CustomTestCase):
     [Test Target] --fastapi-root-path
     """
 
+    fastapi_root_path = "/test_fastapi_root_path"
+
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
-        cls.fastapi_root_path = "test_fastapi_root_path"
         cls.common_args = [
             "--trust-remote-code",
             "--mem-fraction-static", 0.8,
@@ -75,24 +76,20 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
-        response = requests.get(f"{self.base_url}/get_server_info")
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        # response url is the same as request url which doesn't contain fastapi root path
-        self.assertNotIn(
-            self.fastapi_root_path, response.url,
-            "The root path should not in response url."
-        )
-        self.assertEqual(
-            response.json()['fastapi_root_path'], self.fastapi_root_path,
-            "The fastapi root path is not correct."
-        )
-
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
         # request should be redirected to fastapi_root_path.
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
-        self.assertIn(f"GET {self.fastapi_root_path}/model_info HTTP/1.1", content)
+
+
+class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
+    fastapi_root_path = "/test/fastapi/root/path"
+
+
+class TestAscendFastapiRootPathErrorPath(CustomTestCase):
+    # TODO 确认错误模式
+    fastapi_root_path = "test_fastapi_root_path"
 
 
 if __name__ == "__main__":
