@@ -230,7 +230,6 @@ class TestOpenAIServerWithHiddenStatesEnabled(
                 "--enable-return-hidden-states",
                 "--attention-backend",
                 "ascend",
-                # "--disable-cuda-graph",
             ],
             env=ENV,
         )
