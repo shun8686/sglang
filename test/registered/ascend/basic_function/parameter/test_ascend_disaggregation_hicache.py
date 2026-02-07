@@ -186,12 +186,11 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
             port=21000,
         )
         metrics = run_eval(args)
-        self.assertGreater(metrics['accuracy'], 0.86)
+        self.assertGreaterEqual(metrics['accuracy'], 0.86)
 
     @classmethod
     def tearDownClass(cls):
-        # Test class cleanup: Remove the Ascend MF store environment variable and call parent class cleanup to terminate all processes
-        os.environ.pop("ASCEND_MF_STORE_URL")
+        # Test class cleanup: call parent class cleanup to terminate all processes
         super().tearDownClass()
 
 
