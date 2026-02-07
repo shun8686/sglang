@@ -27,7 +27,6 @@ class BaseModelLoaderTest(ABC):
     """Test base class"""
 
     models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
-    accuracy = 0.5
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -110,7 +109,6 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     [Test Target] --model-loader-extra-config
     """
 
-    models = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
     accuracy = 0.5
     other_args = [
         "--trust-remote-code",
