@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableCacheReport(CustomTestCase):
-    """Testcase：Verify set --enable-cache-report, the inference request is successfully processed.
+    """Testcase：Verify set --enable-cache-report, the parameter takes effect.
 
        [Test Category] Parameter
        [Test Target] --enable-cache-report
