@@ -212,8 +212,8 @@ class TestOpenAIServerWithHiddenStatesEnabled(
 ):
     """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --enable-return-hidden-states
     """
 
     @classmethod
@@ -252,8 +252,8 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 ):
     """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --enable-return-hidden-states
     """
 
     @classmethod
@@ -293,8 +293,8 @@ class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
     """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful,
     and can correctly teturn the hidden states.
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --enable-return-hidden-states
     """
 
     @classmethod
