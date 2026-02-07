@@ -48,7 +48,6 @@ class TestHybridAttnBackendBase(CustomTestCase):
             "--tp-size",
             "2",
         ]
-        # disable deep gemm precompile to make launch server faster
         os.environ["SGL_JIT_DEEPGEMM_PRECOMPILE"] = "false"
         os.environ["SGL_ENABLE_JIT_DEEPGEMM"] = "false"
         model = cls.model
