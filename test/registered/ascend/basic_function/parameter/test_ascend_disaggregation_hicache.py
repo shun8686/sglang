@@ -168,6 +168,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         repeated_prompt = self.gen_prompt(800)
 
         # First request - should miss cache
+        self.send_request(repeated_prompt, max_tokens=100)
         # Flush cache
         # Second request - should hit cache (faster)
         response2 = self.send_request(repeated_prompt, max_tokens=100)
@@ -186,6 +187,12 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         )
         metrics = run_eval(args)
         self.assertGreater(metrics['accuracy'], 0.86)
+
+    @classmethod
+    def tearDownClass(cls):
+        # Test class cleanup: Remove the Ascend MF store environment variable and call parent class cleanup to terminate all processes
+        os.environ.pop("ASCEND_MF_STORE_URL")
+        super().tearDownClass()
 
 
 if __name__ == "__main__":
