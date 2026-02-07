@@ -1,8 +1,7 @@
+import random
 import unittest
 from types import SimpleNamespace
-
 import requests
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
@@ -10,14 +9,22 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
+    popen_launch_server, is_in_ci,
 )
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=2500, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(est_time=500, suite="nightly-16-npu-a3", nightly=True)
+
+RUN_FLAGS = (
+    "all"
+    if is_in_ci()
+    else
+    random.choice(["round_robin", "auto", "follow_bootstrap_room", "total_requests", "total_tokens"])
+)
 
 
+@unittest.skipIf(RUN_FLAGS != "all" and RUN_FLAGS != "round_robin", "To reduce the CI execution time.")
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     """
     Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
@@ -78,18 +85,22 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         self.assertGreater(metrics["score"], 0.5)
 
 
+@unittest.skipIf(RUN_FLAGS != "all" and RUN_FLAGS != "auto", "To reduce the CI execution time.")
 class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "auto"
 
 
+@unittest.skipIf(RUN_FLAGS != "all" and RUN_FLAGS != "follow_bootstrap_room", "To reduce the CI execution time.")
 class _TestDPAttentionFollowBootstrapRoomLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "follow_bootstrap_room"
 
 
+@unittest.skipIf(RUN_FLAGS != "all" and RUN_FLAGS != "total_requests", "To reduce the CI execution time.")
 class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_requests"
 
 
+@unittest.skipIf(RUN_FLAGS != "all" and RUN_FLAGS != "total_tokens", "To reduce the CI execution time.")
 class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_tokens"
 
