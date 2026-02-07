@@ -25,7 +25,6 @@ BASE_OTHER_ARGS = [
     "--disable-cuda-graph",
     "--mem-fraction-static", "0.8",
     "--tp-size", "2",
-    "--base-gpu-id", "4",
     "--enable-hierarchical-cache",
 ]
 
