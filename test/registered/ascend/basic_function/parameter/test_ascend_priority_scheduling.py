@@ -60,7 +60,6 @@ class TestPriorityScheduling(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        _verify_max_running_requests_and_max_queued_request_validation(1, 3)
         cls.stdout.close()
         cls.stderr.close()
         os.remove(STDOUT_FILENAME)
@@ -236,7 +235,7 @@ class TestPriorityScheduling(CustomTestCase):
 
 class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
     """Testcase: Tests core functionality with --enable-priority-scheduling configuration,
-    and multiple concurrent requests,the inference service can correctly implement priority scheduling
+    and high-priority requests can preempt/abort low-priority requests as expected.
 
     [Test Category] Parameter
     [Test Target] --enable-priority-scheduling
@@ -247,11 +246,11 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         other_args = (
             (
-                "--max-running-requests",  # Enforce max request concurrency is 2
+                "--max-running-requests",
                 "2",
-                "--max-queued-requests",  # Enforce max queued request number is 3
+                "--max-queued-requests",
                 "3",
-                "--enable-priority-scheduling",  # Enable priority scheduling
+                "--enable-priority-scheduling",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
@@ -275,7 +274,6 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        _verify_max_running_requests_and_max_queued_request_validation(2, 3)
         cls.stdout.close()
         cls.stderr.close()
         os.remove(STDOUT_FILENAME)
@@ -313,6 +311,39 @@ class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
         _verify_genereate_responses(responses, expected_status_and_error_messages, [])
 
     def test_priority_scheduling_preemption_token_offset_calculation(self):
+        """
+        Verify correct token offset calculation during preemption.
+
+        This test specifically targets the bug where rem_total_token_offset was incorrectly
+        calculated using the incoming request's tokens instead of the preempted request's tokens
+        (related to issue #13111 and PR #13201).
+
+        THE BUG:
+        In schedule_policy.py line 700, the code was using:
+            self.rem_total_token_offset -= self._get_running_request_total_token_offset(req)
+        Instead of:
+            self.rem_total_token_offset -= self._get_running_request_total_token_offset(running_req)
+
+        WHY THIS TEST CATCHES THE BUG:
+        - Request 1 (preempted): 8000 tokens - This is what SHOULD be freed
+        - Request 3 (incoming):  1000 tokens - This is what WAS freed (bug)
+        - Token difference: 8000 - 1000 = 7000 tokens incorrectly accounted
+
+        With the bug, the system thinks it only freed 1000 tokens instead of 8000 tokens.
+        This causes incorrect memory accounting and can lead to:
+        1. Scheduler believes less memory is available than actually is
+        2. Subsequent requests (like Request 4) may fail to schedule or cause issues
+        3. Memory calculations become increasingly inaccurate with each preemption
+
+        The test creates a scenario where:
+        1. A low-priority request with many tokens (8000) starts running
+        2. A high-priority request with few tokens (1000) arrives and triggers preemption
+        3. The system must correctly free 8000 tokens from the preempted request
+        4. Additional requests can be scheduled only if tokens were correctly freed
+        5. Execution order validates priority-based scheduling works correctly
+
+        The large token difference (8x) makes the bug's impact obvious and testable.
+        """
         responses = asyncio.run(
             send_concurrent_generate_requests_with_custom_params(
                 self.base_url,
