@@ -13,6 +13,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
+
 class TestEnableTokenizerBatchEncode(CustomTestCase):
     """Testcase：Verify set --enable-tokenizer-batch-encode parameter, the inference request is successfully processed.
 
@@ -20,6 +21,7 @@ class TestEnableTokenizerBatchEncode(CustomTestCase):
        [Test Target] --enable-tokenizer-batch-encode
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
     @classmethod
     def setUpClass(cls):
         other_args = (
@@ -53,7 +55,6 @@ class TestEnableTokenizerBatchEncode(CustomTestCase):
                 },
             },
         )
-        print(response.text)
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
