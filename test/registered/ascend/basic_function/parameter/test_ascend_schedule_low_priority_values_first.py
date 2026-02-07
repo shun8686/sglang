@@ -147,7 +147,7 @@ def _verify_genereate_responses(
             f"expected_status:{expected_status}，actually:{got_status}"
 
         if got_status != 200:
-            assert got_json.get("object") == "error",
+            assert got_json.get("object") == "error", \
             assert got_json.get("message") == expected_err_msg, \
                 f"expected_err_msg:{expected_err_msg}，actually: {got_json.get('message')}"
         else:
