@@ -26,7 +26,7 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
     score_with_param = None
     score_without_param = None
 
-    def _launch_server(self, enable_multimodal: bool):
+    def launch_server(self, enable_multimodal: bool):
         """Universal server launch method, add --enable-multimodal based on parameters"""
         other_args = [
             "--trust-remote-code",
@@ -49,7 +49,7 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self.addCleanup(kill_process_tree, process.pid)
         return process
 
-    def _verify_inference(self):
+    def verify_inference(self):
         """Universal inference function verification"""
         # Basic generation request verification
         response = requests.post(
@@ -65,7 +65,7 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-    def _run_mmlu_eval(self) -> float:
+    def run_mmlu_eval(self) -> float:
         """Universal MMLU evaluation execution method, returns evaluation score"""
         args = SimpleNamespace(
             base_url=self.base_url,
@@ -80,14 +80,14 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         return metrics["score"]
 
     def test_01_enable_multimodal(self):
-        self._launch_server(enable_multimodal=True)
-        self._verify_inference()
-        TestEnableMultimodalNonMlm.score_with_param = self._run_mmlu_eval()
+        self.launch_server(enable_multimodal=True)
+        self.verify_inference()
+        TestEnableMultimodalNonMlm.score_with_param = self.run_mmlu_eval()
 
     def test_02_disable_multimodal(self):
-        self._launch_server(enable_multimodal=False)
-        self._verify_inference()
-        TestEnableMultimodalNonMlm.score_without_param = self._run_mmlu_eval()
+        self.launch_server(enable_multimodal=False)
+        self.verify_inference()
+        TestEnableMultimodalNonMlm.score_without_param = self.run_mmlu_eval()
 
     def test_03_assert_score(self):
         self.assertIsNotNone(TestEnableMultimodalNonMlm.score_with_param, "MMLU score with parameter not obtained")
