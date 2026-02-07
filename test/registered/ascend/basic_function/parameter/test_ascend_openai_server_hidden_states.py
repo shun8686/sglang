@@ -134,7 +134,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 
         hidden_states_list = []
         for response in generator:
-            usage = response.usage
             for choice in response.choices:
                 if hasattr(choice, "hidden_states"):
                     assert return_hidden_states
@@ -210,7 +209,8 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 class TestOpenAIServerWithHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration,
+    in multi-sampling scenarios, returning the hidden state in both streaming and non-streaming modes.
 
     [Test Category] Parameter
     [Test Target] --enable-return-hidden-states
@@ -230,9 +230,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
                 "--enable-return-hidden-states",
                 "--attention-backend",
                 "ascend",
-                "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
+                # "--disable-cuda-graph",
             ],
             env=ENV,
         )
@@ -250,10 +248,10 @@ class TestOpenAIServerWithHiddenStatesEnabled(
 class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, in non-graph mode, correctly return hidden states.
 
     [Test Category] Parameter
-    [Test Target] --enable-return-hidden-states
+    [Test Target] --disable-cuda-graph; --enable-return-hidden-states
     """
 
     @classmethod
@@ -271,8 +269,6 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
             ],
             env=ENV,
         )
@@ -290,11 +286,10 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful,
-    and can correctly teturn the hidden states.
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, and enable the EAGLE3 algorithm and return hidden states.
 
     [Test Category] Parameter
-    [Test Target] --enable-return-hidden-states
+    [Test Target] --speculative-algorithm; --enable-return-hidden-states
     """
 
     @classmethod
@@ -331,8 +326,6 @@ class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
             ],
             env=ENV,
         )
