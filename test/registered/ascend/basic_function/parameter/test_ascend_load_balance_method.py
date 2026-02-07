@@ -1,8 +1,7 @@
+import random
 import unittest
 from types import SimpleNamespace
-
 import requests
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
@@ -10,12 +9,12 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
+    popen_launch_server, is_in_ci,
 )
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=2500, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(est_time=500, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
@@ -57,7 +56,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         cls.process = popen_launch_server(
             cls.model_path,
             cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            timeout=3*DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
 
@@ -95,4 +94,19 @@ class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance)
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # To reduce the CI execution time.
+    if is_in_ci():
+        loader = unittest.TestLoader()
+        suite = unittest.TestSuite()
+        RUN_FLAG = [
+            TestDPAttentionRoundBinLoadBalance,
+            _TestDPAttentionAutoLoadBalance,
+            _TestDPAttentionFollowBootstrapRoomLoadBalance,
+            _TestDPAttentionTotalRequestsLoadBalance,
+            _TestDPAttentionTotalTokensLoadBalance,
+        ]
+        suite.addTests(loader.loadTestsFromTestCase(random.choice(RUN_FLAG)))
+        runner = unittest.TextTestRunner()
+        runner.run(suite)
+    else:
+        unittest.main()

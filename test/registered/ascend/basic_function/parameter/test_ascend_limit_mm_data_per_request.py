@@ -1,6 +1,5 @@
 import random
 import unittest
-import openai
 import requests
 import multiprocessing as mp
 
@@ -11,7 +10,6 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     popen_launch_server,
 )
 
@@ -26,10 +24,6 @@ IMAGE_SGL_LOGO_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-fil
 # video
 VIDEO_JOBS_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/videos/jobs_presenting_ipod.mp4"
 
-# audio
-AUDIO_TRUMP_SPEECH_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/audios/Trump_WEF_2018_10s.mp3"
-AUDIO_BIRD_SONG_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/audios/bird_song.mp3"
-
 
 def popen_launch_server_wrapper(base_url, model, other_args):
     process = popen_launch_server(
@@ -41,8 +35,8 @@ def popen_launch_server_wrapper(base_url, model, other_args):
     return process
 
 
-class TestVisionModel(CustomTestCase):
-    """Testcase: Configuring '--limit-mm-data-per-request' to send different multimodal inference requests,
+class TestLimitMMDatePerRequest(CustomTestCase):
+    """Testcase: Configuring '--limit-mm-data-per-request {"image":1, "video":1}' to send different multimodal inference requests,
        each containing multiple multimodal input data, with verfication ensuring that only one data point is processed at a time
 
     [Test Category] Parameter
@@ -55,6 +49,29 @@ class TestVisionModel(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.base_url += "/v1"
         cls.api_key = "sk-123456"
+
+        limit_mm = '{"image":1, "video":1}'
+        other_args = [
+            "--mem-fraction-static",
+            "0.5",
+            "--enable-multimodal",
+            "--limit-mm-data-per-request",
+            limit_mm,
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
+            "--tp-size",
+            "16",
+            "--disable-cuda-graph",
+        ]
+        cls.process = popen_launch_server_wrapper(
+            DEFAULT_URL_FOR_TEST, MODEL, other_args
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
     def _run_multi_turn_request(self):
         # Input video and image respectively
@@ -113,8 +130,6 @@ class TestVisionModel(CustomTestCase):
         ]
         response1 = requests.post(self.base_url + '/chat/completions',
                                   json={"messages": messages1, "temperature": 0, "max_completion_tokens": 1024})
-        print(f"*****{response1.status_code=}")
-        print(f"*****{response1.text=}")
         assert response1.status_code == 400
 
     def _run_multi_turn_request2(self):
@@ -140,41 +155,12 @@ class TestVisionModel(CustomTestCase):
         ]
         response2 = requests.post(self.base_url + '/chat/completions',
                                   json={"messages": messages2, "temperature": 0, "max_completion_tokens": 1024})
-        print(f"*****{response2.status_code=}")
-        print(f"*****{response2.text=}")
         assert response2.status_code == 400
 
     def test_vlm(self):
-        models_to_test = MODEL
-
-        if is_in_ci():
-            models_to_test = [random.choice(MODEL)]
-        limit_mm = '{"image":1, "video":1}'
-        for model in models_to_test:
-            with self.subTest(model=model):
-                other_args = [
-                    "--mem-fraction-static",
-                    "0.5",
-                    "--enable-multimodal",
-                    "--limit-mm-data-per-request",
-                    limit_mm,
-                    "--attention-backend",
-                    "ascend",
-                    "--device",
-                    "npu",
-                    "--tp-size",
-                    "16",
-                    "--disable-cuda-graph",
-                ]
-                try:
-                    process = popen_launch_server_wrapper(
-                        DEFAULT_URL_FOR_TEST, model, other_args
-                    )
-                    self._run_multi_turn_request()
-                    self._run_multi_turn_request1()
-                    self._run_multi_turn_request2()
-                finally:
-                    kill_process_tree(process.pid)
+        self._run_multi_turn_request()
+        self._run_multi_turn_request1()
+        self._run_multi_turn_request2()
 
 
 if __name__ == "__main__":

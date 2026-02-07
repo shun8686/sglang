@@ -38,7 +38,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=(
+            other_args = [
                 "--max-running-requests", "1",  # Limit concurrent running requests to 1
                 "--max-queued-requests", "10",
                 "--enable-priority-scheduling", # Enable priority scheduling (required for preemption)
@@ -47,7 +47,7 @@ class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
                 "--attention-backend", "ascend",
                 "--tp-size", "1",
                 "--mem-fraction-static", "0.8",
-            ),
+            ]
             return_stdout_stderr=(cls.stdout, cls.stderr),
         )
     

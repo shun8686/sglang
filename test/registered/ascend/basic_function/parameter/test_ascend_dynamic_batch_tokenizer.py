@@ -1,4 +1,5 @@
 import unittest
+import logging
 import requests  
 from types import SimpleNamespace
 
@@ -12,6 +13,14 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
+
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
 
 BASE_OTHER_ARGS = [
     "--chunked-prefill-size", "256",
@@ -66,7 +75,7 @@ class BaseQwenTest(CustomTestCase):
         )
         
         server_info = requests.get(self.base_url + "/get_server_info")
-        print(f"{scenario}: {server_info=}")
+        logger.info(f"{scenario}: server_info={server_info}")
 
 class TestQwenPPTieWeightsAccuracyTokenizerTimeout0(BaseQwenTest):
     """Testcase: Verify Qwen3-32B model accuracy on GSM8K with dynamic batch tokenizer timeout set to 0.

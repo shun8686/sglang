@@ -38,8 +38,6 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
             "512",
             "--tp",
             "16",
-            "--dp",
-            "1",
             "--attention-backend",
             "ascend",
             "--moe-a2a-backend",
@@ -75,7 +73,6 @@ class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
             port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval_few_shot_gsm8k(args)
-        print(f"Eval accuracy of GSM8K: {metrics=}")
         self.assertGreaterEqual(metrics["accuracy"], 0.86)
 
 

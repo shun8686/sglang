@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestEnableThinking(CustomTestCase):
-    """Testcase: Test the basic functionality of the 'v1/completions' interface parameters.
+    """Testcase: The test is to verify whether the functions of each parameter of the v1/completions interface are normal.
 
     [Test Category] Interface
     [Test Target] v1/completions
@@ -52,7 +52,7 @@ class TestEnableThinking(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_parameters_model(self):
-        # Test model parameter
+        # Test model and messages parameter; configured model returns correct name, unconfigured defaults to "default", reasoning works
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -63,11 +63,10 @@ class TestEnableThinking(CustomTestCase):
         logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
         data = client.json()
-        # Assertion model configuration successful
         self.assertEqual(data["model"], self.model)
 
     def test_model_parameters_prompt(self):
-        # Test prompt parameter
+        # Test prompt parameter, The input has str, list[int], list[str], and list[list[int]], reasoning works
         # The input is in str format
         client = requests.post(
             f"{self.base_url}/v1/completions",
@@ -112,7 +111,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(client3.status_code, 200, f"Failed with: {client3.text}")
 
     def test_model_parameters_max_tokens(self):
-        # Test max_tokens parameter
+        # Test max_completion_tokens parameter; setting to 1 token forces immediate truncation, verify finish_reason is "length"
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -127,7 +126,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertEqual(client.json()['choices'][0]['finish_reason'], 'length')
 
     def test_model_parameters_stream(self):
-        # Test stream parameter
+        # Test stream parameter; verify streaming response contains both reasoning_content and normal content chunks
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -156,12 +155,12 @@ class TestEnableThinking(CustomTestCase):
         )
 
     def test_model_parameters_temperature(self):
-        # Test temperature parameter
+        # Test temperature parameter; temperature=0 yields identical outputs across requests, temperature=2 yields varied outputs
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "temperature": 1
+                "temperature": 0
             },
         )
         logging.info(f"client.json:{client.json()}")
@@ -171,16 +170,37 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "temperature": 1
+                "temperature": 0
             },
         )
-        logging.info(f"client1.json:{client.json()}")
-        self.assertEqual(client1.status_code, 200, f"Failed with: {client.text}")
+        logging.info(f"client1.json:{client1.json()}")
+        self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
         # Asser that the configuration temperature is the same and the output response is the same
-        self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
+        self.assertEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
+
+        client2 = requests.post(
+            f"{self.base_url}/v1/completions",
+            json={
+                "prompt": 'who are you?',
+                "temperature": 2
+            },
+        )
+        logging.info(f"client.json:{client2.json()}")
+        self.assertEqual(client2.status_code, 200, f"Failed with: {client2.text}")
+
+        client3 = requests.post(
+            f"{self.base_url}/v1/completions",
+            json={
+                "prompt": 'who are you?',
+                "temperature": 2
+            },
+        )
+        logging.info(f"client3.json:{client3.json()}")
+        self.assertEqual(client3.status_code, 200, f"Failed with: {client3.text}")
+        self.assertNotEqual(client2.json()['choices'][0]['text'], client3.json()['choices'][0]['text'])
 
     def test_model_parameters_hidden_states(self):
-        # Test hidden_states parameter
+        # Test return_hidden_states parameter; verify hidden_states field appears when enabled and is absent when disabled
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -190,16 +210,15 @@ class TestEnableThinking(CustomTestCase):
         )
         logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # Assert the output response contains hidden_states
         self.assertIn("hidden_states", client.json()['choices'][0])
 
     def test_model_parameters_top_k(self):
-        # Test top_k parameter
+        # Test top_k parameter; with k=20, outputs vary between identical requests due to token sampling
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "top_k": 5
+                "top_k": 20
             },
         )
         logging.info(f"client.json:{client.json()}")
@@ -210,17 +229,16 @@ class TestEnableThinking(CustomTestCase):
             f"{self.base_url}/v1/completions",
             json={
                 "prompt": 'who are you?',
-                "top_k": 5
+                "top_k": 20
             },
         )
         logging.info(f"client1.json:{client1.json()}")
         logging.info(f"client1.text:{client1.text}")
         self.assertEqual(client1.status_code, 200, f"Failed with: {client1.text}")
-        # Asser that the configuration top_k is the same and the output response is the same
         self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
 
     def test_model_parameters_stop_token_ids(self):
-        # Test stop_token_ids parameter
+        # Test stop_token_ids parameter; verify response stops at specified token ID (13) and matched_stop field is correct
         list_ids = [1, 13]
         client = requests.post(
             f"{self.base_url}/v1/completions",
@@ -232,11 +250,10 @@ class TestEnableThinking(CustomTestCase):
         )
         logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # Asser can terminate the token according to the configured stop_token_ids
         self.assertEqual(client.json()['choices'][0]['matched_stop'], 13)
 
     def test_model_parameters_rid(self):
-        # Test rid parameter
+        # Test rid parameter; verify response ID matches the requested rid value '10086'
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -246,7 +263,6 @@ class TestEnableThinking(CustomTestCase):
         )
         logging.info(f"client.json:{client.json()}")
         self.assertEqual(client.status_code, 200, f"Failed with: {client.text}")
-        # Assert the output response to include the configured rid
         self.assertEqual(client.json()['id'], '10086')
 
 

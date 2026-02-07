@@ -1,10 +1,7 @@
 import os
 import unittest
 from abc import ABC
-
-import numpy as np
 import openai
-import torch
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -36,7 +33,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
         cls.parallel_sample_nums = [1, 2]
 
     def test_completion(self):
-        print("----------------------testcase1")
         for return_hidden_states in self.return_hidden_states:
             for use_list_input in self.use_list_input:
                 for parallel_sample_num in self.parallel_sample_nums:
@@ -47,7 +43,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
                     )
 
     def test_comptetion_stream(self):
-        print("----------------------testcase2")
         # parallel sampling and list input are not supported in streaming mode
         for return_hidden_states in self.return_hidden_states:
             for use_list_input in self.use_list_input:
@@ -59,7 +54,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
                     )
 
     def test_chat_completion(self):
-        print("----------------------testcase3")
         for return_hidden_states in self.return_hidden_states:
             for (
                 parallel_sample_num
@@ -69,7 +63,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
                 self.run_chat_completion(parallel_sample_num, return_hidden_states)
 
     def test_chat_completion_stream(self):
-        print("----------------------testcase4")
         for return_hidden_states in self.return_hidden_states:
             for (
                 parallel_sample_num
@@ -92,10 +85,8 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 
         if use_list_input:
             prompt_arg = [prompt_input, prompt_input]
-            num_choices = len(prompt_arg)
         else:
             prompt_arg = prompt_input
-            num_choices = 1
 
         response = client.completions.create(
             model=self.model,
@@ -143,7 +134,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 
         hidden_states_list = []
         for response in generator:
-            usage = response.usage
             for choice in response.choices:
                 if hasattr(choice, "hidden_states"):
                     assert return_hidden_states
@@ -197,7 +187,6 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
             extra_body=dict(return_hidden_states=return_hidden_states),
         )
 
-        is_firsts = {}
         hidden_states_list = []
 
         for response in generator:
@@ -220,10 +209,11 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 class TestOpenAIServerWithHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration,
+    in multi-sampling scenarios, returning the hidden state in both streaming and non-streaming modes.
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --enable-return-hidden-states
     """
 
     @classmethod
@@ -240,9 +230,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
                 "--enable-return-hidden-states",
                 "--attention-backend",
                 "ascend",
-                "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
+                # "--disable-cuda-graph",
             ],
             env=ENV,
         )
@@ -260,10 +248,10 @@ class TestOpenAIServerWithHiddenStatesEnabled(
 class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, in non-graph mode, correctly return hidden states.
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --disable-cuda-graph; --enable-return-hidden-states
     """
 
     @classmethod
@@ -281,8 +269,6 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
             ],
             env=ENV,
         )
@@ -300,10 +286,10 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, and enable the EAGLE3 algorithm and return hidden states.
 
-    [Test Category] --enable-return-hidden-states
-    [Test Target] Enable returning hidden states with responses
+    [Test Category] Parameter
+    [Test Target] --speculative-algorithm; --enable-return-hidden-states
     """
 
     @classmethod
@@ -340,8 +326,6 @@ class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
             ],
             env=ENV,
         )
