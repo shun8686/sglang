@@ -300,7 +300,8 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful
+    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, inference requests successful,
+    and can correctly teturn the hidden states.
 
     [Test Category] --enable-return-hidden-states
     [Test Target] Enable returning hidden states with responses
