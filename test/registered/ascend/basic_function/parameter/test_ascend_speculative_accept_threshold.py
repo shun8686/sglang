@@ -74,37 +74,35 @@ class TestAscendDistTimeout(CustomTestCase):
             "auto",
         ]
 
-    def test_a_gsm8k(self):
-        other_args = self.common_args
-        process = popen_launch_server(
+        cls.process = popen_launch_server(
             DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
-            self.base_url,
+            cls.base_url,
             timeout=1500,
-            other_args=[
-                *other_args,
-            ],
-            env=self.env,
+            other_args=cls.common_args,
+            env=cls.env,
         )
 
-        try:
-            args = SimpleNamespace(
-                num_shots=5,
-                data_path=None,
-                num_questions=1319,
-                max_new_tokens=512,
-                parallel=128,
-                host=f"http://{self.url.hostname}",
-                port=int(self.url.port),
-            )
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
-            metrics = run_eval_few_shot_gsm8k(args)
-            print(f"metrics['accuracy']=")
-            self.assertGreaterEqual(
-                metrics["accuracy"],
-                TEST_MODEL_MATRIX[DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH]["accuracy"],
-            )
-        finally:
-            kill_process_tree(process.pid)
+    def test_a_gsm8k(self):
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=1319,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
+
+        metrics = run_eval_few_shot_gsm8k(args)
+        print(f"metrics['accuracy']=")
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            TEST_MODEL_MATRIX[DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH]["accuracy"],
+        )
 
 
 if __name__ == "__main__":
