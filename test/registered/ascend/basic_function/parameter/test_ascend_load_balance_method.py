@@ -94,9 +94,8 @@ class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance)
 
 
 if __name__ == "__main__":
-    if True:
-        print(f"{is_in_ci()=}")
-        print("-------------CI test------------------------")
+    # To reduce the CI execution time.
+    if is_in_ci():
         loader = unittest.TestLoader()
         suite = unittest.TestSuite()
         RUN_FLAG = [
