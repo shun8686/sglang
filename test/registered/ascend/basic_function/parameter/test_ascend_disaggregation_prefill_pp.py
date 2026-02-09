@@ -12,12 +12,9 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
-)
-logger = logging.getLogger(__name__)
+base_id = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
+BASE_PORT_FOR_ASCEND_MF = 20000 + base_id * 1000 +66
+os.environ["ASCEND_MF_STORE_URL"] = f"tcp://127.0.0.1:{BASE_PORT_FOR_ASCEND_MF}"
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
@@ -32,7 +29,6 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
-        os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
         env = os.environ.copy()
 
         # Non blocking start servers
