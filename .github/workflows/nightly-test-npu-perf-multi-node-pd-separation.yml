@@ -73,12 +73,16 @@ jobs:
 
       - name: Prepare scripts
         run: |
-          sglang_source_path=$(pwd)
+          current_path=$(pwd)
+          sglang_source_path=/root/.cache/tests/sglang
+          rm -rf ${sglang_source_path}
+          mkdir ${sglang_source_path}
+          cp -r ${current_path}/* ${sglang_source_path}/
           echo "Source code path: ${sglang_source_path}"
 
           # mkdir for output data
           current_date=$(date +%Y%m%d)
-          test_data_output_path=/data/.cache/tests/output/perf/${current_date}
+          test_data_output_path=/root/.cache/tests/output/perf/${current_date}
           mkdir -p ${test_data_output_path}
 
           install_sglang_from_source="${{ inputs.install_sglang_from_source }}"
