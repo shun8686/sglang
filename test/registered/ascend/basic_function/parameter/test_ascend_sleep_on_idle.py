@@ -3,8 +3,8 @@ from types import SimpleNamespace
 
 import requests
 
+from sglang.test.run_eval import run_eval
 from sglang.srt.utils import kill_process_tree
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -60,23 +60,21 @@ class TestSleepOnIdle(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        # response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-        # self.assertEqual(response.status_code, 200)
-        # self.assertEqual(response.json()["sleep_on_idle"], True)
+        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["sleep_on_idle"], True)
 
-    def test_a_gsm8k(self):
+    def test_mmlu(self):
         args = SimpleNamespace(
-            num_shots=5,
-            data_path=None,
-            num_questions=200,
-            max_new_tokens=512,
-            parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            base_url=self.base_url,
+            model=self.model,
+            eval_name="mmlu",
+            num_examples=64,
+            num_threads=32,
         )
 
-        metrics = run_eval_few_shot_gsm8k(args)
-        # self.assertGreaterEqual(metrics["accuracy"], 0.86)
+        metrics = run_eval(args)
+        # self.assertGreaterEqual(metrics["score"], 0.65)
 
 
 if __name__ == "__main__":
