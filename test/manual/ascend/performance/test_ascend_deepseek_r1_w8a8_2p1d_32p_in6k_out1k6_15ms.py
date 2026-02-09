@@ -3,7 +3,7 @@ import unittest
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
     TestAscendMultiNodePdSepTestCaseBase,
     DEEPSEEK_R1_W8A8_MODEL_PATH,
-    NIC_NAME
+    NIC_NAME, ROUND_ROBIN
 )
 
 MODEL_CONFIG = {
@@ -84,7 +84,7 @@ MODEL_CONFIG = {
         "--prefill-round-robin-balance",
         "--disable-shared-experts-fusion",
         "--dtype", "bfloat16",
-        "--load-balance-method", "round_robin",
+        "--load-balance-method", ROUND_ROBIN,
     ],
     "router_args": [
         "--mini-lb",
