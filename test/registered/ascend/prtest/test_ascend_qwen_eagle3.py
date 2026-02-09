@@ -12,7 +12,6 @@ from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     popen_launch_pd_server,
 )
-DEFAULT_URL_FOR_TEST = f"http://127.0.0.1:40000"
 
 class TestAscendQwenEagle3(TestDisaggregationBase):
 
@@ -124,8 +123,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-draft-tokens", 4,
             "--tokenizer-worker-num", 4,
             "--mem-fraction-static", 0.7,
-            # "--cuda-graph-bs", 42, 88, 96, 132, 144, 156, 172, 178, 192,
-            "--disable-cuda-graph",
+            "--cuda-graph-bs", 16,
+            # "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
         cls.extra_envs = {
