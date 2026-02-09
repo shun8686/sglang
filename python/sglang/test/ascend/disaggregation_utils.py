@@ -50,9 +50,6 @@ class TestDisaggregationBase(CustomTestCase):
 
     @classmethod
     def launch_lb(cls):
-        print("======================================================================================================")
-        print(cls.base_host)
-        print(cls.lb_port)
         lb_command = [
             "python3",
             "-m",
@@ -68,6 +65,9 @@ class TestDisaggregationBase(CustomTestCase):
             "--port",
             cls.lb_port,
         ]
+        print("======================================================================================================")
+        print(cls.base_host)
+        print(cls.lb_port)
         print("Starting load balancer:", " ".join(lb_command))
         cls.process_lb = popen_with_error_check(lb_command)
         cls.wait_server_ready(cls.lb_url + "/health")

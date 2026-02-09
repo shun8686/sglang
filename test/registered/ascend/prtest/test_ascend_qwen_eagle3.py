@@ -123,8 +123,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-draft-tokens", 4,
             "--tokenizer-worker-num", 4,
             "--mem-fraction-static", 0.7,
-            "--cuda-graph-bs", 16,
-            # "--disable-cuda-graph",
+            # "--cuda-graph-bs", 16,
+            "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
         cls.extra_envs = {
