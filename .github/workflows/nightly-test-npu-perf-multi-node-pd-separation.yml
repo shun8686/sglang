@@ -100,20 +100,20 @@ jobs:
           prefill_size="${{ inputs.prefill_size }}"
           decode_size="${{ inputs.decode_size }}"
           router_size="${{ inputs.router_size }}"
-          echo "{ \"image\": $image,                                                  \
-                  \"name_space\": \"$NAMESPACE\",                                     \
-                  \"kube_job_name\": \"$KUBE_JOB_NAME\",                              \
-                  \"kube_config\": \"$KUBECONFIG\",                                   \
-                  \"kube_config_map\": \"$KUBE_CONFIG_MAP\",                          \
-                  \"prefill_size\": $prefill_size,                                    \
-                  \"decode_size\": $decode_size,                                      \
-                  \"router_size\": $router_size,                                      \
-                  \"sglang_source_path\": \"$sglang_source_path\",                    \
-                  \"metrics_data_file\": \"$metrics_data_file\",                      \
-                  \"test_case\": \"$test_case\",                                      \
-                  \"sglang_is_in_ci\": \"$SGLANG_IS_IN_CI\",                          \
-                  \"install_sglang_from_source\": \"$install_sglang_from_source\" }" |\
-              jinja2 ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_separation.yaml.jinja2 -o \
+          echo "{ \"image\": $image,                                                         \
+                  \"name_space\": \"$NAMESPACE\",                                            \
+                  \"kube_job_name\": \"$KUBE_JOB_NAME\",                                     \
+                  \"kube_config\": \"$KUBECONFIG\",                                          \
+                  \"kube_config_map\": \"$KUBE_CONFIG_MAP\",                                 \
+                  \"prefill_size\": $prefill_size,                                           \
+                  \"decode_size\": $decode_size,                                             \
+                  \"router_size\": $router_size,                                             \
+                  \"sglang_source_path\": \"$sglang_source_path\",                           \
+                  \"metrics_data_file\": \"$metrics_data_file\",                             \
+                  \"test_case\": \"$test_case\",                                             \
+                  \"sglang_is_in_ci\": \"$SGLANG_IS_IN_CI\",                                 \
+                  \"install_sglang_from_source\": \"$install_sglang_from_source\" }"        |\
+              jinja2 ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_separation.yaml.jinja2 -o  \
                      ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_separation.yaml
           echo "Kubelete config file is generated: ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_separation.yaml"
 

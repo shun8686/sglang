@@ -101,7 +101,7 @@ jobs:
                   \"test_case\": \"$test_case\",                                      \
                   \"sglang_is_in_ci\": \"$SGLANG_IS_IN_CI\",                          \
                   \"install_sglang_from_source\": \"$install_sglang_from_source\" }" |\
-              jinja2 ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml.jinja2 -o         \
+              jinja2 ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml.jinja2 -o  \
                      ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml
           echo "Kubelete config file is generated: ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml"
 
