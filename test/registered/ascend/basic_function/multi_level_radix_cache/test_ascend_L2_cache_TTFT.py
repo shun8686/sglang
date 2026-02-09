@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.srt.utils import is_npu, kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.test_utils import (
@@ -17,8 +16,7 @@ class TestNoChunkedPrefill(CustomTestCase):
     [Test Target] --enable-hierarchical-cache
     """
 
-    @classmethod
-    def setUpClass(cls):
+    def test_no_chunked_prefill_without_radix_cache(self):
         TTFTS = []
         model = QWEN3_32B_WEIGHTS_PATH
         common_args = [
@@ -46,8 +44,6 @@ class TestNoChunkedPrefill(CustomTestCase):
                 "--chunked-prefill-size",
                 "-1",
                 "--disable-cuda-graph",
-                "--base-gpu-id",
-                8,
                 "--enable-hierarchical-cache",
                 "--hicache-ratio",
                 5,
@@ -61,7 +57,7 @@ class TestNoChunkedPrefill(CustomTestCase):
                  "ascend",
                  ]
             )
-            cls.process = run_bench_serving(
+            res = run_bench_serving(
                 model=model,
                 dataset_name="generated-shared-prefix",
                 num_prompts=128,
@@ -76,14 +72,10 @@ class TestNoChunkedPrefill(CustomTestCase):
                 gsp_output_len=1,
                 other_server_args=other_args,
             )
-            cls.TTFT = cls.process["mean_ttft_ms"]
-            TTFTS.append(cls.TTFT)
+            TTFT = res["mean_ttft_ms"]
+            TTFTS.append(TTFT)
 
         assert float(TTFTS[1]) <= 0.8 * float(TTFTS[0])
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
 
 
 if __name__ == "__main__":
