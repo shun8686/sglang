@@ -3,7 +3,6 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import run_command
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -43,8 +42,6 @@ class TestSleepOnIdle(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_sleep_on_idle(self):
-        result = run_command(f"ps -p {self.process.pid} -o %cpu")
-        print(result)
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
