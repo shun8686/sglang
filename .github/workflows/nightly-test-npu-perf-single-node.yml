@@ -49,6 +49,7 @@ jobs:
         env:
           SGLANG_USE_MODELSCOPE: true
           HF_ENDPOINT: https://hf-mirror.com
+          SGLANG_IS_IN_CI: true
         run: |
           sglang_source_path=$(pwd)
           echo "Source code path: ${sglang_source_path}"

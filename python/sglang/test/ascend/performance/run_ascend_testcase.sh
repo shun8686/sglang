@@ -60,14 +60,19 @@ fi
 . /usr/local/Ascend/cann/set_env.sh
 . /usr/local/Ascend/nnal/atb/set_env.sh
 
+echo "Running test case ${test_case}"
 tc_name=${test_case##*/}
 tc_name=${tc_name%.*}
-log_path="/root/.cache/tests/logs/log/${tc_name}/${HOSTNAME}"
-rm -rf ${log_path}
-mkdir -p ${log_path}
-
-echo "Running test case ${test_case}"
-python3 -u ${test_case} | tee -a ${log_path}
+current_date=$(date +%Y%m%d)
+if [ "${SGLANG_IS_IN_CI}" = "true" ];then
+    log_path="/root/.cache/tests/logs/log/${current_date}/${tc_name}/${HOSTNAME}"
+    rm -rf ${log_path}
+    mkdir -p ${log_path}
+    echo "Log path: ${log_path}"
+    python3 -u ${test_case} | tee -a ${log_path}
+else
+    python3 -u ${test_case}
+fi
 echo "Finished test case ${test_case}"
 
 source_plog_path="/root/ascend/log/debug/plog"

@@ -48,6 +48,7 @@ jobs:
         KUBE_JOB_TYPE: multi
         KUBE_JOB_NAME: ascend-sglang-multi
         KUBE_CONFIG_MAP: ascend-sglang-info
+        SGLANG_IS_IN_CI: true
     steps:
       - name: Install system denpendencies
         run: |
@@ -98,6 +99,7 @@ jobs:
                   \"sglang_source_path\": \"$sglang_source_path\",                    \
                   \"metrics_data_file\": \"$metrics_data_file\",                      \
                   \"test_case\": \"$test_case\",                                      \
+                  \"sglang_is_in_ci\": \"$SGLANG_IS_IN_CI\",                          \
                   \"install_sglang_from_source\": \"$install_sglang_from_source\" }" |\
               jinja2 ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml.jinja2 -o         \
                      ${ASCEND_PERF_TEST_CONFIG_PATH}/k8s_multi_pd_mix.yaml
