@@ -2,6 +2,8 @@ import unittest
 
 import requests
 
+from types import SimpleNamespace
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -62,6 +64,19 @@ class TestScheduleConservativeness(CustomTestCase):
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["schedule_conservativeness"], 2.0)
+
+    def test_gsm8k(self):
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            parallel=512,
+            max_new_tokens=512,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        metrics = run_eval_few_shot_gsm8k(args)
+        self.assertGreaterEqual(metrics["accuracy"], 0.86)
 
 
 if __name__ == "__main__":
