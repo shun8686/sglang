@@ -12,6 +12,13 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 

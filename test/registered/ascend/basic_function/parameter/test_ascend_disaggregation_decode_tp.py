@@ -11,8 +11,16 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
 
-os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:23666"
+base_id = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
+BASE_PORT_FOR_ASCEND_MF = 20000 + base_id * 1000 +66
+os.environ["ASCEND_MF_STORE_URL"] = f"tcp://127.0.0.1:{BASE_PORT_FOR_ASCEND_MF}"
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
@@ -27,8 +35,10 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
+        logger.info(os.environ.get("ASCEND_RT_VISIBLE_DEVICES"))
         super().setUpClass()
         cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
+        
         env = os.environ.copy()
 
         # Non blocking start servers
