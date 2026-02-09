@@ -18,6 +18,7 @@ MODEL_CONFIG = {
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         "TASK_QUEUE_ENABLE": "2",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
+        "GLOO_SOCKET_IFNAME": NIC_NAME,
     },
     "decode_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
