@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     popen_launch_pd_server,
 )
-
+DEFAULT_URL_FOR_TEST = f"http://127.0.0.1:40000"
 
 class TestAscendQwenEagle3(TestDisaggregationBase):
 
