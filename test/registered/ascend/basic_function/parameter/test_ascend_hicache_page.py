@@ -16,8 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHiCachePage(CustomTestCase):
-    """Testcase: Test configuration of page-size interence request successful
-                MMLU dataset accuracy verification (score ≥ 0.65)
+    """Testcase: The test configuration page-size value is only 128.
 
     [Test Category] Parameter
     [Test Target] --page-size
