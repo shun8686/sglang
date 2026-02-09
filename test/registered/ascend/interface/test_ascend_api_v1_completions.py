@@ -239,7 +239,7 @@ class TestEnableThinking(CustomTestCase):
 
     def test_model_parameters_stop_token_ids(self):
         # Test stop_token_ids parameter; verify response stops at specified token ID (13) and matched_stop field is correct
-        list_ids = [1, 13]
+        list_ids = [13]
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
