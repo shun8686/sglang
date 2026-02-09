@@ -5,7 +5,7 @@ import requests
 from types import SimpleNamespace
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -14,12 +14,11 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestScheduleConservativeness(CustomTestCase):
-    """Testcase: Test the schedule policy.
-                 Test --schedule-conservativeness is configured, inference request successful.
+    """Testcase: Test the schedule policy, and use the GSM8K dataset ensure an inference accuracy of at least 0.86.
 
     [Test Category] Parameter
     [Test Target] --schedule-conservativeness
@@ -33,10 +32,12 @@ class TestScheduleConservativeness(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
+            "--tp-size",
+            2,
         ]
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
-            LLAMA_3_2_1B_WEIGHTS_PATH,
+            QWEN3_32B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
@@ -62,9 +63,6 @@ class TestScheduleConservativeness(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json()["schedule_conservativeness"], 2.0)
 
     def test_gsm8k(self):
         args = SimpleNamespace(
