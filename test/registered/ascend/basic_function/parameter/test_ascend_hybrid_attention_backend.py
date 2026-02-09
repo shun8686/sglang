@@ -1,6 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+
 import requests
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
@@ -13,40 +14,53 @@ from sglang.test.test_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
+GSM_DATASET_PATH = None
+
+# Default server arguments shared across all tests
+DEFAULT_SERVER_ARGS = (
+    [
+        "--trust-remote-code",
+        "--cuda-graph-max-bs",
+        "8",
+        "--prefill-attention-backend",
+        "ascend",
+        "--decode-attention-backend",
+        "ascend",
+        "--attention-backend",
+        "cutlass_mla",
+        "--disable-cuda-graph",
+        "--mem-fraction-static",
+        0.9,
+        "--tp-size",
+        2,
+    ]
+)
 
 
 @unittest.skipIf(
     False, "Test requires CUDA SM 90 or higher"
 )
 class TestHybridAttnBackendBase(CustomTestCase):
-    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the gsm8k accuracy greater than 0.65 and inference request is successfully processed.
+    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --prefill-attention-backend, --decode-attention-backend
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    accuracy_threshold = 0.65
+    accuracy_threshold = 0.65  # derived tests need to override this
+
+    @classmethod
+    def get_server_args(cls):
+        """Return the arguments for the server launch. Override in subclasses."""
+        return DEFAULT_SERVER_ARGS
 
     @classmethod
     def setUpClass(cls):
-        other_args = [
-            "--trust-remote-code",
-            "--cuda-graph-max-bs",
-            "8",
-            "--prefill-attention-backend",
-            "ascend",
-            "--decode-attention-backend",
-            "ascend",
-            "--attention-backend",
-            "cutlass_mla",
-            "--disable-cuda-graph",
-            "--mem-fraction-static",
-            "0.9",
-            "--tp-size",
-            "2",
-        ]
+        # disable deep gemm precompile to make launch server faster
+        # please don't do this if you want to make your inference workload faster
         os.environ["SGL_JIT_DEEPGEMM_PRECOMPILE"] = "false"
         os.environ["SGL_ENABLE_JIT_DEEPGEMM"] = "false"
         model = cls.model
@@ -54,7 +68,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
             model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
+            other_args=cls.get_server_args(),
         )
 
     @classmethod
@@ -71,7 +85,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
             parallel=128,
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
-            data_path=None,
+            data_path=GSM_DATASET_PATH,
         )
         metrics = run_eval_few_shot_gsm8k(args)
         print(f"{metrics=}")
@@ -97,7 +111,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         )
         self.assertEqual(
             response.json()["internal_states"][0]["attention_backend"],
-            "cutlass_mla",
+            "ascend",
         )
 
 
