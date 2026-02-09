@@ -82,14 +82,15 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
     @classmethod
     def start_decode(cls):
         # Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)
-        if "ASCEND_RT_VISIBLE_DEVICES" not in os.environ:
-            os.environ["ASCEND_RT_VISIBLE_DEVICES"] = "0,1,2,3"
+        ascend_devices = os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0,1,2,3")
+        os.environ["ASCEND_RT_VISIBLE_DEVICES"] = ascend_devices
+        base_gpu_id = ascend_devices.split(",")[2] if len(ascend_devices.split(",")) >= 3 else "2"
         decode_args = (
             [
                 "--disaggregation-mode",
                 "decode",
                 "--base-gpu-id",
-                "os.environ.get("ASCEND_RT_VISIBLE_DEVICES")[2]",
+                base_gpu_id,
                 "--disaggregation-transfer-backend",
                 "ascend",
                 "--disable-cuda-graph",
