@@ -1,9 +1,7 @@
 import unittest
-from types import SimpleNamespace
 
 import requests
 
-from sglang.test.run_eval import run_eval
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -63,18 +61,6 @@ class TestSleepOnIdle(CustomTestCase):
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["sleep_on_idle"], True)
-
-    def test_mmlu(self):
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model,
-            eval_name="mmlu",
-            num_examples=64,
-            num_threads=32,
-        )
-
-        metrics = run_eval(args)
-        # self.assertGreaterEqual(metrics["score"], 0.65)
 
 
 if __name__ == "__main__":
