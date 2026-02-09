@@ -6,6 +6,7 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -14,6 +15,8 @@ from sglang.test.test_utils import (
 )
 
 MODEL_PATH = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+
 
 class TestDeepEpAutoDeepseekR1(CustomTestCase):
     """Testcase: Verify the accuracy of DeepSeek-R1 model on MMLU and GSM8K tasks with --deepep-mode auto on Ascend backend.
@@ -105,7 +108,7 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
             base_url=self.base_url,
             model=self.model,
             eval_name="mmlu",
-            num_examples=8,
+            num_examples=64,
             num_threads=32,
         )
 
