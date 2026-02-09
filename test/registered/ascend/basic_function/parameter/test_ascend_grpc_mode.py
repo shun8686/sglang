@@ -34,15 +34,25 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
 
-        worker_args = [
-            "--grpc-mode"
+        # worker_args = [
+        #     "--grpc-mode"
+        # ]
+        # cls.worker_process = popen_launch_server(
+        #     cls.model,
+        #     cls.base_url,
+        #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        #     other_args=worker_args,
+        # )
+        worker_command = [
+            "python3",
+            "-m", "sglang.launch_server",
+            "--model-path", cls.model,
+            "--grpc-mode",
+            "--worker-urls", cls.grpc_base_url,
+            "--host", cls.url.hostname, "--port", str(cls.url.port),
+
         ]
-        cls.worker_process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=worker_args,
-        )
+        cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
 
         router_command = [
             "python3",
@@ -52,7 +62,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "--model-path", cls.model,
         ]
 
-        cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        # cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         cls.router_process = popen_with_error_check(router_command)
         cls.wait_server_ready(cls.base_url + "/health")
