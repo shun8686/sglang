@@ -1,3 +1,5 @@
+from time import sleep
+
 import requests
 import unittest
 import subprocess
@@ -65,6 +67,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         # cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
         cls.router_process = popen_with_error_check(router_command)
+        sleep(100)
         cls.wait_server_ready(cls.base_url + "/health")
 
     @classmethod
