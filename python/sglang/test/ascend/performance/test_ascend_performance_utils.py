@@ -41,7 +41,7 @@ LOCAL_HOST_NAME = os.getenv("HOSTNAME")
 if not LOCAL_HOST_IP or not LOCAL_HOST_NAME:
     raise RuntimeError(f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}")
 
-ROUND_ROBIN = "decode_round_robin"
+ROUND_ROBIN = "round_robin"
 
 LOCAL_TIMEOUT = 3600
 
