@@ -53,25 +53,26 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "--host", cls.url.hostname, "--port", str(cls.url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
-
-        router_command = [
-            "python3",
-            "-m", "sglang_router.launch_router",
-            "--worker-urls", cls.grpc_base_url,
-            "--host", cls.url.hostname, "--port", str(cls.url.port),
-            "--model-path", cls.model,
-        ]
-
-        # cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-        cls.router_process = popen_with_error_check(router_command)
         sleep(100)
-        cls.wait_server_ready(cls.base_url + "/health")
+
+        # router_command = [
+        #     "python3",
+        #     "-m", "sglang_router.launch_router",
+        #     "--worker-urls", cls.grpc_base_url,
+        #     "--host", cls.url.hostname, "--port", str(cls.url.port),
+        #     "--model-path", cls.model,
+        # ]
+        #
+        # # cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        #
+        # cls.router_process = popen_with_error_check(router_command)
+        # sleep(100)
+        # cls.wait_server_ready(cls.base_url + "/health")
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.worker_process.pid)
-        kill_process_tree(cls.router_process.pid)
+        # kill_process_tree(cls.router_process.pid)
 
     @classmethod
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
