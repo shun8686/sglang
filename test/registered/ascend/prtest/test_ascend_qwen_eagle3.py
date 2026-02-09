@@ -164,6 +164,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
         self.assertGreaterEqual(metrics["score"], 0.77)
 
     def test_gsm8k(self):
+        print("======================================================================================================")
+        print(f"{self.url}")
         expect_accuracy = 0.83
         args = SimpleNamespace(
             num_shots=8,

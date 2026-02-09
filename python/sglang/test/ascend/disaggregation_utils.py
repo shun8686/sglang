@@ -50,6 +50,9 @@ class TestDisaggregationBase(CustomTestCase):
 
     @classmethod
     def launch_lb(cls):
+        print("======================================================================================================")
+        print(cls.base_host)
+        print(cls.lb_port)
         lb_command = [
             "python3",
             "-m",
