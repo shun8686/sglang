@@ -60,17 +60,21 @@ fi
 . /usr/local/Ascend/cann/set_env.sh
 . /usr/local/Ascend/nnal/atb/set_env.sh
 
+tc_name=${test_case##*/}
+tc_name=${tc_name%.*}
+log_path="/root/.cache/tests/logs/log/${tc_name}/${HOSTNAME}"
+rm -rf ${log_path}
+mkdir -p ${log_path}
+
 echo "Running test case ${test_case}"
-python3 -u ${test_case}
+python3 -u ${test_case} | tee -a ${log_path}
 echo "Finished test case ${test_case}"
 
-plog_path="/root/ascend/log/debug/plog"
-if [ -d "$plog_path" ];then
+source_plog_path="/root/ascend/log/debug/plog"
+if [ -d "$source_plog_path" ];then
     echo "Plog files found. Begin to backup them."
-    tc_name=${test_case##*/}
-    tc_name=${tc_name%.*}
     target_plog_path="/root/.cache/tests/logs/plog/${tc_name}/${HOSTNAME}"
     rm -rf ${target_plog_path}
     mkdir -p ${target_plog_path}
-    cp ${plog_path}/* ${target_plog_path}
+    cp ${source_plog_path}/* ${target_plog_path}
 fi
