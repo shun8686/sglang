@@ -32,6 +32,7 @@ class TestSleepOnIdle(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
         ]
+        cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
@@ -70,8 +71,8 @@ class TestSleepOnIdle(CustomTestCase):
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host=f"http://{self.url.hostname}",
-            port=int(self.url.port),
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
         )
 
         metrics = run_eval_few_shot_gsm8k(args)
