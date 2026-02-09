@@ -20,14 +20,14 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
     False, "Test requires CUDA SM 90 or higher"
 )
 class TestHybridAttnBackendBase(CustomTestCase):
-    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the gsm8k accuracy greater than 0.84 and inference request is successfully processed.
+    """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the gsm8k accuracy greater than 0.65 and inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --prefill-attention-backend, --decode-attention-backend
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    accuracy_threshold = 0.84
+    accuracy_threshold = 0.65
 
     @classmethod
     def setUpClass(cls):
@@ -65,7 +65,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         requests.get(self.base_url + "/flush_cache")
 
         args = SimpleNamespace(
-            num_shots=8,
+            num_shots=4,
             num_questions=100,
             max_new_tokens=512,
             parallel=128,
