@@ -12,8 +12,8 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-base_id = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
-BASE_PORT_FOR_ASCEND_MF = 20000 + base_id * 1000 +66
+base_port = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
+BASE_PORT_FOR_ASCEND_MF = 20000 + base_port * 1000 +66
 os.environ["ASCEND_MF_STORE_URL"] = f"tcp://127.0.0.1:{BASE_PORT_FOR_ASCEND_MF}"
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
