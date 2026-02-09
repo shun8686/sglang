@@ -87,7 +87,7 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
                 "--disaggregation-mode",
                 "decode",
                 "--base-gpu-id",
-                "2",
+                "os.environ.get("ASCEND_RT_VISIBLE_DEVICES")[2]",
                 "--disaggregation-transfer-backend",
                 "ascend",
                 "--disable-cuda-graph",
