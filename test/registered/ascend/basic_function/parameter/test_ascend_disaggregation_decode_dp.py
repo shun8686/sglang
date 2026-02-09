@@ -82,6 +82,8 @@ class TestDisaggregationDecodeDp(TestDisaggregationBase):
     @classmethod
     def start_decode(cls):
         # Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)
+        if "ASCEND_RT_VISIBLE_DEVICES" not in os.environ:
+            os.environ["ASCEND_RT_VISIBLE_DEVICES"] = "0,1,2,3"
         decode_args = (
             [
                 "--disaggregation-mode",
