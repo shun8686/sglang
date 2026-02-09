@@ -57,7 +57,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         os.remove("./warmup_out_log.txt")
         os.remove("./warmup_err_log.txt")
 
-    def test_delete_fastapi_root_path(self):
+    def test_fastapi_root_path(self):
         response = requests.post(
             f"{self.base_url}/generate",
             json={
