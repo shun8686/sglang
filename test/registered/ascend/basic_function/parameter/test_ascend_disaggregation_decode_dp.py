@@ -1,5 +1,6 @@
 import os
 import unittest
+import logging
 
 import requests
 
