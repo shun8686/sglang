@@ -119,6 +119,14 @@ class TestAscendGrpcMode(CustomTestCase):
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
+curl --location 'http://127.0.0.1:21000/generate' --header 'Content-Type: application/json' --data '{
+    "text": "The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is The capital of france is ",
+    "sampling_params": {
+        "temperature": 0,
+        "max_new_tokens": 1
+    }
+}'
+
 
 if __name__ == "__main__":
     unittest.main()
