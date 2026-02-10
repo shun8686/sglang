@@ -1,5 +1,6 @@
 import os
 import unittest
+import logging
 
 import requests
 
@@ -11,6 +12,10 @@ from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     popen_launch_pd_server,
 )
+
+base_port = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
+BASE_PORT_FOR_ASCEND_MF = 20000 + base_port * 1000 +66
+os.environ["ASCEND_MF_STORE_URL"] = f"tcp://127.0.0.1:{BASE_PORT_FOR_ASCEND_MF}"
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
@@ -25,7 +30,6 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
-        os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
         env = os.environ.copy()
 
         # Non blocking start servers
@@ -65,12 +69,15 @@ class TestDisaggregationPrefillPp(TestDisaggregationBase):
     @classmethod
     def start_decode(cls):
         """Launch the Decode service with --disaggregation-prefill-pp=2 configuration for Ascend NPU"""
+        ascend_devices = os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0,1,2,3")
+        os.environ["ASCEND_RT_VISIBLE_DEVICES"] = ascend_devices
+        base_gpu_id = ascend_devices.split(",")[2] if len(ascend_devices.split(",")) >= 3 else "2"
         decode_args = (
             [
                 "--disaggregation-mode",
                 "decode",
                 "--base-gpu-id",
-                "2",
+                base_gpu_id,
                 "--disaggregation-transfer-backend",
                 "ascend",
                 "--disable-cuda-graph",

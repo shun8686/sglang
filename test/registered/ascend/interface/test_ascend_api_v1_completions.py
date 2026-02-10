@@ -52,7 +52,7 @@ class TestEnableThinking(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_parameters_model(self):
-        # Test model and messages parameter; configured model returns correct name, unconfigured defaults to "default", reasoning works
+        # Test model parameter; configured model returns correct name, unconfigured defaults to "default", reasoning works
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -200,7 +200,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertNotEqual(client2.json()['choices'][0]['text'], client3.json()['choices'][0]['text'])
 
     def test_model_parameters_hidden_states(self):
-        # Test return_hidden_states parameter; verify hidden_states field appears when enabled and is absent when disabled
+        # Test return_hidden_states parameter; verify hidden_states field appears when enabled
         client = requests.post(
             f"{self.base_url}/v1/completions",
             json={
@@ -238,7 +238,7 @@ class TestEnableThinking(CustomTestCase):
         self.assertNotEqual(client.json()['choices'][0]['text'], client1.json()['choices'][0]['text'])
 
     def test_model_parameters_stop_token_ids(self):
-        # Test stop_token_ids parameter; verify response stops at specified token ID (13) and matched_stop field is correct
+        # Test stop_token_ids parameter; verify response stops at specified token ID (13 is a period) and matched_stop field is correct
         list_ids = [13]
         client = requests.post(
             f"{self.base_url}/v1/completions",

@@ -193,8 +193,8 @@ def build_tree_kernel_efficient(
     avg_kernel_time = sum(kernel_tree_times) / len(kernel_tree_times)
     
     # Performance assertion: kernel implementation should be faster than native implementation
-    # Threshold: kernel time should be at least 10% faster than native time (adjustable as needed)
-    performance_threshold = 0.1  # 10% speedup requirement
+    # Threshold: kernel time should be at least 50% faster than native time (adjustable as needed)
+    performance_threshold = 0.5  # 10% speedup requirement
     if avg_native_time > 1e-9:  # Avoid division by zero
         speedup_ratio = (avg_native_time - avg_kernel_time) / avg_native_time
         logger.info(f'Average native tree time: {avg_native_time}, Average kernel tree time: {avg_kernel_time}')

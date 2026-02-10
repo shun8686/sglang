@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_W8A8_MODEL_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
@@ -25,7 +25,7 @@ class TestDeepepAutoQwen3(CustomTestCase):
     """
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+        cls.model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,

@@ -13,7 +13,6 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-
 class TestAscendQwenEagle3(TestDisaggregationBase):
 
     @classmethod
@@ -63,7 +62,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
-            "--mem-fraction-static", 0.8,
+            "--mem-fraction-static", 0.7,
             "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
@@ -123,8 +122,9 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
             "--tokenizer-worker-num", 4,
-            "--mem-fraction-static", 0.8,
-            "--cuda-graph-bs", 42, 88, 96, 132, 144, 156, 172, 178, 192,
+            "--mem-fraction-static", 0.7,
+            # "--cuda-graph-bs", 16,
+            "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
         cls.extra_envs = {
@@ -135,7 +135,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_NPU_USE_MLAPO": "1",
             "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
             "TASK_QUEUE_ENABLE": "1",
-            "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
+            "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
             "HCCL_BUFFSIZE": "3000",
             "HCCL_OP_EXPANSION_MODE": "AIV",
@@ -164,6 +164,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
         self.assertGreaterEqual(metrics["score"], 0.77)
 
     def test_gsm8k(self):
+        print("======================================================================================================")
+        print(f"{self.url}")
         expect_accuracy = 0.83
         args = SimpleNamespace(
             num_shots=8,

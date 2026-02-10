@@ -51,7 +51,7 @@ class TestHiCache(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_gsm8k(self):
-        # Verify gsm8k dataset evaluation accuracy meets the minimum requirement (score ≥ 0.845) with HiCache enabled
+        # Verify gsm8k dataset evaluation accuracy meets the minimum requirement (score ≥ 0.9) with HiCache enabled
         expect_accuracy = 0.9
         args = SimpleNamespace(
             num_shots=8,
