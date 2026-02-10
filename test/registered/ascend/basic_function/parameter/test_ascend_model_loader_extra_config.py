@@ -95,10 +95,10 @@ class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
 
-    def test_model_loader_extra_config(self):
-        # "When the --model-loader-extra-config parameter is not configured, the startup log contains the 'Loading safetensors' string."
+    def test_no_model_loader_extra_config(self):
         self.err_file.seek(0)
         content = self.err_file.read()
+        # "When the --model-loader-extra-config parameter is not configured, the startup log contains the 'Loading safetensors' string."
         self.assertIn(self.log_info, content)
 
 
@@ -130,9 +130,9 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
-        # "When the --model-loader-extra-config parameter is configured, the startup log contains the 'Multi-thread' string."
         self.err_file.seek(0)
         content = self.err_file.read()
+        # "When the --model-loader-extra-config parameter is configured, the startup log contains the 'Multi-thread' string."
         self.assertIn(self.log_info, content)
 
     def test_model_loading_time_reduced(self):
