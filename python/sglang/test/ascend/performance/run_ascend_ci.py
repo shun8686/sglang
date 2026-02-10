@@ -290,6 +290,8 @@ if __name__ == "__main__":
             response = create_or_update_configmap(cm_name=KUBE_CONFIG_MAP, data=cm_data, namespace=KUBE_NAME_SPACE)
             print(response)
     else:
-        print("Pod not ready, maybe not enough resource")
+        raise Exception(
+            "Pod not ready, maybe not enough resource"
+        )
 
     monitor_pod_logs(MONITOR_POD_NAME, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
