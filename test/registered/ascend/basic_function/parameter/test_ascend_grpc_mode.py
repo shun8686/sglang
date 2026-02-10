@@ -50,7 +50,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "-m", "sglang.launch_server",
             "--model-path", cls.model,
             "--grpc-mode",
-            "--host", cls.grpc_url, "--port", str(cls.grpc_url.port),
+            "--host", cls.grpc_url.hostname, "--port", str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         sleep(100)
