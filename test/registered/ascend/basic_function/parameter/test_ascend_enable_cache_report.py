@@ -24,12 +24,12 @@ class TestEnableCacheReport(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        other_args =[
-                "--enable-cache-report",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
+        other_args = [
+            "--enable-cache-report",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
@@ -47,11 +47,10 @@ class TestEnableCacheReport(CustomTestCase):
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
                     "prompt": "just return me a string with of 5000 characters,"
-                            "just return me a string with of 5000 characters, just return me a string with of 5000 characters,"
-                            "just return me a string with of 5000 characters,just return me a string with of 5000 characters,"
-                            "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
-
-                    "max_new_tokens": 260,
+                              "just return me a string with of 5000 characters, just return me a string with of 5000 characters,"
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters,"
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
+                    "max_tokens": 50,
 
                 },
             )
