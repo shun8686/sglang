@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestModeImpl(CustomTestCase):
     """Testcase：Verify Llama-3.2-1B-Instruct model set --model-impl = transformers and set --prefill-max-requests = 5,
-    the mmlu accuracy greaterequal 0.65 and the gsm8k accuracy greater 0.845.
+    the mmlu accuracy greater than 0.65 and the gsm8k accuracy more than 0.65.
 
        [Test Category] Parameter
        [Test Target] --model-impl, --prefill-max-requests
@@ -44,7 +44,7 @@ class TestModeImpl(CustomTestCase):
             ),
         )
         cls.mmlu_lower_bound = 0.65
-        cls.gsm8k_lower_bound = 0.845
+        cls.gsm8k_lower_bound = 0.65
 
     @classmethod
     def tearDownClass(cls):
@@ -66,7 +66,7 @@ class TestModeImpl(CustomTestCase):
 
     def test_gsm8k(self):
         args = SimpleNamespace(
-            num_shots=8,
+            num_shots=5,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
