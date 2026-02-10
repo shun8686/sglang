@@ -76,7 +76,7 @@ class TestEnableCacheReport(CustomTestCase):
                             "11, 220, 7743, 931, 11, 220, 5120, 931, 11, 220, 5037, 931, 11, 220, 7261, 931, 11, 220,",
                     "sampling_params": {
                         "temperature": 0,
-                        "max_new_tokens": 128,
+                        "max_new_tokens": 260,
                     },
                 },
             )
