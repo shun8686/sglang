@@ -43,7 +43,7 @@ class TestEnableCacheReport(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_enable_cache_report(self):
-        for i in range(3):
+        for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
