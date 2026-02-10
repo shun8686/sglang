@@ -53,9 +53,9 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "--host", cls.grpc_url.hostname, "--port", str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
-        cls.wait_server_ready(cls.grpc_base_url + "/health")
-        print("=========server is ready==========")
-        sleep(100)
+        # cls.wait_server_ready(cls.grpc_base_url + "/health")
+        # print("=========server is ready==========")
+        # sleep(100)
 
         router_command = [
             "python3",
@@ -96,9 +96,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     def test_grpc_mode(self):
         response = requests.post(
-            f"{self.base_url}/generate",
+            # f"{self.base_url}/generate",
+            f"http://127.0.0.1:21000/generate",
             json={
                 "text": "The capital of France is",
+                "model": self.model,
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 32,
@@ -121,6 +123,21 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         )
 
         print("============grpc==============")
+        print(f"{response.status_code=}")
+        print(f"{response.text=}")
+
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+        print("============base==============")
         print(f"{response.status_code=}")
         print(f"{response.text=}")
 
