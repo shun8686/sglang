@@ -22,21 +22,21 @@ class TestEnableProfileCudaGraph(CustomTestCase):
     [Test Target] --enable-profile-cuda-graph
     """
 
+    other_args = [
+        "--attention-backend",
+        "ascend",
+        "--enable-profile-cuda-graph",
+    ]
+
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = [
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--enable-profile-cuda-graph",
-        ]
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
+            other_args=cls.other_args,
         )
 
     @classmethod
@@ -58,11 +58,20 @@ class TestEnableProfileCudaGraph(CustomTestCase):
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
         response = requests.get(f"{self.base_url}/get_server_info")
-        self.assertEqual( response.status_code, 200, "The request status code is not 200.")
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertTrue(
             response.json()["enable_profile_cuda_graph"],
             "--enable-profile-cuda-graph is not taking effect.",
         )
+
+
+class TestEnableProfileCudaGraphDisableGudaGraph(TestEnableProfileCudaGraph):
+    other_args = [
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--enable-profile-cuda-graph",
+    ]
 
 
 if __name__ == "__main__":
