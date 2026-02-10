@@ -15,7 +15,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRequestLengthValidation(CustomTestCase):
-    """Testcase：Verify set --max-total-tokens and --context-length, can correctly reject inference requests that exceed the limits and throw the specified exceptions.
+    """Testcase：Verify set --max-total-tokens and --context-length, can correctly reject inference requests that exceed
+    the limits and throw the specified exceptions.
 
        [Test Category] Parameter
        [Test Target] --max-total-tokens, --context-length
