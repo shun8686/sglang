@@ -2,7 +2,23 @@
 
 import os
 import subprocess
-from typing import Optional, NamedTuple
+import copy
+from typing import NamedTuple
+from typing import  Awaitable, Callable, Optional
+
+import asyncio
+from sglang.bench_serving import run_benchmark
+from sglang.srt.utils import (
+    kill_process_tree,
+)
+from types import SimpleNamespace
+
+from sglang.test.test_utils import (
+    auto_config_device,
+    DEFAULT_URL_FOR_TEST,
+    popen_launch_server,
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+)
 
 # Model weights storage directory
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
@@ -325,3 +341,232 @@ def get_device_ids(index=None):
             return None
 
     return device_ids
+
+def get_benchmark_args(
+    base_url="",
+    backend="sglang",
+    dataset_name="",
+    dataset_path="",
+    tokenizer="",
+    num_prompts=500,
+    sharegpt_output_len=None,
+    random_input_len=4096,
+    random_output_len=2048,
+    sharegpt_context_len=None,
+    request_rate=float("inf"),
+    disable_stream=False,
+    disable_ignore_eos=False,
+    seed: int = 0,
+    device="auto",
+    pd_separated: bool = False,
+    lora_name=None,
+    lora_request_distribution="uniform",
+    lora_zipf_alpha=1.5,
+    gsp_num_groups=4,
+    gsp_prompts_per_group=4,
+    gsp_system_prompt_len=128,
+    gsp_question_len=32,
+    gsp_output_len=32,
+    gsp_num_turns=1,
+    header=None,
+    max_concurrency=None,
+):
+    """Constructing the parameter objects needed for inference tests
+
+    Parameters:
+        base_url: url
+        backend: Inference backend
+        dataset_name: Data set name
+        dataset_path: Dataset path
+        tokenizer: tokenizer
+        num_prompts: Total number of test requests
+        sharegpt_output_len: Output the number of tokens
+        random_input_len: The length of the randomly generated input prompt
+        random_output_len: The length of the randomly generated output prompt
+        sharegpt_context_len: Sharegpt dataset context length
+        request_rate: Request rate
+        disable_stream: Disable streaming output
+        disable_ignore_eos: Should eos_token be ignored?
+        seed: random seed
+        device: Device type
+        pd_separated: Enable PD separation
+        lora_name: LoRA fine-tuning model path
+        lora_request_distribution: LoRA request distribution strategy
+        lora_zipf_alpha: Control request distribution skewness
+        gsp_num_groups: Grouped Sequence Parallelism
+        gsp_prompts_per_group: Number of parallel prompts within each group
+        gsp_system_prompt_len: GSP system prompts length
+        gsp_question_len: GSP question length
+        gsp_output_len: GSP output length
+        gsp_num_turns: GSP Dialogue Rounds
+        header: HTTP request header
+        max_concurrency: Maximum number of concurrent requests
+    Returns:
+        The return parameter is the same as the input.
+    """
+
+    return SimpleNamespace(
+        backend=backend,
+        base_url=base_url,
+        host=None,
+        port=None,
+        dataset_name=dataset_name,
+        dataset_path=dataset_path,
+        model=None,
+        tokenizer=tokenizer,
+        num_prompts=num_prompts,
+        sharegpt_output_len=sharegpt_output_len,
+        sharegpt_context_len=sharegpt_context_len,
+        random_input_len=random_input_len,
+        random_output_len=random_output_len,
+        random_range_ratio=0.0,
+        request_rate=request_rate,
+        multi=None,
+        output_file=None,
+        disable_tqdm=False,
+        disable_stream=disable_stream,
+        return_logprob=False,
+        return_routed_experts=False,
+        seed=seed,
+        disable_ignore_eos=disable_ignore_eos,
+        extra_request_body=None,
+        apply_chat_template=False,
+        profile=None,
+        lora_name=lora_name,
+        lora_request_distribution=lora_request_distribution,
+        lora_zipf_alpha=lora_zipf_alpha,
+        prompt_suffix="",
+        device=device,
+        pd_separated=pd_separated,
+        gsp_num_groups=gsp_num_groups,
+        gsp_prompts_per_group=gsp_prompts_per_group,
+        gsp_system_prompt_len=gsp_system_prompt_len,
+        gsp_question_len=gsp_question_len,
+        gsp_output_len=gsp_output_len,
+        gsp_num_turns=gsp_num_turns,
+        header=header,
+        max_concurrency=max_concurrency,
+    )
+
+def run_bench_serving(
+    model,
+    num_prompts,
+    request_rate,
+    other_server_args,
+    dataset_name="random",
+    dataset_path="",
+    tokenizer=None,
+    random_input_len=4096,
+    random_output_len=2048,
+    sharegpt_context_len=None,
+    disable_stream=False,
+    disable_ignore_eos=False,
+    need_warmup=False,
+    seed: int = 0,
+    device="auto",
+    gsp_num_groups=None,
+    gsp_prompts_per_group=None,
+    gsp_system_prompt_len=None,
+    gsp_question_len=None,
+    gsp_output_len=None,
+    max_concurrency=None,
+    background_task: Optional[Callable[[str, asyncio.Event], Awaitable[None]]] = None,
+    lora_name: Optional[str] = None,
+):
+    """Start the service and obtain the inference results.
+
+    Parameters:
+        model: Model name
+        num_prompts: Total number of test requests
+        request_rate: Request rate
+        other_server_args: Additional configuration when starting the service
+        dataset_name: Data set name
+        dataset_path: Dataset path
+        tokenizer: tokenizer
+        random_input_len: The length of the randomly generated input prompt
+        random_output_len: The length of the randomly generated output prompt
+        sharegpt_context_len: Sharegpt dataset context length
+        disable_stream: Disable streaming output
+        disable_ignore_eos: Should eos_token be ignored?
+        need_warmup: Preheating required
+        seed: random seed
+        device: Device type
+        gsp_num_groups: Grouped Sequence Parallelism
+        gsp_prompts_per_group: Number of parallel prompts within each group
+        gsp_system_prompt_len: GSP system prompts length
+        gsp_question_len: GSP question length
+        gsp_output_len: GSP output length
+        max_concurrency: Maximum number of concurrent requests
+        background_task: Background tasks
+        lora_name: LoRA fine-tuning model path
+    Returns:
+        res: Number of requests successfully completed
+
+    """
+
+    if device == "auto":
+        device = auto_config_device()
+    # Launch the server
+    base_url = DEFAULT_URL_FOR_TEST
+    process = popen_launch_server(
+        model,
+        base_url,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_server_args,
+    )
+
+    # Run benchmark
+    args = get_benchmark_args(
+        base_url=base_url,
+        dataset_name=dataset_name,
+        dataset_path=dataset_path,
+        tokenizer=tokenizer,
+        num_prompts=num_prompts,
+        random_input_len=random_input_len,
+        random_output_len=random_output_len,
+        sharegpt_context_len=sharegpt_context_len,
+        request_rate=request_rate,
+        disable_stream=disable_stream,
+        disable_ignore_eos=disable_ignore_eos,
+        seed=seed,
+        device=device,
+        lora_name=lora_name,
+        gsp_num_groups=gsp_num_groups,
+        gsp_prompts_per_group=gsp_prompts_per_group,
+        gsp_system_prompt_len=gsp_system_prompt_len,
+        gsp_question_len=gsp_question_len,
+        gsp_output_len=gsp_output_len,
+        max_concurrency=max_concurrency,
+    )
+
+    async def _run():
+        if need_warmup:
+            warmup_args = copy.deepcopy(args)
+            warmup_args.num_prompts = 16
+            await asyncio.to_thread(run_benchmark, warmup_args)
+
+        start_event = asyncio.Event()
+        stop_event = asyncio.Event()
+        task_handle = (
+            asyncio.create_task(background_task(base_url, start_event, stop_event))
+            if background_task
+            else None
+        )
+
+        try:
+            start_event.set()
+            result = await asyncio.to_thread(run_benchmark, args)
+        finally:
+            if task_handle:
+                stop_event.set()
+                await task_handle
+
+        return result
+
+    try:
+        res = asyncio.run(_run())
+    finally:
+        kill_process_tree(process.pid)
+
+    assert res["completed"] == num_prompts
+    return res
