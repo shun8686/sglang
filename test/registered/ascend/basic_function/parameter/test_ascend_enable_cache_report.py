@@ -55,7 +55,7 @@ class TestEnableCacheReport(CustomTestCase):
             print(response.json())
             self.assertEqual(response.status_code, 200)
             if i == 2:
-                self.assertIn("prompt_tokens_details", response.json())
+                self.assertIn("prompt_tokens_details", response.json()["prompt_tokens_details"])
 
 
 if __name__ == "__main__":
