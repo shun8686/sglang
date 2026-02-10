@@ -15,7 +15,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRandomSeed(CustomTestCase):
-    """Testcase：Verify set same --random-seed parameter, when temperature the reasoning result unchanged.
+    """Testcase：Verify set same --random-seed parameter, when set the --temperature
+    greater than 0 (will introduce randomness) the reasoning result unchanged.
 
        [Test Category] Parameter
        [Test Target] --random-seed
