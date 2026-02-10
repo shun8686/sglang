@@ -23,7 +23,7 @@ class TestDecodeLogInterval(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--disable-radix-cache",
-            "--gc_warning_threshold_secs",
+            "--gc-warning-threshold-secs",
             0.00001,
         ]
         cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
@@ -40,7 +40,7 @@ class TestDecodeLogInterval(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_decode_log_interval(self):
+    def test_warning_threshold_secs(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
         response = requests.post(

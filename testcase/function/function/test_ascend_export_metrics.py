@@ -1,3 +1,4 @@
+import subprocess
 import unittest
 
 import requests
@@ -11,9 +12,21 @@ from sglang.test.test_utils import (
 )
 
 
+def run_command(cmd, shell=True):
+    try:
+        result = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, check=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"execute command error: {e}")
+        return None
+
+
 class TestDecodeLogInterval(CustomTestCase):
     @classmethod
     def setUpClass(cls):
+        cls.message = "request_parameters"
         cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
@@ -23,7 +36,7 @@ class TestDecodeLogInterval(CustomTestCase):
             "--disable-radix-cache",
             "--export-metrics-to-file",
             "--export-metrics-to-file-dir",
-            "/tmp"
+            "./",
         ]
         cls.process = popen_launch_server(
             cls.model,
@@ -36,7 +49,7 @@ class TestDecodeLogInterval(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_decode_log_interval(self):
+    def test_export_metrics(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
         response = requests.post(
@@ -51,8 +64,10 @@ class TestDecodeLogInterval(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+        res = run_command(f"ll | grep sglang-request-metrics*.log")
+        content = res.read()
+        self.assertIn(self.message, content)
 
 
 if __name__ == "__main__":
-
     unittest.main()
