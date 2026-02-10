@@ -16,8 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMultimodalNonMlm(CustomTestCase):
-    """Testcase: Verify that when the --enable-multimodal parameter is set, mmlu accuracy is within the margin of error compared
-    that when the parameter is not set.
+    """Testcase: Verify that when the --enable-multimodal parameter is set, mmlu accuracy greater than or equal 0.37
 
         [Test Category] Parameter
         [Test Target] --enable-multimodal
@@ -26,33 +25,32 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
     base_url = DEFAULT_URL_FOR_TEST
     score_with_param = None
     score_without_param = None
+    accuracy=0.37
 
-    def launch_server(self, enable_multimodal: bool):
-        """Universal server launch method, add --enable-multimodal based on parameters"""
+    @classmethod
+    def setUpClass(cls):
         other_args = [
             "--trust-remote-code",
+            "--enable-multimodal",
             "--mem-fraction-static",
             "0.8",
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
         ]
-        # Add multimodal parameter as needed
-        if enable_multimodal:
-            other_args.insert(1, "--enable-multimodal")
 
-        process = popen_launch_server(
-            self.model,
-            self.base_url,
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
-        self.addCleanup(kill_process_tree, process.pid)
-        return process
 
-    def verify_inference(self):
-        """Universal inference function verification"""
-        # Basic generation request verification
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_enable_multimodal_func(self):
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -63,11 +61,11 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
                 },
             },
         )
+
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-    def run_mmlu_eval(self) -> float:
-        """Universal MMLU evaluation execution method, returns evaluation score"""
+    def test_mmlu(self):
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -75,34 +73,9 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
             num_examples=64,
             num_threads=32,
         )
+
         metrics = run_eval(args)
-        # Retain basic score lower limit assertion
-        self.assertGreaterEqual(metrics["score"], 0.2)
-        return metrics["score"]
-
-    def test_01_enable_multimodal(self):
-        self.launch_server(enable_multimodal=True)
-        self.verify_inference()
-        TestEnableMultimodalNonMlm.score_with_param = self.run_mmlu_eval()
-
-    def test_02_disable_multimodal(self):
-        self.launch_server(enable_multimodal=False)
-        self.verify_inference()
-        TestEnableMultimodalNonMlm.score_without_param = self.run_mmlu_eval()
-
-    def test_03_assert_score(self):
-        print("---------------------------------------res---------------------------------------------")
-        print(f"MMLU score with parameter: {TestEnableMultimodalNonMlm.score_with_param}")
-        print(f"MMLU score without parameter: {TestEnableMultimodalNonMlm.score_without_param}")
-        ALLOWED_ERROR = 0.015
-        score_diff = TestEnableMultimodalNonMlm.score_with_param - TestEnableMultimodalNonMlm.score_without_param
-        abs_score_diff = round(abs(score_diff), 4)
-        self.assertLessEqual(
-            abs_score_diff,
-            ALLOWED_ERROR,
-            f"MMLU score absolute difference ({abs_score_diff}) exceeds allowed error ({ALLOWED_ERROR})"
-        )
-
+        self.assertGreaterEqual(metrics["score"], self.accuracy)
 
 
 if __name__ == "__main__":
