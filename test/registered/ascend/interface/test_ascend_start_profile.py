@@ -10,18 +10,14 @@ import unittest
 import requests
 
 from sglang.srt.environ import envs
-from sglang.srt.utils import is_npu, kill_process_tree
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
-)
-
-DEFAULT_SMALL_MODEL_NAME_FOR_TEST_NPU = (
-    "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B-Instruct"
 )
 
 OUTPUT_DIR = "./profiler_dir"
@@ -30,26 +26,18 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestStartProfile(CustomTestCase):
-    """Test for /start_profile"""
+    """Testcase: Verify the correctness of /start_profile API with different parameter combinations (start_step/num_steps) on Ascend NPU backend.
+
+    [Test Category] Interface
+    [Test Target] /start_profile
+    """
 
     @classmethod
     def setUpClass(cls):
         envs.SGLANG_TORCH_PROFILER_DIR.set(OUTPUT_DIR)
-        cls.model = (
-            DEFAULT_SMALL_MODEL_NAME_FOR_TEST
-            if not is_npu()
-            else DEFAULT_SMALL_MODEL_NAME_FOR_TEST_NPU
-        )
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = (
-            [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ]
-            if is_npu()
-            else []
-        )
+        other_args = ["--attention-backend", "ascend", "--disable-cuda-graph" ]
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -70,7 +58,7 @@ class TestStartProfile(CustomTestCase):
 
         self._post_request()
 
-        self._check_empty_profile_dir()
+        self._check_non_empty_profile_dir()
 
     def test_start_profile_2(self):
         """Test /start_profile with no argument"""
@@ -83,12 +71,13 @@ class TestStartProfile(CustomTestCase):
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/stop_profile",
         )
+        self._check_non_empty_profile_dir()
 
     def test_start_profile_3(self):
         """Test /start_profile with num_steps argument"""
         response = self._start_profile(num_steps=5)
         self._post_request()
-        self._check_empty_profile_dir()
+        self._check_non_empty_profile_dir()
 
     def _start_profile(self, **kwargs):
         """Start profiling with optional parameters."""
