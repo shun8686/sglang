@@ -95,10 +95,10 @@ class TestNOModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
 
-    def test_model_loader_extra_config(self):
-        # Check if the startup log contains the string "Loading safetensors".
+    def test_no_model_loader_extra_config(self):
         self.err_file.seek(0)
         content = self.err_file.read()
+        # "When the --model-loader-extra-config parameter is not configured, the startup log contains the 'Loading safetensors' string."
         self.assertIn(self.log_info, content)
 
 
@@ -130,15 +130,13 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
     err_file = open(MULTITHREAD_ERR_LOG, "w+", encoding="utf-8")
 
     def test_model_loader_extra_config(self):
-        # Check if the startup log contains the string "Multi-thread".
         self.err_file.seek(0)
         content = self.err_file.read()
+        # "When the --model-loader-extra-config parameter is configured, the startup log contains the 'Multi-thread' string."
         self.assertIn(self.log_info, content)
 
     def test_model_loading_time_reduced(self):
-        # Verify that configuring this parameter reduces the model's loading time.
         def get_loading_seconds(filename, pattern):
-            # Helper function to extract loading time
             cmd = f"grep '{pattern}' {filename} | tail -1"
             line = run_command(cmd)
             if not line:
@@ -163,11 +161,10 @@ class TestModelLoaderExtraConfig(BaseModelLoaderTest, CustomTestCase):
 
         print(f"Multi-thread: {multi_thread_seconds}s, Loading safetensors: {checkpoint_seconds}s.")
 
-        # Assert that parameter configuration reduces model loading time.
+        # "Model loading time is reduced."
         self.assertGreater(checkpoint_seconds, multi_thread_seconds)
 
     def test_gsm8k(self):
-        # Verify that the model's accuracy does not decrease after configuring this parameter.
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
