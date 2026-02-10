@@ -44,7 +44,7 @@ class TestRequestLengthValidation(CustomTestCase):
     def test_input_length_longer_than_context_length(self):
         # The request is rejected when the number of tokens after the input text is segmented exceeds the model's context-length (1000).
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
-        long_text = "hello " * 1200  # Will tokenize to more than context length
+        long_text = "a" * 1200  # Will tokenize to more than context length
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
                 model=self.model,
@@ -61,7 +61,7 @@ class TestRequestLengthValidation(CustomTestCase):
         # but exceeds the server's actual acceptable input limit after reserving based on max-total-tokens, the request is rejected.
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
 
-        long_text = "hello " * 999  # the maximum allowed length is 994 tokens
+        long_text = "a" * 999  # the maximum allowed length is 994 tokens
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
@@ -78,7 +78,7 @@ class TestRequestLengthValidation(CustomTestCase):
         # The request is rejected if the number of tokens to be generated (max_tokens) specified request exceeds the total token limit configured on the server.
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
 
-        long_text = "hello "
+        long_text = "a"
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
