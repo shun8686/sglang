@@ -1,28 +1,24 @@
 import unittest
 
-from sglang.srt.utils import is_npu
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     CustomTestCase,
     run_bench_serving,
-    run_mmlu_test,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+
 
 class TestNoChunkedPrefill(CustomTestCase):
     """Test DeepSeek R1 model
     Enable L2 cache increases hit rate by up to 50% and improves TTFT by 20%.
     --enable-hierarchical-cache: enable L2 cache
     """
+
     def test_no_chunked_prefill_without_radix_cache(self):
-        TTFTS=[]
-        model = (
-            "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/DeepSeek-R1-W8A8"
-            if is_npu()
-            else "Qwen/Qwen3-32B"
-        )
+        TTFTS = []
+        model = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
         common_args = [
             [
                 "--trust-remote-code",
@@ -65,13 +61,11 @@ class TestNoChunkedPrefill(CustomTestCase):
             ]
         ]
         for common_arg in common_args:
-            other_args=common_arg + (
-                    ["--attention-backend",
-                     "ascend",
-                    ]
-                    if is_npu()
-                    else []
-                    )
+            other_args = common_arg + (
+                ["--attention-backend",
+                 "ascend",
+                 ]
+            )
             res = run_bench_serving(
                 model=model,
                 dataset_name="generated-shared-prefix",
@@ -83,17 +77,17 @@ class TestNoChunkedPrefill(CustomTestCase):
                 gsp_num_groups=1,
                 gsp_prompts_per_group=128,
                 gsp_system_prompt_len=1792,
-                gsp_question_len=1792, 
+                gsp_question_len=1792,
                 gsp_output_len=1,
                 other_server_args=other_args,
-                )
-            print("---------------------------------------------",res)
-            TTFT=res["mean_ttft_ms"]
+            )
+            print("---------------------------------------------", res)
+            TTFT = res["mean_ttft_ms"]
             TTFTS.append(TTFT)
 
         print(f"***********{TTFTS[1]=}")
         print(f"***********{TTFTS[0]=}")
-        assert float(TTFTS[1]) <= 0.8*float(TTFTS[0])
+        assert float(TTFTS[1]) <= 0.8 * float(TTFTS[0])
 
 
 if __name__ == "__main__":
