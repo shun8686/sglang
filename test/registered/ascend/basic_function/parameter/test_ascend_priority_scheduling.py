@@ -21,8 +21,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPriorityScheduling(CustomTestCase):
-    """Testcase: Tests core functionality with --enable-priority-scheduling configuration,
-                 the inference service can correctly implement priority scheduling
+    """Testcase: Configure '--enable-priority-scheduling', and the inference service can correctly implement priority scheduling.
 
     [Test Category] Parameter
     [Test Target] --enable-priority-scheduling
@@ -234,8 +233,7 @@ class TestPriorityScheduling(CustomTestCase):
 
 
 class TestPrioritySchedulingMultipleRunningRequests(CustomTestCase):
-    """Testcase: Tests core functionality with --enable-priority-scheduling configuration,
-    and high-priority requests can preempt/abort low-priority requests as expected.
+    """Testcase: Configure --enable-priority-scheduling, and high-priority requests can preempt/abort low-priority requests as expected.
 
     [Test Category] Parameter
     [Test Target] --enable-priority-scheduling
