@@ -53,6 +53,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "--host", cls.grpc_url.hostname, "--port", str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
+        cls.wait_server_ready(cls.grpc_base_url + "/health")
+        print("=========server is ready==========")
         sleep(100)
 
         router_command = [
@@ -69,7 +71,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
         cls.wait_server_ready(cls.base_url + "/health")
         print("=========server is ready==========")
-        sleep(3600)
 
     @classmethod
     def tearDownClass(cls):
