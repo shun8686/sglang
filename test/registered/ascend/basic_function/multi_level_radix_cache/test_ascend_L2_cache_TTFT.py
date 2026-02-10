@@ -11,7 +11,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestNoChunkedPrefill(CustomTestCase):
-    """Test Enable L2 cache improves TTFT by 20%.
+    """The test used the Qwen3-32B model, with L2 cache enabled, and TTFT improved by 40%.
     [Test Category] Parameter
     [Test Target] --enable-hierarchical-cache
     """
@@ -75,7 +75,7 @@ class TestNoChunkedPrefill(CustomTestCase):
             TTFT = res["mean_ttft_ms"]
             TTFTS.append(TTFT)
 
-        assert float(TTFTS[1]) <= 0.8 * float(TTFTS[0])
+        assert float(TTFTS[1]) <= 0.6 * float(TTFTS[0])
 
 
 if __name__ == "__main__":
