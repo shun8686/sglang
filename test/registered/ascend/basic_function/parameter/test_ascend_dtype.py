@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDtype(CustomTestCase):
-    """Testcase：Verify set different --dtype parameter, the inference request is successfully processed.
+    """Testcase：Verify set different --dtype parameter, different types occupy different amounts of memory and accuracy.
 
        [Test Category] Parameter
        [Test Target] --dtype
