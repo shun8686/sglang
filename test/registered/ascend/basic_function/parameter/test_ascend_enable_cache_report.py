@@ -29,6 +29,7 @@ class TestEnableCacheReport(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
+            "--enable-hierarchical-cache",
         ]
         cls.process = popen_launch_server(
             cls.model,
@@ -46,7 +47,18 @@ class TestEnableCacheReport(CustomTestCase):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
-                    "prompt": "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
+                    "prompt": "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
                     "max_tokens": 260,
 
                 },
