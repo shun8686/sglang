@@ -26,21 +26,28 @@ class TestScheduleConservativeness(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.message = ("KV cache pool is full. Retract requests.")
+        cls.message1 = ("#new_token_ratio:")
         other_args = [
             "--schedule-conservativeness",
-            2.0,
+            0,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
             "--tp-size",
             2,
+            "--mem-fraction-static",
+            "0.52"
         ]
+        cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
+        cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             QWEN3_32B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
     @classmethod
@@ -76,6 +83,10 @@ class TestScheduleConservativeness(CustomTestCase):
         )
         metrics = run_eval_few_shot_gsm8k(args)
         self.assertGreaterEqual(metrics["accuracy"], 0.86)
+        content = self.err_log_file.read()
+        # error_message information is recorded in the log
+        self.assertIn(self.message, content)
+        self.assertIn(self.message1, content)
 
 
 if __name__ == "__main__":
