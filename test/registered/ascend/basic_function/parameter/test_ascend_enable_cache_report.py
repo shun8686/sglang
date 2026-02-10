@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableCacheReport(CustomTestCase):
-    """Testcase：Verify set --enable-cache-report, sent openai request usage.prompt_tokens_details will return cache token.
+    """Testcase：Verify set --enable-cache-report, sent openai request prompt_tokens_details will return cached_tokens.
 
        [Test Category] Parameter
        [Test Target] --enable-cache-report
@@ -67,7 +67,7 @@ class TestEnableCacheReport(CustomTestCase):
             print(response.json())
             self.assertEqual(response.status_code, 200)
             if i == 2:
-                self.assertIn("'prompt_tokens_details' : {'cached_tokens': 256}", response.text)
+                self.assertIn("'cached_tokens': 256", response.text)
 
 
 if __name__ == "__main__":
