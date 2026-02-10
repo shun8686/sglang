@@ -44,7 +44,7 @@ class TestEnableCacheReport(CustomTestCase):
     def test_enable_cache_report(self):
         for i in range(3):
             response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/completions",
+                f"{DEFAULT_URL_FOR_TEST}/chat/completions",
                 json={
                     "text": "just return me a string with of 5000 characters,"
                             "just return me a string with of 5000 characters, just return me a string with of 5000 characters,"
