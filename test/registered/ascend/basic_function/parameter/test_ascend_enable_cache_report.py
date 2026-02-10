@@ -44,7 +44,7 @@ class TestEnableCacheReport(CustomTestCase):
     def test_enable_cache_report(self):
         for i in range(3):
             response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/v1/chat/completions",
+                f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
                     "prompt": "just return me a string with of 5000 characters",
                     "max_tokens": 50,
