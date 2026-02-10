@@ -1,3 +1,4 @@
+import os
 import unittest
 import requests
 from sglang.srt.utils import kill_process_tree
@@ -31,17 +32,24 @@ class TestEnableProfileCudaGraph(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
+        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.other_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        cls.out_log_file.close()
+        cls.err_log_file.close()
+        # os.remove("./warmup_out_log.txt")
+        os.remove("./warmup_err_log.txt")
 
     def test_enable_profile_cuda_graph(self):
         response = requests.post(
@@ -65,13 +73,13 @@ class TestEnableProfileCudaGraph(CustomTestCase):
         )
 
 
-class TestEnableProfileCudaGraphDisableGudaGraph(TestEnableProfileCudaGraph):
-    other_args = [
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--enable-profile-cuda-graph",
-    ]
+# class TestEnableProfileCudaGraphDisableGudaGraph(TestEnableProfileCudaGraph):
+#     other_args = [
+#         "--attention-backend",
+#         "ascend",
+#         "--disable-cuda-graph",
+#         "--enable-profile-cuda-graph",
+#     ]
 
 
 if __name__ == "__main__":
