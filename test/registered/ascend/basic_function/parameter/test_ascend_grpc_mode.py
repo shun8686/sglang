@@ -75,7 +75,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.worker_process.pid)
-        # kill_process_tree(cls.router_process.pid)
+        kill_process_tree(cls.router_process.pid)
 
     @classmethod
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
