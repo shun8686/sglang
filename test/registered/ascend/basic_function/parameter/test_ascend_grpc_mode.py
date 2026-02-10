@@ -50,24 +50,26 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "-m", "sglang.launch_server",
             "--model-path", cls.model,
             "--grpc-mode",
-            "--host", cls.url.hostname, "--port", str(cls.url.port),
+            "--host", cls.grpc_url, "--port", str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         sleep(100)
 
-        # router_command = [
-        #     "python3",
-        #     "-m", "sglang_router.launch_router",
-        #     "--worker-urls", cls.grpc_base_url,
-        #     "--host", cls.url.hostname, "--port", str(cls.url.port),
-        #     "--model-path", cls.model,
-        # ]
-        #
-        # # cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #
-        # cls.router_process = popen_with_error_check(router_command)
-        # sleep(100)
-        # cls.wait_server_ready(cls.base_url + "/health")
+        router_command = [
+            "python3",
+            "-m", "sglang_router.launch_router",
+            "--worker-urls", cls.grpc_base_url,
+            "--host", cls.url.hostname, "--port", str(cls.url.port),
+            "--model-path", cls.model,
+        ]
+
+        # cls.router_process = subprocess.Popen(router_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        cls.router_process = popen_with_error_check(router_command)
+
+        cls.wait_server_ready(cls.base_url + "/health")
+        print("=========server is ready==========")
+        sleep(3600)
 
     @classmethod
     def tearDownClass(cls):
