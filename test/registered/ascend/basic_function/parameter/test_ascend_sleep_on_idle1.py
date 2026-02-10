@@ -72,12 +72,29 @@ class TestAscendSleepOnIdle(CustomTestCase):
         cpu_usage = run_command(f"ps -p {pid} -o %cpu --no-headers | xargs")
         if not cpu_usage:
             cls.fail("Failed to get CPU usage")
-        cls.cpu_float = float(cpu_usage)
+        cls.cpu_float = cpu_usage
         print(f"***********{cls.cpu_float=}")
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+
+    def test_Ascend_sleep_on_idle(self):
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        self.assertEqual(response.status_code, 200)
+
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
 
 
 class TestSleepOnIdle(CustomTestCase):
@@ -105,7 +122,7 @@ class TestSleepOnIdle(CustomTestCase):
         cpu_usage_sleep_on = run_command(f"ps -p {pid_sleep_on} -o %cpu --no-headers | xargs")
         if not cpu_usage_sleep_on:
             cls.fail("Failed to get CPU usage")
-        cls.cpu_float_sleep_on = float(cpu_usage_sleep_on)
+        cls.cpu_float_sleep_on = cpu_usage_sleep_on
         print(f"***********{cls.cpu_float_sleep_on=}")
 
     @classmethod
