@@ -48,17 +48,17 @@ class TestEnableCacheReport(CustomTestCase):
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
                     "prompt": "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                                "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
                     "max_tokens": 260,
 
                 },
@@ -67,7 +67,7 @@ class TestEnableCacheReport(CustomTestCase):
             print(response.json())
             self.assertEqual(response.status_code, 200)
             if i == 2:
-                self.assertIn("prompt_tokens_details", response.text)
+                self.assertIn("'prompt_tokens_details' : {'cached_tokens': 256}", response.text)
 
 
 if __name__ == "__main__":
