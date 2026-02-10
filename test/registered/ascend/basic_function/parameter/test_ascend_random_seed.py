@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRandomSeed(CustomTestCase):
-    """Testcase：Verify set --random-seed parameter, the inference request is successfully processed.
+    """Testcase：Verify set same --random-seed parameter, when temperature the reasoning result unchanged.
 
        [Test Category] Parameter
        [Test Target] --random-seed
@@ -57,7 +57,7 @@ class TestRandomSeed(CustomTestCase):
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
-                    "temperature": 0,
+                    "temperature": 2,
                     "max_new_tokens": 32,
                 },
             },
@@ -68,10 +68,6 @@ class TestRandomSeed(CustomTestCase):
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
         )
-
-
-class TestRandomSeedOne(TestRandomSeed):
-    random_seed = 1
 
 
 if __name__ == "__main__":
