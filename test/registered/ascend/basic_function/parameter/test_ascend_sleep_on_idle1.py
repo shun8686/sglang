@@ -78,7 +78,7 @@ class TestSleepOnIdle(CustomTestCase):
 
             time.sleep(5)
             pid = run_command(
-                f"ps -ef | awk -v ppid = {process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | tr -s '' | cut -d'' -f2")
+                f"ps -ef | awk -v ppid = {process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
             if not pid:
                 self.fail("Failed to get child process PID")
             cpu_usage = run_command(f"ps -p {pid} -o %cpu --no-headers | xargs")
