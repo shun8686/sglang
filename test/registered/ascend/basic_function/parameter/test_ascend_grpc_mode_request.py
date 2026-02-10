@@ -29,6 +29,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
         pass
 
 
@@ -57,6 +58,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             f"http://127.0.0.1:21000/generate",
             json={
                 "text": "The capital of France is",
+                "model_id": self.model,
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 32,
