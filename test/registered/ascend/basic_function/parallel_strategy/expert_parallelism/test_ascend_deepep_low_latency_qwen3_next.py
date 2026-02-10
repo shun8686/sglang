@@ -50,7 +50,7 @@ class TestQwen3Next(CustomTestCase):
                 "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "low_latency",
-                "--quantization", "modelslim",
+                # "--quantization", "modelslim",
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",

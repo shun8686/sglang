@@ -49,7 +49,7 @@ class TestQwen3Next(CustomTestCase):
                 "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "auto",
-                "--quantization", "modelslim",
+                # "--quantization", "modelslim",
                 "--chunked-prefill-size", -1,
             ],
             env={
