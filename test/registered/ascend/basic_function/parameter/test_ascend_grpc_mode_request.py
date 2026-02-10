@@ -57,12 +57,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         response = requests.post(
             f"http://127.0.0.1:21000/generate",
             json={
+                "model": self.model,
                 "text": "The capital of France is",
-                "model_path": self.model,
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 32,
-                    "model_path": self.model,
                 },
             },
         )
