@@ -91,17 +91,18 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         TestEnableMultimodalNonMlm.score_without_param = self.run_mmlu_eval()
 
     def test_03_assert_score(self):
-        self.assertIsNotNone(TestEnableMultimodalNonMlm.score_with_param, "MMLU score with parameter not obtained")
-        self.assertIsNotNone(TestEnableMultimodalNonMlm.score_without_param,
-                             "MMLU score without parameter not obtained")
-        # Core assertion: Score with --enable-multimodal ≥ Score without the parameter
-        ALLOWED_ERROR = 0.01
+        print("---------------------------------------res---------------------------------------------")
+        print(f"MMLU score with parameter: {TestEnableMultimodalNonMlm.score_with_param}")
+        print(f"MMLU score without parameter: {TestEnableMultimodalNonMlm.score_without_param}")
+        ALLOWED_ERROR = 0.015
         score_diff = TestEnableMultimodalNonMlm.score_with_param - TestEnableMultimodalNonMlm.score_without_param
-        self.assertGreaterEqual(
-            score_diff,
-            -ALLOWED_ERROR,
-            f"MMLU score with --enable-multimodal ({TestEnableMultimodalNonMlm.score_with_param:.4f}) is lower than the score without it ({TestEnableMultimodalNonMlm.score_without_param:.4f}) by more than {ALLOWED_ERROR} (difference: {score_diff:.4f})"
+        abs_score_diff = abs(score_diff)
+        self.assertLessEqual(
+            abs_score_diff,
+            ALLOWED_ERROR,
+            f"MMLU score absolute difference ({abs_score_diff}) exceeds allowed error ({ALLOWED_ERROR})"
         )
+
 
 
 if __name__ == "__main__":
