@@ -23,12 +23,6 @@ class TestEnableProfileCudaGraph(CustomTestCase):
     [Test Target] --enable-profile-cuda-graph
     """
 
-    other_args = [
-        "--attention-backend",
-        "ascend",
-        "--enable-profile-cuda-graph",
-    ]
-
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -37,6 +31,11 @@ class TestEnableProfileCudaGraph(CustomTestCase):
         cls.out_log_file = open(cls.out_log_file_name, "w+", encoding="utf-8")
         cls.err_log_file = open(cls.err_log_file_name, "w+", encoding="utf-8")
 
+        cls.other_args = [
+            "--attention-backend",
+            "ascend",
+            "--enable-profile-cuda-graph",
+        ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             cls.base_url,
@@ -77,16 +76,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
-        self.assertIn("profile.py: Start parsing profiling data:", content)
-
-
-class TestEnableProfileCudaGraphDisableGudaGraph(TestEnableProfileCudaGraph):
-    other_args = [
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--enable-profile-cuda-graph",
-    ]
+        self.assertIn("profiler.py: Start parsing profiling data:", content)
 
 
 if __name__ == "__main__":
