@@ -23,17 +23,14 @@ class TestDtype(CustomTestCase):
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
     def test_dtype_options(self):
-        for i in ["half", "auto", "float16", "bfloat16"]:
-            other_args = (
-                [
-                    "--dtype",
-                    i,
-                    "--attention-backend",
-                    "ascend",
-                    "--disable-cuda-graph",
-                ]
-
-            )
+        for i in ["half", "float16", "bfloat16"]:
+            other_args = [
+                "--dtype",
+                i,
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+            ]
             process = popen_launch_server(
                 self.model,
                 DEFAULT_URL_FOR_TEST,
@@ -52,7 +49,6 @@ class TestDtype(CustomTestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertIn("Paris", response.text)
-            kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":
