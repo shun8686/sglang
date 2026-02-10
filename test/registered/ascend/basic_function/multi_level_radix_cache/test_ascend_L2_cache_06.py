@@ -12,7 +12,9 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 class TestNoChunkedPrefill(CustomTestCase):
     """The test used the DeepSeek-R1 model, with L2 cache enabled, and TTFT improved by 20%.
-    --enable-hierarchical-cache: enable L2 cache
+
+    [Test Category] Parameter
+    [Test Target] --enable-hierarchical-cache
     """
 
     def test_no_chunked_prefill_without_radix_cache(self):
