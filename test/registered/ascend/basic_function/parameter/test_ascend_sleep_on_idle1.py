@@ -106,11 +106,11 @@ class TestSleepOnIdle(CustomTestCase):
         self.assertIn("Paris", response.text)
 
         # save process
-        self.process.append(process)
+        self.processes.append(process)
 
     @classmethod
     def tearDownClass(cls):
-        for process in cls.process:
+        for process in cls.processes:
             kill_process_tree(process.pid)
 
     def test_cpu_reducation(self):
