@@ -32,7 +32,7 @@ class TestRequestLengthValidation(CustomTestCase):
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            other_args=["--max-total-tokens", "100", "--context-length", "100"],
+            other_args=["--max-total-tokens", "1000", "--context-length", "1000"],
         )
 
     @classmethod
