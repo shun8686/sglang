@@ -47,7 +47,7 @@ class TestRequestLengthValidation(CustomTestCase):
         long_text = "hello " * 1200  # Will tokenize to more than context length
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
@@ -65,7 +65,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
@@ -82,7 +82,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
