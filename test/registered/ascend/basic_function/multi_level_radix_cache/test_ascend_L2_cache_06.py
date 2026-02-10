@@ -1,11 +1,9 @@
 import unittest
 
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH, run_bench_serving
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.test_utils import (
-    CustomTestCase,
-    run_bench_serving,
-)
+from sglang.test.test_utils import CustomTestCase
+
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
