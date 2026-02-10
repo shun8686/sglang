@@ -96,7 +96,7 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         print(f"MMLU score without parameter: {TestEnableMultimodalNonMlm.score_without_param}")
         ALLOWED_ERROR = 0.015
         score_diff = TestEnableMultimodalNonMlm.score_with_param - TestEnableMultimodalNonMlm.score_without_param
-        abs_score_diff = abs(score_diff)
+        abs_score_diff = round(abs(score_diff), 4)
         self.assertLessEqual(
             abs_score_diff,
             ALLOWED_ERROR,

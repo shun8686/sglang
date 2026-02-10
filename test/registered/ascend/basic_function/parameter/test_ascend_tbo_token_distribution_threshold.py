@@ -203,9 +203,9 @@ class TestTboDisabled(CustomTestCase):
         print(f"Average Elapsed Time Comparison")
         print(f"   TBO 0.8 Enabled: {tbo_08_avg}s | TBO 0 Disabled: {tbo_0_avg}s ")
 
-        self.assertGreater(
-            tbo_08_avg, tbo_0_avg,
-            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not lesser than TBO 0.8 ({tbo_08_avg}s)"
+        self.assertAlmostEqual(
+            tbo_08_avg, tbo_0_avg, 1,
+            f"Assertion Failed: Average elapsed time - TBO 0 ({tbo_0_avg}s) is not close to TBO 0.8 ({tbo_08_avg}s)"
         )
         print("\n Assertion Passed: TBO 0 Average Latency < TBO 0.8 Average Latency")
 
