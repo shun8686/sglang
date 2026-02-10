@@ -38,7 +38,11 @@ def run_command(cmd, shell=True):
         return None
 
 
-class TestSleepOnIdle(CustomTestCase):
+cpu_float = 0
+cpu_float_sleep = 0
+
+
+class TestAscendSleepOnIdle(CustomTestCase):
     """Testcase: Test configuration --sleep-on-idle, send request, interence successful.
 
     [Test Category] Parameter
@@ -48,47 +52,67 @@ class TestSleepOnIdle(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.other_args = [
-            [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ],
-            [
-                "--sleep-on-idle",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--base-gpu-id",
-                1,
-                "--port",
-                20001,
-            ],
-        ]
-        cls.cpu_values = []
-        cls.processes = []
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ],
+
+        cls.process = popen_launch_server(
+            LLAMA_3_2_1B_WEIGHTS_PATH,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=cls.other_args,
+        )
+        time.sleep(5)
+
+        pid = run_command(
+            f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
+        if not pid:
+            cls.fail("Failed to get child process PID")
+        cpu_usage = run_command(f"ps -p {pid} -o %cpu --no-headers | xargs")
+        if not cpu_usage:
+            cls.fail("Failed to get CPU usage")
+        cls.cpu_float = float(cpu_usage)
+        print(f"***********{cls.cpu_float=}")
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+
+class TestSleepOnIdle(CustomTestCase):
+    @classmethod
+    def setUpClass(cls):
+        cls.other_args = [
+            "--sleep-on-idle",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ],
+
+        cls.process = popen_launch_server(
+            LLAMA_3_2_1B_WEIGHTS_PATH,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=cls.other_args,
+        )
+        time.sleep(5)
+
+        pid_sleep_on = run_command(
+            f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
+        if not pid_sleep_on:
+            cls.fail("Failed to get child process PID")
+        cpu_usage_sleep_on = run_command(f"ps -p {pid_sleep_on} -o %cpu --no-headers | xargs")
+        if not cpu_usage_sleep_on:
+            cls.fail("Failed to get CPU usage")
+        cls.cpu_float_sleep_on = float(cpu_usage_sleep_on)
+        print(f"***********{cls.cpu_float_sleep_on=}")
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
     def test_sleep_on_idle(self):
-        for i, args in enumerate(self.other_args):
-            process = popen_launch_server(
-                LLAMA_3_2_1B_WEIGHTS_PATH,
-                DEFAULT_URL_FOR_TEST,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=args,
-            )
-
-            time.sleep(5)
-            pid = run_command(
-                f"ps -ef | awk -v ppid = {process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
-            if not pid:
-                self.fail("Failed to get child process PID")
-            cpu_usage = run_command(f"ps -p {pid} -o %cpu --no-headers | xargs")
-            if not cpu_usage:
-                self.fail("Failed to get CPU usage")
-
-            cpu_float = float(cpu_usage)
-            self.cpu_values.append(cpu_float)
-            print(f"***********{self.cpu_values=}")
-
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -105,16 +129,8 @@ class TestSleepOnIdle(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-        # save process
-        self.processes.append(process)
-
-    @classmethod
-    def tearDownClass(cls):
-        for process in cls.processes:
-            kill_process_tree(process.pid)
-
     def test_cpu_reducation(self):
-        self.assertGreater(self.cpu_values[0], self.cpu_values[1], f"CPU usage shoule drop with --sleep-on-idle")
+        self.assertGreater(cpu_float, cpu_float_sleep, f"CPU usage shoule drop with --sleep-on-idle")
 
 
 if __name__ == "__main__":
