@@ -30,7 +30,7 @@ class TestNcclPort(CustomTestCase):
     def setUpClass(cls):
         other_args = [
             "--nccl-port",
-            "8111",
+            "9111",
             "--tp-size",
             "2",
             "--attention-backend",
@@ -65,9 +65,8 @@ class TestNcclPort(CustomTestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        print(response.text)
-        result = run_command("lsof -i:8111")
-        self.assertIn("*:8111 (LISTEN)", result)
+        result = run_command("lsof -i:9111")
+        self.assertIn("*:9111 (LISTEN)", result)
 
 
 if __name__ == "__main__":
