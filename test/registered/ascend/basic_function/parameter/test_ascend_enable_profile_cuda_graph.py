@@ -1,3 +1,4 @@
+import os
 import unittest
 import requests
 from sglang.srt.utils import kill_process_tree
@@ -31,17 +32,26 @@ class TestEnableProfileCudaGraph(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.out_log_file_name = "./tmp_out_log.txt"
+        cls.err_log_file_name = "./tmp_err_log.txt"
+        cls.out_log_file = open(cls.out_log_file_name, "w+", encoding="utf-8")
+        cls.err_log_file = open(cls.err_log_file_name, "w+", encoding="utf-8")
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.other_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        cls.out_log_file.close()
+        cls.err_log_file.close()
+        os.remove(cls.out_log_file_name)
+        os.remove(cls.err_log_file_name)
 
     def test_enable_profile_cuda_graph(self):
         response = requests.post(
@@ -63,6 +73,11 @@ class TestEnableProfileCudaGraph(CustomTestCase):
             response.json()["enable_profile_cuda_graph"],
             "--enable-profile-cuda-graph is not taking effect.",
         )
+
+        self.out_log_file.seek(0)
+        content = self.out_log_file.read()
+        self.assertTrue(len(content) > 0)
+        self.assertIn("profile.py: Start parsing profiling data:", content)
 
 
 class TestEnableProfileCudaGraphDisableGudaGraph(TestEnableProfileCudaGraph):
