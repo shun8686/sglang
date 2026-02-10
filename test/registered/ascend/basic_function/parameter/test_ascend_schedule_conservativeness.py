@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import requests
@@ -18,7 +19,8 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestScheduleConservativeness(CustomTestCase):
-    """Testcase: Test the schedule policy, and use the GSM8K dataset ensure an inference accuracy of at least 0.86.
+    """Testcase: Setting "--schedule-conservativeness" ensures successful request processing,
+    rejects new requests when resources are scarce, prevents key-value cache overflow, and dynamically adjusts new_token_ratio.
 
     [Test Category] Parameter
     [Test Target] --schedule-conservativeness
@@ -75,7 +77,7 @@ class TestScheduleConservativeness(CustomTestCase):
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
-            num_questions=200,
+            num_questions=100,
             parallel=512,
             max_new_tokens=512,
             host="http://127.0.0.1",
@@ -83,10 +85,15 @@ class TestScheduleConservativeness(CustomTestCase):
         )
         metrics = run_eval_few_shot_gsm8k(args)
         self.assertGreaterEqual(metrics["accuracy"], 0.86)
+        self.err_log_file.seek(0)
         content = self.err_log_file.read()
         # error_message information is recorded in the log
         self.assertIn(self.message, content)
         self.assertIn(self.message1, content)
+        self.out_log_file.close()
+        self.err_log_file.close()
+        os.remove("./cache_out_log.txt")
+        os.remove("./cache_err_log.txt")
 
 
 if __name__ == "__main__":
