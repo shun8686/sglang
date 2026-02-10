@@ -55,7 +55,7 @@ class TestAscendSleepOnIdle(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
-        ],
+        ]
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
@@ -99,7 +99,7 @@ class TestSleepOnIdle(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
-        ],
+        ]
 
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
