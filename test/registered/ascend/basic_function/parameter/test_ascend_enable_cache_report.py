@@ -85,7 +85,6 @@ class TestEnableCacheReport(CustomTestCase):
             )
             self.assertEqual(response.status_code, 200)
             if i == 2:
-                print("------------------------look-------------", response.json())
                 self.assertTrue(
                     int(response.json()["meta_info"]["cached_tokens"]) > 0
                 )
