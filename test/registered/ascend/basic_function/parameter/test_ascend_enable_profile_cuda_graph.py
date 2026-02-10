@@ -65,7 +65,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
         )
 
 
-class TestEnableProfileCudaGraphDisableGudaGraph(CustomTestCase):
+class TestEnableProfileCudaGraphDisableGudaGraph(TestEnableProfileCudaGraph):
     other_args = [
         "--attention-backend",
         "ascend",
