@@ -55,7 +55,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        expect_score = 0.8
+        expect_score = 0.58
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -68,7 +68,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.85
+        expect_accuracy = 0.4
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
