@@ -51,10 +51,8 @@ class TestEnableCacheReport(CustomTestCase):
                             "just return me a string with of 5000 characters,just return me a string with of 5000 characters,"
                             "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
 
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 260,
-                    },
+                    "max_new_tokens": 260,
+
                 },
             )
             print("--------------------------respon----------------------------")
