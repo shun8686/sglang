@@ -11,8 +11,7 @@ register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestNoChunkedPrefill(CustomTestCase):
-    """Test DeepSeek R1 model
-    Enable L2 cache increases hit rate by up to 50% and improves TTFT by 20%.
+    """The test used the DeepSeek-R1 model, with L2 cache enabled, and TTFT improved by 20%.
     --enable-hierarchical-cache: enable L2 cache
     """
 
@@ -81,12 +80,9 @@ class TestNoChunkedPrefill(CustomTestCase):
                 gsp_output_len=1,
                 other_server_args=other_args,
             )
-            print("---------------------------------------------", res)
             TTFT = res["mean_ttft_ms"]
             TTFTS.append(TTFT)
 
-        print(f"***********{TTFTS[1]=}")
-        print(f"***********{TTFTS[0]=}")
         assert float(TTFTS[1]) <= 0.8 * float(TTFTS[0])
 
 
