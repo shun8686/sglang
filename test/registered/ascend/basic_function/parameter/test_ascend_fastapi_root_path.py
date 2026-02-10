@@ -89,7 +89,6 @@ class TestAscendFastapiRootPath(CustomTestCase):
 #
 #
 # class TestAscendFastapiRootPathErrorPath(CustomTestCase):
-#     # TODO 确认错误模式
 #     fastapi_root_path = "test_fastapi_root_path"
 
 
