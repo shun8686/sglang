@@ -38,20 +38,20 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
 
     def test_grpc_mode(self):
-        response = requests.post(
-            f"http://127.0.0.1:20000/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print("============http://127.0.0.1:20000==============")
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
+        # response = requests.post(
+        #     f"http://127.0.0.1:20000/generate",
+        #     json={
+        #         "text": "The capital of France is",
+        #         "sampling_params": {
+        #             "temperature": 0,
+        #             "max_new_tokens": 32,
+        #         },
+        #     },
+        # )
+        #
+        # print("============http://127.0.0.1:20000==============")
+        # print(f"{response.status_code=}")
+        # print(f"{response.text=}")
 
         response = requests.post(
             f"http://127.0.0.1:21000/generate",
@@ -69,36 +69,36 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         print(f"{response.text=}")
 
 
-        response = requests.post(
-            f"grpc://127.0.0.1:20000/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+        # response = requests.post(
+        #     f"grpc://127.0.0.1:20000/generate",
+        #     json={
+        #         "text": "The capital of France is",
+        #         "sampling_params": {
+        #             "temperature": 0,
+        #             "max_new_tokens": 32,
+        #         },
+        #     },
+        # )
 
-        print("============grpc://127.0.0.1:20000==============")
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
-
-
-        response = requests.post(
-            f"grpc://127.0.0.1:21000/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print("============grpc://127.0.0.1:21000==============")
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
+        # print("============grpc://127.0.0.1:20000==============")
+        # print(f"{response.status_code=}")
+        # print(f"{response.text=}")
+        #
+        #
+        # response = requests.post(
+        #     f"grpc://127.0.0.1:21000/generate",
+        #     json={
+        #         "text": "The capital of France is",
+        #         "sampling_params": {
+        #             "temperature": 0,
+        #             "max_new_tokens": 32,
+        #         },
+        #     },
+        # )
+        #
+        # print("============grpc://127.0.0.1:21000==============")
+        # print(f"{response.status_code=}")
+        # print(f"{response.text=}")
 
         # self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         # self.assertIn("Paris", response.text, "The inference result does not include Paris.")
