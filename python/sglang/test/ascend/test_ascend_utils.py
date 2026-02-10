@@ -51,6 +51,9 @@ DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH = os.path.join(
 DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V3.2-W8A8"
 )
+DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+)
 ERNIE_4_5_21B_A3B_PT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "baidu/ERNIE-4.5-21B-A3B-PT"
 )

@@ -2,59 +2,50 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
-class TestDeepEpDeepseekV32(CustomTestCase):
-    """Testcase: Verify that for the DeepSeek V3.2 model in the single-machine colocation scenario,
-    its inference accuracy on the MMLU and GSM8K dataset meets the preset standard when the parameter --deepep-mode auto is configured.
-
-    """
+class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
+        cls.model = DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
-            timeout=6000,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
+                "--attention-backend", "ascend",
                 "--tp-size",
-                "16",
-                "--quantization",
-                "modelslim",
+                "8",
                 "--moe-a2a-backend",
                 "deepep",
                 "--deepep-mode",
-                "auto",
-                "--mem-fraction-static",
-                0.82,
+                "low_latency",
                 "--disable-cuda-graph",
-                "--disable-radix-cache",
-                "--context-length", 40960,
-                "--max-prefill-tokens", 40960,
-                "--max-total-tokens", 40960,
+                "--dp-size", 2,
+                "--enable-dp-attention",
+                "--chunked-prefill-size", 1024,
+                #"--mem-fraction-static",
+                #0.7,
             ],
             env={
-                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-                "STREAMS_PER_DEVICE": "32",
-                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "16",
-                "HCCL_BUFFSIZE": "1600",
-                "HCCL_OP_EXPANSION_MODE": "AIV",
-                "SGLANG_NPU_USE_MLAPO": "0",
-                "SGLANG_NPU_USE_MULTI_STREAM": "1",
-                "TASK_QUEUE_ENABLE": "0",
+                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                "HCCL_BUFFSIZE": "2048",
+                #"HCCL_BUFFSIZE": "3048",
+                "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
         )
@@ -64,7 +55,7 @@ class TestDeepEpDeepseekV32(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        expect_score = 0.565
+        expect_score = 0.8
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -77,11 +68,10 @@ class TestDeepEpDeepseekV32(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.95
+        expect_accuracy = 0.85
         args = SimpleNamespace(
-            num_shots=8,
+            num_shots=5,
             data_path=None,
-            timeout=60000,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,

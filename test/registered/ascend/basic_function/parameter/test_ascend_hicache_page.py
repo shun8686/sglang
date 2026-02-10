@@ -16,7 +16,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHiCachePage(CustomTestCase):
-    """Testcase: The test configuration page-size value is 128.
+    """Testcase: On NPUs, page-size configuration only supports 128.
 
     [Test Category] Parameter
     [Test Target] --page-size
