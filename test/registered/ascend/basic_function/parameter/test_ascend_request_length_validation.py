@@ -94,7 +94,7 @@ class TestRequestLengthValidation(CustomTestCase):
                     {"role": "user", "content": long_text},
                 ],
                 temperature=0,
-                max_tokens=1001,
+                max_tokens=1002,
             )
         self.assertIn(
             "max_completion_tokens is too large",
