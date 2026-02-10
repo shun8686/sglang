@@ -209,8 +209,7 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
 class TestOpenAIServerWithHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration,
-    in multi-sampling scenarios, returning the hidden state in both streaming and non-streaming modes.
+    """Testcase: In multi-sampling scenarios, configuring "--enable-return-hidden-states" , returning the hidden state
 
     [Test Category] Parameter
     [Test Target] --enable-return-hidden-states
@@ -247,7 +246,7 @@ class TestOpenAIServerWithHiddenStatesEnabled(
 class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, in non-graph mode, correctly return hidden states.
+    """Testcase: In non-graphical scenarios, configuring "--enable-return-hidden-states" will return the hidden state.
 
     [Test Category] Parameter
     [Test Target] --disable-cuda-graph; --enable-return-hidden-states
@@ -285,7 +284,7 @@ class TestOpenAIServerWithHiddenStatesEnabledAndCUDAGraphDisabled(
 class TestOpenAIServerWithEAGLE3AndHiddenStatesEnabled(
     CustomTestCase, BaseTestOpenAIServerWithHiddenStates
 ):
-    """Testcase: Tests core functionality with --enable-return-hidden-states configuration, and enable the EAGLE3 algorithm and return hidden states.
+    """Testcase: When the EAGLE3 algorithm is enabled, configuring "--enable-return-hidden-states" will return the hidden state.
 
     [Test Category] Parameter
     [Test Target] --speculative-algorithm; --enable-return-hidden-states
