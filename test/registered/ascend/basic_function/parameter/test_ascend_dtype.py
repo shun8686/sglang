@@ -49,6 +49,7 @@ class TestDtype(CustomTestCase):
             )
             self.assertEqual(response.status_code, 200)
             self.assertIn("Paris", response.text)
+            kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":
