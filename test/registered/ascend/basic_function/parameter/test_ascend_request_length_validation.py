@@ -41,7 +41,6 @@ class TestRequestLengthValidation(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_input_length_longer_than_context_length(self):
-        # The request is rejected when the number of tokens after the input text is segmented exceeds the model's context-length (1000).
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
         long_text = "a" * 1200  # Will tokenize to more than context length
         with self.assertRaises(openai.BadRequestError) as cm:
@@ -56,7 +55,6 @@ class TestRequestLengthValidation(CustomTestCase):
         self.assertIn("is longer than the model's context length", str(cm.exception))
 
     def test_max_tokens_validation(self):
-        # The request is rejected if the number of tokens to be generated (max_tokens) specified request exceeds the total token limit configured on the server.
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
 
         long_text = "a"
