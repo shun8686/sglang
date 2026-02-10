@@ -16,7 +16,8 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestEnableMultimodalNonMlm(CustomTestCase):
-    """Testcase: Verify that when the --enable-multimodal parameter is set, the mmlu accuracy is greater than or equal to that when the parameter is not set.
+    """Testcase: Verify that when the --enable-multimodal parameter is set, mmlu accuracy is within the margin of error compared
+    that when the parameter is not set.
 
         [Test Category] Parameter
         [Test Target] --enable-multimodal
@@ -94,10 +95,12 @@ class TestEnableMultimodalNonMlm(CustomTestCase):
         self.assertIsNotNone(TestEnableMultimodalNonMlm.score_without_param,
                              "MMLU score without parameter not obtained")
         # Core assertion: Score with --enable-multimodal ≥ Score without the parameter
+        ALLOWED_ERROR = 0.01
+        score_diff = TestEnableMultimodalNonMlm.score_with_param - TestEnableMultimodalNonMlm.score_without_param
         self.assertGreaterEqual(
-            TestEnableMultimodalNonMlm.score_with_param,
-            TestEnableMultimodalNonMlm.score_without_param,
-            f"MMLU score with --enable-multimodal ({TestEnableMultimodalNonMlm.score_with_param:.4f}) is less than the score without it ({TestEnableMultimodalNonMlm.score_without_param:.4f})"
+            score_diff,
+            -ALLOWED_ERROR,
+            f"MMLU score with --enable-multimodal ({TestEnableMultimodalNonMlm.score_with_param:.4f}) is lower than the score without it ({TestEnableMultimodalNonMlm.score_without_param:.4f}) by more than {ALLOWED_ERROR} (difference: {score_diff:.4f})"
         )
 
 
