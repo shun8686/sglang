@@ -62,6 +62,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 32,
+                    "model_id": self.model,
                 },
             },
         )
