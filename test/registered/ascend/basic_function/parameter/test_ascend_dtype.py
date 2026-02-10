@@ -15,7 +15,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDtype(CustomTestCase):
-    """Testcase：Verify set --dtype is half or float16 or bfloat16, request and inference successful.
+    """Testcase：Verify set --dtype is half or float16 or bfloat16, request inference successful.
 
        [Test Category] Parameter
        [Test Target] --dtype
