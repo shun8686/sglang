@@ -24,15 +24,12 @@ class TestEnableCacheReport(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        other_args = (
-            [
+        other_args =[
                 "--enable-cache-report",
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
             ]
-
-        )
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
