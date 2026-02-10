@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
@@ -17,7 +17,7 @@ from sglang.test.test_utils import (
 class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH
+        cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -52,7 +52,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmlu(self):
-        expect_score = 0.8
+        expect_score = 0.58
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -65,7 +65,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.85
+        expect_accuracy = 0.4
         args = SimpleNamespace(
             num_shots=8,
             data_path=None,
