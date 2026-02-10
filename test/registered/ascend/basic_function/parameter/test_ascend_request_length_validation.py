@@ -65,10 +65,10 @@ class TestRequestLengthValidation(CustomTestCase):
             )
         self.assertIn("is longer than the model's context length", str(cm.exception))
 
-    def test_not_max_tokens_validation(self):
+    def test_not_longer_max_tokens_validation(self):
         # The request is rejected if the number of tokens to be generated (max_tokens) specified request exceeds the total token limit configured on the server.
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
-        long_text = "hello "
+        long_text = "hello"
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
                 model=self.model,
@@ -83,10 +83,10 @@ class TestRequestLengthValidation(CustomTestCase):
             str(cm.exception),
         )
 
-    def test_max_tokens_validation(self):
+    def test_longer_max_tokens_validation(self):
         # The request is rejected if the number of tokens to be generated (max_tokens) specified request exceeds the total token limit configured on the server.
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
-        long_text = "hello "
+        long_text = "hello"
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
                 model=self.model,
