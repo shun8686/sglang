@@ -11,10 +11,12 @@ from sglang.test.test_utils import (
 
 #缺少观测点
 class TestDebugTensorInputFile(CustomTestCase):
-    """Testcase：Verify set --debug-tensor-dump-input-file parameter, after warm up the process will be kill .
+    """Testcase：Verify set --debug-tensor-dump-input-file parameter, after warm up the process will be killed .
 
-
-        """
+       [Test Category] Parameter
+       [Test Target] --debug-tensor-dump-input-file
+       """
+    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     def test_tensor_input_file(self):
         vector = numpy.array([1001, 1002, 1003, 1004, 1005, 1006, 1007])
         numpy.save("./input_tensor.npy", vector)
