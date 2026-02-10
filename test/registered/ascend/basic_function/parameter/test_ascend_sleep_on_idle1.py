@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 def run_command(cmd, shell=True):
@@ -58,22 +58,25 @@ class TestSleepOnIdle(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
+                "--base-gpu-id",
+                1,
+                "--port",
+                20001,
             ],
         ]
         cls.cpu_values = []
-        cls.process = []
+        cls.processes = []
 
     def test_sleep_on_idle(self):
-        for i, common_arg in enumerate(self.other_args):
+        for i, args in enumerate(self.other_args):
             process = popen_launch_server(
                 LLAMA_3_2_1B_WEIGHTS_PATH,
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=common_arg,
+                other_args=args,
             )
 
             time.sleep(5)
-
             pid = run_command(
                 f"ps -ef | awk -v ppid = {process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | tr -s '' | cut -d'' -f2")
             if not pid:
@@ -84,27 +87,26 @@ class TestSleepOnIdle(CustomTestCase):
 
             cpu_float = float(cpu_usage)
             self.cpu_values.append(cpu_float)
-            print(f"***********{self.cpu_values[1]=}")
-            print(f"***********{self.cpu_values[0]=}")
+            print(f"***********{self.cpu_values=}")
 
-            response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-            self.assertEqual(response.status_code, 200)
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        self.assertEqual(response.status_code, 200)
 
-            response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": "The capital of France is",
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 32,
-                    },
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
                 },
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertIn("Paris", response.text)
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
 
-            # save process
-            self.process.append(process)
+        # save process
+        self.process.append(process)
 
     @classmethod
     def tearDownClass(cls):
