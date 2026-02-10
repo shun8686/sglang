@@ -46,10 +46,8 @@ class TestEnableCacheReport(CustomTestCase):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/v1/chat/completions",
                 json={
-                    "prompt": "just return me a string with of 5000 characters,"
-                            "just return me a string with of 5000 characters, just return me a string with of 5000 characters,"
-                            "just return me a string with of 5000 characters,just return me a string with of 5000 characters,"
-                            "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
+                    "prompt": "just return me a string with of 5000 characters, just return me a string with of 5000 characters,",
+
 
                     "sampling_params": {
                         "temperature": 0,
