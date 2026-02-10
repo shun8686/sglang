@@ -1,3 +1,4 @@
+import os
 from time import sleep
 
 import requests
@@ -45,6 +46,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
         #     other_args=worker_args,
         # )
+        cls.out_log_file_name = "./grpc_mode_out_log.txt"
+        cls.out_log_file = open("./grpc_mode_out_log.txt", "w+", encoding="utf-8")
         worker_command = [
             "python3",
             "-m", "sglang.launch_server",
@@ -52,7 +55,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "--grpc-mode",
             "--host", cls.grpc_url.hostname, "--port", str(cls.grpc_url.port),
         ]
-        cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
+        cls.worker_process = subprocess.Popen(worker_command, stdout=cls.out_log_file, stderr=None)
+        cls.wait_grpc_server_ready(cls.out_log_file)
         # cls.wait_server_ready(cls.grpc_base_url + "/health")
         # print("=========server is ready==========")
         # sleep(100)
@@ -74,8 +78,28 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.worker_process.pid)
+
         kill_process_tree(cls.router_process.pid)
+        kill_process_tree(cls.worker_process.pid)
+        cls.out_log_file.close()
+        os.remove(cls.out_log_file_name)
+
+    @classmethod
+    def wait_grpc_server_ready(cls, out_log_file, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
+        start_time = time.perf_counter()
+        while True:
+            try:
+                out_log_file.seek(0)
+                content = out_log_file.read()
+                if len(content) > 0 and "The server is fired up and ready to roll" in content:
+                    return
+            except Exception:
+                pass
+            if time.perf_counter() - start_time > timeout:
+                raise RuntimeError(f"Server failed to start in {timeout}s")
+
+            time.sleep(1)
+
 
     @classmethod
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
@@ -110,21 +134,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-
-        response = requests.post(
-            f"{self.grpc_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print("============grpc==============")
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
 
         response = requests.post(
             f"{self.base_url}/generate",
