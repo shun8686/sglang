@@ -22,7 +22,7 @@ class TestRandomSeed(CustomTestCase):
        [Test Target] --random-seed
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-    random_seed = 0
+    random_seed = 2
 
     @classmethod
     def get_server_args(cls):
