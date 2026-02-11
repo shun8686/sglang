@@ -39,7 +39,7 @@ def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
         if length < 8:
             raise ValueError("length can not be smaller than 8")
         random_length = length - 8
-        char_pool = string.ascii_letters + string.digits
+        char_pool = string.ascii_lowercase + string.digits
         random_chars = ''.join([random.choice(char_pool) for _ in range(random_length)])
         result = uuid_str[:8] + random_chars
     else:
@@ -139,7 +139,7 @@ def delete_pod(yaml_file, namespace):
                 config_map_name = doc["metadata"]["name"]
                 response = core_api.delete_namespaced_config_map(name=config_map_name, namespace=namespace)
                 print(f"ConfigMap {config_map_name} is deleted.")
-                print(f"Response status: {response.get('status')}")
+                print(f"Response: {response}")
             else:
                 raise f"Unrecognized kind: {kind}/{api_version}"
         except ApiException as e:
