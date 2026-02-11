@@ -72,8 +72,9 @@ class TestRandomSeed(CustomTestCase):
         )
 
 class TestRandomSeedOne(TestRandomSeed):
-    random_seed = 1
     print("------------------responseee2222222222eee---------------------------------")
+    random_seed = 1
+
 
 
 if __name__ == "__main__":
