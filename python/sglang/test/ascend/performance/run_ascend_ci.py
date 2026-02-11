@@ -14,8 +14,8 @@ import yaml
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
-KUBE_CONFIG = os.environ.get('KUBECONFIG')
 
+KUBE_CONFIG = os.environ.get('KUBECONFIG')
 config.load_kube_config(KUBE_CONFIG)
 core_api = client.CoreV1Api()
 custom_api = client.CustomObjectsApi()
@@ -29,7 +29,6 @@ KUBE_YAML_TEMPLATE = {
     "multi-pd-mix": "k8s_multi_pd_mix.yaml.jinja2",
     "multi-pd-separation": "k8s_multi_pd_separation.yaml.jinja2"
 }
-
 
 def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
     uuid_str = str(uuid.uuid4()).replace("-", "")
@@ -352,22 +351,29 @@ if __name__ == "__main__":
     parser.add_argument(
         "--prefill-size",
         type=int,
-        required=True,
+        required=False,
         help="Number of prefill nodes",
     )
 
     parser.add_argument(
         "--decode-size",
         type=int,
-        required=True,
+        required=False,
         help="Number of decode nodes",
     )
 
     parser.add_argument(
         "--router-size",
         type=int,
-        required=True,
+        required=False,
         help="Number of router nodes",
+    )
+
+    parser.add_argument(
+        "--node-size",
+        type=int,
+        required=False,
+        help="Number of nodes for multi-node-pd-mix scenario",
     )
 
     parser.add_argument(
@@ -430,53 +436,90 @@ if __name__ == "__main__":
         help="K8s job name",
     )
 
-    parser.add_argument(
-        "--kube-config-map",
-        type=str,
-        required=True,
-        help="K8s config map name",
-    )
-
     args = parser.parse_args()
 
+    random_str = get_unique_random_string(16, True)
+
     kube_name_space = args.kube_name_space
-    kube_config_map = args.kube_config_map
+    kube_config_map = f"sglang-configmap-{random_str}"
+
     kube_job_type = args.kube_job_type
     kube_job_name = args.kube_job_name
-    final_kube_job_name = f"{kube_job_name}-{get_unique_random_string(16, True)}"
+    final_kube_job_name = f"{kube_job_name}-{random_str}"
 
-    pd_separation_context = {
-        "image": args.image,
-        "name_space": kube_name_space,
-        "kube_job_name": final_kube_job_name,
-        "kube_config": KUBE_CONFIG,
-        "kube_config_map": kube_config_map,
-        "prefill_size": args.prefill_size,
-        "decode_size": args.decode_size,
-        "router_size": args.router_size,
-        "sglang_source_path": args.sglang_source_path,
-        "metrics_data_file": args.metrics_data_file,
-        "test_case": args.test_case,
-        "sglang_is_in_ci": args.sglang_is_in_ci,
-        "install_sglang_from_source": args.install_sglang_from_source,
+    kube_yaml_file_dict = {
+        "single": f"k8s_single_{random_str}.yaml",
+        "multi-pd-mix": f"k8s_multi_pd_mix_{random_str}.yaml",
+        "multi-pd-separation": f"k8s_multi_pd_separation_{random_str}.yaml"
     }
-
-    kube_yaml_file = os.environ.get('KUBE_YAML_FILE')
-    if not kube_yaml_file:
-        random_str = get_unique_random_string(16, True)
-        kube_yaml_file = f"k8s_single_{random_str}.yaml" if kube_job_type == "single" else \
-            f"k8s_multi_pd_mix_{random_str}.yaml" if kube_job_type == "multi-pd-mix" else \
-                f"k8s_multi_pd_separation_{random_str}.yaml"
+    kube_yaml_file = kube_yaml_file_dict.get(kube_job_type)
 
     try:
         print(f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
               f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}")
 
-        create_pod_yaml(
-            kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
-            output_yaml=kube_yaml_file,
-            pod_context=pd_separation_context
-        )
+        match kube_job_type:
+            case "single":
+                k8s_context = {
+                    "image": args.image,
+                    "name_space": kube_name_space,
+                    "kube_job_name": final_kube_job_name,
+                    "kube_config": KUBE_CONFIG,
+                    "sglang_source_path": args.sglang_source_path,
+                    "metrics_data_file": args.metrics_data_file,
+                    "test_case": args.test_case,
+                    "sglang_is_in_ci": args.sglang_is_in_ci,
+                    "install_sglang_from_source": args.install_sglang_from_source,
+                }
+                create_pod_yaml(
+                    kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+                    output_yaml=kube_yaml_file,
+                    pod_context=k8s_context
+                )
+            case "multi-pd-mix":
+                k8s_context = {
+                    "image": args.image,
+                    "name_space": kube_name_space,
+                    "kube_job_name": final_kube_job_name,
+                    "kube_config": KUBE_CONFIG,
+                    "kube_config_map": kube_config_map,
+                    "node_size": args.node_size,
+                    "sglang_source_path": args.sglang_source_path,
+                    "metrics_data_file": args.metrics_data_file,
+                    "test_case": args.test_case,
+                    "sglang_is_in_ci": args.sglang_is_in_ci,
+                    "install_sglang_from_source": args.install_sglang_from_source,
+                }
+                create_pod_yaml(
+                    kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+                    output_yaml=kube_yaml_file,
+                    pod_context=k8s_context
+                )
+            case "multi-pd-separation":
+                k8s_context = {
+                    "image": args.image,
+                    "name_space": kube_name_space,
+                    "kube_job_name": final_kube_job_name,
+                    "kube_config": KUBE_CONFIG,
+                    "kube_config_map": kube_config_map,
+                    "prefill_size": args.prefill_size,
+                    "decode_size": args.decode_size,
+                    "router_size": args.router_size,
+                    "sglang_source_path": args.sglang_source_path,
+                    "metrics_data_file": args.metrics_data_file,
+                    "test_case": args.test_case,
+                    "sglang_is_in_ci": args.sglang_is_in_ci,
+                    "install_sglang_from_source": args.install_sglang_from_source,
+                }
+                create_pod_yaml(
+                    kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+                    output_yaml=kube_yaml_file,
+                    pod_context=k8s_context
+                )
+            case _:
+                raise Exception(f"Unknown k8s job type: {kube_job_type}")
+
+
         create_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
 
         if check_pods_ready(kube_name_space, final_kube_job_name, timeout=LOCAL_TIMEOUT):
@@ -495,10 +538,12 @@ if __name__ == "__main__":
         else:
             print("Pod not ready, maybe not enough resource")
 
-        monitor_pod_name = f"{final_kube_job_name}-pod-0" if kube_job_type == "single" else \
-            f"{final_kube_job_name}-sglang-node-0" if kube_job_type == "multi-pd-mix" else \
-                f"{final_kube_job_name}-sglang-router-0"
-        monitor_pod_logs(monitor_pod_name, kube_name_space, LOCAL_TIMEOUT)
+        monitor_pod_name = {
+            "single": f"{final_kube_job_name}-pod-0",
+            "multi-pd-mix": f"{final_kube_job_name}-sglang-node-0",
+            "multi-pd-separation": f"{final_kube_job_name}-sglang-router-0",
+        }
+        monitor_pod_logs(monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT)
 
     except Exception as e:
         print(f"\nError occured while running k8s task: {e}")
