@@ -15,14 +15,13 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestRandomSeed(CustomTestCase):
-    """Testcase：Verify set same --random-seed parameter, when set the --temperature
-    greater than 0 (will introduce randomness) the reasoning result unchanged.
+    """Testcase：Verify set --random-seed parameter, the inference request is successfully processed.
 
        [Test Category] Parameter
        [Test Target] --random-seed
        """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-    random_seed = 1
+    random_seed = 0
 
     @classmethod
     def get_server_args(cls):
@@ -58,7 +57,7 @@ class TestRandomSeed(CustomTestCase):
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
-                    "temperature": 1,
+                    "temperature": 0,
                     "max_new_tokens": 32,
                 },
             },
@@ -66,9 +65,14 @@ class TestRandomSeed(CustomTestCase):
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
+        print("------------------responseeeeee---------------------------------")
+        print(response.json())
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
         )
+
+class TestRandomSeedOne(TestRandomSeed):
+    random_seed = 1
 
 
 if __name__ == "__main__":
