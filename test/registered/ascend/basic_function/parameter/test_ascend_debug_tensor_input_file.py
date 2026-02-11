@@ -1,4 +1,5 @@
 import os
+import requests
 import unittest
 import numpy
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -42,6 +43,21 @@ class TestDebugTensorInputFile(CustomTestCase):
         err_log_file.seek(0)
         content = err_log_file.read()
         self.assertIn("The server is fired up and ready to roll!", content)
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+        self.assertEqual(response.status_code, 400)
+        self.assertIn("Paris", response.text)
+
+
         # out_log_file.close()
         # err_log_file.close()
         # os.remove("./tensor_input_out_log.txt")
