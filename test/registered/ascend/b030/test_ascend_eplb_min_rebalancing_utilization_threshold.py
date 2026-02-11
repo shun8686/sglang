@@ -23,7 +23,12 @@ class TestQwen330B(CustomTestCase):
     model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
     accuracy = 0.86
     other_args = [
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
         "--trust-remote-code",
+        "--chunked-prefill-size",
+        "1024",
         "--tp-size",
         "8",
         "--quantization",
@@ -31,10 +36,7 @@ class TestQwen330B(CustomTestCase):
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "normal",
-        "--disable-cuda-graph",
-        "--chunked-prefill-size",
-        "1024",
+        "auto",
         "--enable-eplb",
         "--ep-num-redundant-experts",
         16,
