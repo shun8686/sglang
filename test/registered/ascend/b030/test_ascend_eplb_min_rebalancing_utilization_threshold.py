@@ -44,6 +44,8 @@ class TestQwen330B(CustomTestCase):
         50,
         "--eplb-min-rebalancing-utilization-threshold",
         0.05,
+        "--base-gpu-id",
+        "8"
     ]
 
     @classmethod
