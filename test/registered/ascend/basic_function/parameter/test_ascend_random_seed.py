@@ -65,7 +65,7 @@ class TestRandomSeed(CustomTestCase):
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
-        print("------------------responseeeeee---------------------------------")
+        print("------------------respo1111111111111nseeeeee---------------------------------")
         print(response.json())
         self.assertIn(
             "Paris", response.text, "The inference result does not include Paris."
@@ -73,6 +73,7 @@ class TestRandomSeed(CustomTestCase):
 
 class TestRandomSeedOne(TestRandomSeed):
     random_seed = 1
+    print("------------------responseee2222222222eee---------------------------------")
 
 
 if __name__ == "__main__":
