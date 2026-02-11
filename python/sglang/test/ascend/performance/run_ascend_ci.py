@@ -565,4 +565,6 @@ if __name__ == "__main__":
     except Exception as e:
         print(f"\nError occured while running k8s task: {e}")
     finally:
-        delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
+        if os.path.exists(kube_yaml_file):
+            delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
+            os.remove(kube_yaml_file)
