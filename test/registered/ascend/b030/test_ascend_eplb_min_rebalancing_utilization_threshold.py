@@ -21,24 +21,20 @@ class TestQwen330B(CustomTestCase):
     """
 
     model = QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
-    accuracy = 0.90
+    accuracy = 0.86
     other_args = [
         "--trust-remote-code",
-        "--mem-fraction-static",
-        0.7,
-        "--max-running-requests",
-        32,
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--cuda-graph-max-bs",
-        32,
         "--tp-size",
-        2,
+        "8",
+        "--quantization",
+        "modelslim",
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "normal",
+        "auto",
+        "--disable-cuda-graph",
+        "--chunked-prefill-size",
+        "1024",
         "--enable-eplb",
         "--ep-num-redundant-experts",
         16,
@@ -60,7 +56,7 @@ class TestQwen330B(CustomTestCase):
             other_args=cls.other_args,
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
                 "HCCL_BUFFSIZE": "2048",
                 **os.environ,
             },
