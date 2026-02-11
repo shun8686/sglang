@@ -58,6 +58,12 @@ class TestQwen330B(CustomTestCase):
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.other_args,
+            env={
+                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                "HCCL_BUFFSIZE": "2048",
+                **os.environ,
+            },
         )
 
     @classmethod
