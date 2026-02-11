@@ -43,17 +43,18 @@ class TestDebugTensorInputFile(CustomTestCase):
         err_log_file.seek(0)
         content = err_log_file.read()
         self.assertIn("The server is fired up and ready to roll!", content)
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
+        with self.assertRaises(ConnectionError) as cm:
+            response = requests.post(
+                f"{DEFAULT_URL_FOR_TEST}/generate",
+                json={
+                    "text": "The capital of France is",
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 32,
+                    },
                 },
-            },
-        )
-
+            )
+        self.assertIn("Connection refused", str(cm.exception))
         self.assertEqual(response.status_code, 400)
         self.assertIn("Paris", response.text)
 
