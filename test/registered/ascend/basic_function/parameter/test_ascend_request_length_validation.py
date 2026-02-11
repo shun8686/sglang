@@ -1,6 +1,8 @@
 import unittest
 
 import openai
+
+from docs.basic_usage.native_api import response
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
@@ -56,15 +58,15 @@ class TestRequestLengthValidation(CustomTestCase):
     def test_input_length_no_longer_than_context_length(self):
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
         long_text = "hello " * 500
-        with self.assertRaises(openai.BadRequestError) as cm:
-            client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "user", "content": long_text},
-                ],
-                temperature=0,
-            )
-        self.assertNotIn("is longer than the model's context length", str(cm.exception))
+        response=client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "user", "content": long_text},
+            ],
+            temperature=0,
+        )
+        self.assertEqual(response.status_code, 200)
+
 
     def test_max_tokens_validation(self):
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
@@ -82,6 +84,20 @@ class TestRequestLengthValidation(CustomTestCase):
             "max_completion_tokens is too large",
             str(cm.exception),
         )
+
+    def test_less_max_tokens(self):
+        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        long_text = "hello"
+        response=client.chat.completions.create(
+            model=self.model,
+            messages=[
+                {"role": "user", "content": long_text},
+            ],
+            temperature=0,
+            max_tokens=800,
+        )
+        self.assertEqual(response.status_code, 200)
+
 
 
 if __name__ == "__main__":
