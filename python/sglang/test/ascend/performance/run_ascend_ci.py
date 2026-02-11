@@ -23,8 +23,7 @@ batch_api = client.BatchV1Api()
 rbac_api = client.RbacAuthorizationV1Api()
 
 LOCAL_TIMEOUT = 10800
-KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
-KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
+
 KUBE_YAML_TEMPLATE = {
     "single": "k8s_single.yaml.jinja2",
     "multi-pd-mix": "k8s_multi_pd_mix.yaml.jinja2",
@@ -145,12 +144,12 @@ def delete_pod(yaml_file, namespace):
         except ApiException as e:
             raise f"delete resource {kind} error: {e}"
 
-def check_pods_ready(pod_name_key_str, timeout=300):
+def check_pods_ready(namespace, pod_name_key_str, timeout=300):
     print("Waiting all pods to running...")
     start_time = time.time()
 
     while time.time() - start_time < timeout:
-        pods = core_api.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
+        pods = core_api.list_namespaced_pod(namespace=namespace)
 
         if len(pods.items) == 0:
             time.sleep(5)
@@ -227,8 +226,8 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
             print(error_msg)
             raise
 
-def prepare_cm_data(pod_string):
-    pods = core_api.list_namespaced_pod(namespace=KUBE_NAME_SPACE)
+def prepare_cm_data(namespace, pod_string):
+    pods = core_api.list_namespaced_pod(namespace=namespace)
     data = {}
     for pod in pods.items:
         pod_name = pod.metadata.name
@@ -410,6 +409,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--kube-name-space",
+        type=str,
+        required=True,
+        help="K8s name space",
+    )
+
+    parser.add_argument(
         "--kube-job-type",
         type=str,
         choices=["single", "multi-pd-mix", "multi-pd-separation"],
@@ -424,18 +430,27 @@ if __name__ == "__main__":
         help="K8s job name",
     )
 
+    parser.add_argument(
+        "--kube-config-map",
+        type=str,
+        required=True,
+        help="K8s config map name",
+    )
+
     args = parser.parse_args()
 
+    kube_name_space = args.kube_name_space
+    kube_config_map = args.kube_config_map
     kube_job_type = args.kube_job_type
     kube_job_name = args.kube_job_name
     final_kube_job_name = f"{kube_job_name}-{get_unique_random_string(16, True)}"
 
     pd_separation_context = {
         "image": args.image,
-        "name_space": KUBE_NAME_SPACE,
+        "name_space": kube_name_space,
         "kube_job_name": final_kube_job_name,
         "kube_config": KUBE_CONFIG,
-        "kube_config_map": KUBE_CONFIG_MAP,
+        "kube_config_map": kube_config_map,
         "prefill_size": args.prefill_size,
         "decode_size": args.decode_size,
         "router_size": args.router_size,
@@ -454,7 +469,7 @@ if __name__ == "__main__":
                 f"k8s_multi_pd_separation_{random_str}.yaml"
 
     try:
-        print(f"Apply k8s yaml... KUBE_NAME_SPACE:{KUBE_NAME_SPACE}, KUBE_CONFIG_MAP:{KUBE_CONFIG_MAP}, "
+        print(f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
               f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}")
 
         create_pod_yaml(
@@ -462,19 +477,19 @@ if __name__ == "__main__":
             output_yaml=kube_yaml_file,
             pod_context=pd_separation_context
         )
-        create_pod(yaml_file=kube_yaml_file, namespace=KUBE_NAME_SPACE)
+        create_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
 
-        if check_pods_ready(final_kube_job_name, timeout=LOCAL_TIMEOUT):
+        if check_pods_ready(kube_name_space, final_kube_job_name, timeout=LOCAL_TIMEOUT):
             if kube_job_type != "single":
                 matching_pod_string = final_kube_job_name
-                cm_data = prepare_cm_data(matching_pod_string)
+                cm_data = prepare_cm_data(kube_name_space, matching_pod_string)
                 if not cm_data:
                     print(f"No sglang pod found while matching {matching_pod_string}")
 
                 response = create_or_update_configmap(
-                    cm_name=KUBE_CONFIG_MAP,
+                    cm_name=kube_config_map,
                     data=cm_data,
-                    namespace=KUBE_NAME_SPACE
+                    namespace=kube_name_space
                 )
                 print(response)
         else:
@@ -483,9 +498,9 @@ if __name__ == "__main__":
         monitor_pod_name = f"{final_kube_job_name}-pod-0" if kube_job_type == "single" else \
             f"{final_kube_job_name}-sglang-node-0" if kube_job_type == "multi-pd-mix" else \
                 f"{final_kube_job_name}-sglang-router-0"
-        monitor_pod_logs(monitor_pod_name, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
+        monitor_pod_logs(monitor_pod_name, kube_name_space, LOCAL_TIMEOUT)
 
     except Exception as e:
         print(f"\nError occured while running k8s task: {e}")
     finally:
-        delete_pod(yaml_file=kube_yaml_file, namespace=KUBE_NAME_SPACE)
+        delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
