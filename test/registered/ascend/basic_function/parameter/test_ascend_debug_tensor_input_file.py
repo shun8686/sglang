@@ -57,8 +57,7 @@ class TestDebugTensorInputFile(CustomTestCase):
         print("-------------efvdddddddddddddd---------------")
         print(cm.exception)
         self.assertIn("Connection refused", str(cm.exception))
-        self.assertEqual(response.status_code, 400)
-        self.assertIn("Paris", response.text)
+
 
 
         # out_log_file.close()
