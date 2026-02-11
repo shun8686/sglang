@@ -1,6 +1,7 @@
 import subprocess
 import time
 import unittest
+from abc import ABC
 
 import requests
 
@@ -38,10 +39,6 @@ def run_command(cmd, shell=True):
         return None
 
 
-cpu_float = 0
-cpu_float_sleep = 0
-
-
 class TestAscendSleepOnIdle(CustomTestCase):
     """Testcase: Test configuration --sleep-on-idle, send request, interence successful.
 
@@ -63,11 +60,13 @@ class TestAscendSleepOnIdle(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.other_args,
         )
-        time.sleep(5)
+        time.sleep(10)
         pid = run_command(
-            f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
-        cls.cpu_float = run_command(f"ps -p {pid} -o %cpu --no-headers | xargs")
+            f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {cls.process.pid} | tr -s ' '|cut -d' ' -f2")
+        cls.cpu = run_command(f"ps -p {pid.strip()} -o %cpu --no-headers | xargs")
+        cls.cpu_float = float(cls.cpu.strip())
         print(f"***********{cls.cpu_float=}")
+        run_command(f"echo {cls.cpu_float} > ./cpu.txt")
 
     @classmethod
     def tearDownClass(cls):
@@ -107,16 +106,12 @@ class TestSleepOnIdle(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.other_args,
         )
-        time.sleep(5)
+        time.sleep(10)
 
         pid_sleep_on = run_command(
-            f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
-        # if not pid_sleep_on:
-        #     cls.fail("Failed to get child process PID")
-        cpu_usage_sleep_on = run_command(f"ps -p {pid_sleep_on} -o %cpu --no-headers | xargs")
-        # if not cpu_usage_sleep_on:
-        #     cls.fail("Failed to get CPU usage")
-        cls.cpu_float_sleep_on = float(cpu_usage_sleep_on)
+            f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {cls.process.pid} | tr -s ' '|cut -d' ' -f2")
+        cls.cpu_sleep_on = run_command(f"ps -p {pid_sleep_on.strip()} -o %cpu --no-headers | xargs")
+        cls.cpu_sleep_on_float = float(cls.cpu_sleep_on.strip())
         print(f"***********{cls.cpu_float_sleep_on=}")
 
     @classmethod
@@ -140,8 +135,9 @@ class TestSleepOnIdle(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-    def _test_cpu_reducation(self):
-        self.assertGreater(cpu_float, cpu_float_sleep, f"CPU usage shoule drop with --sleep-on-idle")
+    def test_cpu_reducation(self):
+        cpu_float = float(run_command(f"cat ./cpu.txt"))
+        self.assertGreater(cpu_float, self.cpu_float_sleep_on, f"CPU usage shoule drop with --sleep-on-idle")
 
 
 if __name__ == "__main__":

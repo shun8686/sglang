@@ -1,7 +1,7 @@
-import random
-import unittest
-import requests
 import multiprocessing as mp
+import unittest
+
+import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
@@ -103,8 +103,14 @@ class TestLimitMMDatePerRequest(CustomTestCase):
                 ],
             },
         ]
-        response = requests.post(self.base_url + '/chat/completions',
-                                 json={"messages": messages, "temperature": 0, "max_completion_tokens": 1024})
+        response = requests.post(
+            self.base_url + '/chat/completions',
+            json={
+                "messages": messages,
+                "temperature": 0,
+                "max_completion_tokens": 1024
+            },
+        )
         assert response.status_code == 200
 
     def _run_multi_turn_request1(self):
@@ -128,8 +134,14 @@ class TestLimitMMDatePerRequest(CustomTestCase):
                 ],
             },
         ]
-        response1 = requests.post(self.base_url + '/chat/completions',
-                                  json={"messages": messages1, "temperature": 0, "max_completion_tokens": 1024})
+        response1 = requests.post(
+            self.base_url + '/chat/completions',
+            json={
+                "messages": messages1,
+                "temperature": 0,
+                "max_completion_tokens": 1024
+            },
+        )
         assert response1.status_code == 400
 
     def _run_multi_turn_request2(self):
@@ -153,8 +165,14 @@ class TestLimitMMDatePerRequest(CustomTestCase):
                 ],
             },
         ]
-        response2 = requests.post(self.base_url + '/chat/completions',
-                                  json={"messages": messages2, "temperature": 0, "max_completion_tokens": 1024})
+        response2 = requests.post(
+            self.base_url + '/chat/completions',
+            json={
+                "messages": messages2,
+                "temperature": 0,
+                "max_completion_tokens": 1024
+            },
+        )
         assert response2.status_code == 400
 
     def test_vlm(self):
