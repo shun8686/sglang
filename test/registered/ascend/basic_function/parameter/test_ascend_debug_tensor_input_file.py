@@ -38,7 +38,7 @@ class TestDebugTensorInputFile(CustomTestCase):
                 other_args=other_args,
                 return_stdout_stderr=(out_log_file, err_log_file),
             )
-        self.assertIn("Sever process exited", str(cm.exception))
+        self.assertIn("Server process exited with code -9", str(cm.exception))
         err_log_file.seek(0)
         content = err_log_file.read()
         self.assertIn("The server is fired up and ready to roll!", content)
