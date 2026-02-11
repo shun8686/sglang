@@ -1,11 +1,9 @@
 import os
 import unittest
 from shutil import copy2
-
 import requests
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, \
-    LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -31,17 +29,11 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
     def setUpClass(cls):
         cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.tokenizer_path = "/tmp"
-        cls.tokenizer_file_name = cls.tokenizer_path + "/" + "tokenizer.json"
-        cls.tokenizer_config_file_name = cls.tokenizer_path + "/" + "tokenizer_config.json"
-        cls.special_tokens_map_file_name = cls.tokenizer_path + "/" + "special_tokens_map.json"
-        if not os.path.exists(cls.tokenizer_path + "/" + "special_tokens_map.json"):
-            copy2(cls.special_tokens_map_file_name, cls.tokenizer_path)
-        if not os.path.exists(cls.tokenizer_path + "/" + "tokenizer.json"):
-            copy2(cls.tokenizer_file_name, cls.tokenizer_path)
-        if not os.path.exists(cls.tokenizer_path + "/" + "tokenizer_config.json"):
-            copy2(cls.tokenizer_config_file_name, cls.tokenizer_path)
+        cls.file_names = ["tokenizer.json", "tokenizer_config.json", "special_tokens_map.json"]
+        for file_name in cls.file_names:
+            if not os.path.exists(cls.tokenizer_path + "/" + file_name):
+                copy2(cls.model_path + "/" + file_name, cls.tokenizer_path)
 
-        # cls.tokenizer_path = LLAMA_3_2_11B_VISION_INSTRUCT_WEIGHTS_PATH
         cls.tokenizer_worker_num = 4
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
@@ -65,12 +57,9 @@ class TestEnableTokenizerModeSlow(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        if os.path.exists(cls.tokenizer_path + "/" + "special_tokens_map.json"):
-            os.remove(cls.tokenizer_path + "/" + "special_tokens_map.json")
-        if not os.path.exists(cls.tokenizer_path + "/" + "tokenizer.json"):
-            os.remove(cls.tokenizer_path + "/" + "tokenizer.json")
-        if not os.path.exists(cls.tokenizer_path + "/" + "tokenizer_config.json"):
-            os.remove(cls.tokenizer_path + "/" + "tokenizer_config.json")
+        for file_name in cls.file_names:
+            if os.path.exists(cls.tokenizer_path + "/" + file_name):
+                os.remove(cls.tokenizer_path + "/" + file_name)
 
     def test_tokenzier_mode(self):
         response = requests.post(
