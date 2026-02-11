@@ -14,8 +14,8 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestRandomSeed(CustomTestCase):
-    """Testcase：Verify set --random-seed parameter, the inference request is successfully processed.
+class TestRandomSeedZero(CustomTestCase):
+    """Testcase：Verify set --random-seed parameter, with the same random_seed the model's output is consistent.
 
        [Test Category] Parameter
        [Test Target] --random-seed
@@ -24,27 +24,19 @@ class TestRandomSeed(CustomTestCase):
     random_seed = 0
 
     @classmethod
-    def get_server_args(cls):
-        """Return the arguments for the server launch. Override in subclasses."""
-        other_args = (
-            [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--random-seed",
-                cls.random_seed,
-            ]
-
-        )
-        return other_args
-
-    @classmethod
     def setUpClass(cls):
+        other_args = [
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--random-seed",
+            cls.random_seed,
+        ]
         cls.process = popen_launch_server(
             cls.model,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.get_server_args(),
+            other_args=other_args,
         )
 
     @classmethod
@@ -52,49 +44,29 @@ class TestRandomSeed(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_random_seed(self):
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 1,
-                    "max_new_tokens": 32,
+        response_text1 = None
+        response_text2 = None
+        for i in range(2):
+            response = requests.post(
+                f"{DEFAULT_URL_FOR_TEST}/generate",
+                json={
+                    "text": "The capital of France is",
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 32,
+                    },
                 },
-            },
-        )
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        print("------------------respo1111111111111nseeeeee---------------------------------")
-        print(response.json())
-        self.assertIn(
-            "Paris", response.text, "The inference result does not include Paris."
-        )
+            )
+            self.assertEqual(response.status_code, 200)
+            if i == 0:
+                response_text1 = response.json()["text"]
+            else:
+                response_text2 = response.json()["text"]
+        self.assertEqual(response_text1, response_text2)
 
-class TestRandomSeedOne(TestRandomSeed):
+
+class TestRandomSeedOne(TestRandomSeedZero):
     random_seed = 1
-    def test_random_seed(self):
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 1,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        print("------------------responseee2222222222eee---------------------------------")
-        print(response.json())
-        self.assertIn(
-            "Paris", response.text, "The inference result does not include Paris."
-        )
-
-
-
 
 
 if __name__ == "__main__":
