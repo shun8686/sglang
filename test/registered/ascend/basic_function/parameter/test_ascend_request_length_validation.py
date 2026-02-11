@@ -70,7 +70,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
     def test_max_tokens_validation(self):
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
-        long_text = "hello"
+        long_text = "hello "
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
                 model=self.model,
@@ -87,7 +87,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
     def test_less_max_tokens(self):
         client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
-        long_text = "hello"
+        long_text = "hello "
         response=client.chat.completions.create(
             model=self.model,
             messages=[
