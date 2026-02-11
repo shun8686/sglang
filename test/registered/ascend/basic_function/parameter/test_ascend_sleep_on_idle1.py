@@ -1,6 +1,7 @@
 import subprocess
 import time
 import unittest
+from abc import ABC
 
 import requests
 
@@ -38,10 +39,6 @@ def run_command(cmd, shell=True):
         return None
 
 
-cpu_float = 0
-cpu_float_sleep = 0
-
-
 class TestAscendSleepOnIdle(CustomTestCase):
     """Testcase: Test configuration --sleep-on-idle, send request, interence successful.
 
@@ -69,6 +66,7 @@ class TestAscendSleepOnIdle(CustomTestCase):
         cls.cpu = run_command(f"ps -p {pid.strip()} -o %cpu --no-headers | xargs")
         cls.cpu_float = float(cls.cpu.strip())
         print(f"***********{cls.cpu_float=}")
+        run_command(f"echo {cls.cpu_float} > ./cpu.txt")
 
     @classmethod
     def tearDownClass(cls):
@@ -138,7 +136,8 @@ class TestSleepOnIdle(CustomTestCase):
         self.assertIn("Paris", response.text)
 
     def test_cpu_reducation(self):
-        self.assertGreater(cpu_float, cpu_float_sleep, f"CPU usage shoule drop with --sleep-on-idle")
+        cpu_float = float(run_command(f"cat ./cpu.txt"))
+        self.assertGreater(cpu_float, self.cpu_float_sleep_on, f"CPU usage shoule drop with --sleep-on-idle")
 
 
 if __name__ == "__main__":
