@@ -443,6 +443,14 @@ if __name__ == "__main__":
         help="K8s job name",
     )
 
+    parser.add_argument(
+        "--env",
+        type=str,
+        choices=["debug", "ci"],
+        required=True,
+        help="Environment type",
+    )
+
     args = parser.parse_args()
 
     random_str = get_unique_random_string(16, True)
@@ -477,6 +485,7 @@ if __name__ == "__main__":
                 "test_case": args.test_case,
                 "sglang_is_in_ci": args.sglang_is_in_ci,
                 "install_sglang_from_source": args.install_sglang_from_source,
+                "env": args.env
             }
             create_pod_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
@@ -496,6 +505,7 @@ if __name__ == "__main__":
                 "test_case": args.test_case,
                 "sglang_is_in_ci": args.sglang_is_in_ci,
                 "install_sglang_from_source": args.install_sglang_from_source,
+                "env": args.env
             }
             create_pod_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
@@ -517,6 +527,7 @@ if __name__ == "__main__":
                 "test_case": args.test_case,
                 "sglang_is_in_ci": args.sglang_is_in_ci,
                 "install_sglang_from_source": args.install_sglang_from_source,
+                "env": args.env
             }
             create_pod_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
