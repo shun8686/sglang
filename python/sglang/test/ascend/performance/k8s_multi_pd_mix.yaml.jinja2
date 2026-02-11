@@ -105,7 +105,17 @@ spec:
         - name: sglang-source-code
           hostPath:
             path: {{ sglang_source_path }}
+        {% if env == "debug" %}
+        tolerations:
+          - key: "instance"
+            operator: "Equal"
+            value: "npu-class-service"
+            effect: "NoSchedule"
+        {% endif %}
         nodeSelector:
           accelerator/huawei-npu: ascend-snt9c
+          {% if env == "debug" %}
+          nodestatus: debug
+          {% endif %}
         restartPolicy: OnFailure
 
