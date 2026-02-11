@@ -377,6 +377,13 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
+        "--npu-size",
+        type=int,
+        required=False,
+        help="Number of npu for single-node scenario",
+    )
+
+    parser.add_argument(
         "--sglang-source-path",
         type=str,
         required=True,
@@ -464,6 +471,7 @@ if __name__ == "__main__":
                 "name_space": kube_name_space,
                 "kube_job_name": final_kube_job_name,
                 "kube_config": KUBE_CONFIG,
+                "npu_size": args.npu_size,
                 "sglang_source_path": args.sglang_source_path,
                 "metrics_data_file": args.metrics_data_file,
                 "test_case": args.test_case,

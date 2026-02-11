@@ -54,10 +54,10 @@ spec:
                bash /root/sglang/python/sglang/test/ascend/performance/run_ascend_testcase.sh {{ test_case }}
           resources:
             requests:
-              huawei.com/ascend-1980: {{ npu_num }}
+              huawei.com/ascend-1980: {{ npu_size }}
               cpu: "76"
             limits:
-              huawei.com/ascend-1980: {{ npu_num }}
+              huawei.com/ascend-1980: {{ npu_size }}
               cpu: "76"
           volumeMounts:
           - name: ascend-driver
