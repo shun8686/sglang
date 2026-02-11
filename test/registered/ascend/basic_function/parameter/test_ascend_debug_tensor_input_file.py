@@ -30,29 +30,18 @@ class TestDebugTensorInputFile(CustomTestCase):
         ]
         out_log_file = open("./tensor_input_out_log.txt", "w+", encoding="utf-8")
         err_log_file = open("./tensor_input_err_log.txt", "w+", encoding="utf-8")
-        popen_launch_server(
-            LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-            return_stdout_stderr=(out_log_file, err_log_file),
-        )
+        with self.assertRaises(Exception) as cm:
+            popen_launch_server(
+                LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+                DEFAULT_URL_FOR_TEST,
+                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                other_args=other_args,
+                return_stdout_stderr=(out_log_file, err_log_file),
+            )
+        self.assertIn("Sever process exited with code -9", str(cm.exception))
         err_log_file.seek(0)
         content = err_log_file.read()
         self.assertIn("The server is fired up and ready to roll!", content)
-        with self.assertRaises(Exception) as cm:
-           requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": "The capital of France is",
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 32,
-                    },
-                },
-            )
-        print(cm.exception)
-        self.assertIn("Connection refused", str(cm.exception))
         out_log_file.close()
         err_log_file.close()
         os.remove("./tensor_input_out_log.txt")
