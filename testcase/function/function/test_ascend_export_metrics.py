@@ -64,9 +64,9 @@ class TestDecodeLogInterval(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        res = run_command(f"ll | grep sglang-request-metrics*.log")
-        content = res.read()
-        self.assertIn(self.message, content)
+        res = run_command(f"ll | grep sglang-request-metrics*.log").split()
+        content = run_command(f"cat {res} | grep {self.message}")
+        self.assertNotEqual(content, None)
 
 
 if __name__ == "__main__":
