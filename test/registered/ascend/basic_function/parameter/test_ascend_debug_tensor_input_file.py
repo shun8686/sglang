@@ -39,11 +39,11 @@ class TestDebugTensorInputFile(CustomTestCase):
             )
         except Exception as e:
             print("process is killed")
-        out_log_file.close()
-        err_log_file.close()
-        os.remove("./tensor_input_out_log.txt")
-        os.remove("./tensor_input_err_log.txt")
-        os.remove("./input_tensor.npy")
+        # out_log_file.close()
+        # err_log_file.close()
+        # os.remove("./tensor_input_out_log.txt")
+        # os.remove("./tensor_input_err_log.txt")
+        # os.remove("./input_tensor.npy")
 
 
 if __name__ == "__main__":
