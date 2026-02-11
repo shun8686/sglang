@@ -69,8 +69,6 @@ spec:
             limits:
               huawei.com/ascend-1980: 16
           volumeMounts:
-          - name: ascend-910-config
-            mountPath: /user/serverid/devindex/config
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver
           - name: localtime
@@ -93,9 +91,6 @@ spec:
         - name: cache
           hostPath:
             path: /data/ascend-ci-share-pkking-sglang
-        - name: ascend-910-config
-          configMap:
-            name: rings-config-ascend-sglang-test
         - name: ascend-driver
           hostPath:
             path: /usr/local/Ascend/driver
