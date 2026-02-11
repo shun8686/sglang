@@ -1,0 +1,50 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ascend-sglang-pod-access
+  namespace: sglang-multi-debug
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["get", "list"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ascend-sglang-pod-binding
+  namespace: sglang-multi-debug
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: sglang-multi-debug
+roleRef:
+  kind: Role
+  name: ascend-sglang-pod-access
+  apiGroup: rbac.authorization.k8s.io
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: ascend-sglang-configmap-access
+  namespace: sglang-multi-debug
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "update", "patch"]
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: ascend-sglang-configmap-binding
+  namespace: sglang-multi-debug
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: sglang-multi-debug
+roleRef:
+  kind: Role
+  name: ascend-sglang-configmap-access
+  apiGroup: rbac.authorization.k8s.io

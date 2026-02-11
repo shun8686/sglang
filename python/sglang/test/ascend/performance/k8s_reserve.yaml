@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rings-config-ascend-sglang-test
+  namespace: {{ name_space }}
+  labels:
+    ring-controller.atlas: ascend-1980
+data:
+  hccl.json: |
+    {
+        "status":"initializing"
+    }
+
+
+
