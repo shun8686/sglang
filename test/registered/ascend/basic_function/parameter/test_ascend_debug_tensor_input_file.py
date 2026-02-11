@@ -43,7 +43,7 @@ class TestDebugTensorInputFile(CustomTestCase):
         err_log_file.seek(0)
         content = err_log_file.read()
         self.assertIn("The server is fired up and ready to roll!", content)
-        with self.assertRaises(ConnectionError) as cm:
+        with self.assertRaises(ConnectionRefusedError) as cm:
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
                 json={
