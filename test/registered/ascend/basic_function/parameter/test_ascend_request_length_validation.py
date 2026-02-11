@@ -64,6 +64,8 @@ class TestRequestLengthValidation(CustomTestCase):
             ],
             temperature=0,
         )
+        print("-----------------------response-------------------------")
+        print(response)
         self.assertEqual(response.status_code, 200)
 
 
