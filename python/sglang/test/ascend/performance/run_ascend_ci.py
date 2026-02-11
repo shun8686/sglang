@@ -25,12 +25,11 @@ rbac_api = client.RbacAuthorizationV1Api()
 LOCAL_TIMEOUT = 10800
 KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
 KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
-KUBE_JOB_TYPE = os.environ.get('KUBE_JOB_TYPE')
-KUBE_JOB_NAME = os.environ.get('KUBE_JOB_NAME')
-MONITOR_POD_NAME = "{}-pod-0".format(KUBE_JOB_NAME) if KUBE_JOB_TYPE == "single" else \
-    "{}-sglang-node-0".format(KUBE_JOB_NAME) if KUBE_JOB_TYPE == "multi" else \
-    "{}-sglang-router-0".format(KUBE_JOB_NAME)
-KUBE_YAML_TEMPLATE = "k8s_single.yaml.jinja2" if KUBE_JOB_TYPE == "single" else "k8s_multi_pd_mix.yaml.jinja2" if KUBE_JOB_TYPE == "multi" else "k8s_multi_pd_separation.yaml.jinja2"
+KUBE_YAML_TEMPLATE = {
+    "single": "k8s_single.yaml.jinja2",
+    "multi": "k8s_multi_pd_mix.yaml.jinja2",
+    "pd": "k8s_multi_pd_separation.yaml.jinja2"
+}
 
 
 def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
@@ -48,8 +47,8 @@ def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
 
     return result
 
-def create_pod_yaml(output_yaml, pod_context):
-    with open(KUBE_YAML_TEMPLATE, 'r') as f:
+def create_pod_yaml(kube_yaml_template, output_yaml, pod_context):
+    with open(kube_yaml_template, 'r') as f:
         template = Template(f.read())
     kube_pod_yaml = template.render(pod_context)
     with open(output_yaml, 'w') as f:
@@ -146,9 +145,8 @@ def delete_pod(yaml_file, namespace):
         except ApiException as e:
             raise f"delete resource {kind} error: {e}"
 
-def check_pods_ready(timeout=300):
+def check_pods_ready(pod_name_key_str, timeout=300):
     print("Waiting all pods to running...")
-    matching_string = "{}".format(os.environ.get('KUBE_JOB_NAME'))
     start_time = time.time()
 
     while time.time() - start_time < timeout:
@@ -162,7 +160,7 @@ def check_pods_ready(timeout=300):
         sglang_pods_found = False
         for pod in pods.items:
             pod_name = pod.metadata.name
-            if matching_string not in pod_name:
+            if pod_name_key_str not in pod_name:
                 continue
 
             sglang_pods_found = True
@@ -411,12 +409,31 @@ if __name__ == "__main__":
         help="Install sglang from source",
     )
 
+    parser.add_argument(
+        "--kube-job-type",
+        type=str,
+        choices=["single", "multi", "pd"],
+        required=True,
+        help="K8s job type [single, multi, pd]",
+    )
+
+    parser.add_argument(
+        "--kube-job-name",
+        type=str,
+        required=True,
+        help="K8s job name",
+    )
+
     args = parser.parse_args()
+
+    kube_job_type = args.kube_job_type
+    kube_job_name = args.kube_job_name
+    final_kube_job_name = f"{kube_job_name}-{get_unique_random_string(16, True)}"
 
     pd_separation_context = {
         "image": args.image,
         "name_space": KUBE_NAME_SPACE,
-        "kube_job_name": KUBE_JOB_NAME,
+        "kube_job_name": final_kube_job_name,
         "kube_config": KUBE_CONFIG,
         "kube_config_map": KUBE_CONFIG_MAP,
         "prefill_size": args.prefill_size,
@@ -432,31 +449,43 @@ if __name__ == "__main__":
     kube_yaml_file = os.environ.get('KUBE_YAML_FILE')
     if not kube_yaml_file:
         random_str = get_unique_random_string(16, True)
-        kube_yaml_file = f"k8s_single_{random_str}.yaml" if KUBE_JOB_TYPE == "single" else \
-            f"k8s_multi_pd_mix_{random_str}.yaml" if KUBE_JOB_TYPE == "multi" else \
+        kube_yaml_file = f"k8s_single_{random_str}.yaml" if kube_job_type == "single" else \
+            f"k8s_multi_pd_mix_{random_str}.yaml" if kube_job_type == "multi" else \
                 f"k8s_multi_pd_separation_{random_str}.yaml"
 
     try:
-        print("Apply k8s yaml... KUBE_NAME_SPACE:{}, KUBE_CONFIG_MAP:{}, KUBE_JOB_TYPE:{}, KUBE_YAML_FILE:{}"
-              .format(KUBE_NAME_SPACE, KUBE_CONFIG_MAP, KUBE_JOB_TYPE, kube_yaml_file))
-        create_pod_yaml(output_yaml=kube_yaml_file, pod_context=pd_separation_context)
+        print(f"Apply k8s yaml... KUBE_NAME_SPACE:{KUBE_NAME_SPACE}, KUBE_CONFIG_MAP:{KUBE_CONFIG_MAP}, "
+              f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}")
+
+        create_pod_yaml(
+            kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+            output_yaml=kube_yaml_file,
+            pod_context=pd_separation_context
+        )
         create_pod(yaml_file=kube_yaml_file, namespace=KUBE_NAME_SPACE)
 
-        if check_pods_ready(timeout=LOCAL_TIMEOUT):
-            if KUBE_JOB_TYPE != "single":
-                matching_pod_string = os.environ.get('KUBE_JOB_NAME')
+        if check_pods_ready(final_kube_job_name, timeout=LOCAL_TIMEOUT):
+            if kube_job_type != "single":
+                matching_pod_string = final_kube_job_name
                 cm_data = prepare_cm_data(matching_pod_string)
                 if not cm_data:
                     print(f"No sglang pod found while matching {matching_pod_string}")
 
-                response = create_or_update_configmap(cm_name=KUBE_CONFIG_MAP, data=cm_data, namespace=KUBE_NAME_SPACE)
+                response = create_or_update_configmap(
+                    cm_name=KUBE_CONFIG_MAP,
+                    data=cm_data,
+                    namespace=KUBE_NAME_SPACE
+                )
                 print(response)
         else:
             print("Pod not ready, maybe not enough resource")
 
-        monitor_pod_logs(MONITOR_POD_NAME, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
+        monitor_pod_name = f"{final_kube_job_name}-pod-0" if kube_job_type == "single" else \
+            f"{final_kube_job_name}-sglang-node-0" if kube_job_type == "multi" else \
+                f"{final_kube_job_name}-sglang-router-0"
+        monitor_pod_logs(monitor_pod_name, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
 
     except Exception as e:
-        print(e)
+        print(f"\nError occured while running k8s task: {e}")
     finally:
         delete_pod(yaml_file=kube_yaml_file, namespace=KUBE_NAME_SPACE)
