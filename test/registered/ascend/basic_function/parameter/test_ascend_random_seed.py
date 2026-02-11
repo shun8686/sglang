@@ -72,8 +72,28 @@ class TestRandomSeed(CustomTestCase):
         )
 
 class TestRandomSeedOne(TestRandomSeed):
-    print("------------------responseee2222222222eee---------------------------------")
     random_seed = 1
+    def test_random_seed(self):
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(
+            response.status_code, 200, "The request status code is not 200."
+        )
+        print("------------------responseee2222222222eee---------------------------------")
+        print(response.json())
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
+
+
 
 
 
