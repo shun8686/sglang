@@ -27,8 +27,8 @@ KUBE_NAME_SPACE = os.environ.get('NAMESPACE')
 KUBE_CONFIG_MAP = os.environ.get('KUBE_CONFIG_MAP')
 KUBE_YAML_TEMPLATE = {
     "single": "k8s_single.yaml.jinja2",
-    "multi": "k8s_multi_pd_mix.yaml.jinja2",
-    "pd": "k8s_multi_pd_separation.yaml.jinja2"
+    "multi-pd-mix": "k8s_multi_pd_mix.yaml.jinja2",
+    "multi-pd-separation": "k8s_multi_pd_separation.yaml.jinja2"
 }
 
 
@@ -412,9 +412,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--kube-job-type",
         type=str,
-        choices=["single", "multi", "pd"],
+        choices=["single", "multi-pd-mix", "multi-pd-separation"],
         required=True,
-        help="K8s job type [single, multi, pd]",
+        help="K8s job type [single, multi-pd-mix, multi-pd-separation]",
     )
 
     parser.add_argument(
@@ -450,7 +450,7 @@ if __name__ == "__main__":
     if not kube_yaml_file:
         random_str = get_unique_random_string(16, True)
         kube_yaml_file = f"k8s_single_{random_str}.yaml" if kube_job_type == "single" else \
-            f"k8s_multi_pd_mix_{random_str}.yaml" if kube_job_type == "multi" else \
+            f"k8s_multi_pd_mix_{random_str}.yaml" if kube_job_type == "multi-pd-mix" else \
                 f"k8s_multi_pd_separation_{random_str}.yaml"
 
     try:
@@ -481,7 +481,7 @@ if __name__ == "__main__":
             print("Pod not ready, maybe not enough resource")
 
         monitor_pod_name = f"{final_kube_job_name}-pod-0" if kube_job_type == "single" else \
-            f"{final_kube_job_name}-sglang-node-0" if kube_job_type == "multi" else \
+            f"{final_kube_job_name}-sglang-node-0" if kube_job_type == "multi-pd-mix" else \
                 f"{final_kube_job_name}-sglang-router-0"
         monitor_pod_logs(monitor_pod_name, KUBE_NAME_SPACE, LOCAL_TIMEOUT)
 
