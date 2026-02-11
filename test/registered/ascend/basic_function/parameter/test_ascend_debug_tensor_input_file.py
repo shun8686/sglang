@@ -39,6 +39,8 @@ class TestDebugTensorInputFile(CustomTestCase):
             )
         except Exception as e:
             print("process is killed")
+        content = err_log_file.read()
+        self.assertIn("The server is fired up and ready to roll!", content)
         # out_log_file.close()
         # err_log_file.close()
         # os.remove("./tensor_input_out_log.txt")
