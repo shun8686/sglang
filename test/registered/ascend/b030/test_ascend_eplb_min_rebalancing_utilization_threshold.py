@@ -31,7 +31,7 @@ class TestQwen330B(CustomTestCase):
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "auto",
+        "normal",
         "--disable-cuda-graph",
         "--chunked-prefill-size",
         "1024",
@@ -44,8 +44,6 @@ class TestQwen330B(CustomTestCase):
         50,
         "--eplb-min-rebalancing-utilization-threshold",
         0.05,
-        "--base-gpu-id",
-        "8"
     ]
 
     @classmethod
