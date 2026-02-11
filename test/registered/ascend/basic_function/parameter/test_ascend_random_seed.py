@@ -57,7 +57,7 @@ class TestRandomSeed(CustomTestCase):
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
-                    "temperature": 0,
+                    "temperature": 1,
                     "max_new_tokens": 32,
                 },
             },
@@ -79,7 +79,7 @@ class TestRandomSeedOne(TestRandomSeed):
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
-                    "temperature": 0,
+                    "temperature": 1,
                     "max_new_tokens": 32,
                 },
             },
