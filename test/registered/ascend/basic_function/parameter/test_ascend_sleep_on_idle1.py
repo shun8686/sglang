@@ -64,9 +64,9 @@ class TestAscendSleepOnIdle(CustomTestCase):
             other_args=cls.other_args,
         )
         time.sleep(5)
-        # pid = run_command(
-        #     f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
-        cls.cpu_float = run_command(f"ps -p {cls.process.pid} -o %cpu --no-headers | xargs")
+        pid = run_command(
+            f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
+        cls.cpu_float = run_command(f"ps -p {pid} -o %cpu --no-headers | xargs")
         print(f"***********{cls.cpu_float=}")
 
     @classmethod
@@ -109,14 +109,14 @@ class TestSleepOnIdle(CustomTestCase):
         )
         time.sleep(5)
 
-        # pid_sleep_on = run_command(
-        #     f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler_TP0/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
+        pid_sleep_on = run_command(
+            f"ps -ef | awk -v ppid = {cls.process.pid} '/sglang::scheduler/ && $3 == ppid' | head -1 | awk '{{print $2}}'")
         # if not pid_sleep_on:
         #     cls.fail("Failed to get child process PID")
-        cpu_usage_sleep_on = run_command(f"ps -p {cls.process.pid} -o %cpu --no-headers | xargs")
+        cpu_usage_sleep_on = run_command(f"ps -p {pid_sleep_on} -o %cpu --no-headers | xargs")
         # if not cpu_usage_sleep_on:
         #     cls.fail("Failed to get CPU usage")
-        cls.cpu_float_sleep_on = cpu_usage_sleep_on
+        cls.cpu_float_sleep_on = float(cpu_usage_sleep_on)
         print(f"***********{cls.cpu_float_sleep_on=}")
 
     @classmethod
