@@ -29,6 +29,7 @@ if not LOCAL_HOST_IP or not LOCAL_HOST_NAME:
     raise RuntimeError(f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}")
 
 LOCAL_TIMEOUT = 3600
+ALL_ROLE_SET = {"prefill", "decode", "router", "master", "worker"}
 
 # Port numbers
 ASCEND_RT_VISIBLE_DEVICES=os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
@@ -210,10 +211,14 @@ def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15
     return False
 
 def check_role(allowed_roles: Union[str, Iterable[str]]):
+
     if isinstance(allowed_roles, str):
         allowed_roles = {allowed_roles}
     else:
         allowed_roles = set(allowed_roles)
+
+    if not allowed_roles.issubset(ALL_ROLE_SET):
+        raise ValueError(f"Invalid allowed roles: {allowed_roles}")
 
     def decorator(func):
         @wraps(func)
@@ -222,7 +227,7 @@ def check_role(allowed_roles: Union[str, Iterable[str]]):
             if current_role in allowed_roles:
                 return func(self, *args, **kwargs)
             else:
-                print(f"Role {current_role} is not found or matched.")
+                print(f"The current node is {current_role}, skip this function {func.__name__}.")
                 return None
         return wrapper
     return decorator
