@@ -71,13 +71,10 @@ class TestDecodeLogInterval(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
         result = run_command("cat ./cache_err_log.txt | grep 'Decode batch' | wc -l")
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
-        self.assertEqual(response.status_code, 200)
-        # decode_number = response.json()["decode_log_interval"]
         decod_batch_result = math.ceil(max_tokens / self.decode_numbers)
         print(f"******result={result}")
-        print(f"******result={decod_batch_result}")
-        self.assertIn(decod_batch_result, int(result.strip()))
+        print(f"******decod_batch_result={decod_batch_result}")
+        self.assertEqual(decod_batch_result, int(result.strip()))
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
 
@@ -86,5 +83,4 @@ class TestDecodeLogIntervalOther(TestDecodeLogInterval):
 
 
 if __name__ == "__main__":
-
     unittest.main()
