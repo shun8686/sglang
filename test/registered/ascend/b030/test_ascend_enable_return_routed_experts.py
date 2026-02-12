@@ -61,9 +61,8 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        print(response)
-        print(response.json())
-        print(response.text)
+        print(response.json()["meta_info"])
+        self.assertEqual("routed_experts", response.json()["meta_info"])
 
 
 if __name__ == "__main__":
