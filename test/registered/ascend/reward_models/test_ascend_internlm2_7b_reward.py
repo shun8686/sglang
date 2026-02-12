@@ -39,7 +39,6 @@ class TestInternlm2(CustomTestCase):
     def setUpClass(cls):
         mp.set_start_method("spawn", force=True)
 
-
     def test_assert_close_reward_scores(self):
         with SRTRunner(
             self.model_path,
@@ -50,9 +49,6 @@ class TestInternlm2(CustomTestCase):
             tp_size=4,
             mem_fraction_static=0.8,
         ) as srt_runner:
-            env = os.environ.copy()
-            print(33333333333333333333333333333333)
-            print(env)
             prompts = srt_runner.tokenizer.apply_chat_template(CONVS, tokenize=False)
             srt_outputs = srt_runner.forward(prompts)
         srt_scores = torch.tensor(srt_outputs.scores)
