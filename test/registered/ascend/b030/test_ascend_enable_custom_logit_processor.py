@@ -61,7 +61,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_enable_return_routed_experts(self):
+    def test_enable_custom_logit_processor(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
