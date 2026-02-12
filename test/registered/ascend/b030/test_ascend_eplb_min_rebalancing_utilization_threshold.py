@@ -36,7 +36,7 @@ class TestQwen330B(CustomTestCase):
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
-        "auto",
+        "normal",
         "--enable-eplb",
         "--ep-num-redundant-experts",
         16,
