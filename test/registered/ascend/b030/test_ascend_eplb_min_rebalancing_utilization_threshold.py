@@ -65,6 +65,7 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
                 "HCCL_BUFFSIZE": "2048",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 **os.environ,
             },
             return_stdout_stderr=(cls.out_file, cls.err_file),
