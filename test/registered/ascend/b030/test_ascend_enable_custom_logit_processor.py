@@ -84,6 +84,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         )
         print(response)
         print(response.text)
+        print(response.json())
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.text, res)
 
