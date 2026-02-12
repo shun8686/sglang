@@ -38,15 +38,9 @@ class TestInternlm2(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         mp.set_start_method("spawn", force=True)
-        env = os.environ.copy()
-        print(11111111111111111111111)
-        print(env)
 
 
     def test_assert_close_reward_scores(self):
-        env = os.environ.copy()
-        print(2222222222222222222222222)
-        print(env)
         with SRTRunner(
             self.model_path,
             torch_dtype=self.torch_dtype,
