@@ -551,7 +551,7 @@ def launch_router(model_config):
     # Router server params
     router_command = [
         "python3", "-u", "-m", "sglang_router.launch_router",
-        "--host", "127.0.0.1",
+        "--host", "0.0.0.0",
         "--port", str(SERVICE_PORT),
         "--pd-disaggregation",
         "--policy", "cache_aware",
@@ -981,10 +981,12 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.process = None
-        cls.local_ip = os.getenv("POD_IP")
-        hostname = os.getenv("HOSTNAME")
-        cls.role = "router" if "router" in hostname else "prefill" if "prefill" in hostname else "decode"
-        print(f"Init {cls.local_ip} {cls.role=}!")
+        cls.local_ip = "127.0.0.1"
+        cls.host = os.getenv("POD_IP")
+        cls.port = SERVICE_PORT
+        cls.hostname = os.getenv("HOSTNAME")
+        cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
+        print(f"Init {cls.host} {cls.role=}!")
 
     @classmethod
     def tearDownClass(cls):
@@ -1029,8 +1031,8 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             num_questions=num_questions,
             max_new_tokens=max_new_tokens,
             parallel=parallel,
-            host="http://127.0.0.1",
-            port=SERVICE_PORT,
+            host=self.host,
+            port=self.port,
         )
         print("Starting gsm8k test...")
         metrics = run_eval_gsm8k(args)
@@ -1039,46 +1041,3 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             expect_accuracy,
             f'Accuracy is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
         )
-
-    def run_gsm8k_test_bak(self, expect_accuracy, num_shots=8, data_path=None, num_questions=200, max_new_tokens=512, parallel=128):
-        if self.role == "router":
-            print(f"Starting router in thread...")
-            router_thread = threading.Thread(
-                target=launch_router, args=(self.model_config,)
-            )
-            router_thread.start()
-
-            health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
-            print(f"Waiting for router to be ready at {health_check_url}")
-            wait_server_ready(health_check_url)
-
-            init_wait_seconds = 10
-            print(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
-            time.sleep(init_wait_seconds)
-
-            args = SimpleNamespace(
-                num_shots=num_shots,
-                data_path=data_path,
-                num_questions=num_questions,
-                max_new_tokens=max_new_tokens,
-                parallel=parallel,
-                host="http://127.0.0.1",
-                port=SERVICE_PORT,
-            )
-            print("Starting gsm8k test...")
-            metrics = run_eval_gsm8k(args)
-            self.assertGreaterEqual(
-                metrics["accuracy"],
-                expect_accuracy,
-                f'Accuracy is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
-            )
-
-        else:
-            # launch p/d node
-            sglang_thread = threading.Thread(
-                target=launch_pd_seperation_node, args=(self.model_config,)
-            )
-            sglang_thread.start()
-            keep_alive_time = 1800
-            print(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
-            time.sleep(keep_alive_time)
