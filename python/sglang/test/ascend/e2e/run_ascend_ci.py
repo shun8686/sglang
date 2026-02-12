@@ -24,10 +24,11 @@ rbac_api = client.RbacAuthorizationV1Api()
 
 LOCAL_TIMEOUT = 10800
 
+script_path = os.path.dirname(os.path.abspath(__file__))
 KUBE_YAML_TEMPLATE = {
-    "single": "k8s_single.yaml.jinja2",
-    "multi-pd-mix": "k8s_multi_pd_mix.yaml.jinja2",
-    "multi-pd-separation": "k8s_multi_pd_separation.yaml.jinja2"
+    "single": f"{script_path}/k8s_single.yaml.jinja2",
+    "multi-pd-mix": f"{script_path}/k8s_multi_pd_mix.yaml.jinja2",
+    "multi-pd-separation": f"{script_path}/k8s_multi_pd_separation.yaml.jinja2"
 }
 
 def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
