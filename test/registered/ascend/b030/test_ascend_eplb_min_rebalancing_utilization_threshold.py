@@ -46,10 +46,6 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
         "--expert-distribution-recorder-buffer-size",
         50,
         "--enable-expert-distribution-metrics",
-        "--expert-distribution-recorder-mode",
-        "stat",
-        "--ep-dispatch-algorithm",
-        "static",
         "--eplb-min-rebalancing-utilization-threshold",
         eplb_min_rebalancing_utilization_threshold,
     ]
