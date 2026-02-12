@@ -123,7 +123,7 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
 
         metrics = run_eval(args)
         print(f"mmlu:{metrics}")
-        self.assertGreaterEqual(metrics["score"], 0.5)
+        self.assertGreaterEqual(metrics["score"], 0.95)
 
 
 if __name__ == "__main__":
