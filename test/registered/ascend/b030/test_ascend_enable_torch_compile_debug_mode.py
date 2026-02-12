@@ -48,10 +48,10 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
                 other_server_args=args,
             )
             res_list.append(res)
-        for res in res_list:
-            print(f'output_throughput{res["output_throughput"]}')
-            print(f'mean_ttft_ms{res["mean_ttft_ms"]}')
-            print(f'mean_tpot_ms{res["mean_tpot_ms"]}')
+        for i, res in enumerate(res_list):
+            print(f'output_throughput_{i}：{res["output_throughput"]}')
+            print(f'mean_ttft_ms_{i}：{res["mean_ttft_ms"]}')
+            print(f'mean_tpot_ms_{i}：{res["mean_tpot_ms"]}')
         self.assertGreater(res_list[0]["output_throughput"], res_list[1]["output_throughput"])
         self.assertGreater(res_list[1]["mean_ttft_ms"], res_list[0]["mean_ttft_ms"])
         self.assertGreater(res_list[1]["mean_tpot_ms"], res_list[0]["mean_tpot_ms"])
