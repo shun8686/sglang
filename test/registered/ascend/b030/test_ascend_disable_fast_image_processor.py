@@ -14,7 +14,7 @@ class TestQwen3OmniServer(VideoOpenAITestMixin):
         "32",
         "--enable-multimodal",
         "--mem-fraction-static",
-        0.35,
+        0.5,
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
