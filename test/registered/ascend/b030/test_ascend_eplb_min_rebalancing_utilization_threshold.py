@@ -63,12 +63,18 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
             other_args=cls.other_args,
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
                 "HCCL_BUFFSIZE": "2048",
-                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
+            # env={
+            #     "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+            #     "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
+            #     "HCCL_BUFFSIZE": "2048",
+            #     "SGLANG_DEEPEP_BF16_DISPATCH": "1",
+            #     "MOE_ENABLE_TOPK_NEG_ONE": "1",
+            #     **os.environ,
+            # },
             return_stdout_stderr=(cls.out_file, cls.err_file),
         )
 
