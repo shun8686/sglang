@@ -75,7 +75,7 @@ fi
 rm -rf ${log_path}
 mkdir -p ${log_path}
 echo "Log path: ${log_path}"
-python3 -u ${test_case} | tee -a ${log_path}/${tc_name}.log
+python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
 echo "Finished test case ${test_case}"
 
 source_plog_path="/root/ascend/log/debug/plog"
