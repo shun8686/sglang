@@ -509,8 +509,6 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time > timeout:
             raise RuntimeError(f"Server {url} failed to start in {timeout}s (elapsed: {elapsed_time:.2f}s)")
-
-        print(f"Waiting... ({elapsed_time:.2f}s elapsed, {timeout - elapsed_time:.2f}s remaining)")
         time.sleep(check_interval)
 
 class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
