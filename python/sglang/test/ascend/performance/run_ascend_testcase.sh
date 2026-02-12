@@ -32,6 +32,7 @@ sysctl -w vm.swappiness=0
 sysctl -w kernel.numa_balancing=0
 sysctl -w kernel.sched_migration_cost_ns=50000
 
+export SGLANG_TEST_MAX_RETRY=0
 export SGLANG_SET_CPU_AFFINITY=1
 ASCEND_RT_VISIBLE_DEVICES=$(echo $ASCEND_VISIBLE_DEVICES | tr ',' '\n' | sort -n | tr '\n' ',')
 export ASCEND_RT_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES%,}
