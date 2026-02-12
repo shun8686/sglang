@@ -1,17 +1,19 @@
 import unittest
 
-from utils.test_ascend_deepep_mode_config import DEEPSEEK_R1_W8A8_MODEL_PATH, NIC_NAME
-from utils.test_ascend_pd_separation_utils import TestAscendPdSepTestCaseBase, launch_server
-
+from sglang.test.ascend.performance.test_ascend_performance_utils import (
+    DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
+    NIC_NAME, ROUND_ROBIN, TestAscendMultiNodePdSepTestCaseBase
+)
 
 MODEL_CONFIG = {
-    "model_path": DEEPSEEK_R1_W8A8_MODEL_PATH,
+    "model_path": DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     "prefill_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
+        "ENABLE_MOE_NZ": "1",
         "HCCL_BUFFSIZE": "1536",
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         "TASK_QUEUE_ENABLE": "2",
@@ -24,29 +26,27 @@ MODEL_CONFIG = {
         "STREAMS_PER_DEVICE": "32",
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
+        "ENABLE_MOE_NZ": "1",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
-        "HCCL_BUFFSIZE": "650",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "78",
+        "HCCL_BUFFSIZE": "720",
+        "SGLANG_DP_ROUND_ROBIN": "1",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "96",
         "TASK_QUEUE_ENABLE": "1",
-        "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
-    },
-    "router_envs": {
-        "SGLANG_DP_ROUND_ROBIN": "1",
     },
     "prefill_args": [
         "--nnodes", "1",
         "--node-rank", "0",
         "--disaggregation-mode", "prefill",
         "--tp-size", 16,
-        "--mem-fraction-static", 0.81,
+        "--mem-fraction-static", 0.6,
         "--quantization", "modelslim",
         "--max-running-requests", 8,
         "--context-length", 8192,
         "--disable-radix-cache",
-        "--chunked-prefill-size", -1,
+        "--chunked-prefill-size", 32768,
         "--max-prefill-tokens", 28680,
         "--moe-a2a-backend", "deepep",
         "--deepep-mode", "normal",
@@ -58,50 +58,47 @@ MODEL_CONFIG = {
         "--enable-dp-attention",
         "--disable-shared-experts-fusion",
         "--dtype", "bfloat16",
-        "--enable-attn-tp-input-scattered",
     ],
     "decode_args": [
-        "--nnodes", "2",
+        "--nnodes", "1",
         "--disaggregation-mode", "decode",
-        "--tp-size", 32,
-        "--dp-size", 32,
-        "--mem-fraction-static", 0.815,
-        "--max-running-requests", 832,
+        "--tp-size", 16,
+        "--dp-size", 16,
+        "--mem-fraction-static", 0.8,
+        "--max-running-requests", 384,
         "--quantization", "modelslim",
-        "--moe-a2a-backend", "ascend_fuseep",
+        "--moe-a2a-backend", "deepep",
         "--enable-dp-attention",
+        "--deepep-mode", "low_latency",
         "--enable-dp-lm-head",
-        "--moe-dense-tp", "1",
-        "--cuda-graph-bs", 12, 14, 16, 18, 20, 22, 24, 26,
+        "--cuda-graph-bs", 8, 10, 12, 14, 16, 18, 20, 22, 24,
         "--watchdog-timeout", 9000,
         "--context-length", 8192,
         "--speculative-algorithm", "NEXTN",
-        "--speculative-num-steps", 2,
+        "--speculative-num-steps", 3,
         "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 3,
-        "--tokenizer-worker-num", 4,
+        "--speculative-num-draft-tokens", 4,
         "--prefill-round-robin-balance",
         "--disable-shared-experts-fusion",
         "--dtype", "bfloat16",
-        "--load-balance-method", "round_robin",
+        "--tokenizer-worker-num", 4,
+        "--load-balance-method", ROUND_ROBIN,
     ],
     "router_args": [
-        "--mini-lb",
     ],
 }
 
 
-class TestDeepSeekV32(TestAscendPdSepTestCaseBase):
+class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
-    # 0.625
-    expect_score = 0.56
-    # 0.985
-    expect_accuracy = 0.9
 
-    def test_deepseek_r1(self):
-        launch_server(self.role, self.model_config)
-        self.run_test_mmlu()
-        self.run_test_gsm8k()
+    # T：143@50ms.  800I A3: 2*T
+    output_token_throughput = 7812
+
+    def test_gsm8k(self):
+        self.launch_pd_seperation_node()
+        self.launch_router()
+        self.run_gsm8k_test(expect_accuracy=0.7)
 
 
 if __name__ == "__main__":

@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestPerformanceTestCaseBase,
+    TestAscendPerformanceTestCaseBase,
     NIC_NAME,
     QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
 )
@@ -38,7 +38,7 @@ QWEN3_NEXT_80B_A3B_OTHER_ARGS = [
     "--chunked-prefill-size", -1,
 ]
 
-class TestQwen3Next80BA3B(TestPerformanceTestCaseBase):
+class TestQwen3Next80BA3B(TestAscendPerformanceTestCaseBase):
     model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
     other_args = QWEN3_NEXT_80B_A3B_OTHER_ARGS
     envs = QWEN3_NEXT_80B_A3B_ENVS

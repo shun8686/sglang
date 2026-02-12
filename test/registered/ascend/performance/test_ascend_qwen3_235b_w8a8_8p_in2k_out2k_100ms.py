@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestPerformanceTestCaseBase,
+    TestAscendPerformanceTestCaseBase,
     NIC_NAME,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
     QWEN3_235B_W8A8_MODEL_PATH
@@ -52,7 +52,7 @@ QWEN3_235B_OTHER_ARGS = (
     ]
 )
 
-class TestQwen235B(TestPerformanceTestCaseBase):
+class TestQwen235B(TestAscendPerformanceTestCaseBase):
     model = QWEN3_235B_W8A8_MODEL_PATH
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS

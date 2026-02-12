@@ -2,7 +2,7 @@ import unittest
 import os
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestAscendMultiNodePdSepTestCaseBase,
+    TestAscendPerfMultiNodePdSepTestCaseBase,
     NIC_NAME,
     run_command
 )
@@ -106,7 +106,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestQwen235bW8a8(TestAscendMultiNodePdSepTestCaseBase):
+class TestQwen235bW8a8(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 768

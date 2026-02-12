@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestAscendMultiNodePdSepTestCaseBase,
+    TestAscendPerfMultiNodePdSepTestCaseBase,
     NIC_NAME,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
     QWEN3_235B_W8A8_MODEL_PATH
@@ -101,7 +101,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestQwen235bW8A8(TestAscendMultiNodePdSepTestCaseBase):
+class TestQwen235bW8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     backend = "sglang-oai"
     dataset_name = "random"

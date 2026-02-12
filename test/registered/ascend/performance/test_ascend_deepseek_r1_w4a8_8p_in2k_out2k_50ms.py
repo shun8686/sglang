@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestPerformanceTestCaseBase,
+    TestAscendPerformanceTestCaseBase,
     NIC_NAME,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
 )
@@ -55,7 +55,7 @@ MODEL_OTHER_ARGS = (
 )
 
 
-class TestAscendDeepSeekR1W4A8(TestPerformanceTestCaseBase):
+class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     model = DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS

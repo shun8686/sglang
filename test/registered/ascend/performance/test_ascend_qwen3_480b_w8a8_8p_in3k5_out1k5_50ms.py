@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestPerformanceTestCaseBase,
+    TestAscendPerformanceTestCaseBase,
     QWEN3_480B_W8A8_MODEL_PATH,
     NIC_NAME
 )
@@ -41,7 +41,7 @@ QWEN3_480B_OTHER_ARGS = [
     "--cuda-graph-bs", 16, 20, 24,
 ]
 
-class TestQwen480B(TestPerformanceTestCaseBase):
+class TestQwen480B(TestAscendPerformanceTestCaseBase):
     model = QWEN3_480B_W8A8_MODEL_PATH
     other_args = QWEN3_480B_OTHER_ARGS
     envs = QWEN3_480B_ENVS

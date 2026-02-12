@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestMultiNodePdMixTestCaseBase,
+    TestAscendPerfMultiNodePdMixTestCaseBase,
     GLM_4_6_W8A8_MODEL_PATH,
     NIC_NAME
 )
@@ -49,7 +49,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestGlm46W8A8(TestMultiNodePdMixTestCaseBase):
+class TestGlm46W8A8(TestAscendPerfMultiNodePdMixTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 256

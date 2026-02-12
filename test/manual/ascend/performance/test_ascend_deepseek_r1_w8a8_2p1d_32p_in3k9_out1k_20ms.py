@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    TestAscendMultiNodePdSepTestCaseBase,
+    TestAscendPerfMultiNodePdSepTestCaseBase,
     DEEPSEEK_R1_W8A8_MODEL_PATH,
     NIC_NAME, ROUND_ROBIN
 )
@@ -93,7 +93,7 @@ MODEL_CONFIG = {
     ],
 }
 
-class TestDeepSeekR1W8A8(TestAscendMultiNodePdSepTestCaseBase):
+class TestDeepSeekR1W8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
