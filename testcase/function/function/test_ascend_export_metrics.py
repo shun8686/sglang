@@ -1,3 +1,4 @@
+import os
 import subprocess
 import unittest
 
@@ -64,9 +65,12 @@ class TestDecodeLogInterval(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        res = run_command(f"ll | grep sglang-request-metrics*.log").split()
-        content = run_command(f"cat {res} | grep {self.message}")
+        res = run_command("ls -l | grep sglang-request-metrics").strip(" ")[-1]
+        content = run_command(f"grep '{self.message}' {res} ")
+        print(f"*******content={content}")
         self.assertNotEqual(content, None)
+        run_command(f"rm -rf  {res} ")
+
 
 
 if __name__ == "__main__":
