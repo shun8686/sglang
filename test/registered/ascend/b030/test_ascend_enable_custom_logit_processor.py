@@ -81,7 +81,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                     "max_new_tokens": 1,
                 },
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
-                "custom_params": {"token_id": token_id},
+                "custom_params": [{"token_id": token_id}],
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -96,7 +96,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                     "max_new_tokens": 1,
                 },
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
-                "custom_params": {"token_id": token_id},
+                "custom_params": [{"token_id": token_id}],
             },
         )
         self.assertEqual(response.status_code, 200)
