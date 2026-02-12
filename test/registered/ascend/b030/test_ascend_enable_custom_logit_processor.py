@@ -82,6 +82,8 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
             },
         )
+        print(response)
+        print(response.text)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.text, res)
 
