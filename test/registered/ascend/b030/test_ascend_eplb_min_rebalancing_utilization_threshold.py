@@ -102,7 +102,7 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
         self.assertIn(self.log_info, content)
 
 
-class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
+class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtilizationThresholdBase):
     log_info = "Skipped ep rebalancing: current GPU utilization"
     out_file = open(SKIP_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
