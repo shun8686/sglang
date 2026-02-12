@@ -71,6 +71,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         tokenizer = AutoTokenizer.from_pretrained(self.model)
         token_id = tokenizer(res, return_tensors="pt")["input_ids"][0].tolist()
         print(f"11111111111111111111111111111111111111111111111111111  {token_id}")
+        print(f"11111111111111111111111111111111111111111111111111111  {type(token_id)}")
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -80,7 +81,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                     "max_new_tokens": 1,
                 },
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
-                "custom_params": [{"token_id": token_id}],
+                "custom_params": {"token_id": token_id},
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -95,7 +96,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                     "max_new_tokens": 1,
                 },
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
-                "custom_params": [{"token_id": token_id}],
+                "custom_params": {"token_id": token_id},
             },
         )
         self.assertEqual(response.status_code, 200)
