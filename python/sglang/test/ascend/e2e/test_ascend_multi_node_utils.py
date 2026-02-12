@@ -504,7 +504,7 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
                 print(f"Server {url} returned status code: {response.status_code}")
         except Exception as e:
             # print(f"Server {url} request error: {e}, retrying...")
-            print("X", end="")
+            pass
 
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time > timeout:
@@ -568,14 +568,16 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
     @classmethod
     @check_role(allowed_roles=["prefill", "decode", "router"])
     def stop_sglang_thread(cls):
-        if cls.sglang_thread and cls.sglang_thread.is_alive():
-            print("Notifying stop event...")
-            cls.stop_event.set()
-            cls.sglang_thread.join(timeout=5)
+        if cls.sglang_thread:
+            print(f"Stopping sglang thread {cls.sglang_thread}")
             if cls.sglang_thread.is_alive():
-                print("Warning: subprocess is not terminated normally, it may has been already force stopped.")
-            else:
-                print("Subprocess has been Stopped.")
+                print("Notifying stop event...")
+                cls.stop_event.set()
+                cls.sglang_thread.join(timeout=5)
+                if cls.sglang_thread.is_alive():
+                    print("Warning: subprocess is not terminated normally, it may has been already force stopped.")
+                else:
+                    print("Subprocess has been Stopped.")
         else:
             print("No running sglang thread.")
 
