@@ -299,10 +299,13 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.local_ip = os.getenv("POD_IP")
-        hostname = os.getenv("HOSTNAME")
-        cls.role = "master" if hostname.endswith("sglang-node-0") else "worker"
-        print(f"Init {cls.local_ip} {cls.role=}!")
+        cls.local_ip = "127.0.0.1"
+        cls.host = os.getenv("POD_IP")
+        cls.port = SERVICE_PORT
+        cls.base_url = f"http://{cls.host}:{cls.port}"
+        cls.hostname = os.getenv("HOSTNAME")
+        cls.role = "master" if cls.hostname.endswith("sglang-node-0") else "worker"
+        print(f"Init {cls.host} {cls.role=}!")
 
     @classmethod
     def tearDownClass(cls):
@@ -346,14 +349,14 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         sglang_thread.start()
 
         if self.role == "master":
-            wait_server_ready(f"http://{self.local_ip}:{SERVICE_PORT}" + "/health")
+            wait_server_ready(f"{self.base_url}/health")
 
             print(f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......")
             time.sleep(SERVER_INITIALIZATION_DELAY)
 
             bench_params = {
-                'host': self.local_ip,
-                'port': str(SERVICE_PORT),
+                'host': self.host,
+                'port': str(self.port),
                 'model_path': self.model_config.get("model_path"),
                 'backend': self.backend,
                 'dataset_name': self.dataset_name,
@@ -393,10 +396,13 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.process = None
-        cls.local_ip = os.getenv("POD_IP")
-        hostname = os.getenv("HOSTNAME")
-        cls.role = "router" if "router" in hostname else "prefill" if "prefill" in hostname else "decode"
-        print(f"Init {cls.local_ip} {cls.role=}!")
+        cls.local_ip = "127.0.0.1"
+        cls.host = os.getenv("POD_IP")
+        cls.port = SERVICE_PORT
+        cls.base_url = f"http://{cls.host}:{cls.port}"
+        cls.hostname = os.getenv("HOSTNAME")
+        cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
+        print(f"Init {cls.host} {cls.role=}!")
 
     @classmethod
     def tearDownClass(cls):

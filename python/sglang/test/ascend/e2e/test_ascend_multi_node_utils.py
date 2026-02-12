@@ -550,7 +550,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
 
-        health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
+        health_check_url = f"{cls.base_url}/health"
         print(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
