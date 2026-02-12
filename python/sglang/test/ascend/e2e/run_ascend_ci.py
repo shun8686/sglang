@@ -1,5 +1,4 @@
 import re
-import signal
 import string
 import subprocess
 import sys
@@ -237,15 +236,6 @@ def prepare_cm_data(namespace, pod_string):
     return data
 
 def monitor_pod_logs(pod_name, namespace=None, timeout=None):
-    class TimeoutException(Exception):
-        """Custom exception for timeout events"""
-
-        pass
-
-    def timeout_handler(signum, frame):
-        """Signal handler for timeout events"""
-        raise TimeoutException("Monitoring timeout")
-
     # Build kubectl command
     cmd = ["kubectl", "logs", "-f", pod_name]
     if namespace:
@@ -255,11 +245,6 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
     pattern_lines = [r"^-{70,}$", r"^Ran \d+ tests? in [\d.]+s$", r"^$", r"^(OK|FAILED \(errors=\d+\))$"]
     patterns = [re.compile(line_pattern) for line_pattern in pattern_lines]
     pattern_ok = re.compile(r"^OK$")
-
-    # Set up timeout handling
-    if timeout:
-        signal.signal(signal.SIGALRM, timeout_handler)
-        signal.alarm(timeout)
 
     process = None
     try:
@@ -323,18 +308,10 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
 
         print("Monitoring completed successfully. Script exiting.")
 
-    except TimeoutException:
-        print(f"\nError: Target pattern not detected within {timeout} seconds")
-        sys.exit(1)
-    except KeyboardInterrupt:
-        print("\nError: Monitoring interrupted by user")
-        sys.exit(1)
     except Exception as e:
         print(f"\nError: {e}")
         sys.exit(1)
     finally:
-        if timeout:
-            signal.alarm(0)
         if process and process.poll() is None:
             process.terminate()
             try:

@@ -6,9 +6,8 @@ function prepare_env() {
     # copy utils to image if not exist
     sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
     ascend_test_util_path=${sglang_pkg_path}/sglang/test/ascend/e2e
-    if [ ! -d "${ascend_test_util_path}" ];then
-        cp -r /data/d00662834/dev-0210/sglang/python/sglang/test/ascend/e2e ${ascend_test_util_path}
-    fi
+    rm -rf ${ascend_test_util_path}
+    cp -r /data/d00662834/dev-0210/sglang/python/sglang/test/ascend/e2e ${ascend_test_util_path}
 }
 
 prepare_env
