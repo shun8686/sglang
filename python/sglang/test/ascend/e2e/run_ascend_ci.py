@@ -342,6 +342,131 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
             except subprocess.TimeoutExpired:
                 process.kill()
 
+def run_ascend_e2e_test_case(
+    docker_image_url: str,
+    kube_name_space: str,
+    kube_job_type: str, # multi-pd-separation、multi-pd-mix、single
+    kube_job_name_prefix: str, # kube job prefix-name
+    resource_info: dict, # pd-separation: {"prefill_size": 1, "decode_size": 1, "router_size": 1}; pd-mix: {"node_size": 2; single: {"npu_size": 4}
+    sglang_source_path: str,
+    metrics_data_file: str,
+    test_case: str,
+    sglang_is_in_ci = False,
+    install_sglang_from_source = False,
+    env = "debug", # ["debug", "ci"]
+):
+    random_str = get_unique_random_string(16, True)
+
+    kube_config_map = f"sglang-configmap-{random_str}"
+    final_kube_job_name = f"{kube_job_name_prefix}-{random_str}"
+
+    kube_yaml_file_dict = {
+        "single": f"k8s_single_{random_str}.yaml",
+        "multi-pd-mix": f"k8s_multi_pd_mix_{random_str}.yaml",
+        "multi-pd-separation": f"k8s_multi_pd_separation_{random_str}.yaml"
+    }
+    kube_yaml_file = kube_yaml_file_dict.get(kube_job_type)
+
+    try:
+        print(f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
+              f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}")
+
+        if kube_job_type == "single":
+            k8s_context = {
+                "image": docker_image_url,
+                "name_space": kube_name_space,
+                "kube_job_name": final_kube_job_name,
+                "kube_config": KUBE_CONFIG,
+                "npu_size": resource_info["npu_size"],
+                "sglang_source_path": sglang_source_path,
+                "metrics_data_file": metrics_data_file,
+                "test_case": test_case,
+                "sglang_is_in_ci": sglang_is_in_ci,
+                "install_sglang_from_source": install_sglang_from_source,
+                "env": env
+            }
+            create_pod_yaml(
+                kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+                output_yaml=kube_yaml_file,
+                pod_context=k8s_context
+            )
+        elif kube_job_type == "multi-pd-mix":
+            k8s_context = {
+                "image": docker_image_url,
+                "name_space": kube_name_space,
+                "kube_job_name": final_kube_job_name,
+                "kube_config": KUBE_CONFIG,
+                "kube_config_map": kube_config_map,
+                "node_size": resource_info["node_size"],
+                "sglang_source_path": sglang_source_path,
+                "metrics_data_file": metrics_data_file,
+                "test_case": test_case,
+                "sglang_is_in_ci": sglang_is_in_ci,
+                "install_sglang_from_source": install_sglang_from_source,
+                "env": env
+            }
+            create_pod_yaml(
+                kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+                output_yaml=kube_yaml_file,
+                pod_context=k8s_context
+            )
+        elif kube_job_type == "multi-pd-separation":
+            k8s_context = {
+                "image": docker_image_url,
+                "name_space": kube_name_space,
+                "kube_job_name": final_kube_job_name,
+                "kube_config": KUBE_CONFIG,
+                "kube_config_map": kube_config_map,
+                "prefill_size": resource_info["prefill_size"],
+                "decode_size": resource_info["decode_size"],
+                "router_size": resource_info["router_size"],
+                "sglang_source_path": sglang_source_path,
+                "metrics_data_file": metrics_data_file,
+                "test_case": test_case,
+                "sglang_is_in_ci": sglang_is_in_ci,
+                "install_sglang_from_source": install_sglang_from_source,
+                "env": env
+            }
+            create_pod_yaml(
+                kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
+                output_yaml=kube_yaml_file,
+                pod_context=k8s_context
+            )
+        else:
+            raise Exception(f"Unknown k8s job type: {kube_job_type}")
+
+        create_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
+
+        if check_pods_ready(kube_name_space, final_kube_job_name, timeout=LOCAL_TIMEOUT):
+            if kube_job_type != "single":
+                matching_pod_string = final_kube_job_name
+                cm_data = prepare_cm_data(kube_name_space, matching_pod_string)
+                if not cm_data:
+                    print(f"No sglang pod found while matching {matching_pod_string}")
+
+                response = create_or_update_configmap(
+                    cm_name=kube_config_map,
+                    data=cm_data,
+                    namespace=kube_name_space
+                )
+                print(response)
+        else:
+            print("Pod not ready, maybe not enough resource")
+
+        monitor_pod_name = {
+            "single": f"{final_kube_job_name}-pod-0",
+            "multi-pd-mix": f"{final_kube_job_name}-sglang-node-0",
+            "multi-pd-separation": f"{final_kube_job_name}-sglang-router-0",
+        }
+        monitor_pod_logs(monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT)
+
+    except Exception as e:
+        print(f"\nError occured while running k8s task: {e}")
+    finally:
+        if os.path.exists(kube_yaml_file):
+            delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
+            os.remove(kube_yaml_file)
+
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(
@@ -445,10 +570,10 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--kube-job-name",
+        "--kube-job-name-prefix",
         type=str,
         required=True,
-        help="K8s job name",
+        help="K8s job name prefix",
     )
 
     parser.add_argument(
@@ -461,118 +586,39 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    random_str = get_unique_random_string(16, True)
+    docker_image_url = args.image
+    npu_size = int(args.npu_size)
+    node_size = int(args.node_size)
+    prefill_size = int(args.prefill_size)
+    decode_size = int(args.decode_size)
+    router_size = int(args.router_size)
+    sglang_source_path = args.sglang_source_path
+    metrics_data_file = args.metrics_data_file
+    test_case = args.test_case
+    sglang_is_in_ci = args.sglang_is_in_ci
+    install_sglang_from_source = args.install_sglang_from_source
+    env = args.env
 
     kube_name_space = args.kube_name_space
-    kube_config_map = f"sglang-configmap-{random_str}"
-
     kube_job_type = args.kube_job_type
-    kube_job_name = args.kube_job_name
-    final_kube_job_name = f"{kube_job_name}-{random_str}"
+    kube_job_name_prefix = args.kube_job_name_prefix
 
-    kube_yaml_file_dict = {
-        "single": f"k8s_single_{random_str}.yaml",
-        "multi-pd-mix": f"k8s_multi_pd_mix_{random_str}.yaml",
-        "multi-pd-separation": f"k8s_multi_pd_separation_{random_str}.yaml"
+    resource_info_dict = {
+        "single": {"npu_size": npu_size},
+        "multi-pd-mix": {"node_size": node_size},
+        "multi-pd-separation": {"prefill_size": prefill_size, "decode_size": decode_size, "router_size": router_size},
     }
-    kube_yaml_file = kube_yaml_file_dict.get(kube_job_type)
 
-    try:
-        print(f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
-              f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}")
-
-        if kube_job_type == "single":
-            k8s_context = {
-                "image": args.image,
-                "name_space": kube_name_space,
-                "kube_job_name": final_kube_job_name,
-                "kube_config": KUBE_CONFIG,
-                "npu_size": args.npu_size,
-                "sglang_source_path": args.sglang_source_path,
-                "metrics_data_file": args.metrics_data_file,
-                "test_case": args.test_case,
-                "sglang_is_in_ci": args.sglang_is_in_ci,
-                "install_sglang_from_source": args.install_sglang_from_source,
-                "env": args.env
-            }
-            create_pod_yaml(
-                kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
-                output_yaml=kube_yaml_file,
-                pod_context=k8s_context
-            )
-        elif kube_job_type == "multi-pd-mix":
-            k8s_context = {
-                "image": args.image,
-                "name_space": kube_name_space,
-                "kube_job_name": final_kube_job_name,
-                "kube_config": KUBE_CONFIG,
-                "kube_config_map": kube_config_map,
-                "node_size": args.node_size,
-                "sglang_source_path": args.sglang_source_path,
-                "metrics_data_file": args.metrics_data_file,
-                "test_case": args.test_case,
-                "sglang_is_in_ci": args.sglang_is_in_ci,
-                "install_sglang_from_source": args.install_sglang_from_source,
-                "env": args.env
-            }
-            create_pod_yaml(
-                kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
-                output_yaml=kube_yaml_file,
-                pod_context=k8s_context
-            )
-        elif kube_job_type == "multi-pd-separation":
-            k8s_context = {
-                "image": args.image,
-                "name_space": kube_name_space,
-                "kube_job_name": final_kube_job_name,
-                "kube_config": KUBE_CONFIG,
-                "kube_config_map": kube_config_map,
-                "prefill_size": args.prefill_size,
-                "decode_size": args.decode_size,
-                "router_size": args.router_size,
-                "sglang_source_path": args.sglang_source_path,
-                "metrics_data_file": args.metrics_data_file,
-                "test_case": args.test_case,
-                "sglang_is_in_ci": args.sglang_is_in_ci,
-                "install_sglang_from_source": args.install_sglang_from_source,
-                "env": args.env
-            }
-            create_pod_yaml(
-                kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
-                output_yaml=kube_yaml_file,
-                pod_context=k8s_context
-            )
-        else:
-            raise Exception(f"Unknown k8s job type: {kube_job_type}")
-
-        create_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
-
-        if check_pods_ready(kube_name_space, final_kube_job_name, timeout=LOCAL_TIMEOUT):
-            if kube_job_type != "single":
-                matching_pod_string = final_kube_job_name
-                cm_data = prepare_cm_data(kube_name_space, matching_pod_string)
-                if not cm_data:
-                    print(f"No sglang pod found while matching {matching_pod_string}")
-
-                response = create_or_update_configmap(
-                    cm_name=kube_config_map,
-                    data=cm_data,
-                    namespace=kube_name_space
-                )
-                print(response)
-        else:
-            print("Pod not ready, maybe not enough resource")
-
-        monitor_pod_name = {
-            "single": f"{final_kube_job_name}-pod-0",
-            "multi-pd-mix": f"{final_kube_job_name}-sglang-node-0",
-            "multi-pd-separation": f"{final_kube_job_name}-sglang-router-0",
-        }
-        monitor_pod_logs(monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT)
-
-    except Exception as e:
-        print(f"\nError occured while running k8s task: {e}")
-    finally:
-        if os.path.exists(kube_yaml_file):
-            delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
-            os.remove(kube_yaml_file)
+    run_ascend_e2e_test_case(
+        docker_image_url=docker_image_url,
+        kube_name_space=kube_name_space,
+        kube_job_type=kube_job_type,
+        kube_job_name_prefix=kube_job_name_prefix,
+        resource_info=resource_info_dict.get(kube_job_type),
+        sglang_source_path=sglang_source_path,
+        metrics_data_file=metrics_data_file,
+        test_case=test_case,
+        sglang_is_in_ci=sglang_is_in_ci,
+        install_sglang_from_source=install_sglang_from_source,
+        env=env,
+    )
