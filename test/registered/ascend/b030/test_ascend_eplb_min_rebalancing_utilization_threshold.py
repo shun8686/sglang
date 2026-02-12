@@ -21,6 +21,7 @@ REBALANCE_ERR_LOG = "./rebalance_err_log.txt"
 
 class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
     model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
+    eplb_min_rebalancing_utilization_threshold = 0.05
     accuracy = 0.86
     other_args = [
         "--attention-backend",
@@ -44,8 +45,9 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
         50,
         "--expert-distribution-recorder-buffer-size",
         50,
+        "--enable-expert-distribution-metrics",
         "--eplb-min-rebalancing-utilization-threshold",
-        0.05,
+        eplb_min_rebalancing_utilization_threshold,
     ]
     out_file = None
     err_file = None
@@ -109,31 +111,7 @@ class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtiliz
     log_info = "rebalance end"
     out_file = open(REBALANCE_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(REBALANCE_ERR_LOG, "w+", encoding="utf-8")
-    other_args = [
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--trust-remote-code",
-        "--chunked-prefill-size",
-        "1024",
-        "--tp-size",
-        "8",
-        "--quantization",
-        "modelslim",
-        "--moe-a2a-backend",
-        "deepep",
-        "--deepep-mode",
-        "normal",
-        "--enable-eplb",
-        "--ep-num-redundant-experts",
-        16,
-        "--eplb-rebalance-num-iterations",
-        50,
-        "--expert-distribution-recorder-buffer-size",
-        50,
-        "--eplb-min-rebalancing-utilization-threshold",
-        0.95,
-    ]
+    eplb_min_rebalancing_utilization_threshold = 0.95
 
 
 if __name__ == "__main__":
