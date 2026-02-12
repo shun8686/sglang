@@ -1,14 +1,17 @@
-pip config set global.index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
-pip config set global.trusted-host "pypi.tuna.tsinghua.edu.cn"
+function prepare_env() {
+    pip config set global.index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
+    pip config set global.trusted-host "pypi.tuna.tsinghua.edu.cn"
+    pip3 install kubernetes
 
-pip3 install kubernetes
+    # copy utils to image if not exist
+    sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
+    ascend_test_util_path=${sglang_pkg_path}/sglang/test/ascend/e2e
+    if [ ! -d "${ascend_test_util_path}" ];then
+        cp -r /data/d00662834/dev-0210/sglang/python/sglang/test/ascend/e2e ${ascend_test_util_path}
+    fi
+}
 
-# copy utils to image if not exist
-sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
-ascend_test_util_path=${sglang_pkg_path}/sglang/test/ascend/e2e
-if [ ! -d "${ascend_test_util_path}" ];then
-    cp -r /data/d00662834/dev-0210/sglang/python/sglang/test/ascend/e2e ${ascend_test_util_path}
-fi
+prepare_env
 
 export KUBECONFIG=/data/.cache/kb.yaml
 
