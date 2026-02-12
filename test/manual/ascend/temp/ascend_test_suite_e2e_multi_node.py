@@ -74,8 +74,7 @@ def concurrent_run_test_cases(
                 print(f"Progress: {completed_count}/{total_count} | Case {test_case} exception: {str(e)}")
 
     end_time = time.time()
-    print(
-        f"\nAll test cases completed! Total time: {end_time - start_time:.2f} seconds, Total cases: {total_count}, Concurrency level: {concurrency}")
+    print(f"All test cases completed! Total time: {end_time - start_time:.2f} seconds, Total cases: {total_count}, Concurrency level: {concurrency}")
     return results
 
 if __name__ == "__main__":
@@ -96,3 +95,4 @@ if __name__ == "__main__":
         }
         test_cases.append(test_case_info)
     all_results = concurrent_run_test_cases(test_cases, concurrency=concurrency)
+    print(all_results)
