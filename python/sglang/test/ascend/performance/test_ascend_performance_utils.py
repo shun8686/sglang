@@ -984,6 +984,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.local_ip = "127.0.0.1"
         cls.host = os.getenv("POD_IP")
         cls.port = SERVICE_PORT
+        cls.base_url = f"http://{cls.host}:{cls.port}"
         cls.hostname = os.getenv("HOSTNAME")
         cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
         print(f"Init {cls.host} {cls.role=}!")

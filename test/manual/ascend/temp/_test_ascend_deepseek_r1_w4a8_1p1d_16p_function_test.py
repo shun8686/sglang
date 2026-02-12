@@ -1,11 +1,13 @@
 import unittest
+from types import SimpleNamespace
 
 from prompt_toolkit.key_binding.bindings.named_commands import self_insert
 
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
-    NIC_NAME, ROUND_ROBIN, TestAscendMultiNodePdSepTestCaseBase
+    NIC_NAME, ROUND_ROBIN, TestAscendMultiNodePdSepTestCaseBase, check_role
 )
+from sglang.test.run_eval import run_eval
 
 MODEL_CONFIG = {
     "model_path": DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
@@ -100,13 +102,30 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
         cls.launch_pd_seperation_node()
         cls.launch_router()
 
-    def test_gsm8k(self):
-        self.run_gsm8k_test(expect_accuracy=0.7)
-
     @classmethod
     def tearDownClass(cls):
         super(TestDeepSeekR1W4A8, cls).tearDownClass()
         cls.stop_sglang_thread()
+
+    def test_gsm8k(self):
+        self.run_gsm8k_test(expect_accuracy=0.7)
+
+    @check_role(allowed_roles=["router"])
+    def test_example(self):
+        print("Start running test_example...")
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model_config,
+            eval_name="mmlu",
+            num_examples=8,
+            num_threads=32,
+        )
+
+        metrics = run_eval(args)
+        print(f"mmlu:{metrics}")
+        self.assertGreaterEqual(metrics["score"], 0.5)
+
+
 
 if __name__ == "__main__":
     unittest.main()
