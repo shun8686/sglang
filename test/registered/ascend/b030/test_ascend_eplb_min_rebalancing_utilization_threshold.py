@@ -23,7 +23,7 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
     model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
     eplb_min_rebalancing_utilization_threshold = 0.05
     accuracy = 0.86
-    other_args = [
+    common_args = [
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
@@ -46,9 +46,9 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
         "--expert-distribution-recorder-buffer-size",
         50,
         "--enable-expert-distribution-metrics",
-        "--eplb-min-rebalancing-utilization-threshold",
-        eplb_min_rebalancing_utilization_threshold,
     ]
+    test_args = []
+    other_args = common_args + test_args
     out_file = None
     err_file = None
     log_info = ""
@@ -106,13 +106,14 @@ class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtiliz
     log_info = "Skipped ep rebalancing: current GPU utilization"
     out_file = open(SKIP_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
+    test_args = ["--eplb-min-rebalancing-utilization-threshold", 0.05]
 
 
 class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
     log_info = "rebalance end"
     out_file = open(REBALANCE_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(REBALANCE_ERR_LOG, "w+", encoding="utf-8")
-    eplb_min_rebalancing_utilization_threshold = 0.95
+    test_args = ["--eplb-min-rebalancing-utilization-threshold", 0.95]
 
 
 if __name__ == "__main__":
