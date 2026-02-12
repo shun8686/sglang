@@ -1,14 +1,16 @@
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.ascend.performance.test_ascend_performance_utils import (
-    DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
-    NIC_NAME, ROUND_ROBIN, TestAscendMultiNodePdSepTestCaseBase, check_role
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
+    TestAscendMultiNodePdSepTestCaseBase,
+    check_role,
+    NIC_NAME,
 )
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
 from sglang.test.run_eval import run_eval
 
 MODEL_CONFIG = {
-    "model_path": DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
+    "model_path": DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
     "prefill_envs": {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -84,7 +86,7 @@ MODEL_CONFIG = {
         "--disable-shared-experts-fusion",
         "--dtype", "bfloat16",
         "--tokenizer-worker-num", 4,
-        "--load-balance-method", ROUND_ROBIN,
+        "--load-balance-method", "round_robin",
     ],
     "router_args": [
     ],
