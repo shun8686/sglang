@@ -25,7 +25,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
 
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwem3-32B"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
 
         cls.tokenizer = get_tokenizer(cls.model)
         cls.temp_dir = tempfile.mkdtemp()
@@ -54,7 +54,11 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "--disable-cuda-graph",
             "--attention-backend",
             "ascend",
-
+            "--disaggregation-decode-enable-offload-kvcache",
+            "--enable-hierarchical-cache",
+            "--hicache-ratio",
+            "--hicache-storage-backend",
+            "file",
         ]
         prefill_args += cls.transfer_backend + cls.rdma_devices
         env = {
@@ -94,6 +98,9 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
             "2",
             "--attention-backend",
             "ascend",
+            "--disaggregation-decode-enable-offload-kvcache",
+            "--hicache-storage-backend",
+            "file",
         ]
         decode_args += cls.transfer_backend + cls.rdma_devices
         env = {
