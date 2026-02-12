@@ -48,7 +48,6 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
         "--enable-expert-distribution-metrics",
     ]
     test_args = []
-    other_args = common_args + test_args
     out_file = None
     err_file = None
     log_info = ""
@@ -60,7 +59,7 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
+            other_args=cls.common_args + cls.test_args,
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_EXPERT_LOCATION_UPDATER_CANARY": "1",
