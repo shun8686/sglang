@@ -51,7 +51,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "--disable-cuda-graph",
             "--attention-backend",
             "ascend",
-            "--disaggregation-decode-enable-offload-kvcache",
             "--enable-hierarchical-cache",
             "--hicache-storage-backend",
             "file",
