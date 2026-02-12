@@ -238,7 +238,6 @@ def check_port_availability(host, port, timeout=3):
             if result == 0:
                 return True
             else:
-                print(f"Port check failed for {host}:{port} - socket error code: {result}")
                 return False
 
     except socket.timeout:
@@ -588,20 +587,14 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
 
     while True:
         try:
-            response = requests.get(url, timeout=5)
+            response = requests.get(url, timeout=30)
             if response.status_code == 200:
                 print(f"Server {url} is ready!")
                 return
             else:
                 print(f"Server {url} returned status code: {response.status_code}")
-        except requests.exceptions.Timeout:
-            print(f"Server {url} request timeout, retrying...")
-        except requests.exceptions.ConnectionError as e:
-            print(f"Server {url} connection error: {e}, retrying...")
-        except requests.exceptions.RequestException as e:
-            print(f"Server {url} request error: {e}, retrying...")
         except Exception as e:
-            print(f"Server {url} unexpected error: {e}, retrying...")
+            print(f"Server {url} request error: {e}, retrying...")
 
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time > timeout:
