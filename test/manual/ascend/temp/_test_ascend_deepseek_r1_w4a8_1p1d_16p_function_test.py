@@ -92,13 +92,15 @@ MODEL_CONFIG = {
 class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
 
-    # T：143@50ms.  800I A3: 2*T
-    output_token_throughput = 7812
+    @classmethod
+    def setUpClass(cls):
+        super(TestDeepSeekR1W4A8, cls).setUpClass()
+        cls.launch_pd_seperation_node()
+        cls.launch_router()
 
     def test_gsm8k(self):
-        self.launch_pd_seperation_node()
-        self.launch_router()
         self.run_gsm8k_test(expect_accuracy=0.7)
+
 
 
 if __name__ == "__main__":
