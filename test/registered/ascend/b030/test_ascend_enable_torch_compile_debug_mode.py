@@ -27,48 +27,34 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
     enable_args = [
         "--enable-torch-compile-debug-mode",
     ]
+    args_list = [other_args, other_args + enable_args]
 
     def test_enable_torch_compile_debug_mode(self):
-        res1 = run_bench_serving(
-            model=self.model,
-            dataset_name="random",
-            num_prompts=312,
-            random_input_len=3500,
-            random_output_len=1500,
-            request_rate=float("inf"),
-            max_concurrency=78,
-            gsp_num_groups=1,
-            gsp_prompts_per_group=128,
-            gsp_system_prompt_len=1792,
-            gsp_question_len=1792,
-            gsp_output_len=1,
-            other_server_args=self.other_args,
-        )
-        mean_ttft_ms1 = res1["mean_ttft_ms"]
-        mean_tpot_ms1 = res1["mean_tpot_ms"]
-        output_throughput1 = res1["output_throughput"]
-        res2 = run_bench_serving(
-            model=self.model,
-            dataset_name="random",
-            num_prompts=312,
-            random_input_len=3500,
-            random_output_len=1500,
-            request_rate=float("inf"),
-            max_concurrency=78,
-            gsp_num_groups=1,
-            gsp_prompts_per_group=128,
-            gsp_system_prompt_len=1792,
-            gsp_question_len=1792,
-            gsp_output_len=1,
-            other_server_args=self.other_args + self.enable_args,
-        )
-        mean_ttft_ms2 = res2["mean_ttft_ms"]
-        mean_tpot_ms2 = res2["mean_tpot_ms"]
-        output_throughput2 = res2["output_throughput"]
-        print(1111111111111111111111111111111111111111111111111)
-        print(mean_ttft_ms1, mean_tpot_ms1, output_throughput1)
-        print(2222222222222222222222222222222222222222222222222)
-        print(mean_ttft_ms2, mean_tpot_ms2, output_throughput2)
+        res_list = []
+        for args in self.args_list:
+            res = run_bench_serving(
+                model=self.model,
+                dataset_name="random",
+                num_prompts=312,
+                random_input_len=3500,
+                random_output_len=1500,
+                request_rate=float("inf"),
+                max_concurrency=78,
+                gsp_num_groups=1,
+                gsp_prompts_per_group=128,
+                gsp_system_prompt_len=1792,
+                gsp_question_len=1792,
+                gsp_output_len=1,
+                other_server_args=args,
+            )
+            res_list.append(res)
+        for res in res_list:
+            print(f'output_throughput{res["output_throughput"]}')
+            print(f'mean_ttft_ms{res["mean_ttft_ms"]}')
+            print(f'mean_tpot_ms{res["mean_tpot_ms"]}')
+        self.assertGreater(res_list[0]["output_throughput"], res_list[1]["output_throughput"])
+        self.assertGreater(res_list[1]["mean_ttft_ms"], res_list[0]["mean_ttft_ms"])
+        self.assertGreater(res_list[1]["mean_tpot_ms"], res_list[0]["mean_tpot_ms"])
 
 
 
