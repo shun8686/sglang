@@ -81,8 +81,8 @@ class TestRequestLoggerFormatText(TestrequestABC, CustomTestCase):
         self.assertIn("Paris", response.text)
         log_path = run_command(f"ls -l {self.temp_dir}").split(" ")[-1]
         self.assertNotEqual(log_path, None)
-        result = run_command(f"cat {log_path} | grep '{self.text_message}'")
-        result1 = run_command(f"cat {log_path} | grep '{self.text_message1}'")
+        result = run_command(f"grep '{self.text_message}' {log_path}")
+        result1 = run_command(f"grep '{self.text_message1}' {log_path}")
         self.assertNotEqual(result, None)
         self.assertNotEqual(result1, None)
 
@@ -108,10 +108,10 @@ class TestRequestLoggerFormatJson(TestrequestABC, CustomTestCase):
         self.assertIn("Paris", response.text)
         log_path = run_command(f"ls -l {self.temp_dir}").split(" ")[-1]
         self.assertNotEqual(log_path, None)
-        result = run_command(f"cat {log_path} | grep 'timestamp'")
-        result1 = run_command(f"cat {log_path} | grep 'rid'")
-        result2 = run_command(f"cat {log_path} | grep 'obj'")
-        result3 = run_command(f"cat {log_path} | grep 'out'")
+        result = run_command(f"grep 'timestamp' {log_path}")
+        result1 = run_command(f"grep 'rid' {log_path}")
+        result2 = run_command(f"grep 'obj' {log_path}")
+        result3 = run_command(f"grep 'out' {log_path}")
         self.assertNotEqual(result, None)
         self.assertNotEqual(result1, None)
         self.assertNotEqual(result2, None)
