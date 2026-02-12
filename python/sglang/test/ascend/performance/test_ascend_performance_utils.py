@@ -9,7 +9,6 @@ from typing import Iterable, Union
 import psutil
 import socket
 import requests
-import logging
 from urllib.parse import urlparse
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
@@ -22,8 +21,6 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
-
-logger = logging.getLogger(__name__)
 
 DEEPSEEK_R1_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
@@ -317,7 +314,7 @@ def check_role(allowed_roles: Union[str, Iterable[str]]):
             if current_role in allowed_roles:
                 return func(self, *args, **kwargs)
             else:
-                logger.info(f"Role {current_role} is not found or matched.")
+                print(f"Role {current_role} is not found or matched.")
                 return None
         return wrapper
     return decorator
@@ -1006,29 +1003,29 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
 
     @check_role(allowed_roles=["router"])
     def launch_router(self):
-        logger.info(f"Starting router in thread...")
+        print(f"Starting router in thread...")
         router_thread = threading.Thread(
             target=launch_router, args=(self.model_config,)
         )
         router_thread.start()
 
         health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
-        logger.info(f"Waiting for router to be ready at {health_check_url}")
+        print(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
         init_wait_seconds = 10
-        logger.info(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
+        print(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
         time.sleep(init_wait_seconds)
 
     @check_role(allowed_roles=["prefill", "decode"])
     def launch_pd_seperation_node(self):
-        logger.info(f"Starting pd seperation node in thread...")
+        print(f"Starting pd seperation node in thread...")
         sglang_thread = threading.Thread(
             target=launch_pd_seperation_node, args=(self.model_config,)
         )
         sglang_thread.start()
         keep_alive_time = 1800
-        logger.info(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
+        print(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
         time.sleep(keep_alive_time)
 
     @check_role(allowed_roles=["router"])
@@ -1042,7 +1039,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             host="http://127.0.0.1",
             port=SERVICE_PORT,
         )
-        logger.info("Starting gsm8k test...")
+        print("Starting gsm8k test...")
         metrics = run_eval_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],
@@ -1052,18 +1049,18 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
 
     def run_gsm8k_test_bak(self, expect_accuracy, num_shots=8, data_path=None, num_questions=200, max_new_tokens=512, parallel=128):
         if self.role == "router":
-            logger.info(f"Starting router in thread...")
+            print(f"Starting router in thread...")
             router_thread = threading.Thread(
                 target=launch_router, args=(self.model_config,)
             )
             router_thread.start()
 
             health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
-            logger.info(f"Waiting for router to be ready at {health_check_url}")
+            print(f"Waiting for router to be ready at {health_check_url}")
             wait_server_ready(health_check_url)
 
             init_wait_seconds = 10
-            logger.info(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
+            print(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
             time.sleep(init_wait_seconds)
 
             args = SimpleNamespace(
@@ -1075,7 +1072,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
                 host="http://127.0.0.1",
                 port=SERVICE_PORT,
             )
-            logger.info("Starting gsm8k test...")
+            print("Starting gsm8k test...")
             metrics = run_eval_gsm8k(args)
             self.assertGreaterEqual(
                 metrics["accuracy"],
@@ -1090,5 +1087,5 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             )
             sglang_thread.start()
             keep_alive_time = 1800
-            logger.info(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
+            print(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
             time.sleep(keep_alive_time)
