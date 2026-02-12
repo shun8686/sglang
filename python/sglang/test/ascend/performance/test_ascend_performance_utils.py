@@ -1031,7 +1031,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             num_questions=num_questions,
             max_new_tokens=max_new_tokens,
             parallel=parallel,
-            host=self.host,
+            host=f"http://{self.host}",
             port=self.port,
         )
         print("Starting gsm8k test...")
