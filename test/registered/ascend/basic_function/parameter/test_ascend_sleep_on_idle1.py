@@ -91,6 +91,8 @@ class TestAscendSleepOnIdle(CustomTestCase):
 
 
 class TestSleepOnIdle(CustomTestCase):
+    cpu_sleep_on_float = 0
+
     @classmethod
     def setUpClass(cls):
         cls.other_args = [
@@ -112,7 +114,7 @@ class TestSleepOnIdle(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_sleep_on_idle(self):
+    def test_add_sleep_on_idle(self):
         pid_sleep_on = run_command(
             f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {self.process.pid} | tr -s ' '|cut -d' ' -f2")
         self.cpu_sleep_on = run_command(f"ps -p {pid_sleep_on.strip()} -o %cpu --no-headers | xargs")
@@ -135,7 +137,7 @@ class TestSleepOnIdle(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-    def test_cpu_reducation(self):
+    def test_reducation_cpu(self):
         cpu_float = float(run_command(f"cat ./cpu.txt"))
         self.assertGreater(cpu_float, self.cpu_sleep_on_float, f"CPU usage shoule drop with --sleep-on-idle")
 
