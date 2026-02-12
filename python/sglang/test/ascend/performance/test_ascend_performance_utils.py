@@ -987,6 +987,8 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.hostname = os.getenv("HOSTNAME")
         cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
         print(f"Init {cls.host} {cls.role=}!")
+        cls.sglang_thread = None
+        cls.stop_event = threading.Event()
 
     @classmethod
     def tearDownClass(cls):
@@ -996,13 +998,15 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
             except Exception as e:
                 print(f"Error during tearDown: {e}")
 
+    @classmethod
     @check_role(allowed_roles=["router"])
-    def launch_router(self):
+    def launch_router(cls):
         print(f"Starting router in thread...")
-        router_thread = threading.Thread(
-            target=launch_router, args=(self.model_config,)
+        cls.sglang_thread = threading.Thread(
+            target=launch_router, args=(cls.model_config,)
         )
-        router_thread.start()
+        cls.sglang_thread.daemon = True
+        cls.sglang_thread.start()
 
         health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
         print(f"Waiting for router to be ready at {health_check_url}")
@@ -1012,16 +1016,32 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         print(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
         time.sleep(init_wait_seconds)
 
+    @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
-    def launch_pd_seperation_node(self):
+    def launch_pd_seperation_node(cls):
         print(f"Starting pd seperation node in thread...")
-        sglang_thread = threading.Thread(
-            target=launch_pd_seperation_node, args=(self.model_config,)
+        cls.sglang_thread = threading.Thread(
+            target=launch_pd_seperation_node, args=(cls.model_config,)
         )
-        sglang_thread.start()
+        cls.sglang_thread.daemon = True
+        cls.sglang_thread.start()
         keep_alive_time = 1800
-        print(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
+        print(f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds")
         time.sleep(keep_alive_time)
+
+    @classmethod
+    @check_role(allowed_roles=["prefill", "decode", "router"])
+    def stop_sglang_thread(cls):
+        if cls.sglang_thread and cls.sglang_thread.is_alive():
+            print("Notifying stop event...")
+            cls.stop_event.set()
+            cls.sglang_thread.join(timeout=5)
+            if cls.sglang_thread.is_alive():
+                print("Warning: subprocess is not terminated normally, it may has been already force stopped.")
+            else:
+                print("Subprocess has been Stopped.")
+        else:
+            print("No running sglang thread.")
 
     @check_role(allowed_roles=["router"])
     def run_gsm8k_test(self, expect_accuracy, num_shots=8, data_path=None, num_questions=200, max_new_tokens=512, parallel=128):

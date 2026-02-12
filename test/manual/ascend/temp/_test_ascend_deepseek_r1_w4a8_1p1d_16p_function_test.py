@@ -1,5 +1,7 @@
 import unittest
 
+from prompt_toolkit.key_binding.bindings.named_commands import self_insert
+
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     NIC_NAME, ROUND_ROBIN, TestAscendMultiNodePdSepTestCaseBase
@@ -101,7 +103,10 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
     def test_gsm8k(self):
         self.run_gsm8k_test(expect_accuracy=0.7)
 
-
+    @classmethod
+    def tearDownClass(cls):
+        super(TestDeepSeekR1W4A8, cls).tearDownClass()
+        cls.stop_sglang_thread()
 
 if __name__ == "__main__":
     unittest.main()
