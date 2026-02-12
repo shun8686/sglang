@@ -69,7 +69,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         text2 = "Today is"
         res = "apple"
         tokenizer = AutoTokenizer.from_pretrained(self.model)
-        token_id = tokenizer(res, return_tensors="pt")["input_ids"][0].tolist()
+        token_id = tokenizer(res, return_tensors="pt")["input_ids"][0]
         print(f"11111111111111111111111111111111111111111111111111111  {token_id}")
         print(f"11111111111111111111111111111111111111111111111111111  {type(token_id)}")
         response = requests.post(
