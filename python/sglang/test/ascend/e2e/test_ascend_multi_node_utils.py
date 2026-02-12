@@ -503,7 +503,8 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
             else:
                 print(f"Server {url} returned status code: {response.status_code}")
         except Exception as e:
-            print(f"Server {url} request error: {e}, retrying...")
+            # print(f"Server {url} request error: {e}, retrying...")
+            print("X", end="")
 
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time > timeout:
