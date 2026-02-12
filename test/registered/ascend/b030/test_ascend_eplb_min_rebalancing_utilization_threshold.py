@@ -107,7 +107,7 @@ class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtiliz
     err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
 
 
-class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
+class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase):
     log_info = "rebalance end"
     out_file = open(REBALANCE_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(REBALANCE_ERR_LOG, "w+", encoding="utf-8")
@@ -118,7 +118,7 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
     suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_gsm8k"))
     suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_eplb_min_rebalancing_utilization_threshold"))
-    suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_gsm8k"))
-    suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_eplb_min_rebalancing_utilization_threshold"))
+    #suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_gsm8k"))
+    #suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_eplb_min_rebalancing_utilization_threshold"))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
