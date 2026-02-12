@@ -1,4 +1,4 @@
-import os
+import time
 import unittest
 from types import SimpleNamespace
 
@@ -27,35 +27,67 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
     enable_args = [
         "--enable-torch-compile-debug-mode",
     ]
-    args_list = [other_args, other_args + enable_args]
+
+    def setUp(self):
+        """Execute before each test method"""
+        self.base_url = DEFAULT_URL_FOR_TEST
+        self.process = None
+
+    def tearDown(self):
+        """Execute after each test method to ensure cleanup of processes started by current test"""
+        if hasattr(self, 'process') and self.process and self.process.pid:
+            try:
+                kill_process_tree(self.process.pid)
+                self.process = None
+            except:
+                pass  # Process may have already exited
 
     def test_enable_torch_compile_debug_mode(self):
-        res_list = []
-        for args in self.args_list:
-            res = run_bench_serving(
-                model=self.model,
-                dataset_name="random",
-                num_prompts=312,
-                random_input_len=3500,
-                random_output_len=1500,
-                request_rate=float("inf"),
-                max_concurrency=78,
-                gsp_num_groups=1,
-                gsp_prompts_per_group=128,
-                gsp_system_prompt_len=1792,
-                gsp_question_len=1792,
-                gsp_output_len=1,
-                other_server_args=args,
-            )
-            res_list.append(res)
-        for i, res in enumerate(res_list):
-            print(f'output_throughput_{i}：{res["output_throughput"]}')
-            print(f'mean_ttft_ms_{i}：{res["mean_ttft_ms"]}')
-            print(f'mean_tpot_ms_{i}：{res["mean_tpot_ms"]}')
-        self.assertGreater(res_list[0]["output_throughput"], res_list[1]["output_throughput"])
-        self.assertGreater(res_list[1]["mean_ttft_ms"], res_list[0]["mean_ttft_ms"])
-        self.assertGreater(res_list[1]["mean_tpot_ms"], res_list[0]["mean_tpot_ms"])
+        """Test performance difference after enabling torch compile debug mode"""
+        # First run: without debug mode
+        self.process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=self.other_args,
+        )
 
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+
+        # Run baseline test
+        start_time1 = time.perf_counter()
+        metrics = run_eval(args)
+        end_time1 = time.perf_counter()
+        run_gsm8k_time1 = round(end_time1 - start_time1, 6)
+
+        # Clean up first process
+        self.tearDown()
+        time.sleep(5)
+
+        # Second run: with debug mode enabled
+        self.process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=self.other_args + self.enable_args,
+        )
+
+        start_time2 = time.perf_counter()
+        metrics = run_eval(args)
+        end_time2 = time.perf_counter()
+        run_gsm8k_time2 = round(end_time2 - start_time2, 6)
+
+        # Assertion: Debug mode should be slower
+        self.assertGreater(run_gsm8k_time2, run_gsm8k_time1,
+                           f"Debug mode should be slower, but measured time: normal mode={run_gsm8k_time1}s, debug mode={run_gsm8k_time2}s")
 
 
 if __name__ == "__main__":
