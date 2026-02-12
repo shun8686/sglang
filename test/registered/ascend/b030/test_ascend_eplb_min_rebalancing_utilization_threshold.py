@@ -96,7 +96,6 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
     def test_eplb_min_rebalancing_utilization_threshold(self):
         self.err_file.seek(0)
         content = self.err_file.read()
-        # "When the --model-loader-extra-config parameter is not configured, the startup log contains the 'Loading safetensors' string."
         self.assertIn(self.log_info, content)
 
 
