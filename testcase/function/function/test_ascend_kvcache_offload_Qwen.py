@@ -48,7 +48,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "prefill",
             "--tp-size",
             "2",
-            "--disable-radix-cache",
             "--disable-cuda-graph",
             "--attention-backend",
             "ascend",
