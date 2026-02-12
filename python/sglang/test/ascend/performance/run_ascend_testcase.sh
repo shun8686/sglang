@@ -66,22 +66,25 @@ echo "Running test case ${test_case}"
 tc_name=${test_case##*/}
 tc_name=${tc_name%.*}
 current_date=$(date +%Y%m%d)
+log_path="/root/.cache/tests/debug/logs/log/${current_date}/${tc_name}/${HOSTNAME}"
 if [ "${SGLANG_IS_IN_CI}" = "true" ];then
     log_path="/root/.cache/tests/logs/log/${current_date}/${tc_name}/${HOSTNAME}"
-    rm -rf ${log_path}
-    mkdir -p ${log_path}
-    echo "Log path: ${log_path}"
-    python3 -u ${test_case} | tee -a ${log_path}
-else
-    python3 -u ${test_case}
 fi
+rm -rf ${log_path}
+mkdir -p ${log_path}
+echo "Log path: ${log_path}"
+python3 -u ${test_case} | tee -a ${log_path}/${tc_name}.log
 echo "Finished test case ${test_case}"
 
 source_plog_path="/root/ascend/log/debug/plog"
 if [ -d "$source_plog_path" ];then
     echo "Plog files found. Begin to backup them."
-    target_plog_path="/root/.cache/tests/logs/plog/${tc_name}/${HOSTNAME}"
+    target_plog_path="/root/.cache/tests/debug/logs/plog/${tc_name}/${HOSTNAME}"
+    if [ "${SGLANG_IS_IN_CI}" = "true" ];then
+        target_plog_path="/root/.cache/tests/logs/plog/${tc_name}/${HOSTNAME}"
+    fi
     rm -rf ${target_plog_path}
     mkdir -p ${target_plog_path}
     cp ${source_plog_path}/* ${target_plog_path}
 fi
+
