@@ -1,8 +1,6 @@
 import unittest
 from types import SimpleNamespace
 
-from prompt_toolkit.key_binding.bindings.named_commands import self_insert
-
 from sglang.test.ascend.performance.test_ascend_performance_utils import (
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     NIC_NAME, ROUND_ROBIN, TestAscendMultiNodePdSepTestCaseBase, check_role
@@ -115,7 +113,7 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
         print("Start running test_example...")
         args = SimpleNamespace(
             base_url=self.base_url,
-            model=self.model_config,
+            model=self.model_config.get("model_path"),
             eval_name="mmlu",
             num_examples=8,
             num_threads=32,
