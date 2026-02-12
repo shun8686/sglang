@@ -54,7 +54,7 @@ ROUND_ROBIN = "round_robin"
 LOCAL_TIMEOUT = 3600
 
 # Port numbers
-SERVICE_PORT = 6677 + int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
+SERVICE_PORT = 6677 + int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0").split(',')[0])
 PREFILL_DECODE_PORT = 8000
 BOOTSTRAP_INIT_PORT = 8995
 
