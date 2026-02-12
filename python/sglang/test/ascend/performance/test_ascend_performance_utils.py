@@ -1013,7 +1013,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         print(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
-        init_wait_seconds = 10
+        init_wait_seconds = 30
         print(f"Waiting {init_wait_seconds} seconds for the server to fully initialize...")
         time.sleep(init_wait_seconds)
 
