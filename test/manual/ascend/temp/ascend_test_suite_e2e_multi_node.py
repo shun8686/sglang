@@ -59,7 +59,7 @@ def concurrent_run_test_cases(
                 # Get task execution result
                 task_result = future.result()
                 results.append(task_result)
-                print(f"Progress: {completed_count}/{total_count} | Case {test_case} result collected")
+                print(f"Progress: {completed_count}/{total_count} | Case {test_case} result : {task_result}")
             except Exception as e:
                 # Catch exceptions during task submission/execution (e.g., parameter errors)
                 error_result = {
