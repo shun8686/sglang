@@ -25,9 +25,10 @@ def run_command(cmd, shell=True):
 
 
 class TestDecodeLogInterval(CustomTestCase):
+    decode_numbers = 10
     @classmethod
     def setUpClass(cls):
-        numbers = 10
+
         cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
@@ -36,7 +37,7 @@ class TestDecodeLogInterval(CustomTestCase):
             "--disable-cuda-graph",
             "--disable-radix-cache",
             "--decode-log-interval",
-            numbers,
+            cls.decode_numbers,
         ]
         cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
         cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
@@ -69,17 +70,19 @@ class TestDecodeLogInterval(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        result = run_command("cat ./cache_err_log.txt | grep 'Decode batch' | wc -1")
+        result = run_command("cat ./cache_err_log.txt | grep 'Decode batch' | wc -l")
         response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
         self.assertEqual(response.status_code, 200)
-        decode_number = response.json()["--decode-log-interval"]
-        decod_batch_result = math.ceil(max_tokens / decode_number)
-        self.assertIn(decod_batch_result, result)
+        # decode_number = response.json()["decode_log_interval"]
+        decod_batch_result = math.ceil(max_tokens / self.decode_numbers)
+        print(f"******result={result}")
+        print(f"******result={decod_batch_result}")
+        self.assertIn(decod_batch_result, int(result.strip()))
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
 
 class TestDecodeLogIntervalOther(TestDecodeLogInterval):
-    numbers = 30
+    decode_numbers = 30
 
 
 if __name__ == "__main__":
