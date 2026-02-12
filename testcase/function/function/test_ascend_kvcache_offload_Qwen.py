@@ -54,7 +54,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "ascend",
             "--disaggregation-decode-enable-offload-kvcache",
             "--enable-hierarchical-cache",
-            "--hicache-ratio",
             "--hicache-storage-backend",
             "file",
         ]
