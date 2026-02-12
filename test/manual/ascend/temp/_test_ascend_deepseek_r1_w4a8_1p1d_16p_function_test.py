@@ -110,20 +110,20 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
     def test_gsm8k(self):
         self.run_gsm8k_test(expect_accuracy=0.7)
 
-    # @check_role(allowed_roles=["router"])
-    # def test_example(self):
-    #     print("Start running test_example...")
-    #     args = SimpleNamespace(
-    #         base_url=self.base_url,
-    #         model=self.model_config.get("model_path"),
-    #         eval_name="mmlu",
-    #         num_examples=8,
-    #         num_threads=32,
-    #     )
-    #
-    #     metrics = run_eval(args)
-    #     print(f"mmlu:{metrics}")
-    #     self.assertGreaterEqual(metrics["score"], 0.5)
+    @check_role(allowed_roles=["router"])
+    def test_example(self):
+        print("Start running test_example...")
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model_config.get("model_path"),
+            eval_name="mmlu",
+            num_examples=8,
+            num_threads=32,
+        )
+
+        metrics = run_eval(args)
+        print(f"mmlu:{metrics}")
+        self.assertGreaterEqual(metrics["score"], 0.5)
 
 
 if __name__ == "__main__":
