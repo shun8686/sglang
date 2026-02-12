@@ -44,7 +44,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         "--disable-cuda-graph",
         "--tp-size",
         "4",
-        "--enable-return-routed-experts",
+        "--enable-custom-logit-processor",
     ]
 
     @classmethod
