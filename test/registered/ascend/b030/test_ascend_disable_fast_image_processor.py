@@ -2,11 +2,11 @@ import unittest
 
 from sglang.test.ascend.test_ascend_utils import QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.vlm_utils import (
-    OmniOpenAITestMixin, ImageOpenAITestMixin,
+    OmniOpenAITestMixin, ImageOpenAITestMixin, VideoOpenAITestMixin,
 )
 
 
-class TestQwen3OmniServer(ImageOpenAITestMixin):
+class TestQwen3OmniServer(VideoOpenAITestMixin):
     model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
     extra_args = [
         "--trust-remote-code",
