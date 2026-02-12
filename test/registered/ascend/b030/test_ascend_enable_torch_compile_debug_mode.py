@@ -84,7 +84,8 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
         metrics = run_eval(args)
         end_time2 = time.perf_counter()
         run_gsm8k_time2 = round(end_time2 - start_time2, 6)
-
+        print("run_gsm8k_time1:", run_gsm8k_time1)
+        print("run_gsm8k_time2:", run_gsm8k_time2)
         # Assertion: Debug mode should be slower
         self.assertGreater(run_gsm8k_time2, run_gsm8k_time1,
                            f"Debug mode should be slower, but measured time: normal mode={run_gsm8k_time1}s, debug mode={run_gsm8k_time2}s")
