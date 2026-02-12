@@ -1,7 +1,6 @@
 import subprocess
 import time
 import unittest
-from abc import ABC
 
 import requests
 
@@ -61,18 +60,19 @@ class TestAscendSleepOnIdle(CustomTestCase):
             other_args=cls.other_args,
         )
         time.sleep(10)
-        pid = run_command(
-            f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {cls.process.pid} | tr -s ' '|cut -d' ' -f2")
-        cls.cpu = run_command(f"ps -p {pid.strip()} -o %cpu --no-headers | xargs")
-        cls.cpu_float = float(cls.cpu.strip())
-        print(f"***********{cls.cpu_float=}")
-        run_command(f"echo {cls.cpu_float} > ./cpu.txt")
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
     def test_Ascend_sleep_on_idle(self):
+        pid = run_command(
+            f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {self.process.pid} | tr -s ' '|cut -d' ' -f2")
+        self.cpu = run_command(f"ps -p {pid.strip()} -o %cpu --no-headers | xargs")
+        self.cpu_float = float(self.cpu.strip())
+        print(f"***********{self.cpu_float=}")
+        run_command(f"echo {self.cpu_float} > ./cpu.txt")
+
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -108,17 +108,17 @@ class TestSleepOnIdle(CustomTestCase):
         )
         time.sleep(10)
 
-        pid_sleep_on = run_command(
-            f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {cls.process.pid} | tr -s ' '|cut -d' ' -f2")
-        cls.cpu_sleep_on = run_command(f"ps -p {pid_sleep_on.strip()} -o %cpu --no-headers | xargs")
-        cls.cpu_sleep_on_float = float(cls.cpu_sleep_on.strip())
-        print(f"***********{cls.cpu_float_sleep_on=}")
-
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
     def test_sleep_on_idle(self):
+        pid_sleep_on = run_command(
+            f"ps -ef | grep -E 'sglang::scheduler' | grep -v grep | grep -w {self.process.pid} | tr -s ' '|cut -d' ' -f2")
+        self.cpu_sleep_on = run_command(f"ps -p {pid_sleep_on.strip()} -o %cpu --no-headers | xargs")
+        self.cpu_sleep_on_float = float(self.cpu_sleep_on.strip())
+        print(f"***********{self.cpu_sleep_on_float=}")
+
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
 
@@ -137,7 +137,7 @@ class TestSleepOnIdle(CustomTestCase):
 
     def test_cpu_reducation(self):
         cpu_float = float(run_command(f"cat ./cpu.txt"))
-        self.assertGreater(cpu_float, self.cpu_float_sleep_on, f"CPU usage shoule drop with --sleep-on-idle")
+        self.assertGreater(cpu_float, self.cpu_sleep_on_float, f"CPU usage shoule drop with --sleep-on-idle")
 
 
 if __name__ == "__main__":
