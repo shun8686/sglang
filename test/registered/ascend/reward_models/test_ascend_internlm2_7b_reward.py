@@ -50,6 +50,7 @@ class TestInternlm2(CustomTestCase):
             tp_size=4,
             mem_fraction_static=0.8,
         ) as srt_runner:
+            print(os.environ.copy())
             prompts = srt_runner.tokenizer.apply_chat_template(CONVS, tokenize=False)
             srt_outputs = srt_runner.forward(prompts)
         srt_scores = torch.tensor(srt_outputs.scores)
