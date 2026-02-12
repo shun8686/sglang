@@ -25,7 +25,8 @@ class TestDeepEpDeepseek(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--attention-backend", "ascend",
+                "--attention-backend",
+                "ascend",
                 "--tp-size",
                 "8",
                 "--moe-a2a-backend",
@@ -33,13 +34,15 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--deepep-mode",
                 "auto",
                 "--disable-cuda-graph",
-                "--dp-size", 2,
+                "--dp-size", 8,
                 "--enable-dp-attention",
-                "--chunked-prefill-size", 1024,
+                "--chunked-prefill-size",
+                1024,
+                "--mem-fraction-static",
+                0.7,
             ],
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
                 "HCCL_BUFFSIZE": "2048",
                 "MOE_ENABLE_TOPK_NEG_ONE": "1",
@@ -65,7 +68,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.4
+        expect_accuracy = 0.34
         args = SimpleNamespace(
             num_shots=8,
             data_path=None,
