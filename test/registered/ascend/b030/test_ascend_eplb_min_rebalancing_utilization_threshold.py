@@ -108,7 +108,7 @@ class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtiliz
     err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
 
 
-class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase):
+class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
     log_info = "rebalance end"
     out_file = open(REBALANCE_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(REBALANCE_ERR_LOG, "w+", encoding="utf-8")
