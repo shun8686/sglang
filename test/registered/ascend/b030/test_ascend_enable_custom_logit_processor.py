@@ -77,13 +77,13 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 1,
-                    "custom_params": {"token_id": 50},
+                    "custom_params": {"token_id": token_id},
                 },
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
             },
         )
         self.assertEqual(response.status_code, 200)
-        # self.assertEqual(response.text, res)
+        self.assertEqual(response.text, res)
 
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -92,13 +92,13 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 1,
-                    "custom_params": {"token_id": 50},
+                    "custom_params": {"token_id": token_id},
                 },
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
             },
         )
         self.assertEqual(response.status_code, 200)
-        # self.assertEqual(response.text, res)
+        self.assertEqual(response.text, res)
 
 
 if __name__ == "__main__":
