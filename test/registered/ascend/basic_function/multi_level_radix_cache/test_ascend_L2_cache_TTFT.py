@@ -7,7 +7,7 @@ from sglang.test.test_utils import CustomTestCase
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
-class TestNoChunkedPrefill(CustomTestCase):
+class TestAscendL2CacheTTFT(CustomTestCase):
     """The test used the Qwen3-32B model, with L2 cache enabled, and TTFT improved by 40%.
 
     [Test Category] Parameter
