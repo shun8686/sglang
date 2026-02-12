@@ -82,11 +82,8 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 "custom_logit_processor": DeterministicLogitProcessor().to_str(),
             },
         )
-        print(response)
-        print(response.text)
-        print(response.json())
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.text, res)
+        self.assertEqual(response.json()["text"], res)
 
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -101,7 +98,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.text, res)
+        self.assertEqual(response.json()["text"], res)
 
 
 if __name__ == "__main__":
