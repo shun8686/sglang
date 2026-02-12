@@ -294,7 +294,7 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
                 match_state += 1
                 if match_state == len(patterns):
                     matched = True
-                    if pattern_ok[match_state-1].match(line):
+                    if pattern_ok.match(line):
                         is_success = True
                     print("\nSuccessfully detected complete test completion pattern!")
             else:
