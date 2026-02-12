@@ -70,6 +70,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         res = "apple"
         tokenizer = AutoTokenizer.from_pretrained(self.model)
         token_id = tokenizer(res, return_tensors="pt")["input_ids"][0].tolist()
+        print(f"11111111111111111111111111111111111111111111111111111  {token_id}")
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
