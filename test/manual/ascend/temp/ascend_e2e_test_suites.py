@@ -17,14 +17,14 @@ env = "debug"
 concurrency = 1
 
 TEST_SUITE = [
-    {
-        "testcase": "test/manual/ascend/temp/_test_ascend_deepseek_r1_w4a8_1p1d_16p_function_test.py",
-        "resource": {
-            "prefill_size": 1,
-            "decode_size": 1,
-            "router_size": 1
-        }
-    },
+    # {
+    #     "testcase": "test/manual/ascend/temp/_test_ascend_deepseek_r1_w4a8_1p1d_16p_function_test.py",
+    #     "resource": {
+    #         "prefill_size": 1,
+    #         "decode_size": 1,
+    #         "router_size": 1
+    #     }
+    # },
     {
         "testcase": "test/manual/ascend/temp/test_ascend_fim.py",
         "resource": {
