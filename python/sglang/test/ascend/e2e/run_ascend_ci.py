@@ -462,6 +462,7 @@ if __name__ == "__main__":
         "--prefill-size",
         type=int,
         required=False,
+        default=1,
         help="Number of prefill nodes",
     )
 
@@ -469,6 +470,7 @@ if __name__ == "__main__":
         "--decode-size",
         type=int,
         required=False,
+        default=1,
         help="Number of decode nodes",
     )
 
@@ -476,6 +478,7 @@ if __name__ == "__main__":
         "--router-size",
         type=int,
         required=False,
+        default=1,
         help="Number of router nodes",
     )
 
@@ -483,6 +486,7 @@ if __name__ == "__main__":
         "--node-size",
         type=int,
         required=False,
+        default=2,
         help="Number of nodes for multi-node-pd-mix scenario",
     )
 
@@ -490,6 +494,7 @@ if __name__ == "__main__":
         "--npu-size",
         type=int,
         required=False,
+        default=0,
         help="Number of npu for single-node scenario",
     )
 
