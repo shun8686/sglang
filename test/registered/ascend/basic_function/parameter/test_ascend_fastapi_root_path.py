@@ -25,7 +25,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
     [Test Target] --fastapi-root-path
     """
 
-    fastapi_root_path = "test_fastapi_root_path"
+    # fastapi_root_path = "test_fastapi_root_path"
+    fastapi_root_path = "/sglang"
 
     @classmethod
     def setUpClass(cls):
