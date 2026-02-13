@@ -5,7 +5,7 @@ from abc import ABC
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -20,7 +20,7 @@ REBALANCE_ERR_LOG = "./rebalance_err_log.txt"
 
 
 class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
-    model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
+    model = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
     accuracy = 0.86
     common_args = [
         "--trust-remote-code",
