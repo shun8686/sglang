@@ -52,6 +52,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        print("****************************teardown_class**************************")
         kill_process_tree(cls.process.pid)
 
 
