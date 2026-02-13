@@ -107,6 +107,7 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
         super(TestDeepSeekR1W4A8, cls).tearDownClass()
         cls.stop_sglang_thread()
 
+    @check_role(allowed_roles=["router"])
     def test_gsm8k(self):
         self.run_gsm8k_test(expect_accuracy=0.7)
 
