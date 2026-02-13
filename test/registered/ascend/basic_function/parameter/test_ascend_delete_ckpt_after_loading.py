@@ -43,7 +43,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading",
         ]
 
-        if os.path.exists(cls.back_up_model):
+        if not os.path.exists(cls.back_up_model):
             shutil.copytree(cls.model, cls.back_up_model)
 
         cls.process = popen_launch_server(
