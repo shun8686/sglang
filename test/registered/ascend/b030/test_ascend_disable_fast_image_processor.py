@@ -16,7 +16,9 @@ class TestQwen3OmniServer(VideoOpenAITestMixin):
         "--disable-cuda-graph",
         "--disable-fast-image-processor",
         "--grammar-backend",
-        "none"
+        "none",
+        "--tp-size",
+        4,
     ]
 
 
