@@ -62,6 +62,19 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
         self.assertEqual(int(res), self.tp_size)
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": text1,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 1,
+                },
+            },
+        )
+        run_command("rm -rf TP*_PP*")
+        res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+        self.assertEqual(int(res), self.tp_size)
         # tensor_file_path = "./TP0"
         # tensor_data = torch.load(tensor_file_path, map_location="cpu")
         # for idx, key in enumerate(tensor_data.keys(), 1):
