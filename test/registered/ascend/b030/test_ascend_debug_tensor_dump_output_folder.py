@@ -26,7 +26,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         tp_size,
         "--debug-tensor-dump-output-folder",
         "./",
-        "--skip-warmup",
+        "--skip-server-warmup",
     ]
 
     @classmethod
