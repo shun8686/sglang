@@ -75,9 +75,12 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
-    def my_sigquit_handler(self):
-        print("******************************my_sigquit_handler***************************")
+
 
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def my_sigquit_handler(self):
+    print("******************************my_sigquit_handler***************************")
