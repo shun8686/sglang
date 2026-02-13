@@ -69,34 +69,23 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             env=env,
         )
 
-    def gen_prompt(self, token_num: int) -> str:
-        all_available_tokens = list(self.tokenizer.get_vocab().values())
-        selected_tokens = random.choices(all_available_tokens, k=token_num)
-        return self.tokenizer.decode(selected_tokens)
+    def test_sleep_on_idle(self):
+        response = requests.get(f"{self.lb_url}/health_generate")
+        self.assertEqual(response.status_code, 200)
 
-    def send_request(
-        self, prompt: str, max_tokens: int = 200, temperature: float = 0.0
-    ) -> Dict:
-        """Send a generate request and return response"""
         response = requests.post(
             f"{self.lb_url}/generate",
             json={
-                "text": prompt,
+                "text": "The capital of France is",
                 "sampling_params": {
-                    "temperature": temperature,
-                    "max_new_tokens": max_tokens,
-                    "ignore_eos": True,
+                    "temperature": 0,
+                    "max_new_tokens": 32,
                 },
             },
-            timeout=60,
         )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
 
-        self.assertEqual(
-            response.status_code,
-            200,
-            f"Request failed: {response.status_code} - {response.text}",
-        )
-        return response.json()
 
     def trigger_offloading_and_flush(self):
         """Helper method to trigger offloading and flush cache"""
@@ -144,8 +133,6 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
             other_args=decode_args,
             env=env,
         )
-
-
 
 
 if __name__ == "__main__":

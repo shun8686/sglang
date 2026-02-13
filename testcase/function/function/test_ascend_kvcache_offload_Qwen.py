@@ -69,6 +69,11 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             env=env,
         )
 
+        cls.wait_server_ready(cls.prefill_url + "/health")
+        cls.wait_server_ready(cls.decode_url + "/health")
+
+        cls.launch_lb()
+
     @classmethod
     def start_decode(cls):
         pass
