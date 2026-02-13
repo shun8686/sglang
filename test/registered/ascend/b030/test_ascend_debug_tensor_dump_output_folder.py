@@ -89,10 +89,16 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         # self.assertEqual(response2.status_code, 200)
         # res2 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
         # self.assertEqual(int(res2), self.tp_size)
-        # tensor_file_path = "./TP0"
-        # tensor_data = torch.load(tensor_file_path, map_location="cpu")
-        # for idx, key in enumerate(tensor_data.keys(), 1):
-        #     print(f"{idx}. {key}")
+        import glob
+        import torch
+
+        file_pattern = "./TP0_PP0_Rank0_pid*"
+        matching_files = glob.glob(file_pattern)
+        if matching_files:
+            tensor_file_path = matching_files[0]
+            tensor_data = torch.load(tensor_file_path, map_location="cpu")
+            for idx, key in enumerate(tensor_data.keys(), 1):
+                print(f"{idx}. {key}")
 
 
 if __name__ == "__main__":
