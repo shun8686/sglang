@@ -235,11 +235,9 @@ def prepare_cm_data(namespace, pod_string):
             data[pod_name] = pod_ip
     return data
 
-def monitor_pod_logs(pod_name, namespace=None, timeout=None):
+def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
     # Build kubectl command
-    cmd = ["kubectl", "logs", "-f", pod_name]
-    if namespace:
-        cmd.extend(["-n", namespace])
+    cmd = ["kubectl", "logs", "-f", "-n", namespace, pod_name]
 
     # Define multiline pattern to match
     pattern_lines = [r"^-{70,}$", r"^Ran \d+ tests? in [\d.]+s$", r"^$", r"^(OK|FAILED \(errors=\d+\))$"]
@@ -258,16 +256,16 @@ def monitor_pod_logs(pod_name, namespace=None, timeout=None):
         )
 
         print(f"Starting to monitor logs for Pod: {pod_name}")
-        if namespace:
-            print(f"Namespace: {namespace}")
-        if timeout:
-            print(f"Timeout set to: {timeout} seconds")
         match_state = 0
         matched = False
         is_success = False
 
+        start_time = time.time()
         # Process output
         while process.poll() is None and not matched:
+            if time.time() - start_time > timeout:
+                raise Exception("Timeout exceeded, the thread is {timeout} seconds long.}")
+
             line = process.stdout.readline()
             if not line:
                 time.sleep(0.1)
