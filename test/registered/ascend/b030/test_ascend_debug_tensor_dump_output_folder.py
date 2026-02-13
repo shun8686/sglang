@@ -62,6 +62,9 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         self.assertEqual(response1.status_code, 200)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
         self.assertEqual(int(res1), self.tp_size)
+
+        run_command("rm -rf TP*_PP*")
+
         response2 = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
