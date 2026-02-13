@@ -3,7 +3,8 @@ import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
-from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+# from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+from sglang.test.server_fixtures.disaggregation_fixture import PDDisaggregationServerBase
 
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.run_eval import run_eval
@@ -13,8 +14,8 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-class TestAscendQwenEagle3(TestDisaggregationBase):
-
+# class TestAscendQwenEagle3(TestDisaggregationBase):
+class TestAscendQwenEagle3(PDDisaggregationServerBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -164,8 +165,6 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
         self.assertGreaterEqual(metrics["score"], 0.77)
 
     def test_gsm8k(self):
-        print("======================================================================================================")
-        print(f"{self.url}")
         expect_accuracy = 0.83
         args = SimpleNamespace(
             num_shots=8,
@@ -174,7 +173,8 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             max_new_tokens=512,
             parallel=128,
             host=f"http://{self.url.hostname}",
-            port=int(self.url.port),
+            # port=int(self.url.port),
+            port=int(self.lb_port),
         )
         metrics = run_gsm8k(args)
         achieved_accuracy = metrics["accuracy"]
