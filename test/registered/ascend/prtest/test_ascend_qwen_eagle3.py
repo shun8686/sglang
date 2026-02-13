@@ -170,8 +170,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             max_new_tokens=512,
             parallel=128,
             host=f"http://{self.url.hostname}",
-            # port=int(self.url.port),
-            port=int(self.lb_port),
+            port=int(self.url.port),
         )
         metrics = run_gsm8k(args)
         achieved_accuracy = metrics["accuracy"]
