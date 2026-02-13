@@ -17,4 +17,4 @@ prepare_env
 
 export KUBECONFIG=/data/.cache/kb.yaml
 
-python3 ascend_e2e_test_suites.py
+python3 ascend_e2e_test_suites.py --testcase test/manual/ascend/temp/test_ascend_fim.py

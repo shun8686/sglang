@@ -24,7 +24,15 @@ TEST_SUITE = [
             "decode_size": 1,
             "router_size": 1
         }
-    }
+    },
+    {
+        "testcase": "test/manual/ascend/temp/test_ascend_fim.py",
+        "resource": {
+            "prefill_size": 1,
+            "decode_size": 1,
+            "router_size": 1
+        }
+    },
 ]
 
 def concurrent_run_test_cases(
