@@ -7,7 +7,8 @@ from sglang.test.vlm_utils import (
 
 
 class TestQwen3OmniServer(VideoOpenAITestMixin):
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Omni-30B-A3B-Instruct"
+    #model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Omni-30B-A3B-Instruct"
+    model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
     extra_args = [
         "--attention-backend",
         "ascend",
