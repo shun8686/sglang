@@ -39,7 +39,7 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--custom-sigquit-handler",
-            "my_sigquit_handler"
+            "custom_handler：my_sigquit_handler"
         ]
 
         cls.process = popen_launch_server(

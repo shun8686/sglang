@@ -2,7 +2,7 @@
 import logging
 import sys
 import time
-import torch  # 若需清理GPU资源，导入torch
+# import torch  # 若需清理GPU资源，导入torch
 import signal
 
 # 配置日志（可选，便于排查退出原因）
@@ -20,16 +20,16 @@ def custom_sigquit_handler(signum, frame):
     :param frame: 信号触发时的栈帧（通常无需处理）
     """
     logger.info(f"接收到SIGQUIT信号（signum={signum}），开始执行自定义退出逻辑...")
-    
+
     # 步骤1：清理GPU资源（SGLang基于GPU推理，核心清理项）
 
-    
+
     # 步骤2：保存退出状态/上下文（可选）
 
-    
+
     # 步骤3：自定义其他逻辑（如通知监控、关闭数据库连接等）
     logger.info("自定义退出逻辑执行完成，准备退出服务...")
-    
+
     # 最后必须主动退出进程（否则服务会挂起）
     sys.exit(0)
 
