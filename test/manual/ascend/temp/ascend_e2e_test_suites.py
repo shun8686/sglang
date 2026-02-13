@@ -1,3 +1,4 @@
+import argparse
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any
@@ -57,12 +58,12 @@ def concurrent_run_test_cases(
             test_case = params["test_case"]
             try:
                 # Get task execution result
-                task_result = future.result()
+                test_result = "Pass" if future.result() else "Fail"
                 results.append({
                     "test_case": test_case,
-                    "result": "Pass" if task_result else "Fail",
+                    "result": test_result,
                 })
-                print(f"Progress: {completed_count}/{total_count} | Case {test_case} result : {task_result}")
+                print(f"Progress: {completed_count}/{total_count} | Case {test_case} result : {test_result}")
             except Exception as e:
                 # Catch exceptions during task submission/execution (e.g., parameter errors)
                 error_result = {
@@ -81,30 +82,50 @@ def concurrent_run_test_cases(
     fail_count = len([item for item in results if item["result"] == "Fail"])
     error_count = len([item for item in results if item["result"] == "Error"])
     print(f"All test cases completed! Total time: {end_time - start_time:.2f} seconds, "
-          f"Total cases: {total_count}, Concurrency level: {concurrency}"
+          f"Total cases: {total_count}, Concurrency level: {concurrency}, "
           f"Pass: {pass_count} | Fail: {fail_count} | Error: {error_count}")
 
-    print("Not Passed Test Cases:")
     not_pass_testcase = [item["test_case"] for item in results if item["result"] != "Pass"]
-    print('\n'.join(str(item) for item in not_pass_testcase))
+    if not_pass_testcase:
+        print("Not Passed Test Cases:")
+        print('\n'.join(str(item) for item in not_pass_testcase))
+    else:
+        print("All Pass.")
     return results
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Run test case",
+        formatter_class=argparse.RawTextHelpFormatter
+    )
+    parser.add_argument(
+        "--testcase",
+        type=str,
+        required=True,
+        help="Specify test case name to run which should be configured in TEST_SUITE",
+    )
+    args = parser.parse_args()
+    specified_test_case = args.testcase
+
     test_cases = list()
     for test_case in TEST_SUITE:
-        test_case_info = {
-            "docker_image_url": docker_image_url,
-            "kube_name_space": kube_name_space,
-            "kube_job_type": kube_job_type,
-            "kube_job_name_prefix": kube_job_name_prefix,
-            "resource_info": test_case.get("resource"),
-            "sglang_source_path": sglang_source_path,
-            "test_case": test_case.get("testcase"),
-            "metrics_data_file": metrics_data_file,
-            "sglang_is_in_ci": sglang_is_in_ci,
-            "install_sglang_from_source": install_sglang_from_source,
-            "env": env,
-        }
-        test_cases.append(test_case_info)
+        if specified_test_case and test_case.get("testcase") != specified_test_case:
+            continue
+        else:
+            test_case_info = {
+                "docker_image_url": docker_image_url,
+                "kube_name_space": kube_name_space,
+                "kube_job_type": kube_job_type,
+                "kube_job_name_prefix": kube_job_name_prefix,
+                "resource_info": test_case.get("resource"),
+                "sglang_source_path": sglang_source_path,
+                "test_case": test_case.get("testcase"),
+                "metrics_data_file": metrics_data_file,
+                "sglang_is_in_ci": sglang_is_in_ci,
+                "install_sglang_from_source": install_sglang_from_source,
+                "env": env,
+            }
+            test_cases.append(test_case_info)
+
     concurrent_run_test_cases(test_cases, concurrency=concurrency)
 
