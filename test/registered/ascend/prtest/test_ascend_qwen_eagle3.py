@@ -61,7 +61,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
             "--mem-fraction-static", 0.7,
-            "--disable-cuda-graph",
+            # "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
         cls.extra_envs = {
@@ -80,6 +80,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_ENABLE_SPEC_V2": "1",
             "TASK_QUEUE_ENABLE": "2",
             "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
+            "MOE_ENABLE_TOPK_NEG_ONE": "1",
         }
         os.environ.update(cls.extra_envs)
         cls.process_prefill = popen_launch_pd_server(
@@ -122,7 +123,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--tokenizer-worker-num", 4,
             "--mem-fraction-static", 0.7,
             # "--cuda-graph-bs", 16,
-            "--disable-cuda-graph",
+            # "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
         cls.extra_envs = {
@@ -140,6 +141,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
             "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
+            "MOE_ENABLE_TOPK_NEG_ONE": "1",
         }
         os.environ.update(cls.extra_envs)
         cls.process_decode = popen_launch_pd_server(
@@ -170,8 +172,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             max_new_tokens=512,
             parallel=128,
             host=f"http://{self.url.hostname}",
-            # port=int(self.url.port),
-            port=int(self.lb_port),
+            port=int(self.url.port),
         )
         metrics = run_gsm8k(args)
         achieved_accuracy = metrics["accuracy"]
