@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 
 from sglang.test.ascend.e2e.run_ascend_ci import run_ascend_e2e_test_case
 
-sglang_source_path = "/data/d00662834/dev-0210/sglang"
+sglang_source_path = "/data/y30082119/dev/sglang"
 docker_image_url = "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B025"
 kube_name_space = "sglang-multi-debug"
 kube_job_type = "multi-pd-separation"
