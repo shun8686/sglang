@@ -10,11 +10,8 @@ class TestQwen3OmniServer(VideoOpenAITestMixin):
     model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
     extra_args = [
         "--trust-remote-code",
-        "--cuda-graph-max-bs",
-        "32",
-        "--enable-multimodal",
-        "--mem-fraction-static",
-        0.9,
+        # "--mem-fraction-static",
+        # 0.9,
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
