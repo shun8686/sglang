@@ -3,7 +3,7 @@ import requests
 import unittest
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+# from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -30,7 +30,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        #cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
