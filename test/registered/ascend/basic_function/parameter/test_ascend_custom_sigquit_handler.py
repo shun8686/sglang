@@ -1,86 +1,49 @@
-import os
-import shutil
+
 import unittest
-from urllib.parse import urlparse
 
 import requests
 
-from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-from sglang.test.ci.ci_register import register_npu_ci
+
+from sglang import Engine
+from sglang.srt.tracing.trace import *
+from custom_handler import custom_sigquit_handler
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
 )
 
-register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+
+@dataclass
+class Req:
+    rid: int
+    trace_context: Optional[Dict[str, Any]] = None
 
 
-class TestAscendDeleteCkptAfterLoading(CustomTestCase):
-    """
-    Testcase：
+class TestTrace(CustomTestCase):
 
-    [Test Category] Parameter
-    [Test Target] --custom-sigquit-handler
-    """
+    def test_trace_engine_enable(self):
 
-    @classmethod
-    def setUpClass(cls):
-        # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(cls.base_url)
-        cls.common_args = [
-            "--trust-remote-code",
-            "--mem-fraction-static",
-            0.8,
-            "--attention-backend",
-            "ascend",
-            "--custom-sigquit-handler",
-            "custom_handler：my_sigquit_handler"
-        ]
+        prompt = "Today is a sunny day and I like"
+        model_path = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
 
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                *cls.common_args,
-            ],
+        sampling_params = {"temperature": 0, "max_new_tokens": 8}
+
+        engine = Engine(
+            model_path=model_path,
+            random_seed=42,
+            custom_sigquit_handler=custom_sigquit_handler,
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        print("****************************teardown_class**************************")
-        kill_process_tree(cls.process.pid)
+        try:
+            engine.generate(prompt, sampling_params)
 
+            # sleep for a few seconds to wait for opentelemetry collector to asynchronously export data to file.
+            time.sleep(100)
 
-    def test_delete_ckpt_after_loading(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertIn(
-            "Paris", response.text, "The inference result does not include Paris."
-        )
-
+            # check trace file
+        finally:
+            engine.shutdown()
 
 
 
 if __name__ == "__main__":
     unittest.main()
-
-
-def my_sigquit_handler(self):
-    print("******************************my_sigquit_handler***************************")
