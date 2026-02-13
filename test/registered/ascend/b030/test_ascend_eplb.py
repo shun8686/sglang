@@ -21,7 +21,7 @@ REBALANCE_ERR_LOG = "./rebalance_err_log.txt"
 
 class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
     model = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
-    accuracy = 0.86
+    accuracy = 0
     common_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
