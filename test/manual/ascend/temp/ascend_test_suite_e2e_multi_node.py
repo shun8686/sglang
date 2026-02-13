@@ -58,23 +58,35 @@ def concurrent_run_test_cases(
             try:
                 # Get task execution result
                 task_result = future.result()
-                results.append({test_case: "Pass" if task_result else "Fail"})
+                results.append({
+                    "test_case": test_case,
+                    "result": "Pass" if task_result else "Fail",
+                })
                 print(f"Progress: {completed_count}/{total_count} | Case {test_case} result : {task_result}")
             except Exception as e:
                 # Catch exceptions during task submission/execution (e.g., parameter errors)
                 error_result = {
                     "test_case": test_case,
+                    "result": "Error",
+                    "resource_info": params.get("resource_info"),
                     "kube_job_type": params.get("kube_job_type"),
-                    "namespace": params.get("kube_name_space"),
-                    "status": "error",
-                    "message": f"Task submission/execution exception: {str(e)}",
-                    "resource_info": params.get("resource_info")
+                    "kube_name_space": params.get("kube_name_space"),
+                    "message": f"Task submission/execution exception: {str(e)}"
                 }
                 results.append(error_result)
                 print(f"Progress: {completed_count}/{total_count} | Case {test_case} exception: {str(e)}")
 
     end_time = time.time()
-    print(f"All test cases completed! Total time: {end_time - start_time:.2f} seconds, Total cases: {total_count}, Concurrency level: {concurrency}")
+    pass_count = len([item for item in results if item["result"] == "Pass"])
+    fail_count = len([item for item in results if item["result"] == "Fail"])
+    error_count = len([item for item in results if item["result"] == "Error"])
+    print(f"All test cases completed! Total time: {end_time - start_time:.2f} seconds, "
+          f"Total cases: {total_count}, Concurrency level: {concurrency}"
+          f"Pass: {pass_count} | Fail: {fail_count} | Error: {error_count}")
+
+    print("Not Passed Test Cases:")
+    not_pass_testcase = [item["test_case"] for item in results if item["result"] != "Pass"]
+    print('\n'.join(str(item) for item in not_pass_testcase))
     return results
 
 if __name__ == "__main__":
@@ -94,5 +106,5 @@ if __name__ == "__main__":
             "env": env,
         }
         test_cases.append(test_case_info)
-    all_results = concurrent_run_test_cases(test_cases, concurrency=concurrency)
-    print(all_results)
+    concurrent_run_test_cases(test_cases, concurrency=concurrency)
+
