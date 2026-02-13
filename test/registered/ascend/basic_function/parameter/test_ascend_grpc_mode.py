@@ -44,6 +44,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         # TODO: 检查服务是否拉起
+        #
         sleep(100)
 
         router_command = [
@@ -83,13 +84,14 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             f"http://127.0.0.1:21000/generate",
             json={
                 "text": "The capital of France is",
-                "model": self.model,
                 "sampling_params": {
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
             },
         )
+
+        sleep(600)
 
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
