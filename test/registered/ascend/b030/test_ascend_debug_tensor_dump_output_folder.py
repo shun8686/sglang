@@ -16,6 +16,8 @@ from sglang.test.test_utils import (
 class TestEnableReturnRoutedExperts(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
     tp_size = 4
+    pp_size = 2
+    dp_size = 2
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -25,6 +27,10 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         "--disable-cuda-graph",
         "--tp-size",
         tp_size,
+        "--pp-size",
+        pp_size,
+        "--dp-size",
+        dp_size,
         "--debug-tensor-dump-output-folder",
         "./",
         "--skip-server-warmup",
@@ -62,7 +68,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         )
         self.assertEqual(response1.status_code, 200)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), self.tp_size)
+        self.assertEqual(int(res1), self.tp_size * self.pp_size)
         time.sleep(100000000000000000000)
 
         # run_command("rm -rf TP*_PP*")
