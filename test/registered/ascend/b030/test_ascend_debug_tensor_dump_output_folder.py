@@ -49,7 +49,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
 
         text1 = "The capital of France is"
 
-        response = requests.post(
+        response1 = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": text1,
@@ -59,10 +59,10 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 },
             },
         )
-        self.assertEqual(response.status_code, 200)
-        res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res), self.tp_size)
-        response = requests.post(
+        self.assertEqual(response1.status_code, 200)
+        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+        self.assertEqual(int(res1), self.tp_size)
+        response2 = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": text1,
@@ -72,9 +72,9 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 },
             },
         )
-        run_command("rm -rf TP*_PP*")
-        res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res), self.tp_size)
+        self.assertEqual(response2.status_code, 200)
+        res2 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+        self.assertEqual(int(res2), self.tp_size)
         # tensor_file_path = "./TP0"
         # tensor_data = torch.load(tensor_file_path, map_location="cpu")
         # for idx, key in enumerate(tensor_data.keys(), 1):
