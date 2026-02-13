@@ -3,9 +3,7 @@ import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
-# from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
-from sglang.test.server_fixtures.disaggregation_fixture import PDDisaggregationServerBase
-
+from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -14,8 +12,7 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-# class TestAscendQwenEagle3(TestDisaggregationBase):
-class TestAscendQwenEagle3(PDDisaggregationServerBase):
+class TestAscendQwenEagle3(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
