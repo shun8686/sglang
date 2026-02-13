@@ -30,8 +30,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     def setUpClass(cls):
         cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
         cls.back_up_model = cls.model + "-back-up"
-        cls.source_path = os.path.abspath(repr(cls.model))
-        cls.target_path = os.path.abspath(repr(cls.back_up_model))
+        # cls.source_path = os.path.abspath(repr(cls.model))
+        # cls.target_path = os.path.abspath(repr(cls.back_up_model))
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
@@ -43,8 +43,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
             "--delete-ckpt-after-loading",
         ]
 
-        if os.path.exists(cls.target_path):
-            shutil.copytree(cls.source_path, cls.target_path)
+        if os.path.exists(cls.back_up_model):
+            shutil.copytree(cls.model, cls.back_up_model)
 
         cls.process = popen_launch_server(
             cls.back_up_model,
@@ -58,8 +58,8 @@ class TestAscendDeleteCkptAfterLoading(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        if os.path.exists(cls.target_path):
-            shutil.rmtree(cls.target_path)
+        if os.path.exists(cls.back_up_model):
+            shutil.rmtree(cls.back_up_model)
 
     def test_delete_ckpt_after_loading(self):
         response = requests.post(
