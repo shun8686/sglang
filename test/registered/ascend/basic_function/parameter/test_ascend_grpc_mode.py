@@ -91,6 +91,9 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
+        print(f"{response.status_code=}")
+        print(f"{response.text=}")
+
         sleep(600)
 
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
