@@ -7,19 +7,20 @@ from sglang.test.vlm_utils import (
 
 
 class TestQwen3OmniServer(VideoOpenAITestMixin):
-    #model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Omni-30B-A3B-Instruct"
     model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
     extra_args = [
-        "--attention-backend",
-        "ascend",
+        "--trust-remote-code",
+        "--cuda-graph-max-bs",
+        "32",
+        "--enable-multimodal",
         "--mem-fraction-static",
         0.9,
+        "--attention-backend",
+        "ascend",
         "--disable-cuda-graph",
-        "--disable-fast-image-processor",
-        "--grammar-backend",
-        "none",
         "--tp-size",
         4,
+        "--disable-fast-image-processor",
     ]
 
 
