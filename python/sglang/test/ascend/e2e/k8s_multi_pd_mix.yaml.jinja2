@@ -76,30 +76,25 @@ spec:
           - name: kube-config
             mountPath: /root/script
           - name: share
-            mountPath: /data
-          - name: cache
+            mountPath: /data/ascend-ci-share-pkking-sglang
+          - name: share
             mountPath: /root/.cache
-          - name: sglang-source-code
+          - name: share
             mountPath: /root/sglang
+            subPath: {{ sglang_source_path }}
         volumes:
         - name: kube-config
           hostPath:
             path: /root/script
         - name: share
-          hostPath:
-            path: /data
-        - name: cache
-          hostPath:
-            path: /data/ascend-ci-share-pkking-sglang
+          persistentVolumeClaim:
+            claimName: sglang-guiyang004
         - name: ascend-driver
           hostPath:
             path: /usr/local/Ascend/driver
         - name: localtime
           hostPath:
             path: /etc/localtime
-        - name: sglang-source-code
-          hostPath:
-            path: {{ sglang_source_path }}
         {% if env == "debug" %}
         tolerations:
           - key: "instance"

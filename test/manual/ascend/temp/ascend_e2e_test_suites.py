@@ -1,30 +1,20 @@
 import argparse
+import os.path
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import List, Dict, Any
 
 from sglang.test.ascend.e2e.run_ascend_ci import run_ascend_e2e_test_case
 
-sglang_source_path = "/data/y30082119/dev/sglang"
-docker_image_url = "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B025"
-kube_name_space = "sglang-multi-debug"
-kube_job_type = "multi-pd-separation"
-kube_job_name_prefix = "sglang-multi-debug"
-metrics_data_file = ""
-sglang_is_in_ci = False
-install_sglang_from_source = False
-env = "debug"
-concurrency = 1
-
 TEST_SUITE = [
-    # {
-    #     "testcase": "test/manual/ascend/temp/_test_ascend_deepseek_r1_w4a8_1p1d_16p_function_test.py",
-    #     "resource": {
-    #         "prefill_size": 1,
-    #         "decode_size": 1,
-    #         "router_size": 1
-    #     }
-    # },
+    {
+        "testcase": "test/manual/ascend/temp/_test_ascend_deepseek_r1_w4a8_1p1d_16p_function_test.py",
+        "resource": {
+            "prefill_size": 1,
+            "decode_size": 1,
+            "router_size": 1
+        }
+    },
     {
         "testcase": "test/manual/ascend/temp/test_ascend_fim.py",
         "resource": {
@@ -112,8 +102,99 @@ if __name__ == "__main__":
         required=True,
         help="Specify test case name to run which should be configured in TEST_SUITE",
     )
+
+    parser.add_argument(
+        "--image",
+        type=str,
+        required=True,
+        help="Docker image to use",
+    )
+
+    parser.add_argument(
+        "--sglang-source-path",
+        type=str,
+        required=True,
+        help="Sglang source code path on shared-disk",
+    )
+
+    parser.add_argument(
+        "--sglang-is-in-ci",
+        type=bool,
+        required=False,
+        default=os.environ.get('SGLANG_IS_IN_CI'),
+        help="Is in CI",
+    )
+
+    parser.add_argument(
+        "--install-sglang-from-source",
+        type=bool,
+        required=False,
+        default=os.environ.get('INSTALL_SGLANG_FROM_SOURCE'),
+        help="Install sglang from source",
+    )
+
+    parser.add_argument(
+        "--kube-name-space",
+        type=str,
+        required=True,
+        help="K8s name space",
+    )
+
+    parser.add_argument(
+        "--kube-job-type",
+        type=str,
+        choices=["single", "multi-pd-mix", "multi-pd-separation"],
+        required=True,
+        help="K8s job type [single, multi-pd-mix, multi-pd-separation]",
+    )
+
+    parser.add_argument(
+        "--kube-job-name-prefix",
+        type=str,
+        required=True,
+        help="K8s job name prefix",
+    )
+
+    parser.add_argument(
+        "--metrics-data-file",
+        type=str,
+        required=False,
+        default=os.environ.get('METRICS_DATA_FILE'),
+        help="Metrics data file",
+    )
+
+    parser.add_argument(
+        "--env",
+        type=str,
+        choices=["debug", "ci"],
+        required=True,
+        help="Environment type",
+    )
+
+    parser.add_argument(
+        "--concurrency",
+        type=int,
+        required=False,
+        default=1,
+        help="Concurrency level (number of test cases running simultaneously)",
+    )
+
     args = parser.parse_args()
     specified_test_case = args.testcase
+
+    docker_image_url = args.image
+    sglang_source_path = args.sglang_source_path
+    sglang_is_in_ci = args.sglang_is_in_ci
+    install_sglang_from_source = args.install_sglang_from_source
+
+    kube_name_space = args.kube_name_space
+    kube_job_type = args.kube_job_type
+    kube_job_name_prefix = args.kube_job_name_prefix
+
+    metrics_data_file = args.metrics_data_file
+
+    env = args.env
+    concurrency = args.concurrency
 
     test_cases = list()
     for test_case in TEST_SUITE:
@@ -133,6 +214,10 @@ if __name__ == "__main__":
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
             }
+            test_case_file = f"{sglang_source_path}/{test_case_info.get('test_case')}"
+            if not os.path.exists(test_case_file):
+                raise FileNotFoundError(f"{test_case_file} does not exist")
+
             test_cases.append(test_case_info)
 
     concurrent_run_test_cases(test_cases, concurrency=concurrency)

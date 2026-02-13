@@ -15,6 +15,16 @@ function prepare_env() {
 
 prepare_env
 
-export KUBECONFIG=/data/.cache/kb.yaml
+export KUBECONFIG=/data/ascend-ci-share-pkking-sglang/.cache/kb.yaml
 
-python3 ascend_e2e_test_suites.py --testcase test/manual/ascend/temp/test_ascend_fim.py
+python3 ascend_e2e_test_suites.py \
+    --testcase test/manual/ascend/temp/test_ascend_fim.py \
+    --image swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B025 \
+    --sglang-source-path /data/ascend-ci-share-pkking-sglang/multi-node-test/dev-0210/sglang \
+    --sglang-is-in-ci False \
+    --install-sglang-from-source False \
+    --kube-name-space sglang-multi-debug \
+    --kube-job-type multi-pd-separation \
+    --kube-job-name-prefix sglang-multi-debug \
+    --env debug
+

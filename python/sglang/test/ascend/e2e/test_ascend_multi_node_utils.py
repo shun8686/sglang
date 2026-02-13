@@ -93,7 +93,6 @@ def discover_worker_nodes():
         int: Number of worker nodes, or 0 if failed.
     """
     try:
-        # Use existing config instead of loading incluster config again
         prefill_pods = v1.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-prefill"
         )
@@ -415,8 +414,8 @@ def launch_router(model_config):
     decode_url = []
     bootstrap_ports = []
     node_ip_list = []
-    is_prefill_instance_multi_node = "--node-rank" not in model_config["prefill_args"]
-    is_decode_instance_multi_node = "--node-rank" not in model_config["decode_args"]
+    is_multi_node_prefill_instance = "--node-rank" not in model_config["prefill_args"]
+    is_multi_node_decode_instance = "--node-rank" not in model_config["decode_args"]
 
     is_ready = False
     bootstrap_init_port = BOOTSTRAP_INIT_PORT
@@ -430,13 +429,13 @@ def launch_router(model_config):
         print(f"Retrieved ConfigMap data: {configmap.data}")
         for pod_name, pod_ip in configmap.data.items():
             pod_index = int(pod_name.rsplit("-", 1)[-1])
-            prefill_keyword = "prefill-0" if is_prefill_instance_multi_node else "prefill"
+            prefill_keyword = "prefill-0" if is_multi_node_prefill_instance else "prefill"
             if prefill_keyword in pod_name:
                 prefill_url.append(f"{pod_ip}:{PREFILL_DECODE_PORT}")
-                bootstrap_port = (bootstrap_init_port if is_prefill_instance_multi_node else bootstrap_init_port + pod_index)
+                bootstrap_port = (bootstrap_init_port if is_multi_node_prefill_instance else bootstrap_init_port + pod_index)
                 bootstrap_ports.append(str(bootstrap_port))
                 node_ip_list.append(pod_ip)
-            decode_keyword = "decode-0" if is_decode_instance_multi_node else "decode"
+            decode_keyword = "decode-0" if is_multi_node_decode_instance else "decode"
             if decode_keyword in pod_name:
                 decode_url.append(f"{pod_ip}:{PREFILL_DECODE_PORT}")
                 node_ip_list.append(pod_ip)
@@ -514,6 +513,95 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
         if elapsed_time > timeout:
             raise RuntimeError(f"Server {url} failed to start in {timeout}s (elapsed: {elapsed_time:.2f}s)")
         time.sleep(check_interval)
+
+class TestAscendMultiNodePdMixTestCaseBase(CustomTestCase):
+    model_config = None
+
+    @classmethod
+    def setUpClass(cls):
+        cls.process = None
+        cls.local_ip = "127.0.0.1"
+        cls.host = os.getenv("POD_IP")
+        cls.port = SERVICE_PORT
+        cls.base_url = f"http://{cls.host}:{cls.port}"
+        cls.hostname = os.getenv("HOSTNAME")
+        cls.role = "master" if cls.hostname.endswith("sglang-node-0") else "worker"
+        print(f"Init {cls.host} {cls.role=}!")
+        cls.sglang_thread = None
+        cls.stop_event = threading.Event()
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.process:
+            try:
+                kill_process_tree(cls.process.pid)
+            except Exception as e:
+                print(f"Error during tearDown: {e}")
+
+    @classmethod
+    @check_role(allowed_roles=["master"])
+    def launch_pd_mix_master_node(cls):
+        print(f"Starting master node in thread...")
+        cls.sglang_thread = threading.Thread(
+            target=launch_pd_mix_node, args=(cls.model_config,)
+        )
+        cls.sglang_thread.daemon = True
+        cls.sglang_thread.start()
+
+        health_check_url = f"{cls.base_url}/health"
+        print(f"Waiting for router to be ready at {health_check_url}")
+        wait_server_ready(health_check_url)
+
+        print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
+        time.sleep(SERVER_INITIALIZATION_DELAY)
+
+    @classmethod
+    @check_role(allowed_roles=["worker"])
+    def launch_pd_mix_worker_node(cls):
+        print(f"Starting master node in thread...")
+        cls.sglang_thread = threading.Thread(
+            target=launch_pd_mix_node, args=(cls.model_config,)
+        )
+        cls.sglang_thread.daemon = True
+        cls.sglang_thread.start()
+        keep_alive_time = 1800
+        print(f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds")
+        time.sleep(keep_alive_time)
+
+    @classmethod
+    @check_role(allowed_roles=["master", "worker"])
+    def stop_sglang_thread(cls):
+        if cls.sglang_thread:
+            print(f"Stopping sglang thread {cls.sglang_thread}")
+            if cls.sglang_thread.is_alive():
+                print("Notifying stop event...")
+                cls.stop_event.set()
+                cls.sglang_thread.join(timeout=5)
+                if cls.sglang_thread.is_alive():
+                    print("Warning: subprocess is not terminated normally, it may has been already force stopped.")
+                else:
+                    print("Subprocess has been Stopped.")
+        else:
+            print("No running sglang thread.")
+
+    @check_role(allowed_roles=["master"])
+    def run_gsm8k_test(self, expect_accuracy, num_shots=8, data_path=None, num_questions=200, max_new_tokens=512, parallel=128):
+        args = SimpleNamespace(
+            num_shots=num_shots,
+            data_path=data_path,
+            num_questions=num_questions,
+            max_new_tokens=max_new_tokens,
+            parallel=parallel,
+            host=f"http://{self.host}",
+            port=self.port,
+        )
+        print("Starting gsm8k test...")
+        metrics = run_eval_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            expect_accuracy,
+            f'Accuracy is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
+        )
 
 class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
