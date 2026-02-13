@@ -1,9 +1,10 @@
 import unittest
 
 import requests
+import torch
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -13,6 +14,7 @@ from sglang.test.test_utils import (
 
 class TestEnableReturnRoutedExperts(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
+    tp_size = 4
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -21,7 +23,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        "4",
+        tp_size,
         "--debug-tensor-dump-output-folder",
         "./",
     ]
@@ -57,6 +59,12 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
+        res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+        self.assertEqual(int(res), self.tp_size)
+        tensor_file_path = "./TP0"
+        tensor_data = torch.load(tensor_file_path, map_location="cpu")
+        for idx, key in enumerate(tensor_data.keys(), 1):
+            print(f"{idx}. {key}")
 
 
 if __name__ == "__main__":
