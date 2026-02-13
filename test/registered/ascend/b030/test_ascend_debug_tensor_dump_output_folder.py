@@ -17,7 +17,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
     tp_size = 4
     pp_size = 2
-    dp_size = 2
+    dp_size = 1
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -34,6 +34,8 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         "--debug-tensor-dump-output-folder",
         "./",
         "--skip-server-warmup",
+        "--base-gpu-id",
+        "8",
     ]
 
     @classmethod
@@ -67,9 +69,10 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
             },
         )
         self.assertEqual(response1.status_code, 200)
+        print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
         self.assertEqual(int(res1), self.tp_size * self.pp_size)
-        time.sleep(100000000000000000000)
+        time.sleep(100000)
 
         # run_command("rm -rf TP*_PP*")
         #
