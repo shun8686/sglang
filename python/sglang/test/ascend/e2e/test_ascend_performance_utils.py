@@ -10,7 +10,7 @@ from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
     launch_pd_mix_node,
     launch_router,
     wait_server_ready,
-    launch_pd_seperation_node, SERVICE_PORT
+    launch_pd_seperation_node, SERVICE_PORT, check_role
 )
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -342,42 +342,53 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
                 self.ttft * TTFT_TOLERANCE,
             )
 
-    def run_throughput(self, run_cycles=2):
+    @classmethod
+    @check_role(allowed_roles=["master"])
+    def launch_pd_mix_master_node(cls):
         sglang_thread = threading.Thread(
-            target=launch_pd_mix_node, args=(self.model_config,)
+            target=launch_pd_mix_node, args=(cls.model_config,)
         )
         sglang_thread.start()
 
-        if self.role == "master":
-            wait_server_ready(f"{self.base_url}/health")
+        wait_server_ready(f"{cls.base_url}/health")
 
-            print(f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......")
-            time.sleep(SERVER_INITIALIZATION_DELAY)
+        print(f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......")
+        time.sleep(SERVER_INITIALIZATION_DELAY)
 
-            bench_params = {
-                'host': self.host,
-                'port': str(self.port),
-                'model_path': self.model_config.get("model_path"),
-                'backend': self.backend,
-                'dataset_name': self.dataset_name,
-                'request_rate': self.request_rate,
-                'max_concurrency': self.max_concurrency,
-                'num_prompts': self.num_prompts,
-                'input_len': self.input_len,
-                'output_len': self.output_len,
-                'random_range_ratio': self.random_range_ratio,
-            }
-            print(f"Starting benchmark with parameters: {bench_params}")
+    @classmethod
+    @check_role(allowed_roles=["worker"])
+    def launch_pd_mix_worker_node(cls):
+        sglang_thread = threading.Thread(
+            target=launch_pd_mix_node, args=(cls.model_config,)
+        )
+        sglang_thread.start()
 
-            metrics = None
-            for i in range(run_cycles):
-                print(f"Running benchmark, {i+1}/{run_cycles}")
-                metrics = run_bench_serving(**bench_params)
+        print("Worker node is running.")
+        time.sleep(LOCAL_TIMEOUT)
 
-            self._assert_metrics(metrics)
-        else:
-            print("Worker node is running.")
-            time.sleep(LOCAL_TIMEOUT)
+    @check_role(allowed_roles=["master", "worker"])
+    def run_throughput(self, run_cycles=2):
+        bench_params = {
+            'host': self.host,
+            'port': str(self.port),
+            'model_path': self.model_config.get("model_path"),
+            'backend': self.backend,
+            'dataset_name': self.dataset_name,
+            'request_rate': self.request_rate,
+            'max_concurrency': self.max_concurrency,
+            'num_prompts': self.num_prompts,
+            'input_len': self.input_len,
+            'output_len': self.output_len,
+            'random_range_ratio': self.random_range_ratio,
+        }
+        print(f"Starting benchmark with parameters: {bench_params}")
+
+        metrics = None
+        for i in range(run_cycles):
+            print(f"Running benchmark, {i+1}/{run_cycles}")
+            metrics = run_bench_serving(**bench_params)
+
+        self._assert_metrics(metrics)
 
 class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
@@ -403,6 +414,9 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.hostname = os.getenv("HOSTNAME")
         cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
         print(f"Init {cls.host} {cls.role=}!")
+
+        launch_pd_seperation_node(cls)
+        launch_router(cls)
 
     @classmethod
     def tearDownClass(cls):
@@ -443,48 +457,57 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 self.ttft * TTFT_TOLERANCE,
             )
 
+    @classmethod
+    @check_role(allowed_roles=["router"])
+    def launch_router(cls):
+        print(f"Starting router in thread...")
+        cls.sglang_thread = threading.Thread(
+            target=launch_router, args=(cls.model_config,)
+        )
+        cls.sglang_thread.daemon = True
+        cls.sglang_thread.start()
+
+        health_check_url = f"{cls.base_url}/health"
+        print(f"Waiting for router to be ready at {health_check_url}")
+        wait_server_ready(health_check_url)
+
+        print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
+        time.sleep(SERVER_INITIALIZATION_DELAY)
+
+    @classmethod
+    @check_role(allowed_roles=["prefill", "decode"])
+    def launch_pd_seperation_node(cls):
+        print(f"Starting pd seperation node in thread...")
+        cls.sglang_thread = threading.Thread(
+            target=launch_pd_seperation_node, args=(cls.model_config,)
+        )
+        cls.sglang_thread.daemon = True
+        cls.sglang_thread.start()
+        keep_alive_time = LOCAL_TIMEOUT * 2
+        print(f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds")
+        time.sleep(keep_alive_time)
+
+    @check_role(allowed_roles=["router"])
     def run_throughput(self, run_cycles=2):
-        if self.role == "router":
-            print(f"Starting router in thread...")
-            router_thread = threading.Thread(
-                target=launch_router, args=(self.model_config,)
-            )
-            router_thread.start()
+        bench_params = {
+            'host': self.host,
+            'port': str(self.port),
+            'model_path': self.model_config.get("model_path"),
+            'backend': self.backend,
+            'dataset_name': self.dataset_name,
+            'request_rate': self.request_rate,
+            'max_concurrency': self.max_concurrency,
+            'num_prompts': self.num_prompts,
+            'input_len': self.input_len,
+            'output_len': self.output_len,
+            'random_range_ratio': self.random_range_ratio,
+        }
+        print(f"Starting benchmark with parameters: {bench_params}")
 
-            health_check_url = f"http://127.0.0.1:{SERVICE_PORT}/health"
-            print(f"Waiting for router to be ready at {health_check_url}")
-            wait_server_ready(health_check_url)
+        metrics = None
+        for i in range(run_cycles):
+            print(f"Running benchmark, {i+1}/{run_cycles}")
+            metrics = run_bench_serving(**bench_params)
 
-            print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
-            time.sleep(SERVER_INITIALIZATION_DELAY)
+        self._assert_metrics(metrics)
 
-            bench_params = {
-                'host': "127.0.0.1",
-                'port': str(SERVICE_PORT),
-                'model_path': self.model_config.get("model_path"),
-                'backend': self.backend,
-                'dataset_name': self.dataset_name,
-                'request_rate': self.request_rate,
-                'max_concurrency': self.max_concurrency,
-                'num_prompts': self.num_prompts,
-                'input_len': self.input_len,
-                'output_len': self.output_len,
-                'random_range_ratio': self.random_range_ratio,
-            }
-            print(f"Starting benchmark with parameters: {bench_params}")
-
-            metrics = None
-            for i in range(run_cycles):
-                print(f"Running benchmark, {i+1}/{run_cycles}")
-                metrics = run_bench_serving(**bench_params)
-
-            self._assert_metrics(metrics)
-        else:
-            # launch p/d node
-            sglang_thread = threading.Thread(
-                target=launch_pd_seperation_node, args=(self.model_config,)
-            )
-            sglang_thread.start()
-            keep_alive_time = LOCAL_TIMEOUT * 2
-            print(f"{self.role} node started, keeping test alive for {keep_alive_time} seconds")
-            time.sleep(keep_alive_time)

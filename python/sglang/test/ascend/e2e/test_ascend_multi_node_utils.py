@@ -408,8 +408,7 @@ def launch_pd_seperation_node(model_config):
 # Launch router node
 def launch_router(model_config):
     print(f"launch_router start ......")
-    nodes_count = discover_worker_nodes()
-    print(f"Discovered {nodes_count} worker nodes")
+    discover_worker_nodes()
 
     # Monitor to generate prefill/decode URL
     prefill_url = []
