@@ -93,6 +93,7 @@ class DisaggregationHiCacheBase(CustomTestCase):
         metrics = run_bench_serving(
             host=self.url.hostname,
             port=int(self.url.port),
+            model_path=self.model,
             dataset_name="random",
             num_prompts=16,
             input_len=3500,
