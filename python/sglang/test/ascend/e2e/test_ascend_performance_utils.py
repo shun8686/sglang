@@ -38,6 +38,7 @@ GLM_4_6_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_
 ROUND_ROBIN = "round_robin"
 
 LOCAL_TIMEOUT = 3600
+MAX_SERVER_KEEP_ALIVE_TIME = 3600
 
 # Timeouts and delays
 SERVER_INITIALIZATION_DELAY = 120
@@ -367,8 +368,8 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         )
         sglang_thread.start()
 
-        print("Worker node is running.")
-        time.sleep(LOCAL_TIMEOUT)
+        print(f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds")
+        time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
 
     @check_role(allowed_roles=["master", "worker"])
     def run_throughput(self, run_cycles=2):
@@ -487,9 +488,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         )
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
-        keep_alive_time = LOCAL_TIMEOUT * 2
-        print(f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds")
-        time.sleep(keep_alive_time)
+        print(f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds")
+        time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
 
     @check_role(allowed_roles=["router"])
     def run_throughput(self, run_cycles=2):
