@@ -2,6 +2,7 @@ import unittest
 
 import requests
 
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -52,6 +53,15 @@ class DisaggregationHiCacheBase(CustomTestCase):
             other_args=cls.decode_args,
             return_stdout_stderr=(cls.out_file, cls.err_file),
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process_decode.pid)
+
+        if hasattr(cls, 'out_file') and cls.out_file:
+            cls.out_file.close()
+        if hasattr(cls, 'err_file') and cls.err_file:
+            cls.err_file.close()
 
     def test_disaggregation_decode_enable_fake_auto(self):
         response = requests.get(f"{self.decode_url}/health_generate")
