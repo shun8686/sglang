@@ -86,8 +86,8 @@ class TestDeepSeekR1W4A8(TestAscendMultiNodePdSepTestCaseBase):
     @classmethod
     def setUpClass(cls):
         super(TestDeepSeekR1W4A8, cls).setUpClass()
-        cls.launch_pd_seperation_node()
-        cls.launch_router()
+        cls.start_pd_seperation_server()
+        cls.start_router_server()
 
     @classmethod
     def tearDownClass(cls):

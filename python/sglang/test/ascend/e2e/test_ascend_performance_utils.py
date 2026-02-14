@@ -10,7 +10,8 @@ from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
     launch_pd_mix_node,
     launch_router,
     wait_server_ready,
-    launch_pd_seperation_node, SERVICE_PORT, check_role
+    launch_pd_seperation_node,
+    SERVICE_PORT, check_role
 )
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -307,6 +308,9 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         cls.role = "master" if cls.hostname.endswith("sglang-node-0") else "worker"
         print(f"Init {cls.host} {cls.role=}!")
 
+        cls.start_pd_mix_master_node()
+        cls.start_pd_mix_worker_node()
+
     @classmethod
     def tearDownClass(cls):
         pass
@@ -344,7 +348,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 
     @classmethod
     @check_role(allowed_roles=["master"])
-    def launch_pd_mix_master_node(cls):
+    def start_pd_mix_master_node(cls):
         sglang_thread = threading.Thread(
             target=launch_pd_mix_node, args=(cls.model_config,)
         )
@@ -357,7 +361,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 
     @classmethod
     @check_role(allowed_roles=["worker"])
-    def launch_pd_mix_worker_node(cls):
+    def start_pd_mix_worker_node(cls):
         sglang_thread = threading.Thread(
             target=launch_pd_mix_node, args=(cls.model_config,)
         )
@@ -415,8 +419,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
         print(f"Init {cls.host} {cls.role=}!")
 
-        launch_pd_seperation_node(cls)
-        launch_router(cls)
+        cls.start_pd_server()
+        cls.start_router_server()
 
     @classmethod
     def tearDownClass(cls):
@@ -459,7 +463,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
 
     @classmethod
     @check_role(allowed_roles=["router"])
-    def launch_router(cls):
+    def start_router_server(cls):
         print(f"Starting router in thread...")
         cls.sglang_thread = threading.Thread(
             target=launch_router, args=(cls.model_config,)
@@ -476,7 +480,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
 
     @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
-    def launch_pd_seperation_node(cls):
+    def start_pd_server(cls):
         print(f"Starting pd seperation node in thread...")
         cls.sglang_thread = threading.Thread(
             target=launch_pd_seperation_node, args=(cls.model_config,)

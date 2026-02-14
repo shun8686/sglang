@@ -629,7 +629,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
 
     @classmethod
     @check_role(allowed_roles=["router"])
-    def launch_router(cls):
+    def start_router_server(cls):
         print(f"Starting router in thread...")
         cls.sglang_thread = threading.Thread(
             target=launch_router, args=(cls.model_config,)
@@ -646,7 +646,7 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
 
     @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
-    def launch_pd_seperation_node(cls):
+    def start_pd_server(cls):
         print(f"Starting pd seperation node in thread...")
         cls.sglang_thread = threading.Thread(
             target=launch_pd_seperation_node, args=(cls.model_config,)
