@@ -56,7 +56,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         ]
         env = {
             **os.environ,
-            "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,
