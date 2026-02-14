@@ -21,7 +21,10 @@ from sglang.test.test_utils import (
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Base class for disaggregation with HiCache tests"""
-
+    CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
+    CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
+    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
+    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
@@ -45,7 +48,11 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "--disaggregation-mode",
             "decode",
             "--tp-size",
-            "4",
+            "2",
+            "--dp-size",
+            "2",
+            "--base-gpu-id",
+            "0",
             "--mem-fraction-static",
             "0.8",
             "--disaggregation-transfer-backend",
