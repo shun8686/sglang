@@ -121,13 +121,13 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--sglang-is-in-ci",
-        action='store_false',
+        action='store_true',
         help="Used to set env var SGLANG_IS_IN_CI in pod",
     )
 
     parser.add_argument(
         "--install-sglang-from-source",
-        action='store_false',
+        action='store_true',
         help="Used to set env var INSTALL_SGLANG_FROM_SOURCE in pod",
     )
 
