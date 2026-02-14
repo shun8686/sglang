@@ -79,7 +79,7 @@ spec:
             mountPath: /root/.cache
           - name: share
             mountPath: /root/sglang
-            subPath: {{ sglang_source_path }}
+            subPath: {{ sglang_source_relative_path }}
         volumes:
         - name: share
           persistentVolumeClaim:
