@@ -83,3 +83,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         )
         self.assertEqual(response.status_code, 200)
         print(response.json())
+
+
+if __name__ == "__main__":
+    unittest.main()
