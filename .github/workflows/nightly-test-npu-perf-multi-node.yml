@@ -131,7 +131,7 @@ jobs:
           metrics_data_file=${test_data_output_path}/${tc_name}.txt
           echo "Metrics file: ${metrics_data_file}"
 
-          cd ${sglang_source_path}/${ASCEND_E2E_TEST_CONFIG_PATH}
+          cd ${ASCEND_E2E_TEST_CONFIG_PATH}
           CMD=(
             python3 -u run_ascend_ci.py
             --env ci
