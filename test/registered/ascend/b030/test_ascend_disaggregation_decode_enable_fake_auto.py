@@ -1,14 +1,8 @@
-import os
-import tempfile
 import unittest
 
 import requests
 
-from sglang.bench_serving import get_tokenizer
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
-from sglang.test.server_fixtures.disaggregation_fixture import (
-    PDDisaggregationServerBase,
-)
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_server, CustomTestCase, DEFAULT_URL_FOR_TEST,
@@ -30,7 +24,7 @@ class DisaggregationHiCacheBase(CustomTestCase):
         "--dp-size",
         "2",
         "--base-gpu-id",
-        "0",
+        "1",
         "--mem-fraction-static",
         "0.8",
         "--disaggregation-transfer-backend",
