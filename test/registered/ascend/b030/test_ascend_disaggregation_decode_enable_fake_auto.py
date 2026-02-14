@@ -1,9 +1,6 @@
 import os
-import random
 import tempfile
-import time
 import unittest
-from typing import Dict
 
 import requests
 
@@ -13,18 +10,16 @@ from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
 )
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    popen_launch_pd_server,
+    popen_launch_server,
 )
 
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Base class for disaggregation with HiCache tests"""
-    CHECKPOINT_OUT_LOG = "./checkpoint_out_log.txt"
-    CHECKPOINT_ERR_LOG = "./checkpoint_err_log.txt"
-    out_file = open(CHECKPOINT_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(CHECKPOINT_ERR_LOG, "w+", encoding="utf-8")
+    out_file = open("./out_log.txt", "w+", encoding="utf-8")
+    err_file = open("./err_log.txt", "w+", encoding="utf-8")
+
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
@@ -64,12 +59,13 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         env = {
             **os.environ,
         }
-        cls.process_decode = popen_launch_pd_server(
+        cls.process_decode = popen_launch_server(
             cls.model,
             cls.decode_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=decode_args,
             env=env,
+            return_stdout_stderr=(cls.out_file, cls.err_file),
         )
 
     def test_disaggregation_decode_enable_fake_auto(self):
