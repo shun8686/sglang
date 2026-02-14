@@ -38,20 +38,21 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     @classmethod
     def start_decode(cls):
         decode_args = [
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
             "--trust-remote-code",
             "--disaggregation-mode",
             "decode",
             "--tp-size",
             "4",
-            "--page-size",
-            "64",
             "--mem-fraction-static",
             "0.8",
             "--disaggregation-transfer-backend",
             "ascend",
             "--disaggregation-decode-enable-fake-auto",
             "--load-balance-method",
-            "follow_bootstrap_room"
+            "follow_bootstrap_room",
         ]
         env = {
             **os.environ,
