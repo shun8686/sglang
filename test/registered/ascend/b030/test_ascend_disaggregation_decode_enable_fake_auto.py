@@ -1,8 +1,10 @@
 import unittest
+from urllib.parse import urlparse
 
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.performance.test_ascend_performance_utils import run_bench_serving
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -46,6 +48,7 @@ class DisaggregationHiCacheBase(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.decode_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         cls.process_decode = popen_launch_server(
             cls.model,
             cls.decode_url,
@@ -86,6 +89,17 @@ class DisaggregationHiCacheBase(CustomTestCase):
         res = run_command(f"cat {self.err_log} | grep '{self.keyword}'")
         gen_throughput = res.split(self.keyword)[1].split(',')[0]
         self.assertGreater(float(gen_throughput), 0)
+
+        metrics = run_bench_serving(
+            host=self.url.hostname,
+            port=int(self.url.port),
+            dataset_name="random",
+            num_prompts=16,
+            input_len=3500,
+            output_len=1,
+        )
+        print(metrics)
+        self.assertGreater(float(metrics["mean_ttft"]), 0)
 
 
 if __name__ == "__main__":
