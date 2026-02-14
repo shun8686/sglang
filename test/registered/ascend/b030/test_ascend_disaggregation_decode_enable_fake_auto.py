@@ -2,11 +2,14 @@ import unittest
 
 import requests
 
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_server, CustomTestCase, DEFAULT_URL_FOR_TEST,
 )
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class DisaggregationHiCacheBase(CustomTestCase):
@@ -33,8 +36,11 @@ class DisaggregationHiCacheBase(CustomTestCase):
         "--load-balance-method",
         "follow_bootstrap_room",
     ]
-    out_file = open("./out_log.txt", "w+", encoding="utf-8")
-    err_file = open("./err_log.txt", "w+", encoding="utf-8")
+    keyword = "gen throughput (token/s): "
+    out_log = "./out_log.txt"
+    err_log = "./err_log.txt"
+    out_file = open(out_log, "w+", encoding="utf-8")
+    err_file = open(err_log, "w+", encoding="utf-8")
 
     @classmethod
     def setUpClass(cls):
@@ -63,7 +69,13 @@ class DisaggregationHiCacheBase(CustomTestCase):
                 },
             },
         )
-        print(response.json())
+        self.assertEqual(response.status_code, 200)
+        self.err_file.seek(0)
+        content = self.err_file.read()
+        self.assertIn(self.keyword, content)
+        res = run_command(f"cat {self.err_log} | grep '{self.keyword}'")
+        gen_throughput = res.split(self.keyword)[1].split(',')[0]
+        self.assertGreater(float(gen_throughput), 0)
 
 
 if __name__ == "__main__":
