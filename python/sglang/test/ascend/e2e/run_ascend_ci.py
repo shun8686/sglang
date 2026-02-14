@@ -322,7 +322,7 @@ def run_ascend_e2e_test_case(
     kube_job_type: str, # multi-pd-separation、multi-pd-mix、single
     kube_job_name_prefix: str, # kube job prefix-name
     resource_info: dict, # pd-separation: {"prefill_size": 1, "decode_size": 1, "router_size": 1}; pd-mix: {"node_size": 2; single: {"npu_size": 4}
-    sglang_source_path: str,
+    sglang_source_relative_path: str,
     metrics_data_file: str,
     test_case: str,
     sglang_is_in_ci = False,
@@ -352,7 +352,7 @@ def run_ascend_e2e_test_case(
                 "kube_job_name": final_kube_job_name,
                 "kube_config": KUBE_CONFIG,
                 "npu_size": resource_info["npu_size"],
-                "sglang_source_path": sglang_source_path,
+                "sglang_source_relative_path": sglang_source_relative_path,
                 "metrics_data_file": metrics_data_file,
                 "test_case": test_case,
                 "sglang_is_in_ci": sglang_is_in_ci,
@@ -372,7 +372,7 @@ def run_ascend_e2e_test_case(
                 "kube_config": KUBE_CONFIG,
                 "kube_config_map": kube_config_map,
                 "node_size": resource_info["node_size"],
-                "sglang_source_path": sglang_source_path,
+                "sglang_source_relative_path": sglang_source_relative_path,
                 "metrics_data_file": metrics_data_file,
                 "test_case": test_case,
                 "sglang_is_in_ci": sglang_is_in_ci,
@@ -394,7 +394,7 @@ def run_ascend_e2e_test_case(
                 "prefill_size": resource_info["prefill_size"],
                 "decode_size": resource_info["decode_size"],
                 "router_size": resource_info["router_size"],
-                "sglang_source_path": sglang_source_path,
+                "sglang_source_relative_path": sglang_source_relative_path,
                 "metrics_data_file": metrics_data_file,
                 "test_case": test_case,
                 "sglang_is_in_ci": sglang_is_in_ci,
@@ -497,17 +497,17 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--sglang-source-path",
+        "--sglang-source-relative-path",
         type=str,
         required=True,
-        help="Sglang source code path on shared-disk",
+        help="Sglang source code relative path on shared-disk(NFS_ROOT_PATH: /data/ascend-ci-share-pkking-sglang/)",
     )
 
     parser.add_argument(
         "--metrics-data-file",
         type=str,
         required=False,
-        default=os.environ.get('METRICS_DATA_FILE'),
+        default="",
         help="Metrics data file",
     )
 
@@ -520,18 +520,14 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--sglang-is-in-ci",
-        type=bool,
-        required=False,
-        default=os.environ.get('SGLANG_IS_IN_CI'),
-        help="Is in CI",
+        action='store_false',
+        help="Used to set env var SGLANG_IS_IN_CI in pod",
     )
 
     parser.add_argument(
         "--install-sglang-from-source",
-        type=bool,
-        required=False,
-        default=os.environ.get('INSTALL_SGLANG_FROM_SOURCE'),
-        help="Install sglang from source",
+        action='store_false',
+        help="Used to set env var INSTALL_SGLANG_FROM_SOURCE in pod",
     )
 
     parser.add_argument(
@@ -572,7 +568,7 @@ if __name__ == "__main__":
     prefill_size = int(args.prefill_size)
     decode_size = int(args.decode_size)
     router_size = int(args.router_size)
-    sglang_source_path = args.sglang_source_path
+    sglang_source_relative_path = args.sglang_source_relative_path
     metrics_data_file = args.metrics_data_file
     test_case = args.test_case
     sglang_is_in_ci = args.sglang_is_in_ci
@@ -595,7 +591,7 @@ if __name__ == "__main__":
         kube_job_type=kube_job_type,
         kube_job_name_prefix=kube_job_name_prefix,
         resource_info=resource_info_dict.get(kube_job_type),
-        sglang_source_path=sglang_source_path,
+        sglang_source_relative_path=sglang_source_relative_path,
         metrics_data_file=metrics_data_file,
         test_case=test_case,
         sglang_is_in_ci=sglang_is_in_ci,

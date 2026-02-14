@@ -73,8 +73,6 @@ spec:
             mountPath: /usr/local/Ascend/driver
           - name: localtime
             mountPath: /etc/localtime
-          - name: kube-config
-            mountPath: /root/script
           - name: share
             mountPath: /data/ascend-ci-share-pkking-sglang
           - name: share
@@ -83,9 +81,6 @@ spec:
             mountPath: /root/sglang
             subPath: {{ sglang_source_path }}
         volumes:
-        - name: kube-config
-          hostPath:
-            path: /root/script
         - name: share
           persistentVolumeClaim:
             claimName: sglang-guiyang004

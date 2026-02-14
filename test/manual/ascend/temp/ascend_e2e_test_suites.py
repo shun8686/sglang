@@ -6,6 +6,8 @@ from typing import List, Dict, Any
 
 from sglang.test.ascend.e2e.run_ascend_ci import run_ascend_e2e_test_case
 
+NFS_ROOT_PATH = "/data/ascend-ci-share-pkking-sglang"
+
 TEST_SUITE = [
     {
         "testcase": "test/manual/ascend/temp/_test_ascend_deepseek_r1_w4a8_1p1d_16p_function_test.py",
@@ -111,26 +113,22 @@ if __name__ == "__main__":
     )
 
     parser.add_argument(
-        "--sglang-source-path",
+        "--sglang-source-relative-path",
         type=str,
         required=True,
-        help="Sglang source code path on shared-disk",
+        help="Sglang source code relative path on shared-disk(NFS_ROOT_PATH: /data/ascend-ci-share-pkking-sglang/)",
     )
 
     parser.add_argument(
         "--sglang-is-in-ci",
-        type=bool,
-        required=False,
-        default=os.environ.get('SGLANG_IS_IN_CI'),
-        help="Is in CI",
+        action='store_false',
+        help="Used to set env var SGLANG_IS_IN_CI in pod",
     )
 
     parser.add_argument(
         "--install-sglang-from-source",
-        type=bool,
-        required=False,
-        default=os.environ.get('INSTALL_SGLANG_FROM_SOURCE'),
-        help="Install sglang from source",
+        action='store_false',
+        help="Used to set env var INSTALL_SGLANG_FROM_SOURCE in pod",
     )
 
     parser.add_argument(
@@ -183,7 +181,7 @@ if __name__ == "__main__":
     specified_test_case = args.testcase
 
     docker_image_url = args.image
-    sglang_source_path = args.sglang_source_path
+    sglang_source_relative_path = args.sglang_source_relative_path
     sglang_is_in_ci = args.sglang_is_in_ci
     install_sglang_from_source = args.install_sglang_from_source
 
@@ -207,14 +205,14 @@ if __name__ == "__main__":
                 "kube_job_type": kube_job_type,
                 "kube_job_name_prefix": kube_job_name_prefix,
                 "resource_info": test_case.get("resource"),
-                "sglang_source_path": sglang_source_path,
+                "sglang_source_relative_path": sglang_source_relative_path,
                 "test_case": test_case.get("testcase"),
                 "metrics_data_file": metrics_data_file,
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
             }
-            test_case_file = f"{sglang_source_path}/{test_case_info.get('test_case')}"
+            test_case_file = f"{NFS_ROOT_PATH}/{sglang_source_relative_path}/{test_case_info.get('test_case')}"
             if not os.path.exists(test_case_file):
                 raise FileNotFoundError(f"{test_case_file} does not exist")
 
