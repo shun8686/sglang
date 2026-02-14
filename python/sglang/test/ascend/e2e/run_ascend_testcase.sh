@@ -48,7 +48,7 @@ unset HTTP_PROXY
 unset ASCEND_LAUNCH_BLOCKING
 
 # use sglang from source or from image
-if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "true" ] || if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "True" ];then
+if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "true" ] || [ "${INSTALL_SGLANG_FROM_SOURCE}" = "True" ];then
     echo "Use sglang from source: ${sglang_source_path}"
     export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
 else
