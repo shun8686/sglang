@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 # from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.performance.test_ascend_performance_utils import NIC_NAME
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
@@ -50,12 +51,14 @@ class TestQwen3Next(CustomTestCase):
                 "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "auto",
-                # "--quantization", "modelslim",
+                "--quantization", "modelslim",
                 "--chunked-prefill-size", -1,
             ],
             env={
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
+                "HCCL_SOCKET_IFNAME": NIC_NAME,
+                "GLOO_SOCKET_IFNAME": NIC_NAME,
                 "HCCL_OP_EXPANSION_MODE": "AIV",
                 "HCCL_ALGO": "level0:NA;level1:ring",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
