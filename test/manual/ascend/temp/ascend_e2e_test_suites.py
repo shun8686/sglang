@@ -27,6 +27,7 @@ TEST_SUITE = [
     },
 ]
 
+
 def concurrent_run_test_cases(
     test_cases_params: List[Dict[str, Any]],
     concurrency: int = 3
@@ -58,12 +59,11 @@ def concurrent_run_test_cases(
             test_case = params["test_case"]
             try:
                 # Get task execution result
-                test_result = "Pass" if future.result() else "Fail"
+                future.result()
                 results.append({
                     "test_case": test_case,
-                    "result": test_result,
+                    "result": "Pass",
                 })
-                print(f"Progress: {completed_count}/{total_count} | Case {test_case} result : {test_result}")
             except Exception as e:
                 # Catch exceptions during task submission/execution (e.g., parameter errors)
                 error_result = {
@@ -75,7 +75,7 @@ def concurrent_run_test_cases(
                     "message": f"Task submission/execution exception: {str(e)}"
                 }
                 results.append(error_result)
-                print(f"Progress: {completed_count}/{total_count} | Case {test_case} exception: {str(e)}")
+            print(f"Progress: {completed_count}/{total_count} | Case {test_case} exception: {str(e)}")
 
     end_time = time.time()
     pass_count = len([item for item in results if item["result"] == "Pass"])
@@ -92,6 +92,7 @@ def concurrent_run_test_cases(
     else:
         print("All Pass.")
     return results
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
@@ -219,4 +220,3 @@ if __name__ == "__main__":
             test_cases.append(test_case_info)
 
     concurrent_run_test_cases(test_cases, concurrency=concurrency)
-

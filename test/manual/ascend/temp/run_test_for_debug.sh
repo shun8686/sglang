@@ -31,5 +31,3 @@ python3 ascend_e2e_test_suites.py \
 
 #    --sglang-is-in-ci \
 #    --install-sglang-from-source \
-
-

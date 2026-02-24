@@ -1,11 +1,11 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerformanceTestCaseBase,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
     QWEN3_235B_W8A8_MODEL_PATH
 )
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=1800, suite="nightly-16-npu-a3", nightly=True)
@@ -51,6 +51,7 @@ QWEN3_235B_OTHER_ARGS = (
         "--cuda-graph-bs", 8, 16, 20, 24, 32, 36,
     ]
 )
+
 
 class TestQwen235B(TestAscendPerformanceTestCaseBase):
     model = QWEN3_235B_W8A8_MODEL_PATH

@@ -64,14 +64,13 @@ jobs:
         KUBECONFIG: /data/ascend-ci-share-pkking-sglang/.cache/kb.yaml
         KUBECTL: /data/ascend-ci-share-pkking-sglang/.cache/kubectl
         NAMESPACE: sgl-project
-        KUBE_JOB_TYPE: multi-pd-separation
         KUBE_JOB_NAME: ascend-sglang-perf-test
         SGLANG_IS_IN_CI: true
         ASCEND_E2E_TEST_CONFIG_PATH: python/sglang/test/ascend/e2e
         SGLANG_USE_MODELSCOPE: true
         HF_ENDPOINT: https://hf-mirror.com
     steps:
-      - name: Install system denpendencies
+      - name: Install system dependencies
         run: |
           pip3 install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple jinja2-cli
 
@@ -131,6 +130,17 @@ jobs:
           metrics_data_file=${test_data_output_path}/${tc_name}.txt
           echo "Metrics file: ${metrics_data_file}"
 
+          prefill_decode_deployment="${{ inputs.prefill_decode_deployment }}"
+          kube_job_type=""
+          if [ "$prefill_decode_deployment" = "separation" ];then
+            kube_job_type=multi-pd-separation
+          elif [ "$prefill_decode_deployment" = "mix" ];then
+            kube_job_type=multi-pd-mix
+          else
+            echo "Unsupported deployment type: ${prefill_decode_deployment}"
+            exit 1
+          fi
+
           cd ${ASCEND_E2E_TEST_CONFIG_PATH}
           CMD="python3 -u run_ascend_ci.py \
             --env ci \
@@ -139,10 +149,9 @@ jobs:
             --metrics-data-file ${metrics_data_file} \
             --test-case ${test_case} \
             --kube-name-space ${NAMESPACE} \
-            --kube-job-type ${KUBE_JOB_TYPE} \
+            --kube-job-type ${kube_job_type} \
             --kube-job-name-prefix ${KUBE_JOB_NAME}"
 
-          prefill_decode_deployment="${{ inputs.prefill_decode_deployment }}"
           if [ "$prefill_decode_deployment" = "separation" ];then
             CMD="${CMD} \
               --prefill-size ${{ inputs.prefill_size }} \

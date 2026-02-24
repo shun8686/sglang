@@ -1,18 +1,24 @@
+import argparse
+import logging
+import os
+import random
 import re
 import string
 import subprocess
-import sys
 import time
-import os
-import argparse
 import uuid
-import random
-from jinja2 import Template
 
 import yaml
+from jinja2 import Template
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
 
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
 config.load_kube_config(KUBE_CONFIG)
@@ -30,6 +36,7 @@ KUBE_YAML_TEMPLATE = {
     "multi-pd-separation": f"{script_path}/k8s_multi_pd_separation.yaml.jinja2"
 }
 
+
 def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
     uuid_str = str(uuid.uuid4()).replace("-", "")
 
@@ -45,13 +52,15 @@ def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
 
     return result
 
-def create_pod_yaml(kube_yaml_template, output_yaml, pod_context):
-    with open(kube_yaml_template, 'r') as f:
+
+def create_kube_yaml(kube_yaml_template, output_yaml, pod_context):
+    with open(kube_yaml_template, "r") as f:
         template = Template(f.read())
     kube_pod_yaml = template.render(pod_context)
-    with open(output_yaml, 'w') as f:
+    with open(output_yaml, "w") as f:
         f.write(kube_pod_yaml)
     print(f"Pod YAML written to {output_yaml}")
+
 
 def create_pod(yaml_file, namespace):
     with open(yaml_file, "r", encoding="utf-8") as f:
@@ -67,11 +76,11 @@ def create_pod(yaml_file, namespace):
         try:
             if kind == "Pod" and api_version == "v1":
                 core_api.create_namespaced_pod(namespace=namespace, body=doc)
-                print(f"Pod {doc['metadata']['name']} is created")
+                logger.info(f"Pod {doc['metadata']['name']} created")
 
             elif kind == "Job" and api_version == "batch/v1":
                 batch_api.create_namespaced_job(namespace=namespace, body=doc)
-                print(f"Job {doc['metadata']['name']} is created")
+                logger.info(f"Job {doc['metadata']['name']} is created")
 
             elif kind == "Job" and api_version == "batch.volcano.sh/v1alpha1":
                 response = custom_api.create_namespaced_custom_object(
@@ -79,34 +88,31 @@ def create_pod(yaml_file, namespace):
                     version="v1alpha1",
                     namespace=namespace,
                     plural="jobs",
-                    body=doc
+                    body=doc,
                 )
-                print(f"Volcano Job {doc['metadata']['name']} is created")
-                print(f"Response info: {response['metadata']['name']}")
+                logger.info(f"Volcano job {doc['metadata']['name']} is created")
+                logger.debug(response)
 
             elif kind == "ConfigMap" and api_version == "v1":
                 core_api.create_namespaced_config_map(namespace=namespace, body=doc)
-                print(f"ConfigMap {doc['metadata']['name']} is created")
+                logger.info(f"ConfigMap {doc['metadata']['name']} is created")
 
             elif kind == "Role" and api_version == "rbac.authorization.k8s.io/v1":
-                rbac_api.create_namespaced_role(
-                    namespace=namespace,
-                    body=doc
-                )
-                print(f"Role {doc['metadata']['name']} is created")
+                rbac_api.create_namespaced_role(namespace=namespace, body=doc)
+                logger.info(f"Role {doc['metadata']['name']} is created")
 
-            elif kind == "RoleBinding" and api_version == "rbac.authorization.k8s.io/v1":
-                rbac_api.create_namespaced_role_binding(
-                    namespace=namespace,
-                    body=doc
-                )
-                print(f"RoleBinding {doc['metadata']['name']} is created")
+            elif (
+                kind == "RoleBinding" and api_version == "rbac.authorization.k8s.io/v1"
+            ):
+                rbac_api.create_namespaced_role_binding(namespace=namespace, body=doc)
+                logger.info(f"RoleBinding {doc['metadata']['name']} is created")
 
             else:
                 raise f"Unrecognized kind: {kind}/{api_version}"
         except ApiException as e:
             print(f"create resource {kind} error: {e}")
             raise
+
 
 def delete_pod(yaml_file, namespace):
     with open(yaml_file, "r", encoding="utf-8") as f:
@@ -127,24 +133,25 @@ def delete_pod(yaml_file, namespace):
                     plural="jobs",
                     name=job_name,
                     body=client.V1DeleteOptions(
-                        grace_period_seconds=0,
-                        propagation_policy="Foreground"
-                    )
+                        grace_period_seconds=0, propagation_policy="Foreground"
+                    ),
                 )
-                print(f"Volcano Job {job_name} is deleted.")
-                print(f"Response status: {response.get('status')}")
+                logger.info(f"Deleted job {job_name}")
+                logger.info(f"Response status: {response.get('status')}")
             elif kind == "ConfigMap" and api_version == "v1":
                 config_map_name = doc["metadata"]["name"]
-                response = core_api.delete_namespaced_config_map(name=config_map_name, namespace=namespace)
+                core_api.delete_namespaced_config_map(
+                    name=config_map_name, namespace=namespace
+                )
                 print(f"ConfigMap {config_map_name} is deleted.")
-                print(f"Response: {response}")
             else:
                 raise f"Unrecognized kind: {kind}/{api_version}"
         except ApiException as e:
             raise f"delete resource {kind} error: {e}"
 
+
 def check_pods_ready(namespace, pod_name_key_str, timeout=300):
-    print("Waiting all pods to running...")
+    logger.info("Waiting all pods to running...")
     start_time = time.time()
 
     while time.time() - start_time < timeout:
@@ -192,18 +199,16 @@ def check_pods_ready(namespace, pod_name_key_str, timeout=300):
     print(f"timeout in {timeout}s")
     return False
 
+
 def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
     cm_metadata = client.V1ObjectMeta(name=cm_name, namespace=namespace)
     configmap = client.V1ConfigMap(
-        api_version="v1",
-        kind="ConfigMap",
-        metadata=cm_metadata,
-        data=data)
+        api_version="v1", kind="ConfigMap", metadata=cm_metadata, data=data
+    )
 
     try:
         response = core_api.create_namespaced_config_map(
-            namespace=namespace,
-            body=configmap
+            namespace=namespace, body=configmap
         )
         print(f"ConfigMap '{cm_name}' create successfully!")
         print(f"data: {list(data.keys())}")
@@ -212,9 +217,7 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
         if e.status == 409:
             print(f"ConfigMap {cm_name} already exists. Updating...")
             response = core_api.replace_namespaced_config_map(
-                namespace=namespace,
-                name=cm_name,
-                body=configmap
+                namespace=namespace, name=cm_name, body=configmap
             )
             print(f"ConfigMap {cm_name} updated successfully.")
             return response
@@ -224,6 +227,7 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
                 error_msg += f" | details: {e.body}"
             print(error_msg)
             raise
+
 
 def prepare_cm_data(namespace, pod_string):
     pods = core_api.list_namespaced_pod(namespace=namespace)
@@ -235,12 +239,17 @@ def prepare_cm_data(namespace, pod_string):
             data[pod_name] = pod_ip
     return data
 
+
 def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
     # Build kubectl command
     cmd = ["kubectl", "logs", "-f", "-n", namespace, pod_name]
 
     # Define multiline pattern to match
-    pattern_lines = [r"^-{70,}$", r"^Ran \d+ tests? in [\d.]+s$", r"^$", r"^(OK|FAILED \(errors=\d+\))$"]
+    pattern_lines = [
+        r"^-{70,}$",
+        r"^Ran \d+ tests? in [\d.]+s$",
+        r"^$",
+        r"^(OK|FAILED \(errors=\d+\))$"]
     patterns = [re.compile(line_pattern) for line_pattern in pattern_lines]
     pattern_ok = re.compile(r"^OK$")
 
@@ -264,7 +273,9 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
         # Process output
         while process.poll() is None and not matched:
             if time.time() - start_time > timeout:
-                raise Exception("Timeout exceeded, the thread is {timeout} seconds long.}")
+                raise Exception(
+                    f"Timeout exceeded, the thread is {timeout} seconds long."
+                )
 
             line = process.stdout.readline()
             if not line:
@@ -279,7 +290,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
                     matched = True
                     if pattern_ok.match(line):
                         is_success = True
-                    print("\nSuccessfully detected complete test completion pattern!")
+                    print("\nDetected complete test completion pattern!")
             else:
                 match_state = 0
                 if patterns[0].match(line):
@@ -303,11 +314,6 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
             raise Exception("The test result was FAILED!")
         else:
             print("The test result was OK!")
-            return True
-
-    except Exception as e:
-        print(f"\nError: {e}")
-        return False
     finally:
         if process and process.poll() is None:
             process.terminate()
@@ -316,18 +322,20 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
             except subprocess.TimeoutExpired:
                 process.kill()
 
+
 def run_ascend_e2e_test_case(
     docker_image_url: str,
     kube_name_space: str,
-    kube_job_type: str, # multi-pd-separation、multi-pd-mix、single
-    kube_job_name_prefix: str, # kube job prefix-name
-    resource_info: dict, # pd-separation: {"prefill_size": 1, "decode_size": 1, "router_size": 1}; pd-mix: {"node_size": 2; single: {"npu_size": 4}
+    kube_job_type: str,  # multi-pd-separation、multi-pd-mix、single
+    kube_job_name_prefix: str,  # kube job prefix-name
+    resource_info: dict,
+    # pd-separation: {"prefill_size": 1, "decode_size": 1, "router_size": 1}; pd-mix: {"node_size": 2; single: {"npu_size": 4}
     sglang_source_relative_path: str,
     metrics_data_file: str,
     test_case: str,
-    sglang_is_in_ci = False,
-    install_sglang_from_source = False,
-    env = "debug", # ["debug", "ci"]
+    sglang_is_in_ci=False,
+    install_sglang_from_source=False,
+    env="debug",  # ["debug", "ci"]
 ):
     random_str = get_unique_random_string(16, True)
 
@@ -337,13 +345,15 @@ def run_ascend_e2e_test_case(
     kube_yaml_file_dict = {
         "single": f"k8s_single_{random_str}.yaml",
         "multi-pd-mix": f"k8s_multi_pd_mix_{random_str}.yaml",
-        "multi-pd-separation": f"k8s_multi_pd_separation_{random_str}.yaml"
+        "multi-pd-separation": f"k8s_multi_pd_separation_{random_str}.yaml",
     }
     kube_yaml_file = kube_yaml_file_dict.get(kube_job_type)
 
     try:
-        print(f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
-              f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}")
+        print(
+            f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
+            f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}"
+        )
 
         if kube_job_type == "single":
             k8s_context = {
@@ -357,12 +367,12 @@ def run_ascend_e2e_test_case(
                 "test_case": test_case,
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
-                "env": env
+                "env": env,
             }
-            create_pod_yaml(
+            create_kube_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
                 output_yaml=kube_yaml_file,
-                pod_context=k8s_context
+                pod_context=k8s_context,
             )
         elif kube_job_type == "multi-pd-mix":
             k8s_context = {
@@ -377,12 +387,12 @@ def run_ascend_e2e_test_case(
                 "test_case": test_case,
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
-                "env": env
+                "env": env,
             }
-            create_pod_yaml(
+            create_kube_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
                 output_yaml=kube_yaml_file,
-                pod_context=k8s_context
+                pod_context=k8s_context,
             )
         elif kube_job_type == "multi-pd-separation":
             k8s_context = {
@@ -399,19 +409,21 @@ def run_ascend_e2e_test_case(
                 "test_case": test_case,
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
-                "env": env
+                "env": env,
             }
-            create_pod_yaml(
+            create_kube_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
                 output_yaml=kube_yaml_file,
-                pod_context=k8s_context
+                pod_context=k8s_context,
             )
         else:
             raise Exception(f"Unknown k8s job type: {kube_job_type}")
 
         create_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
 
-        if check_pods_ready(kube_name_space, final_kube_job_name, timeout=LOCAL_TIMEOUT):
+        if check_pods_ready(
+            kube_name_space, final_kube_job_name, timeout=LOCAL_TIMEOUT
+        ):
             if kube_job_type != "single":
                 matching_pod_string = final_kube_job_name
                 cm_data = prepare_cm_data(kube_name_space, matching_pod_string)
@@ -419,9 +431,7 @@ def run_ascend_e2e_test_case(
                     print(f"No sglang pod found while matching {matching_pod_string}")
 
                 response = create_or_update_configmap(
-                    cm_name=kube_config_map,
-                    data=cm_data,
-                    namespace=kube_name_space
+                    cm_name=kube_config_map, data=cm_data, namespace=kube_name_space
                 )
                 print(response)
         else:
@@ -432,21 +442,18 @@ def run_ascend_e2e_test_case(
             "multi-pd-mix": f"{final_kube_job_name}-sglang-node-0",
             "multi-pd-separation": f"{final_kube_job_name}-sglang-router-0",
         }
-        return monitor_pod_logs(monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT)
-
-    except Exception as e:
-        print(f"\nError occured while running k8s task: {e}")
-        return False
+        monitor_pod_logs(
+            monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT
+        )
     finally:
         if os.path.exists(kube_yaml_file):
             delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
             os.remove(kube_yaml_file)
 
-if __name__ == "__main__":
 
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(
-        description="Apply k8s yaml",
-        formatter_class=argparse.RawTextHelpFormatter
+        description="Apply k8s yaml", formatter_class=argparse.RawTextHelpFormatter
     )
 
     parser.add_argument(
@@ -520,13 +527,13 @@ if __name__ == "__main__":
 
     parser.add_argument(
         "--sglang-is-in-ci",
-        action='store_true',
+        action="store_true",
         help="Used to set env var SGLANG_IS_IN_CI in pod",
     )
 
     parser.add_argument(
         "--install-sglang-from-source",
-        action='store_true',
+        action="store_true",
         help="Used to set env var INSTALL_SGLANG_FROM_SOURCE in pod",
     )
 
@@ -582,7 +589,11 @@ if __name__ == "__main__":
     resource_info_dict = {
         "single": {"npu_size": npu_size},
         "multi-pd-mix": {"node_size": node_size},
-        "multi-pd-separation": {"prefill_size": prefill_size, "decode_size": decode_size, "router_size": router_size},
+        "multi-pd-separation": {
+            "prefill_size": prefill_size,
+            "decode_size": decode_size,
+            "router_size": router_size
+        },
     }
 
     run_ascend_e2e_test_case(
