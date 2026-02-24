@@ -2,7 +2,7 @@ import os
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+# from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -29,7 +29,8 @@ class TestQwen3Next(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        # cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Next-80B-A3B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
