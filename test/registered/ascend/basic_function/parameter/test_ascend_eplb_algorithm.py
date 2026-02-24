@@ -4,7 +4,7 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH as MODEL_PATH
+# from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH as MODEL_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -29,7 +29,8 @@ class TestEplbAlgorithm(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = MODEL_PATH
+        # cls.model = MODEL_PATH
+        cls.model = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
