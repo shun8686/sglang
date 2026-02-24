@@ -77,7 +77,7 @@ jobs:
           # copy download through proxy
           curl -o /tmp/test.jsonl -L https://gh-proxy.test.osinfra.cn/https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl
 
-          echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+          sudo echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
           sysctl -w vm.swappiness=0
           sysctl -w kernel.numa_balancing=0
           sysctl -w kernel.sched_migration_cost_ns=50000

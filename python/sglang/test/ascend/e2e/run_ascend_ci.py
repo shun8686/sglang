@@ -1,7 +1,6 @@
 import re
 import string
 import subprocess
-import sys
 import time
 import os
 import argparse
@@ -303,11 +302,6 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
             raise Exception("The test result was FAILED!")
         else:
             print("The test result was OK!")
-            return True
-
-    except Exception as e:
-        print(f"\nError: {e}")
-        return False
     finally:
         if process and process.poll() is None:
             process.terminate()
@@ -432,11 +426,7 @@ def run_ascend_e2e_test_case(
             "multi-pd-mix": f"{final_kube_job_name}-sglang-node-0",
             "multi-pd-separation": f"{final_kube_job_name}-sglang-router-0",
         }
-        return monitor_pod_logs(monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT)
-
-    except Exception as e:
-        print(f"\nError occured while running k8s task: {e}")
-        return False
+        monitor_pod_logs(monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT)
     finally:
         if os.path.exists(kube_yaml_file):
             delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
