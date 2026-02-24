@@ -2,7 +2,6 @@ import os
 import subprocess
 import threading
 import time
-
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
@@ -10,7 +9,7 @@ from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
     launch_pd_mix_node,
     launch_router,
     wait_server_ready,
-    launch_pd_seperation_node,
+    launch_pd_separation_node,
     SERVICE_PORT, check_role
 )
 from sglang.test.test_utils import (
@@ -54,7 +53,15 @@ TTFT_TOLERANCE = 1.02  # +2%
 OUTPUT_TOKEN_THROUGHPUT_TOLERANCE = 0.98  # -2%
 
 # Package filtering keywords
-PACKAGE_FILTER_KEYWORDS = ['sglang', 'sgl', 'torch', 'transformers', 'deep-ep', 'memfabric_hybrid']
+PACKAGE_FILTER_KEYWORDS = [
+    'sglang',
+    'sgl',
+    'torch',
+    'transformers',
+    'deep-ep',
+    'memfabric_hybrid'
+]
+
 
 def get_cann_version():
     """Get CANN version info.
@@ -66,9 +73,9 @@ def get_cann_version():
     cann_ver_num = None
 
     try:
-        with open(cann_info_file, 'r', encoding='utf-8') as f:
+        with open(cann_info_file, "r", encoding='utf-8') as f:
             for line in f:
-                if line.startswith('version='):
+                if line.startswith("version="):
                     cann_ver_num = line.strip()
                     break
 
@@ -87,6 +94,7 @@ def get_cann_version():
         print(f"Error reading CANN info: {e}")
         return f"CANN: {cann_ver_num}"
 
+
 def write_pkg_info_to_file(result_file):
     """Write package information to result file.
 
@@ -94,34 +102,62 @@ def write_pkg_info_to_file(result_file):
         result_file (str): Path to the result file.
     """
     try:
-        pip_output = subprocess.run(["pip", "list"], capture_output=True, text=True, check=False)
+        pip_output = subprocess.run(
+            ["pip", "list"], capture_output=True, text=True, check=False
+        )
         packages = pip_output.stdout
 
         # Filter relevant packages using list comprehension
         filtered_packages = [
-            line for line in packages.split('\n')
+            line
+            for line in packages.split('\n')
             if any(keyword in line for keyword in PACKAGE_FILTER_KEYWORDS)
         ]
 
         # Write to result file
-        with open(result_file, 'w', encoding='utf-8') as f:
+        with open(result_file, "w", encoding="utf-8") as f:
             for pkg in filtered_packages:
-                f.write(pkg + '\n')
+                f.write(pkg + "\n")
                 print(pkg)
-            f.write(get_cann_version() + '\n')
+            f.write(get_cann_version() + "\n")
 
     except Exception as e:
         print(f"Error getting packages: {e}")
 
-def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_name=None, request_rate=None,
-                      max_concurrency=None, num_prompts=None, input_len=None, output_len=None, random_range_ratio=1, dataset_path=None):
+
+def run_bench_serving(
+    host,
+    port,
+    model_path=None,
+    backend="sglang",
+    dataset_name=None,
+    request_rate=None,
+    max_concurrency=None,
+    num_prompts=None,
+    input_len=None,
+    output_len=None,
+    random_range_ratio=1,
+    dataset_path=None,
+):
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
     print(f"The metrics result file: {result_file}")
 
     write_pkg_info_to_file(result_file)
 
-    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port), "--model", model_path, "--backend", backend]
+    cmd_args = [
+        "python3",
+        "-m",
+        "sglang.bench_serving",
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--model",
+        model_path,
+        "--backend",
+        backend
+    ]
 
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
@@ -142,34 +178,32 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
     print(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
-    metrics = {
-        'mean_ttft': None,
-        'mean_tpot': None,
-        'total_tps': None
-    }
+    metrics = {'mean_ttft': None, 'mean_tpot': None, 'total_tps': None}
 
-    process = subprocess.Popen(cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1)
+    process = subprocess.Popen(
+        cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+    )
     try:
         # Read output line by line
-        with open(result_file, 'a', encoding='utf-8') as f:
+        with open(result_file, "a", encoding="utf-8") as f:
             for line in process.stdout:
                 f.write(line)
                 stripped_line = line.strip()
                 print(stripped_line)
 
                 # Extract metrics
-                if 'Mean TTFT' in stripped_line:
+                if "Mean TTFT" in stripped_line:
                     parts = stripped_line.split()
                     if len(parts) >= 4:
-                        metrics['mean_ttft'] = parts[3]
-                elif 'Mean TPOT' in stripped_line:
+                        metrics["mean_ttft"] = parts[3]
+                elif "Mean TPOT" in stripped_line:
                     parts = stripped_line.split()
                     if len(parts) >= 4:
-                        metrics['mean_tpot'] = parts[3]
-                elif 'Output token throughput' in stripped_line:
+                        metrics["mean_tpot"] = parts[3]
+                elif "Output token throughput" in stripped_line:
                     parts = stripped_line.split()
                     if len(parts) >= 5:
-                        metrics['total_tps'] = parts[4]
+                        metrics["total_tps"] = parts[4]
         process.wait()
         if process.returncode != 0:
             print(f"Benchmark command failed with return code: {process.returncode}")
@@ -180,6 +214,7 @@ def run_bench_serving(host, port, model_path=None, backend="sglang", dataset_nam
             process.stdout.close()
 
     return metrics
+
 
 class TestAscendPerformanceTestCaseBase(CustomTestCase):
     model = None
@@ -283,6 +318,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             metrics = run_bench_serving(**bench_params)
 
         self._assert_metrics(metrics)
+
 
 class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
@@ -390,10 +426,11 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 
         metrics = None
         for i in range(run_cycles):
-            print(f"Running benchmark, {i+1}/{run_cycles}")
+            print(f"Running benchmark, {i + 1}/{run_cycles}")
             metrics = run_bench_serving(**bench_params)
 
         self._assert_metrics(metrics)
+
 
 class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
@@ -417,7 +454,11 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.port = SERVICE_PORT
         cls.base_url = f"http://{cls.host}:{cls.port}"
         cls.hostname = os.getenv("HOSTNAME")
-        cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
+        cls.role = (
+            "router"
+            if "router" in cls.hostname
+            else "prefill" if "prefill" in cls.hostname else "decode"
+        )
         print(f"Init {cls.host} {cls.role=}!")
 
         cls.start_pd_server()
@@ -443,22 +484,22 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot + TPOT_TOLERANCE_LOW,
                 )
             else:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot * TPOT_TOLERANCE_HIGH,
                 )
         if self.output_token_throughput:
             self.assertGreaterEqual(
-                float(metrics['total_tps']),
+                float(metrics["total_tps"]),
                 self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
             )
         if self.ttft:
             self.assertLessEqual(
-                float(metrics['mean_ttft']),
+                float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
 
@@ -476,19 +517,23 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         print(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
-        print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
+        print(
+            f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize..."
+        )
         time.sleep(SERVER_INITIALIZATION_DELAY)
 
     @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
     def start_pd_server(cls):
-        print(f"Starting pd seperation node in thread...")
+        print(f"Starting pd separation node in thread...")
         cls.sglang_thread = threading.Thread(
-            target=launch_pd_seperation_node, args=(cls.model_config,)
+            target=launch_pd_separation_node, args=(cls.model_config,)
         )
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
-        print(f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds")
+        print(
+            f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds"
+        )
         time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
 
     @check_role(allowed_roles=["router"])
@@ -510,8 +555,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
 
         metrics = None
         for i in range(run_cycles):
-            print(f"Running benchmark, {i+1}/{run_cycles}")
+            print(f"Running benchmark, {i + 1}/{run_cycles}")
             metrics = run_bench_serving(**bench_params)
 
         self._assert_metrics(metrics)
-

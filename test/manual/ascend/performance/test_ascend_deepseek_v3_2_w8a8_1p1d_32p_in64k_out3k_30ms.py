@@ -1,11 +1,11 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerfMultiNodePdSepTestCaseBase,
     DEEPSEEK_V32_W8A8_MODEL_PATH,
     ROUND_ROBIN
 )
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 
 MODEL_CONFIG = {
     "model_path": DEEPSEEK_V32_W8A8_MODEL_PATH,
@@ -93,6 +93,7 @@ MODEL_CONFIG = {
         "--mini-lb",
     ],
 }
+
 
 class TestDeepSeekV32(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG

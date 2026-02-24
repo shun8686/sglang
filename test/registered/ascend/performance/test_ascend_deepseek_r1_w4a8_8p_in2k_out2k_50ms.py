@@ -1,10 +1,10 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerformanceTestCaseBase,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
 )
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=1800, suite="nightly-16-npu-a3", nightly=True)

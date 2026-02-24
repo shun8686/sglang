@@ -1,10 +1,10 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerfMultiNodePdMixTestCaseBase,
     QWEN3_480B_W8A8_MODEL_PATH
 )
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 
 MODEL_CONFIG = {
     "model_path": QWEN3_480B_W8A8_MODEL_PATH,
@@ -18,7 +18,7 @@ MODEL_CONFIG = {
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
         "HCCL_OP_EXPANSION_MODE": "AIV",
-   },
+    },
     "other_args": [
         "--trust-remote-code",
         "--nnodes", "2",

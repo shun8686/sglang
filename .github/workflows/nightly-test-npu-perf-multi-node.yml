@@ -70,7 +70,7 @@ jobs:
         SGLANG_USE_MODELSCOPE: true
         HF_ENDPOINT: https://hf-mirror.com
     steps:
-      - name: Install system denpendencies
+      - name: Install system dependencies
         run: |
           pip3 install -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple jinja2-cli
 

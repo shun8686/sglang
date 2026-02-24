@@ -1,11 +1,11 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerformanceTestCaseBase,
     QWEN3_32B_EAGLE_MODEL_PATH,
     QWEN3_32B_MODEL_PATH
 )
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=1800, suite="nightly-8-npu-a3", nightly=True)

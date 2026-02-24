@@ -1,4 +1,5 @@
 import os
+import socket
 import subprocess
 import threading
 import time
@@ -7,17 +8,16 @@ from types import SimpleNamespace
 from typing import Iterable, Union
 
 import psutil
-import socket
 import requests
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 
 KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
@@ -26,14 +26,20 @@ CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 LOCAL_HOST_IP = os.getenv("POD_IP")
 LOCAL_HOST_NAME = os.getenv("HOSTNAME")
 if not LOCAL_HOST_IP or not LOCAL_HOST_NAME:
-    raise RuntimeError(f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}")
+    raise RuntimeError(
+        f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}"
+    )
 
 LOCAL_TIMEOUT = 3600
 ALL_ROLE_SET = {"prefill", "decode", "router", "master", "worker"}
 
 # Port numbers
-ASCEND_RT_VISIBLE_DEVICES=os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
-SERVICE_PORT = 6677 if not ASCEND_RT_VISIBLE_DEVICES else 6677 + int(ASCEND_RT_VISIBLE_DEVICES.strip().split(',')[0])
+ASCEND_RT_VISIBLE_DEVICES = os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
+SERVICE_PORT = (
+    6677
+    if not ASCEND_RT_VISIBLE_DEVICES
+    else 6677 + int(ASCEND_RT_VISIBLE_DEVICES.strip().split(',')[0])
+)
 PREFILL_DECODE_PORT = 8000
 BOOTSTRAP_INIT_PORT = 8995
 
@@ -47,6 +53,7 @@ NETWORK_ADDRESS_PREFIXES = ["172.", "192."]
 config.load_kube_config(KUBE_CONFIG)
 v1 = client.CoreV1Api()
 
+
 def get_nic_name():
     """Get network interface name.
 
@@ -55,13 +62,17 @@ def get_nic_name():
     """
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
-            if addr.family == socket.AF_INET and any(addr.address.startswith(prefix) for prefix in NETWORK_ADDRESS_PREFIXES):
+            if addr.family == socket.AF_INET and any(
+                addr.address.startswith(prefix) for prefix in NETWORK_ADDRESS_PREFIXES
+            ):
                 print(f"The nic name matched is {nic}")
                 return nic
     return None
 
+
 nic = get_nic_name()
 NIC_NAME = "lo" if nic is None else nic
+
 
 # Query ConfigMap from Kubernetes
 def query_configmap(name, namespace):
@@ -85,6 +96,7 @@ def query_configmap(name, namespace):
         print(f"Unexpected error querying ConfigMap: {e}")
         return None
 
+
 # Get node count from Kubernetes
 def discover_worker_nodes():
     """Discover worker nodes from Kubernetes.
@@ -104,12 +116,15 @@ def discover_worker_nodes():
         decode_count = len(decode_pods.items)
         nodes_count = prefill_count + decode_count
 
-        print(f"Discovered {nodes_count} worker nodes (prefill: {prefill_count}, decode: {decode_count})")
+        print(
+            f"Discovered {nodes_count} worker nodes (prefill: {prefill_count}, decode: {decode_count})"
+        )
         return nodes_count
 
     except Exception as e:
         print(f"Unexpected error discovering worker nodes: {e}")
         return 0
+
 
 def set_environment_variables(env_vars):
     """Set environment variables.
@@ -128,6 +143,7 @@ def set_environment_variables(env_vars):
         os.environ[key] = value
 
     return env_vars
+
 
 def check_port_availability(host, port, timeout=3):
     """Check if the port is available.
@@ -164,6 +180,7 @@ def check_port_availability(host, port, timeout=3):
     except Exception as e:
         print(f"Port check unexpected error for {host}:{port}: {e}")
         return False
+
 
 def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15):
     """Wait for all nodes' ports to be ready.
@@ -209,8 +226,8 @@ def wait_for_all_ports_ready(ips, port, timeout=LOCAL_TIMEOUT, check_interval=15
     print(f"Timeout: Not all nodes are ready after {timeout} seconds")
     return False
 
-def check_role(allowed_roles: Union[str, Iterable[str]]):
 
+def check_role(allowed_roles: Union[str, Iterable[str]]):
     if isinstance(allowed_roles, str):
         allowed_roles = {allowed_roles}
     else:
@@ -226,10 +243,15 @@ def check_role(allowed_roles: Union[str, Iterable[str]]):
             if current_role in allowed_roles:
                 return func(self, *args, **kwargs)
             else:
-                print(f"The current node is {current_role}, skip this function {func.__name__}.")
+                print(
+                    f"The current node is {current_role}, skip this function {func.__name__}."
+                )
                 return None
+
         return wrapper
+
     return decorator
+
 
 # Launch master/worker node
 def launch_pd_mix_node(model_config):
@@ -263,11 +285,15 @@ def launch_pd_mix_node(model_config):
         is_ready = True
 
     if not is_ready:
-        raise RuntimeError(f"Timeout: Failed to get master node information from ConfigMap after {LOCAL_TIMEOUT} seconds")
+        raise RuntimeError(
+            f"Timeout: Failed to get master node information from ConfigMap after {LOCAL_TIMEOUT} seconds"
+        )
 
     special_args = [
-        "--dist-init-addr", dist_init_addr,
-        "--node-rank", str(pod_index),
+        "--dist-init-addr",
+        dist_init_addr,
+        "--node-rank",
+        str(pod_index),
     ]
     other_args = model_config["other_args"]
     for sa in special_args:
@@ -292,9 +318,10 @@ def launch_pd_mix_node(model_config):
 
     return process
 
+
 # Launch prefill/decode separation node
-def launch_pd_seperation_node(model_config):
-    print(f"Launch pd seperation node start ......")
+def launch_pd_separation_node(model_config):
+    print(f"Launch pd separation node start ......")
     pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
     role = "prefill" if "prefill" in LOCAL_HOST_NAME else "decode"
 
@@ -326,18 +353,25 @@ def launch_pd_seperation_node(model_config):
         if master_prefill_ip and master_decode_ip:
             is_ready = True
         else:
-            print(f"Missing master node information - prefill: {master_prefill_ip}, decode: {master_decode_ip}")
+            print(
+                f"Missing master node information - prefill: {master_prefill_ip}, decode: {master_decode_ip}"
+            )
             print("Retrying in 15s...")
             time.sleep(15)
     if not is_ready:
-        raise RuntimeError(f"Timeout: Failed to get master node information from ConfigMap")
+        raise RuntimeError(
+            f"Timeout: Failed to get master node information from ConfigMap"
+        )
 
     # Generate prefill/decode run command
     common_args = [
         "--trust-remote-code",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--disaggregation-transfer-backend", "ascend",
+        "--attention-backend",
+        "ascend",
+        "--device",
+        "npu",
+        "--disaggregation-transfer-backend",
+        "ascend",
     ]
     service_args = list(common_args)
 
@@ -354,18 +388,24 @@ def launch_pd_seperation_node(model_config):
 
         prefill_args = model_config["prefill_args"]
         if is_prefill_instance_multi_node:
-            print("No node-rank specified - all prefill nodes will form a single instance.")
+            print(
+                "No node-rank specified - all prefill nodes will form a single instance."
+            )
             prefill_args.extend(
                 [
-                    "--node-rank", pod_index,
-                    "--dist-init-addr", dist_init_addr,
-                    "--disaggregation-bootstrap-port", bootstrap_init_port,
+                    "--node-rank",
+                    pod_index,
+                    "--dist-init-addr",
+                    dist_init_addr,
+                    "--disaggregation-bootstrap-port",
+                    bootstrap_init_port,
                 ]
             )
         else:
             print("Node-rank specified - each prefill node is an instance.")
             prefill_args.extend([
-                    "--disaggregation-bootstrap-port", str(bootstrap_init_port + pod_index),
+                "--disaggregation-bootstrap-port",
+                str(bootstrap_init_port + pod_index),
             ])
 
         service_args.extend(prefill_args)
@@ -378,10 +418,14 @@ def launch_pd_seperation_node(model_config):
 
         decode_args = model_config["decode_args"]
         if is_decode_instance_multi_node:
-            print("No node-rank specified - all decode nodes will form a single instance.")
+            print(
+                "No node-rank specified - all decode nodes will form a single instance."
+            )
             decode_args.extend([
-                "--node-rank", str(pod_index),
-                "--dist-init-addr", dist_init_addr,
+                "--node-rank",
+                str(pod_index),
+                "--dist-init-addr",
+                dist_init_addr,
             ])
         else:
             print("Node-rank specified - each decode node is an instance.")
@@ -403,6 +447,7 @@ def launch_pd_seperation_node(model_config):
         raise RuntimeError(f"Failed to start {role} node on {LOCAL_HOST_IP}: {e}")
 
     return process
+
 
 # Launch router node
 def launch_router(model_config):
@@ -429,10 +474,16 @@ def launch_router(model_config):
         print(f"Retrieved ConfigMap data: {configmap.data}")
         for pod_name, pod_ip in configmap.data.items():
             pod_index = int(pod_name.rsplit("-", 1)[-1])
-            prefill_keyword = "prefill-0" if is_multi_node_prefill_instance else "prefill"
+            prefill_keyword = (
+                "prefill-0" if is_multi_node_prefill_instance else "prefill"
+            )
             if prefill_keyword in pod_name:
                 prefill_url.append(f"{pod_ip}:{PREFILL_DECODE_PORT}")
-                bootstrap_port = (bootstrap_init_port if is_multi_node_prefill_instance else bootstrap_init_port + pod_index)
+                bootstrap_port = (
+                    bootstrap_init_port
+                    if is_multi_node_prefill_instance
+                    else bootstrap_init_port + pod_index
+                )
                 bootstrap_ports.append(str(bootstrap_port))
                 node_ip_list.append(pod_ip)
             decode_keyword = "decode-0" if is_multi_node_decode_instance else "decode"
@@ -446,14 +497,18 @@ def launch_router(model_config):
             time.sleep(15)
 
     if not is_ready:
-        raise RuntimeError(f"Timeout: Failed to get complete node information from ConfigMap")
+        raise RuntimeError(
+            f"Timeout: Failed to get complete node information from ConfigMap"
+        )
     print(
         f"ConfigMap monitoring complete: prefill_url={prefill_url}, decode_url={decode_url}, "
         f"bootstrap_ports={bootstrap_ports}, node_ip_list={node_ip_list}"
     )
 
     # Check all node port ready
-    if not wait_for_all_ports_ready(ips=node_ip_list, port=PREFILL_DECODE_PORT, timeout=LOCAL_TIMEOUT):
+    if not wait_for_all_ports_ready(
+        ips=node_ip_list, port=PREFILL_DECODE_PORT, timeout=LOCAL_TIMEOUT
+    ):
         raise RuntimeError("Failed to wait for all nodes to be ready")
 
     # Set environment variables
@@ -462,16 +517,24 @@ def launch_router(model_config):
     router_args = model_config["router_args"]
     # Router server params
     router_command = [
-        "python3", "-u", "-m", "sglang_router.launch_router",
-        "--host", "0.0.0.0",
-        "--port", str(SERVICE_PORT),
+        "python3",
+        "-u",
+        "-m",
+        "sglang_router.launch_router",
+        "--host",
+        "0.0.0.0",
+        "--port",
+        str(SERVICE_PORT),
         "--pd-disaggregation",
-        "--policy", "cache_aware",
+        "--policy",
+        "cache_aware",
         *[str(x) for x in router_args],
     ]
 
     for index, url in enumerate(prefill_url):
-        router_command.extend(["--prefill", f"http://{url}", f"{bootstrap_ports[index]}"])
+        router_command.extend(
+            ["--prefill", f"http://{url}", f"{bootstrap_ports[index]}"]
+        )
 
     for url in decode_url:
         router_command.extend(["--decode", f"http://{url}"])
@@ -482,6 +545,7 @@ def launch_router(model_config):
         print(f"Router process started with PID: {router_process.pid}")
     except Exception as e:
         raise RuntimeError(f"Failed to start router process: {e}")
+
 
 def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
     """Wait for the server to be ready.
@@ -511,8 +575,11 @@ def wait_server_ready(url, timeout=LOCAL_TIMEOUT):
 
         elapsed_time = time.perf_counter() - start_time
         if elapsed_time > timeout:
-            raise RuntimeError(f"Server {url} failed to start in {timeout}s (elapsed: {elapsed_time:.2f}s)")
+            raise RuntimeError(
+                f"Server {url} failed to start in {timeout}s (elapsed: {elapsed_time:.2f}s)"
+            )
         time.sleep(check_interval)
+
 
 class TestAscendMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
@@ -552,7 +619,9 @@ class TestAscendMultiNodePdMixTestCaseBase(CustomTestCase):
         print(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
-        print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
+        print(
+            f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize..."
+        )
         time.sleep(SERVER_INITIALIZATION_DELAY)
 
     @classmethod
@@ -565,7 +634,9 @@ class TestAscendMultiNodePdMixTestCaseBase(CustomTestCase):
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
         keep_alive_time = 1800
-        print(f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds")
+        print(
+            f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds"
+        )
         time.sleep(keep_alive_time)
 
     @classmethod
@@ -578,14 +649,24 @@ class TestAscendMultiNodePdMixTestCaseBase(CustomTestCase):
                 cls.stop_event.set()
                 cls.sglang_thread.join(timeout=5)
                 if cls.sglang_thread.is_alive():
-                    print("Warning: subprocess is not terminated normally, it may has been already force stopped.")
+                    print(
+                        "Warning: subprocess is not terminated normally, it may has been already force stopped."
+                    )
                 else:
                     print("Subprocess has been Stopped.")
         else:
             print("No running sglang thread.")
 
     @check_role(allowed_roles=["master"])
-    def run_gsm8k_test(self, expect_accuracy, num_shots=8, data_path=None, num_questions=200, max_new_tokens=512, parallel=128):
+    def run_gsm8k_test(
+        self,
+        expect_accuracy,
+        num_shots=8,
+        data_path=None,
+        num_questions=200,
+        max_new_tokens=512,
+        parallel=128,
+    ):
         args = SimpleNamespace(
             num_shots=num_shots,
             data_path=data_path,
@@ -602,6 +683,7 @@ class TestAscendMultiNodePdMixTestCaseBase(CustomTestCase):
             expect_accuracy,
             f'Accuracy is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
         )
+
 
 class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
@@ -641,20 +723,24 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         print(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
-        print(f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize...")
+        print(
+            f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize..."
+        )
         time.sleep(SERVER_INITIALIZATION_DELAY)
 
     @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
     def start_pd_server(cls):
-        print(f"Starting pd seperation node in thread...")
+        print(f"Starting pd separation node in thread...")
         cls.sglang_thread = threading.Thread(
-            target=launch_pd_seperation_node, args=(cls.model_config,)
+            target=launch_pd_separation_node, args=(cls.model_config,)
         )
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
         keep_alive_time = 1800
-        print(f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds")
+        print(
+            f"{cls.role} node started, keeping test alive for {keep_alive_time} seconds"
+        )
         time.sleep(keep_alive_time)
 
     @classmethod
@@ -667,14 +753,24 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
                 cls.stop_event.set()
                 cls.sglang_thread.join(timeout=5)
                 if cls.sglang_thread.is_alive():
-                    print("Warning: subprocess is not terminated normally, it may has been already force stopped.")
+                    print(
+                        "Warning: subprocess is not terminated normally, it may has been already force stopped."
+                    )
                 else:
                     print("Subprocess has been Stopped.")
         else:
             print("No running sglang thread.")
 
     @check_role(allowed_roles=["router"])
-    def run_gsm8k_test(self, expect_accuracy, num_shots=8, data_path=None, num_questions=200, max_new_tokens=512, parallel=128):
+    def run_gsm8k_test(
+        self,
+        expect_accuracy,
+        num_shots=8,
+        data_path=None,
+        num_questions=200,
+        max_new_tokens=512,
+        parallel=128,
+    ):
         args = SimpleNamespace(
             num_shots=num_shots,
             data_path=data_path,

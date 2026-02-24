@@ -1,11 +1,11 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerfMultiNodePdSepTestCaseBase,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     ROUND_ROBIN
 )
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 
 MODEL_CONFIG = {
     "model_path": DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
