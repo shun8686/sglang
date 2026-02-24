@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerformanceTestCaseBase,
     QWEN3_480B_W8A8_MODEL_PATH,
@@ -13,8 +12,8 @@ QWEN3_480B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "2100",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
 }
 

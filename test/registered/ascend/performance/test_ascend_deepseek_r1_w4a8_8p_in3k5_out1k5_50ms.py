@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerformanceTestCaseBase,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
@@ -13,8 +12,8 @@ MODEL_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "36",
     "HCCL_BUFFSIZE": "1600",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",

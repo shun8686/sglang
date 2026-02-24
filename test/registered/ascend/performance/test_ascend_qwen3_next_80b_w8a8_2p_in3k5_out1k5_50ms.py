@@ -1,6 +1,5 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
     TestAscendPerformanceTestCaseBase,
     QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
@@ -12,8 +11,8 @@ register_npu_ci(est_time=1800, suite="nightly-4-npu-a3", nightly=True)
 QWEN3_NEXT_80B_A3B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "HCCL_ALGO": "level0:NA;level1:ring",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "20",
