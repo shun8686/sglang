@@ -89,6 +89,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             time.sleep(1)
 
     def test_grpc_mode(self):
+        sleep(600)
         print("===========http://127.0.0.1:21000==============")
         response = requests.post(
             f"http://127.0.0.1:21000/generate",
