@@ -5,7 +5,7 @@ import subprocess
 import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_8B
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -28,7 +28,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        cls.model = QWEN3_8B
         # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
@@ -89,28 +89,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             time.sleep(1)
 
     def test_grpc_mode(self):
-        sleep(600)
-        print("===========http://127.0.0.1:21000==============")
-        response = requests.post(
-            f"http://127.0.0.1:21000/generate",
-            json={
-                "model": self.model,
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
-
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-        print("===========http://127.0.0.1:21000_end==============")
-
-        print("===========base_url==============")
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -123,31 +101,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-        print("===========base_url_end==============")
-
-        print("===========http://127.0.0.1:21000==============")
-        response = requests.post(
-            f"http://127.0.0.1:21000/generate",
-            json={
-                "model": self.model,
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
-
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-        print("===========http://127.0.0.1:21000_end==============")
 
 
 if __name__ == "__main__":
