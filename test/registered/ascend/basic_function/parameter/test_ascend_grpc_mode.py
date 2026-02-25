@@ -90,19 +90,20 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     def test_grpc_mode(self):
         response = requests.post(
             f"{self.base_url}/worker",
-            # json={
-            #     "model": self.model,
-            #     "text": "The capital of France is",
-            #     "sampling_params": {
-            #         "temperature": 0,
-            #         "max_new_tokens": 32,
-            #     },
-            # },
+            json={
+                "url": f"{self.base_url}",
+                # "model": self.model,
+                # "text": "The capital of France is",
+                # "sampling_params": {
+                #     "temperature": 0,
+                #     "max_new_tokens": 32,
+                # },
+            },
         )
 
         print(f"{response.status_code=}, {response.text=}")
 
-        sleep(600)
+        # sleep(600)
 
         # response = requests.post(
         #     f"{self.base_url}/generate",
