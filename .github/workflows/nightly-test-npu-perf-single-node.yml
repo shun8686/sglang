@@ -78,8 +78,10 @@ jobs:
           # copy download through proxy
           curl -o /tmp/test.jsonl -L https://gh-proxy.test.osinfra.cn/https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl
 
+          pip3 install kubernetes
 
-          echo "scaling_governor: $(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor)"
+          echo "scaling_governor performance num: \
+            $(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | grep performance | wc -l)"
           echo "swappiness: $(cat /proc/sys/vm/swappiness)"
           echo "numa_balancing: $(cat /proc/sys/kernel/numa_balancing)"
           echo "sched_migration_cost_ns: $(cat /proc/sys/kernel/sched_migration_cost_ns)"
