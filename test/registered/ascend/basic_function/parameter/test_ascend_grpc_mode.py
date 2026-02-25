@@ -39,9 +39,13 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         worker_command = [
             "python3",
             "-m", "sglang.launch_server",
-            "--model-path", cls.model,
+            "--model-path",
+            cls.model,
             "--grpc-mode",
-            "--host", cls.grpc_url.hostname, "--port", str(cls.grpc_url.port),
+            "--host",
+            cls.grpc_url.hostname,
+            "--port",
+            str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         # TODO: 检查服务是否拉起
@@ -50,9 +54,14 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         router_command = [
             "python3",
             "-m", "sglang_router.launch_router",
-            "--worker-urls", cls.grpc_base_url,
-            "--host", cls.url.hostname, "--port", str(cls.url.port),
-            "--model-path", cls.model,
+            "--worker-urls",
+            cls.grpc_base_url,
+            "--host",
+            cls.url.hostname,
+            "--port",
+            str(cls.url.port),
+            "--model-path",
+            cls.model,
         ]
         cls.router_process = popen_with_error_check(router_command)
         cls.wait_server_ready(cls.base_url + "/health")
@@ -80,7 +89,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             time.sleep(1)
 
     def test_grpc_mode(self):
-        # sleep(600)
+        print("===========http://127.0.0.1:21000==============")
         response = requests.post(
             f"http://127.0.0.1:21000/generate",
             json={
@@ -96,11 +105,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         print(f"{response.status_code=}")
         print(f"{response.text=}")
 
-
-
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        print("===========http://127.0.0.1:21000_end==============")
 
+        print("===========base_url==============")
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -113,9 +122,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        print("===========base_url==============")
         print(f"{response.status_code=}")
         print(f"{response.text=}")
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        print("===========base_url_end==============")
         # self.assertEqual(response.status_code, 500, "The request status code is not 500.")
         # self.assertIn("Paris", response.text, "The inference result does not include Paris.")
         #
