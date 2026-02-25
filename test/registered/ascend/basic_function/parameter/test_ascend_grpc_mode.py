@@ -80,6 +80,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     def wait_router_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
         start_time = time.perf_counter()
         while True:
+            response = requests.get(url)
             try:
                 response = requests.get(url)
                 print(f"{response.status_code=}, {response.text=}")
@@ -99,6 +100,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     def wait_worker_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
         start_time = time.perf_counter()
         while True:
+            response = requests.get(url)
             try:
                 response = requests.get(url)
                 print(f"{response.status_code=}, {response.text=}")
