@@ -1,9 +1,9 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
-    TestAscendPerformanceTestCaseBase,
     QWEN3_30B_A3B_W8A8_MODEL_PATH,
-    QWEN3_A3B_EAGLE_MODEL_PATH
+    QWEN3_A3B_EAGLE_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -20,30 +20,54 @@ QWEN3_30B_A3B_ENVS = {
     "SGLANG_ENABLE_SPEC_V2": "1",
 }
 
-QWEN3_30B_A3B_OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--quantization", "modelslim",
-        "--max-running-requests", 192,
-        "--disable-radix-cache",
-        "--speculative-draft-model-quantization", "unquant",
-        "--chunked-prefill-size", -1,
-        "--max-prefill-tokens", 32768,
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_A3B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 3,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 4,
-        "--tp-size", 2,
-        "--mem-fraction-static", 0.86,
-        "--cuda-graph-bs", 42, 88, 96, 132, 144, 156, 172, 178, 192,
-        "--dtype", "bfloat16",
-    ]
-)
+QWEN3_30B_A3B_OTHER_ARGS = [
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--quantization",
+    "modelslim",
+    "--max-running-requests",
+    192,
+    "--disable-radix-cache",
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    32768,
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_A3B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
+    "--tp-size",
+    2,
+    "--mem-fraction-static",
+    0.86,
+    "--cuda-graph-bs",
+    42,
+    88,
+    96,
+    132,
+    144,
+    156,
+    172,
+    178,
+    192,
+    "--dtype",
+    "bfloat16",
+]
 
 
 class TestQwen30B(TestAscendPerformanceTestCaseBase):

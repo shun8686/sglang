@@ -1,3 +1,4 @@
+import logging
 import os
 import subprocess
 import threading
@@ -6,11 +7,12 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
+    SERVICE_PORT,
+    check_role,
     launch_pd_mix_node,
+    launch_pd_separation_node,
     launch_router,
     wait_server_ready,
-    launch_pd_separation_node,
-    SERVICE_PORT, check_role
 )
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -19,19 +21,46 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-DEEPSEEK_R1_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
-DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
-DEEPSEEK_V32_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8"
-QWEN3_30B_A3B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
+DEEPSEEK_R1_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+)
+DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
+)
+DEEPSEEK_V32_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8"
+)
+QWEN3_30B_A3B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
+)
 QWEN3_A3B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-a3B_eagle3"
 QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
-QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
+QWEN3_32B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+)
+QWEN3_32B_EAGLE_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
+)
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B"
-QWEN3_235B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
-QWEN3_235B_A22B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
-QWEN3_480B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
-QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
+QWEN3_235B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
+)
+QWEN3_235B_A22B_EAGLE_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+)
+QWEN3_480B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+)
+QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
+)
 GLM_4_6_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
 
 ROUND_ROBIN = "round_robin"
@@ -54,12 +83,12 @@ OUTPUT_TOKEN_THROUGHPUT_TOLERANCE = 0.98  # -2%
 
 # Package filtering keywords
 PACKAGE_FILTER_KEYWORDS = [
-    'sglang',
-    'sgl',
-    'torch',
-    'transformers',
-    'deep-ep',
-    'memfabric_hybrid'
+    "sglang",
+    "sgl",
+    "torch",
+    "transformers",
+    "deep-ep",
+    "memfabric_hybrid",
 ]
 
 
@@ -73,7 +102,7 @@ def get_cann_version():
     cann_ver_num = None
 
     try:
-        with open(cann_info_file, "r", encoding='utf-8') as f:
+        with open(cann_info_file, "r", encoding="utf-8") as f:
             for line in f:
                 if line.startswith("version="):
                     cann_ver_num = line.strip()
@@ -81,17 +110,17 @@ def get_cann_version():
 
         if cann_ver_num:
             cann_version_info = f"CANN: {cann_ver_num}"
-            print(cann_version_info)
+            logger.info(cann_version_info)
             return cann_version_info
         else:
-            print("CANN version not found")
+            logger.info("CANN version not found")
             return f"CANN: {cann_ver_num}"
 
     except FileNotFoundError:
-        print(f"CANN info file not found: {cann_info_file}")
+        logger.error(f"CANN info file not found: {cann_info_file}")
         return f"CANN: {cann_ver_num}"
     except Exception as e:
-        print(f"Error reading CANN info: {e}")
+        logger.error(f"Error reading CANN info: {e}")
         return f"CANN: {cann_ver_num}"
 
 
@@ -110,7 +139,7 @@ def write_pkg_info_to_file(result_file):
         # Filter relevant packages using list comprehension
         filtered_packages = [
             line
-            for line in packages.split('\n')
+            for line in packages.split("\n")
             if any(keyword in line for keyword in PACKAGE_FILTER_KEYWORDS)
         ]
 
@@ -118,11 +147,11 @@ def write_pkg_info_to_file(result_file):
         with open(result_file, "w", encoding="utf-8") as f:
             for pkg in filtered_packages:
                 f.write(pkg + "\n")
-                print(pkg)
+                logger.info(pkg)
             f.write(get_cann_version() + "\n")
 
     except Exception as e:
-        print(f"Error getting packages: {e}")
+        logger.error(f"Error getting packages: {e}")
 
 
 def run_bench_serving(
@@ -141,7 +170,7 @@ def run_bench_serving(
 ):
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
-    print(f"The metrics result file: {result_file}")
+    logger.info(f"The metrics result file: {result_file}")
 
     write_pkg_info_to_file(result_file)
 
@@ -156,7 +185,7 @@ def run_bench_serving(
         "--model",
         model_path,
         "--backend",
-        backend
+        backend,
     ]
 
     if dataset_name:
@@ -175,10 +204,10 @@ def run_bench_serving(
         cmd_args.extend(["--random-output-len", str(output_len)])
     if random_range_ratio:
         cmd_args.extend(["--random-range-ratio", str(random_range_ratio)])
-    print(f"Command: {' '.join(cmd_args)}")
+    logger.info(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
-    metrics = {'mean_ttft': None, 'mean_tpot': None, 'total_tps': None}
+    metrics = {"mean_ttft": None, "mean_tpot": None, "total_tps": None}
 
     process = subprocess.Popen(
         cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
@@ -189,7 +218,7 @@ def run_bench_serving(
             for line in process.stdout:
                 f.write(line)
                 stripped_line = line.strip()
-                print(stripped_line)
+                logger.info(stripped_line)
 
                 # Extract metrics
                 if "Mean TTFT" in stripped_line:
@@ -206,9 +235,11 @@ def run_bench_serving(
                         metrics["total_tps"] = parts[4]
         process.wait()
         if process.returncode != 0:
-            print(f"Benchmark command failed with return code: {process.returncode}")
+            logger.error(
+                f"Benchmark command failed with return code: {process.returncode}"
+            )
     except Exception as e:
-        print(f"Error running benchmark: {e}")
+        logger.error(f"Error running benchmark: {e}")
     finally:
         if process.stdout is not None and not process.stdout.closed:
             process.stdout.close()
@@ -239,10 +270,10 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
         for key, value in env.items():
-            print(f"ENV_VAR_SYS {key}:{value}")
+            logger.info(f"ENV_VAR_SYS {key}:{value}")
         if cls.envs:
             for key, value in cls.envs.items():
-                print(f"ENV_VAR_CASE {key}:{value}")
+                logger.info(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
 
         cls.process = popen_launch_server(
@@ -255,11 +286,11 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if hasattr(cls, 'process') and cls.process:
+        if hasattr(cls, "process") and cls.process:
             try:
                 kill_process_tree(cls.process.pid)
             except Exception as e:
-                print(f"Error during tearDown: {e}")
+                logger.error(f"Error during tearDown: {e}")
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
@@ -273,22 +304,22 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot + TPOT_TOLERANCE_LOW,
                 )
             else:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot * TPOT_TOLERANCE_HIGH,
                 )
         if self.output_token_throughput:
             self.assertGreaterEqual(
-                float(metrics['total_tps']),
+                float(metrics["total_tps"]),
                 self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
             )
         if self.ttft:
             self.assertLessEqual(
-                float(metrics['mean_ttft']),
+                float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
 
@@ -297,24 +328,24 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         host = parsed_url.hostname
         port = parsed_url.port
         bench_params = {
-            'host': host,
-            'port': port,
-            'model_path': self.model,
-            'backend': self.backend,
-            'dataset_name': self.dataset_name,
-            'request_rate': self.request_rate,
-            'max_concurrency': self.max_concurrency,
-            'num_prompts': self.num_prompts,
-            'input_len': self.input_len,
-            'output_len': self.output_len,
-            'random_range_ratio': self.random_range_ratio,
-            'dataset_path': self.dataset_path,
+            "host": host,
+            "port": port,
+            "model_path": self.model,
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
+            "dataset_path": self.dataset_path,
         }
-        print(f"Starting benchmark with parameters: {bench_params}")
+        logger.info(f"Starting benchmark with parameters: {bench_params}")
 
         metrics = None
         for i in range(run_cycles):
-            print(f"Running benchmark, {i + 1}/{run_cycles}")
+            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
             metrics = run_bench_serving(**bench_params)
 
         self._assert_metrics(metrics)
@@ -343,7 +374,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         cls.base_url = f"http://{cls.host}:{cls.port}"
         cls.hostname = os.getenv("HOSTNAME")
         cls.role = "master" if cls.hostname.endswith("sglang-node-0") else "worker"
-        print(f"Init {cls.host} {cls.role=}!")
+        logger.info(f"Init {cls.host} {cls.role=}!")
 
         cls.start_pd_mix_master_node()
         cls.start_pd_mix_worker_node()
@@ -364,22 +395,22 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot + TPOT_TOLERANCE_LOW,
                 )
             else:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot * TPOT_TOLERANCE_HIGH,
                 )
         if self.output_token_throughput:
             self.assertGreaterEqual(
-                float(metrics['total_tps']),
+                float(metrics["total_tps"]),
                 self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
             )
         if self.ttft:
             self.assertLessEqual(
-                float(metrics['mean_ttft']),
+                float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
 
@@ -393,7 +424,9 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 
         wait_server_ready(f"{cls.base_url}/health")
 
-        print(f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......")
+        logger.info(
+            f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......"
+        )
         time.sleep(SERVER_INITIALIZATION_DELAY)
 
     @classmethod
@@ -404,29 +437,31 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         )
         sglang_thread.start()
 
-        print(f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds")
+        logger.info(
+            f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds"
+        )
         time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
 
     @check_role(allowed_roles=["master", "worker"])
     def run_throughput(self, run_cycles=2):
         bench_params = {
-            'host': self.host,
-            'port': str(self.port),
-            'model_path': self.model_config.get("model_path"),
-            'backend': self.backend,
-            'dataset_name': self.dataset_name,
-            'request_rate': self.request_rate,
-            'max_concurrency': self.max_concurrency,
-            'num_prompts': self.num_prompts,
-            'input_len': self.input_len,
-            'output_len': self.output_len,
-            'random_range_ratio': self.random_range_ratio,
+            "host": self.host,
+            "port": str(self.port),
+            "model_path": self.model_config.get("model_path"),
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
         }
-        print(f"Starting benchmark with parameters: {bench_params}")
+        logger.info(f"Starting benchmark with parameters: {bench_params}")
 
         metrics = None
         for i in range(run_cycles):
-            print(f"Running benchmark, {i + 1}/{run_cycles}")
+            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
             metrics = run_bench_serving(**bench_params)
 
         self._assert_metrics(metrics)
@@ -459,7 +494,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             if "router" in cls.hostname
             else "prefill" if "prefill" in cls.hostname else "decode"
         )
-        print(f"Init {cls.host} {cls.role=}!")
+        logger.info(f"Init {cls.host} {cls.role=}!")
 
         cls.start_pd_server()
         cls.start_router_server()
@@ -470,7 +505,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             try:
                 kill_process_tree(cls.process.pid)
             except Exception as e:
-                print(f"Error during tearDown: {e}")
+                logger.error(f"Error during tearDown: {e}")
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
@@ -506,7 +541,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @classmethod
     @check_role(allowed_roles=["router"])
     def start_router_server(cls):
-        print(f"Starting router in thread...")
+        logger.info(f"Starting router in thread...")
         cls.sglang_thread = threading.Thread(
             target=launch_router, args=(cls.model_config,)
         )
@@ -514,10 +549,10 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.sglang_thread.start()
 
         health_check_url = f"{cls.base_url}/health"
-        print(f"Waiting for router to be ready at {health_check_url}")
+        logger.info(f"Waiting for router to be ready at {health_check_url}")
         wait_server_ready(health_check_url)
 
-        print(
+        logger.info(
             f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize..."
         )
         time.sleep(SERVER_INITIALIZATION_DELAY)
@@ -525,13 +560,13 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
     def start_pd_server(cls):
-        print(f"Starting pd separation node in thread...")
+        logger.info(f"Starting pd separation node in thread...")
         cls.sglang_thread = threading.Thread(
             target=launch_pd_separation_node, args=(cls.model_config,)
         )
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
-        print(
+        logger.info(
             f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds"
         )
         time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
@@ -539,23 +574,23 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @check_role(allowed_roles=["router"])
     def run_throughput(self, run_cycles=2):
         bench_params = {
-            'host': self.host,
-            'port': str(self.port),
-            'model_path': self.model_config.get("model_path"),
-            'backend': self.backend,
-            'dataset_name': self.dataset_name,
-            'request_rate': self.request_rate,
-            'max_concurrency': self.max_concurrency,
-            'num_prompts': self.num_prompts,
-            'input_len': self.input_len,
-            'output_len': self.output_len,
-            'random_range_ratio': self.random_range_ratio,
+            "host": self.host,
+            "port": str(self.port),
+            "model_path": self.model_config.get("model_path"),
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
         }
-        print(f"Starting benchmark with parameters: {bench_params}")
+        logger.info(f"Starting benchmark with parameters: {bench_params}")
 
         metrics = None
         for i in range(run_cycles):
-            print(f"Running benchmark, {i + 1}/{run_cycles}")
+            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
             metrics = run_bench_serving(**bench_params)
 
         self._assert_metrics(metrics)

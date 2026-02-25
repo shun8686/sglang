@@ -1,9 +1,9 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
-    TestAscendPerformanceTestCaseBase,
     QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_MODEL_PATH
+    QWEN3_32B_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -19,29 +19,44 @@ QWEN3_32B_ENVS = {
     "SGLANG_ENABLE_SPEC_V2": "1",
 }
 
-QWEN3_32B_OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--max-running-requests", 1,
-        "--disable-radix-cache",
-        "--speculative-draft-model-quantization", "unquant",
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_32B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 4,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 5,
-        "--chunked-prefill-size", -1,
-        "--max-prefill-tokens", 65536,
-        "--tp-size", 16,
-        "--mem-fraction-static", 0.72,
-        "--cuda-graph-bs", 1,
-        "--dtype", "bfloat16",
-    ]
-)
+QWEN3_32B_OTHER_ARGS = [
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--max-running-requests",
+    1,
+    "--disable-radix-cache",
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_32B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    4,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    5,
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    65536,
+    "--tp-size",
+    16,
+    "--mem-fraction-static",
+    0.72,
+    "--cuda-graph-bs",
+    1,
+    "--dtype",
+    "bfloat16",
+]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):

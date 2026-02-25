@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
+    DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
-    DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -26,32 +26,50 @@ MODEL_ENVS = {
     "ENABLE_MOE_NZ": "1",
 }
 
-MODEL_OTHER_ARGS = (
-    [
-        "--tp-size", 16,
-        "--trust-remote-code",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--quantization", "modelslim",
-        "--watchdog-timeout", 9000,
-        "--cuda-graph-bs", 4, 8, 16,
-        "--mem-fraction-static", 0.74,
-        "--max-running-requests", 256,
-        "--disable-radix-cache",
-        "--chunked-prefill-size", "-1",
-        "--max-prefill-tokens", "1500",
-        "--moe-a2a-backend", "deepep",
-        "--deepep-mode", "auto",
-        "--enable-dp-attention",
-        "--dp-size", 16,
-        "--enable-dp-lm-head",
-        "--speculative-algorithm", "NEXTN",
-        "--speculative-num-steps", 3,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 4,
-        "--dtype", "bfloat16",
-    ]
-)
+MODEL_OTHER_ARGS = [
+    "--tp-size",
+    16,
+    "--trust-remote-code",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--quantization",
+    "modelslim",
+    "--watchdog-timeout",
+    9000,
+    "--cuda-graph-bs",
+    4,
+    8,
+    16,
+    "--mem-fraction-static",
+    0.74,
+    "--max-running-requests",
+    256,
+    "--disable-radix-cache",
+    "--chunked-prefill-size",
+    "-1",
+    "--max-prefill-tokens",
+    "1500",
+    "--moe-a2a-backend",
+    "deepep",
+    "--deepep-mode",
+    "auto",
+    "--enable-dp-attention",
+    "--dp-size",
+    16,
+    "--enable-dp-lm-head",
+    "--speculative-algorithm",
+    "NEXTN",
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
+    "--dtype",
+    "bfloat16",
+]
 
 
 class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):

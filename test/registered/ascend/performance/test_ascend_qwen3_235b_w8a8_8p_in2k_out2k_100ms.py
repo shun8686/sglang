@@ -1,9 +1,9 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
-    TestAscendPerformanceTestCaseBase,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-    QWEN3_235B_W8A8_MODEL_PATH
+    QWEN3_235B_W8A8_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -21,35 +21,59 @@ QWEN3_235B_ENVS = {
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "144",
 }
 
-QWEN3_235B_OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--quantization", "modelslim",
-        "--max-running-requests", 576,
-        "--context-length", 8192,
-        "--dtype", "bfloat16",
-        "--chunked-prefill-size", 32768,
-        "--max-prefill-tokens", 458880,
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 3,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 4,
-        "--disable-radix-cache",
-        "--moe-a2a-backend", "deepep",
-        "--deepep-mode", "auto",
-        "--speculative-draft-model-quantization", "unquant",
-        "--tp-size", 16,
-        "--dp-size", 16,
-        "--enable-dp-attention",
-        "--enable-dp-lm-head",
-        "--mem-fraction-static", 0.84,
-        "--cuda-graph-bs", 8, 16, 20, 24, 32, 36,
-    ]
-)
+QWEN3_235B_OTHER_ARGS = [
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--quantization",
+    "modelslim",
+    "--max-running-requests",
+    576,
+    "--context-length",
+    8192,
+    "--dtype",
+    "bfloat16",
+    "--chunked-prefill-size",
+    32768,
+    "--max-prefill-tokens",
+    458880,
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
+    "--disable-radix-cache",
+    "--moe-a2a-backend",
+    "deepep",
+    "--deepep-mode",
+    "auto",
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--tp-size",
+    16,
+    "--dp-size",
+    16,
+    "--enable-dp-attention",
+    "--enable-dp-lm-head",
+    "--mem-fraction-static",
+    0.84,
+    "--cuda-graph-bs",
+    8,
+    16,
+    20,
+    24,
+    32,
+    36,
+]
 
 
 class TestQwen235B(TestAscendPerformanceTestCaseBase):

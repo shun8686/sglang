@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
+    QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
-    QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -21,20 +21,33 @@ QWEN3_NEXT_80B_A3B_ENVS = {
 
 QWEN3_NEXT_80B_A3B_OTHER_ARGS = [
     "--trust-remote-code",
-    "--attention-backend", "ascend",
-    "--device", "npu",
-    "--tp-size", 4,
-    "--mem-fraction-static", 0.685,
-    "--max-running-requests", 80,
-    "--watchdog-timeout", 9000,
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--tp-size",
+    4,
+    "--mem-fraction-static",
+    0.685,
+    "--max-running-requests",
+    80,
+    "--watchdog-timeout",
+    9000,
     "--disable-radix-cache",
-    "--cuda-graph-bs", 80,
-    "--max-prefill-tokens", 28672,
-    "--max-total-tokens", 450560,
-    "--moe-a2a-backend", "deepep",
-    "--deepep-mode", "auto",
-    "--quantization", "modelslim",
-    "--chunked-prefill-size", -1,
+    "--cuda-graph-bs",
+    80,
+    "--max-prefill-tokens",
+    28672,
+    "--max-total-tokens",
+    450560,
+    "--moe-a2a-backend",
+    "deepep",
+    "--deepep-mode",
+    "auto",
+    "--quantization",
+    "modelslim",
+    "--chunked-prefill-size",
+    -1,
 ]
 
 
