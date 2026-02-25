@@ -59,7 +59,7 @@ def create_kube_yaml(kube_yaml_template, output_yaml, pod_context):
     kube_pod_yaml = template.render(pod_context)
     with open(output_yaml, "w") as f:
         f.write(kube_pod_yaml)
-    print(f"Pod YAML written to {output_yaml}")
+    logger.info(f"Pod YAML written to {output_yaml}")
 
 
 def create_pod(yaml_file, namespace):
@@ -171,7 +171,7 @@ def check_pods_ready(namespace, pod_name_key_str, timeout=300):
             sglang_pods_found = True
             status = pod.status
             phase = status.phase
-            print(f"Pod: {pod_name}, status: {phase}")
+            logger.info(f"Pod: {pod_name}, status: {phase}")
             if phase != "Running":
                 all_running = False
                 break
@@ -187,16 +187,16 @@ def check_pods_ready(namespace, pod_name_key_str, timeout=300):
                 break
 
         if not sglang_pods_found:
-            print("No sglang pod, waiting...")
+            logger.info("No sglang pod, waiting...")
             time.sleep(5)
             continue
         if all_running:
-            print("All sglang Pod is Running !")
+            logger.info("All sglang Pod is Running !")
             return True
 
         time.sleep(5)
 
-    print(f"timeout in {timeout}s")
+    logger.info(f"timeout in {timeout}s")
     return False
 
 
@@ -210,22 +210,22 @@ def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
         response = core_api.create_namespaced_config_map(
             namespace=namespace, body=configmap
         )
-        print(f"ConfigMap '{cm_name}' create successfully!")
-        print(f"data: {list(data.keys())}")
+        logger.info(f"ConfigMap '{cm_name}' create successfully!")
+        logger.info(f"data: {list(data.keys())}")
         return response
     except ApiException as e:
         if e.status == 409:
-            print(f"ConfigMap {cm_name} already exists. Updating...")
+            logger.info(f"ConfigMap {cm_name} already exists. Updating...")
             response = core_api.replace_namespaced_config_map(
                 namespace=namespace, name=cm_name, body=configmap
             )
-            print(f"ConfigMap {cm_name} updated successfully.")
+            logger.info(f"ConfigMap {cm_name} updated successfully.")
             return response
         else:
             error_msg = f"ConfigMap create failed: {e.reason}"
             if e.body:
                 error_msg += f" | details: {e.body}"
-            print(error_msg)
+            logger.info(error_msg)
             raise
 
 
@@ -265,7 +265,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
             bufsize=1,
         )
 
-        print(f"Starting to monitor logs for Pod: {pod_name}")
+        logger.info(f"Starting to monitor logs for Pod: {pod_name}")
         match_state = 0
         matched = False
         is_success = False
@@ -283,7 +283,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
                 time.sleep(0.1)
                 continue
             line = line.rstrip("\n")
-            print(line)
+            logger.info(line)
             # Check if current line matches expected pattern
             if match_state < len(patterns) and patterns[match_state].match(line):
                 match_state += 1
@@ -291,7 +291,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
                     matched = True
                     if pattern_ok.match(line):
                         is_success = True
-                    print("\nDetected complete test completion pattern!")
+                    logger.info("\nDetected complete test completion pattern!")
             else:
                 match_state = 0
                 if patterns[0].match(line):
@@ -302,7 +302,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
             if process.poll() is not None:
                 remaining_output, stderr_output = process.communicate()
                 if remaining_output:
-                    print(remaining_output)
+                    logger.info(remaining_output)
                 if stderr_output:
                     raise Exception(f"kubectl command error: {stderr_output}")
                 else:
@@ -314,7 +314,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
         elif not is_success:
             raise Exception("The test result was FAILED!")
         else:
-            print("The test result was OK!")
+            logger.info("The test result was OK!")
     finally:
         if process and process.poll() is None:
             process.terminate()
@@ -351,7 +351,7 @@ def run_ascend_e2e_test_case(
     kube_yaml_file = kube_yaml_file_dict.get(kube_job_type)
 
     try:
-        print(
+        logger.info(
             f"Apply k8s yaml... KUBE_NAME_SPACE:{kube_name_space}, KUBE_CONFIG_MAP:{kube_config_map}, "
             f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}"
         )
@@ -429,14 +429,16 @@ def run_ascend_e2e_test_case(
                 matching_pod_string = final_kube_job_name
                 cm_data = prepare_cm_data(kube_name_space, matching_pod_string)
                 if not cm_data:
-                    print(f"No sglang pod found while matching {matching_pod_string}")
+                    logger.info(
+                        f"No sglang pod found while matching {matching_pod_string}"
+                    )
 
                 response = create_or_update_configmap(
                     cm_name=kube_config_map, data=cm_data, namespace=kube_name_space
                 )
-                print(response)
+                logger.info(response)
         else:
-            print("Pod not ready, maybe not enough resource")
+            logger.info("Pod not ready, maybe not enough resource")
 
         monitor_pod_name = {
             "single": f"{final_kube_job_name}-pod-0",

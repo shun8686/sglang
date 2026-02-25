@@ -1,10 +1,18 @@
 import argparse
+import logging
 import os.path
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List
 
 from sglang.test.ascend.e2e.run_ascend_ci import run_ascend_e2e_test_case
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
 
 NFS_ROOT_PATH = "/data/ascend-ci-share-pkking-sglang"
 
@@ -57,7 +65,9 @@ def concurrent_run_test_cases(
                         "result": "Pass",
                     }
                 )
-                print(f"Progress: {completed_count}/{total_count} | Case {test_case}")
+                logger.info(
+                    f"Progress: {completed_count}/{total_count} | Case {test_case}"
+                )
             except Exception as e:
                 # Catch exceptions during task submission/execution (e.g., parameter errors)
                 error_result = {
@@ -69,7 +79,7 @@ def concurrent_run_test_cases(
                     "message": f"Task submission/execution exception: {str(e)}",
                 }
                 results.append(error_result)
-                print(
+                logger.error(
                     f"Progress: {completed_count}/{total_count} | Case {test_case} exception: {str(e)}"
                 )
 
@@ -77,7 +87,7 @@ def concurrent_run_test_cases(
     pass_count = len([item for item in results if item["result"] == "Pass"])
     fail_count = len([item for item in results if item["result"] == "Fail"])
     error_count = len([item for item in results if item["result"] == "Error"])
-    print(
+    logger.info(
         f"All test cases completed! Total time: {end_time - start_time:.2f} seconds, "
         f"Total cases: {total_count}, Concurrency level: {concurrency}, "
         f"Pass: {pass_count} | Fail: {fail_count} | Error: {error_count}"
@@ -87,10 +97,10 @@ def concurrent_run_test_cases(
         item["test_case"] for item in results if item["result"] != "Pass"
     ]
     if not_pass_testcase:
-        print("Not Passed Test Cases:")
-        print("\n".join(str(item) for item in not_pass_testcase))
+        logger.info("Not Passed Test Cases:")
+        logger.info("\n".join(str(item) for item in not_pass_testcase))
     else:
-        print("All Pass.")
+        logger.info("All Pass.")
     return results
 
 
