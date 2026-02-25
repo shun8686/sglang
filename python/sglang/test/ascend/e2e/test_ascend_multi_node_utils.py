@@ -14,14 +14,10 @@ from kubernetes.client.rest import ApiException
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
-from sglang.test.test_utils import (
-    CustomTestCase,
-    popen_launch_server,
-)
+from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
-KUBE_CONFIG = os.environ.get('KUBECONFIG')
-NAMESPACE = os.environ.get('NAMESPACE')
-CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
+NAMESPACE = os.environ.get("NAMESPACE")
+CONFIGMAP_NAME = os.environ.get("KUBE_CONFIG_MAP")
 
 LOCAL_TIMEOUT = 3600
 ALL_ROLE_SET = {"prefill", "decode", "router", "master", "worker"}
@@ -31,7 +27,7 @@ ASCEND_RT_VISIBLE_DEVICES = os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
 SERVICE_PORT = (
     6677
     if not ASCEND_RT_VISIBLE_DEVICES
-    else 6677 + int(ASCEND_RT_VISIBLE_DEVICES.strip().split(',')[0])
+    else 6677 + int(ASCEND_RT_VISIBLE_DEVICES.strip().split(",")[0])
 )
 PREFILL_DECODE_PORT = 8000
 BOOTSTRAP_INIT_PORT = 8995
@@ -42,9 +38,6 @@ SERVER_INITIALIZATION_DELAY = 30
 
 # Network configuration
 NETWORK_ADDRESS_PREFIXES = ["172.", "192."]
-
-config.load_kube_config(KUBE_CONFIG)
-v1 = client.CoreV1Api()
 
 
 def get_nic_name():
@@ -79,10 +72,14 @@ def get_host_name():
 def get_host_ip():
     host_ip = os.getenv("POD_IP")
     if not host_ip:
-        raise RuntimeError(
-            f"Missing required environment variables: POD_IP={host_ip}"
-        )
+        raise RuntimeError(f"Missing required environment variables: POD_IP={host_ip}")
     return host_ip
+
+
+def get_k8s_api():
+    kube_config = os.environ.get("KUBECONFIG")
+    config.load_kube_config(kube_config)
+    return client.CoreV1Api()
 
 
 # Query ConfigMap from Kubernetes
@@ -96,8 +93,9 @@ def query_configmap(name, namespace):
     Returns:
         V1ConfigMap: ConfigMap object, or None if failed.
     """
+    k8s_api = get_k8s_api()
     try:
-        configmap = v1.read_namespaced_config_map(name, namespace)
+        configmap = k8s_api.read_namespaced_config_map(name, namespace)
         print(f"Successfully queried ConfigMap {name} in namespace {namespace}")
         return configmap
     except ApiException as e:
@@ -115,11 +113,12 @@ def discover_worker_nodes():
     Returns:
         int: Number of worker nodes, or 0 if failed.
     """
+    k8s_api = get_k8s_api()
     try:
-        prefill_pods = v1.list_namespaced_pod(
+        prefill_pods = k8s_api.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-prefill"
         )
-        decode_pods = v1.list_namespaced_pod(
+        decode_pods = k8s_api.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-decode"
         )
 
@@ -417,10 +416,12 @@ def launch_pd_separation_node(model_config):
             )
         else:
             print("Node-rank specified - each prefill node is an instance.")
-            prefill_args.extend([
-                "--disaggregation-bootstrap-port",
-                str(bootstrap_init_port + pod_index),
-            ])
+            prefill_args.extend(
+                [
+                    "--disaggregation-bootstrap-port",
+                    str(bootstrap_init_port + pod_index),
+                ]
+            )
 
         service_args.extend(prefill_args)
 
@@ -435,12 +436,14 @@ def launch_pd_separation_node(model_config):
             print(
                 "No node-rank specified - all decode nodes will form a single instance."
             )
-            decode_args.extend([
-                "--node-rank",
-                str(pod_index),
-                "--dist-init-addr",
-                dist_init_addr,
-            ])
+            decode_args.extend(
+                [
+                    "--node-rank",
+                    str(pod_index),
+                    "--dist-init-addr",
+                    dist_init_addr,
+                ]
+            )
         else:
             print("Node-rank specified - each decode node is an instance.")
 
@@ -711,7 +714,11 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.port = SERVICE_PORT
         cls.base_url = f"http://{cls.host}:{cls.port}"
         cls.hostname = os.getenv("HOSTNAME")
-        cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
+        cls.role = (
+            "router"
+            if "router" in cls.hostname
+            else "prefill" if "prefill" in cls.hostname else "decode"
+        )
         print(f"Init {cls.host} {cls.role=}!")
         cls.sglang_thread = None
         cls.stop_event = threading.Event()
