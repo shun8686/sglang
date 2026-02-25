@@ -23,13 +23,6 @@ KUBE_CONFIG = os.environ.get('KUBECONFIG')
 NAMESPACE = os.environ.get('NAMESPACE')
 CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
 
-LOCAL_HOST_IP = os.getenv("POD_IP")
-LOCAL_HOST_NAME = os.getenv("HOSTNAME")
-if not LOCAL_HOST_IP or not LOCAL_HOST_NAME:
-    raise RuntimeError(
-        f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}"
-    )
-
 LOCAL_TIMEOUT = 3600
 ALL_ROLE_SET = {"prefill", "decode", "router", "master", "worker"}
 
@@ -72,6 +65,24 @@ def get_nic_name():
 
 nic = get_nic_name()
 NIC_NAME = "lo" if nic is None else nic
+
+
+def get_host_name():
+    host_name = os.getenv("HOSTNAME")
+    if not host_name:
+        raise RuntimeError(
+            f"Missing required environment variables: HOSTNAME={host_name}"
+        )
+    return host_name
+
+
+def get_host_ip():
+    host_ip = os.getenv("POD_IP")
+    if not host_ip:
+        raise RuntimeError(
+            f"Missing required environment variables: POD_IP={host_ip}"
+        )
+    return host_ip
 
 
 # Query ConfigMap from Kubernetes
@@ -256,7 +267,8 @@ def check_role(allowed_roles: Union[str, Iterable[str]]):
 # Launch master/worker node
 def launch_pd_mix_node(model_config):
     print(f"Launch pd mix node start ......")
-    pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
+    host_name = get_host_name()
+    pod_index = int(host_name.rsplit("-", 1)[-1])
 
     # Monitor ConfigMap to generate dist-init-addr and node-rank
     is_ready = False
@@ -303,18 +315,19 @@ def launch_pd_mix_node(model_config):
         print(f"ENV_VAR_CASE {key}:{value}")
         os.environ[key] = value
 
-    print(f"Starting node, {LOCAL_HOST_IP=} {other_args=}")
+    host_ip = get_host_ip()
+    print(f"Starting node, {host_ip=} {other_args=}")
     try:
         process = popen_launch_server(
             model_config["model_path"],
-            f"http://{LOCAL_HOST_IP}:{SERVICE_PORT}",
+            f"http://{host_ip}:{SERVICE_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *other_args,
             ],
         )
     except Exception as e:
-        raise RuntimeError(f"Failed to start node on {LOCAL_HOST_IP}: {e}")
+        raise RuntimeError(f"Failed to start node on {host_ip}: {e}")
 
     return process
 
@@ -322,8 +335,9 @@ def launch_pd_mix_node(model_config):
 # Launch prefill/decode separation node
 def launch_pd_separation_node(model_config):
     print(f"Launch pd separation node start ......")
-    pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
-    role = "prefill" if "prefill" in LOCAL_HOST_NAME else "decode"
+    host_name = get_host_name()
+    pod_index = int(host_name.rsplit("-", 1)[-1])
+    role = "prefill" if "prefill" in host_name else "decode"
 
     bootstrap_init_port = BOOTSTRAP_INIT_PORT
     master_prefill_ip = None
@@ -432,19 +446,20 @@ def launch_pd_separation_node(model_config):
 
         service_args.extend(decode_args)
 
-    print(f"Starting {role} node on {LOCAL_HOST_IP} with args: {service_args}")
+    host_ip = get_host_ip()
+    print(f"Starting {role} node on {host_ip} with args: {service_args}")
 
     try:
         process = popen_launch_server(
             model_config["model_path"],
-            f"http://{LOCAL_HOST_IP}:{PREFILL_DECODE_PORT}",
+            f"http://{host_ip}:{PREFILL_DECODE_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *service_args,
             ],
         )
     except Exception as e:
-        raise RuntimeError(f"Failed to start {role} node on {LOCAL_HOST_IP}: {e}")
+        raise RuntimeError(f"Failed to start {role} node on {host_ip}: {e}")
 
     return process
 
