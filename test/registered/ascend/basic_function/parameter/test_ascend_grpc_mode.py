@@ -30,7 +30,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     def setUpClass(cls):
         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
         # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -46,6 +46,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         # TODO: 检查服务是否拉起
         sleep(30)
+        #
 
         router_command = [
             "python3",
@@ -80,12 +81,13 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             time.sleep(1)
 
     def test_grpc_mode(self):
-        sleep(600)
         response = requests.post(
             f"http://127.0.0.1:21000/generate",
             json={
                 "text": "The capital of France is",
+
                 "sampling_params": {
+
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },

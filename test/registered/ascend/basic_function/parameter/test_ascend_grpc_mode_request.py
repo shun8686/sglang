@@ -58,8 +58,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             f"http://127.0.0.1:21000/generate",
             json={
                 "model": self.model,
+                "model_id": self.model,
                 "text": "The capital of France is",
                 "sampling_params": {
+                    "model": self.model,
+                    "model_id": self.model,
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
