@@ -127,23 +127,26 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
         print("===========base_url_end==============")
-        # self.assertEqual(response.status_code, 500, "The request status code is not 500.")
-        # self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-        #
-        # response = requests.post(
-        #     f"{self.grpc_base_url}/generate",
-        #     json={
-        #         "text": "The capital of France is",
-        #         "sampling_params": {
-        #             "temperature": 0,
-        #             "max_new_tokens": 32,
-        #         },
-        #     },
-        # )
-        #
-        # print("============grpc_base_url============")
-        # print(f"{response.status_code=}")
-        # print(f"{response.text=}")
+
+        print("===========http://127.0.0.1:21000==============")
+        response = requests.post(
+            f"http://127.0.0.1:21000/generate",
+            json={
+                "model": self.model,
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+        print(f"{response.status_code=}")
+        print(f"{response.text=}")
+
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        print("===========http://127.0.0.1:21000_end==============")
 
 
 if __name__ == "__main__":
