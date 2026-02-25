@@ -82,10 +82,12 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         while True:
             try:
                 response = requests.get(url)
+                print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 200:
                     print(f"Server {url} is ready")
                     return
             except Exception:
+                print(f"{response.status_code=}, {response.text=}")
                 pass
 
             if time.perf_counter() - start_time > timeout:
@@ -99,11 +101,13 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         while True:
             try:
                 response = requests.get(url)
+                print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 202:
                     print(f"Server {url} is ready")
                     print(f"{response.text.url}")
                     return
             except Exception:
+                print(f"{response.status_code=}, {response.text=}")
                 pass
 
             if time.perf_counter() - start_time > timeout:
