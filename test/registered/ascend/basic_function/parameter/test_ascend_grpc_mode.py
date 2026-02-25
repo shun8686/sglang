@@ -5,7 +5,7 @@ import subprocess
 import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_8B
+from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -28,9 +28,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_8B
-        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
+        cls.model = QWEN3_8B_WEIGHTS_PATH
+        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
         cls.base_url = DEFAULT_URL_FOR_TEST
