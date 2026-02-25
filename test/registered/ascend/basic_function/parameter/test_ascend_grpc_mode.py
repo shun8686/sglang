@@ -93,7 +93,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             if time.perf_counter() - start_time > timeout:
                 raise RuntimeError(f"Server {url} failed to start in {timeout}s")
 
-            time.sleep(1)
+            time.sleep(5)
 
     @classmethod
     def wait_worker_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
@@ -113,7 +113,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             if time.perf_counter() - start_time > timeout:
                 raise RuntimeError(f"Server {url} failed to start in {timeout}s")
 
-            time.sleep(1)
+            time.sleep(5)
 
 
     def test_grpc_mode(self):
