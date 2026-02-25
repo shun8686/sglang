@@ -1,10 +1,9 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
-    TestAscendPerformanceTestCaseBase,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-    QWEN3_235B_MODEL_PATH
+    QWEN3_235B_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -14,37 +13,52 @@ QWEN3_235B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "1600",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
 }
 
-QWEN3_235B_OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--max-running-requests", 1,
-        "--dtype", "bfloat16",
-        "--chunked-prefill-size", -1,
-        "--max-prefill-tokens", 16384,
-        "--speculative-draft-model-quantization", "unquant",
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 4,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 5,
-        "--disable-radix-cache",
-        "--enable-dp-lm-head",
-        "--tp-size", 16,
-        "--mem-fraction-static", 0.78,
-        "--cuda-graph-bs", 1,
-    ]
-)
+QWEN3_235B_OTHER_ARGS = [
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--max-running-requests",
+    1,
+    "--dtype",
+    "bfloat16",
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    16384,
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    4,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    5,
+    "--disable-radix-cache",
+    "--enable-dp-lm-head",
+    "--tp-size",
+    16,
+    "--mem-fraction-static",
+    0.78,
+    "--cuda-graph-bs",
+    1,
+]
 
 
 class TestQwen235B(TestAscendPerformanceTestCaseBase):

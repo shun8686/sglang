@@ -1,45 +1,79 @@
-import os
 import datetime
+import os
 import unittest
 
-from sglang.srt.utils import kill_process_tree
+from lts_utils import (
+    NIC_NAME,
+    run_bench_serving,
+    run_command,
+    run_gsm8k,
+    run_long_seq_bench_serving,
+)
 
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from lts_utils import NIC_NAME, run_command, run_bench_serving, run_gsm8k, run_long_seq_bench_serving
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
 EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
 OTHER_ARGS = [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--quantization", "modelslim",
-        "--max-running-requests", 480,
-        "--dtype", "bfloat16",
-        "--chunked-prefill-size", 32768,
-        "--max-prefill-tokens", 68000,
-        "--speculative-draft-model-quantization", "unquant",
-        "--speculative-algorithm", "NEXTN",
-        "--speculative-draft-model-path", EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 1,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 2,
-        "--disable-radix-cache",
-        "--moe-a2a-backend", "deepep",
-        "--deepep-mode", "auto",
-        "--tp", 16,
-        "--dp-size", 16,
-        "--enable-dp-attention",
-        "--enable-dp-lm-head",
-        "--mem-fraction-static", 0.78,
-        "--cuda-graph-bs", 6, 8, 10, 12, 15, 18, 28, 30,
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--quantization",
+    "modelslim",
+    "--max-running-requests",
+    480,
+    "--dtype",
+    "bfloat16",
+    "--chunked-prefill-size",
+    32768,
+    "--max-prefill-tokens",
+    68000,
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--speculative-algorithm",
+    "NEXTN",
+    "--speculative-draft-model-path",
+    EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    1,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    2,
+    "--disable-radix-cache",
+    "--moe-a2a-backend",
+    "deepep",
+    "--deepep-mode",
+    "auto",
+    "--tp",
+    16,
+    "--dp-size",
+    16,
+    "--enable-dp-attention",
+    "--enable-dp-lm-head",
+    "--mem-fraction-static",
+    0.78,
+    "--cuda-graph-bs",
+    6,
+    8,
+    10,
+    12,
+    15,
+    18,
+    28,
+    30,
 ]
 
 QWEN3_235B_ENVS = {
@@ -55,19 +89,25 @@ QWEN3_235B_ENVS = {
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
 }
 
+
 def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
-               f"--request-rate 1 --max-concurrency 1 --num-prompts 1 "
-               f"--random-input-len {input_len} --random-output-len {output_len} "
-               f"--random-range-ratio 1")  # 固定长度，不随机
+    command = (
+        f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
+        f"--request-rate 1 --max-concurrency 1 --num-prompts 1 "
+        f"--random-input-len {input_len} --random-output-len {output_len} "
+        f"--random-range-ratio 1"
+    )  # 固定长度，不随机
     print(f"{seq_type} single long sequence test command:{command}")
     metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
     return metrics
 
+
 class TestLTSQwen3235B(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    dataset_path = (
+        "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    )
     other_args = OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = QWEN3_235B_ENVS
@@ -142,14 +182,20 @@ class TestLTSQwen3235B(CustomTestCase):
         _, host, port = self.base_url.split(":")
         host = host[2:]
         run_long_seq_bench_serving(
-            host=host, port=port, dataset_name=self.dataset_name, dataset_path=self.dataset_path)
+            host=host,
+            port=port,
+            dataset_name=self.dataset_name,
+            dataset_path=self.dataset_path,
+        )
 
     def test_lts_qwen3_235b(self):
         i = 0
         while True:
             i = i + 1
             time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"=============={time_str_1}  Execute the {i}-th long-term stability test==============")
+            print(
+                f"=============={time_str_1}  Execute the {i}-th long-term stability test=============="
+            )
             self.run_throughput()
             self.run_gsm8k()
             self.run_all_long_seq_verify()
@@ -157,4 +203,3 @@ class TestLTSQwen3235B(CustomTestCase):
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
-

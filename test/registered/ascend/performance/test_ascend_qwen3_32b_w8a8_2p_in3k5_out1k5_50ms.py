@@ -1,10 +1,9 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
-    TestAscendPerformanceTestCaseBase,
     QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_W8A8_MODEL_PATH
+    QWEN3_32B_W8A8_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,37 +12,58 @@ register_npu_ci(est_time=1800, suite="nightly-4-npu-a3", nightly=True)
 QWEN3_32B_ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "400",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
 }
 
-QWEN3_32B_OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--quantization", "modelslim",
-        "--max-running-requests", 78,
-        "--disable-radix-cache",
-        "--speculative-draft-model-quantization", "unquant",
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_32B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 3,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 4,
-        "--chunked-prefill-size", -1,
-        "--max-prefill-tokens", 49152,
-        "--tp-size", 4,
-        "--mem-fraction-static", 0.72,
-        "--cuda-graph-bs", 16, 32, 64, 68, 72, 78,
-        "--dtype", "bfloat16",
-    ]
-)
+QWEN3_32B_OTHER_ARGS = [
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--quantization",
+    "modelslim",
+    "--max-running-requests",
+    78,
+    "--disable-radix-cache",
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_32B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    49152,
+    "--tp-size",
+    4,
+    "--mem-fraction-static",
+    0.72,
+    "--cuda-graph-bs",
+    16,
+    32,
+    64,
+    68,
+    72,
+    78,
+    "--dtype",
+    "bfloat16",
+]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):

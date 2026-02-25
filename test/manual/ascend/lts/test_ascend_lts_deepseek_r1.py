@@ -1,18 +1,25 @@
-import sys
 import datetime
+import sys
 import unittest
 
-from sglang.test.test_utils import (
-    CustomTestCase,
+from lts_utils import (
+    run_bench_serving,
+    run_command,
+    run_gsm8k,
+    run_long_seq_bench_serving,
 )
-from lts_utils import run_command, run_bench_serving, run_gsm8k, run_long_seq_bench_serving
+
+from sglang.test.test_utils import CustomTestCase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
+
 
 class TestLTSDeepSeekR1(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    dataset_path = (
+        "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    )
     request_rate = 5.5
     max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
@@ -25,8 +32,6 @@ class TestLTSDeepSeekR1(CustomTestCase):
     accuracy = 0.80
     host = "127.0.0.1"
     port = 6688
-
-
 
     def run_throughput(self):
         print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
@@ -67,14 +72,20 @@ class TestLTSDeepSeekR1(CustomTestCase):
 
     def run_all_long_seq_verify(self):
         run_long_seq_bench_serving(
-            host=self.host, port=self.port, dataset_name=self.dataset_name, dataset_path=self.dataset_path)
+            host=self.host,
+            port=self.port,
+            dataset_name=self.dataset_name,
+            dataset_path=self.dataset_path,
+        )
 
     def test_lts_deepseek_r1(self):
         i = 0
         while True:
             i = i + 1
             time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"=============={time_str_1}  Execute the {i}-th long-term stability test==============")
+            print(
+                f"=============={time_str_1}  Execute the {i}-th long-term stability test=============="
+            )
             self.run_throughput()
             self.run_gsm8k()
             self.run_all_long_seq_verify()
@@ -84,7 +95,7 @@ if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
     log_file = "./log/lts_test_deepseek_r1_" + time_str + ".log"
 
-    with open(log_file, 'w', encoding="utf-8") as f:
+    with open(log_file, "w", encoding="utf-8") as f:
         original_stdout = sys.stdout
         original_stderr = sys.stderr
         sys.stdout = f

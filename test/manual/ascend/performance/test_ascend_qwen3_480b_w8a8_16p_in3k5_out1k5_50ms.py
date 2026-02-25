@@ -2,8 +2,8 @@ import unittest
 
 from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
+    QWEN3_480B_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdMixTestCaseBase,
-    QWEN3_480B_W8A8_MODEL_PATH
 )
 
 MODEL_CONFIG = {
@@ -21,25 +21,42 @@ MODEL_CONFIG = {
     },
     "other_args": [
         "--trust-remote-code",
-        "--nnodes", "2",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--quantization", "modelslim",
-        "--max-running-requests", 288,
-        "--context-length", 8192,
-        "--dtype", "bfloat16",
-        "--chunked-prefill-size", 114688,
-        "--max-prefill-tokens", 458880,
+        "--nnodes",
+        "2",
+        "--attention-backend",
+        "ascend",
+        "--device",
+        "npu",
+        "--quantization",
+        "modelslim",
+        "--max-running-requests",
+        288,
+        "--context-length",
+        8192,
+        "--dtype",
+        "bfloat16",
+        "--chunked-prefill-size",
+        114688,
+        "--max-prefill-tokens",
+        458880,
         "--disable-radix-cache",
-        "--moe-a2a-backend", "deepep",
-        "--deepep-mode", "auto",
-        "--tp-size", 32,
-        "--dp-size", 4,
+        "--moe-a2a-backend",
+        "deepep",
+        "--deepep-mode",
+        "auto",
+        "--tp-size",
+        32,
+        "--dp-size",
+        4,
         "--enable-dp-attention",
         "--enable-dp-lm-head",
-        "--mem-fraction-static", 0.7,
-        "--cuda-graph-bs", 56, 64, 72,
-    ]
+        "--mem-fraction-static",
+        0.7,
+        "--cuda-graph-bs",
+        56,
+        64,
+        72,
+    ],
 }
 
 

@@ -1,20 +1,26 @@
-import subprocess
-import psutil
 import socket
+import subprocess
 from types import SimpleNamespace
 
+import psutil
+
 from sglang.test.few_shot_gsm8k import run_eval
+
 
 def get_nic_name():
     for nic, addrs in psutil.net_if_addrs().items():
         for addr in addrs:
-            if addr.family == socket.AF_INET and (addr.address.startswith("172.") or addr.address.startswith("192.")):
+            if addr.family == socket.AF_INET and (
+                addr.address.startswith("172.") or addr.address.startswith("192.")
+            ):
                 print("The nic name matched is {}".format(nic))
                 return nic
     return None
 
+
 NIC_NAME = get_nic_name()
 NIC_NAME = "lo" if NIC_NAME is None else NIC_NAME
+
 
 def run_command(cmd, shell=True):
     try:
@@ -26,15 +32,29 @@ def run_command(cmd, shell=True):
         print(f"command error: {e}")
         return None
 
-def run_bench_serving(host, port, dataset_name="random", dataset_path="", request_rate=8.0, max_concurrency=8,
-                      num_prompts=32, input_len=3500, output_len=1500, random_range_ratio=1.0):
-    command = (f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} "
-               f"--dataset-name {dataset_name} --dataset-path {dataset_path} --request-rate {request_rate} "
-               f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
-               f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}")
+
+def run_bench_serving(
+    host,
+    port,
+    dataset_name="random",
+    dataset_path="",
+    request_rate=8.0,
+    max_concurrency=8,
+    num_prompts=32,
+    input_len=3500,
+    output_len=1500,
+    random_range_ratio=1.0,
+):
+    command = (
+        f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} "
+        f"--dataset-name {dataset_name} --dataset-path {dataset_path} --request-rate {request_rate} "
+        f"--max-concurrency {max_concurrency} --num-prompts {num_prompts} --random-input-len {input_len} "
+        f"--random-output-len {output_len} --random-range-ratio {random_range_ratio}"
+    )
     print(f"command:{command}")
     metrics = run_command(f"{command} | tee ./bench_log.txt")
     return metrics
+
 
 def run_gsm8k(host="http://127.0.0.1", port=6688, expect_accuracy=None):
     print(f"========== Start gsm8k test ==========\n")
@@ -50,7 +70,10 @@ def run_gsm8k(host="http://127.0.0.1", port=6688, expect_accuracy=None):
     metrics = run_eval(args)
     return metrics
 
-def run_long_seq_bench_serving(host=None, port=None, dataset_name="random", dataset_path=None):
+
+def run_long_seq_bench_serving(
+    host=None, port=None, dataset_name="random", dataset_path=None
+):
     """依次验证16k+1k、32k+1k、64k+1k三种单条长序列"""
     # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
     long_seq_configs = {
@@ -58,19 +81,19 @@ def run_long_seq_bench_serving(host=None, port=None, dataset_name="random", data
             "input_len": 65536,
             "output_len": 1024,
             "ttft_threshold": 100000,
-            "tpot_threshold": 350
+            "tpot_threshold": 350,
         },
         "32k+1k": {
             "input_len": 32768,
             "output_len": 1024,
             "ttft_threshold": 70000,
-            "tpot_threshold": 250
+            "tpot_threshold": 250,
         },
         "16k+1k": {
             "input_len": 16384,
             "output_len": 1024,
             "ttft_threshold": 40000,
-            "tpot_threshold": 200
+            "tpot_threshold": 200,
         },
     }
     for seq_type, config in long_seq_configs.items():
@@ -90,9 +113,15 @@ def run_long_seq_bench_serving(host=None, port=None, dataset_name="random", data
         )
         print(f"{seq_type} metrics: {metrics}")
 
-        res_ttft = run_command("cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'")
-        res_tpot = run_command("cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'")
-        res_output_token_throughput = run_command("cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'")
+        res_ttft = run_command(
+            "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
+        )
+        res_tpot = run_command(
+            "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
+        )
+        res_output_token_throughput = run_command(
+            "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
+        )
         res_ttft = res_ttft.strip() if res_ttft else "0"
         res_tpot = res_tpot.strip() if res_tpot else "0"
 

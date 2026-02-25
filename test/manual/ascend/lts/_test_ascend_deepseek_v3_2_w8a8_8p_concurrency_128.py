@@ -2,12 +2,16 @@ import os
 import unittest
 from types import SimpleNamespace
 
+from lts_utils import NIC_NAME
+
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
-    CustomTestCase, DEFAULT_URL_FOR_TEST, popen_launch_server, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
 )
-from lts_utils import NIC_NAME
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 
@@ -24,19 +28,24 @@ ENVS = {
     "SGLANG_NPU_USE_MULTI_STREAM": "0",
 }
 
-OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--mem-fraction-static", 0.9,
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--disable-cuda-graph",
-        "--tp-size", "16",
-        "--quantization", "modelslim",
-        "--disable-radix-cache",
-        "--max-running-requests", 128,
-    ]
-)
+OTHER_ARGS = [
+    "--trust-remote-code",
+    "--mem-fraction-static",
+    0.9,
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--disable-cuda-graph",
+    "--tp-size",
+    "16",
+    "--quantization",
+    "modelslim",
+    "--disable-radix-cache",
+    "--max-running-requests",
+    128,
+]
+
 
 class TestDeepSeekV32(CustomTestCase):
     model = MODEL_PATH
@@ -77,13 +86,12 @@ class TestDeepSeekV32(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-
     def test_deepseek_v3_2_by_gsm8k(self):
         colon_index = self.base_url.rfind(":")
 
         host = self.base_url[:colon_index]
         print("host:", host)
-        port = int(self.base_url[colon_index+1:])
+        port = int(self.base_url[colon_index + 1 :])
         print("port:", port)
         args = SimpleNamespace(
             num_shots=5,

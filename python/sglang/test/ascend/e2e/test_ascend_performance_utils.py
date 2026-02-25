@@ -6,11 +6,12 @@ from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
+    SERVICE_PORT,
+    check_role,
     launch_pd_mix_node,
+    launch_pd_separation_node,
     launch_router,
     wait_server_ready,
-    launch_pd_separation_node,
-    SERVICE_PORT, check_role
 )
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -19,19 +20,39 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-DEEPSEEK_R1_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
-DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
-DEEPSEEK_V32_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8"
-QWEN3_30B_A3B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
+DEEPSEEK_R1_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
+)
+DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/DeepSeek-R1-0528-w4a8-per-channel"
+)
+DEEPSEEK_V32_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8"
+)
+QWEN3_30B_A3B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
+)
 QWEN3_A3B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-a3B_eagle3"
 QWEN3_32B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-QWEN3_32B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
-QWEN3_32B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
+QWEN3_32B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+)
+QWEN3_32B_EAGLE_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Eagle3-Qwen3-32B-zh"
+)
 QWEN3_235B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B"
-QWEN3_235B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
-QWEN3_235B_A22B_EAGLE_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
-QWEN3_480B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
-QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
+QWEN3_235B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-235B-A22B-W8A8"
+)
+QWEN3_235B_A22B_EAGLE_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-235B-A22B-Eagle3"
+)
+QWEN3_480B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
+)
+QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
+)
 GLM_4_6_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
 
 ROUND_ROBIN = "round_robin"
@@ -54,12 +75,12 @@ OUTPUT_TOKEN_THROUGHPUT_TOLERANCE = 0.98  # -2%
 
 # Package filtering keywords
 PACKAGE_FILTER_KEYWORDS = [
-    'sglang',
-    'sgl',
-    'torch',
-    'transformers',
-    'deep-ep',
-    'memfabric_hybrid'
+    "sglang",
+    "sgl",
+    "torch",
+    "transformers",
+    "deep-ep",
+    "memfabric_hybrid",
 ]
 
 
@@ -73,7 +94,7 @@ def get_cann_version():
     cann_ver_num = None
 
     try:
-        with open(cann_info_file, "r", encoding='utf-8') as f:
+        with open(cann_info_file, "r", encoding="utf-8") as f:
             for line in f:
                 if line.startswith("version="):
                     cann_ver_num = line.strip()
@@ -110,7 +131,7 @@ def write_pkg_info_to_file(result_file):
         # Filter relevant packages using list comprehension
         filtered_packages = [
             line
-            for line in packages.split('\n')
+            for line in packages.split("\n")
             if any(keyword in line for keyword in PACKAGE_FILTER_KEYWORDS)
         ]
 
@@ -156,7 +177,7 @@ def run_bench_serving(
         "--model",
         model_path,
         "--backend",
-        backend
+        backend,
     ]
 
     if dataset_name:
@@ -178,7 +199,7 @@ def run_bench_serving(
     print(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
-    metrics = {'mean_ttft': None, 'mean_tpot': None, 'total_tps': None}
+    metrics = {"mean_ttft": None, "mean_tpot": None, "total_tps": None}
 
     process = subprocess.Popen(
         cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
@@ -255,7 +276,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        if hasattr(cls, 'process') and cls.process:
+        if hasattr(cls, "process") and cls.process:
             try:
                 kill_process_tree(cls.process.pid)
             except Exception as e:
@@ -273,22 +294,22 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot + TPOT_TOLERANCE_LOW,
                 )
             else:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot * TPOT_TOLERANCE_HIGH,
                 )
         if self.output_token_throughput:
             self.assertGreaterEqual(
-                float(metrics['total_tps']),
+                float(metrics["total_tps"]),
                 self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
             )
         if self.ttft:
             self.assertLessEqual(
-                float(metrics['mean_ttft']),
+                float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
 
@@ -297,18 +318,18 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         host = parsed_url.hostname
         port = parsed_url.port
         bench_params = {
-            'host': host,
-            'port': port,
-            'model_path': self.model,
-            'backend': self.backend,
-            'dataset_name': self.dataset_name,
-            'request_rate': self.request_rate,
-            'max_concurrency': self.max_concurrency,
-            'num_prompts': self.num_prompts,
-            'input_len': self.input_len,
-            'output_len': self.output_len,
-            'random_range_ratio': self.random_range_ratio,
-            'dataset_path': self.dataset_path,
+            "host": host,
+            "port": port,
+            "model_path": self.model,
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
+            "dataset_path": self.dataset_path,
         }
         print(f"Starting benchmark with parameters: {bench_params}")
 
@@ -364,22 +385,22 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         if self.tpot:
             if self.tpot < TPOT_THRESHOLD:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot + TPOT_TOLERANCE_LOW,
                 )
             else:
                 self.assertLessEqual(
-                    float(metrics['mean_tpot']),
+                    float(metrics["mean_tpot"]),
                     self.tpot * TPOT_TOLERANCE_HIGH,
                 )
         if self.output_token_throughput:
             self.assertGreaterEqual(
-                float(metrics['total_tps']),
+                float(metrics["total_tps"]),
                 self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
             )
         if self.ttft:
             self.assertLessEqual(
-                float(metrics['mean_ttft']),
+                float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
 
@@ -404,23 +425,25 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         )
         sglang_thread.start()
 
-        print(f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds")
+        print(
+            f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds"
+        )
         time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
 
     @check_role(allowed_roles=["master", "worker"])
     def run_throughput(self, run_cycles=2):
         bench_params = {
-            'host': self.host,
-            'port': str(self.port),
-            'model_path': self.model_config.get("model_path"),
-            'backend': self.backend,
-            'dataset_name': self.dataset_name,
-            'request_rate': self.request_rate,
-            'max_concurrency': self.max_concurrency,
-            'num_prompts': self.num_prompts,
-            'input_len': self.input_len,
-            'output_len': self.output_len,
-            'random_range_ratio': self.random_range_ratio,
+            "host": self.host,
+            "port": str(self.port),
+            "model_path": self.model_config.get("model_path"),
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
         }
         print(f"Starting benchmark with parameters: {bench_params}")
 
@@ -539,17 +562,17 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @check_role(allowed_roles=["router"])
     def run_throughput(self, run_cycles=2):
         bench_params = {
-            'host': self.host,
-            'port': str(self.port),
-            'model_path': self.model_config.get("model_path"),
-            'backend': self.backend,
-            'dataset_name': self.dataset_name,
-            'request_rate': self.request_rate,
-            'max_concurrency': self.max_concurrency,
-            'num_prompts': self.num_prompts,
-            'input_len': self.input_len,
-            'output_len': self.output_len,
-            'random_range_ratio': self.random_range_ratio,
+            "host": self.host,
+            "port": str(self.port),
+            "model_path": self.model_config.get("model_path"),
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
         }
         print(f"Starting benchmark with parameters: {bench_params}")
 

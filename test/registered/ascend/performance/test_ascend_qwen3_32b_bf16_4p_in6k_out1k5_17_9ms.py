@@ -1,10 +1,9 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_ascend_performance_utils import (
-    TestAscendPerformanceTestCaseBase,
     QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_MODEL_PATH
+    QWEN3_32B_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,35 +12,52 @@ register_npu_ci(est_time=1800, suite="nightly-8-npu-a3", nightly=True)
 QWEN3_32B_ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "400",
-    "HCCL_SOCKET_IFNAME": NIC_NAME,
-    "GLOO_SOCKET_IFNAME": NIC_NAME,
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
 }
 
-QWEN3_32B_OTHER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--nnodes", "1",
-        "--node-rank", "0",
-        "--attention-backend", "ascend",
-        "--device", "npu",
-        "--max-running-requests", 32,
-        "--disable-radix-cache",
-        "--chunked-prefill-size", 24576,
-        "--max-prefill-tokens", 65536,
-        "--speculative-algorithm", "EAGLE3",
-        "--speculative-draft-model-path", QWEN3_32B_EAGLE_MODEL_PATH,
-        "--speculative-num-steps", 4,
-        "--speculative-eagle-topk", 1,
-        "--speculative-num-draft-tokens", 5,
-        "--tp-size", 8,
-        "--mem-fraction-static", 0.72,
-        "--cuda-graph-bs", 8, 16, 24, 32,
-        "--dtype", "bfloat16",
-    ]
-)
+QWEN3_32B_OTHER_ARGS = [
+    "--trust-remote-code",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--max-running-requests",
+    32,
+    "--disable-radix-cache",
+    "--chunked-prefill-size",
+    24576,
+    "--max-prefill-tokens",
+    65536,
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_32B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    4,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    5,
+    "--tp-size",
+    8,
+    "--mem-fraction-static",
+    0.72,
+    "--cuda-graph-bs",
+    8,
+    16,
+    24,
+    32,
+    "--dtype",
+    "bfloat16",
+]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):

@@ -14,21 +14,10 @@ from kubernetes.client.rest import ApiException
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
-from sglang.test.test_utils import (
-    CustomTestCase,
-    popen_launch_server,
-)
+from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
-KUBE_CONFIG = os.environ.get('KUBECONFIG')
-NAMESPACE = os.environ.get('NAMESPACE')
-CONFIGMAP_NAME = os.environ.get('KUBE_CONFIG_MAP')
-
-LOCAL_HOST_IP = os.getenv("POD_IP")
-LOCAL_HOST_NAME = os.getenv("HOSTNAME")
-if not LOCAL_HOST_IP or not LOCAL_HOST_NAME:
-    raise RuntimeError(
-        f"Missing required environment variables: POD_IP={LOCAL_HOST_IP}, HOSTNAME={LOCAL_HOST_NAME}"
-    )
+NAMESPACE = os.environ.get("NAMESPACE")
+CONFIGMAP_NAME = os.environ.get("KUBE_CONFIG_MAP")
 
 LOCAL_TIMEOUT = 3600
 ALL_ROLE_SET = {"prefill", "decode", "router", "master", "worker"}
@@ -38,7 +27,7 @@ ASCEND_RT_VISIBLE_DEVICES = os.environ.get("ASCEND_RT_VISIBLE_DEVICES")
 SERVICE_PORT = (
     6677
     if not ASCEND_RT_VISIBLE_DEVICES
-    else 6677 + int(ASCEND_RT_VISIBLE_DEVICES.strip().split(',')[0])
+    else 6677 + int(ASCEND_RT_VISIBLE_DEVICES.strip().split(",")[0])
 )
 PREFILL_DECODE_PORT = 8000
 BOOTSTRAP_INIT_PORT = 8995
@@ -49,9 +38,6 @@ SERVER_INITIALIZATION_DELAY = 30
 
 # Network configuration
 NETWORK_ADDRESS_PREFIXES = ["172.", "192."]
-
-config.load_kube_config(KUBE_CONFIG)
-v1 = client.CoreV1Api()
 
 
 def get_nic_name():
@@ -74,6 +60,28 @@ nic = get_nic_name()
 NIC_NAME = "lo" if nic is None else nic
 
 
+def get_host_name():
+    host_name = os.getenv("HOSTNAME")
+    if not host_name:
+        raise RuntimeError(
+            f"Missing required environment variables: HOSTNAME={host_name}"
+        )
+    return host_name
+
+
+def get_host_ip():
+    host_ip = os.getenv("POD_IP")
+    if not host_ip:
+        raise RuntimeError(f"Missing required environment variables: POD_IP={host_ip}")
+    return host_ip
+
+
+def get_k8s_api():
+    kube_config = os.environ.get("KUBECONFIG")
+    config.load_kube_config(kube_config)
+    return client.CoreV1Api()
+
+
 # Query ConfigMap from Kubernetes
 def query_configmap(name, namespace):
     """Query ConfigMap from Kubernetes.
@@ -85,8 +93,9 @@ def query_configmap(name, namespace):
     Returns:
         V1ConfigMap: ConfigMap object, or None if failed.
     """
+    k8s_api = get_k8s_api()
     try:
-        configmap = v1.read_namespaced_config_map(name, namespace)
+        configmap = k8s_api.read_namespaced_config_map(name, namespace)
         print(f"Successfully queried ConfigMap {name} in namespace {namespace}")
         return configmap
     except ApiException as e:
@@ -104,11 +113,12 @@ def discover_worker_nodes():
     Returns:
         int: Number of worker nodes, or 0 if failed.
     """
+    k8s_api = get_k8s_api()
     try:
-        prefill_pods = v1.list_namespaced_pod(
+        prefill_pods = k8s_api.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-prefill"
         )
-        decode_pods = v1.list_namespaced_pod(
+        decode_pods = k8s_api.list_namespaced_pod(
             namespace=NAMESPACE, label_selector="volcano.sh/task-spec=sglang-decode"
         )
 
@@ -256,7 +266,8 @@ def check_role(allowed_roles: Union[str, Iterable[str]]):
 # Launch master/worker node
 def launch_pd_mix_node(model_config):
     print(f"Launch pd mix node start ......")
-    pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
+    host_name = get_host_name()
+    pod_index = int(host_name.rsplit("-", 1)[-1])
 
     # Monitor ConfigMap to generate dist-init-addr and node-rank
     is_ready = False
@@ -303,18 +314,19 @@ def launch_pd_mix_node(model_config):
         print(f"ENV_VAR_CASE {key}:{value}")
         os.environ[key] = value
 
-    print(f"Starting node, {LOCAL_HOST_IP=} {other_args=}")
+    host_ip = get_host_ip()
+    print(f"Starting node, {host_ip=} {other_args=}")
     try:
         process = popen_launch_server(
             model_config["model_path"],
-            f"http://{LOCAL_HOST_IP}:{SERVICE_PORT}",
+            f"http://{host_ip}:{SERVICE_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *other_args,
             ],
         )
     except Exception as e:
-        raise RuntimeError(f"Failed to start node on {LOCAL_HOST_IP}: {e}")
+        raise RuntimeError(f"Failed to start node on {host_ip}: {e}")
 
     return process
 
@@ -322,8 +334,9 @@ def launch_pd_mix_node(model_config):
 # Launch prefill/decode separation node
 def launch_pd_separation_node(model_config):
     print(f"Launch pd separation node start ......")
-    pod_index = int(LOCAL_HOST_NAME.rsplit("-", 1)[-1])
-    role = "prefill" if "prefill" in LOCAL_HOST_NAME else "decode"
+    host_name = get_host_name()
+    pod_index = int(host_name.rsplit("-", 1)[-1])
+    role = "prefill" if "prefill" in host_name else "decode"
 
     bootstrap_init_port = BOOTSTRAP_INIT_PORT
     master_prefill_ip = None
@@ -403,10 +416,12 @@ def launch_pd_separation_node(model_config):
             )
         else:
             print("Node-rank specified - each prefill node is an instance.")
-            prefill_args.extend([
-                "--disaggregation-bootstrap-port",
-                str(bootstrap_init_port + pod_index),
-            ])
+            prefill_args.extend(
+                [
+                    "--disaggregation-bootstrap-port",
+                    str(bootstrap_init_port + pod_index),
+                ]
+            )
 
         service_args.extend(prefill_args)
 
@@ -421,30 +436,33 @@ def launch_pd_separation_node(model_config):
             print(
                 "No node-rank specified - all decode nodes will form a single instance."
             )
-            decode_args.extend([
-                "--node-rank",
-                str(pod_index),
-                "--dist-init-addr",
-                dist_init_addr,
-            ])
+            decode_args.extend(
+                [
+                    "--node-rank",
+                    str(pod_index),
+                    "--dist-init-addr",
+                    dist_init_addr,
+                ]
+            )
         else:
             print("Node-rank specified - each decode node is an instance.")
 
         service_args.extend(decode_args)
 
-    print(f"Starting {role} node on {LOCAL_HOST_IP} with args: {service_args}")
+    host_ip = get_host_ip()
+    print(f"Starting {role} node on {host_ip} with args: {service_args}")
 
     try:
         process = popen_launch_server(
             model_config["model_path"],
-            f"http://{LOCAL_HOST_IP}:{PREFILL_DECODE_PORT}",
+            f"http://{host_ip}:{PREFILL_DECODE_PORT}",
             timeout=LOCAL_TIMEOUT,
             other_args=[
                 *service_args,
             ],
         )
     except Exception as e:
-        raise RuntimeError(f"Failed to start {role} node on {LOCAL_HOST_IP}: {e}")
+        raise RuntimeError(f"Failed to start {role} node on {host_ip}: {e}")
 
     return process
 
@@ -696,7 +714,11 @@ class TestAscendMultiNodePdSepTestCaseBase(CustomTestCase):
         cls.port = SERVICE_PORT
         cls.base_url = f"http://{cls.host}:{cls.port}"
         cls.hostname = os.getenv("HOSTNAME")
-        cls.role = "router" if "router" in cls.hostname else "prefill" if "prefill" in cls.hostname else "decode"
+        cls.role = (
+            "router"
+            if "router" in cls.hostname
+            else "prefill" if "prefill" in cls.hostname else "decode"
+        )
         print(f"Init {cls.host} {cls.role=}!")
         cls.sglang_thread = None
         cls.stop_event = threading.Event()

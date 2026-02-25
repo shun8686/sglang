@@ -15,12 +15,12 @@ from kubernetes.client.rest import ApiException
 
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
-KUBE_CONFIG = os.environ.get('KUBECONFIG')
+KUBE_CONFIG = os.environ.get("KUBECONFIG")
 config.load_kube_config(KUBE_CONFIG)
 core_api = client.CoreV1Api()
 custom_api = client.CustomObjectsApi()
@@ -33,7 +33,7 @@ script_path = os.path.dirname(os.path.abspath(__file__))
 KUBE_YAML_TEMPLATE = {
     "single": f"{script_path}/k8s_single.yaml.jinja2",
     "multi-pd-mix": f"{script_path}/k8s_multi_pd_mix.yaml.jinja2",
-    "multi-pd-separation": f"{script_path}/k8s_multi_pd_separation.yaml.jinja2"
+    "multi-pd-separation": f"{script_path}/k8s_multi_pd_separation.yaml.jinja2",
 }
 
 
@@ -45,7 +45,7 @@ def get_unique_random_string(length: int = 16, add_random: bool = True) -> str:
             raise ValueError("length can not be smaller than 8")
         random_length = length - 8
         char_pool = string.ascii_lowercase + string.digits
-        random_chars = ''.join([random.choice(char_pool) for _ in range(random_length)])
+        random_chars = "".join([random.choice(char_pool) for _ in range(random_length)])
         result = uuid_str[:8] + random_chars
     else:
         result = uuid_str[:length]
@@ -249,7 +249,8 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
         r"^-{70,}$",
         r"^Ran \d+ tests? in [\d.]+s$",
         r"^$",
-        r"^(OK|FAILED \(errors=\d+\))$"]
+        r"^(OK|FAILED \(errors=\d+\))$",
+    ]
     patterns = [re.compile(line_pattern) for line_pattern in pattern_lines]
     pattern_ok = re.compile(r"^OK$")
 
@@ -592,7 +593,7 @@ if __name__ == "__main__":
         "multi-pd-separation": {
             "prefill_size": prefill_size,
             "decode_size": decode_size,
-            "router_size": router_size
+            "router_size": router_size,
         },
     }
 

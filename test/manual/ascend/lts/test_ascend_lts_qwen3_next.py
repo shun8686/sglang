@@ -1,7 +1,9 @@
-import os
 import datetime
+import os
 import unittest
 from types import SimpleNamespace
+
+from lts_utils import NIC_NAME, run_bench_serving, run_command
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
@@ -10,28 +12,41 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from lts_utils import NIC_NAME, run_command, run_bench_serving
 
 # MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen3-Next-80B-A3B-Instruct-W8A8"
 
 OTHER_ARGS = [
     "--trust-remote-code",
-    "--attention-backend", "ascend",
-    "--device", "npu",
-    "--tp-size", 4,
-    "--mem-fraction-static", 0.685,
-    "--max-running-requests", 80,
-    "--watchdog-timeout", 9000,
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--tp-size",
+    4,
+    "--mem-fraction-static",
+    0.685,
+    "--max-running-requests",
+    80,
+    "--watchdog-timeout",
+    9000,
     "--disable-radix-cache",
-    "--cuda-graph-bs", 80,
-    "--max-prefill-tokens", 28672,
-    "--max-total-tokens", 450560,
-    "--moe-a2a-backend", "deepep",
-    "--deepep-mode", "auto",
-    "--quantization", "modelslim",
-    "--chunked-prefill-size", -1,
-    "--base-gpu-id", 8,
+    "--cuda-graph-bs",
+    80,
+    "--max-prefill-tokens",
+    28672,
+    "--max-total-tokens",
+    450560,
+    "--moe-a2a-backend",
+    "deepep",
+    "--deepep-mode",
+    "auto",
+    "--quantization",
+    "modelslim",
+    "--chunked-prefill-size",
+    -1,
+    "--base-gpu-id",
+    8,
 ]
 
 ENVS = {
@@ -50,7 +65,9 @@ ENVS = {
 class TestLTSQwen332B(CustomTestCase):
     model = MODEL_PATH
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    dataset_path = (
+        "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
+    )
     other_args = OTHER_ARGS
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = ENVS
@@ -145,12 +162,12 @@ class TestLTSQwen332B(CustomTestCase):
         while True:
             i = i + 1
             time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f"=============={time_str_1}  Execute the {i}-th long-term stability test==============")
+            print(
+                f"=============={time_str_1}  Execute the {i}-th long-term stability test=============="
+            )
             self.run_throughput()
             self.run_gsm8k()
 
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)
-
-
