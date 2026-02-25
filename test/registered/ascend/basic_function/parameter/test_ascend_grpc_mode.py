@@ -29,7 +29,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -44,7 +45,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         # TODO: 检查服务是否拉起
-        #
         sleep(100)
 
         router_command = [
