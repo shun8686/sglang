@@ -34,7 +34,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         #cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
