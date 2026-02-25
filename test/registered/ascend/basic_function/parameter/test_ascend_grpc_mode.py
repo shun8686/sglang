@@ -80,6 +80,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             time.sleep(1)
 
     def test_grpc_mode(self):
+        sleep(600)
         response = requests.post(
             f"http://127.0.0.1:21000/generate",
             json={
@@ -94,7 +95,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         print(f"{response.status_code=}")
         print(f"{response.text=}")
 
-        sleep(600)
+
 
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
