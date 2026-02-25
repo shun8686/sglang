@@ -45,7 +45,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         # TODO: 检查服务是否拉起
-        sleep(100)
+        sleep(30)
 
         router_command = [
             "python3",
