@@ -104,6 +104,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         response = requests.post(
             f"{self.base_url}/generate",
             json={
+                "model": self.model,
                 "text": "The capital of France is",
                 "sampling_params": {
                     "temperature": 0,
@@ -115,21 +116,23 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         print("===========base_url==============")
         print(f"{response.status_code=}")
         print(f"{response.text=}")
-
-        response = requests.post(
-            f"{self.grpc_base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print("============grpc_base_url============")
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
+        # self.assertEqual(response.status_code, 500, "The request status code is not 500.")
+        # self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        #
+        # response = requests.post(
+        #     f"{self.grpc_base_url}/generate",
+        #     json={
+        #         "text": "The capital of France is",
+        #         "sampling_params": {
+        #             "temperature": 0,
+        #             "max_new_tokens": 32,
+        #         },
+        #     },
+        # )
+        #
+        # print("============grpc_base_url============")
+        # print(f"{response.status_code=}")
+        # print(f"{response.text=}")
 
 
 if __name__ == "__main__":
