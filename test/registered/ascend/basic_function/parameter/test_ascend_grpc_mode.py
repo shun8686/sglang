@@ -74,16 +74,16 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
         start_time = time.perf_counter()
         while True:
-            response = requests.get(url)
+            # response = requests.get(url)
             try:
-                # response = requests.get(url)
+                response = requests.get(url)
                 print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 202:
                     print(f"Server {url} is ready")
                     print(f"{response.text.url}")
                     return
             except Exception:
-                print(f"{response.status_code=}, {response.text=}")
+                # print(f"{response.status_code=}, {response.text=}")
                 pass
 
             if time.perf_counter() - start_time > timeout:
