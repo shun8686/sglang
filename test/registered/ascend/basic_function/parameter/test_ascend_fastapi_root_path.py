@@ -120,21 +120,21 @@ class TestAscendFastapiRootPath(CustomTestCase):
             },
         )
 
-    def assert_interfsend_request(self, url):
-        return requests.post(
-            url,
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+    # def assert_interfsend_request(self, url):
+    #     return requests.post(
+    #         url,
+    #         json={
+    #             "text": "The capital of France is",
+    #             "sampling_params": {
+    #                 "temperature": 0,
+    #                 "max_new_tokens": 32,
+    #             },
+    #         },
+    #     )
 
 
 
-@unittest.skip("临时设置，减少运行时间")
+# @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
     fastapi_root_path = "/test/fastapi/root/path/"
 
@@ -178,32 +178,14 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+        response = self.send_request(f"{self.base_url}/generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
-        response = requests.post(
-            f"{self.base_url}{self.fastapi_root_path}generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 
-@unittest.skip("临时设置，减少运行时间")
+# @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
     fastapi_root_path = "/sglang"
 
@@ -260,16 +242,7 @@ class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
-        response = requests.post(
-            f"{self.base_url}/{self.fastapi_root_path}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+        response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}/generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 
