@@ -423,8 +423,7 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
                     model_layers_list.append(key.split(".")[2])
-        model_layers_list = sorted(set(int(x) for x in model_layers_list))
-        print(model_layers_list)
+        self.assertEqual(len(model_layers_list), 0)
 
 
 class TestDebugTensorDumpOutputFolder5(CustomTestCase):
