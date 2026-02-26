@@ -77,9 +77,9 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             # response = requests.get(url)
             try:
                 response = requests.get(url)
-                print(f"{response.status_code=}, {response.text=}")
+                # print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 200:
-                    print(f"Server {url} is ready")
+                    # print(f"Server {url} is ready")
                     return
             except Exception:
                 pass
@@ -94,16 +94,15 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             f"{self.base_url}/workers",
             json={
                 "url": f"{self.base_url}",
-                # "model": self.model,
-                # "text": "The capital of France is",
-                # "sampling_params": {
-                #     "temperature": 0,
-                #     "max_new_tokens": 32,
-                # },
             },
         )
 
-        print(f"{response.status_code=}, {response.text=}")
+        # print(f"{response.status_code=}, {response.text=}")
+        self.assertEqual(response.status_code, 202, "The response status code is not 202.")
+        self.assertEqual(response.json["status"], "accepted", "The response status is not accepted.")
+        self.assertEqual(response.json["url"], self.base_url, f"The response url is not {self.base_url}.")
+        self.assertEqual(response.json["location"], "/workers/" + response.json["worker_id"],
+                         f"The response location is not equal with worker_id.")
 
         # sleep(600)
 
@@ -119,7 +118,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertEqual(response.status_code, 200, "The response status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
 
