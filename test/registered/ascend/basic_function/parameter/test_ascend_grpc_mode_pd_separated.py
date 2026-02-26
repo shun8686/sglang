@@ -6,7 +6,7 @@ import subprocess
 import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+# from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 # from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -35,8 +35,9 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         cls.prefill_port = "20100"
         cls.decode_url = f"grpc://127.0.0.1:20100"
         cls.decode_port = "20200"
-        cls.lb_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(cls.base_url)
+        cls.base_url =  DEFAULT_URL_FOR_TEST
+        cls.lb_url = cls.base_url
+        cls.url = urlparse(cls.lb_url)
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
         # Non blocking start servers
