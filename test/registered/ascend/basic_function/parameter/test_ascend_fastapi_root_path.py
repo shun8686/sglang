@@ -137,7 +137,7 @@ class NginxConfigManager:
 
 
         try:
-            with open(self.nginx_conf_path, "w+", encoding="utf-8") as f:
+            with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
             for line in lines:
@@ -145,6 +145,8 @@ class NginxConfigManager:
             lines[49] = "        location " + f"{location}" + " {"
             lines[50] = "            proxy_pass " + f"{proxy_pass}" + ";"
             lines[51] = "        }"
+            with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
+                f.writelines(lines)
         except FileNotFoundError:
             raise FileNotFoundError(f"file not found: {self.nginx_conf_path}")
         except Exception as e:
