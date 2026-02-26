@@ -35,6 +35,7 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
+                "--trust-remote-code",
                 "--moe-runner-backend",
                 cls.moe_runner_backend,
             ],
