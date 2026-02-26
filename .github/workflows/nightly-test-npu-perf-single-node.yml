@@ -110,8 +110,13 @@ jobs:
           source /usr/local/Ascend/cann/set_env.sh || true
           source /usr/local/Ascend/nnal/atb/set_env.sh || true
 
+          log_path="/root/.cache/tests/logs/log/${current_date}/${tc_name}/${HOSTNAME}"
+          rm -rf ${log_path}
+          mkdir -p ${log_path}
+          echo "Log path: ${log_path}"
+
           echo "Running test case ${test_case}"
-          python3 -u ${test_case}
+          python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
           echo "Finished test case ${test_case}"
 
           plog_path="/root/ascend/log/debug/plog"
