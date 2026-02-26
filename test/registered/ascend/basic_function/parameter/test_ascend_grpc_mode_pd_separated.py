@@ -148,7 +148,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             "-m",
             "sglang_router.launch_router",
             "--pd-disaggregation",
-            "--mini-lb",
             "--prefill",
             cls.prefill_url,
             "--decode",
@@ -180,7 +179,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     def test_grpc_mode(self):
         response = requests.post(
-            f"{self.lb_url}/generate",
+            f"http://127.0.0.1:4567/generate",
             json={
                 "text": "The capital of France is",
                 "model": self.model,
