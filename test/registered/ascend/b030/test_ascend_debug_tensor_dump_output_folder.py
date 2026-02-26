@@ -51,6 +51,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        run_command("rm -rf ./TP*_PP*")
 
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
