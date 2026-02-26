@@ -46,7 +46,6 @@ class TestAscendFastapiRootPath(CustomTestCase):
 
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.fastapi_root_path = "test"
-        cls.base_url = "test"
 
         print(cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url))
 
