@@ -119,8 +119,7 @@ class NginxConfigManager:
     def __init__(self, nginx_conf_path, nginx_bin_path):
         self.nginx_conf_path = nginx_conf_path
         self.nginx_bin_path = nginx_bin_path
-
-        # self.backup_conf_path = f"{nginx_conf_path}.backup"
+        self.backup_conf_path = f"{nginx_conf_path}.backup"
 
     def backup_original_config(self):
         if not os.path.exists(self.backup_conf_path):
