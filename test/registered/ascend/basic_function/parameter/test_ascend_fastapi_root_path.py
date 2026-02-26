@@ -116,7 +116,7 @@ class NginxConfigManager:
         self.nginx_conf_path = nginx_conf_path
         self.nginx_bin_path = nginx_bin_path
 
-        self.backup_conf_path = f"{nginx_conf_path}.backup"
+        # self.backup_conf_path = f"{nginx_conf_path}.backup"
 
     def backup_original_config(self):
         if not os.path.exists(self.backup_conf_path):
@@ -132,13 +132,16 @@ class NginxConfigManager:
         return lines
 
     def apply_config(self, location, proxy_pass):
-        if not os.path.exists(self.backup_conf_path):
-            shutil.copy2(self.nginx_conf_path, self.backup_conf_path)
+        # if not os.path.exists(self.backup_conf_path):
+        #     shutil.copy2(self.nginx_conf_path, self.backup_conf_path)
 
 
         try:
             with open(self.nginx_conf_path, "w+", encoding="utf-8") as f:
                 lines = f.readlines()
+
+            for line in lines:
+                print(line)
             lines[49] = "        location " + f"{location}" + " {"
             lines[50] = "            proxy_pass " + f"{proxy_pass}" + ";"
             lines[51] = "        }"
@@ -147,21 +150,21 @@ class NginxConfigManager:
         except Exception as e:
             raise RuntimeError(f"Failed to modify nginx config: {e}")
 
-        # 重启Nginx
-        try:
-            subprocess.run(
-                [self.nginx_bin_path, '-s', 'reload'],
-                capture_output=True,
-                text=True,
-                check=True
-            )
-            return True
-        except subprocess.CalledProcessError as e:
-            # 重启失败时恢复备份配置
-            if os.path.exists(self.backup_conf_path):
-                shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
-                subprocess.run([self.nginx_bin_path, '-s', 'reload'])
-            return False
+        # # 重启Nginx
+        # try:
+        #     subprocess.run(
+        #         [self.nginx_bin_path, '-s', 'reload'],
+        #         capture_output=True,
+        #         text=True,
+        #         check=True
+        #     )
+        #     return True
+        # except subprocess.CalledProcessError as e:
+        #     # 重启失败时恢复备份配置
+        #     if os.path.exists(self.backup_conf_path):
+        #         shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
+        #         subprocess.run([self.nginx_bin_path, '-s', 'reload'])
+        #     return False
 
     def restore_original_config(self):
         if os.path.exists(self.backup_conf_path):
