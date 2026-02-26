@@ -41,7 +41,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         # Modify nginx configuration and start nginx service
         nginx_manager = NginxConfigManager(
             nginx_conf_path="/usr/local/nginx/conf/nginx.conf",  # 根据你的实际路径修改
-            nginx_bin_path="/usr/local/sbin/nginx"  # 根据你的实际路径修改
+            nginx_bin_path="/usr/local/nginx/sbin/nginx"  # 根据你的实际路径修改
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
