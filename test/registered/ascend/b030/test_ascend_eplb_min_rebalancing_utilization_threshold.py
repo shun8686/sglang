@@ -100,7 +100,7 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
         self.assertIn(self.log_info, content)
 
 
-class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtilizationThresholdBase):
+class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
     log_info = "Skipped ep rebalancing: current GPU utilization"
     out_file = open(SKIP_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
@@ -116,9 +116,9 @@ class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtiliz
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    # suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_gsm8k"))
-    # suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_eplb_min_rebalancing_utilization_threshold"))
-    suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_gsm8k"))
-    suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_eplb_min_rebalancing_utilization_threshold"))
+    suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_gsm8k"))
+    suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_eplb_min_rebalancing_utilization_threshold"))
+    # suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_gsm8k"))
+    # suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_eplb_min_rebalancing_utilization_threshold"))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
