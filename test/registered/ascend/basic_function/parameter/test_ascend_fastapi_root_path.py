@@ -1,13 +1,9 @@
 import os
 import shutil
-from typing import Dict
 import subprocess
-
 import requests
 import unittest
 from urllib.parse import urlparse
-
-from Tools.scripts.win_add2path import modify
 
 from sglang.srt.utils import kill_process_tree
 # from sglang.test.ascend.test_ascend_utils import QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
