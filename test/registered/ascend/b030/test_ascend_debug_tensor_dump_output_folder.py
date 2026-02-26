@@ -428,6 +428,67 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
         self.assertEqual(model_layers_list[1], 5)
         self.assertEqual(model_layers_list[2], 10)
 
+class TestDebugTensorDumpOutputFolder5(CustomTestCase):
+    model = QWEN3_32B_WEIGHTS_PATH
+    tp_size = 4
+    pp_size = 2
+    dp_size = 1
+    other_args = [
+        "--trust-remote-code",
+        "--mem-fraction-static",
+        "0.8",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+        "--tp-size",
+        tp_size,
+        "--pp-size",
+        pp_size,
+        "--dp-size",
+        dp_size,
+        "--debug-tensor-dump-layers",
+        "1",
+        "--skip-server-warmup",
+        "--base-gpu-id",
+        "8",
+    ]
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=cls.other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+        run_command("rm -rf ./TP*_PP*")
+
+    def test_debug_tensor_dump_output_folder(self):
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        self.assertEqual(response.status_code, 200)
+
+        text1 = "The capital of France is"
+
+        response1 = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": text1,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 1,
+                },
+            },
+        )
+        self.assertEqual(response1.status_code, 200)
+        print(response1.text)
+        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+        self.assertEqual(int(res1), 0)
+
 if __name__ == "__main__":
     suite = unittest.TestSuite()
     # suite.addTest(TestDebugTensorDumpOutputFolder("test_debug_tensor_dump_output_folder"))
@@ -435,5 +496,6 @@ if __name__ == "__main__":
     suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
     suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))
     # suite.addTest(TestDebugTensorDumpOutputFolder4("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder5("test_debug_tensor_dump_output_folder"))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
