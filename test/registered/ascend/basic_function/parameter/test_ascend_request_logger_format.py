@@ -1,4 +1,3 @@
-import subprocess
 import unittest
 import tempfile
 from abc import ABC

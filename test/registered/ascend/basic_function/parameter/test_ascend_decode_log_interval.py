@@ -1,6 +1,5 @@
 import math
 import os
-import subprocess
 import unittest
 
 import requests
