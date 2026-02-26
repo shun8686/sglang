@@ -253,7 +253,7 @@ class NginxConfigManager:
         self.backup_conf_path = f"{nginx_conf_path}.backup"
 
         self.nginx_path = "/usr/local/nginx"
-        if not os.path.exists(self.backup_conf_path):
+        if not os.path.exists(self.nginx_path):
             subprocess.run(["cd", '/usr/local/'])
             subprocess.run(["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz'])
             subprocess.run(["tar", 'zxvf', 'pcre-8.35.tar.gz'])
@@ -293,12 +293,12 @@ class NginxConfigManager:
 
         # start Nginx
         try:
-            subprocess.run(
-                [self.nginx_bin_path],
-                capture_output=True,
-                text=True,
-                check=True
-            )
+            result = subprocess.run(["ps", "-ef", "|", "grep", "nginx"])
+            output = result.stdout.decode("utf-8").strip()
+            if "process" in output:
+                subprocess.run([self.nginx_bin_path, "-s", "stop"])
+
+            subprocess.run([self.nginx_bin_path],)
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to modify nginx config: {e}")
 
