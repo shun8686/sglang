@@ -77,8 +77,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             # response = requests.get(url)
             try:
                 response = requests.get(url)
-                print(f"{response.status_code=}, {response.text=}")
-                if response.status_code == 202:
+                # print(f"{response.status_code=}, {response.text=}")
+                if response.status_code == 200:
                     print(f"Server {url} is ready")
                     print(f"{response.text.url}")
                     return
