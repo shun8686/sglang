@@ -50,7 +50,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "2",
             "--enable-hierarchical-cache",
             "--hicache-io-backend",
-            "kernel_ascend"
+            "kernel_ascend",
             "--hicache-mem-layout",
             "page_first_direct",
             "--hicache-ratio",
