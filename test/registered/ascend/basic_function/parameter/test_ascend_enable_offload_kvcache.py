@@ -190,6 +190,7 @@ class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
 class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
     """Decode startup parameters, enable offload-kvcache"""
 
+    enable_offload_accuracy = 0
     @classmethod
     def start_decode(cls):
         decode_args = [
@@ -248,12 +249,12 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
         self.enable_offload_accuracy = metrics['accuracy']
         print(f"*************metrics1={self.enable_offload_accuracy}")
 
-    def test_reducation_cpu(self):
+    def test_accuracy(self):
         # Contrast accuracy
         disable_offload_accuracy = float(run_command(f"cat ./accuracy.txt"))
-        self.assertGreater(
-            disable_offload_accuracy,
+        self.assertGreaterEqual(
             self.enable_offload_accuracy,
+            disable_offload_accuracy,
             f"The accuracy did not meet the standard.")
 
 
