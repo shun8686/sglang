@@ -40,7 +40,6 @@ class TestRequestLengthValidation(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def create_openai_client(self):
-        """创建 OpenAI 客户端的公共方法"""
         return openai.Client(
             api_key=self.api_key,
             base_url=f"{DEFAULT_URL_FOR_TEST}/v1"
