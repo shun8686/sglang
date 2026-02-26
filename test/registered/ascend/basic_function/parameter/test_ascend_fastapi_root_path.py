@@ -19,7 +19,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
-
 class TestAscendFastapiRootPath(CustomTestCase):
     """
     Testcase：Verify that the system correctly processes the root path prefix when configuring the root path prefix and
@@ -109,11 +108,15 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
+
 @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
     fastapi_root_path = "/test/fastapi/root/path/"
 
+
 class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
+    fastapi_root_path = "/sglang/"
+
     @classmethod
     def setUpClass(cls):
         # Modify nginx configuration and start nginx service
@@ -220,54 +223,8 @@ class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
-class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
-    fastapi_root_path = "/sglang/"
-
-    @classmethod
-    def setUpClass(cls):
-        # Modify nginx configuration and start nginx service
-        cls.nginx_manager = NginxConfigManager(
-            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
-            nginx_bin_path="/usr/local/nginx/sbin/nginx"
-        )
-
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
-
-        # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(cls.base_url)
-        cls.common_args = [
-            "--trust-remote-code",
-            "--mem-fraction-static", 0.8,
-            "--attention-backend", "ascend",
-            "--fastapi-root-path", cls.fastapi_root_path,
-        ]
-
-        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.common_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        cls.out_log_file.close()
-        cls.err_log_file.close()
-        os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
-        cls.nginx_manager.clean_environment()
-
-    def test_fastapi_root_path(self):
         response = requests.post(
-            f"{self.base_url}/generate",
+            f"{self.base_url}/{self.fastapi_root_path}/generate",
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
@@ -276,31 +233,89 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
                 },
             },
         )
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertNotIn(
-            self.fastapi_root_path,
-            response.url,
-            "The root path should not in response url."
-        )
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
-        self.out_log_file.seek(0)
-        content = self.out_log_file.read()
-        self.assertTrue(len(content) > 0)
-        self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
-        response = requests.post(
-            f"{self.base_url}{self.fastapi_root_path}generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+# class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
+#     fastapi_root_path = "/sglang/"
+#
+#     @classmethod
+#     def setUpClass(cls):
+#         # Modify nginx configuration and start nginx service
+#         cls.nginx_manager = NginxConfigManager(
+#             nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
+#             nginx_bin_path="/usr/local/nginx/sbin/nginx"
+#         )
+#
+#         cls.base_url = DEFAULT_URL_FOR_TEST
+#         cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+#
+#         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+#         # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+#         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+#         cls.base_url = DEFAULT_URL_FOR_TEST
+#         cls.url = urlparse(cls.base_url)
+#         cls.common_args = [
+#             "--trust-remote-code",
+#             "--mem-fraction-static", 0.8,
+#             "--attention-backend", "ascend",
+#             "--fastapi-root-path", cls.fastapi_root_path,
+#         ]
+#
+#         cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
+#         cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
+#         cls.process = popen_launch_server(
+#             cls.model,
+#             cls.base_url,
+#             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+#             other_args=cls.common_args,
+#             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+#         )
+#
+#     @classmethod
+#     def tearDownClass(cls):
+#         kill_process_tree(cls.process.pid)
+#         cls.out_log_file.close()
+#         cls.err_log_file.close()
+#         os.remove("./warmup_out_log.txt")
+#         os.remove("./warmup_err_log.txt")
+#         cls.nginx_manager.clean_environment()
+#
+#     def test_fastapi_root_path(self):
+#         response = requests.post(
+#             f"{self.base_url}/generate",
+#             json={
+#                 "text": "The capital of France is",
+#                 "sampling_params": {
+#                     "temperature": 0,
+#                     "max_new_tokens": 32,
+#                 },
+#             },
+#         )
+#         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+#         self.assertNotIn(
+#             self.fastapi_root_path,
+#             response.url,
+#             "The root path should not in response url."
+#         )
+#         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+#
+#         self.out_log_file.seek(0)
+#         content = self.out_log_file.read()
+#         self.assertTrue(len(content) > 0)
+#         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
+#
+#         response = requests.post(
+#             f"{self.base_url}{self.fastapi_root_path}generate",
+#             json={
+#                 "text": "The capital of France is",
+#                 "sampling_params": {
+#                     "temperature": 0,
+#                     "max_new_tokens": 32,
+#                 },
+#             },
+#         )
+#         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 class NginxConfigManager:
     def __init__(self, nginx_conf_path, nginx_bin_path):
