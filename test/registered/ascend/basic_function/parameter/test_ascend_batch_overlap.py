@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
-class TestDeepseekR1Nvfp4CuteDSLDeepEP(CustomTestCase):
+class TestEnableSingleBatchOverlap(CustomTestCase):
     """Testcase: Test configure `--enable-single-batch-overlap`, use the GSM8K dataset, and ensure an inference accuracy of at least 0.86.
 
     [Test Category] Parameter
