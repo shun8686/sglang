@@ -44,7 +44,7 @@ MODEL_OTHER_ARGS = [
     32,
     36,
     "--mem-fraction-static",
-    0.76,
+    0.77,
     "--max-running-requests",
     144,
     "--context-length",
