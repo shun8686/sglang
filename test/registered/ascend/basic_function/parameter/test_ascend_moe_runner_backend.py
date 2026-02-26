@@ -40,7 +40,7 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
                 cls.moe_runner_backend,
             ],
         )
-
+        
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
