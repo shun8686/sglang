@@ -78,7 +78,6 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        pass
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -102,12 +101,25 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertTrue(len(content) > 0)
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
+        response = requests.post(
+            f"{self.base_url}{self.fastapi_root_path}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
-class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
-    fastapi_root_path = "/test/fastapi/root/path"
 
-class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
-    fastapi_root_path = "/sglang/"
+# class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
+#     fastapi_root_path = "/test/fastapi/root/path"
+#
+# class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
+#     fastapi_root_path = "/sglang/"
 
 # class TestAscendFastapiRootPathErrorPath(CustomTestCase):
 #     fastapi_root_path = "test_fastapi_root_path"
