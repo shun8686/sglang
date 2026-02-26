@@ -165,6 +165,18 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
+        response = requests.post(
+            f"{self.base_url}{self.fastapi_root_path}generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
 
 @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
