@@ -48,7 +48,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.fastapi_root_path = "test"
         cls.base_url = "test"
 
-        nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+        print(nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url))
 
         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
         # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
@@ -80,7 +80,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         # cls.err_log_file.close()
         # os.remove("./warmup_out_log.txt")
         # os.remove("./warmup_err_log.txt")
-        # cls.nginx_manager.restore_original_config()
+        cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
         pass
@@ -174,6 +174,12 @@ class NginxConfigManager:
         if os.path.exists(self.backup_conf_path):
             shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
         subprocess.run([self.nginx_bin_path, '-s', 'reload'])
+
+    def clean_environment(self):
+        # if os.path.exists(self.backup_conf_path):
+        #     shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
+        # os.remove(self.backup_conf_path)
+        subprocess.run([self.nginx_bin_path, '-s', 'stop'])
 
 
 if __name__ == "__main__":
