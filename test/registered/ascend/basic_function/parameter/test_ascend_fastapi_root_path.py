@@ -165,9 +165,10 @@ class NginxConfigManager:
             return True
         except subprocess.CalledProcessError as e:
             # 重启失败时恢复备份配置
-            if os.path.exists(self.backup_conf_path):
-                shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
-                subprocess.run([self.nginx_bin_path, '-s', 'reload'])
+            print(e)
+            # if os.path.exists(self.backup_conf_path):
+            #     shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
+            #     subprocess.run([self.nginx_bin_path, '-s', 'reload'])
             return False
 
     def restore_original_config(self):
