@@ -169,7 +169,7 @@ class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
                 host="http://127.0.0.1",
                 port=21000,
             )
-        metrics2 = run_eval(args)
+        metrics = run_eval(args)
         print(f"*************metrics2={metrics['accuracy']}")
 
 class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
