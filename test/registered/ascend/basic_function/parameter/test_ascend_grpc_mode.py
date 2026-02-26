@@ -48,7 +48,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
         # TODO: 检查服务是否拉起
-        # sleep(100)
+        sleep(100)
 
         router_command = [
             "python3",
@@ -74,7 +74,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     @classmethod
     def wait_server_ready(cls, url):
         cls.wait_router_ready(url + "/health")
-        cls.wait_server_ready(url + "/workers")
+        # cls.wait_server_ready(url + "/workers")
 
     @classmethod
     def wait_router_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
@@ -82,7 +82,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         while True:
             response = requests.get(url)
             try:
-                response = requests.get(url)
+                # response = requests.get(url)
                 print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 200:
                     print(f"Server {url} is ready")
@@ -102,7 +102,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         while True:
             response = requests.get(url)
             try:
-                response = requests.get(url)
+                # response = requests.get(url)
                 print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 202:
                     print(f"Server {url} is ready")
