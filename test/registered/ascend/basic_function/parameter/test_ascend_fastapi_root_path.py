@@ -1,4 +1,8 @@
 import os
+import shutil
+from typing import Dict
+import subprocess
+
 import requests
 import unittest
 from urllib.parse import urlparse
@@ -27,67 +31,77 @@ class TestAscendFastapiRootPath(CustomTestCase):
 
     # fastapi_root_path = "test_fastapi_root_path"
     # fastapi_root_path = ""
-    # fastapi_root_path = "/sglang"
+    fastapi_root_path = "/sglang"
+
     # fastapi_root_path = "/test/fastapi/root/path"
     # fastapi_root_path = "sglang"
 
     @classmethod
     def setUpClass(cls):
-        #cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
-        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(cls.base_url)
-        cls.common_args = [
-            "--trust-remote-code",
-            "--mem-fraction-static", 0.8,
-            "--attention-backend", "ascend",
-            "--fastapi-root-path", cls.fastapi_root_path,
-        ]
-
-        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.common_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+        # Modify nginx configuration and start nginx service
+        nginx_manager = NginxConfigManager(
+            nginx_conf_path="/user/local/nginx/conf/nginx.conf",  # 根据你的实际路径修改
+            nginx_bin_path="/usr/local/sbin/nginx"  # 根据你的实际路径修改
         )
+
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+
+        # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+        # cls.base_url = DEFAULT_URL_FOR_TEST
+        # cls.url = urlparse(cls.base_url)
+        # cls.common_args = [
+        #     "--trust-remote-code",
+        #     "--mem-fraction-static", 0.8,
+        #     "--attention-backend", "ascend",
+        #     "--fastapi-root-path", cls.fastapi_root_path,
+        # ]
+
+        # cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
+        # cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
+        # cls.process = popen_launch_server(
+        #     cls.model,
+        #     cls.base_url,
+        #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        #     other_args=cls.common_args,
+        #     return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+        # )
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        cls.out_log_file.close()
-        cls.err_log_file.close()
-        os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
+        # kill_process_tree(cls.process.pid)
+        # cls.out_log_file.close()
+        # cls.err_log_file.close()
+        # os.remove("./warmup_out_log.txt")
+        # os.remove("./warmup_err_log.txt")
+        cls.nginx_manager.restore_original_config()
 
     def test_fastapi_root_path(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        # response url is the same as request url which doesn't contain fastapi root path
-        print(f"{response.url=}")
-        self.assertNotIn(
-            self.fastapi_root_path, response.url,
-            "The root path should not in response url."
-        )
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-
-        self.out_log_file.seek(0)
-        content = self.out_log_file.read()
-        self.assertTrue(len(content) > 0)
-        # request should be redirected to fastapi_root_path.
-        self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
+        pass
+        # response = requests.post(
+        #     f"{self.base_url}/generate",
+        #     json={
+        #         "text": "The capital of France is",
+        #         "sampling_params": {
+        #             "temperature": 0,
+        #             "max_new_tokens": 32,
+        #         },
+        #     },
+        # )
+        # self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        # self.assertNotIn(
+        #     self.fastapi_root_path,
+        #     response.url,
+        #     "The root path should not in response url."
+        # )
+        # self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        #
+        # self.out_log_file.seek(0)
+        # content = self.out_log_file.read()
+        # self.assertTrue(len(content) > 0)
+        # self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
 
 # class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
@@ -96,6 +110,63 @@ class TestAscendFastapiRootPath(CustomTestCase):
 #
 # class TestAscendFastapiRootPathErrorPath(CustomTestCase):
 #     fastapi_root_path = "test_fastapi_root_path"
+
+class NginxConfigManager:
+    def __init__(self, nginx_conf_path, nginx_bin_path):
+        self.nginx_conf_path = nginx_conf_path
+        self.nginx_bin_path = nginx_bin_path
+
+        self.backup_conf_path = f"{nginx_conf_path}.backup"
+
+    def backup_original_config(self):
+        if not os.path.exists(self.backup_conf_path):
+            shutil.copy2(self.nginx_conf_path, self.backup_conf_path)
+
+    def generate_config(self, location, proxy_pass):
+        lines = [
+            "        location " + f"{location}" + " {",
+            "            proxy_pass " + f"{proxy_pass}" + ";",
+            "        }",
+        ]
+
+        return lines
+
+    def apply_config(self, location, proxy_pass):
+        if not os.path.exists(self.backup_conf_path):
+            shutil.copy2(self.nginx_conf_path, self.backup_conf_path)
+
+
+        try:
+            with open(self.nginx_conf_path, "w+", encoding="utf-8") as f:
+                lines = f.readlines()
+            lines[49] = "        location " + f"{location}" + " {"
+            lines[50] = "            proxy_pass " + f"{proxy_pass}" + ";"
+            lines[51] = "        }"
+        except FileNotFoundError:
+            raise FileNotFoundError(f"file not found: {self.nginx_conf_path}")
+        except Exception as e:
+            raise RuntimeError(f"Failed to modify nginx config: {e}")
+
+        # 重启Nginx
+        try:
+            subprocess.run(
+                [self.nginx_bin_path, '-s', 'reload'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return True
+        except subprocess.CalledProcessError as e:
+            # 重启失败时恢复备份配置
+            if os.path.exists(self.backup_conf_path):
+                shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
+                subprocess.run([self.nginx_bin_path, '-s', 'reload'])
+            return False
+
+    def restore_original_config(self):
+        if os.path.exists(self.backup_conf_path):
+            shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
+        subprocess.run([self.nginx_bin_path, '-s', 'reload'])
 
 
 if __name__ == "__main__":

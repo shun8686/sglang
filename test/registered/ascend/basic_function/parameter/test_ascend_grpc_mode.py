@@ -74,12 +74,9 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
         start_time = time.perf_counter()
         while True:
-            # response = requests.get(url)
             try:
                 response = requests.get(url)
-                # print(f"{response.status_code=}, {response.text=}")
                 if response.status_code == 200:
-                    # print(f"Server {url} is ready")
                     return
             except Exception:
                 pass
@@ -97,14 +94,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        print(f"{response.status_code=}, {response.json()=}")
         self.assertEqual(response.status_code, 202, "The response status code is not 202.")
         self.assertEqual(response.json().get("status"), "accepted", "The response status is not accepted.")
         self.assertEqual(response.json().get("url"), self.base_url, f"The response url is not {self.base_url}.")
         self.assertEqual(response.json().get("location"), "/workers/" + response.json().get("worker_id"),
                          f"The response location is not equal with worker_id.")
-
-        # sleep(600)
 
         response = requests.post(
             f"{self.base_url}/generate",
