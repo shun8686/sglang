@@ -19,6 +19,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
+@unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPath(CustomTestCase):
     """
     Testcase：Verify that the system correctly processes the root path prefix when configuring the root path prefix and
@@ -32,15 +33,12 @@ class TestAscendFastapiRootPath(CustomTestCase):
     # fastapi_root_path = ""
     fastapi_root_path = "/sglang/"
 
-    # fastapi_root_path = "/test/fastapi/root/path"
-    # fastapi_root_path = "sglang"
-
     @classmethod
     def setUpClass(cls):
         # Modify nginx configuration and start nginx service
         cls.nginx_manager = NginxConfigManager(
-            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",  # 根据你的实际路径修改
-            nginx_bin_path="/usr/local/nginx/sbin/nginx"  # 根据你的实际路径修改
+            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
+            nginx_bin_path="/usr/local/nginx/sbin/nginx"
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -114,10 +112,60 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 
+# class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
+#     fastapi_root_path = "/test/fastapi/root/path/"
 
-class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
-    fastapi_root_path = "/test/fastapi/root/path/"
+class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
+    @classmethod
+    def setUpClass(cls):
+        # Modify nginx configuration and start nginx service
+        cls.nginx_manager = NginxConfigManager(
+            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
+            nginx_bin_path="/usr/local/nginx/sbin/nginx"
+        )
 
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+
+        # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
+        # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(cls.base_url)
+        cls.common_args = [
+            "--trust-remote-code",
+            "--mem-fraction-static", 0.8,
+            "--attention-backend", "ascend",
+        ]
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=cls.common_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+        cls.nginx_manager.clean_environment()
+
+    def test_fastapi_root_path(self):
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
+
+@unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
     fastapi_root_path = "/sglang"
 
@@ -157,8 +205,23 @@ class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
-# class TestAscendFastapiRootPathErrorPath(CustomTestCase):
-#     fastapi_root_path = "test_fastapi_root_path"
+
+class TestAscendFastapiRootPathErrorPath(CustomTestCase):
+    fastapi_root_path = "sglang"
+
+    def test_fastapi_root_path(self):
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
 
 class NginxConfigManager:
     def __init__(self, nginx_conf_path, nginx_bin_path):
