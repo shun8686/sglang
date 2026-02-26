@@ -85,8 +85,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
                     model_layers_list.append(key.split(".")[2])
-        model_layers_list = list(set(model_layers_list))
-        model_layers_list.sort()
+        model_layers_list = sorted(set(model_layers_list), key=lambda x: int(x))
         print(model_layers_list)
         self.assertEqual(model_layers_list[-1], 31)
 
