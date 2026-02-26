@@ -67,6 +67,9 @@ DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
 DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
 )
+DEEPSEEK_CODER_1_3_B_BASE_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base"
+)
 ERNIE_4_5_21B_A3B_PT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "baidu/ERNIE-4.5-21B-A3B-PT"
 )
@@ -234,7 +237,8 @@ QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
-
+# Other
+DEEPSEEK_CODER_JSON_PATH="/__w/sglang/sglang/test/registered/ascend/basic_function/deepseek_coder.json"
 
 class ModelTestConfig(NamedTuple):
     """
