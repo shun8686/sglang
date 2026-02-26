@@ -7,7 +7,7 @@ from typing import Dict
 
 import requests
 from types import SimpleNamespace
-from  sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.few_shot_gsm8k import run_eval
 
 from sglang.bench_serving import get_tokenizer
 from sglang.test.server_fixtures.disaggregation_fixture import (
@@ -19,8 +19,10 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Base class for disaggregation with HiCache tests"""
+
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
@@ -59,7 +61,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:26666",
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:26666",
         }
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
@@ -86,7 +88,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-
     def trigger_offloading_and_flush(self):
         """Helper method to trigger offloading and flush cache"""
         # Trigger offloading
@@ -99,6 +100,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     @classmethod
     def start_decode(cls):
         pass
+
 
 class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
     """Test disaggregation with HiCache enabled only on Prefill side"""
@@ -124,7 +126,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:26666",
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:26666",
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,

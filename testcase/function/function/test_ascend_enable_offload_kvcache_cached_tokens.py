@@ -16,8 +16,10 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Base class for disaggregation with HiCache tests"""
+
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
@@ -68,7 +70,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
@@ -212,7 +214,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,
@@ -248,11 +250,11 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             self.assertGreater(
                 cached_tokens,
                 previous_cached_tokens,
-                f"Turn {turn} should have more cached tokens than turn {turn-1}",
+                f"Turn {turn} should have more cached tokens than turn {turn - 1}",
             )
 
             # Update context and cached tokens for next iteration
-            current_context +=response["text"]
+            current_context += response["text"]
             previous_cached_tokens = cached_tokens
 
             # Flush prefill cache

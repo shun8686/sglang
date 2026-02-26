@@ -18,8 +18,10 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     """Base class for disaggregation with HiCache tests"""
+
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
@@ -70,7 +72,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
@@ -161,16 +163,17 @@ class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
 
     def test_gsm8k(self):
         args = SimpleNamespace(
-                num_shots=5,
-                data_path="/tmp/test.jsonl",
-                num_questions=200,
-                max_new_tokens=512,
-                parallel=128,
-                host="http://127.0.0.1",
-                port=21000,
-            )
+            num_shots=5,
+            data_path="/tmp/test.jsonl",
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=21000,
+        )
         metrics = run_eval(args)
         print(f"*************metrics2={metrics['accuracy']}")
+
 
 class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
     """Test disaggregation with HiCache enabled on both Prefill and Decode sides"""
@@ -210,7 +213,7 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL":"tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,
@@ -222,14 +225,14 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
 
     def test_gsm8k(self):
         args = SimpleNamespace(
-                num_shots=5,
-                data_path="/tmp/test.jsonl",
-                num_questions=200,
-                max_new_tokens=512,
-                parallel=128,
-                host="http://127.0.0.1",
-                port=21000,
-            )
+            num_shots=5,
+            data_path="/tmp/test.jsonl",
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host="http://127.0.0.1",
+            port=21000,
+        )
         metrics = run_eval(args)
         print(f"*************metrics1={metrics['accuracy']}")
 
