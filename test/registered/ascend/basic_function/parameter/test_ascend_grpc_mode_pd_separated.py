@@ -108,37 +108,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         print(f"{response.status_code=}")
         print(f"{response.text=}")
 
-# grpc
-# P
-export PYTHONPATH=/home/zkk/sglang/python:$PYTHONPATH
-export ASCEND_MF_STORE_URL="tcp://127.0.0.1:24667"
-python -m sglang.launch_server \
-  --model /home/weights/Qwen3-0.6B \
-  --trust-remote-code --attention-backend ascend --device npu \
-  --disable-cuda-graph \
-  --mem-fraction-static 0.4 --tp-size 1 --dp-size 2 --base-gpu-id 12 \
-  --grpc-mode --disaggregation-transfer-backend ascend --disaggregation-mode prefill \
-  --port 20000 --enable-metrics --metrics-port 10000
-# D
-export PYTHONPATH=/home/zkk/sglang/python:$PYTHONPATH
-export ASCEND_MF_STORE_URL="tcp://127.0.0.1:24667"
-python -m sglang.launch_server \
-  --model /home/weights/Qwen3-0.6B \
-  --trust-remote-code --attention-backend ascend --device npu \
-  --disable-cuda-graph --prefill-round-robin-balance \
-  --mem-fraction-static 0.4 --tp-size 1 --dp-size 2 --base-gpu-id 14 \
-  --grpc-mode --disaggregation-transfer-backend ascend --disaggregation-mode decode \
-  --port 20001 --enable-metrics --metrics-port 10001
-# Router
-export PYTHONPATH=/home/zkk/sglang/python:$PYTHONPATH
-python -m sglang_router.launch_router \
-  --pd-disaggregation \
-  --prefill-policy cache_aware --dp-minimum-tokens-scheduler --worker-load-check-interval 1 \
-  --prefill grpc://127.0.0.1:20000 \
-  --decode grpc://127.0.0.1:20001 \
-  --model-path /home/weights/Qwen3-0.6B \
-  --tokenizer-path /home/weights/Qwen3-0.6B \
-  --host 0.0.0.0 --port 4567
 
 
 if __name__ == "__main__":
