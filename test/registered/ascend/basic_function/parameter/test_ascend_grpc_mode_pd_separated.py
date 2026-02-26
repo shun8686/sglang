@@ -33,7 +33,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
         cls.prefill_url = f"grpc://127.0.0.1:20100"
         cls.prefill_port = "20100"
-        cls.decode_url = f"grpc://127.0.0.1:20100"
+        cls.decode_url = f"grpc://127.0.0.1:20200"
         cls.decode_port = "20200"
         cls.base_url =  DEFAULT_URL_FOR_TEST
         cls.lb_url = cls.base_url
@@ -118,7 +118,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
                 "--disaggregation-mode",
                 "decode",
                 "--port",
-                20001,
+                cls.decode_port,
             ]
         )
         cls.extra_envs = {
