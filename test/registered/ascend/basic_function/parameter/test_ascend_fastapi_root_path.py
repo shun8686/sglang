@@ -146,9 +146,9 @@ class NginxConfigManager:
 
             for line in lines:
                 print(line)
-            lines[49] = "        location " + f"{location}" + " {"
-            lines[50] = "            proxy_pass " + f"{proxy_pass}" + ";"
-            lines[51] = "        }"
+            lines[48] = "        location " + f"{location}" + " {\n"
+            lines[49] = "            proxy_pass " + f"{proxy_pass}" + ";\n"
+            lines[50] = "        }\n"
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
         except FileNotFoundError:
