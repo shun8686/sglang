@@ -133,10 +133,34 @@ class TestAscendFastapiRootPath(CustomTestCase):
     #     )
 
 
-
 # @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
     fastapi_root_path = "/test/fastapi/root/path/"
+
+
+# @unittest.skip("临时设置，减少运行时间")
+class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
+    fastapi_root_path = "/sglang"
+
+
+class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
+    fastapi_root_path = "sglang"
+
+    def test_fastapi_root_path(self):
+        response = self.send_request(f"{self.base_url}/generate")
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
+        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
+        response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}generate")
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
+        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}/generate")
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
+        response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}/generate")
+        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 
 class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
@@ -182,67 +206,6 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
         response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
-
-
-# @unittest.skip("临时设置，减少运行时间")
-class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
-    fastapi_root_path = "/sglang"
-
-    def test_fastapi_root_path(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertNotIn(
-            self.fastapi_root_path,
-            response.url,
-            "The root path should not in response url."
-        )
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-
-        self.out_log_file.seek(0)
-        content = self.out_log_file.read()
-        self.assertTrue(len(content) > 0)
-        self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
-
-        response = requests.post(
-            f"{self.base_url}{self.fastapi_root_path}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
-
-
-class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
-    fastapi_root_path = "sglang"
-
-    def test_fastapi_root_path(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
-
-        response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}/generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 
@@ -326,6 +289,7 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
             },
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+
 
 class NginxConfigManager:
     def __init__(self, nginx_conf_path, nginx_bin_path):
