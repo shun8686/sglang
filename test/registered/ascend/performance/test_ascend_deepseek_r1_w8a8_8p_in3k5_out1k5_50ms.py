@@ -60,7 +60,7 @@ MODEL_OTHER_ARGS = [
     "auto",
     "--enable-dp-attention",
     "--dp-size",
-    4,
+    1,
     "--enable-dp-lm-head",
     "--speculative-algorithm",
     "NEXTN",
