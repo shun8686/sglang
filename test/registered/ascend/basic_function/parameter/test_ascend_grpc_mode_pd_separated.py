@@ -1,3 +1,4 @@
+import os
 from time import sleep
 import requests
 import unittest
@@ -5,12 +6,13 @@ import subprocess
 import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 # from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_with_error_check,
+    popen_with_error_check, popen_launch_pd_server,
 )
 
 from sglang.test.ci.ci_register import register_npu_ci
@@ -28,37 +30,127 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # cls.model = QWEN3_8B_WEIGHTS_PATH
         cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
-        cls.grpc_base_url = f"grpc://127.0.0.1:30111"
-        cls.grpc_url = urlparse(cls.grpc_base_url)
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.prefill_url = f"grpc://127.0.0.1:20100"
+        cls.prefill_port = "20100"
+        cls.decode_url = f"grpc://127.0.0.1:20100"
+        cls.decode_port = "20200"
+        cls.lb_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
+        os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
-        worker_command = [
-            "python3",
-            "-m", "sglang.launch_server",
-            "--model-path", cls.model,
-            "--grpc-mode",
-            "--host", cls.grpc_url.hostname, "--port", str(cls.grpc_url.port),
-        ]
-        cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
+        # Non blocking start servers
+        cls.start_prefill()
+        cls.start_decode()
+
+        # TODO
+        # # Block until both
+        # cls.wait_server_ready(cls.prefill_url + "/health")
+        # cls.wait_server_ready(cls.decode_url + "/health")
         sleep(100)
 
-        router_command = [
-            "python3",
-            "-m", "sglang_router.launch_router",
-            "--worker-urls", cls.grpc_base_url,
-            "--host", cls.url.hostname, "--port", str(cls.url.port),
-            "--model-path", cls.model,
-        ]
-        cls.router_process = popen_with_error_check(router_command)
-        cls.wait_server_ready(cls.base_url + "/health")
+        cls.launch_lb()
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.router_process.pid)
         kill_process_tree(cls.worker_process.pid)
+
+    @classmethod
+    def start_prefill(cls):
+        prefill_args = (
+            [
+                "--trust-remote-code",
+                "--attention-backend",
+                "ascend",
+                "--device",
+                "npu",
+                "--disable-cuda-graph",
+                "--mem-fraction-static",
+                "0.4",
+                "--tp-size",
+                "1",
+                "--base-gpu-id",
+                12,
+                "--grpc-mode",
+                "--disaggregation-transfer-backend",
+                "ascend",
+                "--disaggregation-mode",
+                "prefill",
+                "--port",
+                cls.prefill_port,
+            ]
+        )
+
+        cls.extra_envs = {
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+        }
+        os.environ.update(cls.extra_envs)
+        cls.process_prefill = popen_launch_pd_server(
+            cls.model,
+            cls.prefill_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=prefill_args,
+        )
+
+    @classmethod
+    def start_decode(cls):
+        decode_args = (
+            [
+                "--trust-remote-code",
+                "--attention-backend",
+                "ascend",
+                "--device",
+                "npu",
+                "--disable-cuda-graph",
+                "--prefill-round-robin-balance"
+                "--mem-fraction-static",
+                "0.4",
+                "--tp-size",
+                "1",
+                "--base-gpu-id",
+                14,
+                "--grpc-mode",
+                "--disaggregation-transfer-backend",
+                "ascend",
+                "--disaggregation-mode",
+                "decode",
+                "--port",
+                20001,
+            ]
+        )
+        cls.extra_envs = {
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+        }
+        os.environ.update(cls.extra_envs)
+        cls.process_decode = popen_launch_pd_server(
+            cls.model,
+            cls.decode_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=decode_args,
+        )
+
+    @classmethod
+    def launch_lb(cls):
+        lb_command = [
+            "python3",
+            "-m",
+            "sglang_router.launch_router",
+            "--pd-disaggregation",
+            "--mini-lb",
+            "--prefill",
+            cls.prefill_url,
+            "--decode",
+            cls.decode_url,
+            "--host",
+            cls.url.hostname,
+            "--port",
+            str(cls.url.port),
+        ]
+        cls.process_lb = popen_with_error_check(lb_command)
+        cls.wait_server_ready(cls.lb_url + "/health")
 
     @classmethod
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
@@ -79,7 +171,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     def test_grpc_mode(self):
         response = requests.post(
-            f"http://127.0.0.1:21000/generate",
+            f"{self.lb_url}/generate",
             json={
                 "text": "The capital of France is",
                 "model": self.model,
@@ -92,22 +184,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
         self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertIn("Paris", response.text, "The inference result does not include Paris.")
-
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
-
-        print("============base==============")
-        print(f"{response.status_code=}")
-        print(f"{response.text=}")
-
 
 
 if __name__ == "__main__":
