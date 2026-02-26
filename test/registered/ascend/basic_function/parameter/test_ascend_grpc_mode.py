@@ -101,7 +101,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         self.assertEqual(response.status_code, 202, "The response status code is not 202.")
         self.assertEqual(response.json().get("status"), "accepted", "The response status is not accepted.")
         self.assertEqual(response.json().get("url"), self.base_url, f"The response url is not {self.base_url}.")
-        self.assertEqual(response.json.get("location"), "/workers/" + response.json().get("worker_id"),
+        self.assertEqual(response.json().get("location"), "/workers/" + response.json().get("worker_id"),
                          f"The response location is not equal with worker_id.")
 
         # sleep(600)
