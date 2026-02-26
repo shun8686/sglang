@@ -9,6 +9,11 @@ from typing import Dict
 import requests
 
 from sglang.bench_serving import get_tokenizer
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_32B_WEIGHTS_PATH,
+    run_command
+)
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
@@ -18,15 +23,21 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
-    """Base class for disaggregation with HiCache tests"""
+    """Testcase: In PD separation scenarios, enabling offset does not degrade accuracy compared to not enabling offset.
+
+    [Test Category] Parameter
+    [Test Target] --disaggregation-decode-enable-offload-kvcache
+    """
 
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
 
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+        cls.model = QWEN3_32B_WEIGHTS_PATH
 
         cls.tokenizer = get_tokenizer(cls.model)
         cls.temp_dir = tempfile.mkdtemp()
@@ -41,7 +52,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
     @classmethod
     def start_prefill(cls):
-        # Prefill with HiCache enabled
+        # Startup prefill parameters
         prefill_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -94,7 +105,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     def send_request(
         self, prompt: str, max_tokens: int = 100, temperature: float = 0.0
     ) -> Dict:
-        """Send a generate request and return response"""
+        # Send a generate request and return response
         response = requests.post(
             f"{self.lb_url}/generate",
             json={
@@ -116,7 +127,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         return response.json()
 
     def trigger_offloading_and_flush(self):
-        """Helper method to trigger offloading and flush cache"""
+        # Helper method to trigger offloading and flush cache
         # Trigger offloading
         self.send_request(self.gen_prompt(1), max_tokens=150)
 
@@ -126,11 +137,10 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
 
 class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
-    """Test disaggregation with HiCache enabled only on Prefill side"""
+    """Decode startup parameters, disable offload-kvcache"""
 
     @classmethod
     def start_decode(cls):
-        # Decode without HiCache offload
         decode_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -172,15 +182,16 @@ class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
             port=21000,
         )
         metrics = run_eval(args)
+        run_command(f"echo {metrics['accuracy']} > ./accuracy.txt")
+
         print(f"*************metrics2={metrics['accuracy']}")
 
 
 class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
-    """Test disaggregation with HiCache enabled on both Prefill and Decode sides"""
+    """Decode startup parameters, enable offload-kvcache"""
 
     @classmethod
     def start_decode(cls):
-        # Decode with HiCache offload enabled
         decode_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -234,7 +245,16 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
             port=21000,
         )
         metrics = run_eval(args)
-        print(f"*************metrics1={metrics['accuracy']}")
+        self.enable_offload_accuracy = metrics['accuracy']
+        print(f"*************metrics1={self.enable_offload_accuracy}")
+
+    def test_reducation_cpu(self):
+        # Contrast accuracy
+        disable_offload_accuracy = float(run_command(f"cat ./accuracy.txt"))
+        self.assertGreater(
+            disable_offload_accuracy,
+            self.enable_offload_accuracy,
+            f"The accuracy did not meet the standard.")
 
 
 if __name__ == "__main__":

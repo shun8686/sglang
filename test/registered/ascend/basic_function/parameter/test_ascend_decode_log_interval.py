@@ -6,6 +6,11 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import (
+    LLAMA_3_2_1B_WEIGHTS_PATH,
+    run_command
+)
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -13,24 +18,21 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDecodeLogInterval(CustomTestCase):
+    """Testcase: Test configuration --decode-log-interval is set to 10, generating 52 decode batches.
+
+    [Test Category] Parameter
+    [Test Target] --decode-log-interval
+    """
+
     decode_numbers = 10
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
+        cls.model = LLAMA_3_2_1B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--attention-backend",

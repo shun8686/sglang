@@ -4,6 +4,8 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -11,12 +13,20 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestDecodeLogInterval(CustomTestCase):
+    """Testcase: Test configure the --gc-warning-threshold-secs value can trigger the alarm threshold and print the freeze_gc message.
+
+    [Test Category] Parameter
+    [Test Target] --gc-warning-threshold-secs
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.message = "This may cause latency jitter. Consider calling the freeze_gc API after sending a few warmup requests"
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
+        cls.model = LLAMA_3_2_1B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--attention-backend",
