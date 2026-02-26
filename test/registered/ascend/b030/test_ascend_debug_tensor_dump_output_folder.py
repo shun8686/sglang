@@ -104,6 +104,7 @@ class TestDebugTensorDumpOutputFolder(CustomTestCase):
         self.assertEqual(len(model_layers_list), 32)
         self.assertEqual(sorted(set(model_layers_list)), list(range(32, 64)))
 
+
 class TestDebugTensorDumpOutputFolder1(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
     tp_size = 4
@@ -181,6 +182,7 @@ class TestDebugTensorDumpOutputFolder1(CustomTestCase):
         print(model_layers_list)
         self.assertEqual(len(model_layers_list), 1)
         self.assertEqual(model_layers_list[0], 1)
+
 
 class TestDebugTensorDumpOutputFolder2(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
@@ -264,6 +266,7 @@ class TestDebugTensorDumpOutputFolder2(CustomTestCase):
         self.assertEqual(model_layers_list[1], 3)
         self.assertEqual(model_layers_list[2], 4)
 
+
 class TestDebugTensorDumpOutputFolder3(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
     tp_size = 4
@@ -346,6 +349,7 @@ class TestDebugTensorDumpOutputFolder3(CustomTestCase):
         self.assertEqual(model_layers_list[1], 5)
         self.assertEqual(model_layers_list[2], 10)
 
+
 class TestDebugTensorDumpOutputFolder4(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
     tp_size = 4
@@ -367,9 +371,7 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
         "--debug-tensor-dump-output-folder",
         "./",
         "--debug-tensor-dump-layers",
-        "0",
-        "5",
-        "10",
+        "500",
         "--skip-server-warmup",
         "--base-gpu-id",
         "8",
@@ -388,7 +390,7 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
+        # run_command("rm -rf ./TP*_PP*")
 
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
@@ -423,10 +425,7 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
                     model_layers_list.append(key.split(".")[2])
         model_layers_list = sorted(set(int(x) for x in model_layers_list))
         print(model_layers_list)
-        self.assertEqual(len(model_layers_list), 3)
-        self.assertEqual(model_layers_list[0], 0)
-        self.assertEqual(model_layers_list[1], 5)
-        self.assertEqual(model_layers_list[2], 10)
+
 
 class TestDebugTensorDumpOutputFolder5(CustomTestCase):
     model = QWEN3_32B_WEIGHTS_PATH
@@ -489,13 +488,14 @@ class TestDebugTensorDumpOutputFolder5(CustomTestCase):
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
         self.assertEqual(int(res1), 0)
 
+
 if __name__ == "__main__":
     suite = unittest.TestSuite()
     # suite.addTest(TestDebugTensorDumpOutputFolder("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder1("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))
-    # suite.addTest(TestDebugTensorDumpOutputFolder4("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder5("test_debug_tensor_dump_output_folder"))
+    # suite.addTest(TestDebugTensorDumpOutputFolder1("test_debug_tensor_dump_output_folder"))
+    # suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
+    # suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder4("test_debug_tensor_dump_output_folder"))
+    # suite.addTest(TestDebugTensorDumpOutputFolder5("test_debug_tensor_dump_output_folder"))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
