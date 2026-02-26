@@ -35,11 +35,12 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--disable-cuda-graph",
+                "--trust-remote-code",
                 "--moe-runner-backend",
                 cls.moe_runner_backend,
             ],
         )
-
+        
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
