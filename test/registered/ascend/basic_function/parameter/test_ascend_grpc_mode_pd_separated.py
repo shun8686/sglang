@@ -39,6 +39,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         cls.lb_url = cls.base_url
         cls.url = urlparse(cls.lb_url)
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
+        cls.process_lb, cls.process_decode, cls.process_prefill = None, None, None
 
         # Non blocking start servers
         cls.start_prefill()
@@ -48,14 +49,21 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         # # Block until both
         # cls.wait_server_ready(cls.prefill_url + "/health")
         # cls.wait_server_ready(cls.decode_url + "/health")
-        sleep(100)
+        sleep(200)
 
         cls.launch_lb()
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.router_process.pid)
-        kill_process_tree(cls.worker_process.pid)
+        for process in [cls.process_lb, cls.process_decode, cls.process_prefill]:
+            if process:
+                try:
+                    kill_process_tree(process.pid)
+                except Exception as e:
+                    print(f"Error killing process {process.pid}: {e}")
+
+        # wait for 5 seconds
+        time.sleep(5)
 
     @classmethod
     def start_prefill(cls):
