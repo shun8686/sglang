@@ -108,6 +108,31 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
+    def send_request(self, url):
+        return requests.post(
+            url,
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+    def assert_interfsend_request(self, url):
+        return requests.post(
+            url,
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+
 
 @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
@@ -360,18 +385,17 @@ class NginxConfigManager:
         # reload Nginx
         try:
             subprocess.run(
-                [self.nginx_bin_path, '-s', 'reload'],
+                [self.nginx_bin_path],
                 capture_output=True,
                 text=True,
                 check=True
             )
         except subprocess.CalledProcessError as e:
-            self.restore_original_config()
+            raise RuntimeError(f"Failed to modify nginx config: {e}")
 
     def restore_original_config(self):
         if os.path.exists(self.backup_conf_path):
             shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
-        subprocess.run([self.nginx_bin_path, '-s', 'reload'])
 
     def clean_environment(self):
         if os.path.exists(self.backup_conf_path):
