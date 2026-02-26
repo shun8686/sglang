@@ -19,7 +19,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
-@unittest.skip("临时设置，减少运行时间")
+
 class TestAscendFastapiRootPath(CustomTestCase):
     """
     Testcase：Verify that the system correctly processes the root path prefix when configuring the root path prefix and
