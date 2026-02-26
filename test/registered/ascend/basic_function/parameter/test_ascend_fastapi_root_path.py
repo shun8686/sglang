@@ -103,10 +103,12 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
 
-# class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
-#     fastapi_root_path = "/test/fastapi/root/path"
-#
-#
+class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
+    fastapi_root_path = "/test/fastapi/root/path"
+
+class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
+    fastapi_root_path = "/sglang/"
+
 # class TestAscendFastapiRootPathErrorPath(CustomTestCase):
 #     fastapi_root_path = "test_fastapi_root_path"
 
