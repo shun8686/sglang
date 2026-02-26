@@ -144,11 +144,10 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            for line in lines:
-                print(line)
             lines[48] = "        location " + f"{location}" + " {\n"
             lines[49] = "            proxy_pass " + f"{proxy_pass}" + ";\n"
             lines[50] = "        }\n"
+
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
         except FileNotFoundError:
@@ -156,21 +155,21 @@ class NginxConfigManager:
         except Exception as e:
             raise RuntimeError(f"Failed to modify nginx config: {e}")
 
-        # # 重启Nginx
-        # try:
-        #     subprocess.run(
-        #         [self.nginx_bin_path, '-s', 'reload'],
-        #         capture_output=True,
-        #         text=True,
-        #         check=True
-        #     )
-        #     return True
-        # except subprocess.CalledProcessError as e:
-        #     # 重启失败时恢复备份配置
-        #     if os.path.exists(self.backup_conf_path):
-        #         shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
-        #         subprocess.run([self.nginx_bin_path, '-s', 'reload'])
-        #     return False
+        # 重启Nginx
+        try:
+            subprocess.run(
+                [self.nginx_bin_path, '-s', 'reload'],
+                capture_output=True,
+                text=True,
+                check=True
+            )
+            return True
+        except subprocess.CalledProcessError as e:
+            # 重启失败时恢复备份配置
+            if os.path.exists(self.backup_conf_path):
+                shutil.copy2(self.backup_conf_path, self.nginx_conf_path)
+                subprocess.run([self.nginx_bin_path, '-s', 'reload'])
+            return False
 
     def restore_original_config(self):
         if os.path.exists(self.backup_conf_path):
