@@ -490,11 +490,11 @@ class TestDebugTensorDumpOutputFolder5(CustomTestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    # suite.addTest(TestDebugTensorDumpOutputFolder("test_debug_tensor_dump_output_folder"))
-    # suite.addTest(TestDebugTensorDumpOutputFolder1("test_debug_tensor_dump_output_folder"))
-    # suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
-    # suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder1("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))
     suite.addTest(TestDebugTensorDumpOutputFolder4("test_debug_tensor_dump_output_folder"))
-    # suite.addTest(TestDebugTensorDumpOutputFolder5("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder5("test_debug_tensor_dump_output_folder"))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)
