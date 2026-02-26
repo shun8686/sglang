@@ -133,12 +133,10 @@ class TestAscendFastapiRootPath(CustomTestCase):
     #     )
 
 
-# @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
     fastapi_root_path = "/test/fastapi/root/path/"
 
 
-# @unittest.skip("临时设置，减少运行时间")
 class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
     fastapi_root_path = "/sglang"
 
