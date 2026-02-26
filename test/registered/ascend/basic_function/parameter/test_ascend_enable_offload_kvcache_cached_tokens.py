@@ -8,6 +8,8 @@ from typing import Dict
 import requests
 
 from sglang.bench_serving import get_tokenizer
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
 )
@@ -16,15 +18,21 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
-    """Base class for disaggregation with HiCache tests"""
+    """Testcase: Test with offload enabled, cached_tokens continue to grow.
+
+    [Test Category] Parameter
+    [Test Target] --disaggregation-decode-enable-offload-kvcache
+    """
 
     @classmethod
     def setUpClass(cls):
         super(DisaggregationHiCacheBase, cls).setUpClass()
 
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+        cls.model = QWEN3_32B_WEIGHTS_PATH
 
         cls.tokenizer = get_tokenizer(cls.model)
         cls.temp_dir = tempfile.mkdtemp()
@@ -92,7 +100,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     def send_request(
         self, prompt: str, max_tokens: int = 100, temperature: float = 0.0
     ) -> Dict:
-        """Send a generate request and return response"""
+        # Send a generate request and return response
         response = requests.post(
             f"{self.lb_url}/generate",
             json={
@@ -114,7 +122,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         return response.json()
 
     def trigger_offloading_and_flush(self):
-        """Helper method to trigger offloading and flush cache"""
+        # Helper method to trigger offloading and flush cache
         # Trigger offloading
         self.send_request(self.gen_prompt(1), max_tokens=150)
 
@@ -124,7 +132,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
 
 class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
-    """Test disaggregation with HiCache enabled only on Prefill side"""
+    """Decode startup parameters, disable offload-kvcache"""
 
     @classmethod
     def start_decode(cls):
@@ -177,11 +185,10 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
 
 
 class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
-    """Test disaggregation with HiCache enabled on both Prefill and Decode sides"""
+    """Decode startup parameters, enable offload-kvcache"""
 
     @classmethod
     def start_decode(cls):
-        # Decode with HiCache offload enabled
         decode_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -227,7 +234,6 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
     def test_multi_turn_conversation_cache(self):
         """Test multi-turn conversation scenario with cache hit improvement"""
 
-        print("=== Multi-turn Conversation cache Test ===")
         # Turn 1
         initial_prompt = self.gen_prompt(300)
         response1 = self.send_request(initial_prompt, max_tokens=200, temperature=0.1)

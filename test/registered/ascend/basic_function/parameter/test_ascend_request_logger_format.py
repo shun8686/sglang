@@ -6,6 +6,11 @@ from abc import ABC
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import (
+    LLAMA_3_2_1B_WEIGHTS_PATH,
+    run_command
+)
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -13,19 +18,17 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-
-def run_command(cmd, shell=True):
-    try:
-        result = subprocess.run(
-            cmd, shell=shell, capture_output=True, text=True, check=True
-        )
-        return result.stdout
-    except subprocess.CalledProcessError as e:
-        print(f"execute command error: {e}")
-        return None
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestrequestABC(ABC):
+    """Testcase: Test configure the --log-requests-format to "text", and the output log format will be "text".
+    And configure the --log-requests-format to "json", and the output log format will be "json".
+
+    [Test Category] Parameter
+    [Test Target] --log-requests-format
+    """
+
     log_requests_format = None
 
     @classmethod
@@ -34,7 +37,7 @@ class TestrequestABC(ABC):
         cls.text_message1 = "Finish: obj=GenerateReqInput"
         cls._temp_dir_obj = tempfile.TemporaryDirectory()
         cls.temp_dir = cls._temp_dir_obj.name
-        cls.model = "/root/.cache/modelscope/hub/models/LLM-Research/Llama-3.2-1B"
+        cls.model = LLAMA_3_2_1B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
 
         other_args = [
@@ -61,6 +64,8 @@ class TestrequestABC(ABC):
 
 
 class TestRequestLoggerFormatText(TestrequestABC, CustomTestCase):
+    """Configure the format to "test"."""
+
     log_requests_format = "text"
 
     def test_decode_log_interval(self):
@@ -88,6 +93,8 @@ class TestRequestLoggerFormatText(TestrequestABC, CustomTestCase):
 
 
 class TestRequestLoggerFormatJson(TestrequestABC, CustomTestCase):
+    """Configure the format to "json"."""
+
     log_requests_format = "json"
 
     def test_decode_log_interval(self):
