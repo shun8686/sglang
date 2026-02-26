@@ -87,6 +87,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
                     model_layers_list.append(key.split(".")[2])
         model_layers_list = list(set(model_layers_list))
         model_layers_list.sort()
+        print(model_layers_list)
         self.assertEqual(model_layers_list[-1], 31)
 
         file_pattern = "./TP0_PP1_Rank4_pid*"
