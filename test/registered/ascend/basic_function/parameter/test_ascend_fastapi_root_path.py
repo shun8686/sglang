@@ -45,6 +45,9 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.fastapi_root_path = "test"
+        cls.base_url = "test"
+
         nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
 
         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
@@ -71,12 +74,13 @@ class TestAscendFastapiRootPath(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
+        pass
         # kill_process_tree(cls.process.pid)
         # cls.out_log_file.close()
         # cls.err_log_file.close()
         # os.remove("./warmup_out_log.txt")
         # os.remove("./warmup_err_log.txt")
-        cls.nginx_manager.restore_original_config()
+        # cls.nginx_manager.restore_original_config()
 
     def test_fastapi_root_path(self):
         pass
