@@ -88,10 +88,6 @@ jobs:
 
           # export SGLANG_SET_CPU_AFFINITY=1
           echo "SGLANG_SET_CPU_AFFINITY: $SGLANG_SET_CPU_AFFINITY"
-          ASCEND_RT_VISIBLE_DEVICES=$(echo $ASCEND_VISIBLE_DEVICES | tr ',' '\n' | sort -n | tr '\n' ',')
-          export ASCEND_RT_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES%,}
-          export ASCEND_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES}
-          export NPU_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES}
 
           install_sglang_from_source=${{ inputs.install_sglang_from_source }}
           if [ "$install_sglang_from_source" = "true" ] || [ "$install_sglang_from_source" = "True" ];then
@@ -99,6 +95,8 @@ jobs:
             commit_id=${{ github.sha }}
             echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
             export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
+            bash scripts/ci/npu/npu_ci_install_dependency.sh a3
+            bash scripts/ci/npu/npu_log_print.sh
           else
             echo "Use sglang from image: ${{ inputs.image }}"
             sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')

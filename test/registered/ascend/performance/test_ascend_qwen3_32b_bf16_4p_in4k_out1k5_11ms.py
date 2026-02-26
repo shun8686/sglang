@@ -7,7 +7,12 @@ from sglang.test.ascend.e2e.test_ascend_performance_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=1800, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=1800,
+    suite="nightly-8-npu-a3",
+    nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
+)
 
 QWEN3_32B_ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
