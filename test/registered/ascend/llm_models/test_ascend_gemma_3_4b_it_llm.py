@@ -1,26 +1,26 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import GEMMA_3_4B_IT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(
     est_time=400,
-    suite="nightly-4-npu-a3",
+    suite="nightly-1-npu-a3",
     nightly=True,
 )
 
 
-class TestQwen332B(GSM8KAscendMixin, CustomTestCase):
-    """Testcase: Verify that the inference accuracy of the Qwen/Qwen3-32B model on the GSM8K dataset is no less than 0.86.
+class TestGemma34B(GSM8KAscendMixin, CustomTestCase):
+    """Testcase: Verify that the inference accuracy of the google/gemma-3-4b-it model on the GSM8K dataset is no less than 0.7.
 
     [Test Category] Model
-    [Test Target] Qwen/Qwen3-32B
+    [Test Target] google/gemma-3-4b-it
     """
 
-    model = QWEN3_32B_WEIGHTS_PATH
-    accuracy = 0.86
+    model = GEMMA_3_4B_IT_WEIGHTS_PATH
+    accuracy = 0.7
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -28,8 +28,9 @@ class TestQwen332B(GSM8KAscendMixin, CustomTestCase):
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--tp-size",
-        "4",
+        "--disable-radix-cache",
+        "--chunked-prefill-size",
+        "-1",
     ]
 
 
