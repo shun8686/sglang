@@ -72,23 +72,6 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
         self.assertEqual(int(res1), self.tp_size * self.pp_size)
-        time.sleep(100000)
-
-        # run_command("rm -rf TP*_PP*")
-        #
-        # response2 = requests.post(
-        #     f"{DEFAULT_URL_FOR_TEST}/generate",
-        #     json={
-        #         "text": text1,
-        #         "sampling_params": {
-        #             "temperature": 0,
-        #             "max_new_tokens": 1,
-        #         },
-        #     },
-        # )
-        # self.assertEqual(response2.status_code, 200)
-        # res2 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        # self.assertEqual(int(res2), self.tp_size)
         import glob
         import torch
 
