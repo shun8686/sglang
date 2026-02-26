@@ -105,7 +105,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
                 "--device",
                 "npu",
                 "--disable-cuda-graph",
-                "--prefill-round-robin-balance"
+                "--prefill-round-robin-balance",
                 "--mem-fraction-static",
                 "0.4",
                 "--tp-size",
