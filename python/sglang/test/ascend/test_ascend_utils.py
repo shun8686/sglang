@@ -241,6 +241,7 @@ QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
 # Other
 DEEPSEEK_CODER_JSON_PATH="/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/deepseek_coder.json"
 
+
 class ModelTestConfig(NamedTuple):
     """
     Configuration for model testing.
