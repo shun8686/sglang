@@ -196,7 +196,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             "0.9",
             "--base-gpu-id",
             "2",
-            "--disaggregation-decode-enableoffload-kvcache",
+            "--disaggregation-decode-enable-offload-kvcache",
             "--hicache-io-backend",
             "kernel_ascend",
             "--hicache-mem-layout",
