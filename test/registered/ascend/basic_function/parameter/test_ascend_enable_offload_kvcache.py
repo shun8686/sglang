@@ -190,7 +190,6 @@ class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
 class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
     """Decode startup parameters, enable offload-kvcache"""
 
-    enable_offload_accuracy = 0
     @classmethod
     def start_decode(cls):
         decode_args = [
@@ -235,7 +234,7 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
             env=env,
         )
 
-    def test_gsm8k(self):
+    def test_gsm8k_accuracy(self):
         args = SimpleNamespace(
             num_shots=5,
             data_path="/tmp/test.jsonl",
@@ -249,7 +248,6 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
         self.enable_offload_accuracy = metrics['accuracy']
         print(f"*************metrics1={self.enable_offload_accuracy}")
 
-    def test_accuracy(self):
         # Contrast accuracy
         disable_offload_accuracy = float(run_command(f"cat ./accuracy.txt"))
         self.assertGreaterEqual(
