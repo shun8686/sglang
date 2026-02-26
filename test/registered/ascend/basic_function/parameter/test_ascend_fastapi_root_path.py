@@ -39,7 +39,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # Modify nginx configuration and start nginx service
-        nginx_manager = NginxConfigManager(
+        cls.nginx_manager = NginxConfigManager(
             nginx_conf_path="/usr/local/nginx/conf/nginx.conf",  # 根据你的实际路径修改
             nginx_bin_path="/usr/local/nginx/sbin/nginx"  # 根据你的实际路径修改
         )
@@ -48,7 +48,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.fastapi_root_path = "test"
         cls.base_url = "test"
 
-        print(nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url))
+        print(cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url))
 
         # cls.model = QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH
         # cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen2-0.5B-Instruct"
