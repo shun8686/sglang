@@ -63,8 +63,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             cls.model,
         ]
         cls.router_process = popen_with_error_check(router_command)
-        cls.wait_server_ready(cls.base_url)
-
+        cls.wait_server_ready(cls.base_url + "/health")
 
     @classmethod
     def tearDownClass(cls):
@@ -72,32 +71,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         kill_process_tree(cls.worker_process.pid)
 
     @classmethod
-    def wait_server_ready(cls, url):
-        cls.wait_router_ready(url + "/health")
-        # cls.wait_server_ready(url + "/workers")
-
-    @classmethod
-    def wait_router_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
-        start_time = time.perf_counter()
-        while True:
-            response = requests.get(url)
-            try:
-                # response = requests.get(url)
-                print(f"{response.status_code=}, {response.text=}")
-                if response.status_code == 200:
-                    print(f"Server {url} is ready")
-                    return
-            except Exception:
-                print(f"{response.status_code=}, {response.text=}")
-                pass
-
-            if time.perf_counter() - start_time > timeout:
-                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
-
-            time.sleep(1)
-
-    @classmethod
-    def wait_worker_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
+    def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
         start_time = time.perf_counter()
         while True:
             response = requests.get(url)
@@ -116,7 +90,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
                 raise RuntimeError(f"Server {url} failed to start in {timeout}s")
 
             time.sleep(5)
-
 
     def test_grpc_mode(self):
         response = requests.post(
