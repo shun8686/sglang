@@ -295,9 +295,10 @@ class NginxConfigManager:
         try:
             # result = subprocess.run(["ps", "-ef", "|", "grep", "nginx"])
             result = subprocess.run(["ps", "-ef"])
-            output = result.stdout.decode("utf-8").strip()
-            if "nginx" in output:
-                subprocess.run([self.nginx_bin_path, "-s", "stop"])
+            print(result)
+            # output = result.stdout.decode("utf-8").strip()
+            # if "nginx" in output:
+            #     subprocess.run([self.nginx_bin_path, "-s", "stop"])
 
             subprocess.run([self.nginx_bin_path],)
         except subprocess.CalledProcessError as e:
