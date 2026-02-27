@@ -1,8 +1,9 @@
 import unittest
+
 from sglang.srt.environ import envs
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.kits.radix_cache_server_kit import run_radix_attention_test
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -22,7 +23,11 @@ class TestRadixCacheFCFS(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --schedule-policy
     """
-    extra_args = ["--schedule-policy", "fcfs", ]
+
+    extra_args = [
+        "--schedule-policy",
+        "fcfs",
+    ]
 
     @classmethod
     def setUpClass(cls):
@@ -50,12 +55,16 @@ class TestRadixCacheFCFS(CustomTestCase):
 
 
 class TestRadixCacheLPM(TestRadixCacheFCFS):
-    extra_args = ["--schedule-policy", "lpm", ]
+    extra_args = [
+        "--schedule-policy",
+        "lpm",
+    ]
 
 
 class TestRadixCacheNonOverlapLPM(TestRadixCacheFCFS):
     extra_args = [
-        "--schedule-policy", "lpm",
+        "--schedule-policy",
+        "lpm",
         "--disable-overlap-schedule",
     ]
 

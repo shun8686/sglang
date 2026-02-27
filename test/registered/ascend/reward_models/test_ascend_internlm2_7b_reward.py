@@ -1,3 +1,6 @@
+import os
+
+os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import multiprocessing as mp
 import unittest
 
@@ -8,7 +11,11 @@ from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import SRTRunner
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=400,
+    suite="nightly-4-npu-a3",
+    nightly=True,
+)
 
 PROMPT = (
     "What is the range of the numeric output of a sigmoid node in a neural network?"
@@ -50,7 +57,7 @@ class TestInternlm2(CustomTestCase):
             prompts = srt_runner.tokenizer.apply_chat_template(CONVS, tokenize=False)
             srt_outputs = srt_runner.forward(prompts)
         srt_scores = torch.tensor(srt_outputs.scores)
-        print(f'accuracy: {srt_scores}')
+        print(f"accuracy: {srt_scores}")
         self.assertIsInstance(srt_scores, torch.Tensor)
 
 

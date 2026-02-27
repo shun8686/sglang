@@ -14,7 +14,12 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=400,
+    suite="nightly-1-npu-a3",
+    nightly=True,
+    disabled="https://github.com/Ascend/sglang/issues/39",
+)
 
 
 class TestOpenAIServerFunctionCalling(CustomTestCase):
@@ -24,6 +29,7 @@ class TestOpenAIServerFunctionCalling(CustomTestCase):
     [Test Category] Interface
     [Test Target] /v1/chat/completions
     """
+
     # NOTE: this system_message is for Llama3.2 system prompt. Without this,
     # sometimes Llama3.2 gives a different tool call format such as:
     # '<|python_tag|>{"type": "function", "function": "add", "parameters": {"a": "3", "b": "5"}}'

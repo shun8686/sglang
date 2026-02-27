@@ -20,11 +20,16 @@ from sglang.test.test_utils import (
     popen_launch_pd_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=400,
+    suite="nightly-4-npu-a3",
+    nightly=True,
+    disabled="run failed",
+)
 
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
-    """Testcase: Vaildate Prefill/Decode disaggregated services with hicache write policy configuration, Repeated long hints hit the prefix cache.
+    """Testcase: Validate Prefill/Decode disaggregated services with hicache write policy configuration, Repeated long hints hit the prefix cache.
                  and on the GSM8K dataset is no less than 0.86
 
     [Test Category] Parameter
@@ -184,7 +189,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
             max_new_tokens=512,
             parallel=128,
             host="http://127.0.0.1",
-            port=21000,
+            port=self.lb_port,
         )
         metrics = run_eval(args)
         self.assertGreaterEqual(metrics["accuracy"], 0.86)

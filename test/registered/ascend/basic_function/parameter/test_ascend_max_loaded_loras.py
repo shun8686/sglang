@@ -88,7 +88,7 @@ class TestMaxLoadedLorasError(CustomTestCase):
     """
 
     def test_max_loaded_loras_error(self):
-        error_message = ("The number of LoRA paths should not exceed max_loaded_loras.")
+        error_message = "The number of LoRA paths should not exceed max_loaded_loras."
         other_args = [
             "--enable-lora",
             "--max-loaded-loras",
@@ -117,7 +117,7 @@ class TestMaxLoadedLorasError(CustomTestCase):
                 return_stdout_stderr=(out_log_file, err_log_file),
             )
         except Exception as e:
-            print(f"Server launch failed as expectes:{e}")
+            print(f"Server launch failed as expects:{e}")
         finally:
             err_log_file.seek(0)
             content = err_log_file.read()

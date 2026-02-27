@@ -4,6 +4,7 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -11,13 +12,11 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-from sglang.test.ci.ci_register import register_npu_ci
-
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestL1Cache(CustomTestCase):
-    """Testcase: Test enabled L1 cache inference request reuse successfully
+    """Testcase: Test enabled L1 cache inference request reuse successfully.
 
     [Test Category] Parameter
     [Test Target] --disable-radix-cache
@@ -27,19 +26,15 @@ class TestL1Cache(CustomTestCase):
     def setUpClass(cls):
         cls.model = QWEN3_32B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = (
-            [
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                0.8,
-                "--tp-size",
-                2,
-                "--base-gpu-id",
-                4,
-            ]
-        )
+        other_args = [
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            0.8,
+            "--tp-size",
+            2,
+        ]
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -58,23 +53,23 @@ class TestL1Cache(CustomTestCase):
                 f"{DEFAULT_URL_FOR_TEST}/generate",
                 json={
                     "text": "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?What is The capital of France?"
-                            "What is The capital of France?What is The capital of France?",
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?What is The capital of France?"
+                    "What is The capital of France?What is The capital of France?",
                     "sampling_params": {
                         "temperature": 0,
                         "max_new_tokens": 10,

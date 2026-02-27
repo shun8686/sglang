@@ -1,23 +1,19 @@
 """Common utilities for testing and benchmarking on NPU"""
 
+import asyncio
+import copy
 import os
 import subprocess
-import copy
-from typing import NamedTuple
-from typing import  Awaitable, Callable, Optional
-
-import asyncio
-from sglang.bench_serving import run_benchmark
-from sglang.srt.utils import (
-    kill_process_tree,
-)
 from types import SimpleNamespace
+from typing import Awaitable, Callable, NamedTuple, Optional
 
+from sglang.bench_serving import run_benchmark
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
-    auto_config_device,
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
+    auto_config_device,
     popen_launch_server,
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
 )
 
 # Model weights storage directory
@@ -57,6 +53,7 @@ BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(
 C4AI_COMMAND_R_V01_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "CohereForAI/c4ai-command-r-v01"
 )
+C4AI_COMMAND_R_V01_CHAT_TEMPLATE_PATH = "/__w/sglang/sglang/test/registered/ascend/llm_models/tool_chat_template_c4ai_command_r_v01.jinja"
 CHATGLM2_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "ZhipuAI/chatglm2-6b")
 DBRX_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "AI-ModelScope/dbrx-instruct"
@@ -69,6 +66,9 @@ DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
 )
 DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+)
+DEEPSEEK_CODER_1_3_B_BASE_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base"
 )
 ERNIE_4_5_21B_A3B_PT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "baidu/ERNIE-4.5-21B-A3B-PT"
@@ -189,7 +189,9 @@ QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 )
 
 QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")
-QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-w8a8")
+QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-w8a8"
+)
 
 DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
@@ -235,7 +237,8 @@ QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
-
+# Other
+DEEPSEEK_CODER_JSON_PATH="/__w/sglang/sglang/test/registered/ascend/basic_function/deepseek_coder.json"
 
 class ModelTestConfig(NamedTuple):
     """
@@ -247,6 +250,7 @@ class ModelTestConfig(NamedTuple):
         gsm8k_accuracy: Weight for GSM8K benchmark score
         mmmu_accuracy: Weight for MMMU benchmark score
     """
+
     model_path: str
     mmlu_score: Optional[float] = None
     gsm8k_accuracy: Optional[float] = None
@@ -254,28 +258,23 @@ class ModelTestConfig(NamedTuple):
 
 
 LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-    mmlu_score=0.2
+    model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, mmlu_score=0.2
 )
 
 QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
-    gsm8k_accuracy=0.9
+    model_path=QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH, gsm8k_accuracy=0.9
 )
 
 QWEN3_32B_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWEN3_32B_WEIGHTS_PATH,
-    gsm8k_accuracy=0.82
+    model_path=QWEN3_32B_WEIGHTS_PATH, gsm8k_accuracy=0.82
 )
 
 QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
-    gsm8k_accuracy=0.92
+    model_path=QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH, gsm8k_accuracy=0.92
 )
 
 QWQ_32B_W8A8_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWQ_32B_W8A8_WEIGHTS_PATH,
-    gsm8k_accuracy=0.59
+    model_path=QWQ_32B_W8A8_WEIGHTS_PATH, gsm8k_accuracy=0.59
 )
 
 # Default configuration for testing
@@ -302,45 +301,6 @@ def run_command(cmd, shell=True):
         print(f"execute command error: {e}")
         return None
 
-
-def get_device_ids(index=None):
-    """Get list of NPU device IDs or a single device ID by specified index
-
-    Parameters:
-        index: Optional, integer type, the index value of the device ID list;
-               returns the complete list if not passed in
-    Returns:
-        If index is passed in: returns the integer-type device ID corresponding to the index
-                               (returns None if the index is invalid)
-        If index is not passed in: returns the list of device IDs (integer type),
-                                   returns an empty list if acquisition fails
-    """
-    cmd = "npu-smi info | awk 'BEGIN {OFS=\"\"} /Process id/ {exit} /Phy-ID/ {next} {print $3}' | grep -E '^[0-9]+$'"
-    output = run_command(cmd)
-
-    device_ids = []
-    if output and output.strip():
-        lines = output.strip().split('\n')
-        for line in lines:
-            line = line.strip()
-            if line and line.isdigit():
-                try:
-                    device_id = int(line)
-                    device_ids.append(device_id)
-                except ValueError:
-                    print(f"Device ID '{line}' cannot be converted to an integer and has been skipped")
-
-    if index is not None:
-        if not isinstance(index, int):
-            print(f"Index {index} must be an integer type")
-            return None
-        if 0 <= index < len(device_ids):
-            return device_ids[index]
-        else:
-            print(f"Index {index} is invalid, the length of device ID list is {len(device_ids)}")
-            return None
-
-    return device_ids
 
 def get_benchmark_args(
     base_url="",
@@ -447,6 +407,7 @@ def get_benchmark_args(
         header=header,
         max_concurrency=max_concurrency,
     )
+
 
 def run_bench_serving(
     model,

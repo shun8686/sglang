@@ -57,7 +57,7 @@ class TestEnableThinking(CustomTestCase):
         # Test model parameter; configured model returns correct name, unconfigured defaults to "default", reasoning works
         response = requests.post(
             f"{self.base_url}/v1/completions",
-            json={"model": self.model, "prompt": 'who are you?'},
+            json={"model": self.model, "prompt": "who are you?"},
         )
         logging.info(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")
@@ -156,7 +156,7 @@ class TestEnableThinking(CustomTestCase):
         )
         logging.info(f"response1.json:{response1.json()}")
         self.assertEqual(response1.status_code, 200, f"Failed with: {response1.text}")
-        # Asser that the configuration temperature is the same and the output response is the same
+        # Assert that the configuration temperature is the same and the output response is the same
         self.assertEqual(
             response.json()["choices"][0]["text"],
             response1.json()["choices"][0]["text"],
@@ -202,7 +202,7 @@ class TestEnableThinking(CustomTestCase):
 
         response1 = requests.post(
             f"{self.base_url}/v1/completions",
-            json={"prompt": 'who are you?', "top_k": 20},
+            json={"prompt": "who are you?", "top_k": 20},
         )
         logging.info(f"response1.json:{response1.json()}")
         logging.info(f"response1.text:{response1.text}")
@@ -231,7 +231,7 @@ class TestEnableThinking(CustomTestCase):
         # Test rid parameter; verify response ID matches the requested rid value '10086'
         response = requests.post(
             f"{self.base_url}/v1/completions",
-            json={"prompt": 'who are you?', "rid": "10086"},
+            json={"prompt": "who are you?", "rid": "10086"},
         )
         logging.info(f"response.json:{response.json()}")
         self.assertEqual(response.status_code, 200, f"Failed with: {response.text}")

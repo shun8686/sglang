@@ -5,8 +5,8 @@ from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_235B_A22B_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -18,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestDeepEpLowLatencyQwen3235B(CustomTestCase):
-    """Testcase: This test case verifies that the Qwen3-235B-A22B-W8A8 model with DeepEP's auto mode achieves an
+    """Testcase: This test case verifies that the Qwen3-235B-A22B-W8A8 model with DeepEP's low_latency mode achieves an
     accuracy of greater than or equal to 0.5 on MMLU and greater than or equal to 0.94 on GSM8K.
 
     [Test Category] Parameter
@@ -91,8 +91,11 @@ class TestDeepEpLowLatencyQwen3235B(CustomTestCase):
         )
         metrics = run_gsm8k(args)
         achieved_accuracy = metrics["accuracy"]
-        self.assertGreaterEqual(achieved_accuracy, expect_accuracy,
-                                f'Accuracy of {self.model} is {str(achieved_accuracy)}, is lower than {expect_accuracy}')
+        self.assertGreaterEqual(
+            achieved_accuracy,
+            expect_accuracy,
+            f"Accuracy of {self.model} is {str(achieved_accuracy)}, is lower than {expect_accuracy}",
+        )
         print(f"Model {self.model} achieved accuracy: {str(achieved_accuracy)}")
 
 

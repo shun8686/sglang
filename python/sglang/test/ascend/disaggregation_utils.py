@@ -12,7 +12,6 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     popen_with_error_check,
 )
 
@@ -65,9 +64,6 @@ class TestDisaggregationBase(CustomTestCase):
             "--port",
             cls.lb_port,
         ]
-        print("======================================================================================================")
-        print(cls.base_host)
-        print(cls.lb_port)
         print("Starting load balancer:", " ".join(lb_command))
         cls.process_lb = popen_with_error_check(lb_command)
         cls.wait_server_ready(cls.lb_url + "/health")

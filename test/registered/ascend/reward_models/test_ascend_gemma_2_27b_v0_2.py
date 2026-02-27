@@ -1,17 +1,23 @@
+import logging
 import multiprocessing as mp
+import os
 import unittest
 
 import torch
 
-from sglang.test.ascend.test_ascend_utils import SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase
 
+logger = logging.getLogger(__name__)
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 MODELS = [
-    (SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH, 1, 4e-2),
+    (
+        "/root/.cache/modelscope/hub/models/AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2",
+        1,
+        4e-2,
+    ),
 ]
 TORCH_DTYPES = [torch.bfloat16]
 
@@ -27,12 +33,7 @@ CONVS = [
 ]
 
 
-class TestGemma(CustomTestCase):
-    """Testcase: This test case validates that the reward scores from the AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2 model in the SGLang framework are less than 4e-2 different from the Hugging Face implementation.
-
-    [Test Category] Model
-    [Test Target] AI-ModelScope/Skywork-Reward-Gemma-2-27B-v0.2
-    """
+class TestRewardModels(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
@@ -55,11 +56,9 @@ class TestGemma(CustomTestCase):
 
         with SRTRunner(
             model_path,
-            tp_size=tp_size,
             torch_dtype=torch_dtype,
             model_type="reward",
             mem_fraction_static=0.95,
-            enable_torch_compile=True,
         ) as srt_runner:
             prompts = srt_runner.tokenizer.apply_chat_template(
                 convs, tokenize=False, return_dict=False
@@ -68,8 +67,8 @@ class TestGemma(CustomTestCase):
 
         hf_scores = torch.tensor(hf_outputs.scores)
         srt_scores = torch.tensor(srt_outputs.scores)
-        print(f"{hf_scores=}")
-        print(f"{srt_scores=}")
+        logger.info(f"{hf_scores=}")
+        logger.info(f"{srt_scores=}")
 
         assert torch.all(
             abs(hf_scores - srt_scores) < tolerance
@@ -84,4 +83,6 @@ class TestGemma(CustomTestCase):
 
 
 if __name__ == "__main__":
+    os.environ["SGLANG_NPU_FORWARD_NATIVE_GELUTANH"] = "1"
+    os.environ["SGLANG_NPU_FORWARD_NATIVE_GEMMA_RMS_NORM"] = "1"
     unittest.main()
