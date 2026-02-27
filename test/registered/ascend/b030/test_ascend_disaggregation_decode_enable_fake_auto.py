@@ -4,8 +4,7 @@ from urllib.parse import urlparse
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.performance.test_ascend_performance_utils import run_bench_serving
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command, execute_serving_performance_test
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_server, CustomTestCase, DEFAULT_URL_FOR_TEST,
@@ -89,7 +88,7 @@ class DisaggregationHiCacheBase(CustomTestCase):
         gen_throughput = res.split(self.keyword)[1].split(',')[0]
         self.assertGreater(float(gen_throughput), 0)
 
-        metrics = run_bench_serving(
+        metrics = execute_serving_performance_test(
             host=self.url.hostname,
             port=int(self.url.port),
             model_path=self.model,

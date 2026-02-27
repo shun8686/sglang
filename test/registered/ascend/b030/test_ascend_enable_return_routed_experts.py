@@ -1,12 +1,10 @@
 import unittest
 
 import requests
-from transformers import AutoTokenizer
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     popen_launch_server, CustomTestCase,
 )
@@ -35,7 +33,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            timeout=3000,
             other_args=cls.other_args,
         )
 
