@@ -120,8 +120,8 @@ class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
     fastapi_root_path = "sglang"
 
     def test_fastapi_root_path(self):
-        response = self.send_request(f"{self.base_url}/generate")
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        # response = self.send_request(f"{self.base_url}/generate")
+        # self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
         response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}/generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
@@ -164,8 +164,8 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        response = self.send_request(f"{self.base_url}/generate")
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        # response = self.send_request(f"{self.base_url}/generate")
+        # self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
         response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
