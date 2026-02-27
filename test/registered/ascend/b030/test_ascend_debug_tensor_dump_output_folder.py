@@ -1,4 +1,5 @@
 import unittest
+from abc import ABC
 
 import requests
 import glob
@@ -12,12 +13,24 @@ from sglang.test.test_utils import (
     popen_launch_server, CustomTestCase,
 )
 
+TP_SIZE = 4
+PP_SIZE = 2
+DP_SIZE = 1
+TP_DIR_NUM = TP_SIZE * PP_SIZE
+FILE_PATTERN_PP0 = "./TP0_PP0_Rank0_pid*"
+FILE_PATTERN_PP1 = "./TP0_PP1_Rank4_pid*"
+PT_FILE_NAME = "/Pass00000.pt"
 
-class TestDebugTensorDumpOutputFolder(CustomTestCase):
+
+class TestDebugTensorDumpOutputFolderBase(ABC):
+    """
+    Testcase：The configuration parameters --debug-tensor-dump-output-folderand --debug-tensor-dump-layerscorrectly generate tensor .ptfiles.
+
+    [Test Category] Parameter
+    [Test Target] --debug-tensor-dump-output-folder; --debug-tensor-dump-layers
+    """
+
     model = QWEN3_32B_WEIGHTS_PATH
-    tp_size = 4
-    pp_size = 2
-    dp_size = 1
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -26,16 +39,14 @@ class TestDebugTensorDumpOutputFolder(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        tp_size,
+        TP_SIZE,
         "--pp-size",
-        pp_size,
+        PP_SIZE,
         "--dp-size",
-        dp_size,
+        DP_SIZE,
         "--debug-tensor-dump-output-folder",
         "./",
         "--skip-server-warmup",
-        "--base-gpu-id",
-        "8",
     ]
 
     @classmethod
@@ -53,6 +64,8 @@ class TestDebugTensorDumpOutputFolder(CustomTestCase):
         kill_process_tree(cls.process.pid)
         run_command("rm -rf ./TP*_PP*")
 
+
+class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
@@ -72,14 +85,14 @@ class TestDebugTensorDumpOutputFolder(CustomTestCase):
         self.assertEqual(response1.status_code, 200)
         print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), self.tp_size * self.pp_size)
+        self.assertEqual(int(res1), TP_DIR_NUM)
 
-        file_pattern = "./TP0_PP0_Rank0_pid*"
+        file_pattern = FILE_PATTERN_PP0
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/Pass00000.pt", map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
@@ -89,12 +102,12 @@ class TestDebugTensorDumpOutputFolder(CustomTestCase):
         self.assertEqual(len(model_layers_list), 32)
         self.assertEqual(model_layers_list, list(range(32)))
 
-        file_pattern = "./TP0_PP1_Rank4_pid*"
+        file_pattern = FILE_PATTERN_PP1
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/Pass00000.pt", map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
@@ -105,11 +118,7 @@ class TestDebugTensorDumpOutputFolder(CustomTestCase):
         self.assertEqual(sorted(set(model_layers_list)), list(range(32, 64)))
 
 
-class TestDebugTensorDumpOutputFolder1(CustomTestCase):
-    model = QWEN3_32B_WEIGHTS_PATH
-    tp_size = 4
-    pp_size = 2
-    dp_size = 1
+class TestDebugTensorDumpOutputFolder1(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -118,34 +127,17 @@ class TestDebugTensorDumpOutputFolder1(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        tp_size,
+        TP_SIZE,
         "--pp-size",
-        pp_size,
+        PP_SIZE,
         "--dp-size",
-        dp_size,
+        DP_SIZE,
         "--debug-tensor-dump-output-folder",
         "./",
         "--debug-tensor-dump-layers",
         "1",
         "--skip-server-warmup",
-        "--base-gpu-id",
-        "8",
     ]
-
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
 
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
@@ -166,14 +158,14 @@ class TestDebugTensorDumpOutputFolder1(CustomTestCase):
         self.assertEqual(response1.status_code, 200)
         print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), self.tp_size * self.pp_size)
+        self.assertEqual(int(res1), TP_DIR_NUM)
 
         file_pattern = "./TP0_PP0_Rank0_pid*"
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/Pass00000.pt", map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
@@ -184,11 +176,7 @@ class TestDebugTensorDumpOutputFolder1(CustomTestCase):
         self.assertEqual(model_layers_list[0], 1)
 
 
-class TestDebugTensorDumpOutputFolder2(CustomTestCase):
-    model = QWEN3_32B_WEIGHTS_PATH
-    tp_size = 4
-    pp_size = 2
-    dp_size = 1
+class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -197,11 +185,11 @@ class TestDebugTensorDumpOutputFolder2(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        tp_size,
+        TP_SIZE,
         "--pp-size",
-        pp_size,
+        PP_SIZE,
         "--dp-size",
-        dp_size,
+        DP_SIZE,
         "--debug-tensor-dump-output-folder",
         "./",
         "--debug-tensor-dump-layers",
@@ -209,8 +197,6 @@ class TestDebugTensorDumpOutputFolder2(CustomTestCase):
         "3",
         "4",
         "--skip-server-warmup",
-        "--base-gpu-id",
-        "8",
     ]
 
     @classmethod
@@ -247,14 +233,14 @@ class TestDebugTensorDumpOutputFolder2(CustomTestCase):
         self.assertEqual(response1.status_code, 200)
         print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), self.tp_size * self.pp_size)
+        self.assertEqual(int(res1), TP_DIR_NUM)
 
         file_pattern = "./TP0_PP0_Rank0_pid*"
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/Pass00000.pt", map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
@@ -267,11 +253,7 @@ class TestDebugTensorDumpOutputFolder2(CustomTestCase):
         self.assertEqual(model_layers_list[2], 4)
 
 
-class TestDebugTensorDumpOutputFolder3(CustomTestCase):
-    model = QWEN3_32B_WEIGHTS_PATH
-    tp_size = 4
-    pp_size = 2
-    dp_size = 1
+class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -280,11 +262,11 @@ class TestDebugTensorDumpOutputFolder3(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        tp_size,
+        TP_SIZE,
         "--pp-size",
-        pp_size,
+        PP_SIZE,
         "--dp-size",
-        dp_size,
+        DP_SIZE,
         "--debug-tensor-dump-output-folder",
         "./",
         "--debug-tensor-dump-layers",
@@ -292,24 +274,7 @@ class TestDebugTensorDumpOutputFolder3(CustomTestCase):
         "5",
         "10",
         "--skip-server-warmup",
-        "--base-gpu-id",
-        "8",
     ]
-
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
 
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
@@ -330,14 +295,14 @@ class TestDebugTensorDumpOutputFolder3(CustomTestCase):
         self.assertEqual(response1.status_code, 200)
         print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), self.tp_size * self.pp_size)
+        self.assertEqual(int(res1), TP_DIR_NUM)
 
         file_pattern = "./TP0_PP0_Rank0_pid*"
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/Pass00000.pt", map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
@@ -350,11 +315,7 @@ class TestDebugTensorDumpOutputFolder3(CustomTestCase):
         self.assertEqual(model_layers_list[2], 10)
 
 
-class TestDebugTensorDumpOutputFolder4(CustomTestCase):
-    model = QWEN3_32B_WEIGHTS_PATH
-    tp_size = 4
-    pp_size = 2
-    dp_size = 1
+class TestDebugTensorDumpOutputFolder4(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -363,34 +324,17 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        tp_size,
+        TP_SIZE,
         "--pp-size",
-        pp_size,
+        PP_SIZE,
         "--dp-size",
-        dp_size,
+        DP_SIZE,
         "--debug-tensor-dump-output-folder",
         "./",
         "--debug-tensor-dump-layers",
         "500",
         "--skip-server-warmup",
-        "--base-gpu-id",
-        "8",
     ]
-
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
 
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
@@ -411,14 +355,14 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
         self.assertEqual(response1.status_code, 200)
         print(response1.text)
         res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), self.tp_size * self.pp_size)
+        self.assertEqual(int(res1), TP_DIR_NUM)
 
         file_pattern = "./TP0_PP0_Rank0_pid*"
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/Pass00000.pt", map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
@@ -426,11 +370,7 @@ class TestDebugTensorDumpOutputFolder4(CustomTestCase):
         self.assertEqual(len(model_layers_list), 0)
 
 
-class TestDebugTensorDumpOutputFolder5(CustomTestCase):
-    model = QWEN3_32B_WEIGHTS_PATH
-    tp_size = 4
-    pp_size = 2
-    dp_size = 1
+class TestDebugTensorDumpOutputFolder5(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -439,32 +379,15 @@ class TestDebugTensorDumpOutputFolder5(CustomTestCase):
         "ascend",
         "--disable-cuda-graph",
         "--tp-size",
-        tp_size,
+        TP_SIZE,
         "--pp-size",
-        pp_size,
+        PP_SIZE,
         "--dp-size",
-        dp_size,
+        DP_SIZE,
         "--debug-tensor-dump-layers",
         "1",
         "--skip-server-warmup",
-        "--base-gpu-id",
-        "8",
     ]
-
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
 
     def test_debug_tensor_dump_output_folder(self):
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
@@ -490,7 +413,7 @@ class TestDebugTensorDumpOutputFolder5(CustomTestCase):
 
 if __name__ == "__main__":
     suite = unittest.TestSuite()
-    suite.addTest(TestDebugTensorDumpOutputFolder("test_debug_tensor_dump_output_folder"))
+    suite.addTest(TestDebugTensorDumpOutputFolder0("test_debug_tensor_dump_output_folder"))
     suite.addTest(TestDebugTensorDumpOutputFolder1("test_debug_tensor_dump_output_folder"))
     suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
     suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))

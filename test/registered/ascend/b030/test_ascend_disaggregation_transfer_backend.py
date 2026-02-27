@@ -14,8 +14,14 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
-class DisaggregationHiCacheBase(CustomTestCase):
-    """Base class for disaggregation with HiCache tests"""
+class TestDisaggregationTransferBackend(CustomTestCase):
+    """
+    Testcase：Verification -- disaggregation-transfer-backend parameter set to fake, decode throughput assessment succeeded.
+
+    [Test Category] Parameter
+    [Test Target] --disaggregation-transfer-backend
+    """
+
     model = QWEN3_32B_WEIGHTS_PATH
     decode_args = [
         "--attention-backend",
