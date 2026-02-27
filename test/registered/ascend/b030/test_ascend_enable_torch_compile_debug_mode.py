@@ -8,7 +8,8 @@ from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    popen_launch_server, CustomTestCase,
+    popen_launch_server,
+    CustomTestCase,
 )
 
 
@@ -49,6 +50,18 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
             except:
                 pass  # Process may have already exited
 
+    def benchmark_gsm8k(self, args, num_runs=5):
+        run_times = []
+        for i in range(num_runs):
+            start_time = time.perf_counter()
+            run_eval(args)
+            end_time = time.perf_counter()
+            elapsed_time = round(end_time - start_time, 6)
+            run_times.append(elapsed_time)
+
+        avg_time = sum(run_times) / len(run_times)
+        return avg_time, run_times
+
     def test_enable_torch_compile_debug_mode(self):
         """Test performance difference after enabling torch compile debug mode"""
         # First run: without debug mode
@@ -68,12 +81,7 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
-
-        # Run baseline test
-        start_time1 = time.perf_counter()
-        metrics = run_eval(args)
-        end_time1 = time.perf_counter()
-        run_gsm8k_time1 = round(end_time1 - start_time1, 6)
+        avg_time1, all_times = self.benchmark_gsm8k(args, num_runs=5)
 
         # Clean up first process
         self.tearDown()
@@ -87,15 +95,12 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
             other_args=self.other_args + self.enable_args,
         )
 
-        start_time2 = time.perf_counter()
-        metrics = run_eval(args)
-        end_time2 = time.perf_counter()
-        run_gsm8k_time2 = round(end_time2 - start_time2, 6)
-        print("run_gsm8k_time1:", run_gsm8k_time1)
-        print("run_gsm8k_time2:", run_gsm8k_time2)
+        avg_time2, all_times = self.benchmark_gsm8k(args, num_runs=5)
+        print("run_gsm8k_time1:", avg_time1)
+        print("run_gsm8k_time2:", avg_time2)
         # Assertion: Debug mode should be slower
-        self.assertGreater(run_gsm8k_time2, run_gsm8k_time1,
-                           f"Debug mode should be slower, but measured time: normal mode={run_gsm8k_time1}s, debug mode={run_gsm8k_time2}s")
+        self.assertGreater(avg_time2, avg_time1,
+                           f"Debug mode should be slower, but measured time: normal mode={avg_time1}s, debug mode={avg_time2}s")
 
 
 if __name__ == "__main__":

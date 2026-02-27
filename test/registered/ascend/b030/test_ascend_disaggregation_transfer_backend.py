@@ -70,7 +70,7 @@ class TestDisaggregationTransferBackend(CustomTestCase):
         if hasattr(cls, 'err_file') and cls.err_file:
             cls.err_file.close()
 
-    def test_disaggregation_decode_enable_fake_auto(self):
+    def test_disaggregation_transfer_backend(self):
         response = requests.get(f"{self.decode_url}/health_generate")
         self.assertEqual(response.status_code, 200)
 
