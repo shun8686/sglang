@@ -359,9 +359,11 @@ class NginxConfigManager:
                 timeout=10,
                 check=False,
             )
-            print(result)
-            if "nginx" in result:
-                subprocess.run([self.nginx_bin_path, "-s", "stop"])
+            print(f"{result=}")
+            print(f"{result.stdout=}")
+            print(f"{result.stderr=}")
+            # if "nginx" in result:
+            #     subprocess.run([self.nginx_bin_path, "-s", "stop"])
 
             subprocess.run([self.nginx_bin_path], )
         except subprocess.CalledProcessError as e:
