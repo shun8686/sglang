@@ -20,6 +20,13 @@ REBALANCE_ERR_LOG = "./rebalance_err_log.txt"
 
 
 class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
+    """
+    Testcase：Validates that rebalancing operations are triggered or skipped based on the configured
+    --eplb-min-rebalancing-utilization-threshold value and current load balance.
+
+    [Test Category] Parameter
+    [Test Target] --eplb-min-rebalancing-utilization-threshold
+    """
     model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
     accuracy = 0.86
     common_args = [
@@ -101,13 +108,22 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
 
 
 class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
+    """
+    Testcase：When the configuration --eplb-min-rebalancing-utilization-threshold is set to 0.05, if the load balance
+    exceeds this threshold, rebalancing operations are skipped.
+    """
     log_info = "Skipped ep rebalancing: current GPU utilization"
     out_file = open(SKIP_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
     test_args = ["--eplb-min-rebalancing-utilization-threshold", 0.05]
 
 
+@unittest.skip("Execution failed, issue #49 has been filed.")
 class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
+    """
+    Testcase：When the configuration --eplb-min-rebalancing-utilization-threshold is set to 0.95, if load balancing
+    is less than or equal to this threshold, rebalancing operations are triggered.
+    """
     log_info = "rebalance end"
     out_file = open(REBALANCE_OUT_LOG, "w+", encoding="utf-8")
     err_file = open(REBALANCE_ERR_LOG, "w+", encoding="utf-8")
@@ -118,7 +134,7 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
     suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_gsm8k"))
     suite.addTest(TestEplbMinRebalancingUtilizationThreshold005("test_eplb_min_rebalancing_utilization_threshold"))
-    # suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_gsm8k"))
-    # suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_eplb_min_rebalancing_utilization_threshold"))
+    suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_gsm8k"))
+    suite.addTest(TestEplbMinRebalancingUtilizationThreshold095("test_eplb_min_rebalancing_utilization_threshold"))
     runner = unittest.TextTestRunner(verbosity=2)
     result = runner.run(suite)

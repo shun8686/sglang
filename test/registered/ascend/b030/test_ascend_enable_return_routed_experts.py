@@ -11,6 +11,14 @@ from sglang.test.test_utils import (
 
 
 class TestEnableReturnRoutedExperts(CustomTestCase):
+    """
+    Testcase：When the service startup configuration --enable-return-routed-experts is enabled and the request sets
+    return_routed_experts to true, the response body will contain "routed_experts" information.
+
+    [Test Category] Parameter
+    [Test Target] --enable-return-routed-experts
+    """
+
     model = DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH
     other_args = [
         "--trust-remote-code",

@@ -34,6 +34,14 @@ from sglang.test.test_utils import (
 
 
 class TestEnableReturnRoutedExperts(CustomTestCase):
+    """
+    Testcase：When the service startup configuration --enable-custom-logit-processor is enabled and requests include
+    "custom_logit_processor" and "custom_params," custom functions can control the generated text content.
+
+    [Test Category] Parameter
+    [Test Target] --enable-custom-logit-processor
+    """
+
     model = QWEN3_32B_WEIGHTS_PATH
     other_args = [
         "--trust-remote-code",
@@ -66,7 +74,6 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         self.assertEqual(response.status_code, 200)
 
         text1 = "The capital of France is"
-        text2 = "Today is"
         res = "apple"
         tokenizer = AutoTokenizer.from_pretrained(self.model)
         token_id = tokenizer(res, return_tensors="pt")["input_ids"][0].tolist()[0]
@@ -85,6 +92,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["text"], res)
 
+        text2 = "Today is"
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={

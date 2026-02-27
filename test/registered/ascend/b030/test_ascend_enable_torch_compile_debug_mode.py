@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_bench_serving
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -13,6 +13,13 @@ from sglang.test.test_utils import (
 
 
 class TestEnableTorchCompileDebugMode(CustomTestCase):
+    """
+    Testcase：When --enable-torch-compile-debug-mode is enabled, the overall inference duration increases compared to when it is disabled.
+
+    [Test Category] Parameter
+    [Test Target] --enable-torch-compile-debug-mode
+    """
+
     model = QWEN3_32B_WEIGHTS_PATH
     other_args = [
         "--trust-remote-code",
