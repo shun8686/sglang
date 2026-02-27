@@ -283,7 +283,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
                 time.sleep(0.1)
                 continue
             line = line.rstrip("\n")
-            logger.info(line)
+            print(line)
             # Check if current line matches expected pattern
             if match_state < len(patterns) and patterns[match_state].match(line):
                 match_state += 1
