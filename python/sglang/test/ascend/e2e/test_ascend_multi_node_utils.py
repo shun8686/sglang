@@ -19,7 +19,7 @@ from sglang.test.test_utils import CustomTestCase, popen_launch_server
 
 logging.basicConfig(
     level=logging.INFO,
-    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    format="%(asctime)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
