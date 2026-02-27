@@ -60,6 +60,11 @@ class TestEplbMinRebalancingUtilizationThresholdBase(ABC):
 
     @classmethod
     def setUpClass(cls):
+        if hasattr(cls, 'out_file_path'):
+            cls.out_file = open(cls.out_file_path, "w+", encoding="utf-8")
+        if hasattr(cls, 'err_file_path'):
+            cls.err_file = open(cls.err_file_path, "w+", encoding="utf-8")
+
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -113,8 +118,8 @@ class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtiliz
     exceeds this threshold, rebalancing operations are skipped.
     """
     log_info = "Skipped ep rebalancing: current GPU utilization"
-    out_file = open(SKIP_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(SKIP_ERR_LOG, "w+", encoding="utf-8")
+    out_file_path = SKIP_OUT_LOG
+    err_file_path = SKIP_ERR_LOG
     test_args = ["--eplb-min-rebalancing-utilization-threshold", 0.05]
 
 
@@ -125,8 +130,8 @@ class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtiliz
     is less than or equal to this threshold, rebalancing operations are triggered.
     """
     log_info = "rebalance end"
-    out_file = open(REBALANCE_OUT_LOG, "w+", encoding="utf-8")
-    err_file = open(REBALANCE_ERR_LOG, "w+", encoding="utf-8")
+    out_file_path = REBALANCE_OUT_LOG
+    err_file_path = REBALANCE_ERR_LOG
     test_args = ["--eplb-min-rebalancing-utilization-threshold", 0.95]
 
 
