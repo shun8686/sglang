@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
 
 class TestEnableTorchCompileDebugMode(CustomTestCase):
     """
-    Testcase：When --enable-torch-compile-debug-mode is enabled, the overall inference duration increases compared to when it is disabled.
+    Testcase: When --enable-torch-compile-debug-mode is enabled, the overall inference duration increases compared to when it is disabled.
 
     [Test Category] Parameter
     [Test Target] --enable-torch-compile-debug-mode
@@ -37,22 +37,20 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
     ]
 
     def setUp(self):
-        """Execute before each test method"""
         self.base_url = DEFAULT_URL_FOR_TEST
         self.process = None
 
     def tearDown(self):
-        """Execute after each test method to ensure cleanup of processes started by current test"""
         if hasattr(self, 'process') and self.process and self.process.pid:
             try:
                 kill_process_tree(self.process.pid)
                 self.process = None
-            except:
-                pass  # Process may have already exited
+            except Exception:
+                pass
 
     def benchmark_gsm8k(self, args, num_runs=5):
         run_times = []
-        for i in range(num_runs):
+        for _ in range(num_runs):
             start_time = time.perf_counter()
             run_eval(args)
             end_time = time.perf_counter()
@@ -63,7 +61,6 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
         return avg_time, run_times
 
     def test_enable_torch_compile_debug_mode(self):
-        """Test performance difference after enabling torch compile debug mode"""
         # First run: without debug mode
         self.process = popen_launch_server(
             self.model,
@@ -81,7 +78,7 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
-        avg_time1, all_times = self.benchmark_gsm8k(args, num_runs=5)
+        avg_time1, all_times1 = self.benchmark_gsm8k(args, num_runs=5)
 
         # Clean up first process
         self.tearDown()
@@ -95,12 +92,12 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
             other_args=self.other_args + self.enable_args,
         )
 
-        avg_time2, all_times = self.benchmark_gsm8k(args, num_runs=5)
-        print("run_gsm8k_time1:", avg_time1)
-        print("run_gsm8k_time2:", avg_time2)
+        avg_time2, all_times2 = self.benchmark_gsm8k(args, num_runs=5)
+
         # Assertion: Debug mode should be slower
         self.assertGreater(avg_time2, avg_time1,
-                           f"Debug mode should be slower, but measured time: normal mode={avg_time1}s, debug mode={avg_time2}s")
+                           f"Debug mode should be slower, but measured time: "
+                           f"normal mode={avg_time1}s, debug mode={avg_time2}s")
 
 
 if __name__ == "__main__":
