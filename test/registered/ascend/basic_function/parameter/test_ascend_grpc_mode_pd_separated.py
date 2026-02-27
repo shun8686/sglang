@@ -20,7 +20,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestAscendGrpcModePDMixed(CustomTestCase):
+class TestAscendGrpcModePDDisaggregation(CustomTestCase):
     """
     Testcase：Verify that gRPC requests are correctly received and process when gRPC mode is enabled.
 
