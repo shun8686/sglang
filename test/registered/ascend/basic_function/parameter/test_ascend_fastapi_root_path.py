@@ -280,9 +280,14 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            lines[48] = "        location " + f"{location}" + " {\n"
-            lines[49] = "            proxy_pass " + f"{proxy_pass}" + ";\n"
-            lines[50] = "        }\n"
+            # lines[48] = "        location " + f"{location}" + " {\n"
+            # lines[49] = "            proxy_pass " + f"{proxy_pass}" + ";\n"
+            # lines[50] = "        }\n"
+
+            lines.insert(47, "        }\n")
+            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + ";\n")
+            lines.insert(47, "        location " + f"{location}" + " {\n")
+            lines.insert(47, "\n")
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
