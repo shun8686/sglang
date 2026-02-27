@@ -61,12 +61,12 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
         return avg_time, run_times
 
     def test_enable_torch_compile_debug_mode(self):
-        # First run: without debug mode
+        # Second run: with debug mode enabled
         self.process = popen_launch_server(
             self.model,
             self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=self.other_args,
+            other_args=self.other_args + self.enable_args,
         )
 
         args = SimpleNamespace(
@@ -84,12 +84,12 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
         self.tearDown()
         time.sleep(5)
 
-        # Second run: with debug mode enabled
+        # First run: without debug mode
         self.process = popen_launch_server(
             self.model,
             self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=self.other_args + self.enable_args,
+            other_args=self.other_args,
         )
 
         avg_time2, all_times2 = self.benchmark_gsm8k(args, num_runs=5)
@@ -99,9 +99,9 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
         print("run_gsm8k_avg_time1:", avg_time1)
         print("run_gsm8k_avg_time2:", avg_time2)
         # Assertion: Debug mode should be slower
-        self.assertGreater(avg_time2, avg_time1,
+        self.assertGreater(avg_time1, avg_time2,
                            f"Debug mode should be slower, but measured time: "
-                           f"normal mode={avg_time1}s, debug mode={avg_time2}s")
+                           f"normal mode={avg_time2}s, debug mode={avg_time1}s")
 
 
 if __name__ == "__main__":
