@@ -118,7 +118,7 @@ class TestEplbMinRebalancingUtilizationThreshold005(TestEplbMinRebalancingUtiliz
     test_args = ["--eplb-min-rebalancing-utilization-threshold", 0.05]
 
 
-@unittest.skip("Execution failed, issue #49 has been filed.")
+@unittest.skip("Temporarily skipped due to execution failure. Issue #49 has been filed for investigation.")
 class TestEplbMinRebalancingUtilizationThreshold095(TestEplbMinRebalancingUtilizationThresholdBase, CustomTestCase):
     """
     Testcase：When the configuration --eplb-min-rebalancing-utilization-threshold is set to 0.95, if load balancing
