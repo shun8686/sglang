@@ -38,7 +38,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
         # Modify nginx configuration and start nginx service
         cls.nginx_manager = NginxConfigManager(
             nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
-            nginx_bin_path="/usr/local/nginx/sbin/nginx"
+            nginx_bin_path="/usr/local/nginx/sbin/nginx",
+            usr_local_path="/usr/local"
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -131,7 +132,8 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         # Modify nginx configuration and start nginx service
         cls.nginx_manager = NginxConfigManager(
             nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
-            nginx_bin_path="/usr/local/nginx/sbin/nginx"
+            nginx_bin_path="/usr/local/nginx/sbin/nginx",
+            usr_local_path="/usr/local",
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -247,27 +249,54 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
 
 
 class NginxConfigManager:
-    def __init__(self, nginx_conf_path, nginx_bin_path):
+    def __init__(self, nginx_conf_path, nginx_bin_path, usr_local_path):
         self.nginx_conf_path = nginx_conf_path
         self.nginx_bin_path = nginx_bin_path
         self.backup_conf_path = f"{nginx_conf_path}.backup"
+        self.usr_local_path = usr_local_path
+        self.pcre_path = usr_local_path + "/pcre-8.35"
+        self.nginx_conf = usr_local_path + "/nginx-1.6.2"
 
         self.nginx_path = "/usr/local/nginx"
         if not os.path.exists(self.nginx_path):
-            subprocess.run(["cd", '/usr/local/'])
-            subprocess.run(["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz'])
-            subprocess.run(["tar", 'zxvf', 'pcre-8.35.tar.gz'])
-            subprocess.run(["cd", 'pcre-8.35'])
-            subprocess.run(["./configure"])
-            subprocess.run(["make", "&&", "make", "install"])
+            self.init_pcre()
+            self.init_nginx()
 
-            subprocess.run(["cd", '/usr/local/'])
-            subprocess.run(["wget", 'http://nginx.org/download/nginx-1.6.2.tar.gz'])
-            subprocess.run(["tar", 'zxvf', 'nginx-1.6.2.tar.gz'])
-            subprocess.run(["cd", 'nginx-1.6.2.tar.gz'])
-            subprocess.run(["./configure", "--prefix=/usr/local/webserver/nginx", "--with-http_stub_status_module",
-                            "--with-http_ssl_module", "--with-pcre=/usr/local/pcre-8.35"])
-            subprocess.run(["make", "&&", "make", "install"])
+    def init_pcre(self):
+        subprocess.run(
+            ["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz'],
+            cwd=self.usr_local_path,
+        )
+        subprocess.run(
+            ["tar", 'zxvf', 'pcre-8.35.tar.gz'],
+            cwd=self.usr_local_path,
+        )
+        subprocess.run(
+            ["./configure"],
+            cwd=self.pcre_path,
+        )
+        subprocess.run(
+            ["make", "&&", "make", "install"],
+            cwd=self.pcre_path,
+        )
+
+    def init_nginx(self):
+        subprocess.run(
+            ["wget", 'http://nginx.org/download/nginx-1.6.2.tar.gz'],
+            cwd=self.usr_local_path,
+        )
+        subprocess.run(
+            ["tar", 'zxvf', 'nginx-1.6.2.tar.gz'],
+            cwd=self.usr_local_path,
+        )
+        subprocess.run(
+            ["./configure"],
+            cwd=self.nginx_path,
+        )
+        subprocess.run(
+            ["make", "&&", "make", "install"],
+            cwd=self.nginx_path,
+        )
 
     def backup_original_config(self):
         if not os.path.exists(self.backup_conf_path):
@@ -311,7 +340,7 @@ class NginxConfigManager:
             # if "nginx" in output:
             #     subprocess.run([self.nginx_bin_path, "-s", "stop"])
 
-            subprocess.run([self.nginx_bin_path],)
+            subprocess.run([self.nginx_bin_path], )
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to modify nginx config: {e}")
 
