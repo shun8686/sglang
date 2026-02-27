@@ -33,8 +33,7 @@ class DisaggregationHiCacheBase(CustomTestCase):
         "--mem-fraction-static",
         "0.8",
         "--disaggregation-transfer-backend",
-        "ascend",
-        "--disaggregation-decode-enable-fake-auto",
+        "fake",
         "--load-balance-method",
         "follow_bootstrap_room",
     ]
