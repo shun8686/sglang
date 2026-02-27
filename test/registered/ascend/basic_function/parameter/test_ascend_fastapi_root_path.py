@@ -344,9 +344,15 @@ class NginxConfigManager:
 
             lines.insert(47, "\n")
             lines.insert(48, "        location " + f"{location}" + " {\n")
-            lines.insert(49, "            proxy_set_header Host $host")
+            lines.insert(49, "            proxy_set_header Host $host;")
             lines.insert(49, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
             lines.insert(47, "        }\n")
+            """
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            """
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
