@@ -346,9 +346,8 @@ class NginxConfigManager:
                 check=False,
             )
             print(result)
-            # output = result.stdout.decode("utf-8").strip()
-            # if "nginx" in output:
-            #     subprocess.run([self.nginx_bin_path, "-s", "stop"])
+            if "nginx" in result:
+                subprocess.run([self.nginx_bin_path, "-s", "stop"])
 
             subprocess.run([self.nginx_bin_path], )
         except subprocess.CalledProcessError as e:
@@ -366,14 +365,14 @@ class NginxConfigManager:
 
 
 if __name__ == "__main__":
-    # unittest.main()
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath1))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
-    runner = unittest.TextTestRunner()
-    runner.run(suite)
+    unittest.main()
+    # loader = unittest.TestLoader()
+    # suite = unittest.TestSuite()
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
+    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath1))
+    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
+    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
+    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
