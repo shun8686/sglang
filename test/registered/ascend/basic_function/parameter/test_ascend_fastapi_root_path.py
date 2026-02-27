@@ -255,7 +255,7 @@ class NginxConfigManager:
         self.backup_conf_path = f"{nginx_conf_path}.backup"
         self.usr_local_path = usr_local_path
         self.pcre_path = usr_local_path + "/pcre-8.35"
-        self.nginx_conf = usr_local_path + "/nginx-1.6.2"
+        self.nginx_install_path = usr_local_path + "/nginx-1.6.2"
 
         self.nginx_path = "/usr/local/nginx"
         if not os.path.exists(self.nginx_path):
@@ -291,11 +291,11 @@ class NginxConfigManager:
         )
         subprocess.run(
             ["./configure"],
-            cwd=self.nginx_path,
+            cwd=self.nginx_install_path,
         )
         subprocess.run(
             ["make", "&&", "make", "install"],
-            cwd=self.nginx_path,
+            cwd=self.nginx_install_path,
         )
 
     def backup_original_config(self):
