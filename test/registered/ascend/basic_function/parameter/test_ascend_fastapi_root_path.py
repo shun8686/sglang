@@ -263,14 +263,16 @@ class NginxConfigManager:
             self.init_nginx()
 
     def init_pcre(self):
-        subprocess.run(
-            ["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz'],
-            cwd=self.usr_local_path,
-        )
-        subprocess.run(
-            ["tar", 'zxvf', 'pcre-8.35.tar.gz'],
-            cwd=self.usr_local_path,
-        )
+        if not os.path.exists(self.pcre_path + "/pcre-8.35.tar.gz"):
+            subprocess.run(
+                ["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz'],
+                cwd=self.usr_local_path,
+            )
+        if not os.path.exists(self.pcre_path):
+            subprocess.run(
+                ["tar", 'zxvf', 'pcre-8.35.tar.gz'],
+                cwd=self.usr_local_path,
+            )
         subprocess.run(
             ["./configure"],
             cwd=self.pcre_path,
@@ -285,15 +287,16 @@ class NginxConfigManager:
         )
 
     def init_nginx(self):
-        subprocess.run(
-            ["wget", 'http://nginx.org/download/nginx-1.6.2.tar.gz'],
-            cwd=self.usr_local_path,
-        )
-        subprocess.run(
-            ["tar", 'zxvf', 'nginx-1.6.2.tar.gz'],
-            cwd=self.usr_local_path,
-        )
-
+        if not os.path.exists(self.nginx_install_path):
+            subprocess.run(
+                ["wget", 'http://nginx.org/download/nginx-1.6.2.tar.gz'],
+                cwd=self.usr_local_path,
+            )
+        if not os.path.exists(self.nginx_install_path):
+            subprocess.run(
+                ["tar", 'zxvf', 'nginx-1.6.2.tar.gz'],
+                cwd=self.usr_local_path,
+            )
         subprocess.run(
             ["./configure", "--prefix=/usr/local/nginx", "--with-http_stub_status_module",
              "--with-http_ssl_module", "--with-pcre=/usr/local/pcre-8.35"],
