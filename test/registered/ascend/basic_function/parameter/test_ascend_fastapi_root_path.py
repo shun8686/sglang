@@ -122,6 +122,9 @@ class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
     def test_fastapi_root_path(self):
         # response = self.send_request(f"{self.base_url}/generate")
         # self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        response = self.send_request(f"{self.base_url}/generate")
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
         response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}/generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
@@ -166,6 +169,9 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
     def test_fastapi_root_path(self):
         # response = self.send_request(f"{self.base_url}/generate")
         # self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        response = self.send_request(f"{self.base_url}/generate")
+        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
 
         response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
