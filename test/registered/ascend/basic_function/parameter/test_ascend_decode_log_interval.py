@@ -73,8 +73,6 @@ class TestDecodeLogInterval(CustomTestCase):
         self.assertIn("Paris", response.text)
         result = run_command("cat ./cache_err_log.txt | grep 'Decode batch' | wc -l")
         decod_batch_result = math.floor((max_tokens + 9) / self.decode_numbers)
-        print(f"******result={result}")
-        print(f"******decod_batch_result={decod_batch_result}")
         self.assertEqual(decod_batch_result, int(result.strip()))
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
