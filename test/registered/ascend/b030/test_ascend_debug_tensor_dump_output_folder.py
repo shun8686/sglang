@@ -24,7 +24,7 @@ PT_FILE_NAME = "Pass00000.pt"
 
 class TestDebugTensorDumpOutputFolderBase(ABC):
     """
-    Testcase：The configuration parameters --debug-tensor-dump-output-folderand --debug-tensor-dump-layerscorrectly generate tensor .ptfiles.
+    Testcase：Verify that the configuration parameters --debug-tensor-dump-output-folder and --debug-tensor-dump-layers correctly generate tensor .pt files.
 
     [Test Category] Parameter
     [Test Target] --debug-tensor-dump-output-folder; --debug-tensor-dump-layers
@@ -52,6 +52,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
 
     @classmethod
     def setUpClass(cls):
+        """Set up the test class by launching the server with the specified configuration."""
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -62,10 +63,12 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
 
     @classmethod
     def tearDownClass(cls):
+        """Clean up after the test class by killing the server process and removing generated directories."""
         kill_process_tree(cls.process.pid)
         run_command("rm -rf ./TP*_PP*")
 
     def sending_request(self):
+        """Send a request to the server and count the number of generated tensor dump directories."""
         text1 = "The capital of France is"
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
@@ -81,6 +84,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
         return response, res
 
     def get_layers_from_tensor_file(self, file_pattern, file_name=PT_FILE_NAME):
+        """Extract layer indices from the saved tensor dump file."""
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
 
@@ -99,7 +103,12 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
 
 
 class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    """
+    Testcase： Verify that tensor dumps are generated for all layers when no specific layers are specified.
+    """
+
     def test_debug_tensor_dump_output_folder(self):
+        """Test that tensor dumps are generated for all 64 layers across two pipeline stages."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(res), TP_DIR_NUM)
@@ -114,12 +123,16 @@ class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, Cust
 
 
 class TestDebugTensorDumpOutputFolder1(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    """
+    Testcase： Verify that tensor dumps are generated only for a single specified layer.
+    """
     other_args = [
         "--debug-tensor-dump-layers",
         "1",
     ]
 
     def test_debug_tensor_dump_output_folder(self):
+        """Test that tensor dumps are generated only for layer 1."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(res), TP_DIR_NUM)
@@ -130,6 +143,9 @@ class TestDebugTensorDumpOutputFolder1(TestDebugTensorDumpOutputFolderBase, Cust
 
 
 class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    """
+    Testcase： Verify that tensor dumps are generated for multiple consecutive layers.
+    """
     other_args = [
         "--debug-tensor-dump-layers",
         "2",
@@ -138,6 +154,7 @@ class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, Cust
     ]
 
     def test_debug_tensor_dump_output_folder(self):
+        """Test that tensor dumps are generated for layers 2, 3, and 4."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(res), TP_DIR_NUM)
@@ -150,6 +167,9 @@ class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, Cust
 
 
 class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    """
+    Testcase： Verify that tensor dumps are generated for multiple non-consecutive layers.
+    """
     other_args = [
         "--debug-tensor-dump-layers",
         "0",
@@ -158,6 +178,7 @@ class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, Cust
     ]
 
     def test_debug_tensor_dump_output_folder(self):
+        """Test that tensor dumps are generated for layers 0, 5, and 10."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(res), TP_DIR_NUM)
@@ -170,12 +191,16 @@ class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, Cust
 
 
 class TestDebugTensorDumpOutputFolder4(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    """
+    Testcase： Verify that no tensor dumps are generated when an out-of-range layer is specified.
+    """
     other_args = [
         "--debug-tensor-dump-layers",
         "500",
     ]
 
     def test_debug_tensor_dump_output_folder(self):
+        """Test that no tensor dumps are generated when specifying layer 500 (out of range)."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(res), TP_DIR_NUM)
@@ -185,6 +210,9 @@ class TestDebugTensorDumpOutputFolder4(TestDebugTensorDumpOutputFolderBase, Cust
 
 
 class TestDebugTensorDumpOutputFolder5(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    """
+    Testcase： Verify that no tensor dump directories are created when --debug-tensor-dump-output-folder is not specified.
+    """
     base_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
@@ -204,6 +232,7 @@ class TestDebugTensorDumpOutputFolder5(TestDebugTensorDumpOutputFolderBase, Cust
     ]
 
     def test_debug_tensor_dump_output_folder(self):
+        """Test that no tensor dump directories are created when output folder is not specified."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
         self.assertEqual(int(res), 0)
