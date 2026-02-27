@@ -19,7 +19,7 @@ DP_SIZE = 1
 TP_DIR_NUM = TP_SIZE * PP_SIZE
 FILE_PATTERN_PP0 = "./TP0_PP0_Rank0_pid*"
 FILE_PATTERN_PP1 = "./TP0_PP1_Rank4_pid*"
-PT_FILE_NAME = "/Pass00000.pt"
+PT_FILE_NAME = "Pass00000.pt"
 
 
 class TestDebugTensorDumpOutputFolderBase(ABC):
@@ -31,7 +31,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     """
 
     model = QWEN3_32B_WEIGHTS_PATH
-    other_args = [
+    base_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
         "0.8",
@@ -48,6 +48,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
         "./",
         "--skip-server-warmup",
     ]
+    other_args = []
 
     @classmethod
     def setUpClass(cls):
@@ -56,7 +57,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
+            other_args=cls.base_args + cls.other_args,
         )
 
     @classmethod
@@ -64,15 +65,9 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
         kill_process_tree(cls.process.pid)
         run_command("rm -rf ./TP*_PP*")
 
-
-class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
-    def test_debug_tensor_dump_output_folder(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
-        self.assertEqual(response.status_code, 200)
-
+    def sending_request(self):
         text1 = "The capital of France is"
-
-        response1 = requests.post(
+        response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": text1,
@@ -82,171 +77,72 @@ class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, Cust
                 },
             },
         )
-        self.assertEqual(response1.status_code, 200)
-        print(response1.text)
-        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), TP_DIR_NUM)
+        res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+        return response, res
 
-        file_pattern = FILE_PATTERN_PP0
+    def get_layers_from_tensor_file(self, file_pattern, file_name=PT_FILE_NAME):
         matching_files = glob.glob(file_pattern)
         model_layers_list = []
+
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
+            tensor_data = torch.load(tensor_file_path + "/" + file_name, map_location="cpu")
+
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
                 if "model.layers." in key:
                     model_layers_list.append(key.split(".")[2])
+
         model_layers_list = sorted(set(int(x) for x in model_layers_list))
         print(model_layers_list)
+        return model_layers_list
+
+
+class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+    def test_debug_tensor_dump_output_folder(self):
+        response, res = self.sending_request()
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(res), TP_DIR_NUM)
+
+        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
         self.assertEqual(len(model_layers_list), 32)
         self.assertEqual(model_layers_list, list(range(32)))
 
-        file_pattern = FILE_PATTERN_PP1
-        matching_files = glob.glob(file_pattern)
-        model_layers_list = []
-        if matching_files:
-            tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
-            for idx, key in enumerate(tensor_data.keys(), 1):
-                print(f"{idx}. {key}")
-                if "model.layers." in key:
-                    model_layers_list.append(key.split(".")[2])
-        model_layers_list = sorted(set(int(x) for x in model_layers_list))
-        print(model_layers_list)
+        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP1)
         self.assertEqual(len(model_layers_list), 32)
         self.assertEqual(sorted(set(model_layers_list)), list(range(32, 64)))
 
 
 class TestDebugTensorDumpOutputFolder1(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.8",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        TP_SIZE,
-        "--pp-size",
-        PP_SIZE,
-        "--dp-size",
-        DP_SIZE,
-        "--debug-tensor-dump-output-folder",
-        "./",
         "--debug-tensor-dump-layers",
         "1",
-        "--skip-server-warmup",
     ]
 
     def test_debug_tensor_dump_output_folder(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(res), TP_DIR_NUM)
 
-        text1 = "The capital of France is"
-
-        response1 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": text1,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 1,
-                },
-            },
-        )
-        self.assertEqual(response1.status_code, 200)
-        print(response1.text)
-        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), TP_DIR_NUM)
-
-        file_pattern = "./TP0_PP0_Rank0_pid*"
-        matching_files = glob.glob(file_pattern)
-        model_layers_list = []
-        if matching_files:
-            tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
-            for idx, key in enumerate(tensor_data.keys(), 1):
-                print(f"{idx}. {key}")
-                if "model.layers." in key:
-                    model_layers_list.append(key.split(".")[2])
-        model_layers_list = sorted(set(int(x) for x in model_layers_list))
-        print(model_layers_list)
+        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
         self.assertEqual(len(model_layers_list), 1)
         self.assertEqual(model_layers_list[0], 1)
 
 
 class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.8",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        TP_SIZE,
-        "--pp-size",
-        PP_SIZE,
-        "--dp-size",
-        DP_SIZE,
-        "--debug-tensor-dump-output-folder",
-        "./",
         "--debug-tensor-dump-layers",
         "2",
         "3",
         "4",
-        "--skip-server-warmup",
     ]
 
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
-
     def test_debug_tensor_dump_output_folder(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(res), TP_DIR_NUM)
 
-        text1 = "The capital of France is"
-
-        response1 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": text1,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 1,
-                },
-            },
-        )
-        self.assertEqual(response1.status_code, 200)
-        print(response1.text)
-        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), TP_DIR_NUM)
-
-        file_pattern = "./TP0_PP0_Rank0_pid*"
-        matching_files = glob.glob(file_pattern)
-        model_layers_list = []
-        if matching_files:
-            tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
-            for idx, key in enumerate(tensor_data.keys(), 1):
-                print(f"{idx}. {key}")
-                if "model.layers." in key:
-                    model_layers_list.append(key.split(".")[2])
-        model_layers_list = sorted(set(int(x) for x in model_layers_list))
-        print(model_layers_list)
+        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
         self.assertEqual(len(model_layers_list), 3)
         self.assertEqual(model_layers_list[0], 2)
         self.assertEqual(model_layers_list[1], 3)
@@ -255,60 +151,18 @@ class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, Cust
 
 class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.8",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        TP_SIZE,
-        "--pp-size",
-        PP_SIZE,
-        "--dp-size",
-        DP_SIZE,
-        "--debug-tensor-dump-output-folder",
-        "./",
         "--debug-tensor-dump-layers",
         "0",
         "5",
         "10",
-        "--skip-server-warmup",
     ]
 
     def test_debug_tensor_dump_output_folder(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(res), TP_DIR_NUM)
 
-        text1 = "The capital of France is"
-
-        response1 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": text1,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 1,
-                },
-            },
-        )
-        self.assertEqual(response1.status_code, 200)
-        print(response1.text)
-        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), TP_DIR_NUM)
-
-        file_pattern = "./TP0_PP0_Rank0_pid*"
-        matching_files = glob.glob(file_pattern)
-        model_layers_list = []
-        if matching_files:
-            tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
-            for idx, key in enumerate(tensor_data.keys(), 1):
-                print(f"{idx}. {key}")
-                if "model.layers." in key:
-                    model_layers_list.append(key.split(".")[2])
-        model_layers_list = sorted(set(int(x) for x in model_layers_list))
-        print(model_layers_list)
+        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
         self.assertEqual(len(model_layers_list), 3)
         self.assertEqual(model_layers_list[0], 0)
         self.assertEqual(model_layers_list[1], 5)
@@ -317,61 +171,21 @@ class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, Cust
 
 class TestDebugTensorDumpOutputFolder4(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.8",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        TP_SIZE,
-        "--pp-size",
-        PP_SIZE,
-        "--dp-size",
-        DP_SIZE,
-        "--debug-tensor-dump-output-folder",
-        "./",
         "--debug-tensor-dump-layers",
         "500",
-        "--skip-server-warmup",
     ]
 
     def test_debug_tensor_dump_output_folder(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
+        self.assertEqual(int(res), TP_DIR_NUM)
 
-        text1 = "The capital of France is"
-
-        response1 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": text1,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 1,
-                },
-            },
-        )
-        self.assertEqual(response1.status_code, 200)
-        print(response1.text)
-        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), TP_DIR_NUM)
-
-        file_pattern = "./TP0_PP0_Rank0_pid*"
-        matching_files = glob.glob(file_pattern)
-        model_layers_list = []
-        if matching_files:
-            tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + PT_FILE_NAME, map_location="cpu")
-            for idx, key in enumerate(tensor_data.keys(), 1):
-                print(f"{idx}. {key}")
-                if "model.layers." in key:
-                    model_layers_list.append(key.split(".")[2])
+        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
         self.assertEqual(len(model_layers_list), 0)
 
 
 class TestDebugTensorDumpOutputFolder5(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
-    other_args = [
+    base_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
         "0.8",
@@ -390,34 +204,10 @@ class TestDebugTensorDumpOutputFolder5(TestDebugTensorDumpOutputFolderBase, Cust
     ]
 
     def test_debug_tensor_dump_output_folder(self):
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
+        response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-
-        text1 = "The capital of France is"
-
-        response1 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": text1,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 1,
-                },
-            },
-        )
-        self.assertEqual(response1.status_code, 200)
-        print(response1.text)
-        res1 = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res1), 0)
+        self.assertEqual(int(res), 0)
 
 
 if __name__ == "__main__":
-    suite = unittest.TestSuite()
-    suite.addTest(TestDebugTensorDumpOutputFolder0("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder1("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder2("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder3("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder4("test_debug_tensor_dump_output_folder"))
-    suite.addTest(TestDebugTensorDumpOutputFolder5("test_debug_tensor_dump_output_folder"))
-    runner = unittest.TextTestRunner(verbosity=2)
-    result = runner.run(suite)
+    unittest.main()
