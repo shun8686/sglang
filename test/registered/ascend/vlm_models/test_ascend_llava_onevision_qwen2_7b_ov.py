@@ -30,6 +30,7 @@ class TestLlavaOneVision(TestVLMModels):
         "--mm-per-request-timeout",
         60,
         "--enable-multimodal",
+        "--disable-fast-image-processor",
     ]
 
     def test_vlm_mmmu_benchmark(self):
