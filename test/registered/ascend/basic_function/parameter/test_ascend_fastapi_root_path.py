@@ -20,6 +20,9 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 # MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+USR_LOCAL_PATH = "/usr/local"
+NGINX_VERSION = "1.24.0"
+PCRE_VERSION = "8.37"
 
 
 class TestAscendFastapiRootPath(CustomTestCase):
@@ -37,9 +40,9 @@ class TestAscendFastapiRootPath(CustomTestCase):
     def setUpClass(cls):
         # Modify nginx configuration and start nginx service
         cls.nginx_manager = NginxConfigManager(
-            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
-            nginx_bin_path="/usr/local/nginx/sbin/nginx",
-            usr_local_path="/usr/local"
+            usr_local_path=USR_LOCAL_PATH,
+            nginx_version=NGINX_VERSION,
+            pcre_version=PCRE_VERSION,
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -131,9 +134,9 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
     def setUpClass(cls):
         # Modify nginx configuration and start nginx service
         cls.nginx_manager = NginxConfigManager(
-            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
-            nginx_bin_path="/usr/local/nginx/sbin/nginx",
-            usr_local_path="/usr/local",
+            usr_local_path=USR_LOCAL_PATH,
+            nginx_version=NGINX_VERSION,
+            pcre_version=PCRE_VERSION,
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -175,8 +178,9 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
     def setUpClass(cls):
         # Modify nginx configuration and start nginx service
         cls.nginx_manager = NginxConfigManager(
-            nginx_conf_path="/usr/local/nginx/conf/nginx.conf",
-            nginx_bin_path="/usr/local/nginx/sbin/nginx"
+            usr_local_path=USR_LOCAL_PATH,
+            nginx_version=NGINX_VERSION,
+            pcre_version=PCRE_VERSION,
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -249,28 +253,35 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
 
 
 class NginxConfigManager:
-    def __init__(self, nginx_conf_path, nginx_bin_path, usr_local_path):
-        self.nginx_conf_path = nginx_conf_path
-        self.nginx_bin_path = nginx_bin_path
-        self.backup_conf_path = f"{nginx_conf_path}.backup"
+    def __init__(self, usr_local_path, nginx_version, pcre_version):
         self.usr_local_path = usr_local_path
-        self.pcre_path = usr_local_path + "/pcre-8.35"
-        self.nginx_install_path = usr_local_path + "/nginx-1.6.2"
+        self.nginx_version = nginx_version
+        self.pcre_version = pcre_version
 
-        self.nginx_path = "/usr/local/nginx"
+        self.nginx_path = self.usr_local_path + "/nginx"
+        self.nginx_install_path = self.nginx_path + "-" + self.nginx_version
+        self.nginx_tar_gz_path = self.nginx_install_path + ".tar.gz"
+        self.nginx_conf_path = self.nginx_path + "/conf/nginx.conf"
+        self.backup_conf_path = f"{self.nginx_conf_path}.backup"
+        self.nginx_bin_path = self.nginx_path + "/sbin/nginx"
+
+        self.pcre_path = usr_local_path + "/pcre-" + self.pcre_version
+        self.pcre_tar_gz_path = self.pcre_path + ".tar.gz"
+
         if not os.path.exists(self.nginx_path):
             self.init_pcre()
             self.init_nginx()
 
     def init_pcre(self):
-        if not os.path.exists(self.pcre_path + "/pcre-8.35.tar.gz"):
+        if not os.path.exists(self.pcre_tar_gz_path):
             subprocess.run(
-                ["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/8.35/pcre-8.35.tar.gz'],
+                ["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/' + self.pcre_version + '/pcre-' +
+                 self.pcre_version + '.tar.gz'],
                 cwd=self.usr_local_path,
             )
         if not os.path.exists(self.pcre_path):
             subprocess.run(
-                ["tar", 'zxvf', 'pcre-8.35.tar.gz'],
+                ["tar", 'zxvf', 'pcre-' + self.pcre_version + '.tar.gz'],
                 cwd=self.usr_local_path,
             )
         subprocess.run(
@@ -287,19 +298,19 @@ class NginxConfigManager:
         )
 
     def init_nginx(self):
-        if not os.path.exists(self.nginx_install_path):
+        if not os.path.exists(self.nginx_tar_gz_path):
             subprocess.run(
-                ["wget", 'http://nginx.org/download/nginx-1.6.2.tar.gz'],
+                ["wget", 'http://nginx.org/download/nginx-' + self.nginx_version + '.tar.gz'],
                 cwd=self.usr_local_path,
             )
         if not os.path.exists(self.nginx_install_path):
             subprocess.run(
-                ["tar", 'zxvf', 'nginx-1.6.2.tar.gz'],
+                ["tar", 'zxvf', 'nginx-' + self.nginx_version + '.tar.gz'],
                 cwd=self.usr_local_path,
             )
         subprocess.run(
-            ["./configure", "--prefix=/usr/local/nginx", "--with-http_stub_status_module",
-             "--with-http_ssl_module", "--with-pcre=/usr/local/pcre-8.35"],
+            ["./configure", "--prefix=" + self.nginx_path, "--with-http_stub_status_module",
+             "--with-http_ssl_module", "--with-pcre=/usr/local/pcre-" + self.pcre_version],
             cwd=self.nginx_install_path,
         )
         subprocess.run(
@@ -310,7 +321,6 @@ class NginxConfigManager:
             ["make", "install"],
             cwd=self.nginx_install_path,
         )
-
 
     def backup_original_config(self):
         if not os.path.exists(self.backup_conf_path):
