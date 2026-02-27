@@ -238,7 +238,7 @@ QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
 # Other
-DEEPSEEK_CODER_JSON_PATH=(
+DEEPSEEK_CODER_JSON_PATH = (
     "/__w/sglang/sglang/test/registered/ascend/basic_function/deepseek_coder.json"
 )
 
