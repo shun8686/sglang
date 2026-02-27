@@ -91,7 +91,7 @@ MODEL_CONFIG = {
         "--mem-fraction-static",
         0.8,
         "--max-running-requests",
-        384,
+        24,
         "--quantization",
         "modelslim",
         "--moe-a2a-backend",
