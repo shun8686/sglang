@@ -94,6 +94,10 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
 
         avg_time2, all_times2 = self.benchmark_gsm8k(args, num_runs=5)
 
+        print("run_gsm8k_time1:", all_times1)
+        print("run_gsm8k_time2:", all_times2)
+        print("run_gsm8k_avg_time1:", avg_time1)
+        print("run_gsm8k_avg_time2:", avg_time2)
         # Assertion: Debug mode should be slower
         self.assertGreater(avg_time2, avg_time1,
                            f"Debug mode should be slower, but measured time: "
