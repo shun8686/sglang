@@ -52,9 +52,6 @@ class TestCrashDump(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        if cls.crash_dump_folder and os.path.exists(cls.crash_dump_folder):
-            import shutil
-            shutil.rmtree(cls.crash_dump_folder)
 
     def test_crash_dump_generated(self):
         """Test that crash dump file is generated after server crash."""
