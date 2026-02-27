@@ -276,7 +276,11 @@ class NginxConfigManager:
             cwd=self.pcre_path,
         )
         subprocess.run(
-            ["make", "&&", "make", "install"],
+            ["make"],
+            cwd=self.pcre_path,
+        )
+        subprocess.run(
+            ["make", "install"],
             cwd=self.pcre_path,
         )
 
@@ -289,14 +293,20 @@ class NginxConfigManager:
             ["tar", 'zxvf', 'nginx-1.6.2.tar.gz'],
             cwd=self.usr_local_path,
         )
+
         subprocess.run(
             ["./configure"],
             cwd=self.nginx_install_path,
         )
         subprocess.run(
-            ["make", "&&", "make", "install"],
+            ["make"],
             cwd=self.nginx_install_path,
         )
+        subprocess.run(
+            ["make", "install"],
+            cwd=self.nginx_install_path,
+        )
+
 
     def backup_original_config(self):
         if not os.path.exists(self.backup_conf_path):
