@@ -46,7 +46,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+        # cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
 
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -75,7 +75,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.err_log_file.close()
         os.remove("./warmup_out_log.txt")
         os.remove("./warmup_err_log.txt")
-        cls.nginx_manager.clean_environment()
+        # cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
         response = self.send_request(f"{self.base_url}/generate")
@@ -339,10 +339,14 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            lines.insert(47, "        }\n")
-            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "\;\n")
-            lines.insert(47, "        location " + f"{location}" + " {\n")
+
+
+
             lines.insert(47, "\n")
+            lines.insert(48, "        location " + f"{location}" + " {\n")
+            lines.insert(49, "            proxy_set_header Host $host")
+            lines.insert(49, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
+            lines.insert(47, "        }\n")
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
@@ -353,7 +357,6 @@ class NginxConfigManager:
 
         # start Nginx
         try:
-            # result = subprocess.run(["ps", "-ef", "|", "grep", "nginx"])
             result = subprocess.run(
                 ["ps", "-ef"],
                 capture_output=True,
@@ -383,14 +386,18 @@ class NginxConfigManager:
 
 
 if __name__ == "__main__":
-    unittest.main()
-    # loader = unittest.TestLoader()
-    # suite = unittest.TestSuite()
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
-    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
-    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath1))
-    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
-    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
-    # # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
-    # runner = unittest.TextTestRunner()
-    # runner.run(suite)
+    # unittest.main()
+    loader = unittest.TestLoader()
+
+    suite = unittest.TestSuite()
+
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathHasEnd))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
+
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
+
