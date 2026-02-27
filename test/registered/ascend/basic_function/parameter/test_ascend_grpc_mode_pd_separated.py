@@ -178,6 +178,8 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
             time.sleep(1)
 
     def test_grpc_mode(self):
+        print(f"====================Testing grpc mode=======================")
+        sleep(200)
         response = requests.post(
             f"http://127.0.0.1:4567/generate",
             json={

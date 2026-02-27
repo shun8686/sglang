@@ -34,7 +34,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
     [Test Target] --fastapi-root-path
     """
 
-    fastapi_root_path = "/sglang/"
+    fastapi_root_path = "/sglang"
 
     @classmethod
     def setUpClass(cls):
@@ -92,7 +92,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertTrue(len(content) > 0)
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
-        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
+        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}/generate")
         self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
     def send_request(self, url):
@@ -112,8 +112,8 @@ class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
     fastapi_root_path = "/test/fastapi/root/path/"
 
 
-class TestAscendFastapiRootPath1(TestAscendFastapiRootPath):
-    fastapi_root_path = "/sglang"
+class TestAscendFastapiRootPathHasEnd(TestAscendFastapiRootPath):
+    fastapi_root_path = "/sglang/"
 
 
 class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
@@ -339,12 +339,8 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            # lines[48] = "        location " + f"{location}" + " {\n"
-            # lines[49] = "            proxy_pass " + f"{proxy_pass}" + ";\n"
-            # lines[50] = "        }\n"
-
             lines.insert(47, "        }\n")
-            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + ";\n")
+            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "\;\n")
             lines.insert(47, "        location " + f"{location}" + " {\n")
             lines.insert(47, "\n")
 
