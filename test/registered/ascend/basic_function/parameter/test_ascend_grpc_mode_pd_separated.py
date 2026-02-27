@@ -46,12 +46,13 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
         cls.start_decode()
 
         # TODO
-        # # Block until both
+        # Block until both
         # cls.wait_server_ready(cls.prefill_url + "/health")
         # cls.wait_server_ready(cls.decode_url + "/health")
-        sleep(200)
+
 
         cls.launch_lb()
+        sleep(200)
 
     @classmethod
     def tearDownClass(cls):
@@ -158,30 +159,31 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
             str(cls.url.port),
         ]
         cls.process_lb = popen_with_error_check(lb_command)
-        cls.wait_server_ready(cls.lb_url + "/health")
-
-    @classmethod
-    def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
-        start_time = time.perf_counter()
-        while True:
-            try:
-                response = requests.get(url)
-                if response.status_code == 200:
-                    print(f"Server {url} is ready")
-                    return
-            except Exception:
-                pass
-
-            if time.perf_counter() - start_time > timeout:
-                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
-
-            time.sleep(1)
+    #     cls.wait_server_ready(cls.lb_url + "/health")
+    #
+    # @classmethod
+    # def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
+    #     start_time = time.perf_counter()
+    #     while True:
+    #         try:
+    #             response = requests.get(url)
+    #             if response.status_code == 200:
+    #                 print(f"Server {url} is ready")
+    #                 return
+    #         except Exception:
+    #             pass
+    #
+    #         if time.perf_counter() - start_time > timeout:
+    #             raise RuntimeError(f"Server {url} failed to start in {timeout}s")
+    #
+    #         time.sleep(1)
 
     def test_grpc_mode(self):
         print(f"====================Testing grpc mode=======================")
         sleep(200)
         response = requests.post(
-            f"http://127.0.0.1:4567/generate",
+            # f"http://127.0.0.1:4567/generate",
+            f"{self.base_url}/generate",
             json={
                 "text": "The capital of France is",
                 "model": self.model,
