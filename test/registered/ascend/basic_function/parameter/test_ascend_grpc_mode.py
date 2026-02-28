@@ -1,14 +1,13 @@
 import os
 import subprocess
 import time
-from time import sleep
 import unittest
+from time import sleep
 from urllib.parse import urlparse
 
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -31,7 +30,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_8B_WEIGHTS_PATH
+        # cls.model = QWEN3_8B_WEIGHTS_PATH
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -39,7 +39,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
         worker_command = [
             "python3",
-            "-m", "sglang.launch_server",
+            "-m",
+            "sglang.launch_server",
             "--model-path",
             cls.model,
             "--grpc-mode",
@@ -49,12 +50,13 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
-        # TODO: 检查服务是否拉起
+        # TODO: Check if the service is up and running
         sleep(100)
 
         router_command = [
             "python3",
-            "-m", "sglang_router.launch_router",
+            "-m",
+            "sglang_router.launch_router",
             "--worker-urls",
             cls.grpc_base_url,
             "--host",
@@ -96,13 +98,23 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 202, "The response status code is not 202.")
-        self.assertEqual(response.json().get("status"), "accepted", "The response status is not accepted.")
-        self.assertEqual(response.json().get("url"), self.base_url, f"The response url is not {self.base_url}.")
+        self.assertEqual(
+            response.status_code, 202, "The response status code is not 202."
+        )
+        self.assertEqual(
+            response.json().get("status"),
+            "accepted",
+            "The response status is not accepted.",
+        )
+        self.assertEqual(
+            response.json().get("url"),
+            self.base_url,
+            f"The response url is not {self.base_url}.",
+        )
         self.assertEqual(
             response.json().get("location"),
             "/workers/" + response.json().get("worker_id"),
-            f"The response location is not equal with worker_id."
+            f"The response location is not equal with worker_id.",
         )
 
         response = requests.post(
@@ -117,8 +129,12 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200, "The response status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(
+            response.status_code, 200, "The response status code is not 200."
+        )
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
 
 
 class TestAscendGrpcModePDDisaggregation(CustomTestCase):
@@ -165,29 +181,27 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
 
     @classmethod
     def start_prefill(cls):
-        prefill_args = (
-            [
-                "--trust-remote-code",
-                "--attention-backend",
-                "ascend",
-                "--device",
-                "npu",
-                "--disable-cuda-graph",
-                "--mem-fraction-static",
-                "0.4",
-                "--tp-size",
-                "1",
-                "--base-gpu-id",
-                12,
-                "--grpc-mode",
-                "--disaggregation-transfer-backend",
-                "ascend",
-                "--disaggregation-mode",
-                "prefill",
-                "--port",
-                cls.prefill_port,
-            ]
-        )
+        prefill_args = [
+            "--trust-remote-code",
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
+            "--disable-cuda-graph",
+            "--mem-fraction-static",
+            "0.4",
+            "--tp-size",
+            "1",
+            "--base-gpu-id",
+            12,
+            "--grpc-mode",
+            "--disaggregation-transfer-backend",
+            "ascend",
+            "--disaggregation-mode",
+            "prefill",
+            "--port",
+            cls.prefill_port,
+        ]
 
         cls.extra_envs = {
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
@@ -203,30 +217,28 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
 
     @classmethod
     def start_decode(cls):
-        decode_args = (
-            [
-                "--trust-remote-code",
-                "--attention-backend",
-                "ascend",
-                "--device",
-                "npu",
-                "--disable-cuda-graph",
-                "--prefill-round-robin-balance",
-                "--mem-fraction-static",
-                "0.4",
-                "--tp-size",
-                "1",
-                "--base-gpu-id",
-                14,
-                "--grpc-mode",
-                "--disaggregation-transfer-backend",
-                "ascend",
-                "--disaggregation-mode",
-                "decode",
-                "--port",
-                cls.decode_port,
-            ]
-        )
+        decode_args = [
+            "--trust-remote-code",
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
+            "--disable-cuda-graph",
+            "--prefill-round-robin-balance",
+            "--mem-fraction-static",
+            "0.4",
+            "--tp-size",
+            "1",
+            "--base-gpu-id",
+            14,
+            "--grpc-mode",
+            "--disaggregation-transfer-backend",
+            "ascend",
+            "--disaggregation-mode",
+            "decode",
+            "--port",
+            cls.decode_port,
+        ]
         cls.extra_envs = {
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
@@ -270,8 +282,12 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(
+            response.status_code, 200, "The request status code is not 200."
+        )
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
 
 
 if __name__ == "__main__":
