@@ -1,6 +1,21 @@
 """Common utilities for testing and benchmarking on NPU"""
 
+import asyncio
+import copy
 import os
+import shlex
+import subprocess
+from types import SimpleNamespace
+from typing import Awaitable, Callable, NamedTuple, Optional
+
+from sglang.bench_serving import run_benchmark
+from sglang.srt.utils import kill_process_tree
+from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
+    auto_config_device,
+    popen_launch_server, _try_enable_offline_mode_if_cache_complete, _launch_server_process, _wait_for_server_health,
+)
 
 # Model weights storage directory
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
@@ -39,12 +54,22 @@ BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(
 C4AI_COMMAND_R_V01_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "CohereForAI/c4ai-command-r-v01"
 )
+C4AI_COMMAND_R_V01_CHAT_TEMPLATE_PATH = "/__w/sglang/sglang/test/registered/ascend/llm_models/tool_chat_template_c4ai_command_r_v01.jinja"
 CHATGLM2_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "ZhipuAI/chatglm2-6b")
 DBRX_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "AI-ModelScope/dbrx-instruct"
 )
 DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "DeepSeek-V3.2-Exp-W8A8"
+)
+DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V3.2-W8A8"
+)
+DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+)
+DEEPSEEK_CODER_1_3_B_BASE_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base"
 )
 ERNIE_4_5_21B_A3B_PT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "baidu/ERNIE-4.5-21B-A3B-PT"
@@ -85,10 +110,14 @@ PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "microsoft/Phi-4-multimodal-instruct"
 )
 QWEN3_0_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B")
-Qwen3_30B_A3B_Instruct_2507_WEIGHTS_PATH = os.path.join(
+QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-Instruct-2507"
 )
 QWEN3_32B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B")
+QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-Eagle3")
+QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "aleoyang/Qwen3-32B-w8a8-MindIE"
+)
 QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "vllm-ascend/Qwen3-235B-A22B-W8A8"
 )
@@ -129,6 +158,9 @@ LLAVA_ONEVISION_QWEN2_7B_OV_WEIGHTS_PATH = os.path.join(
 LLAVA_V1_6_34B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b"
 )
+LLAVA_V1_6_34B_TOKENIZER_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "AI-ModelScope/llava-v1.6-34b/llava-1.6v-34b-tokenizer"
+)
 MIMO_VL_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-VL-7B-RL")
 MINICPM_O_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-o-2_6")
 MINICPM_V_2_6_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "openbmb/MiniCPM-V-2_6")
@@ -153,8 +185,18 @@ QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 QWEN3_VL_235B_A22B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen3-VL-235B-A22B-Instruct"
 )
+QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen2-0.5B-Instruct"
+)
 
 QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")
+QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-w8a8"
+)
+
+DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+)
 
 # Embedding model weights path
 BGE_LARGE_EN_V1_5_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bge-large-en-v1.5")
@@ -196,3 +238,502 @@ QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
+# Other
+DEEPSEEK_CODER_JSON_PATH="/__w/sglang/sglang/test/registered/ascend/basic_function/deepseek_coder.json"
+
+class ModelTestConfig(NamedTuple):
+    """
+    Configuration for model testing.
+
+    Attributes:
+        model_path: Path to the model weights directory
+        mmlu_score: Weight for MMLU benchmark score
+        gsm8k_accuracy: Weight for GSM8K benchmark score
+        mmmu_accuracy: Weight for MMMU benchmark score
+    """
+
+    model_path: str
+    mmlu_score: Optional[float] = None
+    gsm8k_accuracy: Optional[float] = None
+    mmmu_accuracy: Optional[float] = None
+
+
+LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, mmlu_score=0.2
+)
+
+QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH, gsm8k_accuracy=0.9
+)
+
+QWEN3_32B_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWEN3_32B_WEIGHTS_PATH, gsm8k_accuracy=0.82
+)
+
+QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH, gsm8k_accuracy=0.92
+)
+
+QWQ_32B_W8A8_WEIGHTS_FOR_TEST = ModelTestConfig(
+    model_path=QWQ_32B_W8A8_WEIGHTS_PATH, gsm8k_accuracy=0.59
+)
+
+# Default configuration for testing
+DEFAULT_WEIGHTS_FOR_TEST = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST
+
+
+def run_command(cmd, shell=True):
+    """Execute system command and return stdout
+
+    parameter:
+        cmd: command to execute
+        shell:
+        True, Execute command in shell
+        False, Commands are invoked directly without shell parsing
+    return:
+        The result of executing the command
+    """
+    try:
+        result = subprocess.run(
+            cmd, shell=shell, capture_output=True, text=True, check=True
+        )
+        return result.stdout
+    except subprocess.CalledProcessError as e:
+        print(f"execute command error: {e}")
+        return None
+
+
+def get_benchmark_args(
+    base_url="",
+    backend="sglang",
+    dataset_name="",
+    dataset_path="",
+    tokenizer="",
+    num_prompts=500,
+    sharegpt_output_len=None,
+    random_input_len=4096,
+    random_output_len=2048,
+    sharegpt_context_len=None,
+    request_rate=float("inf"),
+    disable_stream=False,
+    disable_ignore_eos=False,
+    seed: int = 0,
+    device="auto",
+    pd_separated: bool = False,
+    lora_name=None,
+    lora_request_distribution="uniform",
+    lora_zipf_alpha=1.5,
+    gsp_num_groups=4,
+    gsp_prompts_per_group=4,
+    gsp_system_prompt_len=128,
+    gsp_question_len=32,
+    gsp_output_len=32,
+    gsp_num_turns=1,
+    header=None,
+    max_concurrency=None,
+):
+    """Constructing the parameter objects needed for inference tests
+
+    Parameters:
+        base_url: url
+        backend: Inference backend
+        dataset_name: Data set name
+        dataset_path: Dataset path
+        tokenizer: tokenizer
+        num_prompts: Total number of test requests
+        sharegpt_output_len: Output the number of tokens
+        random_input_len: The length of the randomly generated input prompt
+        random_output_len: The length of the randomly generated output prompt
+        sharegpt_context_len: Sharegpt dataset context length
+        request_rate: Request rate
+        disable_stream: Disable streaming output
+        disable_ignore_eos: Should eos_token be ignored?
+        seed: random seed
+        device: Device type
+        pd_separated: Enable PD separation
+        lora_name: LoRA fine-tuning model path
+        lora_request_distribution: LoRA request distribution strategy
+        lora_zipf_alpha: Control request distribution skewness
+        gsp_num_groups: Grouped Sequence Parallelism
+        gsp_prompts_per_group: Number of parallel prompts within each group
+        gsp_system_prompt_len: GSP system prompts length
+        gsp_question_len: GSP question length
+        gsp_output_len: GSP output length
+        gsp_num_turns: GSP Dialogue Rounds
+        header: HTTP request header
+        max_concurrency: Maximum number of concurrent requests
+    Returns:
+        The return parameter is the same as the input.
+    """
+
+    return SimpleNamespace(
+        backend=backend,
+        base_url=base_url,
+        host=None,
+        port=None,
+        dataset_name=dataset_name,
+        dataset_path=dataset_path,
+        model=None,
+        tokenizer=tokenizer,
+        num_prompts=num_prompts,
+        sharegpt_output_len=sharegpt_output_len,
+        sharegpt_context_len=sharegpt_context_len,
+        random_input_len=random_input_len,
+        random_output_len=random_output_len,
+        random_range_ratio=0.0,
+        request_rate=request_rate,
+        multi=None,
+        output_file=None,
+        disable_tqdm=False,
+        disable_stream=disable_stream,
+        return_logprob=False,
+        return_routed_experts=False,
+        seed=seed,
+        disable_ignore_eos=disable_ignore_eos,
+        extra_request_body=None,
+        apply_chat_template=False,
+        profile=None,
+        lora_name=lora_name,
+        lora_request_distribution=lora_request_distribution,
+        lora_zipf_alpha=lora_zipf_alpha,
+        prompt_suffix="",
+        device=device,
+        pd_separated=pd_separated,
+        gsp_num_groups=gsp_num_groups,
+        gsp_prompts_per_group=gsp_prompts_per_group,
+        gsp_system_prompt_len=gsp_system_prompt_len,
+        gsp_question_len=gsp_question_len,
+        gsp_output_len=gsp_output_len,
+        gsp_num_turns=gsp_num_turns,
+        header=header,
+        max_concurrency=max_concurrency,
+    )
+
+
+def run_bench_serving(
+    model,
+    num_prompts,
+    request_rate,
+    other_server_args,
+    dataset_name="random",
+    dataset_path="",
+    tokenizer=None,
+    random_input_len=4096,
+    random_output_len=2048,
+    sharegpt_context_len=None,
+    disable_stream=False,
+    disable_ignore_eos=False,
+    need_warmup=False,
+    seed: int = 0,
+    device="auto",
+    gsp_num_groups=None,
+    gsp_prompts_per_group=None,
+    gsp_system_prompt_len=None,
+    gsp_question_len=None,
+    gsp_output_len=None,
+    max_concurrency=None,
+    background_task: Optional[Callable[[str, asyncio.Event], Awaitable[None]]] = None,
+    lora_name: Optional[str] = None,
+):
+    """Start the service and obtain the inference results.
+
+    Parameters:
+        model: Model name
+        num_prompts: Total number of test requests
+        request_rate: Request rate
+        other_server_args: Additional configuration when starting the service
+        dataset_name: Data set name
+        dataset_path: Dataset path
+        tokenizer: tokenizer
+        random_input_len: The length of the randomly generated input prompt
+        random_output_len: The length of the randomly generated output prompt
+        sharegpt_context_len: Sharegpt dataset context length
+        disable_stream: Disable streaming output
+        disable_ignore_eos: Should eos_token be ignored?
+        need_warmup: Preheating required
+        seed: random seed
+        device: Device type
+        gsp_num_groups: Grouped Sequence Parallelism
+        gsp_prompts_per_group: Number of parallel prompts within each group
+        gsp_system_prompt_len: GSP system prompts length
+        gsp_question_len: GSP question length
+        gsp_output_len: GSP output length
+        max_concurrency: Maximum number of concurrent requests
+        background_task: Background tasks
+        lora_name: LoRA fine-tuning model path
+    Returns:
+        res: Number of requests successfully completed
+
+    """
+
+    if device == "auto":
+        device = auto_config_device()
+    # Launch the server
+    base_url = DEFAULT_URL_FOR_TEST
+    process = popen_launch_server(
+        model,
+        base_url,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_server_args,
+    )
+
+    # Run benchmark
+    args = get_benchmark_args(
+        base_url=base_url,
+        dataset_name=dataset_name,
+        dataset_path=dataset_path,
+        tokenizer=tokenizer,
+        num_prompts=num_prompts,
+        random_input_len=random_input_len,
+        random_output_len=random_output_len,
+        sharegpt_context_len=sharegpt_context_len,
+        request_rate=request_rate,
+        disable_stream=disable_stream,
+        disable_ignore_eos=disable_ignore_eos,
+        seed=seed,
+        device=device,
+        lora_name=lora_name,
+        gsp_num_groups=gsp_num_groups,
+        gsp_prompts_per_group=gsp_prompts_per_group,
+        gsp_system_prompt_len=gsp_system_prompt_len,
+        gsp_question_len=gsp_question_len,
+        gsp_output_len=gsp_output_len,
+        max_concurrency=max_concurrency,
+    )
+
+    async def _run():
+        if need_warmup:
+            warmup_args = copy.deepcopy(args)
+            warmup_args.num_prompts = 16
+            await asyncio.to_thread(run_benchmark, warmup_args)
+
+        start_event = asyncio.Event()
+        stop_event = asyncio.Event()
+        task_handle = (
+            asyncio.create_task(background_task(base_url, start_event, stop_event))
+            if background_task
+            else None
+        )
+
+        try:
+            start_event.set()
+            result = await asyncio.to_thread(run_benchmark, args)
+        finally:
+            if task_handle:
+                stop_event.set()
+                await task_handle
+
+        return result
+
+    try:
+        res = asyncio.run(_run())
+    finally:
+        kill_process_tree(process.pid)
+
+    assert res["completed"] == num_prompts
+    return res
+
+def popen_launch_server_config(
+    model: str,
+    base_url: str,
+    timeout: float,
+    api_key: Optional[str] = None,
+    other_args: Optional[list[str]] = None,
+    env: Optional[dict] = None,
+    return_stdout_stderr: Optional[tuple] = None,
+    device: str = "auto",
+    pd_separated: bool = False,
+    num_replicas: Optional[int] = None,
+):
+    """Launch a server process with automatic device detection and offline/online retry.
+
+    Args:
+        model: Model path or identifier
+        base_url: Base URL for the server
+        timeout: Timeout for server startup
+        api_key: Optional API key for authentication
+        other_args: Additional command line arguments
+        env: Environment dict for subprocess
+        return_stdout_stderr: Optional tuple for output capture
+        device: Device type ("auto", "cuda", "rocm" or "cpu")
+        pd_separated: Whether to use PD separated mode
+        num_replicas: Number of replicas for mixed PD mode
+
+    Returns:
+        Started subprocess.Popen object
+    """
+    other_args = other_args or []
+
+    # Auto-detect device if needed
+    if device == "auto":
+        device = auto_config_device()
+        other_args = list(other_args)
+        other_args += ["--device", str(device)]
+
+    # CI-specific: Validate cache and enable offline mode if complete
+    if env is None:
+        env = os.environ.copy()
+    else:
+        env = env.copy()
+
+    # Store per-run marker path for potential invalidation
+    per_run_marker_path = None
+    try:
+        from sglang.utils import is_in_ci
+
+        if is_in_ci():
+            per_run_marker_path = _try_enable_offline_mode_if_cache_complete(
+                model, env, other_args
+            )
+    except Exception as e:
+        print(f"CI cache validation failed (non-fatal): {e}")
+
+    # Build server command
+    _, host, port = base_url.split(":")
+    host = host[2:]
+
+    use_mixed_pd_engine = not pd_separated and num_replicas is not None
+    if pd_separated or use_mixed_pd_engine:
+        command = "sglang.launch_pd_server"
+    else:
+        command = "sglang.launch_server"
+
+    command = [
+        "python3",
+        "-m",
+        command,
+        *[str(x) for x in other_args],
+    ]
+
+    if pd_separated or use_mixed_pd_engine:
+        command.extend(["--lb-host", host, "--lb-port", port])
+    else:
+        command.extend(["--host", host, "--port", port])
+
+    if use_mixed_pd_engine:
+        command.extend(["--mixed", "--num-replicas", str(num_replicas)])
+
+    if api_key:
+        command += ["--api-key", api_key]
+
+    print(f"command={shlex.join(command)}")
+
+    # Track if offline mode was enabled for potential retry
+    offline_enabled = env.get("HF_HUB_OFFLINE") == "1"
+
+    # First launch attempt
+    process = _launch_server_process(command, env, return_stdout_stderr, model)
+    success, error_msg = _wait_for_server_health(process, base_url, api_key, timeout)
+
+    # If offline launch failed and offline was enabled, retry with online mode
+    if not success and offline_enabled:
+        print(
+            f"CI_OFFLINE: Offline launch failed ({error_msg}), retrying with online mode..."
+        )
+
+        # Kill failed process
+        try:
+            if process.poll() is None:
+                kill_process_tree(process.pid)
+            else:
+                process.wait(timeout=5)
+        except Exception as e:
+            print(f"CI_OFFLINE: Error cleaning up failed offline process: {e}")
+
+        # Invalidate per-run marker to prevent subsequent tests from using offline
+        if per_run_marker_path and os.path.exists(per_run_marker_path):
+            try:
+                os.remove(per_run_marker_path)
+                print("CI_OFFLINE: Invalidated per-run marker due to offline failure")
+            except Exception as e:
+                print(f"CI_OFFLINE: Failed to remove per-run marker: {e}")
+
+        # Retry with online mode
+        env["HF_HUB_OFFLINE"] = "0"
+        process = _launch_server_process(command, env, return_stdout_stderr, model)
+        success, error_msg = _wait_for_server_health(
+            process, base_url, api_key, timeout
+        )
+
+        if success:
+            print("CI_OFFLINE: Online retry succeeded")
+            return process
+
+        # Online retry also failed
+        try:
+            kill_process_tree(process.pid)
+        except Exception as e:
+            print(f"CI_OFFLINE: Error killing process after online retry failure: {e}")
+
+        if "exited" in error_msg:
+            raise Exception(error_msg + ". Check server logs for errors.")
+        raise TimeoutError(error_msg)
+
+    # First attempt succeeded or offline was not enabled
+    if success:
+        return process
+
+    # First attempt failed and offline was not enabled
+    try:
+        kill_process_tree(process.pid)
+    except Exception as e:
+        print(f"CI_OFFLINE: Error killing process after first attempt failure: {e}")
+
+    if "exited" in error_msg:
+        raise Exception(error_msg + ". Check server logs for errors.")
+    raise TimeoutError(error_msg)
+
+def execute_serving_performance_test(host, port, model_path=None, backend="sglang", dataset_name=None,
+                                     request_rate=None,
+                                     max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
+                                     random_range_ratio=1,
+                                     dataset_path=None):
+    """
+        Usage: Execute performance test by bench_serving tool and write metrics to a file.
+        Parameters: Refer to the bench_serving guide documentation.
+        Return: Metrics dictionary.
+    """
+    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
+                "--model", model_path, "--backend", backend]
+
+    if dataset_name:
+        cmd_args.extend(["--dataset-name", str(dataset_name)])
+    if dataset_path:
+        cmd_args.extend(["--dataset-path", str(dataset_path)])
+    if request_rate:
+        cmd_args.extend(["--request-rate", str(request_rate)])
+    if max_concurrency:
+        cmd_args.extend(["--max-concurrency", str(max_concurrency)])
+    if num_prompts:
+        cmd_args.extend(["--num-prompts", str(num_prompts)])
+    if input_len:
+        cmd_args.extend(["--random-input-len", str(input_len)])
+    if output_len:
+        cmd_args.extend(["--random-output-len", str(output_len)])
+    if random_range_ratio:
+        cmd_args.extend(["--random-range-ratio", str(random_range_ratio)])
+
+    # Write component version information and metrics to file
+    result_file = os.getenv("METRICS_DATA_FILE")
+    result_file = "./bench_log.txt" if not result_file else result_file
+    print(f"The metrics result file: {result_file}")
+    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep|memfabric_hybrid' | tee {result_file}")
+    cann_info = "/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
+    run_command(f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}")
+
+    # Run bench_serving
+    command = " ".join(cmd_args)
+    print(f"Command: {command}")
+    metrics = run_command(f"{command} | tee -a {result_file}")
+    print(f"metrics is {metrics}")
+
+    # Extracting key performance indicator data
+    mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
+    mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
+    total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
+
+    return {
+        'mean_ttft': mean_ttft,
+        'mean_tpot': mean_tpot,
+        'total_tps': total_tps
+    }
