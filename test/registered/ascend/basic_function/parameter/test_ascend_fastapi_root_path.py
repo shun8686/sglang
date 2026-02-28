@@ -1,12 +1,13 @@
 import os
 import shutil
 import subprocess
-import requests
 import unittest
 from urllib.parse import urlparse
 
+import requests
+
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -16,10 +17,9 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
 
-# MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
 USR_LOCAL_PATH = "/usr/local"
 NGINX_VERSION = "1.24.0"
 PCRE_VERSION = "8.37"
@@ -46,16 +46,19 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
-        # cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
 
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
             "--trust-remote-code",
-            "--mem-fraction-static", 0.8,
-            "--attention-backend", "ascend",
-            "--fastapi-root-path", cls.fastapi_root_path,
+            "--mem-fraction-static",
+            0.8,
+            "--attention-backend",
+            "ascend",
+            "--fastapi-root-path",
+            cls.fastapi_root_path,
         ]
 
         cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
@@ -75,25 +78,33 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.err_log_file.close()
         os.remove("./warmup_out_log.txt")
         os.remove("./warmup_err_log.txt")
-        # cls.nginx_manager.clean_environment()
+        cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
         response = self.send_request(f"{self.base_url}/generate")
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
+        self.assertEqual(
+            response.status_code, 200, "The request status code is not 200."
+        )
         self.assertNotIn(
             self.fastapi_root_path,
             response.url,
             "The root path should not in response url."
         )
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
 
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
-        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}/generate")
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        response = self.send_request(
+            f"{self.base_url}{self.fastapi_root_path}/generate"
+        )
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
 
     def send_request(self, url):
         return requests.post(
@@ -120,14 +131,15 @@ class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
     fastapi_root_path = "sglang"
 
     def test_fastapi_root_path(self):
-        # response = self.send_request(f"{self.base_url}/generate")
-        # self.assertEqual(response.status_code, 404, "The request status code is not 404.")
         response = self.send_request(f"{self.base_url}/generate")
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
 
         response = self.send_request(f"{self.base_url}/{self.fastapi_root_path}/generate")
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
 
 
 class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
@@ -150,8 +162,10 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
             "--trust-remote-code",
-            "--mem-fraction-static", 0.8,
-            "--attention-backend", "ascend",
+            "--mem-fraction-static",
+            0.8,
+            "--attention-backend",
+            "ascend",
         ]
 
         cls.process = popen_launch_server(
@@ -167,14 +181,15 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        # response = self.send_request(f"{self.base_url}/generate")
-        # self.assertEqual(response.status_code, 404, "The request status code is not 404.")
         response = self.send_request(f"{self.base_url}/generate")
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
 
         response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
 
 
 class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
@@ -197,9 +212,12 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
         cls.url = urlparse(cls.base_url)
         cls.common_args = [
             "--trust-remote-code",
-            "--mem-fraction-static", 0.8,
-            "--attention-backend", "ascend",
-            "--fastapi-root-path", cls.fastapi_root_path,
+            "--mem-fraction-static",
+            0.8,
+            "--attention-backend",
+            "ascend",
+            "--fastapi-root-path",
+            cls.fastapi_root_path,
         ]
 
         cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
@@ -222,40 +240,28 @@ class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
+        response = self.send_request(f"{self.base_url}/generate")
+        self.assertEqual(
+            response.status_code, 200, "The request status code is not 200."
         )
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
         self.assertNotIn(
             self.fastapi_root_path,
             response.url,
             "The root path should not in response url."
         )
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
 
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
         self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
-        response = requests.post(
-            f"{self.base_url}{self.fastapi_root_path}generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
+        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
         )
-        self.assertEqual(response.status_code, 404, "The request status code is not 404.")
 
 
 class NginxConfigManager:
@@ -281,8 +287,14 @@ class NginxConfigManager:
     def init_pcre(self):
         if not os.path.exists(self.pcre_tar_gz_path):
             subprocess.run(
-                ["wget", 'http://downloads.sourceforge.net/project/pcre/pcre/' + self.pcre_version + '/pcre-' +
-                 self.pcre_version + '.tar.gz'],
+                [
+                    "wget",
+                    'http://downloads.sourceforge.net/project/pcre/pcre/'
+                    + self.pcre_version
+                    + '/pcre-'
+                    + self.pcre_version
+                    + '.tar.gz',
+                ],
                 cwd=self.usr_local_path,
             )
         if not os.path.exists(self.pcre_path):
@@ -306,7 +318,10 @@ class NginxConfigManager:
     def init_nginx(self):
         if not os.path.exists(self.nginx_tar_gz_path):
             subprocess.run(
-                ["wget", 'http://nginx.org/download/nginx-' + self.nginx_version + '.tar.gz'],
+                [
+                    "wget",
+                    'http://nginx.org/download/nginx-' + self.nginx_version + '.tar.gz',
+                ],
                 cwd=self.usr_local_path,
             )
         if not os.path.exists(self.nginx_install_path):
@@ -315,8 +330,13 @@ class NginxConfigManager:
                 cwd=self.usr_local_path,
             )
         subprocess.run(
-            ["./configure", "--prefix=" + self.nginx_path, "--with-http_stub_status_module",
-             "--with-http_ssl_module", "--with-pcre=/usr/local/pcre-" + self.pcre_version],
+            [
+                "./configure",
+                "--prefix=" + self.nginx_path,
+                "--with-http_stub_status_module",
+                "--with-http_ssl_module",
+                "--with-pcre=/usr/local/pcre-" + self.pcre_version
+            ],
             cwd=self.nginx_install_path,
         )
         subprocess.run(
@@ -339,20 +359,13 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-
-
-
             lines.insert(47, "\n")
             lines.insert(48, "        location " + f"{location}" + " {\n")
-            lines.insert(49, "            proxy_set_header Host $host;")
-            lines.insert(49, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
-            lines.insert(47, "        }\n")
-            """
-            proxy_set_header Host $host;
-            proxy_set_header X-Real-IP $remote_addr;
-            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-            proxy_set_header X-Forwarded-Proto $scheme;
-            """
+            lines.insert(49, "            proxy_set_header Host $host;\n")
+            lines.insert(50, "            proxy_set_header X-Real-IP $remote_addr;\n")
+            lines.insert(51, "            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n")
+            lines.insert(52, "            proxy_set_header X-Forwarded-Proto $scheme;\n")
+            lines.insert(53, "        }\n")
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
@@ -370,13 +383,12 @@ class NginxConfigManager:
                 timeout=10,
                 check=False,
             )
-            print(f"{result=}")
-            print(f"{result.stdout=}")
-            print(f"{result.stderr=}")
-            # if "nginx" in result:
-            #     subprocess.run([self.nginx_bin_path, "-s", "stop"])
+            if "nginx" in result.stdout:
+                subprocess.run([self.nginx_bin_path, "-s", "stop"])
 
-            subprocess.run([self.nginx_bin_path], )
+            subprocess.run(
+                [self.nginx_bin_path]
+            )
         except subprocess.CalledProcessError as e:
             raise RuntimeError(f"Failed to modify nginx config: {e}")
 
@@ -392,18 +404,4 @@ class NginxConfigManager:
 
 
 if __name__ == "__main__":
-    # unittest.main()
-    loader = unittest.TestLoader()
-
-    suite = unittest.TestSuite()
-
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathHasEnd))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
-
-    runner = unittest.TextTestRunner()
-    runner.run(suite)
-
+    unittest.main()

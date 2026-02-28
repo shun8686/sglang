@@ -1,20 +1,22 @@
 import os
-from time import sleep
-import requests
-import unittest
 import subprocess
 import time
+from time import sleep
+import unittest
 from urllib.parse import urlparse
+
+import requests
+
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_with_error_check, popen_launch_pd_server,
+    popen_launch_pd_server,
+    popen_with_error_check,
 )
-
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
 
@@ -29,8 +31,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # cls.model = QWEN3_8B_WEIGHTS_PATH
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
+        cls.model = QWEN3_8B_WEIGHTS_PATH
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -98,8 +99,11 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         self.assertEqual(response.status_code, 202, "The response status code is not 202.")
         self.assertEqual(response.json().get("status"), "accepted", "The response status is not accepted.")
         self.assertEqual(response.json().get("url"), self.base_url, f"The response url is not {self.base_url}.")
-        self.assertEqual(response.json().get("location"), "/workers/" + response.json().get("worker_id"),
-                         f"The response location is not equal with worker_id.")
+        self.assertEqual(
+            response.json().get("location"),
+            "/workers/" + response.json().get("worker_id"),
+            f"The response location is not equal with worker_id."
+        )
 
         response = requests.post(
             f"{self.base_url}/generate",
