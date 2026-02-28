@@ -1,19 +1,21 @@
 import os
-from time import sleep
-import requests
-import unittest
 import subprocess
 import time
+import unittest
+from time import sleep
 from urllib.parse import urlparse
+
+import requests
+
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_with_error_check, popen_launch_pd_server,
+    popen_launch_pd_server,
+    popen_with_error_check,
 )
-
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
 
@@ -37,7 +39,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
         worker_command = [
             "python3",
-            "-m", "sglang.launch_server",
+            "-m",
+            "sglang.launch_server",
             "--model-path",
             cls.model,
             "--grpc-mode",
@@ -52,7 +55,8 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
         router_command = [
             "python3",
-            "-m", "sglang_router.launch_router",
+            "-m",
+            "sglang_router.launch_router",
             "--worker-urls",
             cls.grpc_base_url,
             "--host",
@@ -94,11 +98,20 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 202, "The response status code is not 202.")
-        self.assertEqual(response.json().get("status"), "accepted", "The response status is not accepted.")
-        self.assertEqual(response.json().get("url"), self.base_url, f"The response url is not {self.base_url}.")
-        self.assertEqual(response.json().get("location"), "/workers/" + response.json().get("worker_id"),
-                         f"The response location is not equal with worker_id.")
+        self.assertEqual(
+            response.status_code, 202, "The response status code is not 202."
+        )
+        self.assertEqual(
+            response.json().get("status"), "accepted", "The response status is not accepted."
+        )
+        self.assertEqual(
+            response.json().get("url"), self.base_url, f"The response url is not {self.base_url}."
+        )
+        self.assertEqual(
+            response.json().get("location"),
+            "/workers/" + response.json().get("worker_id"),
+        f"The response location is not equal with worker_id."
+        )
 
         response = requests.post(
             f"{self.base_url}/generate",
@@ -112,8 +125,12 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200, "The response status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(
+            response.status_code, 200, "The response status code is not 200."
+        )
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
 
 
 class TestAscendGrpcModePDDisaggregation(CustomTestCase):
@@ -160,8 +177,7 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
 
     @classmethod
     def start_prefill(cls):
-        prefill_args = (
-            [
+        prefill_args = [
                 "--trust-remote-code",
                 "--attention-backend",
                 "ascend",
@@ -182,7 +198,6 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
                 "--port",
                 cls.prefill_port,
             ]
-        )
 
         cls.extra_envs = {
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
@@ -198,8 +213,7 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
 
     @classmethod
     def start_decode(cls):
-        decode_args = (
-            [
+        decode_args = [
                 "--trust-remote-code",
                 "--attention-backend",
                 "ascend",
@@ -221,7 +235,6 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
                 "--port",
                 cls.decode_port,
             ]
-        )
         cls.extra_envs = {
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
@@ -265,8 +278,12 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
             },
         )
 
-        self.assertEqual(response.status_code, 200, "The request status code is not 200.")
-        self.assertIn("Paris", response.text, "The inference result does not include Paris.")
+        self.assertEqual(
+            response.status_code, 200, "The request status code is not 200."
+        )
+        self.assertIn(
+            "Paris", response.text, "The inference result does not include Paris."
+        )
 
 
 if __name__ == "__main__":

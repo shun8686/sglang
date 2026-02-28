@@ -244,6 +244,7 @@ QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
 # Other
 DEEPSEEK_CODER_JSON_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/deepseek_coder.json"
 
+
 class ModelTestConfig(NamedTuple):
     """
     Configuration for model testing.
@@ -687,6 +688,7 @@ def popen_launch_server_config(
         raise Exception(error_msg + ". Check server logs for errors.")
     raise TimeoutError(error_msg)
 
+
 def execute_serving_performance_test(
     host,
     port,
@@ -694,16 +696,18 @@ def execute_serving_performance_test(
     backend="sglang",
     dataset_name=None,
     request_rate=None,
-    max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
+    max_concurrency=None,
+    num_prompts=None,
+    input_len=None,
+    output_len=None,
     random_range_ratio=1,
-    dataset_path=None
+    dataset_path=None,
 ):
     """
     Usage: Execute performance test by bench_serving tool and write metrics to a file.
     Parameters: Refer to the bench_serving guide documentation.
     Return: Metrics dictionary.
     """
-
 
     cmd_args = [
         "python3",
@@ -717,7 +721,7 @@ def execute_serving_performance_test(
         model_path,
         "--backend",
         backend,
-        ]
+    ]
 
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
@@ -761,5 +765,4 @@ def execute_serving_performance_test(
         f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'"
     )
 
-    return {'mean_ttft': mean_ttft, 'mean_tpot': mean_tpot, 'total_tps': total_tps
-    }
+    return {'mean_ttft': mean_ttft, 'mean_tpot': mean_tpot, 'total_tps': total_tps}

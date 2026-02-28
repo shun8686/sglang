@@ -71,9 +71,9 @@ class TestDisaggregationTransferBackend(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process_decode.pid)
 
-        if hasattr(cls, 'out_file') and cls.out_file:
+        if hasattr(cls, "out_file") and cls.out_file:
             cls.out_file.close()
-        if hasattr(cls, 'err_file') and cls.err_file:
+        if hasattr(cls, "err_file") and cls.err_file:
             cls.err_file.close()
 
     def test_disaggregation_transfer_backend(self):

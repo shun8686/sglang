@@ -1,9 +1,11 @@
 import logging
-import requests
 import unittest
+
+import requests
+
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -14,8 +16,8 @@ from sglang.test.test_utils import (
 # Initialize logging configuration (replace print)
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
@@ -26,14 +28,17 @@ COMMON_CONFIG = {
     "model": QWEN3_32B_WEIGHTS_PATH,
     "base_args": [
         "--trust-remote-code",
-        "--mem-fraction-static", "0.8",
-        "--attention-backend", "ascend",
+        "--mem-fraction-static",
+        "0.8",
+        "--attention-backend",
+        "ascend",
         "--disable-cuda-graph",
         "--tp-size", "4",
         "--disable-radix-cache",
-        "--chunked-prefill-size", "-1",
+        "--chunked-prefill-size",
+        "-1",
     ],
-    "request_timeout": 120
+    "request_timeout": 120,
 }
 
 # Common score request data (reused in both test classes)
@@ -42,7 +47,7 @@ COMMON_SCORE_REQUEST = {
     "items": ["It is 3", "It is 4", "It is 5"],
     "label_token_ids": [9454, 2753],
     "apply_softmax": True,
-    "item_first": False
+    "item_first": False,
 }
 
 
@@ -52,6 +57,7 @@ class TestScoreWithDelimiter(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --multi-item-scoring-delimiter
     """
+
     server_process = None
 
     @classmethod
@@ -61,7 +67,7 @@ class TestScoreWithDelimiter(CustomTestCase):
         # Construct complete server startup arguments
         server_args = COMMON_CONFIG["base_args"] + [
             "--multi-item-scoring-delimiter",
-            "151643"
+            "151643",
         ]
         # Trust popen_launch_server's readiness logic, no sleep needed
         cls.server_process = popen_launch_server(

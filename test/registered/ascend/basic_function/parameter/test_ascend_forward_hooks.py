@@ -1,7 +1,9 @@
 import json
 import os
 import unittest
+
 import requests
+
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -61,7 +63,7 @@ class TestSetForwardHooks(CustomTestCase):
         {
             "name": "qwen_first_layer_attn_monitor",
             "target_modules": ["model.layers.0.self_attn"],
-            "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
+            "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
             "config": {"layer_index": 0},
         }
     ]
@@ -154,7 +156,7 @@ class TestSetForwardHooksValidation(TestSetForwardHooks):
 
                 self.assertIn(
                     f"Server process exited with code {expected_code}",
-                    str(ctx.exception)
+                    str(ctx.exception),
                 )
 
                 self.hook_log_file.seek(0)
@@ -175,7 +177,7 @@ class TestSetForwardHooksFieldNameValidation1(TestSetForwardHooks):
         {
             "NAME": "qwen_first_layer_attn_monitor",
             "target_modules": ["model.layers.0.self_attn"],
-            "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
+            "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
             "config": {"layer_index": 0},
         }
     ]
@@ -194,7 +196,7 @@ class TestSetForwardHooksFieldNameValidation2(TestSetForwardHooks):
         {
             "name": "qwen_first_layer_attn_monitor",
             "TARGET_modules": ["model.layers.0.self_attn"],
-            "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
+            "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
             "config": {"layer_index": 0},
         }
     ]
@@ -211,7 +213,7 @@ class TestSetForwardHooksFieldNameValidation3(TestSetForwardHooks):
         {
             "name": "qwen_first_layer_attn_monitor",
             "target_modules": ["model.layers.0.self_attn"],
-            "hook_Factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
+            "hook_Factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
             "config": {"layer_index": 0},
         }
     ]
@@ -228,7 +230,7 @@ class TestSetForwardHooksFieldNameValidation4(TestSetForwardHooks):
         {
             "name": "qwen_first_layer_attn_monitor",
             "target_modules": ["model.layers.0.self_attn"],
-            "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
+            "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
             "Config": {"layer_index": 0},
         }
     ]
@@ -257,10 +259,8 @@ class TestSetForwardHooksFieldNameParameterValidation(TestSetForwardHooks):
                 {
                     "name": name,
                     "target_modules": ["model.layers.0.self_attn"],
-                    "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
-                    "config": {
-                        "layer_index": 0
-                    }
+                    "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
+                    "config": {"layer_index": 0},
                 }
             ]
 
@@ -271,7 +271,7 @@ class TestSetForwardHooksFieldNameParameterValidation(TestSetForwardHooks):
             self.assertIn(
                 expected_log,
                 hook_content,
-                msg=f"tset config={name} fail：expected log content not found"
+                msg=f"tset config={name} fail：expected log content not found",
             )
 
 
@@ -290,10 +290,8 @@ class TestSetForwardHooksFieldParameterTargetModulesValidation(TestSetForwardHoo
                 {
                     "name": "qwen_first_layer_attn_monitor",
                     "target_modules": target_modules,
-                    "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
-                    "config": {
-                        "layer_index": 0
-                    }
+                    "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
+                    "config": {"layer_index": 0},
                 }
             ]
 
@@ -304,7 +302,7 @@ class TestSetForwardHooksFieldParameterTargetModulesValidation(TestSetForwardHoo
             self.assertIn(
                 expected_log,
                 hook_content,
-                msg=f"tset config={target_modules} fail：expected log content not found"
+                msg=f"tset config={target_modules} fail：expected log content not found",
             )
 
 
@@ -324,9 +322,7 @@ class TestSetForwardHooksFieldParameterHookFactoryValidation(TestSetForwardHooks
                     "name": "qwen_first_layer_attn_monitor",
                     "target_modules": ["model.layers.0.self_attn"],
                     "hook_factory": hook_factory,
-                    "config": {
-                        "layer_index": 0
-                    }
+                    "config": {"layer_index": 0},
                 }
             ]
 
@@ -337,7 +333,7 @@ class TestSetForwardHooksFieldParameterHookFactoryValidation(TestSetForwardHooks
             self.assertIn(
                 expected_log,
                 hook_content,
-                msg=f"tset config={hook_factory} fail：expected log content not found"
+                msg=f"tset config={hook_factory} fail：expected log content not found",
             )
 
 
@@ -356,8 +352,8 @@ class TestSetForwardHooksFieldParameterConfigValidation(TestSetForwardHooks):
                 {
                     "name": "qwen_first_layer_attn_monitor",
                     "target_modules": ["model.layers.0.self_attn"],
-                    "hook_factory": "test_ascend_forward_hooks2:create_attention_monitor_factory",
-                    "config": config
+                    "hook_factory": "test_ascend_forward_hooks:create_attention_monitor_factory",
+                    "config": config,
                 }
             ]
 
@@ -368,7 +364,7 @@ class TestSetForwardHooksFieldParameterConfigValidation(TestSetForwardHooks):
             self.assertIn(
                 expected_log,
                 hook_content,
-                msg=f"tset config={config} fail：expected log content not found"
+                msg=f"tset config={config} fail：expected log content not found",
             )
 
 

@@ -106,13 +106,12 @@ class TestConfigPriority(TestConfig):
             self._launch_server()
         self.assertIn(
             "Server process exited with code 1. Check server logs for errors.",
-            str(ctx.exception)
+            str(ctx.exception),
         )
         self.hook_log_file.seek(0)
         hook_content = self.hook_log_file.read()
         self.assertIn(
-            "make sure '/data/Qwen/Qwen3-32B' is the correct path",
-            hook_content
+            "make sure '/data/Qwen/Qwen3-32B' is the correct path",hook_content
         )
 
 
@@ -132,10 +131,12 @@ class TestConfigValidation(TestConfig):
         "config1.yaml",
     ]
     for config in test_cases:
+
         @classmethod
         def _build_other_args(cls):
             return [
-                "--config", cls.config,
+                "--config",
+                cls.config,
             ]
 
         def test_config(self):
@@ -143,7 +144,7 @@ class TestConfigValidation(TestConfig):
                 self._launch_server()
             self.assertIn(
                 "Server process exited with code 1. Check server logs for errors.",
-                str(ctx.exception)
+                str(ctx.exception),
             )
 
 
@@ -173,7 +174,7 @@ class TestConfigFileModeValidation(TestConfig):
                 self._launch_server()
             self.assertIn(
                 "Server process exited with code 1. Check server logs for errors.",
-                str(ctx.exception)
+                str(ctx.exception),
             )
 
 
@@ -191,7 +192,7 @@ class TestConfigParamValidation(TestConfig):
             self._launch_server()
         self.assertIn(
             "Server process exited with code 2. Check server logs for errors.",
-            str(ctx.exception)
+            str(ctx.exception),
         )
 
 

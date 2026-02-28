@@ -36,7 +36,7 @@ class TestEnableReturnRoutedExperts(CustomTestCase):
         "--quantization",
         "modelslim",
         "--disable-radix-cache",
-        "--enable-return-routed-experts"
+        "--enable-return-routed-experts",
     ]
 
     @classmethod
