@@ -7,6 +7,7 @@ from urllib.parse import urlparse
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -17,8 +18,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
-# MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-0.6B"
+MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
 USR_LOCAL_PATH = "/usr/local"
 NGINX_VERSION = "1.24.0"
 PCRE_VERSION = "8.37"
@@ -312,7 +312,7 @@ class NginxConfigManager:
     def init_pcre(self):
         if not os.path.exists(self.pcre_tar_gz_path):
             subprocess.run(
-            [
+                [
                     "wget",
                     "http://downloads.sourceforge.net/project/pcre/pcre/"
                     + self.pcre_version
@@ -343,10 +343,10 @@ class NginxConfigManager:
     def init_nginx(self):
         if not os.path.exists(self.nginx_tar_gz_path):
             subprocess.run(
-        [
-                "wget",
-                "http://nginx.org/download/nginx-" + self.nginx_version + ".tar.gz",
-            ],
+                [
+                    "wget",
+                    "http://nginx.org/download/nginx-" + self.nginx_version + ".tar.gz",
+                ],
                 cwd=self.usr_local_path,
             )
         if not os.path.exists(self.nginx_install_path):
@@ -355,12 +355,12 @@ class NginxConfigManager:
                 cwd=self.usr_local_path,
             )
         subprocess.run(
-        [
-                 "./configure",
-                 "--prefix=" + self.nginx_path,
-                 "--with-http_stub_status_module",
-                 "--with-http_ssl_module",
-                 "--with-pcre=/usr/local/pcre-" + self.pcre_version
+            [
+                "./configure",
+                "--prefix=" + self.nginx_path,
+                "--with-http_stub_status_module",
+                "--with-http_ssl_module",
+                "--with-pcre=/usr/local/pcre-" + self.pcre_version
             ],
             cwd=self.nginx_install_path,
         )

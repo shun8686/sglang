@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH as MODEL_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -30,8 +31,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # cls.model = QWEN3_8B_WEIGHTS_PATH
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
+        cls.model = MODEL_PATH
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -114,7 +114,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
         self.assertEqual(
             response.json().get("location"),
             "/workers/" + response.json().get("worker_id"),
-        f"The response location is not equal with worker_id.",
+            f"The response location is not equal with worker_id.",
         )
 
         response = requests.post(
@@ -147,7 +147,7 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
+        cls.model = MODEL_PATH
         cls.prefill_url = f"grpc://127.0.0.1:20100"
         cls.prefill_port = "20100"
         cls.decode_url = f"grpc://127.0.0.1:20200"

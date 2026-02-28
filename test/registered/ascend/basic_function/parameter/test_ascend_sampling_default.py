@@ -224,26 +224,28 @@ class TestSamplingDefaultsModel(BaseSamplingTest):
         self.assertEqual(
             sampling_params["temperature"],
             COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["temperature"],
-            f"temperature mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['temperature']}, actual={sampling_params['temperature']}"
+            f"temperature mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['temperature']}, actual={sampling_params['temperature']}",
         )
         self.assertEqual(
-            sampling_params["top_p"], COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["top_p"],
-            f"top_p mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['top_p']}, actual={sampling_params['top_p']}"
+            sampling_params["top_p"],
+            COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["top_p"],
+            f"top_p mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['top_p']}, actual={sampling_params['top_p']}",
         )
         self.assertEqual(
             sampling_params["top_k"],
             COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["top_k"],
-            f"top_k mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['top_k']}, actual={sampling_params['top_k']}"
+            f"top_k mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['top_k']}, actual={sampling_params['top_k']}",
         )
         self.assertEqual(
-            sampling_params["min_p"], COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["min_p"],
-            f"min_p mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['min_p']}, actual={sampling_params['min_p']}"
+            sampling_params["min_p"],
+            COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["min_p"],
+            f"min_p mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['min_p']}, actual={sampling_params['min_p']}",
         )
         self.assertEqual(
             sampling_params["repetition_penalty"],
             COMMON_CONFIG["MODEL_GEN_DEFAULTS"]["repetition_penalty"],
             f"repetition_penalty mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['repetition_penalty']}, "
-            f"actual={sampling_params['repetition_penalty']}"
+            f"actual={sampling_params['repetition_penalty']}",
         )
         logger.info("✅ Model mode default parameters assertion passed!")
 
@@ -256,7 +258,7 @@ class TestSamplingDefaultsModel(BaseSamplingTest):
             "top_p": 0.75,
             "top_k": 100,
             "min_p": 0.2,
-            "repetition_penalty": 1.1
+            "repetition_penalty": 1.1,
         }
         logger.info(f"Manually configured parameters: {custom_params}")
         sampling_params = self._call_chat(custom_params)
@@ -264,18 +266,23 @@ class TestSamplingDefaultsModel(BaseSamplingTest):
         # Precise assertion: manual parameters take full effect
         for key, expected_value in custom_params.items():
             self.assertEqual(
-                sampling_params[key], expected_value,
-                f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}"
+                sampling_params[key],
+                expected_value,
+                f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}",
             )
         logger.info("✅ Model mode manual parameters assertion passed!")
 
 
 class TestSamplingDefaultsOpenAI(BaseSamplingTest):
     """Test --sampling-defaults=openai mode"""
+
     @classmethod
     def _launch_server(cls):
         """Launch server in openai mode"""
-        server_args = COMMON_CONFIG["base_server_args"] + ["--sampling-defaults", "openai"]
+        server_args = COMMON_CONFIG["base_server_args"] + [
+            "--sampling-defaults",
+            "openai",
+        ]
         logger.info(f"\n=== Launching server in openai mode ===")
         logger.info(f"Launch parameters: {server_args}")
 
@@ -293,24 +300,29 @@ class TestSamplingDefaultsOpenAI(BaseSamplingTest):
 
         # Precise assertion: match openai default parameters in logs (consistent with SGLang built-in)
         self.assertEqual(
-            sampling_params["temperature"], COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["temperature"],
-            f"temperature mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['temperature']}, actual={sampling_params['temperature']}"
+            sampling_params["temperature"],
+            COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["temperature"],
+            f"temperature mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['temperature']}, actual={sampling_params['temperature']}",
         )
         self.assertEqual(
-            sampling_params["top_p"], COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["top_p"],
-            f"top_p mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['top_p']}, actual={sampling_params['top_p']}"
+            sampling_params["top_p"],
+            COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["top_p"],
+            f"top_p mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['top_p']}, actual={sampling_params['top_p']}",
         )
         self.assertEqual(
-            sampling_params["top_k"], COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["top_k"],
-            f"top_k mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['top_k']}, actual={sampling_params['top_k']}"
+            sampling_params["top_k"],
+            COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["top_k"],
+            f"top_k mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['top_k']}, actual={sampling_params['top_k']}",
         )
         self.assertEqual(
-            sampling_params["min_p"], COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["min_p"],
-            f"min_p mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['min_p']}, actual={sampling_params['min_p']}"
+            sampling_params["min_p"],
+            COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["min_p"],
+            f"min_p mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['min_p']}, actual={sampling_params['min_p']}",
         )
         self.assertEqual(
-            sampling_params["repetition_penalty"], COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["repetition_penalty"],
-            f"repetition_penalty mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['repetition_penalty']}, actual={sampling_params['repetition_penalty']}"
+            sampling_params["repetition_penalty"],
+            COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["repetition_penalty"],
+            f"repetition_penalty mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['repetition_penalty']}, actual={sampling_params['repetition_penalty']}",
         )
         logger.info("✅ openai mode default parameters assertion passed!")
 
@@ -323,7 +335,7 @@ class TestSamplingDefaultsOpenAI(BaseSamplingTest):
             "top_p": 0.9,
             "top_k": 50,
             "min_p": 0.1,
-            "repetition_penalty": 1.3
+            "repetition_penalty": 1.3,
         }
         logger.info(f"Manually configured parameters: {custom_params}")
         sampling_params = self._call_chat(custom_params)
@@ -331,7 +343,8 @@ class TestSamplingDefaultsOpenAI(BaseSamplingTest):
         # Precise assertion: manual parameters take full effect
         for key, expected_value in custom_params.items():
             self.assertEqual(
-                sampling_params[key], expected_value,
+                sampling_params[key],
+                expected_value,
                 f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}"
             )
         logger.info("✅ openai mode manual parameters assertion passed!")
