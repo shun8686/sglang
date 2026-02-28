@@ -60,16 +60,19 @@ class TestScoreWithDelimiter(CustomTestCase):
         logger.info("\n=== Initializing test environment [delimiter enabled] ===")
         # Construct complete server startup arguments
         server_args = COMMON_CONFIG["base_args"] + [
-            "--multi-item-scoring-delimiter", "151643"
+            "--multi-item-scoring-delimiter",
+            "151643"
         ]
         # Trust popen_launch_server's readiness logic, no sleep needed
         cls.server_process = popen_launch_server(
             model=COMMON_CONFIG["model"],
             base_url=DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=server_args
+            other_args=server_args,
         )
-        logger.info(f"✅ Server started successfully (with delimiter), args: {server_args}")
+        logger.info(
+            f"✅ Server started successfully (with delimiter), args: {server_args}"
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -83,14 +86,15 @@ class TestScoreWithDelimiter(CustomTestCase):
             url=f"{DEFAULT_URL_FOR_TEST}/v1/score",
             json=COMMON_SCORE_REQUEST,
             headers={"Content-Type": "application/json"},
-            timeout=COMMON_CONFIG["request_timeout"]
+            timeout=COMMON_CONFIG["request_timeout"],
         )
         # Verify response status code
         self.assertEqual(
-            response.status_code, 200,
-            f"❌ API returned wrong status code: expected 200, actual {response.status_code}"
+            response.status_code,
+            200,
+            f"❌ API returned wrong status code: expected 200, actual {response.status_code}",
         )
-        
+
         # Parse result and verify score logic
         result = response.json()
         scores = result["scores"]
@@ -99,15 +103,15 @@ class TestScoreWithDelimiter(CustomTestCase):
         # Core logic assertions
         self.assertTrue(
             scores[0][0] > scores[0][1],
-            "❌ Score logic error for correct item (It is 3): score[0] should be greater than score[1]"
+            "❌ Score logic error for correct item (It is 3): score[0] should be greater than score[1]",
         )
         self.assertTrue(
             scores[1][0] < scores[1][1],
-            "❌ Score logic error for wrong item (It is 4): score[0] should be less than score[1]"
+            "❌ Score logic error for wrong item (It is 4): score[0] should be less than score[1]",
         )
         self.assertTrue(
             scores[2][0] < scores[2][1],
-            "❌ Score logic error for wrong item (It is 5): score[0] should be less than score[1]"
+            "❌ Score logic error for wrong item (It is 5): score[0] should be less than score[1]",
         )
         logger.info("✅ Delimiter enabled: Score logic verification passed!")
 
@@ -118,6 +122,7 @@ class TestScoreWithoutDelimiter(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --multi-item-scoring-delimiter
     """
+
     server_process = None
 
     @classmethod
@@ -130,9 +135,11 @@ class TestScoreWithoutDelimiter(CustomTestCase):
             model=COMMON_CONFIG["model"],
             base_url=DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=server_args
+            other_args=server_args,
         )
-        logger.info(f"✅ Server started successfully (without delimiter), args: {server_args}")
+        logger.info(
+            f"✅ Server started successfully (without delimiter), args: {server_args}"
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -145,13 +152,14 @@ class TestScoreWithoutDelimiter(CustomTestCase):
             url=f"{DEFAULT_URL_FOR_TEST}/v1/score",
             json=COMMON_SCORE_REQUEST,
             headers={"Content-Type": "application/json"},
-            timeout=COMMON_CONFIG["request_timeout"]
+            timeout=COMMON_CONFIG["request_timeout"],
         )
         self.assertEqual(
-            response.status_code, 200,
-            f"❌ API returned wrong status code: expected 200, actual {response.status_code}"
+            response.status_code,
+            200,
+            f"❌ API returned wrong status code: expected 200, actual {response.status_code}",
         )
-        
+
         # Parse result and verify score logic
         result = response.json()
         scores = result["scores"]
@@ -159,15 +167,15 @@ class TestScoreWithoutDelimiter(CustomTestCase):
 
         self.assertTrue(
             scores[0][0] > scores[0][1],
-            "❌ Score logic error for correct item (It is 3): score[0] should be greater than score[1]"
+            "❌ Score logic error for correct item (It is 3): score[0] should be greater than score[1]",
         )
         self.assertTrue(
             scores[1][0] > scores[1][1],
-            "❌ Score logic error for wrong item (It is 4): score[0] should be greater than score[1]"
+            "❌ Score logic error for wrong item (It is 4): score[0] should be greater than score[1]",
         )
         self.assertTrue(
             scores[2][0] > scores[2][1],
-            "❌ Score logic error for wrong item (It is 5): score[0] should be greater than score[1]"
+            "❌ Score logic error for wrong item (It is 5): score[0] should be greater than score[1]",
         )
         logger.info("✅ Delimiter disabled: Score logic verification passed!")
 
