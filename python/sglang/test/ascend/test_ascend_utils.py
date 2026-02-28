@@ -765,4 +765,4 @@ def execute_serving_performance_test(
         f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'"
     )
 
-    return {'mean_ttft': mean_ttft, 'mean_tpot': mean_tpot, 'total_tps': total_tps}
+    return {"mean_ttft": mean_ttft, "mean_tpot": mean_tpot, "total_tps": total_tps}

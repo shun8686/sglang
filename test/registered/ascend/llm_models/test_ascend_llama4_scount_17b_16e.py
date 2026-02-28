@@ -8,7 +8,8 @@ register_npu_ci(
     est_time=400,
     suite="nightly-4-npu-a3",
     nightly=True,
-    disabled="run failed",)
+    disabled="run failed",
+)
 
 
 class TestLlama4(GSM8KAscendMixin, CustomTestCase):

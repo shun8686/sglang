@@ -318,7 +318,7 @@ class NginxConfigManager:
                     + self.pcre_version
                     + "/pcre-"
                     + self.pcre_version
-                    + ".tar.gz"
+                    + ".tar.gz",
                 ],
                 cwd=self.usr_local_path,
             )
@@ -343,10 +343,10 @@ class NginxConfigManager:
     def init_nginx(self):
         if not os.path.exists(self.nginx_tar_gz_path):
             subprocess.run(
-            [
-                    "wget",
-                    "http://nginx.org/download/nginx-" + self.nginx_version + ".tar.gz"
-                ],
+        [
+                "wget",
+                "http://nginx.org/download/nginx-" + self.nginx_version + ".tar.gz",
+            ],
                 cwd=self.usr_local_path,
             )
         if not os.path.exists(self.nginx_install_path):
@@ -361,7 +361,7 @@ class NginxConfigManager:
                  "--with-http_stub_status_module",
                  "--with-http_ssl_module",
                  "--with-pcre=/usr/local/pcre-" + self.pcre_version
-             ],
+            ],
             cwd=self.nginx_install_path,
         )
         subprocess.run(
