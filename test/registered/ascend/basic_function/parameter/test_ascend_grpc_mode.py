@@ -6,7 +6,6 @@ import subprocess
 import time
 from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN3_8B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,

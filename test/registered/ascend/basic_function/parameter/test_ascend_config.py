@@ -1,10 +1,11 @@
 import os
+import unittest
 
 import requests
-import unittest
+
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import popen_launch_server_config
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -21,13 +22,15 @@ class TestConfig(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --config
     """
+
     model = None
     config = "config.yaml"
 
     @classmethod
     def _build_other_args(cls):
         return [
-            "--config", cls.config,
+            "--config",
+            cls.config,
         ]
 
     @classmethod
@@ -69,6 +72,7 @@ class TestConfigPriority(TestConfig):
     [Test Category] Parameter
     [Test Target] --config
     """
+
     model = "/data/Qwen/Qwen3-32B"
 
     @classmethod
@@ -100,10 +104,16 @@ class TestConfigPriority(TestConfig):
     def test_config(self):
         with self.assertRaises(Exception) as ctx:
             self._launch_server()
-        self.assertIn("Server process exited with code 1. Check server logs for errors.", str(ctx.exception))
+        self.assertIn(
+            "Server process exited with code 1. Check server logs for errors.",
+            str(ctx.exception)
+        )
         self.hook_log_file.seek(0)
         hook_content = self.hook_log_file.read()
-        self.assertIn("make sure '/data/Qwen/Qwen3-32B' is the correct path", hook_content)
+        self.assertIn(
+            "make sure '/data/Qwen/Qwen3-32B' is the correct path",
+            hook_content
+        )
 
 
 class TestConfigValidation(TestConfig):
@@ -112,6 +122,7 @@ class TestConfigValidation(TestConfig):
     [Test Category] Parameter
     [Test Target] --config
     """
+
     test_cases = [
         "abc",
         3.14,
@@ -130,7 +141,10 @@ class TestConfigValidation(TestConfig):
         def test_config(self):
             with self.assertRaises(Exception) as ctx:
                 self._launch_server()
-            self.assertIn("Server process exited with code 1. Check server logs for errors.", str(ctx.exception))
+            self.assertIn(
+                "Server process exited with code 1. Check server logs for errors.",
+                str(ctx.exception)
+            )
 
 
 class TestConfigFileModeValidation(TestConfig):
@@ -139,22 +153,28 @@ class TestConfigFileModeValidation(TestConfig):
     [Test Category] Parameter
     [Test Target] --config
     """
+
     test_cases = [
         "config.ini",
         "config.txt",
         "config.xml",
     ]
     for config in test_cases:
+
         @classmethod
         def _build_other_args(cls):
             return [
-                "--config", cls.config,
+                "--config",
+                cls.config,
             ]
 
         def test_config(self):
             with self.assertRaises(Exception) as ctx:
                 self._launch_server()
-            self.assertIn("Server process exited with code 1. Check server logs for errors.", str(ctx.exception))
+            self.assertIn(
+                "Server process exited with code 1. Check server logs for errors.",
+                str(ctx.exception)
+            )
 
 
 class TestConfigParamValidation(TestConfig):
@@ -163,12 +183,16 @@ class TestConfigParamValidation(TestConfig):
     [Test Category] Parameter
     [Test Target] --config
     """
+
     config = "config_valid.yaml"
 
     def test_config(self):
         with self.assertRaises(Exception) as ctx:
             self._launch_server()
-        self.assertIn("Server process exited with code 2. Check server logs for errors.", str(ctx.exception))
+        self.assertIn(
+            "Server process exited with code 2. Check server logs for errors.",
+            str(ctx.exception)
+        )
 
 
 if __name__ == "__main__":

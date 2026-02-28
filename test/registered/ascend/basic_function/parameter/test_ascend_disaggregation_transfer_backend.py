@@ -4,12 +4,18 @@ from urllib.parse import urlparse
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command, execute_serving_performance_test
-from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    popen_launch_server, CustomTestCase, DEFAULT_URL_FOR_TEST,
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_32B_WEIGHTS_PATH,
+    execute_serving_performance_test,
+    run_command,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
+)
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
@@ -90,7 +96,7 @@ class TestDisaggregationTransferBackend(CustomTestCase):
         content = self.err_file.read()
         self.assertIn(self.keyword, content)
         res = run_command(f"cat {self.err_log} | grep '{self.keyword}'")
-        gen_throughput = res.split(self.keyword)[1].split(',')[0]
+        gen_throughput = res.split(self.keyword)[1].split(",")[0]
         self.assertGreater(float(gen_throughput), 0)
 
         metrics = execute_serving_performance_test(

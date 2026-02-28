@@ -13,8 +13,11 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
+    _launch_server_process,
+    _try_enable_offline_mode_if_cache_complete,
+    _wait_for_server_health,
     auto_config_device,
-    popen_launch_server, _try_enable_offline_mode_if_cache_complete, _launch_server_process, _wait_for_server_health,
+    popen_launch_server,
 )
 
 # Model weights storage directory
@@ -239,7 +242,7 @@ QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
 # Other
-DEEPSEEK_CODER_JSON_PATH="/__w/sglang/sglang/test/registered/ascend/basic_function/deepseek_coder.json"
+DEEPSEEK_CODER_JSON_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/deepseek_coder.json"
 
 class ModelTestConfig(NamedTuple):
     """
@@ -533,6 +536,7 @@ def run_bench_serving(
     assert res["completed"] == num_prompts
     return res
 
+
 def popen_launch_server_config(
     model: str,
     base_url: str,
@@ -683,18 +687,37 @@ def popen_launch_server_config(
         raise Exception(error_msg + ". Check server logs for errors.")
     raise TimeoutError(error_msg)
 
-def execute_serving_performance_test(host, port, model_path=None, backend="sglang", dataset_name=None,
-                                     request_rate=None,
-                                     max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
-                                     random_range_ratio=1,
-                                     dataset_path=None):
+def execute_serving_performance_test(
+    host,
+    port,
+    model_path=None,
+    backend="sglang",
+    dataset_name=None,
+    request_rate=None,
+    max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
+    random_range_ratio=1,
+    dataset_path=None
+):
     """
-        Usage: Execute performance test by bench_serving tool and write metrics to a file.
-        Parameters: Refer to the bench_serving guide documentation.
-        Return: Metrics dictionary.
+    Usage: Execute performance test by bench_serving tool and write metrics to a file.
+    Parameters: Refer to the bench_serving guide documentation.
+    Return: Metrics dictionary.
     """
-    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
-                "--model", model_path, "--backend", backend]
+
+
+    cmd_args = [
+        "python3",
+        "-m",
+        "sglang.bench_serving",
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--model",
+        model_path,
+        "--backend",
+        backend,
+        ]
 
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
@@ -717,9 +740,13 @@ def execute_serving_performance_test(host, port, model_path=None, backend="sglan
     result_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not result_file else result_file
     print(f"The metrics result file: {result_file}")
-    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep|memfabric_hybrid' | tee {result_file}")
+    run_command(
+        f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep|memfabric_hybrid' | tee {result_file}"
+    )
     cann_info = "/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
-    run_command(f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}")
+    run_command(
+        f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}"
+    )
 
     # Run bench_serving
     command = " ".join(cmd_args)
@@ -730,10 +757,9 @@ def execute_serving_performance_test(host, port, model_path=None, backend="sglan
     # Extracting key performance indicator data
     mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
     mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
-    total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
+    total_tps = run_command(
+        f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'"
+    )
 
-    return {
-        'mean_ttft': mean_ttft,
-        'mean_tpot': mean_tpot,
-        'total_tps': total_tps
+    return {'mean_ttft': mean_ttft, 'mean_tpot': mean_tpot, 'total_tps': total_tps
     }

@@ -1,8 +1,8 @@
+import glob
 import unittest
 from abc import ABC
 
 import requests
-import glob
 import torch
 
 from sglang.srt.utils import kill_process_tree
@@ -11,7 +11,8 @@ from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    popen_launch_server, CustomTestCase,
+    CustomTestCase,
+    popen_launch_server,
 )
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
@@ -93,7 +94,9 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
 
         if matching_files:
             tensor_file_path = matching_files[0]
-            tensor_data = torch.load(tensor_file_path + "/" + file_name, map_location="cpu")
+            tensor_data = torch.load(
+                tensor_file_path + "/" + file_name, map_location="cpu"
+            )
 
             for idx, key in enumerate(tensor_data.keys(), 1):
                 print(f"{idx}. {key}")
@@ -105,7 +108,9 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
         return model_layers_list
 
 
-class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+class TestDebugTensorDumpOutputFolder0(
+    TestDebugTensorDumpOutputFolderBase, CustomTestCase
+):
     """
     Testcase： Verify that tensor dumps are generated for all layers when no specific layers are specified.
     """
@@ -125,10 +130,13 @@ class TestDebugTensorDumpOutputFolder0(TestDebugTensorDumpOutputFolderBase, Cust
         self.assertEqual(sorted(set(model_layers_list)), list(range(32, 64)))
 
 
-class TestDebugTensorDumpOutputFolder1(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+class TestDebugTensorDumpOutputFolder1(
+    TestDebugTensorDumpOutputFolderBase, CustomTestCase
+):
     """
     Testcase： Verify that tensor dumps are generated only for a single specified layer.
     """
+
     other_args = [
         "--debug-tensor-dump-layers",
         "1",
@@ -145,10 +153,13 @@ class TestDebugTensorDumpOutputFolder1(TestDebugTensorDumpOutputFolderBase, Cust
         self.assertEqual(model_layers_list[0], 1)
 
 
-class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+class TestDebugTensorDumpOutputFolder2(
+    TestDebugTensorDumpOutputFolderBase, CustomTestCase
+):
     """
     Testcase： Verify that tensor dumps are generated for multiple consecutive layers.
     """
+
     other_args = [
         "--debug-tensor-dump-layers",
         "2",
@@ -169,10 +180,13 @@ class TestDebugTensorDumpOutputFolder2(TestDebugTensorDumpOutputFolderBase, Cust
         self.assertEqual(model_layers_list[2], 4)
 
 
-class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+class TestDebugTensorDumpOutputFolder3(
+    TestDebugTensorDumpOutputFolderBase, CustomTestCase
+):
     """
     Testcase： Verify that tensor dumps are generated for multiple non-consecutive layers.
     """
+
     other_args = [
         "--debug-tensor-dump-layers",
         "0",
@@ -193,10 +207,13 @@ class TestDebugTensorDumpOutputFolder3(TestDebugTensorDumpOutputFolderBase, Cust
         self.assertEqual(model_layers_list[2], 10)
 
 
-class TestDebugTensorDumpOutputFolder4(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+class TestDebugTensorDumpOutputFolder4(
+    TestDebugTensorDumpOutputFolderBase, CustomTestCase
+):
     """
     Testcase： Verify that no tensor dumps are generated when an out-of-range layer is specified.
     """
+
     other_args = [
         "--debug-tensor-dump-layers",
         "500",
@@ -212,10 +229,13 @@ class TestDebugTensorDumpOutputFolder4(TestDebugTensorDumpOutputFolderBase, Cust
         self.assertEqual(len(model_layers_list), 0)
 
 
-class TestDebugTensorDumpOutputFolder5(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
+class TestDebugTensorDumpOutputFolder5(
+    TestDebugTensorDumpOutputFolderBase, CustomTestCase
+):
     """
     Testcase： Verify that no tensor dump directories are created when --debug-tensor-dump-output-folder is not specified.
     """
+
     base_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

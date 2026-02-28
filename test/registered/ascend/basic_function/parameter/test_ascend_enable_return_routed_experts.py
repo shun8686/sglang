@@ -7,7 +7,8 @@ from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
-    popen_launch_server, CustomTestCase,
+    CustomTestCase,
+    popen_launch_server,
 )
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
