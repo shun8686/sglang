@@ -345,7 +345,7 @@ class TestSamplingDefaultsOpenAI(BaseSamplingTest):
             self.assertEqual(
                 sampling_params[key],
                 expected_value,
-                f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}"
+                f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}",
             )
         logger.info("✅ openai mode manual parameters assertion passed!")
 
