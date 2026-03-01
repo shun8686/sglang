@@ -385,7 +385,7 @@ class NginxConfigManager:
                 lines = f.readlines()
 
             lines.insert(47, "        }\n")
-            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "\;\n")
+            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
             lines.insert(47, "        location " + f"{location}" + " {\n")
             lines.insert(47, "\n")
 

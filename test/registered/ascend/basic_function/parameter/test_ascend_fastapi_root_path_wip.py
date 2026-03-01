@@ -46,7 +46,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
-        # cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
 
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -386,7 +386,7 @@ class NginxConfigManager:
                 lines = f.readlines()
 
             lines.insert(47, "        }\n")
-            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "\;\n")
+            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
             lines.insert(47, "        location " + f"{location}" + " {\n")
             lines.insert(47, "\n")
 
