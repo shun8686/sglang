@@ -384,10 +384,13 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            lines.insert(47, "        }\n")
-            lines.insert(47, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
             lines.insert(47, "        location " + f"{location}" + " {\n")
-            lines.insert(47, "\n")
+            lines.insert(48, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
+            lines.insert(49, "            proxy_set_header Host $host;\n")
+            lines.insert(50, "            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n")
+            lines.insert(51, "            proxy_set_header X-Forwarded-Proto $scheme;\n")
+            lines.insert(52, "        }\n")
+            lines.insert(53, "\n")
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
