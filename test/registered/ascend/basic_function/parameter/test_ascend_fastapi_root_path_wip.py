@@ -18,7 +18,8 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
-MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
+# MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
+MODEL_PATH = "/home/weights/Qwen3-0.6B"
 USR_LOCAL_PATH = "/usr/local"
 NGINX_VERSION = "1.24.0"
 PCRE_VERSION = "8.37"
