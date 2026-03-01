@@ -46,7 +46,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
 
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+        # cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
 
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -78,7 +78,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.err_log_file.close()
         os.remove("./warmup_out_log.txt")
         os.remove("./warmup_err_log.txt")
-        cls.nginx_manager.clean_environment()
+        # cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
         response = self.send_request(f"{self.base_url}/generate")
