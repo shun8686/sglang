@@ -15,7 +15,6 @@ from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     wait_server_ready,
 )
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
@@ -65,7 +64,7 @@ GLM_4_6_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_
 
 ROUND_ROBIN = "round_robin"
 
-LOCAL_TIMEOUT = 3600
+DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH = 3600
 MAX_SERVER_KEEP_ALIVE_TIME = 3600
 
 # Timeouts and delays
@@ -253,7 +252,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     dataset_name = None
     dataset_path = None
     other_args = None
-    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
     request_rate = None
     max_concurrency = 8
