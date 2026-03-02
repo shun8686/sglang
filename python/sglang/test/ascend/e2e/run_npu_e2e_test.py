@@ -3,11 +3,11 @@ import logging
 import os
 import random
 import re
+import select
 import string
 import subprocess
 import time
 import uuid
-import select
 
 import psutil
 import yaml
@@ -320,8 +320,9 @@ def monitor_pod_logs(
             universal_newlines=True,
             bufsize=1,
         )
-        
+
         import fcntl
+
         fcntl.fcntl(process.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
 
         logger.info(f"Starting to monitor logs for Pod: {pod_name}")
@@ -344,7 +345,9 @@ def monitor_pod_logs(
             if not check_pods_running(
                 namespace=namespace, pod_name_key_str=kube_job_prefix_name
             ):
-                logger.error(f"Some pods are not running properly. Please check the sglang logs on these pods. Exiting...")
+                logger.error(
+                    f"Some pods are not running properly. Please check the sglang logs on these pods. Exiting..."
+                )
                 raise Exception("Some pods are not running.")
 
             # Read log line if process is still running
@@ -358,13 +361,17 @@ def monitor_pod_logs(
                             line = line.rstrip("\n")
                             print(line)
                             # Check if current line matches expected pattern
-                            if match_state < len(patterns) and patterns[match_state].match(line):
+                            if match_state < len(patterns) and patterns[
+                                match_state
+                            ].match(line):
                                 match_state += 1
                                 if match_state == len(patterns):
                                     matched = True
                                     if pattern_ok.match(line):
                                         is_success = True
-                                    logger.info("\nDetected complete test completion pattern!")
+                                    logger.info(
+                                        "\nDetected complete test completion pattern!"
+                                    )
                             else:
                                 match_state = 0
                                 if patterns[0].match(line):
