@@ -47,6 +47,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
 
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
+        cls.host = cls.url.hostname
+        print(cls.host)
         cls.nginx_port = "80"
         cls.nginx_manager.apply_config(cls.nginx_port, cls.fastapi_root_path, cls.base_url)
 
@@ -81,7 +83,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         # cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        response = self.send_request(f"{self.base_url}/generate")
+        response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
