@@ -223,26 +223,6 @@ def check_pods_ready(namespace, pod_name_key_str, timeout=300):
     return False
 
 
-def check_pods_running(namespace, pod_name_key_str):
-    """check pods are running"""
-    pods = core_api.list_namespaced_pod(namespace=namespace)
-    if len(pods.items) == 0:
-        logger.warning(f"No pods found in the namespace {namespace}")
-        return False
-
-    for pod in pods.items:
-        pod_name = pod.metadata.name
-        if pod_name_key_str not in pod_name:
-            continue
-        status = pod.status
-        phase = status.phase
-        if phase != "Running":
-            logger.error(f"Pod {pod_name} is not running, status: {phase}")
-            return False
-
-    return True
-
-
 def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
     """Create a k8s configmap or update it if already exists"""
     cm_metadata = client.V1ObjectMeta(name=cm_name, namespace=namespace)
@@ -322,52 +302,21 @@ def monitor_pod_logs(
 
         logger.info(f"Starting to monitor logs for Pod: {pod_name}")
         match_state = 0
-        matched = False
         is_success = False
 
-        start_time = time.time()
-        # Process output
-        while not matched:
-            if time.time() - start_time > timeout:
-                raise Exception(
-                    f"Timeout exceeded, the thread is {timeout} seconds long."
-                )
+        # Use two threads: one for reading logs, one for checking pod status
+        import threading
 
-            if not check_parent_process():
-                logger.error(f"Parent process exited. Exiting...")
-                raise Exception("Parent process exited.")
+        # Shared variables
+        match_event = threading.Event()
+        pod_error_event = threading.Event()
 
-            if not check_pods_running(
-                namespace=namespace, pod_name_key_str=kube_job_prefix_name
-            ):
-                logger.error(
-                    f"Some pods are not running properly. Please check the sglang logs on these pods. Exiting..."
-                )
-                raise Exception("Some pods are not running.")
+        def read_logs():
+            """Thread function to read logs continuously"""
+            nonlocal is_success, match_state
 
-            # Read log line with timeout
-            import threading
-
-            # Function to read a line with timeout
-            def read_line_with_timeout(process, timeout=0.5):
-                line = [None]
-
-                def read_line():
-                    try:
-                        line[0] = process.stdout.readline()
-                    except:
-                        line[0] = None
-
-                thread = threading.Thread(target=read_line)
-                thread.daemon = True
-                thread.start()
-                thread.join(timeout)
-
-                return line[0]
-
-            # Read log line if process is still running
-            if process.poll() is None:
-                line = read_line_with_timeout(process)
+            while process.poll() is None and not match_event.is_set():
+                line = process.stdout.readline()
                 if line:
                     line = line.rstrip("\n")
                     print(line)
@@ -377,27 +326,89 @@ def monitor_pod_logs(
                     ):
                         match_state += 1
                         if match_state == len(patterns):
-                            matched = True
                             if pattern_ok.match(line):
                                 is_success = True
                             logger.info("\nDetected complete test completion pattern!")
+                            match_event.set()
                     else:
                         match_state = 0
                         if patterns[0].match(line):
                             match_state = 1
-            else:
-                # Process has exited, check if we have matched the pattern
-                if not matched:
-                    remaining_output, stderr_output = process.communicate()
-                    if remaining_output:
-                        logger.info(remaining_output)
-                    if stderr_output:
-                        raise Exception(f"kubectl command error: {stderr_output}")
-                    # Continue checking pod status until timeout or pattern matched
-                    time.sleep(0.5)
+
+            # Read remaining output after process exits
+            if not match_event.is_set():
+                remaining_output, stderr_output = process.communicate()
+                if remaining_output:
+                    print(remaining_output)
+                if stderr_output:
+                    logger.error(f"kubectl command error: {stderr_output}")
+                    pod_error_event.set()
+
+        def check_pods_running(namespace, pod_name_key_str):
+            """check pods are running"""
+            pods = core_api.list_namespaced_pod(namespace=namespace)
+            if len(pods.items) == 0:
+                logger.warning(f"No pods found in the namespace {namespace}")
+                return False
+
+            for pod in pods.items:
+                pod_name = pod.metadata.name
+                if pod_name_key_str not in pod_name:
+                    continue
+                status = pod.status
+                phase = status.phase
+                if phase != "Running":
+                    logger.error(f"Pod {pod_name} is not running, status: {phase}")
+                    return False
+
+            return True
+
+        def check_pod_status():
+            """Thread function to check pod status periodically"""
+            start_time = time.time()
+            while not match_event.is_set() and not pod_error_event.is_set():
+                if time.time() - start_time > timeout:
+                    pod_error_event.set()
+                    break
+
+                if not check_parent_process():
+                    logger.error(f"Parent process exited. Exiting...")
+                    pod_error_event.set()
+                    break
+
+                if not check_pods_running(
+                    namespace=namespace, pod_name_key_str=kube_job_prefix_name
+                ):
+                    logger.error(
+                        f"Some pods are not running properly. Please check the sglang logs on these pods. Exiting..."
+                    )
+                    pod_error_event.set()
+                    break
+
+                # Sleep for a short time before next check
+                time.sleep(0.5)
+
+        # Start threads
+        log_thread = threading.Thread(target=read_logs)
+        status_thread = threading.Thread(target=check_pod_status)
+
+        log_thread.daemon = True
+        status_thread.daemon = True
+
+        log_thread.start()
+        status_thread.start()
+
+        # Wait for either match event or error event
+        start_time = time.time()
+        while not match_event.is_set() and not pod_error_event.is_set():
+            if time.time() - start_time > timeout:
+                raise Exception(
+                    f"Timeout exceeded, the thread is {timeout} seconds long."
+                )
+            time.sleep(0.1)
 
         # Check if pattern was successfully matched
-        if not matched:
+        if not match_event.is_set():
             if process.poll() is not None:
                 remaining_output, stderr_output = process.communicate()
                 if remaining_output:
