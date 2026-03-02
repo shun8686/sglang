@@ -54,11 +54,6 @@ class TestNPUHierarchicalCache(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def flush_cache(self):
-        # Flush device cache
-        time.sleep(2)
-        requests.post(f"{DEFAULT_URL_FOR_TEST}/flush_cache")
-
     def test_hierarchical_cache_reused_long_identical(self):
         """Long identical texts should reuse HierarchicalCache"""
         # Ultra-long repeated prompt (meets page size requirement)
@@ -79,7 +74,6 @@ class TestNPUHierarchicalCache(CustomTestCase):
             if i == 0:
                 # First request: no cache
                 self.assertEqual(cached_tokens, 0)
-                self.flush_cache()
             else:
                 # Second request: cache reused
                 self.assertGreater(cached_tokens, 0)
@@ -99,12 +93,10 @@ class TestNPUHierarchicalCache(CustomTestCase):
                     },
                 },
             )
-            if i == 0:
-                self.flush_cache()
-        self.assertEqual(response.status_code, 200)
-        # No cache reuse for both requests
-        cached_tokens = int(response.json()["meta_info"]["cached_tokens"])
-        self.assertEqual(cached_tokens, 0)
+            self.assertEqual(response.status_code, 200)
+            # No cache reuse for both requests
+            cached_tokens = int(response.json()["meta_info"]["cached_tokens"])
+            self.assertEqual(cached_tokens, 0)
 
     def test_hierarchical_cache_not_reused_different_long(self):
         """Different long texts should NOT reuse HierarchicalCache (text uniqueness)"""
@@ -126,12 +118,10 @@ class TestNPUHierarchicalCache(CustomTestCase):
                     },
                 },
             )
-            if text == texts[0]:
-                self.flush_cache()
-        self.assertEqual(response.status_code, 200)
-        # No cache reuse for different text requests
-        cached_tokens = int(response.json()["meta_info"]["cached_tokens"])
-        self.assertEqual(cached_tokens, 0)
+            self.assertEqual(response.status_code, 200)
+            # No cache reuse for different text requests
+            cached_tokens = int(response.json()["meta_info"]["cached_tokens"])
+            self.assertEqual(cached_tokens, 0)
 
 
 if __name__ == "__main__":

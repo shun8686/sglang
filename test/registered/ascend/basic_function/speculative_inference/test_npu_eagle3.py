@@ -46,7 +46,7 @@ class TestNpuEagle3(CustomTestCase):
             "EAGLE3",
             "--speculative-draft-model-path",
             # QWEN3_8B_EAGLE3_WEIGHTS_PATH,
-            "Qwen3-8B_eagle3",
+            "AngelSlim/Qwen3-8B_eagle3",
             "--speculative-num-steps",
             "4",
             "--speculative-eagle-topk",
