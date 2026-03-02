@@ -7,6 +7,7 @@ import string
 import subprocess
 import time
 import uuid
+import select
 
 import psutil
 import yaml
@@ -319,6 +320,9 @@ def monitor_pod_logs(
             universal_newlines=True,
             bufsize=1,
         )
+        
+        import fcntl
+        fcntl.fcntl(process.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
 
         logger.info(f"Starting to monitor logs for Pod: {pod_name}")
         match_state = 0
@@ -327,7 +331,7 @@ def monitor_pod_logs(
 
         start_time = time.time()
         # Process output
-        while process.poll() is None and not matched:
+        while not matched:
             if time.time() - start_time > timeout:
                 raise Exception(
                     f"Timeout exceeded, the thread is {timeout} seconds long."
@@ -340,27 +344,44 @@ def monitor_pod_logs(
             if not check_pods_running(
                 namespace=namespace, pod_name_key_str=kube_job_prefix_name
             ):
-                logger.error(f"Some pods are not running. Exiting...")
+                logger.error(f"Some pods are not running properly. Please check the sglang logs on these pods. Exiting...")
                 raise Exception("Some pods are not running.")
 
-            line = process.stdout.readline()
-            if not line:
-                time.sleep(0.1)
-                continue
-            line = line.rstrip("\n")
-            print(line)
-            # Check if current line matches expected pattern
-            if match_state < len(patterns) and patterns[match_state].match(line):
-                match_state += 1
-                if match_state == len(patterns):
-                    matched = True
-                    if pattern_ok.match(line):
-                        is_success = True
-                    logger.info("\nDetected complete test completion pattern!")
+            # Read log line if process is still running
+            if process.poll() is None:
+                # Use select to check if there's data available without blocking
+                ready, _, _ = select.select([process.stdout], [], [], 0.5)
+                if ready:
+                    try:
+                        line = process.stdout.readline()
+                        if line:
+                            line = line.rstrip("\n")
+                            print(line)
+                            # Check if current line matches expected pattern
+                            if match_state < len(patterns) and patterns[match_state].match(line):
+                                match_state += 1
+                                if match_state == len(patterns):
+                                    matched = True
+                                    if pattern_ok.match(line):
+                                        is_success = True
+                                    logger.info("\nDetected complete test completion pattern!")
+                            else:
+                                match_state = 0
+                                if patterns[0].match(line):
+                                    match_state = 1
+                    except IOError:
+                        # No data available
+                        pass
             else:
-                match_state = 0
-                if patterns[0].match(line):
-                    match_state = 1
+                # Process has exited, check if we have matched the pattern
+                if not matched:
+                    remaining_output, stderr_output = process.communicate()
+                    if remaining_output:
+                        logger.info(remaining_output)
+                    if stderr_output:
+                        raise Exception(f"kubectl command error: {stderr_output}")
+                    # Continue checking pod status until timeout or pattern matched
+                    time.sleep(0.5)
 
         # Check if pattern was successfully matched
         if not matched:
