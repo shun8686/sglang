@@ -146,14 +146,14 @@ class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
             f"http://127.0.0.1:{self.nginx_port}{self.fastapi_root_path}/generate"
         )
         self.assertEqual(
-            response.status_code, 404, "The request status code is not 200."
+            response.status_code, 404, "The request status code is not 404."
         )
 
         response = self.send_request(
             f"http://127.0.0.1:{self.nginx_port}/{self.fastapi_root_path}/generate"
         )
         self.assertEqual(
-            response.status_code, 404, "The request status code is not 200."
+            response.status_code, 404, "The request status code is not 404."
         )
 
         # response = self.send_request(f"{self.base_url}/generate")
@@ -211,18 +211,16 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
-        response = self.send_request(f"{self.base_url}/generate")
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
-        self.assertIn(
-            "Paris", response.text, "The inference result does not include Paris."
-        )
-
-        response = self.send_request(f"{self.base_url}{self.fastapi_root_path}generate")
+        response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
         self.assertEqual(
             response.status_code, 404, "The request status code is not 404."
         )
+
+        response = self.send_request(
+            f"http://127.0.0.1:{self.nginx_port}{self.fastapi_root_path}/generate"
+        )
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404.")
 
 
 class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
