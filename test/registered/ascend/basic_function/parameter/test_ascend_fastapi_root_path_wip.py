@@ -103,7 +103,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         # self.assertIn(f"POST {self.fastapi_root_path}/generate HTTP/1.1", content)
 
         response = self.send_request(
-            f"{self.base_url}{self.fastapi_root_path}/generate"
+            f"http://127.0.0.1:{self.nginx_port}{self.fastapi_root_path}/generate"
         )
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
