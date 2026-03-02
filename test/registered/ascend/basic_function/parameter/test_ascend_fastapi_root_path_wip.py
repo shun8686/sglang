@@ -78,7 +78,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.err_log_file.close()
         # os.remove("./warmup_out_log.txt")
         # os.remove("./warmup_err_log.txt")
-        # cls.nginx_manager.clean_environment()
+        cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
         response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
