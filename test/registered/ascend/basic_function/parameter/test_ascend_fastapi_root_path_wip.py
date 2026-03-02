@@ -18,7 +18,8 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
-MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
+# MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
+MODEL_PATH = "/home/weights/Qwen3-0.6B"
 USR_LOCAL_PATH = "/usr/local"
 NGINX_VERSION = "1.24.0"
 PCRE_VERSION = "8.37"
@@ -77,7 +78,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.err_log_file.close()
         os.remove("./warmup_out_log.txt")
         os.remove("./warmup_err_log.txt")
-        cls.nginx_manager.clean_environment()
+        # cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
         response = self.send_request(f"{self.base_url}/generate")
@@ -383,13 +384,17 @@ class NginxConfigManager:
             with open(self.nginx_conf_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
 
-            lines.insert(47, "        location " + f"{location}" + " {\n")
+            lines.insert(47, "        location " + f"{location}" + "/ {\n")
             lines.insert(48, "            proxy_pass " + f"{proxy_pass}" + "/;\n")
             lines.insert(49, "            proxy_set_header Host $host;\n")
             lines.insert(50, "            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;\n")
             lines.insert(51, "            proxy_set_header X-Forwarded-Proto $scheme;\n")
             lines.insert(52, "        }\n")
             lines.insert(53, "\n")
+            lines.insert(54, "        location " + f"{location}" + " {\n")
+            lines.insert(55, "            return 301 " + f"{proxy_pass}" + "/;\n")
+            lines.insert(56, "        }\n")
+            lines.insert(57, "\n")
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
@@ -411,6 +416,11 @@ class NginxConfigManager:
             print(f"{result.stdout=}")
             print(f"{result.stderr=}")
 
+            if "nginx" in result.stdout:
+                subprocess.run(
+                    [self.nginx_bin_path, "-s", "stop"],
+                )
+
             subprocess.run(
                 [self.nginx_bin_path],
             )
@@ -429,4 +439,13 @@ class NginxConfigManager:
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # unittest.main()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
