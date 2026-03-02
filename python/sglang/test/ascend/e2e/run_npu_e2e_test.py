@@ -31,10 +31,14 @@ rbac_api = client.RbacAuthorizationV1Api()
 LOCAL_TIMEOUT = 10800
 
 script_path = os.path.dirname(os.path.abspath(__file__))
+
+KUBE_JOB_SINGLE = "single"
+KUBE_JOB_MULTI_PD_MIX = "multi-pd-mix"
+KUBE_JOB_MULTI_PD_SEPARATION = "multi-pd-separation"
 KUBE_YAML_TEMPLATE = {
-    "single": f"{script_path}/k8s_single.yaml.jinja2",
-    "multi-pd-mix": f"{script_path}/k8s_multi_pd_mix.yaml.jinja2",
-    "multi-pd-separation": f"{script_path}/k8s_multi_pd_separation.yaml.jinja2",
+    KUBE_JOB_SINGLE: f"{script_path}/k8s_single.yaml.jinja2",
+    KUBE_JOB_MULTI_PD_MIX: f"{script_path}/k8s_multi_pd_mix.yaml.jinja2",
+    KUBE_JOB_MULTI_PD_SEPARATION: f"{script_path}/k8s_multi_pd_separation.yaml.jinja2",
 }
 
 
@@ -219,6 +223,26 @@ def check_pods_ready(namespace, pod_name_key_str, timeout=300):
     return False
 
 
+def check_pods_running(namespace, pod_name_key_str):
+    """check pods are running"""
+    pods = core_api.list_namespaced_pod(namespace=namespace)
+    if len(pods.items) == 0:
+        logger.warning(f"No pods found in the namespace {namespace}")
+        return False
+
+    for pod in pods.items:
+        pod_name = pod.metadata.name
+        if pod_name_key_str not in pod_name:
+            continue
+        status = pod.status
+        phase = status.phase
+        if phase != "Running":
+            logger.error(f"Pod {pod_name} is not running, status: {phase}")
+            return False
+
+    return True
+
+
 def create_or_update_configmap(cm_name: str, data: dict, namespace: str):
     """Create a k8s configmap or update it if already exists"""
     cm_metadata = client.V1ObjectMeta(name=cm_name, namespace=namespace)
@@ -261,8 +285,17 @@ def prepare_cm_data(namespace, pod_string):
     return data
 
 
-def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
+def monitor_pod_logs(
+    kube_job_type, kube_job_prefix_name, namespace, timeout=LOCAL_TIMEOUT
+):
     """Monitor the logs of the specified pod until the special pattern is matched or reaches its timeout."""
+    monitor_pod_name = {
+        KUBE_JOB_SINGLE: f"{kube_job_prefix_name}-pod-0",
+        KUBE_JOB_MULTI_PD_MIX: f"{kube_job_prefix_name}-sglang-node-0",
+        KUBE_JOB_MULTI_PD_SEPARATION: f"{kube_job_prefix_name}-sglang-router-0",
+    }
+    pod_name = monitor_pod_name.get(kube_job_type)
+
     # Build kubectl command
     cmd = ["kubectl", "logs", "-f", "-n", namespace, pod_name]
 
@@ -301,7 +334,14 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
                 )
 
             if not check_parent_process():
+                logger.error(f"Parent process exited. Exiting...")
                 raise Exception("Parent process exited.")
+
+            if not check_pods_running(
+                namespace=namespace, pod_name_key_str=kube_job_prefix_name
+            ):
+                logger.error(f"Some pods are not running. Exiting...")
+                raise Exception("Some pods are not running.")
 
             line = process.stdout.readline()
             if not line:
@@ -352,8 +392,8 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
 def run_npu_e2e_test_case(
     docker_image_url: str,
     kube_name_space: str,
-    kube_job_type: str,  # multi-pd-separation、multi-pd-mix、single
-    kube_job_name_prefix: str,  # kube job prefix-name
+    kube_job_type: str,
+    kube_job_name_prefix: str,
     resource_info: dict,
     sglang_source_relative_path: str,
     metrics_data_file: str,
@@ -383,9 +423,9 @@ def run_npu_e2e_test_case(
     final_kube_job_name = f"{kube_job_name_prefix}-{random_str}"
 
     kube_yaml_file_dict = {
-        "single": f"k8s_single_{random_str}.yaml",
-        "multi-pd-mix": f"k8s_multi_pd_mix_{random_str}.yaml",
-        "multi-pd-separation": f"k8s_multi_pd_separation_{random_str}.yaml",
+        KUBE_JOB_SINGLE: f"k8s_single_{random_str}.yaml",
+        KUBE_JOB_MULTI_PD_MIX: f"k8s_multi_pd_mix_{random_str}.yaml",
+        KUBE_JOB_MULTI_PD_SEPARATION: f"k8s_multi_pd_separation_{random_str}.yaml",
     }
     kube_yaml_file = kube_yaml_file_dict.get(kube_job_type)
 
@@ -395,7 +435,7 @@ def run_npu_e2e_test_case(
             f"KUBE_JOB_TYPE:{kube_job_type}, KUBE_YAML_FILE:{kube_yaml_file}"
         )
 
-        if kube_job_type == "single":
+        if kube_job_type == KUBE_JOB_SINGLE:
             k8s_context = {
                 "image": docker_image_url,
                 "name_space": kube_name_space,
@@ -414,7 +454,7 @@ def run_npu_e2e_test_case(
                 output_yaml=kube_yaml_file,
                 pod_context=k8s_context,
             )
-        elif kube_job_type == "multi-pd-mix":
+        elif kube_job_type == KUBE_JOB_MULTI_PD_MIX:
             k8s_context = {
                 "image": docker_image_url,
                 "name_space": kube_name_space,
@@ -434,7 +474,7 @@ def run_npu_e2e_test_case(
                 output_yaml=kube_yaml_file,
                 pod_context=k8s_context,
             )
-        elif kube_job_type == "multi-pd-separation":
+        elif kube_job_type == KUBE_JOB_MULTI_PD_SEPARATION:
             k8s_context = {
                 "image": docker_image_url,
                 "name_space": kube_name_space,
@@ -479,13 +519,8 @@ def run_npu_e2e_test_case(
         else:
             logger.info("Pod not ready, maybe not enough resource")
 
-        monitor_pod_name = {
-            "single": f"{final_kube_job_name}-pod-0",
-            "multi-pd-mix": f"{final_kube_job_name}-sglang-node-0",
-            "multi-pd-separation": f"{final_kube_job_name}-sglang-router-0",
-        }
         monitor_pod_logs(
-            monitor_pod_name.get(kube_job_type), kube_name_space, LOCAL_TIMEOUT
+            kube_job_type, final_kube_job_name, kube_name_space, LOCAL_TIMEOUT
         )
     finally:
         if os.path.exists(kube_yaml_file):
@@ -589,9 +624,9 @@ if __name__ == "__main__":
     parser.add_argument(
         "--kube-job-type",
         type=str,
-        choices=["single", "multi-pd-mix", "multi-pd-separation"],
+        choices=[KUBE_JOB_SINGLE, KUBE_JOB_MULTI_PD_MIX, KUBE_JOB_MULTI_PD_SEPARATION],
         required=True,
-        help="K8s job type [single, multi-pd-mix, multi-pd-separation]",
+        help=f"K8s job type [{KUBE_JOB_SINGLE}, {KUBE_JOB_MULTI_PD_MIX}, {KUBE_JOB_MULTI_PD_SEPARATION}]",
     )
 
     parser.add_argument(
@@ -629,9 +664,9 @@ if __name__ == "__main__":
     kube_job_name_prefix = args.kube_job_name_prefix
 
     resource_info_dict = {
-        "single": {"npu_size": npu_size},
-        "multi-pd-mix": {"node_size": node_size},
-        "multi-pd-separation": {
+        KUBE_JOB_SINGLE: {"npu_size": npu_size},
+        KUBE_JOB_MULTI_PD_MIX: {"node_size": node_size},
+        KUBE_JOB_MULTI_PD_SEPARATION: {
             "prefill_size": prefill_size,
             "decode_size": decode_size,
             "router_size": router_size,
