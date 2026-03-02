@@ -7,14 +7,11 @@ import torch
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     popen_launch_server, CustomTestCase,
 )
-
-register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 TP_SIZE = 4
 PP_SIZE = 2
@@ -56,6 +53,8 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     @classmethod
     def setUpClass(cls):
         """Set up the test class by launching the server with the specified configuration."""
+        cls._cleanup_directories()
+
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -68,7 +67,16 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     def tearDownClass(cls):
         """Clean up after the test class by killing the server process and removing generated directories."""
         kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
+        cls._cleanup_directories()
+
+    @classmethod
+    def _cleanup_directories(cls):
+        """Remove test directories with retry mechanism."""
+        for _ in range(3):
+            run_command("rm -rf ./TP*_PP*")
+            result = run_command("ls -d ./TP*_PP* 2>/dev/null || echo ''")
+            if not result.strip():
+                break
 
     def sending_request(self):
         """Send a request to the server and count the number of generated tensor dump directories."""
