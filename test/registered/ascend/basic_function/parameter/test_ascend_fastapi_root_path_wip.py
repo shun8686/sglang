@@ -140,23 +140,23 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
             other_args=cls.common_args,
         )
 
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        cls.nginx_manager.clean_environment()
-
-    def test_fastapi_root_path(self):
-        response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
-        self.assertEqual(
-            response.status_code, 404, "The request status code is not 404."
-        )
-
-        response = self.send_request(
-            f"http://127.0.0.1:{self.nginx_port}{self.fastapi_root_path}/generate"
-        )
-        self.assertEqual(
-            response.status_code, 200, "The request status code is not 200."
-        )
+    # @classmethod
+    # def tearDownClass(cls):
+    #     kill_process_tree(cls.process.pid)
+    #     cls.nginx_manager.clean_environment()
+    #
+    # def test_fastapi_root_path(self):
+    #     response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
+    #     self.assertEqual(
+    #         response.status_code, 404, "The request status code is not 404."
+    #     )
+    #
+    #     response = self.send_request(
+    #         f"http://127.0.0.1:{self.nginx_port}{self.fastapi_root_path}/generate"
+    #     )
+    #     self.assertEqual(
+    #         response.status_code, 200, "The request status code is not 200."
+    #     )
 
 
 class TestAscendFastapiRootPathWithoutEnd(TestAscendFastapiRootPath):
@@ -418,7 +418,7 @@ if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
     suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
 
