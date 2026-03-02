@@ -53,6 +53,8 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     @classmethod
     def setUpClass(cls):
         """Set up the test class by launching the server with the specified configuration."""
+        cls._cleanup_directories()
+
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -65,7 +67,16 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     def tearDownClass(cls):
         """Clean up after the test class by killing the server process and removing generated directories."""
         kill_process_tree(cls.process.pid)
-        run_command("rm -rf ./TP*_PP*")
+        cls._cleanup_directories()
+
+    @classmethod
+    def _cleanup_directories(cls):
+        """Remove test directories with retry mechanism."""
+        for _ in range(3):
+            run_command("rm -rf ./TP*_PP*")
+            result = run_command("ls -d ./TP*_PP* 2>/dev/null || echo ''")
+            if not result.strip():
+                break
 
     def sending_request(self):
         """Send a request to the server and count the number of generated tensor dump directories."""
