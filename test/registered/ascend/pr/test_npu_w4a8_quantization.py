@@ -11,7 +11,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from test.ci.ci_register import register_npu_ci
+from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
