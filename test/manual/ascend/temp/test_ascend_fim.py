@@ -2,13 +2,12 @@ import unittest
 
 import requests
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     NIC_NAME,
     TestAscendMultiNodePdSepTestCaseBase,
     check_role,
 )
 
-# from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
 DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = (
     "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8"
 )

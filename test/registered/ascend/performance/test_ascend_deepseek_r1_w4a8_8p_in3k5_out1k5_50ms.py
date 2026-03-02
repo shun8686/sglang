@@ -1,6 +1,6 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_performance_utils import (
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )

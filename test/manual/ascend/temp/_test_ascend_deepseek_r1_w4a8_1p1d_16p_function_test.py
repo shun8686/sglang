@@ -1,7 +1,7 @@
 import unittest
 from types import SimpleNamespace
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     NIC_NAME,
     TestAscendMultiNodePdSepTestCaseBase,
     check_role,

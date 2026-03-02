@@ -60,7 +60,7 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               bash /root/sglang/python/sglang/test/ascend/e2e/run_ascend_testcase.sh {{ test_case }}
+               bash /root/sglang/python/sglang/test/ascend/e2e/run_npu_testcase.sh {{ test_case }}
           resources:
             requests:
               huawei.com/ascend-1980: 16
@@ -140,7 +140,7 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               bash /root/sglang/python/sglang/test/ascend/e2e/run_ascend_testcase.sh {{ test_case }}
+               bash /root/sglang/python/sglang/test/ascend/e2e/run_npu_testcase.sh {{ test_case }}
           resources:
             requests:
               huawei.com/ascend-1980: 16
@@ -222,7 +222,7 @@ spec:
           command: ["/bin/bash", "-c"]
           args:
             - |
-               bash /root/sglang/python/sglang/test/ascend/e2e/run_ascend_testcase.sh {{ test_case }}
+               bash /root/sglang/python/sglang/test/ascend/e2e/run_npu_testcase.sh {{ test_case }}
           resources:
             requests:
               cpu: "4"

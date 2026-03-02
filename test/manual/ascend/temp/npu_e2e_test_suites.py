@@ -5,7 +5,7 @@ import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from typing import Any, Dict, List
 
-from sglang.test.ascend.e2e.run_ascend_ci import run_ascend_e2e_test_case
+from sglang.test.ascend.e2e.run_npu_e2e_test import run_npu_e2e_test_case
 
 logging.basicConfig(
     level=logging.INFO,
@@ -32,7 +32,7 @@ def concurrent_run_test_cases(
     test_cases_params: List[Dict[str, Any]], concurrency: int = 3
 ) -> List[Dict[str, Any]]:
     """
-    Execute multiple run_ascend_e2e_test_case test cases concurrently
+    Execute multiple run_npu_e2e_test_case test cases concurrently
     :param test_cases_params: List of test case parameters (each element is a dict containing all function parameters)
     :param concurrency: Concurrency level (number of test cases running simultaneously)
     :return: List of execution results for all test cases
@@ -46,7 +46,7 @@ def concurrent_run_test_cases(
         future_to_params = {}
         for idx, params in enumerate(test_cases_params):
             # executor.submit supports keyword argument passing, **params unpacks dict to function parameters
-            future = executor.submit(run_ascend_e2e_test_case, **params)
+            future = executor.submit(run_npu_e2e_test_case, **params)
             future_to_params[future] = params
 
         # 2. Iterate over completed tasks and collect results (in completion order)

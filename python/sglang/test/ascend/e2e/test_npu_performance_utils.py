@@ -6,7 +6,7 @@ import time
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import (
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     SERVICE_PORT,
     check_role,
     launch_pd_mix_node,

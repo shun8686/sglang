@@ -155,12 +155,25 @@ def delete_pod(yaml_file, namespace):
             raise f"delete resource {kind} error: {e}"
 
 
+def check_parent_process():
+    """Check parent process is alive or not."""
+    try:
+        parent_pid = os.getppid()
+        psutil.Process(parent_pid)
+        return True
+    except psutil.NoSuchProcess:
+        return False
+
+
 def check_pods_ready(namespace, pod_name_key_str, timeout=300):
     """Waiting for all k8s pods are ready"""
     logger.info("Waiting all pods to running...")
     start_time = time.time()
 
     while time.time() - start_time < timeout:
+        if not check_parent_process():
+            raise Exception("Parent process exited.")
+
         pods = core_api.list_namespaced_pod(namespace=namespace)
 
         if len(pods.items) == 0:
@@ -246,16 +259,6 @@ def prepare_cm_data(namespace, pod_string):
             pod_ip = pod.status.pod_ip
             data[pod_name] = pod_ip
     return data
-
-
-def check_parent_process():
-    """Check parent process is alive or not."""
-    try:
-        parent_pid = os.getppid()
-        psutil.Process(parent_pid)
-        return True
-    except psutil.NoSuchProcess:
-        return False
 
 
 def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
@@ -346,7 +349,7 @@ def monitor_pod_logs(pod_name, namespace, timeout=LOCAL_TIMEOUT):
                 process.kill()
 
 
-def run_ascend_e2e_test_case(
+def run_npu_e2e_test_case(
     docker_image_url: str,
     kube_name_space: str,
     kube_job_type: str,  # multi-pd-separation、multi-pd-mix、single
@@ -635,7 +638,7 @@ if __name__ == "__main__":
         },
     }
 
-    run_ascend_e2e_test_case(
+    run_npu_e2e_test_case(
         docker_image_url=docker_image_url,
         kube_name_space=kube_name_space,
         kube_job_type=kube_job_type,

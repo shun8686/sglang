@@ -1,7 +1,7 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_multi_node_utils import NIC_NAME
-from sglang.test.ascend.e2e.test_ascend_performance_utils import (
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
     DEEPSEEK_R1_W8A8_MODEL_PATH,
     ROUND_ROBIN,
     TestAscendPerfMultiNodePdSepTestCaseBase,

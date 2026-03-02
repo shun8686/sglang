@@ -1,6 +1,6 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_ascend_performance_utils import (
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_30B_A3B_W8A8_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,

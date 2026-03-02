@@ -140,7 +140,7 @@ jobs:
           fi
 
           cd ${ASCEND_E2E_TEST_CONFIG_PATH}
-          CMD="python3 -u run_ascend_ci.py \
+          CMD="python3 -u run_npu_e2e_test.py \
             --env ci \
             --image ${{ inputs.image }} \
             --sglang-source-relative-path ${sglang_source_relative_path} \
