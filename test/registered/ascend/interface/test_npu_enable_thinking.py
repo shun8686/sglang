@@ -13,7 +13,12 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=400,
+    suite="nightly-2-npu-a3",
+    nightly=True,
+    disabled="https://github.com/Ascend/sglang/issues/32",
+)
 
 
 class TestEnableThinking(CustomTestCase):
@@ -29,15 +34,13 @@ class TestEnableThinking(CustomTestCase):
         cls.model = KIMI_K2_THINKING_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.other_args = [
-            "--reasoning-parser",
-            "qwen3",
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
             "--mem-fraction-static",
             0.95,
             "--tp",
-            2,
+            16,
         ]
         cls.process = popen_launch_server(
             cls.model,

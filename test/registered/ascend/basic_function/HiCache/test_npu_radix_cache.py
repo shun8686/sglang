@@ -61,7 +61,7 @@ class TestNPURadixCache(CustomTestCase):
     def test_radix_cache_reused_long_identical(self):
         """Long identical texts should reuse RadixCache"""
         # Ultra-long repeated prompt (meets page size requirement)
-        long_text = "What is The capital of France?" * 18
+        long_text = "What is The capital of France?" * 36
         for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
