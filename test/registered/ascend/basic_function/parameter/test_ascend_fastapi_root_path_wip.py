@@ -76,8 +76,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
         kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
         cls.err_log_file.close()
-        os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
+        # os.remove("./warmup_out_log.txt")
+        # os.remove("./warmup_err_log.txt")
         # cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
@@ -449,8 +449,8 @@ if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathHasEnd))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
