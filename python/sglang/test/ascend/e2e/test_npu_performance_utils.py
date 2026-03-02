@@ -565,10 +565,13 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
         )
         cls.sglang_thread.daemon = True
         cls.sglang_thread.start()
-        logger.info(
-            f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds"
-        )
-        time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
+        while True:
+            if cls.sglang_thread.is_alive():
+                time.sleep(30)
+            else:
+                raise Exception(
+                    f"Sglang thread is not alive on node {cls.host} {cls.hostname}"
+                )
 
     @check_role(allowed_roles=["router"])
     def run_throughput(self, run_cycles=2):
