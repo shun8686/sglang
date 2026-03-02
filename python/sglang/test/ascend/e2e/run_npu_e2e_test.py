@@ -3,7 +3,6 @@ import logging
 import os
 import random
 import re
-import select
 import string
 import subprocess
 import time
@@ -321,10 +320,6 @@ def monitor_pod_logs(
             bufsize=1,
         )
 
-        import fcntl
-
-        fcntl.fcntl(process.stdout, fcntl.F_SETFL, os.O_NONBLOCK)
-
         logger.info(f"Starting to monitor logs for Pod: {pod_name}")
         match_state = 0
         matched = False
@@ -350,35 +345,46 @@ def monitor_pod_logs(
                 )
                 raise Exception("Some pods are not running.")
 
+            # Read log line with timeout
+            import threading
+
+            # Function to read a line with timeout
+            def read_line_with_timeout(process, timeout=0.5):
+                line = [None]
+
+                def read_line():
+                    try:
+                        line[0] = process.stdout.readline()
+                    except:
+                        line[0] = None
+
+                thread = threading.Thread(target=read_line)
+                thread.daemon = True
+                thread.start()
+                thread.join(timeout)
+
+                return line[0]
+
             # Read log line if process is still running
             if process.poll() is None:
-                # Use select to check if there's data available without blocking
-                ready, _, _ = select.select([process.stdout], [], [], 0.5)
-                if ready:
-                    try:
-                        line = process.stdout.readline()
-                        if line:
-                            line = line.rstrip("\n")
-                            print(line)
-                            # Check if current line matches expected pattern
-                            if match_state < len(patterns) and patterns[
-                                match_state
-                            ].match(line):
-                                match_state += 1
-                                if match_state == len(patterns):
-                                    matched = True
-                                    if pattern_ok.match(line):
-                                        is_success = True
-                                    logger.info(
-                                        "\nDetected complete test completion pattern!"
-                                    )
-                            else:
-                                match_state = 0
-                                if patterns[0].match(line):
-                                    match_state = 1
-                    except IOError:
-                        # No data available
-                        pass
+                line = read_line_with_timeout(process)
+                if line:
+                    line = line.rstrip("\n")
+                    print(line)
+                    # Check if current line matches expected pattern
+                    if match_state < len(patterns) and patterns[match_state].match(
+                        line
+                    ):
+                        match_state += 1
+                        if match_state == len(patterns):
+                            matched = True
+                            if pattern_ok.match(line):
+                                is_success = True
+                            logger.info("\nDetected complete test completion pattern!")
+                    else:
+                        match_state = 0
+                        if patterns[0].match(line):
+                            match_state = 1
             else:
                 # Process has exited, check if we have matched the pattern
                 if not matched:
