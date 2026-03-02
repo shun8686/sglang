@@ -371,10 +371,10 @@ class NginxConfigManager:
             lines.insert(51, "            proxy_set_header X-Forwarded-Proto $scheme;\n")
             lines.insert(52, "        }\n")
             lines.insert(53, "\n")
-            lines.insert(54, "        location " + f"{location}" + " {\n")
-            lines.insert(55, "            return 301 " + f"{proxy_pass}" + "/;\n")
-            lines.insert(56, "        }\n")
-            lines.insert(57, "\n")
+            # lines.insert(54, "        location " + f"{location}" + " {\n")
+            # lines.insert(55, "            return 301 " + f"{proxy_pass}" + "/;\n")
+            # lines.insert(56, "        }\n")
+            # lines.insert(57, "\n")
 
             with open(self.nginx_conf_path, "w", encoding="utf-8") as f:
                 f.writelines(lines)
