@@ -2,6 +2,7 @@ import os
 import shutil
 import subprocess
 import unittest
+from time import sleep
 from urllib.parse import urlparse
 
 import requests
@@ -75,6 +76,7 @@ class TestAscendFastapiRootPath(CustomTestCase):
         cls.nginx_manager.clean_environment()
 
     def test_fastapi_root_path(self):
+        sleep(1000)
         response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
         self.assertEqual(
             response.status_code, 404, "The request status code is not 404."
@@ -406,7 +408,7 @@ if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
 
@@ -414,7 +416,7 @@ if __name__ == "__main__":
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
 
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
 
     runner = unittest.TextTestRunner()
     runner.run(suite)
