@@ -37,8 +37,6 @@ class TestNpuEagle3(CustomTestCase):
             "--trust-remote-code",
             "--attention-backend",
             "ascend",
-            "--quantization",
-            "modelslim",
             "--disable-radix-cache",
             "--speculative-draft-model-quantization",
             "unquant",
