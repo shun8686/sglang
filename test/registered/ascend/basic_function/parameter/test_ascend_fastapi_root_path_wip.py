@@ -105,31 +105,8 @@ class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
     nginx_location = fastapi_root_path
 
 
-class TestAscendFastapiRootPathWithoutEnd(TestAscendFastapiRootPath):
-    fastapi_root_path = "/sglang"
-    nginx_location = fastapi_root_path
-
-
-class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
-    fastapi_root_path = "sglang"
-    nginx_location = "/sglang/"
-
-    def test_fastapi_root_path(self):
-        response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
-        self.assertEqual(
-            response.status_code, 404, "The request status code is not 404."
-        )
-
-        response = self.send_request(
-            f"http://127.0.0.1:{self.nginx_port}{self.nginx_location}/generate"
-        )
-        self.assertEqual(
-            response.status_code, 404, "The request status code is not 404."
-        )
-
-
 class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
-    fastapi_root_path = "/sglang/"
+    nginx_location = "/sglang/"
 
     @classmethod
     def setUpClass(cls):
@@ -140,8 +117,11 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
             pcre_version=PCRE_VERSION,
         )
 
+
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.nginx_manager.apply_config(cls.fastapi_root_path, cls.base_url)
+        cls.url = urlparse(cls.base_url)
+        cls.nginx_port = "80"
+        cls.nginx_manager.apply_config(cls.nginx_port, cls.nginx_location, cls.base_url)
 
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -177,6 +157,29 @@ class TestAscendFastapiRootPathNotSet(TestAscendFastapiRootPath):
         )
         self.assertEqual(
             response.status_code, 404, "The request status code is not 404.")
+
+
+class TestAscendFastapiRootPathWithoutEnd(TestAscendFastapiRootPath):
+    fastapi_root_path = "/sglang"
+    nginx_location = fastapi_root_path
+
+
+class TestAscendFastapiRootPathErrorPath(TestAscendFastapiRootPath):
+    fastapi_root_path = "sglang"
+    nginx_location = "/sglang/"
+
+    def test_fastapi_root_path(self):
+        response = self.send_request(f"http://127.0.0.1:{self.nginx_port}/generate")
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
+
+        response = self.send_request(
+            f"http://127.0.0.1:{self.nginx_port}{self.nginx_location}/generate"
+        )
+        self.assertEqual(
+            response.status_code, 404, "The request status code is not 404."
+        )
 
 
 class TestAscendFastapiRootPathWithoutNginx(TestAscendFastapiRootPath):
@@ -422,11 +425,13 @@ if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPath))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathMultiLevel))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
+
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutEnd))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathErrorPath))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathNotSet))
+
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendFastapiRootPathWithoutNginx))
 
     runner = unittest.TextTestRunner()
