@@ -2,9 +2,10 @@ import os
 import unittest
 from types import SimpleNamespace
 
-# from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.performance.test_ascend_performance_utils import NIC_NAME
+from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+
 from sglang.test.run_eval import run_eval
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.test_utils import (
@@ -16,7 +17,12 @@ from sglang.test.test_utils import (
 
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=200, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=200,
+    suite="nightly-8-npu-a3",
+    nightly=True,
+    disabled="run failed，issue link:https://github.com/Ascend/sglang/issues/58",
+)
 
 
 class TestQwen3Next(CustomTestCase):
@@ -30,8 +36,7 @@ class TestQwen3Next(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Next-80B-A3B-Instruct"
+        cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -51,7 +56,6 @@ class TestQwen3Next(CustomTestCase):
                 "--max-total-tokens", 450560,
                 "--moe-a2a-backend", "deepep",
                 "--deepep-mode", "auto",
-                # "--quantization", "modelslim",
                 "--chunked-prefill-size", -1,
             ],
             env={
@@ -80,7 +84,6 @@ class TestQwen3Next(CustomTestCase):
             num_examples=8,
             num_threads=32,
         )
-        print("Starting mmlu test...")
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], expect_score)
 
@@ -95,7 +98,6 @@ class TestQwen3Next(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
-        print("Starting gsm8k test...")
         metrics = run_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],
