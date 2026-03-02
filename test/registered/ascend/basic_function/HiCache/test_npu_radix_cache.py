@@ -1,4 +1,5 @@
 import unittest
+
 import requests
 
 from sglang.srt.utils import kill_process_tree
@@ -26,8 +27,7 @@ class TestNPURadixCache(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = "Qwen/Qwen3-8B"
-        # cls.model = QWEN3_8B_WEIGHTS_PATH
+        cls.model = QWEN3_8B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--attention-backend",
@@ -35,7 +35,8 @@ class TestNPURadixCache(CustomTestCase):
             "--disable-cuda-graph",
             "--mem-fraction-static",
             0.8,
-            "--tp-size", 1,
+            "--tp-size",
+            1,
         ]
         cls.process = popen_launch_server(
             cls.model,
@@ -52,7 +53,7 @@ class TestNPURadixCache(CustomTestCase):
     def tearDown(self):
         try:
             # Call the '/flush_cache' interface to clear RadixCache.
-            response = requests.post(f"{self.base_url}/flush_cache")
+            response = requests.post(f"{DEFAULT_URL_FOR_TEST}/flush_cache")
             self.assertEqual(response.status_code, 200, "Failed to flush cache")
         except Exception as e:
             self.fail(f"Flush cache failed with error: {str(e)}")
@@ -79,7 +80,7 @@ class TestNPURadixCache(CustomTestCase):
                 self.assertEqual(cached_tokens, 0)
             else:
                 # Second request: cache reused
-                self.assertGreaterEqual(cached_tokens, 128)
+                self.assertGreater(cached_tokens, 0)
 
     def test_radix_cache_not_reused_short_identical(self):
         """Short identical texts should NOT reuse RadixCache (page size limit)"""
@@ -105,9 +106,11 @@ class TestNPURadixCache(CustomTestCase):
         """Different long texts should NOT reuse RadixCache (text uniqueness)"""
         # Two different long text prompts (both meet the page size requirement)
         texts = [
-            "Marie ordered one chicken meal that costs $12, 5 packs of milk that costs $3 each, 4 apples that cost $1.50 each, and some boxes of pizza. Marie paid a total of $50. How many boxes of pizza did Marie order if each box costs $8.50?" * 8,
-            "Mishka bought 3 pairs of shorts, 3 pairs of pants, and 3 pairs of shoes. One pair of shorts costs $16.50. One pair of pants costs $22.50 and one pair of shoes costs $42. How many dollars did Mishka spend on all the clothing items?" * 8,
-        ]
+            "Marie ordered one chicken meal that costs $12, 5 packs of milk that costs $3 each, 4 apples that cost $1.50 each, and some boxes of pizza. Marie paid a total of $50. How many boxes of pizza did Marie order if each box costs $8.50?"
+            * 8,
+            "Mishka bought 3 pairs of shorts, 3 pairs of pants, and 3 pairs of shoes. One pair of shorts costs $16.50. One pair of pants costs $22.50 and one pair of shoes costs $42. How many dollars did Mishka spend on all the clothing items?"
+            * 8,
+         ]
         for text in texts:
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",

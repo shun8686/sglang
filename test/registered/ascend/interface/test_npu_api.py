@@ -9,9 +9,7 @@ from transformers import AutoTokenizer
 
 from sglang.srt.environ import envs
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-)
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -29,7 +27,12 @@ register_npu_ci(est_time=1600, suite="nightly-npu-a3-merged", nightly=True)
 
 
 class TestNpuApi(CustomTestCase):
-    """Testcase: Verify basic API interface functionality"""
+    """Testcase: Verify that the basic functions of the API interfaces work properly and the returned parameters are consistent with the configurations.
+
+    [Test Category] Interface
+    [Test Target] /health; /health_generate; /ping; /model_info; /server_info; /get_load; /v1/models; /v1/models/{model:path}; /generate
+    """
+
     @classmethod
     def setUpClass(cls):
         global GLOBAL_SERVER_PROCESS, GLOBAL_SERVER_INITIALIZED
@@ -225,7 +228,12 @@ class TestNpuApi(CustomTestCase):
 
 
 class TestChatCompletionsInterface(CustomTestCase):
-    """Testcase: Verify parameter functionality of v1/chat/completions interface"""
+    """Testcase: The test is to verify whether the functions of each parameter of the v1/chat/completions interface are normal.
+
+    [Test Category] Interface
+    [Test Target] v1/chat/completions
+    """
+
     @classmethod
     def setUpClass(cls):
         # Skip initialization, directly reuse global server
@@ -298,7 +306,9 @@ class TestChatCompletionsInterface(CustomTestCase):
                         if "content" in delta and delta["content"]:
                             has_content = True
 
-        self.assertTrue(has_reasoning, "Reasoning content not included in stream response")
+        self.assertTrue(
+            has_reasoning, "Reasoning content not included in stream response"
+        )
         self.assertTrue(has_content, "Normal content not included in stream response")
 
     def test_temperature(self):
@@ -306,7 +316,12 @@ class TestChatCompletionsInterface(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Please write a five-character quatrain for me."}],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Please write a five-character quatrain for me.",
+                    }
+                ],
                 "temperature": 0,
             },
         )
@@ -317,7 +332,12 @@ class TestChatCompletionsInterface(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Please write a five-character quatrain for me."}],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Please write a five-character quatrain for me.",
+                    }
+                ],
                 "temperature": 0,
             },
         )
@@ -329,7 +349,12 @@ class TestChatCompletionsInterface(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Please write a five-character quatrain for me."}],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Please write a five-character quatrain for me.",
+                    }
+                ],
                 "temperature": 2,
             },
         )
@@ -340,7 +365,12 @@ class TestChatCompletionsInterface(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Please write a five-character quatrain for me."}],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Please write a five-character quatrain for me.",
+                    }
+                ],
                 "temperature": 2,
             },
         )
@@ -375,7 +405,12 @@ class TestChatCompletionsInterface(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Please write a five-character quatrain for me."}],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Please write a five-character quatrain for me.",
+                    }
+                ],
                 "top_k": 20,
             },
         )
@@ -386,7 +421,12 @@ class TestChatCompletionsInterface(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Please write a five-character quatrain for me."}],
+                "messages": [
+                    {
+                        "role": "user",
+                        "content": "Please write a five-character quatrain for me.",
+                    }
+                ],
                 "top_k": 20,
             },
         )
@@ -420,7 +460,12 @@ class TestChatCompletionsInterface(CustomTestCase):
 
 
 class TestEnableThinking(CustomTestCase):
-    """Testcase: Verify parameter functionality of v1/completions interface"""
+    """Testcase: The test is to verify whether the functions of each parameter of the v1/completions interface are normal.
+
+    [Test Category] Interface
+    [Test Target] v1/completions
+    """
+
     @classmethod
     def setUpClass(cls):
         # Skip initialization, directly reuse global server
@@ -602,7 +647,12 @@ class TestEnableThinking(CustomTestCase):
 
 
 class TestStartProfile(CustomTestCase):
-    """Testcase: Verify functionality of /start_profile interface"""
+    """Testcase: Verify the correctness of /start_profile API with different parameter combinations (start_step/num_steps) on Ascend NPU backend.
+
+    [Test Category] Interface
+    [Test Target] /start_profile
+    """
+
     @classmethod
     def setUpClass(cls):
         # Skip initialization, reuse global server + configure profiler directory
@@ -667,11 +717,15 @@ class TestStartProfile(CustomTestCase):
 
     def _check_non_empty_profile_dir(self):
         self.assertTrue(os.path.isdir(OUTPUT_DIR), "Profiler directory does not exist")
-        self.assertNotEqual(len(os.listdir(OUTPUT_DIR)), 0, "Profiler directory is empty")
+        self.assertNotEqual(
+            len(os.listdir(OUTPUT_DIR)), 0, "Profiler directory is empty"
+        )
 
     def _check_empty_profile_dir(self):
         if os.path.isdir(OUTPUT_DIR):
-            self.assertEqual(len(os.listdir(OUTPUT_DIR)), 0, "Profiler directory is not empty")
+            self.assertEqual(
+                len(os.listdir(OUTPUT_DIR)), 0, "Profiler directory is not empty"
+            )
 
 
 if __name__ == "__main__":
