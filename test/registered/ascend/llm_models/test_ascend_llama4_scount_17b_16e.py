@@ -11,7 +11,7 @@ register_npu_ci(
     est_time=400,
     suite="nightly-4-npu-a3",
     nightly=True,
-    # disabled="https://github.com/Ascend/sglang/issues/25",
+    disabled="https://github.com/Ascend/sglang/issues/25",
 )
 
 
