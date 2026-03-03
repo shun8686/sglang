@@ -31,6 +31,16 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
+        subprocess.run(
+            ["pip",
+             "install",
+             "grpcio==1.78.1",
+             "grpcio-health-checking==1.78.1",
+             "grpcio-reflection==1.78.1",
+             "protobuf==6.33.1",
+             "--force-reinstall", ],
+        )
+
         cls.model = MODEL_PATH
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
@@ -50,7 +60,7 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
             str(cls.grpc_url.port),
         ]
         cls.worker_process = subprocess.Popen(worker_command, stdout=None, stderr=None)
-        # TODO: Check if the service is up and running
+        # Polling to query health status is not applicable in gRPC mode.
         sleep(100)
 
         router_command = [
