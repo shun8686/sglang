@@ -176,6 +176,7 @@ class TestAscendConfigInValidConfigFileType(CustomTestCase):
         pass
 
     def test_config(self):
+        process = None
         for config in self.invalid_config_file_list:
             try:
             # with self.assertRaises(Exception) as ctx:
@@ -183,7 +184,7 @@ class TestAscendConfigInValidConfigFileType(CustomTestCase):
                     "--config",
                     config,
                 ]
-                self.process = popen_launch_server(
+                process = popen_launch_server(
                     self.model,
                     self.base_url,
                     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -194,9 +195,9 @@ class TestAscendConfigInValidConfigFileType(CustomTestCase):
                     "Server process exited with code 1. Check server logs for errors.",
                     str(e),
                 )
-                continue
             finally:
-                kill_process_tree(self.process.pid)
+                if process:
+                    kill_process_tree(process.pid)
 
 
 
