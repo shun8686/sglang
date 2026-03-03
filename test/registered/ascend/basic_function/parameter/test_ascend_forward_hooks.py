@@ -60,6 +60,7 @@ class TestSetForwardHooks(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --forward-hooks
     """
+
     hook_function_path=HOOK_FUNCTION_PATH
     model = QWEN3_32B_WEIGHTS_PATH
     hooks_spec = [
