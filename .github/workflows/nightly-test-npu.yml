@@ -71,6 +71,7 @@ jobs:
           STREAMS_PER_DEVICE: 32
         run: |
           pip install sentence_transformers accelerate
+          pip install grpcio==1.78.1 grpcio-health-checking==1.78.1 grpcio-reflection==1.78.1 protobuf==6.33.1 --force-reinstall
           cd test
           python3 run_suite.py --hw npu --suite nightly-1-npu-a3 --nightly --continue-on-error --timeout-per-file 3600 --auto-partition-id ${{ matrix.part }} --auto-partition-size 2
 

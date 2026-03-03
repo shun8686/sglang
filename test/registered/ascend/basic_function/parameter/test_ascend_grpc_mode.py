@@ -22,6 +22,8 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
 
+PYTHON_PATH = "/usr/local/python3.11.14/lib/python3.11/site-packages"
+COMPILE_PROTO_PATH = "/sglang/srt/grpc"
 
 class TestAscendGrpcModePDMixed(CustomTestCase):
     """
@@ -33,18 +35,6 @@ class TestAscendGrpcModePDMixed(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        subprocess.run(
-            [
-                "pip",
-                "install",
-                "grpcio==1.78.1",
-                "grpcio-health-checking==1.78.1",
-                "grpcio-reflection==1.78.1",
-                "protobuf==6.33.1",
-                "--force-reinstall",
-            ],
-        )
-
         cls.model = MODEL_PATH
         cls.grpc_base_url = f"grpc://127.0.0.1:30111"
         cls.grpc_url = urlparse(cls.grpc_base_url)
@@ -303,55 +293,21 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
-class TestAscendGrpcModeDep(CustomTestCase):
-    """
-    Testcase：Verify that gRPC requests are correctly received and process when gRPC mode is enabled.
 
-    [Test Category] Parameter
-    [Test Target] --grpc-mode
-    """
-
-    @classmethod
-    def test_grpc_mode(cls):
-
-
-        subprocess.run(
-            [
-                "pip",
-                "install",
-                "grpcio==1.78.1",
-                "grpcio-health-checking==1.78.1",
-                "grpcio-reflection==1.78.1",
-                "protobuf==6.33.1",
-                "--force-reinstall",
-            ],
-        )
-
-        subprocess.run(
-            [
-                "wget",
-                "--no-check-certificate",
-                "https://raw.githubusercontent.com/sgl-project/sglang/main/python/sglang/srt/grpc/sglang_scheduler.proto.py",
-            ],
-            cwd="/usr/local/python3.11.14/lib/python3.11/site-packages/sglang/srt/grpc",
-            text=True,
-            check=True,
-        )
-
-        subprocess.run(
-            [
-                "python3",
-                "sglang_scheduler.proto.py",
-            ],
-            cwd="/usr/local/python3.11.14/lib/python3.11/site-packages/sglang/srt/grpc",
-            text=True,
-            check=True,
-        )
 
 if __name__ == "__main__":
+    subprocess.run(
+        [
+            "python3",
+            "sglang_scheduler.proto.py",
+        ],
+        cwd=PYTHON_PATH + COMPILE_PROTO_PATH,
+        text=True,
+        check=True,
+    )
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendGrpcModeDep))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendGrpcModePDMixed))
     runner = unittest.TextTestRunner()
     runner.run(suite)
