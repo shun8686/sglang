@@ -315,13 +315,9 @@ class TestAscendGrpcModeDep(CustomTestCase):
     def test_grpc_mode(cls):
         subprocess.run(
             [
-                "pip",
-                "install",
-                "grpcio==1.78.1",
-                "grpcio-health-checking==1.78.1",
-                "grpcio-reflection==1.78.1",
-                "protobuf==6.33.1",
-                "--force-reinstall",
+                "wget",
+                "--no-check-certificate",
+                "https://raw.githubusercontent.com/sgl-project/sglang/main/python/sglang/srt/grpc/sglang_scheduler.proto",
             ],
         )
 
