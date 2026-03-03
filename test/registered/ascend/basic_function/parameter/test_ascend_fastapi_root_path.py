@@ -63,6 +63,9 @@ class TestAscendFastapiRootPath(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
+        print("验证推理功能，手动验证配置文件正确和浏览器功能正确")
+        sleep(600)
+
         response = self.send_request(f"{self.base_url}/openapi.json")
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
