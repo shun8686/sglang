@@ -1,5 +1,5 @@
 model-path: /home/weights/Qwen3-0.6B
-host: 27.0.0.1
+host: 127.0.0.1
 port: 21000
 attention-backend: ascend
 trust-remote-code: true
