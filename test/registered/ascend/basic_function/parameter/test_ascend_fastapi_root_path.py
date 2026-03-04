@@ -66,7 +66,9 @@ class TestAscendFastapiRootPath(CustomTestCase):
             response.status_code, 200, "The request status code is not 200."
         )
         self.assertIn(
-            self.fastapi_root_path, response.text, "The correct path is not set in the openai."
+            self.fastapi_root_path,
+            response.text,
+            "The correct path is not set in the openai.",
         )
 
     def send_request(self, url):
