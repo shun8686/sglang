@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
-from sglang.test.ascend.test_ascend_utils import GROK_2_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import GROK_2_WEIGHTS_PATH, GROK_2_WEIGHTS_TOKENIZER_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
@@ -27,7 +27,7 @@ class TestGrok2(GSM8KAscendMixin, CustomTestCase):
         "--disable-radix-cache",
         "--disable-cuda-graph",
         "--tokenizer-path",
-        "/root/.cache/modelscope/hub/models/huihui-ai/grok-2/tokenizer.tok.json",
+        GROK_2_WEIGHTS_TOKENIZER_PATH,
         "--tp-size",
         "16",
     ]
