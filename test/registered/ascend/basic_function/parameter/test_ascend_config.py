@@ -1,4 +1,5 @@
 import os
+import subprocess
 import unittest
 
 import requests
@@ -10,7 +11,7 @@ from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
+    popen_launch_server, _create_clean_subprocess_env,
 )
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
@@ -34,18 +35,29 @@ class TestAscendConfig(CustomTestCase):
     def setUpClass(cls):
         cls.model = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
+
+        # TODO：或许应该在这里生成config文件
         # cls.url = urlparse(cls.base_url)
-        cls.other_args = [
+        # cls.other_args = [
+        #     "--config",
+        #     cls.config,
+        # ]
+        #
+        # cls.process = popen_launch_server(
+        #     cls.model,
+        #     cls.base_url,
+        #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        #     other_args=cls.other_args,
+        # )
+        command = [
+            "python3",
+            "-m",
+            "sglang.launch_server",
             "--config",
             cls.config,
         ]
-
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-        )
+        cls.process = subprocess.Popen(command, stdout=None, stderr=None,
+                                   env=_create_clean_subprocess_env(os.environ.copy()))
 
     @classmethod
     def tearDownClass(cls):
@@ -180,10 +192,13 @@ class TestAscendConfigInValidConfigFileType(CustomTestCase):
         for config in self.invalid_config_file_list:
             try:
             # with self.assertRaises(Exception) as ctx:
+
                 self.other_args = [
                     "--config",
                     config,
                 ]
+
+
                 process = popen_launch_server(
                     self.model,
                     self.base_url,
@@ -226,6 +241,6 @@ if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendConfigInValidConfigFileType))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendConfig))
     runner = unittest.TextTestRunner()
     runner.run(suite)
