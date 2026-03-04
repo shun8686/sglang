@@ -1,12 +1,10 @@
 import unittest
-from time import sleep
 from urllib.parse import urlparse
 
 import requests
 
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH as MODEL_PATH
-MODEL_PATH = "/home/weights/Qwen3-0.6B"
+from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH as MODEL_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -63,10 +61,6 @@ class TestAscendFastapiRootPath(CustomTestCase):
             "Paris", response.text, "The inference result does not include Paris."
         )
 
-        # print("验证推理功能，手动验证配置文件正确和浏览器功能正确")
-        # sleep(600)
-
-
         response = requests.get(f"{self.base_url}/openapi.json")
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
@@ -74,9 +68,6 @@ class TestAscendFastapiRootPath(CustomTestCase):
         self.assertIn(
             self.fastapi_root_path, response.text, "The correct path is not set in the openai."
         )
-
-        print("验证推理功能和配置文件正确，手动验证浏览器功能正确")
-        sleep(600)
 
     def send_request(self, url):
         return requests.post(
@@ -91,8 +82,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
         )
 
 
-# class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
-#     fastapi_root_path = "/test/fastapi/root/path"
+class TestAscendFastapiRootPathMultiLevel(TestAscendFastapiRootPath):
+    fastapi_root_path = "/test/fastapi/root/path"
 
 
 if __name__ == "__main__":
