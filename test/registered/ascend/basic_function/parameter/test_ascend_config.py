@@ -37,16 +37,18 @@ class TestAscendConfig(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
 
         # TODO：或许应该在这里生成config文件
-        command = [
-            "python3",
-            "-m",
-            "sglang.launch_server",
-            "--config",
-            cls.config,
-        ]
-        cls.process = subprocess.Popen(command, stdout=None, stderr=None,
-                                   env=_create_clean_subprocess_env(os.environ.copy()))
-        _wait_for_server_health(cls.process, cls.base_url, None, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
+
+        cls.process = cls._launch_server_with_config_yaml(cls.config, cls.base_url, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
+        # command = [
+        #     "python3",
+        #     "-m",
+        #     "sglang.launch_server",
+        #     "--config",
+        #     cls.config,
+        # ]
+        # cls.process = subprocess.Popen(command, stdout=None, stderr=None,
+        #                            env=_create_clean_subprocess_env(os.environ.copy()))
+        # _wait_for_server_health(cls.process, cls.base_url, None, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
 
     @classmethod
     def tearDownClass(cls):
@@ -66,6 +68,20 @@ class TestAscendConfig(CustomTestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
+    @classmethod
+    def _launch_server_with_config_yaml(cls, config_file, url, timeout):
+        command = [
+            "python3",
+            "-m",
+            "sglang.launch_server",
+            "--config",
+            config_file,
+        ]
+        process = subprocess.Popen(command, stdout=None, stderr=None,
+                                       env=_create_clean_subprocess_env(os.environ.copy()))
+        _wait_for_server_health(process, url, None, timeout)
+        return process
 
 
 
