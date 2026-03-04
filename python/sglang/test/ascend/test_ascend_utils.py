@@ -1,23 +1,23 @@
 """Common utilities for testing and benchmarking on NPU"""
 
-import os
-import subprocess
-import copy
-from typing import NamedTuple
-from typing import Awaitable, Callable, Optional
-
 import asyncio
-from sglang.bench_serving import run_benchmark
-from sglang.srt.utils import (
-    kill_process_tree,
-)
+import copy
+import os
+import shlex
+import subprocess
 from types import SimpleNamespace
+from typing import Awaitable, Callable, NamedTuple, Optional
 
+from sglang.bench_serving import run_benchmark
+from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
-    auto_config_device,
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
+    _launch_server_process,
+    _try_enable_offline_mode_if_cache_complete,
+    _wait_for_server_health,
+    auto_config_device,
     popen_launch_server,
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
 )
 
 # Model weights storage directory
@@ -57,6 +57,7 @@ BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(
 C4AI_COMMAND_R_V01_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "CohereForAI/c4ai-command-r-v01"
 )
+C4AI_COMMAND_R_V01_CHAT_TEMPLATE_PATH = "/__w/sglang/sglang/test/registered/ascend/llm_models/tool_chat_template_c4ai_command_r_v01.jinja"
 CHATGLM2_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "ZhipuAI/chatglm2-6b")
 DBRX_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "AI-ModelScope/dbrx-instruct"
@@ -69,6 +70,9 @@ DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
 )
 DEEPSEEK_CODER_V2_LITE_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-Coder-V2-Lite-Instruct"
+)
+DEEPSEEK_CODER_1_3_B_BASE_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-coder-1.3b-base"
 )
 ERNIE_4_5_21B_A3B_PT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "baidu/ERNIE-4.5-21B-A3B-PT"
@@ -85,6 +89,7 @@ GRANITE_3_1_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "ibm-granite/granite-3.1-8b-instruct"
 )
 GROK_2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "huihui-ai/grok-2")
+GROK_2_WEIGHTS_TOKENIZER_PATH = os.path.join(MODEL_WEIGHTS_DIR, "huihui-ai/grok-2/tokenizer.tok.json")
 INTERNLM2_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b"
 )
@@ -190,7 +195,9 @@ QWEN2_0_5B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 )
 
 QWEN3_30B_A3B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B")
-QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-w8a8")
+QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-w8a8"
+)
 
 DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
@@ -236,6 +243,13 @@ QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
 QWEN2_5_MATH_RM_72B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-Math-RM-72B"
 )
+# Other
+DEEPSEEK_CODER_JSON_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/deepseek_coder.json"
+CONFIG_YAML_PATH = (
+    "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/config.yaml"
+)
+CONFIG_VALID_YAML_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/config_valid.yaml"
+HOOK_FUNCTION_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/test_ascend_forward_hooks:create_attention_monitor_factory"
 
 
 class ModelTestConfig(NamedTuple):
@@ -248,6 +262,7 @@ class ModelTestConfig(NamedTuple):
         gsm8k_accuracy: Weight for GSM8K benchmark score
         mmmu_accuracy: Weight for MMMU benchmark score
     """
+
     model_path: str
     mmlu_score: Optional[float] = None
     gsm8k_accuracy: Optional[float] = None
@@ -255,28 +270,23 @@ class ModelTestConfig(NamedTuple):
 
 
 LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-    mmlu_score=0.2
+    model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, mmlu_score=0.2
 )
 
 QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
-    gsm8k_accuracy=0.9
+    model_path=QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH, gsm8k_accuracy=0.9
 )
 
 QWEN3_32B_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWEN3_32B_WEIGHTS_PATH,
-    gsm8k_accuracy=0.82
+    model_path=QWEN3_32B_WEIGHTS_PATH, gsm8k_accuracy=0.82
 )
 
 QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
-    gsm8k_accuracy=0.92
+    model_path=QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH, gsm8k_accuracy=0.92
 )
 
 QWQ_32B_W8A8_WEIGHTS_FOR_TEST = ModelTestConfig(
-    model_path=QWQ_32B_W8A8_WEIGHTS_PATH,
-    gsm8k_accuracy=0.59
+    model_path=QWQ_32B_W8A8_WEIGHTS_PATH, gsm8k_accuracy=0.59
 )
 
 # Default configuration for testing
@@ -302,46 +312,6 @@ def run_command(cmd, shell=True):
     except subprocess.CalledProcessError as e:
         print(f"execute command error: {e}")
         return None
-
-
-def get_device_ids(index=None):
-    """Get list of NPU device IDs or a single device ID by specified index
-
-    Parameters:
-        index: Optional, integer type, the index value of the device ID list;
-               returns the complete list if not passed in
-    Returns:
-        If index is passed in: returns the integer-type device ID corresponding to the index
-                               (returns None if the index is invalid)
-        If index is not passed in: returns the list of device IDs (integer type),
-                                   returns an empty list if acquisition fails
-    """
-    cmd = "npu-smi info | awk 'BEGIN {OFS=\"\"} /Process id/ {exit} /Phy-ID/ {next} {print $3}' | grep -E '^[0-9]+$'"
-    output = run_command(cmd)
-
-    device_ids = []
-    if output and output.strip():
-        lines = output.strip().split('\n')
-        for line in lines:
-            line = line.strip()
-            if line and line.isdigit():
-                try:
-                    device_id = int(line)
-                    device_ids.append(device_id)
-                except ValueError:
-                    print(f"Device ID '{line}' cannot be converted to an integer and has been skipped")
-
-    if index is not None:
-        if not isinstance(index, int):
-            print(f"Index {index} must be an integer type")
-            return None
-        if 0 <= index < len(device_ids):
-            return device_ids[index]
-        else:
-            print(f"Index {index} is invalid, the length of device ID list is {len(device_ids)}")
-            return None
-
-    return device_ids
 
 
 def get_benchmark_args(
@@ -575,18 +545,190 @@ def run_bench_serving(
     return res
 
 
-def execute_serving_performance_test(host, port, model_path=None, backend="sglang", dataset_name=None,
-                                     request_rate=None,
-                                     max_concurrency=None, num_prompts=None, input_len=None, output_len=None,
-                                     random_range_ratio=1,
-                                     dataset_path=None):
+def popen_launch_server_config(
+    model: str,
+    base_url: str,
+    timeout: float,
+    api_key: Optional[str] = None,
+    other_args: Optional[list[str]] = None,
+    env: Optional[dict] = None,
+    return_stdout_stderr: Optional[tuple] = None,
+    device: str = "auto",
+    pd_separated: bool = False,
+    num_replicas: Optional[int] = None,
+):
+    """Launch a server process with automatic device detection and offline/online retry.
+
+    Args:
+        model: Model path or identifier
+        base_url: Base URL for the server
+        timeout: Timeout for server startup
+        api_key: Optional API key for authentication
+        other_args: Additional command line arguments
+        env: Environment dict for subprocess
+        return_stdout_stderr: Optional tuple for output capture
+        device: Device type ("auto", "cuda", "rocm" or "cpu")
+        pd_separated: Whether to use PD separated mode
+        num_replicas: Number of replicas for mixed PD mode
+
+    Returns:
+        Started subprocess.Popen object
     """
-        Usage: Execute performance test by bench_serving tool and write metrics to a file.
-        Parameters: Refer to the bench_serving guide documentation.
-        Return: Metrics dictionary.
+    other_args = other_args or []
+
+    # Auto-detect device if needed
+    if device == "auto":
+        device = auto_config_device()
+        other_args = list(other_args)
+        other_args += ["--device", str(device)]
+
+    # CI-specific: Validate cache and enable offline mode if complete
+    if env is None:
+        env = os.environ.copy()
+    else:
+        env = env.copy()
+
+    # Store per-run marker path for potential invalidation
+    per_run_marker_path = None
+    try:
+        from sglang.utils import is_in_ci
+
+        if is_in_ci():
+            per_run_marker_path = _try_enable_offline_mode_if_cache_complete(
+                model, env, other_args
+            )
+    except Exception as e:
+        print(f"CI cache validation failed (non-fatal): {e}")
+
+    # Build server command
+    _, host, port = base_url.split(":")
+    host = host[2:]
+
+    use_mixed_pd_engine = not pd_separated and num_replicas is not None
+    if pd_separated or use_mixed_pd_engine:
+        command = "sglang.launch_pd_server"
+    else:
+        command = "sglang.launch_server"
+
+    command = [
+        "python3",
+        "-m",
+        command,
+        *[str(x) for x in other_args],
+    ]
+
+    if pd_separated or use_mixed_pd_engine:
+        command.extend(["--lb-host", host, "--lb-port", port])
+    else:
+        command.extend(["--host", host, "--port", port])
+
+    if use_mixed_pd_engine:
+        command.extend(["--mixed", "--num-replicas", str(num_replicas)])
+
+    if api_key:
+        command += ["--api-key", api_key]
+
+    print(f"command={shlex.join(command)}")
+
+    # Track if offline mode was enabled for potential retry
+    offline_enabled = env.get("HF_HUB_OFFLINE") == "1"
+
+    # First launch attempt
+    process = _launch_server_process(command, env, return_stdout_stderr, model)
+    success, error_msg = _wait_for_server_health(process, base_url, api_key, timeout)
+
+    # If offline launch failed and offline was enabled, retry with online mode
+    if not success and offline_enabled:
+        print(
+            f"CI_OFFLINE: Offline launch failed ({error_msg}), retrying with online mode..."
+        )
+
+        # Kill failed process
+        try:
+            if process.poll() is None:
+                kill_process_tree(process.pid)
+            else:
+                process.wait(timeout=5)
+        except Exception as e:
+            print(f"CI_OFFLINE: Error cleaning up failed offline process: {e}")
+
+        # Invalidate per-run marker to prevent subsequent tests from using offline
+        if per_run_marker_path and os.path.exists(per_run_marker_path):
+            try:
+                os.remove(per_run_marker_path)
+                print("CI_OFFLINE: Invalidated per-run marker due to offline failure")
+            except Exception as e:
+                print(f"CI_OFFLINE: Failed to remove per-run marker: {e}")
+
+        # Retry with online mode
+        env["HF_HUB_OFFLINE"] = "0"
+        process = _launch_server_process(command, env, return_stdout_stderr, model)
+        success, error_msg = _wait_for_server_health(
+            process, base_url, api_key, timeout
+        )
+
+        if success:
+            print("CI_OFFLINE: Online retry succeeded")
+            return process
+
+        # Online retry also failed
+        try:
+            kill_process_tree(process.pid)
+        except Exception as e:
+            print(f"CI_OFFLINE: Error killing process after online retry failure: {e}")
+
+        if "exited" in error_msg:
+            raise Exception(error_msg + ". Check server logs for errors.")
+        raise TimeoutError(error_msg)
+
+    # First attempt succeeded or offline was not enabled
+    if success:
+        return process
+
+    # First attempt failed and offline was not enabled
+    try:
+        kill_process_tree(process.pid)
+    except Exception as e:
+        print(f"CI_OFFLINE: Error killing process after first attempt failure: {e}")
+
+    if "exited" in error_msg:
+        raise Exception(error_msg + ". Check server logs for errors.")
+    raise TimeoutError(error_msg)
+
+
+def execute_serving_performance_test(
+    host,
+    port,
+    model_path=None,
+    backend="sglang",
+    dataset_name=None,
+    request_rate=None,
+    max_concurrency=None,
+    num_prompts=None,
+    input_len=None,
+    output_len=None,
+    random_range_ratio=1,
+    dataset_path=None,
+):
     """
-    cmd_args = ["python3", "-m", "sglang.bench_serving", "--host", host, "--port", str(port),
-                "--model", model_path, "--backend", backend]
+    Usage: Execute performance test by bench_serving tool and write metrics to a file.
+    Parameters: Refer to the bench_serving guide documentation.
+    Return: Metrics dictionary.
+    """
+
+    cmd_args = [
+        "python3",
+        "-m",
+        "sglang.bench_serving",
+        "--host",
+        host,
+        "--port",
+        str(port),
+        "--model",
+        model_path,
+        "--backend",
+        backend,
+    ]
 
     if dataset_name:
         cmd_args.extend(["--dataset-name", str(dataset_name)])
@@ -609,9 +751,13 @@ def execute_serving_performance_test(host, port, model_path=None, backend="sglan
     result_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not result_file else result_file
     print(f"The metrics result file: {result_file}")
-    run_command(f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep|memfabric_hybrid' | tee {result_file}")
+    run_command(
+        f"pip list | grep -E 'sglang|sgl|torch|transformers|deep-ep|memfabric_hybrid' | tee {result_file}"
+    )
     cann_info = "/usr/local/Ascend/ascend-toolkit/latest/aarch64-linux/ascend_toolkit_install.info"
-    run_command(f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}")
+    run_command(
+        f"echo \"CANN: $(cat {cann_info} | grep '^version=')\" | tee -a {result_file}"
+    )
 
     # Run bench_serving
     command = " ".join(cmd_args)
@@ -622,10 +768,8 @@ def execute_serving_performance_test(host, port, model_path=None, backend="sglan
     # Extracting key performance indicator data
     mean_ttft = run_command(f"grep 'Mean TTFT' {result_file} | awk '{{print $4}}'")
     mean_tpot = run_command(f"grep 'Mean TPOT' {result_file} | awk '{{print $4}}'")
-    total_tps = run_command(f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'")
+    total_tps = run_command(
+        f"grep 'Output token throughput' {result_file} | awk '{{print $5}}'"
+    )
 
-    return {
-        'mean_ttft': mean_ttft,
-        'mean_tpot': mean_tpot,
-        'total_tps': total_tps
-    }
+    return {"mean_ttft": mean_ttft, "mean_tpot": mean_tpot, "total_tps": total_tps}
