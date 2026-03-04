@@ -1,6 +1,6 @@
-model-path:/home/weights/Qwen3-0.6B
-host：127.0.0.1
-port：21000
+model-path: /home/weights/Qwen3-0.6B
+host: 27.0.0.1
+port: 21000
 attention-backend: ascend
 trust-remote-code: true
 disable-cuda-graph: true
