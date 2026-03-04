@@ -302,13 +302,4 @@ if __name__ == "__main__":
             "--force-reinstall",
         ],
     )
-    # subprocess.run(
-    #     [
-    #         "python3",
-    #         "compile_proto.py",
-    #     ],
-    #     cwd=PYTHON_PATH + COMPILE_PROTO_PATH,
-    #     text=True,
-    #     check=True,
-    # )
     unittest.main()
