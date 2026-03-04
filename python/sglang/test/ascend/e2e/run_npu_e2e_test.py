@@ -684,7 +684,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "--env",
         type=str,
-        choices=["debug", "ci"],
+        choices=["debug", "ci", "green"],
         required=True,
         help="Environment type",
     )
