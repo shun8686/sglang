@@ -174,6 +174,11 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         except requests.exceptions.RequestException as e:
             self.fail(f"Metrics endpoint not accessible: {e}")
 
+    def _safe_kill_process(self):
+        if self.process is not None:
+            kill_process_tree(self.process.pid)
+            self.process = None
+
 class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
     def test_log_level(self):
         level_list = ["info", "debug",  "warning", "error", "critical"]
@@ -204,9 +209,7 @@ class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
                 self.assertIn("Receive:", file_content)
                 self.assertIn("Finish:", file_content)
             finally:
-                if self.process is not None:
-                    kill_process_tree(self.process.pid)
-                    self.process = None
+                self._safe_kill_process()
 
 
 class TestAscendLoggingNPURequestsLevel(TestAscendLoggingNPUFullBase):
@@ -236,8 +239,7 @@ class TestAscendLoggingNPURequestsLevel(TestAscendLoggingNPUFullBase):
                 self.assertIn("Receive:", file_content)
                 self.assertIn("Finish:", file_content)
             finally:
-                kill_process_tree(self.process.pid)
-                self.process = None
+                self._safe_kill_process()
 
         print(f"✓ All log-requests-level test passed")
 
@@ -272,8 +274,7 @@ class TestAscendLoggingNPURequestsFormat(TestAscendLoggingNPUFullBase):
                 self.assertIn("event", data)
                 self.assertIn("rid", data)
         finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
+            self._safe_kill_process()
 
 class TestAscendLoggingNPURequestsTarget(TestAscendLoggingNPUFullBase):
     def test_06_log_requests_target_variations(self):
@@ -304,53 +305,31 @@ class TestAscendLoggingNPURequestsTarget(TestAscendLoggingNPUFullBase):
                     self.assertIn("Receive:", file_content)
                     self.assertIn("Finish:", file_content)
             finally:
-                kill_process_tree(self.process.pid)
-                self.process = None
+                self._safe_kill_process()
 
         print(f"✓ All log-requests-target variations test passed")
 
-    # def test_07_enable_metrics(self):
-    #     """Test enable-metrics."""
-    #     print("\n=== Test 07: enable-metrics ===")
-    #
-    #     try:
-    #         self.process = self._launch_server_with_logging(
-    #             enable_metrics=True,
-    #         )
-    #         time.sleep(5)
-    #
-    #         result = self._send_inference_request()
-    #         print(f"✓ enable-metrics test passed, result: {result[:50]}...")
-    #
-    #         metrics_content = self._check_metrics_endpoint()
-    #         self.assertIn("sglang_cache_hit_rate", metrics_content)
-    #         self.assertIn("sglang_num_running_reqs", metrics_content)
-    #         self.assertIn("sglang_gen_throughput", metrics_content)
-    #     finally:
-    #         kill_process_tree(self.process.pid)
-    #         self.process = None
-    #
-    # def test_08_enable_metrics_for_all_schedulers(self):
-    #     """Test enable-metrics-for-all-schedulers with TP2."""
-    #     print("\n=== Test 08: enable-metrics-for-all-schedulers (TP2) ===")
-    #
-    #     try:
-    #         self.process = self._launch_server_with_logging(
-    #             enable_metrics=True,
-    #             enable_metrics_for_all_schedulers=True,
-    #             tp_size=2,
-    #         )
-    #         time.sleep(8)
-    #
-    #         result = self._send_inference_request()
-    #         print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
-    #
-    #         metrics_content = self._check_metrics_endpoint()
-    #         self.assertIn("tp_rank", metrics_content)
-    #     finally:
-    #         kill_process_tree(self.process.pid)
-    #         self.process = None
-    #
+class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
+    def test_08_enable_metrics_for_all_schedulers(self):
+        """Test enable-metrics-for-all-schedulers with TP2."""
+        print("\n=== Test 08: enable-metrics-for-all-schedulers (TP2) ===")
+
+        try:
+            self.process = self._launch_server_with_logging(
+                enable_metrics=True,
+                enable_metrics_for_all_schedulers=True,
+                tp_size=2,
+            )
+            time.sleep(8)
+
+            result = self._send_inference_request()
+            print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
+
+            metrics_content = self._check_metrics_endpoint()
+            self.assertIn("tp_rank", metrics_content)
+        finally:
+            self._safe_kill_process()
+
     # def test_09_custom_buckets(self):
     #     """Test custom metric buckets."""
     #     print("\n=== Test 09: custom metric buckets ===")
@@ -717,6 +696,7 @@ if __name__ == "__main__":
     suite = unittest.TestSuite()
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
     runner = unittest.TextTestRunner()
     runner.run(suite)
