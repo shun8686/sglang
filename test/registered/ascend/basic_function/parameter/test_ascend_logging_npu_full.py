@@ -714,6 +714,7 @@ if __name__ == "__main__":
     # unittest.main()
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     runner = unittest.TextTestRunner()
     runner.run(suite)
