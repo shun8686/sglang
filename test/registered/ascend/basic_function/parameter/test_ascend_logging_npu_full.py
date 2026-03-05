@@ -105,8 +105,10 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
         if log_requests:
             other_args.append("--log-requests")
-            other_args.extend(["--log-requests-level", str(log_requests_level)])
-            other_args.extend(["--log-requests-format", log_requests_format])
+            if log_requests_level is not None:
+                other_args.extend(["--log-requests-level", str(log_requests_level)])
+            if log_requests_format is not None:
+                other_args.extend(["--log-requests-format", log_requests_format])
 
             if log_requests_target is not None:
                 other_args.extend(["--log-requests-target"] + log_requests_target)
