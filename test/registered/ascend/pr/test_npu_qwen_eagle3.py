@@ -4,6 +4,7 @@ from types import SimpleNamespace
 from urllib.parse import urlparse
 
 from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -19,7 +20,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+        cls.model = QWEN3_32B_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
@@ -58,7 +59,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--chunked-prefill-size", -1,
             "--max-prefill-tokens", 32768,
             "--speculative-algorithm", "EAGLE3",
-            "--speculative-draft-model-path", "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B_eagle3",
+            "--speculative-draft-model-path", "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3",
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
@@ -117,7 +118,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--disable-radix-cache",
             "--speculative-draft-model-quantization", "unquant",
             "--speculative-algorithm", "EAGLE3",
-            "--speculative-draft-model-path", "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B_eagle3",
+            "--speculative-draft-model-path", "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-Eagle3",
             "--speculative-num-steps", 3,
             "--speculative-eagle-topk", 1,
             "--speculative-num-draft-tokens", 4,
