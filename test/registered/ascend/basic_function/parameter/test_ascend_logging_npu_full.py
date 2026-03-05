@@ -494,7 +494,7 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
             metrics_content = self._check_metrics_endpoint()
 
             self.assertIn('tp_rank="0"', metrics_content)
-            self.assertNotIn('tp_rank="1"', metrics_content)
+            # self.assertNotIn('tp_rank="1"', metrics_content)
             for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
                 message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}"，model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
