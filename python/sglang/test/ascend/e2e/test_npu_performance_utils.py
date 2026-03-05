@@ -249,8 +249,8 @@ def run_bench_serving(
 class TestAscendPerformanceTestCaseBase(CustomTestCase):
     model = None
     backend = "sglang"
-    dataset_name = None
-    dataset_path = None
+    dataset_name = "random"
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -332,13 +332,13 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             "model_path": self.model,
             "backend": self.backend,
             "dataset_name": self.dataset_name,
+            "dataset_path": self.dataset_path,
             "request_rate": self.request_rate,
             "max_concurrency": self.max_concurrency,
             "num_prompts": self.num_prompts,
             "input_len": self.input_len,
             "output_len": self.output_len,
             "random_range_ratio": self.random_range_ratio,
-            "dataset_path": self.dataset_path,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -353,8 +353,8 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
 class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
     backend = "sglang"
-    dataset_name = None
-    dataset_path = None
+    dataset_name = "random"
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
     request_rate = None
     max_concurrency = None
     num_prompts = None
@@ -449,6 +449,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             "model_path": self.model_config.get("model_path"),
             "backend": self.backend,
             "dataset_name": self.dataset_name,
+            "dataset_path": self.dataset_path,
             "request_rate": self.request_rate,
             "max_concurrency": self.max_concurrency,
             "num_prompts": self.num_prompts,
@@ -469,7 +470,8 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
     backend = "sglang"
-    dataset_name = None
+    dataset_name = "random"
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
     request_rate = None
     max_concurrency = None
     num_prompts = None
@@ -581,6 +583,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             "model_path": self.model_config.get("model_path"),
             "backend": self.backend,
             "dataset_name": self.dataset_name,
+            "dataset_path": self.dataset_path,
             "request_rate": self.request_rate,
             "max_concurrency": self.max_concurrency,
             "num_prompts": self.num_prompts,
