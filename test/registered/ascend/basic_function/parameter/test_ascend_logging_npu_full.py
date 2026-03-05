@@ -175,11 +175,11 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
             self.fail(f"Metrics endpoint not accessible: {e}")
 
 class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
-    def test_log_level_info(self):
+    def test_log_level(self):
         level_list = ["info", "debug",  "warning", "error", "critical"]
         http_level_list = ["info", "critical", "error", "warning", "debug", ]
 
-        for level, http_level in level_list, http_level_list:
+        for level, http_level in zip(level_list, http_level_list):
             self._temp_dir_obj = tempfile.TemporaryDirectory()
             self.temp_dir = self._temp_dir_obj.name
 
