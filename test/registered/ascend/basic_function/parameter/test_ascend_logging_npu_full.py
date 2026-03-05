@@ -203,8 +203,9 @@ class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
             self.assertIn("Receive:", file_content)
             self.assertIn("Finish:", file_content)
         finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
+            if self.process is not None:
+                kill_process_tree(self.process.pid)
+
 
     # def test_02_log_level_error(self):
     #     """Test log-level=error."""
@@ -260,38 +261,38 @@ class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
     #     finally:
     #         kill_process_tree(self.process.pid)
     #         self.process = None
-    #
-    # def test_04_log_requests_level_all(self):
-    #     """Test all log-requests-level values."""
-    #     print("\n=== Test 04: log-requests-level (0, 1, 2, 3) ===")
-    #     self._temp_dir_obj = tempfile.TemporaryDirectory()
-    #     self.temp_dir = self._temp_dir_obj.name
-    #
-    #     for level in [0, 1, 2, 3]:
-    #         try:
-    #             self.process = self._launch_server_with_logging(
-    #                 log_requests=True,
-    #                 log_requests_level=level,
-    #                 log_requests_format="text",
-    #                 log_requests_target=["stdout", self.temp_dir],
-    #             )
-    #             time.sleep(5)
-    #
-    #             result = self._send_inference_request()
-    #             print(f"  Level {level} test passed")
-    #
-    #             log_files = list(Path(self.temp_dir).glob("*.log"))
-    #             self.assertGreater(len(log_files), 0)
-    #
-    #             file_content = log_files[0].read_text()
-    #             self.assertIn("Receive:", file_content)
-    #             self.assertIn("Finish:", file_content)
-    #         finally:
-    #             kill_process_tree(self.process.pid)
-    #             self.process = None
-    #
-    #     print(f"✓ All log-requests-level test passed")
-    #
+# class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
+#     def test_04_log_requests_level_all(self):
+#         """Test all log-requests-level values."""
+#         print("\n=== Test 04: log-requests-level (0, 1, 2, 3) ===")
+#         self._temp_dir_obj = tempfile.TemporaryDirectory()
+#         self.temp_dir = self._temp_dir_obj.name
+#
+#         for level in [0, 1, 2, 3]:
+#             try:
+#                 self.process = self._launch_server_with_logging(
+#                     log_requests=True,
+#                     log_requests_level=level,
+#                     log_requests_format="text",
+#                     log_requests_target=["stdout", self.temp_dir],
+#                 )
+#                 time.sleep(5)
+#
+#                 result = self._send_inference_request()
+#                 print(f"  Level {level} test passed")
+#
+#                 log_files = list(Path(self.temp_dir).glob("*.log"))
+#                 self.assertGreater(len(log_files), 0)
+#
+#                 file_content = log_files[0].read_text()
+#                 self.assertIn("Receive:", file_content)
+#                 self.assertIn("Finish:", file_content)
+#             finally:
+#                 kill_process_tree(self.process.pid)
+#                 self.process = None
+#
+#         print(f"✓ All log-requests-level test passed")
+
     # def test_05_log_requests_format_json(self):
     #     """Test log-requests-format=json."""
     #     print("\n=== Test 05: log-requests-format=json ===")
