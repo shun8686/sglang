@@ -47,6 +47,7 @@ QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 )
 
 AFM_4_5B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/AFM-4.5B-Base")
+DOTS_OCR_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "rednote-hilab/dots.ocr")
 BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "baichuan-inc/Baichuan2-13B-Chat"
 )
