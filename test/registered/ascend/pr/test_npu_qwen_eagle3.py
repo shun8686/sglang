@@ -45,9 +45,9 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--enable-dp-attention",
             "--enable-dp-lm-head",
             "--watchdog-timeout", 9000,
-            "--moe-a2a-backend", "deepep",
-            "--deepep-mode", "normal",
-            "--moe-dense-tp-size", 1,
+            # "--moe-a2a-backend", "deepep",
+            # "--deepep-mode", "normal",
+            # "--moe-dense-tp-size", 1,
             "--trust-remote-code",
             "--nnodes", "1",
             "--node-rank", "0",
@@ -123,7 +123,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "--speculative-num-draft-tokens", 4,
             "--tokenizer-worker-num", 4,
             "--mem-fraction-static", 0.7,
-            # "--cuda-graph-bs", 16,
+            "--cuda-graph-bs", 16,
             # "--disable-cuda-graph",
             "--dtype", "bfloat16",
         ]
@@ -133,7 +133,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "STREAMS_PER_DEVICE": "32",
             "SGLANG_NPU_USE_MULTI_STREAM": "1",
             "SGLANG_NPU_USE_MLAPO": "1",
-            "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
+            # "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
             "TASK_QUEUE_ENABLE": "1",
             "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
             "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
@@ -142,7 +142,7 @@ class TestAscendQwenEagle3(TestDisaggregationBase):
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
             "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-            "MOE_ENABLE_TOPK_NEG_ONE": "1",
+            # "MOE_ENABLE_TOPK_NEG_ONE": "1",
         }
         os.environ.update(cls.extra_envs)
         cls.process_decode = popen_launch_pd_server(

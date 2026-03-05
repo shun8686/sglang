@@ -46,6 +46,7 @@ class TestAscendW4A8Quantization(CustomTestCase):
                 "--dp-size", 4,
                 "--enable-dp-lm-head",
                 "--dtype", "bfloat16",
+                "--moe-dense-tp-size", 1,
             ],
             env={
                 "STREAMS_PER_DEVICE": "32",
@@ -60,6 +61,8 @@ class TestAscendW4A8Quantization(CustomTestCase):
                 "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
                 "SGLANG_USE_FIA_NZ": "1",
                 "ENABLE_MOE_NZ": "1",
+                "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
+                "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
         )
@@ -73,7 +76,7 @@ class TestAscendW4A8Quantization(CustomTestCase):
             base_url=self.base_url,
             model=self.model,
             eval_name="mmlu",
-            num_examples=8,
+            num_examples=128,
             num_threads=32,
         )
 
