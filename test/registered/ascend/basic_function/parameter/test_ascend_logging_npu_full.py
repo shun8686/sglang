@@ -80,6 +80,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         tokenizer_metrics_custom_labels_header=None,
         tokenizer_metrics_allowed_custom_labels=None,
         kv_events_config=None,
+        out_log_file=None,
+        err_log_file=None,
     ):
         """Launch server with logging parameters."""
 
@@ -166,7 +168,14 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
             self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
+        ) if out_log_file is None and err_log_file is None else popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+            return_stdout_stderr=(out_log_file, err_log_file),
         )
+
         return process
 
     def _send_inference_request(self, max_new_tokens=32):
@@ -268,6 +277,7 @@ class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
                 self.assertIn("Finish:", file_content)
             finally:
                 self._safe_kill_process()
+
 
 # TODO 验证方式
 class TestAscendLoggingNPURequestsLevel(TestAscendLoggingNPUFullBase):
@@ -372,10 +382,10 @@ class TestAscendLogRequests(TestAscendLoggingNPUFullBase):
 
     def test_log_requests_level(self):
         message = {
-                "0": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None,.*",
-                "1": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None, sampling_params=.*",
-                "2": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
-                "3": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
+            "0": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None,.*",
+            "1": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None, sampling_params=.*",
+            "2": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
+            "3": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
         }
         out_log_name = "./log_requests_level_out_log.txt"
         err_log_name = "./log_requests_level_err_log.txt"
@@ -383,16 +393,14 @@ class TestAscendLogRequests(TestAscendLoggingNPUFullBase):
         keyword_start = "out={'text': '"
         keyword_end = "', 'output_ids'"
         for i in [0, 1, 2, 3]:
-            other_args = (
-                [
-                    "--log-requests-level",
-                    i,
-                    "--log-requests",
-                    "--attention-backend",
-                    "ascend",
-                    "--disable-cuda-graph",
-                ]
-            )
+            other_args = [
+                "--log-requests-level",
+                i,
+                "--log-requests",
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+            ]
             out_log_file = open(out_log_name, "w+", encoding="utf-8")
             err_log_file = open(err_log_name, "w+", encoding="utf-8")
             process = popen_launch_server(
@@ -413,7 +421,7 @@ class TestAscendLogRequests(TestAscendLoggingNPUFullBase):
                     f"{DEFAULT_URL_FOR_TEST}/generate",
                     json={
                         "text": "just return me a string with of 5000 characters",
-                        "sampling_params": {"temperature": 0, "max_new_tokens": 2500},
+                        "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
                     },
                 )
                 self.assertEqual(response.status_code, 200)
@@ -427,7 +435,7 @@ class TestAscendLogRequests(TestAscendLoggingNPUFullBase):
                 self.assertTrue(len(content) > 0)
                 self.assertIsNotNone(re.search(message[str(i)], content))
                 if i >= 2:
-                    lines = get_lines_with_keyword(err_log_name, keyword_Finish)
+                    lines = get_lines_with_keyword(out_log_name, keyword_Finish)
                     Finish_message = lines[0]["content"]
                     start_index = Finish_message.find(keyword_start) + len(
                         keyword_start
