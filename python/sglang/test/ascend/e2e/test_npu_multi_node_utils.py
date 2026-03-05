@@ -45,9 +45,6 @@ BOOTSTRAP_INIT_PORT = 8995
 ROUTER_CONFIGMAP_TIMEOUT = 300
 SERVER_INITIALIZATION_DELAY = 30
 
-# Network configuration
-NETWORK_ADDRESS_PREFIXES = ["172.", "192."]
-
 
 def get_nic_name():
     """
