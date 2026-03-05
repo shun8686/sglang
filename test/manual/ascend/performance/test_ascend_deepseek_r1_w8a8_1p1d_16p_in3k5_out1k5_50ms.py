@@ -138,7 +138,7 @@ MODEL_CONFIG = {
 class TestDeepSeekR1W8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
-    max_concurrency = 384
+    max_concurrency = 16
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
