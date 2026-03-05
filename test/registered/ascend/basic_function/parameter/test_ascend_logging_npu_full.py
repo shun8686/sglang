@@ -356,8 +356,10 @@ class TestLogRequests(TestAscendLoggingNPUFullBase):
             self.assertIn("Paris", response.text)
             out_log_file.seek(0)
             content = out_log_file.read()
-            print("===================================================")
+            print("====================content-start===============================")
             print(content)
+            print("====================content-end===============================")
+
             self.assertTrue(len(content) > 0)
             pattern = r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text='The capital of France is'.*"
             self.assertIsNotNone(re.search(pattern, content))
