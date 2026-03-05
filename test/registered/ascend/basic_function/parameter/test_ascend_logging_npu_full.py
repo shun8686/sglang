@@ -275,39 +275,40 @@ class TestAscendLoggingNPURequestsFormat(TestAscendLoggingNPUFullBase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-    # def test_06_log_requests_target_variations(self):
-    #     """Test log-requests-target variations."""
-    #     print("\n=== Test 06: log-requests-target variations ===")
-    #
-    #     for target_config in [["stdout"], [self.temp_dir], ["stdout", self.temp_dir]]:
-    #         self._temp_dir_obj = tempfile.TemporaryDirectory()
-    #         self.temp_dir = self._temp_dir_obj.name
-    #
-    #         try:
-    #             self.process = self._launch_server_with_logging(
-    #                 log_requests=True,
-    #                 log_requests_level=2,
-    #                 log_requests_format="text",
-    #                 log_requests_target=target_config,
-    #             )
-    #             time.sleep(5)
-    #
-    #             result = self._send_inference_request()
-    #             print(f"  Target {target_config} test passed")
-    #
-    #             if self.temp_dir in target_config:
-    #                 log_files = list(Path(self.temp_dir).glob("*.log"))
-    #                 self.assertGreater(len(log_files), 0)
-    #
-    #                 file_content = log_files[0].read_text()
-    #                 self.assertIn("Receive:", file_content)
-    #                 self.assertIn("Finish:", file_content)
-    #         finally:
-    #             kill_process_tree(self.process.pid)
-    #             self.process = None
-    #
-    #     print(f"✓ All log-requests-target variations test passed")
-    #
+class TestAscendLoggingNPURequestsTarget(TestAscendLoggingNPUFullBase):
+    def test_06_log_requests_target_variations(self):
+        """Test log-requests-target variations."""
+        print("\n=== Test 06: log-requests-target variations ===")
+
+        for target_config in [["stdout"], [self.temp_dir], ["stdout", self.temp_dir]]:
+            self._temp_dir_obj = tempfile.TemporaryDirectory()
+            self.temp_dir = self._temp_dir_obj.name
+
+            try:
+                self.process = self._launch_server_with_logging(
+                    log_requests=True,
+                    log_requests_level=2,
+                    log_requests_format="text",
+                    log_requests_target=target_config,
+                )
+                time.sleep(5)
+
+                result = self._send_inference_request()
+                print(f"  Target {target_config} test passed")
+
+                if self.temp_dir in target_config:
+                    log_files = list(Path(self.temp_dir).glob("*.log"))
+                    self.assertGreater(len(log_files), 0)
+
+                    file_content = log_files[0].read_text()
+                    self.assertIn("Receive:", file_content)
+                    self.assertIn("Finish:", file_content)
+            finally:
+                kill_process_tree(self.process.pid)
+                self.process = None
+
+        print(f"✓ All log-requests-target variations test passed")
+
     # def test_07_enable_metrics(self):
     #     """Test enable-metrics."""
     #     print("\n=== Test 07: enable-metrics ===")
@@ -715,6 +716,7 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
     runner = unittest.TextTestRunner()
     runner.run(suite)
