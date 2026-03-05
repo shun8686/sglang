@@ -34,6 +34,9 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
     ]
     enable_args = [
         "--enable-torch-compile-debug-mode",
+        "--enable-piecewise-cuda-graph",
+        "--piecewise-cuda-graph-max-tokens",
+        "512",
     ]
 
     def setUp(self):
