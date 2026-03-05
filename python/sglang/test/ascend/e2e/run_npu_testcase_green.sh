@@ -10,7 +10,7 @@ fi
 echo "NPU info:"
 npu-smi info
 
-export http_proxy=http://61.251.177.171:30066
+export http_proxy=http://61.251.148.40:30066
 export https_proxy=${http_proxy}
 export no_proxy=127.0.0.1,localhost,local,.local,192.168.*.*
 
