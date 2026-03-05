@@ -496,9 +496,9 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
             self.assertIn('tp_rank="0"', metrics_content)
             # self.assertNotIn('tp_rank="1"', metrics_content)
             for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
-                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}"，model_name="{MODEL_PATH}"}}'
+                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
-                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}"，model_name="{MODEL_PATH}"}}'
+                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
         finally:
             self._safe_kill_process()
