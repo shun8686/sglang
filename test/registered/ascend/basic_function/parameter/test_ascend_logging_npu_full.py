@@ -330,6 +330,7 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
         finally:
             self._safe_kill_process()
 
+# class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
     # def test_09_custom_buckets(self):
     #     """Test custom metric buckets."""
     #     print("\n=== Test 09: custom metric buckets ===")
@@ -531,27 +532,28 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
     #     finally:
     #         kill_process_tree(self.process.pid)
     #         self.process = None
-    #
-    # def test_19_crash_dump_folder(self):
-    #     """Test crash-dump-folder."""
-    #     print("\n=== Test 19: crash-dump-folder ===")
-    #     self._temp_dir_obj = tempfile.TemporaryDirectory()
-    #     self.temp_dir = self._temp_dir_obj.name
-    #     crash_dir = os.path.join(self.temp_dir, "crash_dumps")
-    #     os.makedirs(crash_dir, exist_ok=True)
-    #
-    #     try:
-    #         self.process = self._launch_server_with_logging(
-    #             crash_dump_folder=crash_dir,
-    #         )
-    #         time.sleep(5)
-    #
-    #         result = self._send_inference_request()
-    #         print(f"✓ crash-dump-folder test passed (server started successfully), result: {result[:50]}...")
-    #     finally:
-    #         kill_process_tree(self.process.pid)
-    #         self.process = None
-    #
+
+class TestAscendLoggingNPUCrashDumpFolder(TestAscendLoggingNPUFullBase):
+    def test_19_crash_dump_folder(self):
+        """Test crash-dump-folder."""
+        print("\n=== Test 19: crash-dump-folder ===")
+        self._temp_dir_obj = tempfile.TemporaryDirectory()
+        self.temp_dir = self._temp_dir_obj.name
+        crash_dir = os.path.join(self.temp_dir, "crash_dumps")
+        os.makedirs(crash_dir, exist_ok=True)
+
+        try:
+            self.process = self._launch_server_with_logging(
+                crash_dump_folder=crash_dir,
+            )
+            time.sleep(5)
+
+            result = self._send_inference_request()
+            print(f"✓ crash-dump-folder test passed (server started successfully), result: {result[:50]}...")
+        finally:
+            kill_process_tree(self.process.pid)
+            self.process = None
+
     # def test_20_combined_logging_params(self):
     #     """Test combined logging parameters."""
     #     print("\n=== Test 20: Combined logging parameters ===")
@@ -657,37 +659,7 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
     #     finally:
     #         kill_process_tree(self.process.pid)
     #         self.process = None
-    #
-    # def test_23_long_running_stability(self):
-    #     """Test logging stability under long running."""
-    #     print("\n=== Test 23: Long running stability ===")
-    #     self._temp_dir_obj = tempfile.TemporaryDirectory()
-    #     self.temp_dir = self._temp_dir_obj.name
-    #
-    #     try:
-    #         self.process = self._launch_server_with_logging(
-    #             log_requests=True,
-    #             log_requests_level=2,
-    #             log_requests_format="text",
-    #             log_requests_target=["stdout", self.temp_dir],
-    #             enable_metrics=True,
-    #         )
-    #         time.sleep(5)
-    #
-    #         start_time = time.time()
-    #         request_count = 0
-    #         while time.time() - start_time < 60:
-    #             result = self._send_inference_request()
-    #             request_count += 1
-    #             time.sleep(0.5)
-    #
-    #         print(f"✓ Long running stability test passed, {request_count} requests completed")
-    #
-    #         metrics_content = self._check_metrics_endpoint()
-    #         self.assertIn("sglang_cache_hit_rate", metrics_content)
-    #     finally:
-    #         kill_process_tree(self.process.pid)
-    #         self.process = None
+
 
 
 if __name__ == "__main__":
@@ -697,6 +669,7 @@ if __name__ == "__main__":
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCrashDumpFolder))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
     runner = unittest.TextTestRunner()
     runner.run(suite)
