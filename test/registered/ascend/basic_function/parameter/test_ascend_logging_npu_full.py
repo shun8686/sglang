@@ -321,7 +321,7 @@ def get_lines_with_keyword(filename, keyword):
         return []
 
 
-class TestLogRequests(TestAscendLoggingNPUFullBase):
+class TestAscendLogRequests(TestAscendLoggingNPUFullBase):
     # def test_log_requests(self):
     #     other_args = (
     #         [
@@ -407,11 +407,13 @@ class TestLogRequests(TestAscendLoggingNPUFullBase):
                 response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
                 self.assertEqual(response.status_code, 200)
 
+                max_new_token = 2500 if i >= 2 else 100
+
                 response = requests.post(
                     f"{DEFAULT_URL_FOR_TEST}/generate",
                     json={
                         "text": "just return me a string with of 5000 characters",
-                        "sampling_params": {"temperature": 0, "max_new_tokens": 10000},
+                        "sampling_params": {"temperature": 0, "max_new_tokens": 2500},
                     },
                 )
                 self.assertEqual(response.status_code, 200)
