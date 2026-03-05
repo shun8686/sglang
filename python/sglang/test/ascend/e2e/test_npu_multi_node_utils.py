@@ -56,7 +56,7 @@ def get_nic_name():
             ["ip", "addr", "show"], encoding="utf-8", stderr=subprocess.STDOUT
         )
     except subprocess.CalledProcessError as e:
-        print(f"Failed to execute ip command: {e.output}")
+        logger.error(f"Failed to execute ip command: {e.output}")
         return None
 
     # Split into interface sections
