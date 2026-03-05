@@ -176,36 +176,37 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
 class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
     def test_log_level_info(self):
-        # level_list = ["debug", "info", "warning", "error", "critical"]
+        level_list = ["info", "debug",  "warning", "error", "critical"]
+        http_level_list = ["info", "critical", "error", "warning", "debug", ]
 
-        """Test log-level=debug."""
-        print("\n=== Test 01: log-level=debug ===")
-        self._temp_dir_obj = tempfile.TemporaryDirectory()
-        self.temp_dir = self._temp_dir_obj.name
+        for level, http_level in level_list, http_level_list:
+            self._temp_dir_obj = tempfile.TemporaryDirectory()
+            self.temp_dir = self._temp_dir_obj.name
 
-        try:
-            self.process = self._launch_server_with_logging(
-                log_level="debug",
-                log_requests=True,
-                log_requests_level=2,
-                log_requests_format="text",
-                log_requests_target=["stdout", self.temp_dir],
-            )
-            time.sleep(5)
+            try:
+                self.process = self._launch_server_with_logging(
+                    log_level=level,
+                    log_level_http=http_level,
+                    log_requests=True,
+                    log_requests_level=2,
+                    log_requests_format="text",
+                    log_requests_target=["stdout", self.temp_dir],
+                )
+                time.sleep(5)
 
-            result = self._send_inference_request()
-            print(f"✓ log-level=debug test passed, result: {result[:50]}...")
+                result = self._send_inference_request()
+                print(f"✓ log-level=debug test passed, result: {result[:50]}...")
 
-            log_files = list(Path(self.temp_dir).glob("*.log"))
-            self.assertGreater(len(log_files), 0)
+                log_files = list(Path(self.temp_dir).glob("*.log"))
+                self.assertGreater(len(log_files), 0)
 
-            file_content = log_files[0].read_text()
-            self.assertIn("Receive:", file_content)
-            self.assertIn("Finish:", file_content)
-        finally:
-            if self.process is not None:
-                kill_process_tree(self.process.pid)
-                self.process = None
+                file_content = log_files[0].read_text()
+                self.assertIn("Receive:", file_content)
+                self.assertIn("Finish:", file_content)
+            finally:
+                if self.process is not None:
+                    kill_process_tree(self.process.pid)
+                    self.process = None
 
 
     # def test_02_log_level_error(self):
@@ -236,33 +237,33 @@ class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
     #     finally:
     #         kill_process_tree(self.process.pid)
     #         self.process = None
-class TestAscendLoggingNPUHTTPLevel(TestAscendLoggingNPUFullBase):
-    def test_03_log_level_http_info(self):
-        """Test log-level-http=info."""
-        print("\n=== Test 03: log-level-http=info ===")
-        self._temp_dir_obj = tempfile.TemporaryDirectory()
-        self.temp_dir = self._temp_dir_obj.name
-
-        try:
-            self.process = self._launch_server_with_logging(
-                log_level="error",
-                log_level_http="info",
-                log_requests=True,
-                log_requests_level=2,
-                log_requests_format="text",
-                log_requests_target=["stdout", self.temp_dir],
-            )
-            time.sleep(5)
-
-            result = self._send_inference_request()
-            print(f"✓ log-level-http=info test passed, result: {result[:50]}...")
-
-            log_files = list(Path(self.temp_dir).glob("*.log"))
-            self.assertGreater(len(log_files), 0)
-        finally:
-            if self.process is not None:
-                kill_process_tree(self.process.pid)
-                self.process = None
+# class TestAscendLoggingNPUHTTPLevel(TestAscendLoggingNPUFullBase):
+#     def test_03_log_level_http_info(self):
+#         """Test log-level-http=info."""
+#         print("\n=== Test 03: log-level-http=info ===")
+#         self._temp_dir_obj = tempfile.TemporaryDirectory()
+#         self.temp_dir = self._temp_dir_obj.name
+#
+#         try:
+#             self.process = self._launch_server_with_logging(
+#                 log_level="error",
+#                 log_level_http="info",
+#                 log_requests=True,
+#                 log_requests_level=2,
+#                 log_requests_format="text",
+#                 log_requests_target=["stdout", self.temp_dir],
+#             )
+#             time.sleep(5)
+#
+#             result = self._send_inference_request()
+#             print(f"✓ log-level-http=info test passed, result: {result[:50]}...")
+#
+#             log_files = list(Path(self.temp_dir).glob("*.log"))
+#             self.assertGreater(len(log_files), 0)
+#         finally:
+#             if self.process is not None:
+#                 kill_process_tree(self.process.pid)
+#                 self.process = None
 
 # class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
 #     def test_04_log_requests_level_all(self):
