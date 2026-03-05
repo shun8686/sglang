@@ -203,6 +203,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 # --gc-warning-threshold-secs
 # TestAscendLoggingNPUEnableRequestTimeStatsLogging
 # --enable-request-time-stats-logging
+# TestAscendLoggingNPUEnableTrace
+# --enable-trace、 --otlp-traces-endpoint
 
 # TODO --uvicorn-access-log-exclude-prefixes 排除以这些前缀开头的uvicorn访问日志
 # TestAscendLoggingNPUCrashDumpFolder TODO  注入错误
@@ -211,14 +213,6 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 # TODO --tokenizer-metrics-for-all-schedulers、--tokenizer-metrics-allowed-custom-labels
 # 指定用于传递自定义标签以获取分词器指标的HTTP头， 允许用于分词器指标的自定义标签
 
-
-
-#         if enable_trace:
-#             other_args.append("--enable-trace")
-#             other_args.extend(["--otlp-traces-endpoint", otlp_traces_endpoint])
-#
-#         if crash_dump_folder is not None:
-#             other_args.extend(["--crash-dump-folder", crash_dump_folder])
 
 class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
     def test_log_level(self):
@@ -483,26 +477,27 @@ class TestAscendLoggingNPUEnableRequestTimeStatsLogging(TestAscendLoggingNPUFull
             kill_process_tree(self.process.pid)
             self.process = None
 
-# def test_17_enable_trace(self):
-#     """Test enable-trace (requires OTLP collector)."""
-#     print("\n=== Test 17: enable-trace ===")
-#
-#     try:
-#         self.process = self._launch_server_with_logging(
-#             enable_trace=True,
-#             otlp_traces_endpoint="localhost:4317",
-#         )
-#         time.sleep(5)
-#
-#         result = self._send_inference_request()
-#         print(f"✓ enable-trace test passed (server started successfully), result: {result[:50]}...")
-#     except Exception as e:
-#         print(f"⚠ enable-trace test skipped (OTLP collector may not be available): {e}")
-#     finally:
-#         if self.process:
-#             kill_process_tree(self.process.pid)
-#             self.process = None
-#
+class TestAscendLoggingNPUEnableTrace(TestAscendLoggingNPUFullBase):
+    def test_17_enable_trace(self):
+        """Test enable-trace (requires OTLP collector)."""
+        print("\n=== Test 17: enable-trace ===")
+
+        try:
+            self.process = self._launch_server_with_logging(
+                enable_trace=True,
+                otlp_traces_endpoint="127.0.0.1:4317",
+            )
+            time.sleep(5)
+
+            result = self._send_inference_request()
+            print(f"✓ enable-trace test passed (server started successfully), result: {result[:50]}...")
+        except Exception as e:
+            print(f"⚠ enable-trace test skipped (OTLP collector may not be available): {e}")
+        finally:
+            if self.process:
+                kill_process_tree(self.process.pid)
+                self.process = None
+
 
 
 # TODO: 注入崩溃
@@ -645,7 +640,8 @@ if __name__ == "__main__":
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUDecodeLogInterval))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUEnableRequestTimeStatsLogging))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUEnableRequestTimeStatsLogging))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUEnableTrace))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCrashDumpFolder))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUBucket))
     runner = unittest.TextTestRunner()
