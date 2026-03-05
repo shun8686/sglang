@@ -821,7 +821,7 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
-    suite.addTests(loader.loadTestsFromTestCase(TestLogRequests))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
