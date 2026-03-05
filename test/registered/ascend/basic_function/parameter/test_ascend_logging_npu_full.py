@@ -197,11 +197,17 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 # 请求到达到首个token生成-响应时间；token输出间隔-生成速度稳定性；请求到达到完整返回时间-整体服务性能
 # TestAscendLoggingNPUCollectTokensHistogram TODO 观测点
 # --collect-tokens-histogram、--prompt-tokens-buckets、--generation-tokens-buckets
+#
+# --gc-warning-threshold-secs
+# TestAscendLoggingNPUDecodeLogInterval
+# --decode-log-interval TODO 观测点
 
 # TODO --uvicorn-access-log-exclude-prefixes 排除以这些前缀开头的uvicorn访问日志
 # TestAscendLoggingNPUCrashDumpFolder TODO  注入错误
 # --crash-dump-folder 崩溃转储路径
 # TODO --show-time0cost 打印阶段耗时
+# TODO --tokenizer-metrics-for-all-schedulers、--tokenizer-metrics-allowed-custom-labels
+# 指定用于传递自定义标签以获取分词器指标的HTTP头， 允许用于分词器指标的自定义标签
 
 
 #
@@ -429,50 +435,26 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
                 kill_process_tree(self.process.pid)
                 self.process = None
 
+class TestAscendLoggingNPUDecodeLogInterval(TestAscendLoggingNPUFullBase):
+    def test_15_decode_log_interval(self):
+        """Test decode-log-interval."""
+        print("\n=== Test 15: decode-log-interval ===")
+        self._temp_dir_obj = tempfile.TemporaryDirectory()
+        self.temp_dir = self._temp_dir_obj.name
 
-# def test_14_generation_tokens_buckets_variations(self):
-#     """Test generation-tokens-buckets variations."""
-#     print("\n=== Test 14: generation-tokens-buckets variations ===")
-#
-#     for bucket_config in [["default"], ["tse", "256", "2", "8"], ["custom", "50", "100", "200", "500"]]:
-#         try:
-#             self.process = self._launch_server_with_logging(
-#                 enable_metrics=True,
-#                 collect_tokens_histogram=True,
-#                 generation_tokens_buckets=bucket_config,
-#             )
-#             time.sleep(5)
-#
-#             result = self._send_inference_request()
-#             print(f"  Generation tokens buckets {bucket_config[0]} test passed")
-#
-#             metrics_content = self._check_metrics_endpoint()
-#             self.assertIn("sglang_generation_tokens_bucket", metrics_content)
-#         finally:
-#             kill_process_tree(self.process.pid)
-#             self.process = None
-#
-#     print(f"✓ All generation-tokens-buckets variations test passed")
-#
-# def test_15_decode_log_interval(self):
-#     """Test decode-log-interval."""
-#     print("\n=== Test 15: decode-log-interval ===")
-#     self._temp_dir_obj = tempfile.TemporaryDirectory()
-#     self.temp_dir = self._temp_dir_obj.name
-#
-#     try:
-#         self.process = self._launch_server_with_logging(
-#             log_level="debug",
-#             decode_log_interval=10,
-#         )
-#         time.sleep(5)
-#
-#         result = self._send_inference_request(max_new_tokens=100)
-#         print(f"✓ decode-log-interval test passed, result: {result[:50]}...")
-#     finally:
-#         kill_process_tree(self.process.pid)
-#         self.process = None
-#
+        try:
+            self.process = self._launch_server_with_logging(
+                log_level="debug",
+                decode_log_interval=10,
+            )
+            time.sleep(5)
+
+            result = self._send_inference_request(max_new_tokens=100)
+            print(f"✓ decode-log-interval test passed, result: {result[:50]}...")
+        finally:
+            kill_process_tree(self.process.pid)
+            self.process = None
+
 # def test_16_enable_request_time_stats_logging(self):
 #     """Test enable-request-time-stats-logging."""
 #     print("\n=== Test 16: enable-request-time-stats-logging ===")
@@ -662,7 +644,8 @@ if __name__ == "__main__":
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUDecodeLogInterval))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCrashDumpFolder))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUBucket))
     runner = unittest.TextTestRunner()
