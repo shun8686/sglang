@@ -201,6 +201,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 # --decode-log-interval TODO 观测点
 # TestAscendLoggingNPUGCWarningThresholdSecs
 # --gc-warning-threshold-secs
+# TestAscendLoggingNPUEnableRequestTimeStatsLogging
+# --enable-request-time-stats-logging
 
 # TODO --uvicorn-access-log-exclude-prefixes 排除以这些前缀开头的uvicorn访问日志
 # TestAscendLoggingNPUCrashDumpFolder TODO  注入错误
@@ -210,15 +212,7 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 # 指定用于传递自定义标签以获取分词器指标的HTTP头， 允许用于分词器指标的自定义标签
 
 
-#
-#         if gc_warning_threshold_secs > 0:
-#             other_args.extend(["--gc-warning-threshold-secs", str(gc_warning_threshold_secs)])
-#
-#         other_args.extend(["--decode-log-interval", str(decode_log_interval)])
-#
-#         if enable_request_time_stats_logging:
-#             other_args.append("--enable-request-time-stats-logging")
-#
+
 #         if enable_trace:
 #             other_args.append("--enable-trace")
 #             other_args.extend(["--otlp-traces-endpoint", otlp_traces_endpoint])
@@ -472,22 +466,23 @@ class TestAscendLoggingNPUGCWarningThresholdSecs(TestAscendLoggingNPUFullBase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-# def test_16_enable_request_time_stats_logging(self):
-#     """Test enable-request-time-stats-logging."""
-#     print("\n=== Test 16: enable-request-time-stats-logging ===")
-#
-#     try:
-#         self.process = self._launch_server_with_logging(
-#             enable_request_time_stats_logging=True,
-#         )
-#         time.sleep(5)
-#
-#         result = self._send_inference_request()
-#         print(f"✓ enable-request-time-stats-logging test passed, result: {result[:50]}...")
-#     finally:
-#         kill_process_tree(self.process.pid)
-#         self.process = None
-#
+class TestAscendLoggingNPUEnableRequestTimeStatsLogging(TestAscendLoggingNPUFullBase):
+    def test_16_enable_request_time_stats_logging(self):
+        """Test enable-request-time-stats-logging."""
+        print("\n=== Test 16: enable-request-time-stats-logging ===")
+
+        try:
+            self.process = self._launch_server_with_logging(
+                enable_request_time_stats_logging=True,
+            )
+            time.sleep(5)
+
+            result = self._send_inference_request()
+            print(f"✓ enable-request-time-stats-logging test passed, result: {result[:50]}...")
+        finally:
+            kill_process_tree(self.process.pid)
+            self.process = None
+
 # def test_17_enable_trace(self):
 #     """Test enable-trace (requires OTLP collector)."""
 #     print("\n=== Test 17: enable-trace ===")
@@ -649,7 +644,8 @@ if __name__ == "__main__":
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUDecodeLogInterval))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUEnableRequestTimeStatsLogging))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCrashDumpFolder))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUBucket))
     runner = unittest.TextTestRunner()
