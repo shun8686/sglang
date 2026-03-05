@@ -135,7 +135,7 @@ MODEL_CONFIG = {
 }
 
 
-class TestDeepSeekR1W4A8(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestDeepSeekR1W8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 384
