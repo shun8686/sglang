@@ -12,6 +12,7 @@ from pathlib import Path
 
 import requests
 
+from docs.advanced_features.structured_outputs_for_reasoning_models import messages
 from sglang.srt.utils import kill_process_tree
 
 # from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH as MODEL_PATH
@@ -236,6 +237,9 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
 # TestAscendLoggingNPUMetric
 # --enable-metrics、--enable-metrics-for-all-schedulers TODO 是否需要启用dp_attention
+# --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
+
+
 # TestAscendLoggingNPUBucket TODO 观测点
 # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
 # 请求到达到首个token生成-响应时间；token输出间隔-生成速度稳定性；请求到达到完整返回时间-整体服务性能
@@ -466,7 +470,36 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
             # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
 
             metrics_content = self._check_metrics_endpoint()
-            # self.assertIn("tp_rank", metrics_content)
+            self.assertIn('tp_rank="0"', metrics_content)
+            self.assertIn('tp_rank="1"', metrics_content)
+        finally:
+            self._safe_kill_process()
+
+    def test_08_disable_metrics_for_all_schedulers(self):
+        """Test enable-metrics-for-all-schedulers with TP2."""
+        print("\n=== Test 08: enable-metrics-for-all-schedulers (TP2) ===")
+        print("")
+
+        try:
+            self.process = self._launch_server_with_logging(
+                enable_metrics=True,
+                # enable_metrics_for_all_schedulers=True,
+                tp_size=2,
+            )
+            # time.sleep(8)
+
+            result = self._send_inference_request()
+            # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
+
+            metrics_content = self._check_metrics_endpoint()
+
+            self.assertIn('tp_rank="0"', metrics_content)
+            self.assertNotIn('tp_rank="1"', metrics_content)
+            for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
+                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}"，model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
+                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}"，model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
         finally:
             self._safe_kill_process()
 
