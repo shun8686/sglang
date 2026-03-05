@@ -543,11 +543,9 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @check_role(allowed_roles=["router"])
     def start_router_server(cls):
         logger.info(f"Starting router in thread...")
-        cls.sglang_thread = threading.Thread(
-            target=launch_router, args=(cls.model_config,)
-        )
-        cls.sglang_thread.daemon = True
-        cls.sglang_thread.start()
+        sglang_thread = threading.Thread(target=launch_router, args=(cls.model_config,))
+        sglang_thread.daemon = True
+        sglang_thread.start()
 
         health_check_url = f"{cls.base_url}/health"
         logger.info(f"Waiting for router to be ready at {health_check_url}")
@@ -561,18 +559,20 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @classmethod
     @check_role(allowed_roles=["prefill", "decode"])
     def start_pd_server(cls):
-        logger.info(f"Starting pd separation node in thread...")
-        cls.sglang_thread = threading.Thread(
-            target=launch_pd_separation_node, args=(cls.model_config,)
-        )
-        cls.sglang_thread.daemon = True
-        cls.sglang_thread.start()
+        logger.info(f"Starting pd separation node...")
+        cls.process = launch_pd_separation_node(cls.model_config)
+        logger.info(f"Pd separation node started with PID: {cls.process.pid}")
+
+        # Loop to check if the process is still running
         while True:
-            if cls.sglang_thread.is_alive():
+            if cls.process.poll() is None:
+                # Process is still running
                 time.sleep(30)
             else:
+                # Process has exited
+                exit_code = cls.process.poll()
                 raise Exception(
-                    f"Sglang thread is not alive on node {cls.host} {cls.hostname}"
+                    f"Sglang process exited on node {cls.host} {cls.hostname} with exit code: {exit_code}"
                 )
 
     @check_role(allowed_roles=["router"])
