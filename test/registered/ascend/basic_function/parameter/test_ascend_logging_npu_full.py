@@ -899,7 +899,7 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
                 message = f'sglang:prompt_tokens_histogram_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
             for le in default_generation_tokens_bucket:
-                message = f'sglang:generation_tokens_histogram_buckets{{le="{le}",model_name="{MODEL_PATH}"}}'
+                message = f'sglang:generation_tokens_histogram_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
 
             # metrics_content = self._check_metrics_endpoint()
