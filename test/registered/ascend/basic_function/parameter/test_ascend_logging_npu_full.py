@@ -33,6 +33,8 @@ register_npu_ci(est_time=7200, suite="stage-b-test-npu")
 
 # 求助开发，验证是否充分
 # --log-level、 --log-level-http
+# 已有用例覆盖基本功能
+
 # 求助开发，李果
 # --log-requests-target TODO 多级路径
 
