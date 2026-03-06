@@ -13,6 +13,7 @@ from time import sleep
 
 import requests
 
+from docs.advanced_features.separate_reasoning import messages
 # from docs.advanced_features.structured_outputs_for_reasoning_models import messages
 from sglang.srt.utils import kill_process_tree
 
@@ -272,7 +273,119 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
+class TestAscendLogging(TestAscendLoggingNPUFullBase):
+    def test_logging_default(self):
+        # --log-requests=False;
+        message = r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, .*"
+        out_log_name = "./log_requests_level_out_log.txt"
+        err_log_name = "./log_requests_level_err_log.txt"
 
+        out_log_file = open(out_log_name, "w+", encoding="utf-8")
+        err_log_file = open(err_log_name, "w+", encoding="utf-8")
+        process = self._launch_server_with_logging(
+            out_log_file=out_log_file,
+            err_log_file=err_log_file,
+        )
+
+        try:
+            self._send_inference_request()
+
+            max_new_token = 100
+
+            response = requests.post(
+                f"{self.base_url}/generate",
+                json={
+                    "text": f"just return me a string with of {max_new_token} characters",
+                    "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
+                },
+            )
+            self.assertEqual(response.status_code, 200)
+
+            # check --log-requests=False
+            out_log_file.seek(0)
+            content = out_log_file.read()
+
+            self.assertTrue(len(content) > 0)
+            self.assertIsNone(re.search(message, content))
+
+            # check --enable-metrics=False
+            response = requests.get(f"{self.base_url}/metrics", timeout=10)
+            self.assertEqual(response.status_code, 404)
+        finally:
+            kill_process_tree(process.pid)
+            out_log_file.close()
+            err_log_file.close()
+            os.remove(out_log_name)
+            os.remove(err_log_name)
+
+
+    def test_logging(self):
+        # 拉起4次服务
+        # --log-requests、--log-requests-level
+        # --log-requests=False;--log-requests=True,--log-requests-level=[0, 1, 2, 3]
+        message = {
+            "0": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None,.*",
+            "1": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None, sampling_params=.*",
+            "2": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
+            "3": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
+        }
+        out_log_name = "./log_requests_level_out_log.txt"
+        err_log_name = "./log_requests_level_err_log.txt"
+        keyword_Finish = r".*Finish: obj=GenerateReqInput\(.*http_worker_ipc=None, text='just.*"
+        keyword_start = "out={'text': '"
+        keyword_end = "', 'output_ids'"
+        for i in [0, 1, 2, 3]:
+            out_log_file = open(out_log_name, "w+", encoding="utf-8")
+            err_log_file = open(err_log_name, "w+", encoding="utf-8")
+            process = self._launch_server_with_logging(
+                log_requests=True,
+                log_requests_level=i,
+                out_log_file=out_log_file,
+                err_log_file=err_log_file,
+            ) if i != 2 else self._launch_server_with_logging(
+                log_requests=True,
+                out_log_file=out_log_file,
+                err_log_file=err_log_file,
+            )
+
+            try:
+                self._send_inference_request()
+
+                max_new_token = 2500 if i >= 2 else 100
+
+                response = requests.post(
+                    f"{self.base_url}/generate",
+                    json={
+                        "text": f"just return me a string with of 5000 characters",
+                        "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
+                    },
+                )
+                self.assertEqual(response.status_code, 200)
+                out_log_file.seek(0)
+                content = out_log_file.read()
+
+                self.assertTrue(len(content) > 0)
+                self.assertIsNotNone(re.search(message[str(i)], content))
+                if i >= 2:
+                    lines = get_lines_with_keyword(out_log_name, keyword_Finish)
+                    Finish_message = lines[0]["content"]
+                    start_index = Finish_message.find(keyword_start) + len(keyword_start)
+                    end_index = Finish_message.find(keyword_end)
+                    out_text = Finish_message[start_index:end_index]
+                    out_text_length = len(out_text)
+                    out_text_length_n = len(out_text.replace("\\n", " "))
+                    if i == 2:
+                        self.assertIn("' ... '", out_text)
+                        self.assertTrue(out_text_length_n - len("' ... '") == 2048)
+                    else:
+                        self.assertNotIn("' ... '", out_text)
+                        self.assertTrue(out_text_length > 2048)
+            finally:
+                kill_process_tree(process.pid)
+                out_log_file.close()
+                err_log_file.close()
+                os.remove(out_log_name)
+                os.remove(err_log_name)
 
 
 # TODO 验证方式、删减
@@ -347,6 +460,8 @@ class TestAscendLogRequests(TestAscendLoggingNPUFullBase):
             process = self._launch_server_with_logging(
                 log_requests=True,
                 log_requests_level=i,
+                enable_metrics=True,
+                # enable_metrics_for_all_schedulers=True,
                 out_log_file=out_log_file,
                 err_log_file=err_log_file,
             ) if i != 2 else self._launch_server_with_logging(
