@@ -781,116 +781,6 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
             self._safe_kill_process()
 
 
-class TestAscendLoggingNPUMetricWip(TestAscendLoggingNPUFullBase):
-    def test_08_enable_metrics_for_all_schedulers(self):
-        """Test enable-metrics-for-all-schedulers with TP2."""
-        print("\n=== Test 08: enable-metrics-for-all-schedulers (TP2) ===")
-
-        try:
-            self.process = self._launch_server_with_logging(
-                enable_metrics=True,
-                enable_metrics_for_all_schedulers=True,
-                tp_size=2,
-            )
-            # time.sleep(8)
-
-            result = self._send_inference_request()
-            # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
-
-            metrics_content = self._check_metrics_endpoint()
-            self.assertIn('tp_rank="0"', metrics_content)
-            self.assertIn('tp_rank="1"', metrics_content)
-        finally:
-            self._safe_kill_process()
-
-    def test_metrics_2(self):
-        """Test enable-metrics-for-all-schedulers with TP2."""
-        print("\n=== Test 02: test_metrics_2 ===")
-        print("")
-
-        try:
-            self.process = self._launch_server_with_logging(
-                enable_metrics=True,
-                # enable_metrics_for_all_schedulers=False,
-                tp_size=2,
-                dp_size=2
-            )
-            # time.sleep(8)
-
-            result = self._send_inference_request()
-            # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
-
-            metrics_content = self._check_metrics_endpoint()
-
-            self.assertIn('tp_rank="0"', metrics_content)
-            # self.assertNotIn('tp_rank="1"', metrics_content)
-            for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
-                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
-                self.assertIn(message, metrics_content)
-                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
-                self.assertIn(message, metrics_content)
-        finally:
-            self._safe_kill_process()
-
-    def test_metrics_for_3(self):
-        """Test enable-metrics-for-all-schedulers with TP2."""
-        print("\n=== Test 03: test_metrics_for_3 ===")
-        print("")
-
-        try:
-            self.process = self._launch_server_with_logging(
-                enable_metrics=True,
-                enable_metrics_for_all_schedulers=True,
-                tp_size=2,
-                dp_size=2,
-                # bucket_time_to_first_token=[0.1, 0.5, 1.0, 2.0, 5.0],
-                # bucket_inter_token_latency=[0.01, 0.05, 0.1, 0.5],
-                # bucket_e2e_request_latency=[0.1, 0.5, 1.0, 2.0, 5.0],
-            )
-            # time.sleep(8)
-
-            result = self._send_inference_request()
-            # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
-
-            metrics_content = self._check_metrics_endpoint()
-
-            self.assertIn('tp_rank="0"', metrics_content)
-            # self.assertNotIn('tp_rank="1"', metrics_content)
-            # for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
-            #     message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
-            #     self.assertIn(message, metrics_content)
-            #     message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
-            #     self.assertIn(message, metrics_content)
-            # sleep(600)
-            sleep(600)
-        finally:
-            self._safe_kill_process()
-
-
-# class TestAscendLoggingNPUBucket(TestAscendLoggingNPUFullBase):
-#     def test_09_custom_buckets(self):
-#         """Test custom metric buckets."""
-#         print("\n=== Test 09: custom metric buckets ===")
-#
-#         try:
-#             self.process = self._launch_server_with_logging(
-#                 enable_metrics=True,
-#                 bucket_time_to_first_token=[0.1, 0.5, 1.0, 2.0, 5.0],
-#                 bucket_inter_token_latency=[0.01, 0.05, 0.1, 0.5],
-#                 bucket_e2e_request_latency=[1.0, 5.0, 10.0, 30.0],
-#             )
-#             time.sleep(5)
-#
-#             result = self._send_inference_request()
-#             print(f"✓ custom buckets test passed, result: {result[:50]}...")
-#
-#             metrics_content = self._check_metrics_endpoint()
-#             # self.assertIn("sglang_time_to_first_token_bucket", metrics_content)
-#             # self.assertIn("sglang_e2e_request_latency_bucket", metrics_content)
-#         finally:
-#             kill_process_tree(self.process.pid)
-#             self.process = None
-
 
 class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
     def test_11_prompt_tokens_buckets_default(self):
@@ -946,6 +836,7 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
 
         try:
 
+
             result = self._send_inference_request()
             print(f"✓ prompt-tokens-buckets default test passed, result: {result[:50]}...")
 
@@ -989,6 +880,67 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
         #     finally:
         #         kill_process_tree(self.process.pid)
         #         self.process = None
+
+class TestAscendLoggingNPULabel(TestAscendLoggingNPUFullBase):
+    def test_15_decode_log_interval(self):
+        other_args = [
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+        other_args.extend(["--enable-metrics"])
+        my_label = "business_line"
+        other_args.extend(["--tokenizer-metrics-custom-labels-header", "X-Metrics-Labels"])
+        other_args.extend(["--tokenizer-metrics-allowed-custom-labels", my_label])
+
+
+        self.process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+            # return_stdout_stderr=(out_log_file, err_log_file),
+        )
+
+        try:
+            # my_label = "business_line"
+            response = requests.post(
+                f"{self.base_url}/generate",
+                "Content-Type: application/json",
+                f"X-Metrics-Labels:{my_label}=cunstomer_service",
+                json={
+                    "text": self.test_prompt,
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 32,
+                    },
+                },
+            )
+
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(self.expected_output, response.text)
+
+            response = requests.get(f"{self.base_url}/metrics", timeout=10)
+            self.assertEqual(response.status_code, 200)
+            metrics_content = response.text
+            self.assertIn(self.expected_output, metrics_content)
+            message = f'sglang:time_to_first_token_seconds_bucket{{{my_label}="'
+            self.assertIn(message, metrics_content)
+            message = f'sglang:inter_token_latency_seconds_bucket{{{my_label}='
+            self.assertIn(message, metrics_content)
+            message = f'sglang:e2e_request_latency_seconds_bucket{{{my_label}='
+            self.assertIn(message, metrics_content)
+
+
+            # metrics_content = self._check_metrics_endpoint()
+            # self.assertIn("sglang_prompt_tokens_bucket", metrics_content)
+        finally:
+            kill_process_tree(self.process.pid)
+            self.process = None
+
 
 
 class TestAscendLoggingNPUDecodeLogInterval(TestAscendLoggingNPUFullBase):
@@ -1205,14 +1157,16 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
 
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
 
     # TODO
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPULabel))
+
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
