@@ -147,7 +147,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
 
         return results
 
-    def _test_001_combined_params(self):
+    def test_001_combined_params(self):
         """Test Hicache with combined parameters."""
         logging.warning("\n=== Test 001: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
@@ -220,7 +220,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-    def _test_003_combined_params(self):
+    def test_003_combined_params(self):
         """Test Hicache with combined parameters."""
         logging.warning("\n=== Test 003: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
@@ -238,7 +238,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-    def _test_004_combined_params(self):
+    def test_004_combined_params(self):
         """Test Hicache with combined parameters."""
         logging.warning("\n=== Test 004: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
@@ -257,7 +257,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-    def _test_005_long_sequence(self):
+    def test_005_long_sequence(self):
         """Test Hicache with long sequence."""
         logging.warning("\n=== Test 005: Long sequence (2000 + tokens) ===")
         self.process = self._launch_server_with_hicache(
@@ -289,7 +289,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-    def _test_006_concurrent_requests(self):
+    def test_006_concurrent_requests(self):
         """Test Hicache with concurrent requests."""
         logging.warning("\n=== Test 006: Concurrent Requests (20) ===")
         self.process = self._launch_server_with_hicache()
