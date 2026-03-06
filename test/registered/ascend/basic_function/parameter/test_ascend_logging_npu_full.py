@@ -900,12 +900,11 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
             for le in default_generation_tokens_bucket:
                 message = f'sglang:generation_tokens_histogram_buckets{{le="{le}",model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
-            return metrics_content
 
             # metrics_content = self._check_metrics_endpoint()
             # self.assertIn("sglang_prompt_tokens_bucket", metrics_content)
         finally:
-            kill_process_tree(self.process.pid)
+            kill_process_tree(process.pid)
             self.process = None
 
 
