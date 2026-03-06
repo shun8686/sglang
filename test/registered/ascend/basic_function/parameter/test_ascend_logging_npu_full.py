@@ -284,7 +284,7 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
                 self.assertIn(message, metrics_content)
         if expected_generation_tokens_bucket is not None:
             for le in expected_generation_tokens_bucket:
-                message = f'sglang:expected_generation_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
+                message = f'sglang:generation_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
                 self.assertIn(message, metrics_content)
         return metrics_content
 
