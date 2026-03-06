@@ -17,8 +17,8 @@ import requests
 from sglang.srt.utils import kill_process_tree
 
 # from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH as MODEL_PATH
-# MODEL_PATH = "/home/weights/Llama-3.2-1B-Instruct"
-MODEL_PATH = "/home/weights/Qwen3-0.6B"
+MODEL_PATH = "/home/weights/Llama-3.2-1B-Instruct"
+# MODEL_PATH = "/home/weights/Qwen3-0.6B"
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -419,7 +419,7 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                 response = requests.post(
                     f"{self.base_url}/generate",
                     json={
-                        "text": f"just return me a string with of {max_new_token} characters",
+                        "text": f"just return me a string with of {max_new_token} characters.",
                         "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
                     },
                 )
