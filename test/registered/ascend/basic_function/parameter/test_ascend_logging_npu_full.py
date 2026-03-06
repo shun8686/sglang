@@ -254,16 +254,26 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         return response.text
 
     # TODO 验证方法
-    def _check_metrics_endpoint(self):
+    def _check_metrics_endpoint(
+        self,
+        expected_bucket_time_to_first_token_list,
+        expected_bucket_inter_token_latency_list,
+        expected_bucket_e2e_request_latency_list
+    ):
         """Check if metrics endpoint is accessible and returns valid Prometheus metrics."""
         try:
             response = requests.get(f"{self.base_url}/metrics", timeout=10)
             self.assertEqual(response.status_code, 200)
             metrics_content = response.text
-            # self.assertIn("sglang_", metrics_content)
-            print("=================check_metrics_endpoint==================")
-            print(metrics_content)
-            print("=================check_metrics_endpoint END==================")
+            for le in expected_bucket_time_to_first_token_list:
+                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
+            for le in expected_bucket_inter_token_latency_list:
+                message = f'sglang:inter_token_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
+            for le in expected_bucket_e2e_request_latency_list:
+                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
             return metrics_content
         except requests.exceptions.RequestException as e:
             self.fail(f"Metrics endpoint not accessible: {e}")
@@ -320,43 +330,96 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
 
 
     def test_logging(self):
-        # 拉起4次服务
+        out_log_name = "./log_requests_level_out_log.txt"
+        err_log_name = "./log_requests_level_err_log.txt"
+
+        # 总共拉起4次服务
+
         # --log-requests、--log-requests-level
-        # --log-requests=False;--log-requests=True,--log-requests-level=[0, 1, 2, 3]
+        # 实际使用4次服务
+        # --log-requests=True,--log-requests-level=[0, 1, 2, 3]
         message = {
             "0": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None,.*",
             "1": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None, sampling_params=.*",
             "2": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
             "3": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
         }
-        out_log_name = "./log_requests_level_out_log.txt"
-        err_log_name = "./log_requests_level_err_log.txt"
         keyword_Finish = r".*Finish: obj=GenerateReqInput\(.*http_worker_ipc=None, text='just.*"
         keyword_start = "out={'text': '"
         keyword_end = "', 'output_ids'"
+
+        # --enable-metrics
+        # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
+        # 实际使用两次服务
+        # --enable-metrics=True, i=0 使用默认桶边界, i=1 使用自定义桶边界
+        my_bucket_list = ["0.1", "0.5", "1.0", "5.0", "10.0"]
+        # --bucket-time-to-first-token
+        default_bucket_time_to_first_token_list = [
+            "0.1", "0.2", "0.4", "0.6", "0.8",
+            "1.0", "2.0", "4.0", "6.0", "8.0",
+            "10.0", "20.0", "40.0", "60.0", "80.0",
+            "100.0", "200.0", "400.0",
+        ]
+        # --bucket-inter-token-latency
+        default_bucket_inter_token_latency_list = [
+            "0.002", "0.004", "0.006", "0.008",
+            "0.01", "0.015", "0.02", "0.025", "0.03", "0.035", "0.04", "0.06", "0.08",
+            "0.1", "0.2", "0.4", "0.6", "0.8",
+            "1.0", "2.0", "4.0", "6.0", "8.0",
+        ]
+        # --bucket-e2e-request-latency
+        default_bucket_e2e_request_latency_list = [
+            "0.1", "0.2", "0.4", "0.6", "0.8",
+            "1.0", "2.0", "4.0", "6.0", "8.0",
+            "10.0", "20.0", "40.0", "60.0", "80.0",
+            "100.0", "200.0", "400.0", "600.0", "800.0",
+            "1200.0", "2400.0",
+        ]
         for i in [0, 1, 2, 3]:
+            other_args = [
+                "--trust-remote-code",
+                "--mem-fraction-static",
+                "0.8",
+                "--attention-backend",
+                "ascend",
+                "--disable-cuda-graph",
+            ]
             out_log_file = open(out_log_name, "w+", encoding="utf-8")
             err_log_file = open(err_log_name, "w+", encoding="utf-8")
-            process = self._launch_server_with_logging(
-                log_requests=True,
-                log_requests_level=i,
-                out_log_file=out_log_file,
-                err_log_file=err_log_file,
-            ) if i != 2 else self._launch_server_with_logging(
-                log_requests=True,
-                out_log_file=out_log_file,
-                err_log_file=err_log_file,
+
+            # --log-requests、--log-requests-level
+            other_args.append("--log-requests")
+            # --log-requests-level default value is 2
+            if i != 2:
+                other_args.extend(["--log-requests-level", str(i)])
+
+            # --enable-metrics
+            if i <= 1:
+                other_args.extend(["--enable-metrics"])
+            if i == 1:
+                other_args.extend(["--bucket-time-to-first-token"] + [bucket for bucket in my_bucket_list])
+                other_args.extend(["--bucket-inter-token-latency"] + [bucket for bucket in my_bucket_list])
+                other_args.extend(["--bucket-e2e-request-latency"] + [bucket for bucket in my_bucket_list])
+
+            process = popen_launch_server(
+                self.model,
+                self.base_url,
+                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                other_args=other_args,
+                return_stdout_stderr=(out_log_file, err_log_file),
             )
 
             try:
+                # test inference
                 self._send_inference_request()
 
+                # test --log-requests、--log-requests-level
                 max_new_token = 2500 if i >= 2 else 100
 
                 response = requests.post(
                     f"{self.base_url}/generate",
                     json={
-                        "text": f"just return me a string with of 5000 characters",
+                        "text": f"just return me a string with of {max_new_token} characters",
                         "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
                     },
                 )
@@ -380,6 +443,21 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                     else:
                         self.assertNotIn("' ... '", out_text)
                         self.assertTrue(out_text_length > 2048)
+
+
+                # test metrics
+                if i == 0:
+                    self._check_metrics_endpoint(
+                        default_bucket_time_to_first_token_list,
+                        default_bucket_inter_token_latency_list,
+                        default_bucket_e2e_request_latency_list,
+                    )
+                elif i == 1:
+                    self._check_metrics_endpoint(
+                        my_bucket_list,
+                        my_bucket_list,
+                        my_bucket_list,
+                    )
             finally:
                 kill_process_tree(process.pid)
                 out_log_file.close()
@@ -1005,6 +1083,9 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+
+
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
 
@@ -1015,7 +1096,7 @@ if __name__ == "__main__":
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUDecodeLogInterval))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
