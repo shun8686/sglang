@@ -909,9 +909,10 @@ class TestAscendLoggingNPULabel(TestAscendLoggingNPUFullBase):
             # my_label = "business_line"
             response = requests.post(
                 f"{self.base_url}/generate",
-                "Content-Type: application/json",
-                f"X-Metrics-Labels:{my_label}=cunstomer_service",
+
                 json={
+                    "Content-Type": "application/json",
+                    "X-Metrics-Labels": f"{my_label}=cunstomer_service",
                     "text": self.test_prompt,
                     "sampling_params": {
                         "temperature": 0,
