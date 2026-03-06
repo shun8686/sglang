@@ -238,7 +238,7 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
 
 # TestAscendLoggingNPUMetric
-# --enable-metrics、--enable-metrics-for-all-schedulers TODO 是否需要启用dp_attention
+# --enable-metrics、--enable-metrics-for-all-schedulers TODO 基础、详细监控指标
 # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
 
 
