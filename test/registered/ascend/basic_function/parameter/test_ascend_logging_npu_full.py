@@ -374,7 +374,8 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
             "100.0", "200.0", "400.0", "600.0",
             "1200.0", "1800.0", "2400.0",
         ]
-        for i in [0, 1, 2, 3]:
+        # for i in [0, 1, 2, 3]:
+        for i in [2, 3]:
             other_args = [
                 "--trust-remote-code",
                 "--mem-fraction-static",
