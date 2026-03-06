@@ -24,6 +24,7 @@ spec:
         app: sgl-ascend
         task: prefill
     spec:
+      restartPolicy: Never
       hostNetwork: True
       containers:
       - image: {{ image }}
@@ -56,6 +57,7 @@ spec:
         args:
           - |
              bash /root/sglang/python/sglang/test/ascend/e2e/run_npu_testcase_green.sh {{ test_case }}
+             exit $?
         resources:
           requests:
             huawei.com/Ascend910: 16
@@ -121,6 +123,7 @@ spec:
         app: sgl-ascend
         task: decode
     spec:
+      restartPolicy: Never
       hostNetwork: True
       containers:
       - image: {{ image }}
@@ -153,6 +156,7 @@ spec:
         args:
           - |
              bash /root/sglang/python/sglang/test/ascend/e2e/run_npu_testcase_green.sh {{ test_case }}
+             exit $?
         resources:
           requests:
             huawei.com/Ascend910: 16
