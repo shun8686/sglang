@@ -9,6 +9,7 @@ import unittest
 import subprocess
 import signal
 from pathlib import Path
+from time import sleep
 
 import requests
 
@@ -542,6 +543,8 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
             #     self.assertIn(message, metrics_content)
             #     message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
             #     self.assertIn(message, metrics_content)
+            # sleep(600)
+            sleep(600)
         finally:
             self._safe_kill_process()
 
