@@ -492,7 +492,7 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
         try:
             self.process = self._launch_server_with_logging(
                 enable_metrics=True,
-                # enable_metrics_for_all_schedulers=True,
+                enable_metrics_for_all_schedulers=False,
                 tp_size=2,
                 dp_size=2
             )
