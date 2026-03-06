@@ -498,8 +498,8 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                 other_args.extend(["--log-requests-level", str(i)])
 
             # --enable-metrics
+            other_args.extend(["--enable-metrics"])
             if i <= 2:
-                other_args.extend(["--enable-metrics"])
                 other_args.extend(["--collect-tokens-histogram"])
 
             expected_time_to_first_token_bucket = None
