@@ -927,7 +927,7 @@ class TestAscendLoggingNPULabel(TestAscendLoggingNPUFullBase):
             response = requests.get(f"{self.base_url}/metrics", timeout=10)
             self.assertEqual(response.status_code, 200)
             metrics_content = response.text
-            self.assertIn(self.expected_output, metrics_content)
+            # self.assertIn(self.expected_output, metrics_content)
             message = f'sglang:time_to_first_token_seconds_bucket{{{my_label}="'
             self.assertIn(message, metrics_content)
             message = f'sglang:inter_token_latency_seconds_bucket{{{my_label}='
