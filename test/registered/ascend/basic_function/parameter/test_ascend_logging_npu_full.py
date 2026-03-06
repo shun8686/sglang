@@ -1157,7 +1157,8 @@ if __name__ == "__main__":
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
 
     # TODO
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsLevel))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
 
 
 
