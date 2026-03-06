@@ -29,6 +29,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=7200, suite="stage-b-test-npu")
 
+
 # Done
 # TestAscendLoggingNPURequests
 # --log-requests、--log-requests-level
@@ -36,7 +37,6 @@ register_npu_ci(est_time=7200, suite="stage-b-test-npu")
 # 求助开发，验证是否充分
 # --log-level、 --log-level-http
 # 已有用例覆盖基本功能
-
 
 
 # 求助开发，李果
@@ -154,7 +154,6 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         if log_level is not None:
             other_args.extend(["--log-level", log_level])
 
-
         if log_level_http is not None:
             other_args.extend(["--log-level-http", log_level_http])
 
@@ -258,32 +257,42 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
     # TODO 验证方法
     def _check_metrics_endpoint(
         self,
-        expected_bucket_time_to_first_token_list,
-        expected_bucket_inter_token_latency_list,
-        expected_bucket_e2e_request_latency_list
+        expected_time_to_first_token_bucket=None,
+        expected_inter_token_latency_bucket=None,
+        expected_e2e_request_latency_bucket=None,
+        expected_prompt_tokens_bucket=None,
+        expected_generation_tokens_bucket=None,
     ):
-        """Check if metrics endpoint is accessible and returns valid Prometheus metrics."""
-        try:
-            response = requests.get(f"{self.base_url}/metrics", timeout=10)
-            self.assertEqual(response.status_code, 200)
-            metrics_content = response.text
-            for le in expected_bucket_time_to_first_token_list:
-                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+        response = requests.get(f"{self.base_url}/metrics", timeout=10)
+        self.assertEqual(response.status_code, 200)
+        metrics_content = response.text
+        if expected_time_to_first_token_bucket is not None:
+            for le in expected_time_to_first_token_bucket:
+                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{self.model}"}}'
                 self.assertIn(message, metrics_content)
-            for le in expected_bucket_inter_token_latency_list:
-                message = f'sglang:inter_token_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+        if expected_inter_token_latency_bucket is not None:
+            for le in expected_inter_token_latency_bucket:
+                message = f'sglang:inter_token_latency_seconds_bucket{{le="{le}",model_name="{self.model}"}}'
                 self.assertIn(message, metrics_content)
-            for le in expected_bucket_e2e_request_latency_list:
-                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+        if expected_e2e_request_latency_bucket is not None:
+            for le in expected_e2e_request_latency_bucket:
+                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{self.model}"}}'
                 self.assertIn(message, metrics_content)
-            return metrics_content
-        except requests.exceptions.RequestException as e:
-            self.fail(f"Metrics endpoint not accessible: {e}")
+        if expected_prompt_tokens_bucket is not None:
+            for le in expected_prompt_tokens_bucket:
+                message = f'sglang:prompt_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
+                self.assertIn(message, metrics_content)
+        if expected_generation_tokens_bucket is not None:
+            for le in expected_generation_tokens_bucket:
+                message = f'sglang:expected_generation_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
+                self.assertIn(message, metrics_content)
+        return metrics_content
 
     def _safe_kill_process(self):
         if self.process is not None:
             kill_process_tree(self.process.pid)
             self.process = None
+
 
 class TestAscendLogging(TestAscendLoggingNPUFullBase):
     def test_logging_default(self):
@@ -330,7 +339,6 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
             os.remove(out_log_name)
             os.remove(err_log_name)
 
-
     def test_logging(self):
         out_log_name = "./log_requests_level_out_log.txt"
         err_log_name = "./log_requests_level_err_log.txt"
@@ -355,29 +363,45 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
         # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
         # 实际使用两次服务 i=[0, 1]
         # --enable-metrics=True, i=0 使用默认桶边界, i=1 使用自定义桶边界
-        my_bucket_list = ["0.1", "0.5", "1.0", "5.0", "10.0"]
+        my_bucket = ["0.1", "0.5", "1.0", "5.0", "10.0"]
         # --bucket-time-to-first-token
-        default_bucket_time_to_first_token_list = [
+        default_time_to_first_token_bucket = [
             "0.1", "0.2", "0.4", "0.6", "0.8",
             "1.0", "2.0", "4.0", "6.0", "8.0",
             "10.0", "20.0", "40.0", "60.0", "80.0",
             "100.0", "200.0", "400.0",
         ]
         # --bucket-inter-token-latency
-        default_bucket_inter_token_latency_list = [
+        default_inter_token_latency_bucket = [
             "0.002", "0.004", "0.006", "0.008",
             "0.01", "0.015", "0.02", "0.025", "0.03", "0.035", "0.04", "0.06", "0.08",
             "0.1", "0.2", "0.4", "0.6", "0.8",
             "1.0", "2.0", "4.0", "6.0", "8.0",
         ]
         # --bucket-e2e-request-latency
-        default_bucket_e2e_request_latency_list = [
+        default_e2e_request_latency_bucket = [
             "0.1", "0.2", "0.4", "0.6", "0.8",
             "1.0", "2.0", "4.0", "6.0", "8.0",
             "10.0", "20.0", "40.0", "60.0", "80.0",
             "100.0", "200.0", "400.0", "600.0",
             "1200.0", "1800.0", "2400.0",
         ]
+        # --collect-tokens-histogram
+        # --prompt-tokens-buckets、--generation-tokens-bucket
+        default_tokens_bucket = [
+            "100.0", "300.0", "500.0", "700.0",
+            "1000.0", "1500.0", "2000.0", "3000.0", "4000.0", "5000.0", "6000.0", "7000.0", "8000.0", "9000.0",
+            "10000.0", "12000.0", "15000.0", "20000.0", "22000.0", "25000.0",
+            "30000.0", "35000.0", "40000.0", "66000.0", "99000.0",
+            "132000.0", "300000.0", "600000.0", "900000.0",
+            "1.1e+06",
+        ]
+        my_tokens_bucket = [
+            "100.0", "1000.0", "10000.0", "100000.0", "300000.0", "600000.0", "900000.0",
+        ]
+        my_tse_set = ["1000", "2", "8"]
+        my_tse_bucket = ["984.0", "992.0", "996.0", "998.0", "1000.0", "1002.0", "1004.0", "1008.0", "1016.0"]
+
         for i in [0, 1, 2, 3]:
             other_args = [
                 "--trust-remote-code",
@@ -397,12 +421,41 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                 other_args.extend(["--log-requests-level", str(i)])
 
             # --enable-metrics
-            if i <= 1:
+            if i <= 2:
                 other_args.extend(["--enable-metrics"])
-            if i == 1:
-                other_args.extend(["--bucket-time-to-first-token"] + [bucket for bucket in my_bucket_list])
-                other_args.extend(["--bucket-inter-token-latency"] + [bucket for bucket in my_bucket_list])
-                other_args.extend(["--bucket-e2e-request-latency"] + [bucket for bucket in my_bucket_list])
+                other_args.extend(["--collect-tokens-histogram"])
+
+            expected_time_to_first_token_bucket = None
+            expected_inter_token_latency_bucket = None
+            expected_e2e_request_latency_bucket = None
+
+            expected_prompt_tokens_bucket = None
+            expected_generation_tokens_bucket = None
+            if i == 0:
+                expected_time_to_first_token_bucket = default_time_to_first_token_bucket
+                expected_inter_token_latency_bucket = default_inter_token_latency_bucket
+                expected_e2e_request_latency_bucket = default_e2e_request_latency_bucket
+
+                expected_prompt_tokens_bucket = default_tokens_bucket
+                expected_generation_tokens_bucket = default_tokens_bucket
+            elif i == 1:
+                other_args.extend(["--bucket-time-to-first-token"] + my_bucket)
+                other_args.extend(["--bucket-inter-token-latency"] + my_bucket)
+                other_args.extend(["--bucket-e2e-request-latency"] + my_bucket)
+                expected_time_to_first_token_bucket = my_bucket
+                expected_inter_token_latency_bucket = my_bucket
+                expected_e2e_request_latency_bucket = my_bucket
+
+                other_args.extend(["--prompt-tokens-buckets"] + ["custom"] + my_tokens_bucket)
+                other_args.extend(["--generation-tokens-buckets"] + ["custom"] + my_tokens_bucket)
+                expected_prompt_tokens_bucket = my_tokens_bucket
+                expected_generation_tokens_bucket = my_tokens_bucket
+            elif i == 2:
+                other_args.extend(["--generation-tokens-buckets"] + ["tse"] + my_tse_set)
+                other_args.extend(["--generation-tokens-buckets"] + ["tse"] + my_tse_set)
+                expected_prompt_tokens_bucket = my_tse_bucket
+                expected_generation_tokens_bucket = my_tse_bucket
+
 
             process = popen_launch_server(
                 self.model,
@@ -447,20 +500,15 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                         self.assertNotIn("' ... '", out_text)
                         self.assertTrue(out_text_length > 2048)
 
-
                 # test --enable-metrics
                 # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
-                if i == 0:
+                if i <= 2:
                     self._check_metrics_endpoint(
-                        default_bucket_time_to_first_token_list,
-                        default_bucket_inter_token_latency_list,
-                        default_bucket_e2e_request_latency_list,
-                    )
-                elif i == 1:
-                    self._check_metrics_endpoint(
-                        my_bucket_list,
-                        my_bucket_list,
-                        my_bucket_list,
+                        expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
+                        expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
+                        expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
+                        expected_prompt_tokens_bucket=expected_prompt_tokens_bucket,
+                        expected_generation_tokens_bucket=expected_generation_tokens_bucket,
                     )
             finally:
                 kill_process_tree(process.pid)
@@ -662,6 +710,7 @@ class TestAscendLoggingNPURequestsTarget(TestAscendLoggingNPUFullBase):
 
         print(f"✓ All log-requests-target variations test passed")
 
+
 class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
     def test_metrics(self):
         """Test enable-metrics-for-all-schedulers with TP2."""
@@ -686,7 +735,8 @@ class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
 
             self.assertIn('tp_rank="0"', metrics_content)
             # self.assertNotIn('tp_rank="1"', metrics_content)
-            time_to_first_token_seconds_bucket_list = ["0.1", "0.2", "0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "6.0", "8.0", "400.0", "+Inf"]
+            time_to_first_token_seconds_bucket_list = ["0.1", "0.2", "0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "6.0",
+                                                       "8.0", "400.0", "+Inf"]
             for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
                 message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
                 self.assertIn(message, metrics_content)
@@ -883,7 +933,8 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
         # expected_prompt_tokens_bucket = default_prompt_tokens_bucket
         # expected_generation_tokens_bucket = default_generation_tokens_bucket
         expected_prompt_tokens_bucket = ["100.0", "500.0", "1000.0", "5000.0"]
-        expected_generation_tokens_bucket = ["984.0", "992.0", "996.0", "998.0", "1000.0", "1002.0", "1004.0", "1008.0", "1016.0", ]
+        expected_generation_tokens_bucket = ["984.0", "992.0", "996.0", "998.0", "1000.0", "1002.0", "1004.0", "1008.0",
+                                             "1016.0", ]
 
         self.process = popen_launch_server(
             self.model,
@@ -893,11 +944,7 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
             # return_stdout_stderr=(out_log_file, err_log_file),
         )
 
-
-
-
         try:
-
 
             result = self._send_inference_request()
             print(f"✓ prompt-tokens-buckets default test passed, result: {result[:50]}...")
@@ -917,8 +964,6 @@ class TestAscendLoggingNPUCollectTokensHistogram(TestAscendLoggingNPUFullBase):
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
-
-
 
         # prompt_tokens_bucket_list = [["default"], ["tse", "512", "2", "8"], ["custom", "100", "500", "1000", "5000"]]
         # generation_tokens_buckets_list = [["custom", "100", "500", "1000", "5000"], ["tse", "512", "2", "8"],
@@ -1162,15 +1207,12 @@ if __name__ == "__main__":
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
 
-
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
 
     # TODO
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUMetric))
     suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
-
-
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsFormat))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPURequestsTarget))
