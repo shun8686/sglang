@@ -45,7 +45,7 @@ MODEL_OTHER_ARGS = [
     "--mem-fraction-static",
     0.77,
     "--max-running-requests",
-    256,
+    64,
     "--disable-radix-cache",
     "--chunked-prefill-size",
     "-1",
@@ -77,7 +77,7 @@ class TestAscendDeepSeekR1W8A8(TestAscendPerformanceTestCaseBase):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    max_concurrency = 256
+    max_concurrency = 64
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
