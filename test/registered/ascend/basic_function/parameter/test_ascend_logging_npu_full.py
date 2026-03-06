@@ -114,12 +114,13 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         prompt_tokens_buckets=None,
         generation_tokens_buckets=None,
         gc_warning_threshold_secs=0.0,
-        decode_log_interval=40,
+        decode_log_interval=None,
         enable_request_time_stats_logging=False,
         enable_trace=False,
         otlp_traces_endpoint="localhost:4317",
         crash_dump_folder=None,
         tp_size=None,
+        enable_dp_attention=None,
         dp_size=None,
         uvicorn_access_log_exclude_prefixes=None,
         show_time_cost=None,
@@ -143,7 +144,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         if tp_size:
             other_args.extend(["--tp-size", str(tp_size)])
 
-        if dp_size:
+        if enable_dp_attention:
+            other_args.extend(["--enable-dp-attention"])
             other_args.extend(["--dp-size", str(dp_size)])
 
         if log_level is not None:
@@ -190,7 +192,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         if gc_warning_threshold_secs > 0:
             other_args.extend(["--gc-warning-threshold-secs", str(gc_warning_threshold_secs)])
 
-        other_args.extend(["--decode-log-interval", str(decode_log_interval)])
+        if decode_log_interval:
+            other_args.extend(["--decode-log-interval", str(decode_log_interval)])
 
         if enable_request_time_stats_logging:
             other_args.append("--enable-request-time-stats-logging")
@@ -462,8 +465,76 @@ class TestAscendLoggingNPURequestsTarget(TestAscendLoggingNPUFullBase):
 
         print(f"✓ All log-requests-target variations test passed")
 
-
 class TestAscendLoggingNPUMetric(TestAscendLoggingNPUFullBase):
+    def test_metrics(self):
+        """Test enable-metrics-for-all-schedulers with TP2."""
+        print("\n=== Test not enable_metrics_for_all_schedulers  ===")
+        print("\n=== Test default bucket set  ===")
+        print("")
+
+        try:
+            self.process = self._launch_server_with_logging(
+                enable_metrics=True,
+                # enable_metrics_for_all_schedulers=True,
+                tp_size=2,
+                enable_dp_attention=True,
+                dp_size=2
+            )
+            # time.sleep(8)
+
+            result = self._send_inference_request()
+            # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
+
+            metrics_content = self._check_metrics_endpoint()
+
+            self.assertIn('tp_rank="0"', metrics_content)
+            # self.assertNotIn('tp_rank="1"', metrics_content)
+            time_to_first_token_seconds_bucket_list = ["0.1", "0.2", "0.4", "0.6", "0.8", "1.0", "2.0", "4.0", "6.0", "8.0", "400.0", "+Inf"]
+            for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
+                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
+                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+                self.assertIn(message, metrics_content)
+        finally:
+            self._safe_kill_process()
+
+    def test_metrics_for_3(self):
+        """Test enable-metrics-for-all-schedulers with TP2."""
+        print("\n=== Test 03: test_metrics_for_3 ===")
+        print("")
+
+        try:
+            self.process = self._launch_server_with_logging(
+                enable_metrics=True,
+                enable_metrics_for_all_schedulers=True,
+                tp_size=2,
+                enable_dp_attention=True,
+                dp_size=2,
+                # bucket_time_to_first_token=[0.1, 0.5, 1.0, 2.0, 5.0],
+                # bucket_inter_token_latency=[0.01, 0.05, 0.1, 0.5],
+                # bucket_e2e_request_latency=[0.1, 0.5, 1.0, 2.0, 5.0],
+            )
+            # time.sleep(8)
+
+            result = self._send_inference_request()
+            # print(f"✓ enable-metrics-for-all-schedulers test passed, result: {result[:50]}...")
+
+            metrics_content = self._check_metrics_endpoint()
+
+            self.assertIn('tp_rank="0"', metrics_content)
+            # self.assertNotIn('tp_rank="1"', metrics_content)
+            # for le in ["0.1", "0.2", "0.4", "0.8", "1.0", "400.0", "+Inf"]:
+            #     message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+            #     self.assertIn(message, metrics_content)
+            #     message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{MODEL_PATH}"}}'
+            #     self.assertIn(message, metrics_content)
+            # sleep(600)
+            # sleep(600)
+        finally:
+            self._safe_kill_process()
+
+
+class TestAscendLoggingNPUMetricWip(TestAscendLoggingNPUFullBase):
     # def test_08_enable_metrics_for_all_schedulers(self):
     #     """Test enable-metrics-for-all-schedulers with TP2."""
     #     print("\n=== Test 08: enable-metrics-for-all-schedulers (TP2) ===")
