@@ -106,6 +106,14 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
     @classmethod
     def prepare_data(cls):
+        cls.other_args = [
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
 
         # 默认场景
         # --log-requests=False;
@@ -312,6 +320,17 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
         return process
 
+    def _clean_environment(self, process, out_log_file, err_log_file):
+        """Clean up environment variables used by tests."""
+        if process:
+            kill_process_tree(process.pid)
+        if out_log_file:
+            out_log_file.close()
+            os.remove(self.out_log_name)
+        if err_log_file:
+            err_log_file.close()
+            os.remove(self.err_log_name)
+
     def _send_inference_request(self, max_new_tokens=32):
         """Send a basic inference request."""
         response = requests.post(
@@ -380,7 +399,16 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
                 self.assertNotIn("' ... '", out_text)
                 self.assertTrue(out_text_length > 2048)
 
-    # TODO 验证方法
+    def get_default_other_args(self):
+        return [
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+
     def _check_metrics_endpoint(
         self,
         expected_time_to_first_token_bucket=None,
@@ -827,6 +855,67 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
             "ascend",
             "--disable-cuda-graph",
         ]
+
+
+class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
+    def test_logging_case_1(self):
+        other_args = self.get_default_other_args()
+        out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
+        err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
+
+        # --log-requests=True
+        ## --log-requests-level=1
+        other_args.append("--log-requests")
+        log_requests_level = 1
+        other_args.extend(["--log-requests-level", str(log_requests_level)])
+
+        # --enable-metrics=True
+        ## --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
+        other_args.extend(["--enable-metrics"])
+        other_args.extend(["--bucket-time-to-first-token"] + self.my_bucket)
+        other_args.extend(["--bucket-inter-token-latency"] + self.my_bucket)
+        other_args.extend(["--bucket-e2e-request-latency"] + self.my_bucket)
+        expected_time_to_first_token_bucket = self.my_bucket
+        expected_inter_token_latency_bucket = self.my_bucket
+        expected_e2e_request_latency_bucket = self.my_bucket
+
+        ## --collect-tokens-histogram=True
+        other_args.extend(["--collect-tokens-histogram"])
+        ### --prompt-tokens-buckets=custom
+        ### --generation-tokens-buckets=custom
+        other_args.extend(["--prompt-tokens-buckets"] + ["custom"] + self.my_tokens_bucket)
+        other_args.extend(["--generation-tokens-buckets"] + ["custom"] + self.my_tokens_bucket)
+        expected_prompt_tokens_bucket = self.my_tokens_bucket
+        expected_generation_tokens_bucket = self.my_tokens_bucket
+
+        process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+            return_stdout_stderr=(out_log_file, err_log_file),
+        )
+
+        try:
+            # test inference function
+            self._test_inference_function()
+
+            # test --log-requests、--log-requests-level
+            self._test_log_requests_level(log_requests_level, out_log_file)
+
+            # test --enable-metrics
+            ## --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
+            ## --collect-tokens-histogram
+            ### --prompt-tokens-buckets=default、--generation-tokens-buckets=default
+            self._check_metrics_endpoint(
+                expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
+                expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
+                expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
+                expected_prompt_tokens_bucket=expected_prompt_tokens_bucket,
+                expected_generation_tokens_bucket=expected_generation_tokens_bucket,
+            )
+        finally:
+            self._clean_environment(process, out_log_file, err_log_file)
 
 
 # TODO 验证方式、删减
@@ -1525,7 +1614,10 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+
+
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
 
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
