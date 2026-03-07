@@ -1054,19 +1054,23 @@ class TestAscendLoggingNPULabel(TestAscendLoggingNPUFullBase):
             "ascend",
             "--disable-cuda-graph",
         ]
+        out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
+        err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
         other_args.extend(["--enable-metrics"])
         my_label = "business_line"
         other_args.extend(["--tokenizer-metrics-custom-labels-header", "X-Metrics-Labels"])
         other_args.extend(["--tokenizer-metrics-allowed-custom-labels", my_label])
 
-
-        self.process = popen_launch_server(
+        process = popen_launch_server(
             self.model,
             self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
-            # return_stdout_stderr=(out_log_file, err_log_file),
+            return_stdout_stderr=(out_log_file, err_log_file),
         )
+
+
+
 
         try:
             # my_label = "business_line"
@@ -1135,28 +1139,72 @@ class TestAscendLoggingNPUGCWarningThresholdSecs(TestAscendLoggingNPUFullBase):
         prompt_template = "just return me a string with of 10000 characters: " + "A" * 5000
         max_token = 1000
 
+        other_args = [
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+        out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
+        err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
 
-        def send_request():
-            try:
-                response = requests.post(
-                    f"http://127.0.0.1:30000/generate",
-                    json={
-                        "text": prompt_template,
-                        "sampling_params": {"temperature": 0, "max_new_tokens": max_token},
-                    },
-                )
-            except Exception as e:
-                print(e)
+        # --log-requests、--log-requests-level
+        other_args.append("--log-requests")
 
-        threads = []
-        for _ in range(100):
-            t = threading.Thread(target=send_request)
-            t.start()
-            threads.append(t)
-            sleep(0.01)
 
-        for t in threads:
-            t.join()
+        # --enable-metrics
+        other_args.extend(["--enable-metrics"])
+
+        other_args.extend(["--gc-warning-threshold-secs", "0.01"])
+
+        self.process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+            return_stdout_stderr=(out_log_file, err_log_file),
+        )
+        try:
+            def send_request():
+                try:
+                    response = requests.post(
+                        f"{self.base_url}/generate",
+                        json={
+                            "text": prompt_template,
+                            "sampling_params": {"temperature": 0, "max_new_tokens": max_token},
+                        },
+                    )
+                except Exception as e:
+                    print(e)
+
+            threads = []
+            for _ in range(200):
+                t = threading.Thread(target=send_request)
+                t.start()
+                threads.append(t)
+                sleep(0.01)
+
+            for t in threads:
+                t.join()
+
+            sleep(600)
+
+            GC_info = "LONG GARBAGE COLLECTION DETECTED"
+            out_log_file.seek(0)
+            content = out_log_file.read()
+            self.assertTrue(len(content) > 0)
+            self.assertIn(GC_info, content)
+        finally:
+            kill_process_tree(self.process.pid)
+            out_log_file.close()
+            err_log_file.close()
+            os.remove(self.out_log_name)
+            os.remove(self.err_log_name)
+
+
+
 
 
 class TestAscendLoggingNPUEnableRequestTimeStatsLogging(TestAscendLoggingNPUFullBase):
@@ -1334,13 +1382,13 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
 
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPULabel))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
 
 
 
