@@ -214,8 +214,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         out_log_file.seek(0)
         content = out_log_file.read()
-        print("generate" in content)
-        print("health" in content)
+        print('"POST /generate HTTP/1.1" 200 OK' in content)
+        print('"GET /health HTTP/1.1" 200 OK' in content)
         # message_0 = (f'sglang:num_decode_transfer_queue_reqs{{engine_type="unified",model_name="{self.model}"'
         #              f',moe_ep_rank="0",pp_rank="0",tp_rank="0"}}')
         # message_1 = (f'sglang:num_decode_transfer_queue_reqs{{engine_type="unified",model_name="{self.model}"'
@@ -513,6 +513,12 @@ class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
             expected_prompt_tokens_bucket=self.expected_prompt_tokens_bucket,
             expected_generation_tokens_bucket=self.expected_generation_tokens_bucket,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        sleep(200)
+        super().tearDownClass()
+        # cls._temp_dir_obj.cleanup()
 
 
 class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
