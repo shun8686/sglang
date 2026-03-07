@@ -399,6 +399,33 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
                 self.assertNotIn("' ... '", out_text)
                 self.assertTrue(out_text_length > 2048)
 
+    def _test_log_metrics_tokenizer_label(self):
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "Content-Type": "application/json",
+                "X-Metrics-Labels": f"{self.my_label}=cunstomer_service",
+                "text": self.test_prompt,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.expected_output, response.text)
+
+        response = requests.get(f"{self.base_url}/metrics", timeout=10)
+        self.assertEqual(response.status_code, 200)
+        metrics_content = response.text
+        message = f'sglang:time_to_first_token_seconds_bucket{{{self.my_label}="'
+        self.assertIn(message, metrics_content)
+        message = f'sglang:inter_token_latency_seconds_bucket{{{self.my_label}='
+        self.assertIn(message, metrics_content)
+        message = f'sglang:e2e_request_latency_seconds_bucket{{{self.my_label}='
+        self.assertIn(message, metrics_content)
+
     def get_default_other_args(self):
         return [
             "--trust-remote-code",
@@ -441,6 +468,8 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
                 message = f'sglang:generation_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
                 self.assertIn(message, metrics_content)
         return metrics_content
+
+
 
     def _safe_kill_process(self):
         if self.process is not None:
@@ -966,6 +995,43 @@ class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
         finally:
             self._clean_environment(process, out_log_file, err_log_file)
 
+class TestAscendLoggingCase3(TestAscendLoggingNPUFullBase):
+    def test_logging_case_3(self):
+        other_args = self.get_default_other_args()
+        out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
+        err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
+
+        # --log-requests=True
+        ## --log-requests-level=3
+        other_args.append("--log-requests")
+        log_requests_level = 3
+        other_args.extend(["--log-requests-level", str(log_requests_level)])
+
+        # --enable-metrics=True
+        other_args.extend(["--enable-metrics"])
+        # --tokenizer-metrics-custom-labels-header、--tokenizer-metrics-allowed-custom-labels
+        other_args.extend(["--tokenizer-metrics-custom-labels-header", self.labels_header])
+        other_args.extend(["--tokenizer-metrics-allowed-custom-labels", self.my_label])
+
+        process = popen_launch_server(
+            self.model,
+            self.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+            return_stdout_stderr=(out_log_file, err_log_file),
+        )
+
+        try:
+            # test inference function
+            self._test_inference_function()
+
+            # test --log-requests、--log-requests-level
+            self._test_log_requests_level(log_requests_level, out_log_file)
+
+            # test --tokenizer-metrics-custom-labels-header、--tokenizer-metrics-allowed-custom-labels
+            self._test_log_metrics_tokenizer_label()
+        finally:
+            self._clean_environment(process, out_log_file, err_log_file)
 
 # TODO 验证方式、删减
 class TestAscendLoggingNPULevel(TestAscendLoggingNPUFullBase):
@@ -1667,7 +1733,8 @@ if __name__ == "__main__":
 
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase3))
 
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
