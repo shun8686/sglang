@@ -53,14 +53,6 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
 
         cls.prepare_args_related_data()
 
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=cls.other_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-        )
-
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
@@ -395,7 +387,7 @@ class TestAscendLoggingCase0(TestAscendLoggingNPUFullBase):
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
-    def _test_log_target(self):
+    def _test_log_requests_target(self):
         log_files = list(Path(self.temp_dir).glob("*.log"))
         self.assertGreater(len(log_files), 0)
 
@@ -425,7 +417,9 @@ class TestAscendLoggingCase0(TestAscendLoggingNPUFullBase):
             expected_generation_tokens_bucket=self.expected_generation_tokens_bucket,
         )
 
-        self._test_log_target()
+        self._test_log_requests_target()
+
+        self._test_gc_warning_threshold(self.err_log_file)
 
     @classmethod
     def tearDownClass(cls):
