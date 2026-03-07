@@ -520,6 +520,7 @@ class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
 
     def test_logging_case_2(self):
         for le in self.expected_prompt_tokens_bucket:
+            print(le)
             message = f'sglang:prompt_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
             print(message)
         # self._test_inference_function()
