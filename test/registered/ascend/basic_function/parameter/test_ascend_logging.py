@@ -500,7 +500,7 @@ class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
     def test_logging_case_1(self):
         self._test_inference_function()
 
-        self._test_log_exclude_prefixes(True)
+        self._test_log_exclude_prefixes(True, self.out_log_file)
 
         self._test_log_requests_level(self.log_requests_level, self.out_log_file)
 
