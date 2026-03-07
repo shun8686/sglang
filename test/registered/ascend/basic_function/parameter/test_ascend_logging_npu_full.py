@@ -669,8 +669,8 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                         t.join()
 
                     GC_info = "LONG GARBAGE COLLECTION DETECTED"
-                    out_log_file.seek(0)
-                    content = out_log_file.read()
+                    err_log_file.seek(0)
+                    content = err_log_file.read()
                     self.assertTrue(len(content) > 0)
                     self.assertIn(GC_info, content)
             finally:
@@ -1383,13 +1383,13 @@ if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
 
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
 
     # DONE
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogRequests))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUCollectTokensHistogram))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPULabel))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingNPUGCWarningThresholdSecs))
 
 
 
