@@ -27,7 +27,12 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
     """Testcase：Verify the correct functionality of parameters in the logging feature.
 
     [Test Category] Parameter
-    [Test Target] --log-requests
+    [Test Target] --log-requests; --log-requests-level; --log-requests-target; --uvicorn-access-log-exclude-prefixes;
+    --enable-metrics; --enable-metrics-for-all-scheduler;
+    --bucket-time-to-first-token; --bucket-inter-token-latency; --bucket-e2e-request-latency;
+    --collect-tokens-histogram; --prompt-tokens-buckets;
+    --generation-tokens-buckets; --tokenizer-metrics-custom-labels-header; --tokenizer-metrics-allowed-custom-labels;
+    --gc-warning-threshold-secs
     """
 
     @classmethod
@@ -81,6 +86,9 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         cls.keyword_Finish = r".*Finish: obj=GenerateReqInput\(.*http_worker_ipc=None, text='just.*"
         cls.keyword_start = "out={'text': '"
         cls.keyword_end = "', 'output_ids'"
+
+        # --uvicorn-access-log-exclude-prefixes
+        cls.log_exclude_prefixes = ["/health", "/get_server_info"]
 
         # --enable-metrics
         ## --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
@@ -216,32 +224,34 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
             self.assertIn(health_message, content)
             self.assertIn(get_server_info_message, content)
 
-    def _test_log_metrics_tokenizer_label(self):
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "Content-Type": "application/json",
-                "X-Metrics-Labels": f"{self.my_label}=cunstomer_service",
-                "text": self.test_prompt,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+    @classmethod
+    def _prepare_log_requests_target_obj(cls):
+        cls._temp_dir_obj = tempfile.TemporaryDirectory()
+        cls.temp_dir = cls._temp_dir_obj.name
 
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.expected_output, response.text)
+        cls.temp_level1_dir = os.path.join(cls.temp_dir, "level1")
+        cls.temp_level2_dir = os.path.join(cls.temp_dir, "level2")
+        cls.temp_level3_dir = os.path.join(cls.temp_dir, "level3")
 
-        response = requests.get(f"{self.base_url}/metrics", timeout=10)
-        self.assertEqual(response.status_code, 200)
-        metrics_content = response.text
-        message = f'sglang:time_to_first_token_seconds_bucket{{{self.my_label}="'
-        self.assertIn(message, metrics_content)
-        message = f'sglang:inter_token_latency_seconds_bucket{{{self.my_label}='
-        self.assertIn(message, metrics_content)
-        message = f'sglang:e2e_request_latency_seconds_bucket{{{self.my_label}='
-        self.assertIn(message, metrics_content)
+        os.makedirs(cls.temp_level3_dir, exist_ok=True)
+
+        target_config = ["stdout", cls.temp_dir, cls.temp_level3_dir]
+        cls.other_args.extend(["--log-requests-target"] + target_config)
+
+    def _test_log_requests_target(self):
+        log_files = list(Path(self.temp_dir).glob("*.log"))
+        self.assertGreater(len(log_files), 0)
+
+        file_content = log_files[0].read_text()
+        self.assertIn("Receive:", file_content)
+        self.assertIn("Finish:", file_content)
+
+        log_files = list(Path(self.temp_level3_dir).glob("*.log"))
+        self.assertGreater(len(log_files), 0)
+
+        file_content = log_files[0].read_text()
+        self.assertIn("Receive:", file_content)
+        self.assertIn("Finish:", file_content)
 
     def _test_metrics(
         self,
@@ -288,34 +298,32 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         else:
             self.assertNotIn(message_1, response.text)
 
-    @classmethod
-    def _prepare_log_requests_target_obj(cls):
-        cls._temp_dir_obj = tempfile.TemporaryDirectory()
-        cls.temp_dir = cls._temp_dir_obj.name
+    def _test_log_metrics_tokenizer_label(self):
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "Content-Type": "application/json",
+                "X-Metrics-Labels": f"{self.my_label}=cunstomer_service",
+                "text": self.test_prompt,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
 
-        cls.temp_level1_dir = os.path.join(cls.temp_dir, "level1")
-        cls.temp_level2_dir = os.path.join(cls.temp_dir, "level2")
-        cls.temp_level3_dir = os.path.join(cls.temp_dir, "level3")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.expected_output, response.text)
 
-        os.makedirs(cls.temp_level3_dir, exist_ok=True)
-
-        target_config = ["stdout", cls.temp_dir, cls.temp_level3_dir]
-        cls.other_args.extend(["--log-requests-target"] + target_config)
-
-    def _test_log_requests_target(self):
-        log_files = list(Path(self.temp_dir).glob("*.log"))
-        self.assertGreater(len(log_files), 0)
-
-        file_content = log_files[0].read_text()
-        self.assertIn("Receive:", file_content)
-        self.assertIn("Finish:", file_content)
-
-        log_files = list(Path(self.temp_level3_dir).glob("*.log"))
-        self.assertGreater(len(log_files), 0)
-
-        file_content = log_files[0].read_text()
-        self.assertIn("Receive:", file_content)
-        self.assertIn("Finish:", file_content)
+        response = requests.get(f"{self.base_url}/metrics", timeout=10)
+        self.assertEqual(response.status_code, 200)
+        metrics_content = response.text
+        message = f'sglang:time_to_first_token_seconds_bucket{{{self.my_label}="'
+        self.assertIn(message, metrics_content)
+        message = f'sglang:inter_token_latency_seconds_bucket{{{self.my_label}='
+        self.assertIn(message, metrics_content)
+        message = f'sglang:e2e_request_latency_seconds_bucket{{{self.my_label}='
+        self.assertIn(message, metrics_content)
 
     def _test_gc_warning_threshold(self, err_log_file):
         prompt_template = "just return me a string with of 10000 characters: " + "A" * 5000
@@ -422,7 +430,7 @@ class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
         cls.log_requests_level = 1
         cls.other_args.extend(["--log-requests-level", str(cls.log_requests_level)])
 
-        cls.log_exclude_prefixes = ["/health"]
+
         cls.other_args.extend(["--uvicorn-access-log-exclude-prefixes"] + cls.log_exclude_prefixes)
 
         cls.other_args.extend(["--enable-metrics"])
@@ -539,4 +547,18 @@ class TestAscendLoggingCase3(TestAscendLoggingNPUFullBase):
 
 
 if __name__ == "__main__":
-    unittest.main()
+    # unittest.main()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
+
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingDefault))
+
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase0))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase3))
+
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
