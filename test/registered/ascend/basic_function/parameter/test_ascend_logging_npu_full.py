@@ -365,6 +365,24 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         self.assertIn(self.expected_output, response.text)
         return response.text
 
+    @staticmethod
+    def get_lines_with_keyword(filename, keyword):
+        results = []
+        try:
+            with open(filename, "r", encoding="utf-8") as file:
+                for line_num, line in enumerate(file, 1):
+                    if re.match(keyword, line):
+                        results.append(
+                            {
+                                "line_number": line_num,
+                                "content": line.strip(),
+                            }
+                        )
+            return results
+        except Exception as e:
+            print(f"error:{e}")
+            return []
+
     def _test_log_requests_level(self, log_requests_level, out_log_file):
         """Send a basic inference request to test inference function."""
         # When the log level is 2, input and output will be truncated, retaining a length of 2048.
@@ -385,7 +403,7 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
         self.assertTrue(len(content) > 0)
         self.assertIsNotNone(re.search(self.log_request_message_dict[str(log_requests_level)], content))
         if log_requests_level >= 2:
-            lines = get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
+            lines = self.get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
             Finish_message = lines[0]["content"]
             start_index = Finish_message.find(self.keyword_start) + len(self.keyword_start)
             end_index = Finish_message.find(self.keyword_end)
@@ -436,7 +454,7 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
             "--disable-cuda-graph",
         ]
 
-    def _check_metrics_endpoint(
+    def _test_metrics(
         self,
         expected_time_to_first_token_bucket=None,
         expected_inter_token_latency_bucket=None,
@@ -507,93 +525,11 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
             self.process = None
 
 
-class TestAscendLogging(TestAscendLoggingNPUFullBase):
-    # def test_logging_default(self):
-    #     # --log-requests=False;
-    #     # # --log-requests、--log-requests-level
-    #
-    #     other_args = [
-    #         "--trust-remote-code",
-    #         "--mem-fraction-static",
-    #         "0.8",
-    #         "--attention-backend",
-    #         "ascend",
-    #         "--disable-cuda-graph",
-    #     ]
-    #     out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
-    #     err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
-    #
-    #     process = popen_launch_server(
-    #         self.model,
-    #         self.base_url,
-    #         timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    #         other_args=other_args,
-    #         return_stdout_stderr=(out_log_file, err_log_file),
-    #     )
-    #
-    #     try:
-    #         self._send_inference_request()
-    #
-    #         max_new_token = 100
-    #
-    #         response = requests.post(
-    #             f"{self.base_url}/generate",
-    #             json={
-    #                 "text": f"just return me a string with of {max_new_token} characters",
-    #                 "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
-    #             },
-    #         )
-    #         self.assertEqual(response.status_code, 200)
-    #
-    #         # check --log-requests=False
-    #         out_log_file.seek(0)
-    #         content = out_log_file.read()
-    #
-    #         self.assertTrue(len(content) > 0)
-    #         self.assertIsNone(re.search(self.message, content))
-    #
-    #         # check --enable-metrics=False
-    #         response = requests.get(f"{self.base_url}/metrics", timeout=10)
-    #         self.assertEqual(response.status_code, 404)
-    #
-    #
-    #     finally:
-    #         kill_process_tree(process.pid)
-    #         out_log_file.close()
-    #         err_log_file.close()
-    #         os.remove(self.out_log_name)
-    #         os.remove(self.err_log_name)
-
-    def test_logging_case_0(self):
+class TestAscendLoggingDefault(TestAscendLoggingNPUFullBase):
+    def test_logging_default(self):
         other_args = self.get_default_other_args()
         out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
         err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
-
-        # --log-requests=True
-        ## --log-requests-level=0
-        other_args.append("--log-requests")
-        log_requests_level = 0
-        other_args.extend(["--log-requests-level", str(log_requests_level)])
-
-        # --enable-metrics=True
-        ## --bucket-time-to-first-token=default
-        ## --bucket-inter-token-latency=default
-        ## --bucket-e2e-request-latency=default
-        other_args.extend(["--enable-metrics"])
-
-        expected_time_to_first_token_bucket = self.default_time_to_first_token_bucket
-        expected_inter_token_latency_bucket = self.default_inter_token_latency_bucket
-        expected_e2e_request_latency_bucket = self.default_e2e_request_latency_bucket
-
-        ## --collect-tokens-histogram=True
-        other_args.extend(["--collect-tokens-histogram"])
-        ### --prompt-tokens-buckets=default
-        ### --generation-tokens-buckets=default
-        expected_prompt_tokens_bucket = self.default_tokens_bucket
-        expected_generation_tokens_bucket = self.default_tokens_bucket
-
-        # --gc-warning-threshold-secs=0.01 (Set an extremely low value to observe the log)
-        other_args.extend(["--gc-warning-threshold-secs", "0.01"])
 
         process = popen_launch_server(
             self.model,
@@ -604,316 +540,19 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
         )
 
         try:
-            # test inference function
-            self._test_inference_function()
+            self._send_inference_request()
 
-            # test --log-requests、--log-requests-level
-            self._test_log_requests_level(log_requests_level, out_log_file)
-
-            # test --enable-metrics
-            ## --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
-            ## --collect-tokens-histogram
-            ### --prompt-tokens-buckets=default、--generation-tokens-buckets=default
-            self._check_metrics_endpoint(
-                expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
-                expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
-                expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
-                expected_prompt_tokens_bucket=expected_prompt_tokens_bucket,
-                expected_generation_tokens_bucket=expected_generation_tokens_bucket,
-            )
-
-            prompt_template = "just return me a string with of 10000 characters: " + "A" * 5000
-            max_token = 1000
-
-            def send_request():
-                try:
-                    response = requests.post(
-                        f"{self.base_url}/generate",
-                        json={
-                            "text": prompt_template,
-                            "sampling_params": {"temperature": 0, "max_new_tokens": max_token},
-                        },
-                    )
-                except Exception as e:
-                    print(e)
-
-            threads = []
-            for _ in range(200):
-                t = threading.Thread(target=send_request)
-                t.start()
-                threads.append(t)
-                sleep(0.01)
-
-            for t in threads:
-                t.join()
-
-            GC_info = "LONG GARBAGE COLLECTION DETECTED"
-            err_log_file.seek(0)
-            content = err_log_file.read()
+            out_log_file.seek(0)
+            content = out_log_file.read()
             self.assertTrue(len(content) > 0)
-            self.assertIn(GC_info, content)
+            self.assertIsNone(re.search(self.message, content))
+
+            response = requests.get(f"{self.base_url}/metrics", timeout=10)
+            self.assertEqual(response.status_code, 404)
         finally:
-            kill_process_tree(process.pid)
-            out_log_file.close()
-            err_log_file.close()
-            os.remove(self.out_log_name)
-            os.remove(self.err_log_name)
+            self._clean_environment(process, out_log_file, err_log_file)
 
-    # def test_logging(self):
-    #     # out_log_name = "./log_requests_level_out_log.txt"
-    #     # err_log_name = "./log_requests_level_err_log.txt"
-    #     #
-    #     # # 总共拉起4次服务
-    #     #
-    #     # # --log-requests、--log-requests-level
-    #     # # 实际使用4次服务
-    #     # # --log-requests=True,--log-requests-level=[0, 1, 2, 3]
-    #     # message = {
-    #     #     "0": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None,.*",
-    #     #     "1": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None, sampling_params=.*",
-    #     #     "2": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
-    #     #     "3": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*",
-    #     # }
-    #     # keyword_Finish = r".*Finish: obj=GenerateReqInput\(.*http_worker_ipc=None, text='just.*"
-    #     # keyword_start = "out={'text': '"
-    #     # keyword_end = "', 'output_ids'"
-    #     #
-    #     # # --enable-metrics
-    #     # # 实际使用两次服务 i=[0, 1, 2]
-    #     # # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
-    #     # # 实际使用两次服务 i=[0, 1]
-    #     # # --enable-metrics=True, i=0 使用默认桶边界, i=1 使用自定义桶边界
-    #     # my_bucket = ["0.1", "0.5", "1.0", "5.0", "10.0"]
-    #     # # --bucket-time-to-first-token
-    #     # default_time_to_first_token_bucket = [
-    #     #     "0.1", "0.2", "0.4", "0.6", "0.8",
-    #     #     "1.0", "2.0", "4.0", "6.0", "8.0",
-    #     #     "10.0", "20.0", "40.0", "60.0", "80.0",
-    #     #     "100.0", "200.0", "400.0",
-    #     # ]
-    #     # # --bucket-inter-token-latency
-    #     # default_inter_token_latency_bucket = [
-    #     #     "0.002", "0.004", "0.006", "0.008",
-    #     #     "0.01", "0.015", "0.02", "0.025", "0.03", "0.035", "0.04", "0.06", "0.08",
-    #     #     "0.1", "0.2", "0.4", "0.6", "0.8",
-    #     #     "1.0", "2.0", "4.0", "6.0", "8.0",
-    #     # ]
-    #     # # --bucket-e2e-request-latency
-    #     # default_e2e_request_latency_bucket = [
-    #     #     "0.1", "0.2", "0.4", "0.6", "0.8",
-    #     #     "1.0", "2.0", "4.0", "6.0", "8.0",
-    #     #     "10.0", "20.0", "40.0", "60.0", "80.0",
-    #     #     "100.0", "200.0", "400.0", "600.0",
-    #     #     "1200.0", "1800.0", "2400.0",
-    #     # ]
-    #     # # --collect-tokens-histogram
-    #     # # --prompt-tokens-buckets、--generation-tokens-bucket
-    #     # default_tokens_bucket = [
-    #     #     "100.0", "300.0", "500.0", "700.0",
-    #     #     "1000.0", "1500.0", "2000.0", "3000.0", "4000.0", "5000.0", "6000.0", "7000.0", "8000.0", "9000.0",
-    #     #     "10000.0", "12000.0", "15000.0", "20000.0", "22000.0", "25000.0",
-    #     #     "30000.0", "35000.0", "40000.0", "66000.0", "99000.0",
-    #     #     "132000.0", "300000.0", "600000.0", "900000.0",
-    #     #     "1.1e+06",
-    #     # ]
-    #     # my_tokens_bucket = [
-    #     #     "100.0", "1000.0", "10000.0", "100000.0", "300000.0", "600000.0", "900000.0",
-    #     # ]
-    #     # my_tse_set = ["1000", "2", "8"]
-    #     # my_tse_bucket = ["984.0", "992.0", "996.0", "998.0", "1000.0", "1002.0", "1004.0", "1008.0", "1016.0"]
-    #
-    #     # for i in [0, 1, 2, 3]:
-    #     for i in [2]:
-    #         other_args = [
-    #             "--trust-remote-code",
-    #             "--mem-fraction-static",
-    #             "0.8",
-    #             "--attention-backend",
-    #             "ascend",
-    #             "--disable-cuda-graph",
-    #         ]
-    #         out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
-    #         err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
-    #
-    #         # --log-requests、--log-requests-level
-    #         other_args.append("--log-requests")
-    #         # --log-requests-level default value is 2
-    #         if i != 2:
-    #             other_args.extend(["--log-requests-level", str(i)])
-    #
-    #         # --enable-metrics
-    #         other_args.extend(["--enable-metrics"])
-    #         if i <= 2:
-    #             other_args.extend(["--collect-tokens-histogram"])
-    #
-    #         expected_time_to_first_token_bucket = None
-    #         expected_inter_token_latency_bucket = None
-    #         expected_e2e_request_latency_bucket = None
-    #
-    #         expected_prompt_tokens_bucket = None
-    #         expected_generation_tokens_bucket = None
-    #         if i == 0:
-    #             expected_time_to_first_token_bucket = self.default_time_to_first_token_bucket
-    #             expected_inter_token_latency_bucket = self.default_inter_token_latency_bucket
-    #             expected_e2e_request_latency_bucket = self.default_e2e_request_latency_bucket
-    #
-    #             expected_prompt_tokens_bucket = self.default_tokens_bucket
-    #             expected_generation_tokens_bucket = self.default_tokens_bucket
-    #         elif i == 1:
-    #             other_args.extend(["--bucket-time-to-first-token"] + self.my_bucket)
-    #             other_args.extend(["--bucket-inter-token-latency"] + self.my_bucket)
-    #             other_args.extend(["--bucket-e2e-request-latency"] + self.my_bucket)
-    #             expected_time_to_first_token_bucket = self.my_bucket
-    #             expected_inter_token_latency_bucket = self.my_bucket
-    #             expected_e2e_request_latency_bucket = self.my_bucket
-    #
-    #             other_args.extend(["--prompt-tokens-buckets"] + ["custom"] + self.my_tokens_bucket)
-    #             other_args.extend(["--generation-tokens-buckets"] + ["custom"] + self.my_tokens_bucket)
-    #             expected_prompt_tokens_bucket = self.my_tokens_bucket
-    #             expected_generation_tokens_bucket = self.my_tokens_bucket
-    #         elif i == 2:
-    #             other_args.extend(["--prompt-tokens-buckets"] + ["tse"] + self.my_tse_set)
-    #             other_args.extend(["--generation-tokens-buckets"] + ["tse"] + self.my_tse_set)
-    #             expected_prompt_tokens_bucket = self.my_tse_bucket
-    #             expected_generation_tokens_bucket = self.my_tse_bucket
-    #
-    #         if i == 3:
-    #             other_args.extend(["--tokenizer-metrics-custom-labels-header", self.labels_header])
-    #             other_args.extend(["--tokenizer-metrics-allowed-custom-labels", self.my_label])
-    #
-    #         if i == 2:
-    #             other_args.extend(["--gc-warning-threshold-secs", "0.01"])
-    #
-    #         process = popen_launch_server(
-    #             self.model,
-    #             self.base_url,
-    #             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    #             other_args=other_args,
-    #             return_stdout_stderr=(out_log_file, err_log_file),
-    #         )
-    #
-    #         try:
-    #             # test inference
-    #             self._send_inference_request()
-    #
-    #             # test --log-requests、--log-requests-level
-    #             max_new_token = 2500 if i >= 2 else 100
-    #
-    #             response = requests.post(
-    #                 f"{self.base_url}/generate",
-    #                 json={
-    #                     "text": f"just return me a string with of {max_new_token} characters.",
-    #                     "sampling_params": {"temperature": 0, "max_new_tokens": max_new_token},
-    #                 },
-    #             )
-    #             self.assertEqual(response.status_code, 200)
-    #             out_log_file.seek(0)
-    #             content = out_log_file.read()
-    #
-    #             self.assertTrue(len(content) > 0)
-    #             self.assertIsNotNone(re.search(self.log_request_message_dict[str(i)], content))
-    #             if i >= 2:
-    #                 lines = get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
-    #                 Finish_message = lines[0]["content"]
-    #                 start_index = Finish_message.find(self.keyword_start) + len(self.keyword_start)
-    #                 end_index = Finish_message.find(self.keyword_end)
-    #                 out_text = Finish_message[start_index:end_index]
-    #                 out_text_length = len(out_text)
-    #                 out_text_length_n = len(out_text.replace("\\n", " "))
-    #                 if i == 2:
-    #                     self.assertIn("' ... '", out_text)
-    #                     self.assertTrue(out_text_length_n - len("' ... '") == 2048)
-    #                 else:
-    #                     self.assertNotIn("' ... '", out_text)
-    #                     self.assertTrue(out_text_length > 2048)
-    #
-    #             # test --enable-metrics
-    #             # --bucket-time-to-first-token、--bucket-inter-token-latency、--bucket-e2e-request-latency
-    #             if i <= 2:
-    #                 self._check_metrics_endpoint(
-    #                     expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
-    #                     expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
-    #                     expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
-    #                     expected_prompt_tokens_bucket=expected_prompt_tokens_bucket,
-    #                     expected_generation_tokens_bucket=expected_generation_tokens_bucket,
-    #                 )
-    #
-    #             if i == 3:
-    #                 response = requests.post(
-    #                     f"{self.base_url}/generate",
-    #
-    #                     json={
-    #                         "Content-Type": "application/json",
-    #                         "X-Metrics-Labels": f"{self.my_label}=cunstomer_service",
-    #                         "text": self.test_prompt,
-    #                         "sampling_params": {
-    #                             "temperature": 0,
-    #                             "max_new_tokens": 32,
-    #                         },
-    #                     },
-    #                 )
-    #
-    #                 self.assertEqual(response.status_code, 200)
-    #                 self.assertIn(self.expected_output, response.text)
-    #
-    #                 response = requests.get(f"{self.base_url}/metrics", timeout=10)
-    #                 self.assertEqual(response.status_code, 200)
-    #                 metrics_content = response.text
-    #                 message = f'sglang:time_to_first_token_seconds_bucket{{{self.my_label}="'
-    #                 self.assertIn(message, metrics_content)
-    #                 message = f'sglang:inter_token_latency_seconds_bucket{{{self.my_label}='
-    #                 self.assertIn(message, metrics_content)
-    #                 message = f'sglang:e2e_request_latency_seconds_bucket{{{self.my_label}='
-    #                 self.assertIn(message, metrics_content)
-    #
-    #             # check gc
-    #             if i == 2:
-    #                 prompt_template = "just return me a string with of 10000 characters: " + "A" * 5000
-    #                 max_token = 1000
-    #
-    #                 def send_request():
-    #                     try:
-    #                         response = requests.post(
-    #                             f"{self.base_url}/generate",
-    #                             json={
-    #                                 "text": prompt_template,
-    #                                 "sampling_params": {"temperature": 0, "max_new_tokens": max_token},
-    #                             },
-    #                         )
-    #                     except Exception as e:
-    #                         print(e)
-    #
-    #                 threads = []
-    #                 for _ in range(200):
-    #                     t = threading.Thread(target=send_request)
-    #                     t.start()
-    #                     threads.append(t)
-    #                     sleep(0.01)
-    #
-    #                 for t in threads:
-    #                     t.join()
-    #
-    #                 GC_info = "LONG GARBAGE COLLECTION DETECTED"
-    #                 err_log_file.seek(0)
-    #                 content = err_log_file.read()
-    #                 self.assertTrue(len(content) > 0)
-    #                 self.assertIn(GC_info, content)
-    #         finally:
-    #             kill_process_tree(process.pid)
-    #             out_log_file.close()
-    #             err_log_file.close()
-    #             os.remove(self.out_log_name)
-    #             os.remove(self.err_log_name)
 
-    def get_default_other_args(self):
-        return [
-            "--trust-remote-code",
-            "--mem-fraction-static",
-            "0.8",
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-        ]
 
 
 class TestAscendLoggingCase0(TestAscendLoggingNPUFullBase):
@@ -952,7 +591,7 @@ class TestAscendLoggingCase0(TestAscendLoggingNPUFullBase):
 
             self._test_log_requests_level(log_requests_level, out_log_file)
 
-            self._check_metrics_endpoint(
+            self._test_metrics(
                 expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
                 expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
                 expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
@@ -1004,7 +643,7 @@ class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
 
             self._test_log_requests_level(log_requests_level, out_log_file)
 
-            self._check_metrics_endpoint(
+            self._test_metrics(
                 expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
                 expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
                 expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
@@ -1045,7 +684,7 @@ class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
 
             self._test_log_requests_level(log_requests_level, out_log_file)
 
-            self._check_metrics_endpoint(
+            self._test_metrics(
                 expected_prompt_tokens_bucket=expected_prompt_tokens_bucket,
                 expected_generation_tokens_bucket=expected_generation_tokens_bucket,
             )
@@ -1128,7 +767,9 @@ if __name__ == "__main__":
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLogging))
 
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase0))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingDefault))
+
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase0))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase3))
