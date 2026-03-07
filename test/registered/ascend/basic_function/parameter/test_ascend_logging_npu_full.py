@@ -498,7 +498,7 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
         # my_tse_bucket = ["984.0", "992.0", "996.0", "998.0", "1000.0", "1002.0", "1004.0", "1008.0", "1016.0"]
 
         # for i in [0, 1, 2, 3]:
-        for i in [0]:
+        for i in [2]:
             other_args = [
                 "--trust-remote-code",
                 "--mem-fraction-static",
@@ -556,7 +556,7 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                 other_args.extend(["--tokenizer-metrics-custom-labels-header", self.labels_header])
                 other_args.extend(["--tokenizer-metrics-allowed-custom-labels", self.my_label])
 
-            if i == 0:
+            if i == 2:
                 other_args.extend(["--gc-warning-threshold-secs", "0.01"])
 
             process = popen_launch_server(
@@ -642,7 +642,7 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
                     self.assertIn(message, metrics_content)
 
                 # check gc
-                if i == 0:
+                if i == 2:
                     prompt_template = "just return me a string with of 10000 characters: " + "A" * 5000
                     max_token = 1000
 
@@ -667,7 +667,6 @@ class TestAscendLogging(TestAscendLoggingNPUFullBase):
 
                     for t in threads:
                         t.join()
-                    content = out_log_file.read()
 
                     GC_info = "LONG GARBAGE COLLECTION DETECTED"
                     out_log_file.seek(0)
