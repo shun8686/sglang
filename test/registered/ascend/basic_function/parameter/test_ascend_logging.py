@@ -415,8 +415,6 @@ class TestAscendLoggingCase0(TestAscendLoggingNPUFullBase):
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
-
-
     def test_logging_case_0(self):
         self._test_inference_function()
 
@@ -443,55 +441,55 @@ class TestAscendLoggingCase0(TestAscendLoggingNPUFullBase):
 
 
 class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
-    def test_logging_case_1(self):
-        other_args = self._get_default_other_args()
-        out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
-        err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
-        other_args.append("--log-requests")
-        log_requests_level = 1
-        other_args.extend(["--log-requests-level", str(log_requests_level)])
+        cls.other_args.append("--log-requests")
+        cls.log_requests_level = 1
+        cls.other_args.extend(["--log-requests-level", str(cls.log_requests_level)])
 
-        other_args.extend(["--enable-metrics"])
-        # cls.other_args.extend(["--enable-metrics--for-all-scheduler"])
+        cls.other_args.extend(["--enable-metrics"])
+        cls.other_args.extend(["--tp-size", 2])
+        cls.other_args.extend(["--enable-metrics--for-all-scheduler"])
 
+        cls.other_args.extend(["--bucket-time-to-first-token"] + cls.my_bucket)
+        cls.other_args.extend(["--bucket-inter-token-latency"] + cls.my_bucket)
+        cls.other_args.extend(["--bucket-e2e-request-latency"] + cls.my_bucket)
+        cls.expected_time_to_first_token_bucket = cls.my_bucket
+        cls.expected_inter_token_latency_bucket = cls.my_bucket
+        cls.expected_e2e_request_latency_bucket = cls.my_bucket
 
-        other_args.extend(["--bucket-time-to-first-token"] + self.my_bucket)
-        other_args.extend(["--bucket-inter-token-latency"] + self.my_bucket)
-        other_args.extend(["--bucket-e2e-request-latency"] + self.my_bucket)
-        expected_time_to_first_token_bucket = self.my_bucket
-        expected_inter_token_latency_bucket = self.my_bucket
-        expected_e2e_request_latency_bucket = self.my_bucket
+        cls.other_args.extend(["--collect-tokens-histogram"])
 
-        other_args.extend(["--collect-tokens-histogram"])
+        cls.other_args.extend(["--prompt-tokens-buckets"] + ["custom"] + cls.my_tokens_bucket)
+        cls.other_args.extend(["--generation-tokens-buckets"] + ["custom"] + cls.my_tokens_bucket)
+        cls.expected_prompt_tokens_bucket = cls.my_tokens_bucket
+        cls.expected_generation_tokens_bucket = cls.my_tokens_bucket
 
-        other_args.extend(["--prompt-tokens-buckets"] + ["custom"] + self.my_tokens_bucket)
-        other_args.extend(["--generation-tokens-buckets"] + ["custom"] + self.my_tokens_bucket)
-        expected_prompt_tokens_bucket = self.my_tokens_bucket
-        expected_generation_tokens_bucket = self.my_tokens_bucket
-
-        process = popen_launch_server(
-            self.model,
-            self.base_url,
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-            return_stdout_stderr=(out_log_file, err_log_file),
+            other_args=cls.other_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
-        try:
-            self._test_inference_function()
+    def test_logging_case_1(self):
+        self._test_inference_function()
 
-            self._test_log_requests_level(log_requests_level, out_log_file)
+        self._test_log_requests_level(self.log_requests_level, self.out_log_file)
 
-            self._test_metrics(
-                expected_time_to_first_token_bucket=expected_time_to_first_token_bucket,
-                expected_inter_token_latency_bucket=expected_inter_token_latency_bucket,
-                expected_e2e_request_latency_bucket=expected_e2e_request_latency_bucket,
-                expected_prompt_tokens_bucket=expected_prompt_tokens_bucket,
-                expected_generation_tokens_bucket=expected_generation_tokens_bucket,
-            )
-        finally:
-            self._clean_environment(process, out_log_file, err_log_file)
+        self._test_enable_metrics_for_all_scheduler(True)
+
+        self._test_metrics(
+            expected_time_to_first_token_bucket=self.expected_time_to_first_token_bucket,
+            expected_inter_token_latency_bucket=self.expected_inter_token_latency_bucket,
+            expected_e2e_request_latency_bucket=self.expected_e2e_request_latency_bucket,
+            expected_prompt_tokens_bucket=self.expected_prompt_tokens_bucket,
+            expected_generation_tokens_bucket=self.expected_generation_tokens_bucket,
+        )
+
 
 
 class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
@@ -574,8 +572,8 @@ if __name__ == "__main__":
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingDefault))
 
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase0))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase0))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase3))
 
