@@ -491,7 +491,6 @@ class TestAscendLoggingCase1(TestAscendLoggingNPUFullBase):
         )
 
 
-
 class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
     @classmethod
     def setUpClass(cls):
@@ -530,36 +529,34 @@ class TestAscendLoggingCase2(TestAscendLoggingNPUFullBase):
 
 
 class TestAscendLoggingCase3(TestAscendLoggingNPUFullBase):
-    def test_logging_case_3(self):
-        other_args = self._get_default_other_args()
-        out_log_file = open(self.out_log_name, "w+", encoding="utf-8")
-        err_log_file = open(self.err_log_name, "w+", encoding="utf-8")
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
-        other_args.append("--log-requests")
-        log_requests_level = 3
-        other_args.extend(["--log-requests-level", str(log_requests_level)])
+        cls.other_args.append("--log-requests")
+        cls.log_requests_level = 3
+        cls.other_args.extend(["--log-requests-level", str(cls.log_requests_level)])
 
-        other_args.extend(["--enable-metrics"])
-        other_args.extend(["--tokenizer-metrics-custom-labels-header", self.labels_header])
-        other_args.extend(["--tokenizer-metrics-allowed-custom-labels", self.my_label])
+        cls.other_args.extend(["--enable-metrics"])
 
-        process = popen_launch_server(
-            self.model,
-            self.base_url,
+        cls.other_args.extend(["--tokenizer-metrics-custom-labels-header", cls.labels_header])
+        cls.other_args.extend(["--tokenizer-metrics-allowed-custom-labels", cls.my_label])
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-            return_stdout_stderr=(out_log_file, err_log_file),
+            other_args=cls.other_args,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
-        try:
-            self._test_inference_function()
+    def test_logging_case_3(self):
+        self._test_inference_function()
 
-            self._test_log_requests_level(log_requests_level, out_log_file)
+        self._test_log_requests_level(self.log_requests_level, self.out_log_file)
 
-            # test --tokenizer-metrics-custom-labels-header、--tokenizer-metrics-allowed-custom-labels
-            self._test_log_metrics_tokenizer_label()
-        finally:
-            self._clean_environment(process, out_log_file, err_log_file)
+        # test --tokenizer-metrics-custom-labels-header、--tokenizer-metrics-allowed-custom-labels
+        self._test_log_metrics_tokenizer_label()
 
 
 if __name__ == "__main__":
@@ -573,8 +570,8 @@ if __name__ == "__main__":
 
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase0))
     # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase1))
-    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
-    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase3))
+    # suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase2))
+    suite.addTests(loader.loadTestsFromTestCase(TestAscendLoggingCase3))
 
     runner = unittest.TextTestRunner()
     runner.run(suite)
