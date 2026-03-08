@@ -144,8 +144,11 @@ EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH = os.path.join(
 DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "DeepSeek-R1-0528-w4a8-per-channel"
 )
-DOTS_OCR_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "rednote-hilab/dots.ocr"
+OLMO_2_1124_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "allenai/OLMo-2-1124-7B-Instruct"
+)
+SOLAR_10_7B_INSTRUCT_V1_0_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "upstage/SOLAR-10.7B-Instruct-v1.0"
 )
 
 # VLM model weights path
@@ -204,6 +207,9 @@ QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
 
 DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+)
+DOTS_OCR_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "rednote-hilab/dots.ocr"
 )
 
 # Embedding model weights path
