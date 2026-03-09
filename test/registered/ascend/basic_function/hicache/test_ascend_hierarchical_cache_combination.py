@@ -148,7 +148,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
         return results
 
     def test_001_combined_params(self):
-        """Test Hicache with combined parameters."""
+        """Test Hicache with combined parameters,hicache inference request reuse succeddfully."""
         logging.warning("\n=== Test 001: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_ratio=1.0,
@@ -186,7 +186,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             self.process = None
 
     def test_002_combined_params(self):
-        """Test Hicache with combined parameters."""
+        """Test Hicache with combined parameters, hicache_storage_backend is configured to be file, file storage is hosted under hicache."""
         logging.warning("\n=== Test 002: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_ratio=2.0,
@@ -221,7 +221,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             self.process = None
 
     def test_003_combined_params(self):
-        """Test Hicache with combined parameters."""
+        """Test Hicache with combined parameters, hicache with concurrent requests."""
         logging.warning("\n=== Test 003: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_size=80,
@@ -232,14 +232,18 @@ class TestHierarchicalCacheNPU(CustomTestCase):
 
         try:
             time.sleep(5)
-            result = self._test_basic_inference()
-            logging.warning(f"Combined parameters test passed, result: {result[:50]}...")
+            results = self._send_concurrent_requests(num_requests=20)
+
+            success_count = sum(1 for r in results if r[1] == 200)
+            self.assertGreaterEqual(success_count, 18)
+            logging.warning(f"Concurrent requests test passed, {success_count}/20 succeeded.")
+
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
 
     def test_004_combined_params(self):
-        """Test Hicache with combined parameters."""
+        """Test Hicache with combined parameters, hicache with long sequence"""
         logging.warning("\n=== Test 004: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_size=100,
@@ -247,25 +251,6 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             hicache_io_backend="direct",
             hicache_mem_layout="page_first_kv_split",
             disable_hicache_numa_detect=True,
-        )
-
-        try:
-            time.sleep(5)
-            result = self._test_basic_inference()
-            logging.warning(f"Combined parameters test passed, result: {result[:50]}...")
-        finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
-
-    def test_005_long_sequence(self):
-        """Test Hicache with long sequence."""
-        logging.warning("\n=== Test 005: Long sequence (2000 + tokens) ===")
-        self.process = self._launch_server_with_hicache(
-            hicache_ratio=2.0,
-            hicache_write_policy="write_back",
-            radix_eviction_policy="lru",
-            hicache_io_backend="direct",
-            hicache_mem_layout="page_first",
         )
 
         try:
@@ -285,23 +270,6 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertGreater(len(response.text), 50)
             logging.warning(f"Long sequence test passed, result length: {len(response.text)}")
-        finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
-
-    def test_006_concurrent_requests(self):
-        """Test Hicache with concurrent requests."""
-        logging.warning("\n=== Test 006: Concurrent Requests (20) ===")
-        self.process = self._launch_server_with_hicache()
-
-        try:
-            time.sleep(5)
-            results = self._send_concurrent_requests(num_requests=20)
-
-            success_count = sum(1 for r in results if r[1] == 200)
-            self.assertGreaterEqual(success_count, 18)
-            logging.warning(f"Concurrent requests test passed, {success_count}/20 succeeded.")
-
         finally:
             kill_process_tree(self.process.pid)
             self.process = None

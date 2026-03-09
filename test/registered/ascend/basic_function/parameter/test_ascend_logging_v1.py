@@ -9,8 +9,7 @@ from time import sleep
 import requests
 
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH as MODEL_PATH
-MODEL_PATH = "/home/weights/Llama-3.2-1B-Instruct"
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH as MODEL_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -71,8 +70,7 @@ class TestAscendLoggingNPUFullBase(CustomTestCase):
     @classmethod
     def prepare_args_related_data(cls):
         # --log-requests
-        # Basic end log content: When --log-request=True, regardless of the value set of --log-requests-level,
-        # the log recording the completion of request processing will include at least the following:
+        # Basic log content
         cls.message = r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, .*"
 
         # --log-requests-level: Log content at different log level
