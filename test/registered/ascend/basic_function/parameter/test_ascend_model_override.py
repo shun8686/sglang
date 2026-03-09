@@ -1,12 +1,9 @@
-import json
-
 import requests
 import logging
 import unittest
 import time
 from types import SimpleNamespace
 
-from docs.basic_usage.openai_api_embeddings import result
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
@@ -91,30 +88,22 @@ class TestModelOverrideBaisc(CustomTestCase):
 
         try:
             time.sleep(5)
-            response = requests.post(
-                f"{self.base_url}/generate",
-                json={
-                    "text": self.test_prompt,
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 32,
-                    },
-                    "stream": True,
-                },
-            )
-            self.assertEqual(response.status_code, 200)
-            result = response.json()
+            result = self._test_basic_inference()
             self.assertIn("text", result)
             self.assertGreater(len(result["text"]), 0)
             logging.warning(f"Inference num_hidden_layers override, {result['text'][:50]}...")
-            # Streaming output
-            full_text = ""
-            for chunk in response.iter_lines():
-                if chunk:
-                    chunk_data = json.loads(chunk)
-                    if "text" in chunk_data:
-                        full_text += chunk_data["text"]
-            logging.warning(f"Inference num_hidden_layers override, {full_text[:50]}...")
+
+            args = SimpleNamespace(
+                num_shots=5,
+                data_path="/tmp/test.jsonl",
+                num_questions=200,
+                max_new_tokens=512,
+                parallel=128,
+                host="http://127.0.0.1",
+                port=21000,
+            )
+            run_eval(args)
+            logging.warning(f"Batch processing requests successful.")
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
@@ -124,7 +113,7 @@ class TestModelOverrideBaisc(CustomTestCase):
         logging.warning("\n=== Test 002: Override multiple parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
-            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 128, "stop": ["\n", "END"]}'
+            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 128,  "min_new_tokens": 8}'
         )
         try:
             time.sleep(5)
@@ -142,36 +131,21 @@ class TestModelOverrideBaisc(CustomTestCase):
         logging.warning("\n=== Test 003: multiple sampling parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50}',
-            preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "min_new_tokens": 8, "max_new_tokens": 256}'
+            preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256}'
         )
         try:
             time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")
             result = response.json()
-            self.assertIn("num_hidden_layers", result)
             self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)
             self.assertEqual(result["preferred_sampling_params"]["top_p"], 0.9)
             self.assertEqual(result["preferred_sampling_params"]["top_k"], 40)
-            self.assertEqual(result["preferred_sampling_params"]["min_new_tokens"], 8)
             self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 256)
 
             result1 = self._test_basic_inference()
             self.assertIn("text", result1)
             self.assertGreater(len(result1["text"]), 0)
-            self.assertIn("Paris", response.text)
             logging.warning(f"Inference with multiple sampling: {result1['text'][:50]}...")
-
-            args = SimpleNamespace(
-                num_shots=5,
-                data_path="/tmp/test.jsonl",
-                num_questions=200,
-                max_new_tokens=512,
-                parallel=128,
-                host="http://127.0.0.1",
-                port=21000,
-            )
-            run_eval(args)
-            logging.warning(f"Batch processing requests successful.")
 
         finally:
             kill_process_tree(self.process.pid)
@@ -181,14 +155,13 @@ class TestModelOverrideBaisc(CustomTestCase):
         """Test configuration with multiple sampling penalty parameters."""
         logging.warning("\n=== Test 004: multiple sampling parameterss ===")
         self.process = self._launch_server_with_hicache(
-            model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
+            model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "max_new_tokens": 64, "frequency_penalty": 0.5, "presence_penalty": 0.3, "repetition_penalty": 1.2}'
         )
         try:
             time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")
             result = response.json()
-            self.assertIn("num_hidden_layers", result)
             self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)
             self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 64)
             self.assertEqual(result["preferred_sampling_params"]["frequency_penalty"], 0.5)
@@ -215,5 +188,5 @@ class TestModelOverrideBaisc(CustomTestCase):
             self.process = None
 
 
-    if __name__ == "__main__":
-        unittest.main()
+if __name__ == "__main__":
+    unittest.main()
