@@ -153,7 +153,7 @@ class TestModelOverrideBaisc(CustomTestCase):
 
     def test_004_override_prefferred_combination(self):
         """Test configuration with multiple sampling penalty parameters."""
-        logging.warning("\n=== Test 004: multiple sampling parameterss ===")
+        logging.warning("\n=== Test 004: multiple sampling penalty parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "max_new_tokens": 64, "frequency_penalty": 0.5, "presence_penalty": 0.3, "repetition_penalty": 1.2}'
