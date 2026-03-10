@@ -200,7 +200,7 @@ class TestHiCache(CustomTestCase):
 
         try:
             time.sleep(5)
-            result = self._test_basic_inference
+            result = self._test_basic_inference()
             logging.warning(f"Concurrent requests test passed, {result[:50]}....")
         finally:
             kill_process_tree(self.process.pid)
@@ -240,7 +240,7 @@ class TestHiCache(CustomTestCase):
 
     def test_005_combined_params(self):
         """Test Hicache with combined parameters, hicache_mem_layout is configured as page_head"""
-        logging.warning("\n=== Test 004: Combined Parameters ===")
+        logging.warning("\n=== Test 005: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_ratio=5,
             hicache_write_policy="write_through",
@@ -250,7 +250,7 @@ class TestHiCache(CustomTestCase):
 
         try:
             time.sleep(5)
-            result = self._test_basic_inference
+            result = self._test_basic_inference()
             logging.warning(f"Concurrent requests test passed, {result[:50]}....")
         finally:
             kill_process_tree(self.process.pid)
