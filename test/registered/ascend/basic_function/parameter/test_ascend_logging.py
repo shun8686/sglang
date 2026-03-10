@@ -280,7 +280,7 @@ class TestAscendLoggingBase(CustomTestCase):
             output_ids_end_index = finish_message.find(self.keyword_output_id_end)
             output_ids_list_str = finish_message[output_ids_start_index:output_ids_end_index].strip()
             if log_requests_level == 2:
-                self.assertIn("' ... '", output_ids_list_str)
+                self.assertIn("] ... [", output_ids_list_str)
                 output_ids_list_str = output_ids_list_str.replace("] ... [", ", ")
                 token_id_count = len([x.strip() for x in re.split(r",\s*", output_ids_list_str) if x.strip()])
                 self.assertTrue(token_id_count == 2048)
