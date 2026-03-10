@@ -16,7 +16,7 @@ from sglang.test.test_utils import (
 )
 
 
-class TestAscendLoggingBase(CustomTestCase):
+class TestNPULoggingBase(CustomTestCase):
     """Testcase：Verify the correct functionality of parameters in the logging feature.
 
     [Test Category] Parameter

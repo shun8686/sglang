@@ -3,7 +3,7 @@ import tempfile
 import unittest
 import requests
 
-from test_ascend_logging import TestAscendLoggingBase
+from test_ascend_logging import TestNPULoggingBase
 
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=100, suite="nightly-2-npu-a3", nightly=True)
 
 
-class TestAscendLoggingCase0(TestAscendLoggingBase):
+class TestNPULoggingCase0(TestNPULoggingBase):
     """Test case class for validating specific scenarios of logging feature parameters (complementary to Case1/2/3).
 
     Core Functionality:
