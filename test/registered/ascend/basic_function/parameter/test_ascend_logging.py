@@ -1,6 +1,5 @@
 import os
 import re
-import tempfile
 import threading
 import unittest
 from pathlib import Path
@@ -14,10 +13,8 @@ from sglang.srt.utils import kill_process_tree
 MODEL_PATH = "/home/weights/Llama-3.2-1B-Instruct"
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    popen_launch_server,
 )
 
 register_npu_ci(est_time=300, suite="nightly-2-npu-a3", nightly=True)

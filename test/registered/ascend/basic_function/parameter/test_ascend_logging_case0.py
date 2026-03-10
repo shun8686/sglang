@@ -5,8 +5,6 @@ import requests
 
 from test_ascend_logging import TestAscendLoggingBase
 
-# from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH as MODEL_PATH
-MODEL_PATH = "/home/weights/Llama-3.2-1B-Instruct"
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
