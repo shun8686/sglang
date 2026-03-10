@@ -104,7 +104,6 @@ class TestAscendLoggingBase(CustomTestCase):
         cls.keyword_Finish = r".*Finish: obj=GenerateReqInput\(.*http_worker_ipc=None, text='just.*"  # Match target log line
         cls.keyword_output_id_start = "'output_ids': ["  # Start delimiter for token ID array
         cls.keyword_output_id_end = "], 'meta_info'"  # End delimiter for token ID array
-        cls.keyword_output_id_ellipsis = "] ... ["
 
         # --------------------------------------------------------------------------
         # 2. --uvicorn-access-log-exclude-prefixes Configuration
@@ -238,8 +237,8 @@ class TestAscendLoggingBase(CustomTestCase):
 
         Core Functionality:
             1. Send a request to the model to generate the longest possible string, with token generation limits optimized for efficiency:
-               - Max 100 new tokens for log_requests_level ≤ 1 (reduce generation time for low-detail logging)
-               - Max 2500 new tokens for log_requests_level ≥ 2 (exceeds 2048 to test truncation behavior)
+               - Max 100 new tokens for --log-requests-level ≤ 1 (reduce generation time for low-detail logging)
+               - Max 2500 new tokens for --log-requests-level ≥ 2 (exceeds 2048 to test truncation behavior)
             2. Verify the log file contains level-specific keywords matching the target log_requests_level
             3. Validate token count preservation rules in logs:
                - Level 2: Logs are truncated to retain only 2048 tokens (partial input/output)
@@ -267,22 +266,26 @@ class TestAscendLoggingBase(CustomTestCase):
         content = out_log_file.read()
         self.assertTrue(len(content) > 0)
         self.assertIsNotNone(re.search(self.log_request_message_dict[str(log_requests_level)], content))
+        # The total number of generated tokens should equal the configured maximum number of generated tokens
+        lines = self.get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
+        finish_message = lines[0]["content"]
+        self.assertIn(f"'completion_tokens': {max_new_token}", finish_message)
 
         # Step 3: Validate token count preservation rules in logs:
         if log_requests_level >= 2:
-            lines = self.get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
-            finish_message = lines[0]["content"]
-            self.assertIn(f"'completion_tokens': {max_new_token}", finish_message)
+            # Extract the content of output_ids to count the number of generated tokens recorded in the logs
             output_ids_start_index = finish_message.find(self.keyword_output_id_start) + len(
                 self.keyword_output_id_start)
             output_ids_end_index = finish_message.find(self.keyword_output_id_end)
             output_ids_list_str = finish_message[output_ids_start_index:output_ids_end_index].strip()
             if log_requests_level == 2:
-                self.assertIn(self.keyword_output_id_ellipsis, output_ids_list_str)
-                output_ids_list_str = output_ids_list_str.replace(self.keyword_output_id_ellipsis, ", ")
+                # When --log-requests-level=2, the log records a maximum of 2048 tokens (truncated content)
+                self.assertIn("] ... [", output_ids_list_str)
+                output_ids_list_str = output_ids_list_str.replace("] ... [", ", ")
                 token_id_count = len([x.strip() for x in re.split(r",\s*", output_ids_list_str) if x.strip()])
                 self.assertTrue(token_id_count == 2048)
             else:
+                # When --log-requests_level=3, the log records all generated token content (no truncation)
                 token_id_count = len([x.strip() for x in re.split(r",\s*", output_ids_list_str) if x.strip()])
                 self.assertTrue(token_id_count > 2048)
 
@@ -422,7 +425,7 @@ class TestAscendLoggingBase(CustomTestCase):
 
         def send_request():
             try:
-                response = requests.post(
+                requests.post(
                     f"{self.base_url}/generate",
                     json={
                         "text": prompt_template,
