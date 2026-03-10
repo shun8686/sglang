@@ -30,7 +30,6 @@ class TestAscendLoggingCase0(TestAscendLoggingBase):
           --enable-metrics-for-all-scheduler (default False); --uvicorn-access-log-exclude-prefixes (default False);
           --bucket-time-to-first-token (default boundaries); --bucket-inter-token-latency (default boundaries); --bucket-e2e-request-latency (default boundaries);
           --prompt-tokens-buckets (default boundaries); --generation-tokens-buckets (default boundaries);
-        - Additional validated parameters: --log-requests-target; --gc-warning-threshold-secs
 
         Note:
         1. --tp-size=2 is configured to verify that only TP rank 0 metrics are recorded when --enable-metrics-for-all-scheduler=False
@@ -51,6 +50,7 @@ class TestAscendLoggingCase0(TestAscendLoggingBase):
         super().setUpClass()
 
         cls.log_requests_level = 0
+        # --log-requests-target supports single-level and multi-level directories.
         cls._temp_dir_obj = tempfile.TemporaryDirectory()
         cls.temp_dir = cls._temp_dir_obj.name
         cls.temp_level1_dir = os.path.join(cls.temp_dir, "level1")
