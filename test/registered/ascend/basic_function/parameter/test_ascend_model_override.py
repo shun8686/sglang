@@ -95,7 +95,7 @@ class TestModelOverrideBaisc(CustomTestCase):
 
             args = SimpleNamespace(
                 num_shots=5,
-                data_path="/tmp/test.jsonl",
+                data_path=None,
                 num_questions=200,
                 max_new_tokens=512,
                 parallel=128,
