@@ -1,7 +1,6 @@
 import logging
 import unittest
 import time
-import threading
 from types import SimpleNamespace
 
 import requests
@@ -22,9 +21,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=3600, suite="stage-b-test-npu")
 
-# 类名改一下
-# 文件名
-# 去掉并发
+
 class TestHiCache(CustomTestCase):
     """Test Hierarchical Cache functionality on NPU environment.
 
@@ -184,7 +181,6 @@ class TestHiCache(CustomTestCase):
             )
             run_eval(args)
             hicache_file = run_command(f"ls /tmp/hicache")
-            # 断言文件内容
             self.assertNotEqual(hicache_file, None)
             run_command(f"rm -rf /tmp/hicache")
         finally:
