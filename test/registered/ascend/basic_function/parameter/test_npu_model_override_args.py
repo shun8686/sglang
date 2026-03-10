@@ -84,8 +84,8 @@ class TestModelOverrideArgs(CustomTestCase):
         """Test multiple configuration parameters simultaneously overriding, batch processing requests."""
         logging.warning("\n=== Test 001: Override multiple parameters ===")
         self.process = self._launch_server_with_hicache(
-            model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
-            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 127,  "min_new_tokens": 1}'
+            model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
+            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 64,  "min_new_tokens": 1}'
         )
 
         try:
@@ -122,7 +122,7 @@ class TestModelOverrideArgs(CustomTestCase):
         """Test configuration with multiple sampling parameters."""
         logging.warning("\n=== Test 002: multiple sampling parameters ===")
         self.process = self._launch_server_with_hicache(
-            model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50}',
+            model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256}'
         )
         try:
