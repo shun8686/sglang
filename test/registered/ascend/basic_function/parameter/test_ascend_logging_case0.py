@@ -1,6 +1,6 @@
 import os
 import tempfile
-
+import unittest
 import requests
 
 from test_ascend_logging import TestAscendLoggingBase
@@ -103,3 +103,7 @@ class TestAscendLoggingCase0(TestAscendLoggingBase):
     def tearDownClass(cls):
         super().tearDownClass()
         cls._temp_dir_obj.cleanup()
+
+
+if __name__ == "__main__":
+    unittest.main()
