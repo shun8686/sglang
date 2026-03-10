@@ -73,7 +73,7 @@ class TestModelOverrideArgs(CustomTestCase):
                 "text": self.test_prompt,
                 "sampling_params": {
                     "temperature": 0,
-                    "max_new_tokens": 64,
+                    "max_new_tokens": 32,
                 },
             },
         )
@@ -85,7 +85,7 @@ class TestModelOverrideArgs(CustomTestCase):
         logging.warning("\n=== Test 001: Override multiple parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
-            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 64,  "min_new_tokens": 1}'
+            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 128,  "min_new_tokens": 1}'
         )
 
         try:
@@ -94,7 +94,7 @@ class TestModelOverrideArgs(CustomTestCase):
             result = response.json()
             self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)
             self.assertEqual(result["preferred_sampling_params"]["min_new_tokens"], 1)
-            self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 127)
+            self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 128)
 
             result1 = self._test_basic_inference()
             self.assertIn("text", result1)
@@ -125,6 +125,7 @@ class TestModelOverrideArgs(CustomTestCase):
             model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256}'
         )
+
         try:
             time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")
@@ -150,6 +151,7 @@ class TestModelOverrideArgs(CustomTestCase):
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "max_new_tokens": 64, "frequency_penalty": 0.5, "presence_penalty": 0.3, "repetition_penalty": 1.2}'
         )
+
         try:
             time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")

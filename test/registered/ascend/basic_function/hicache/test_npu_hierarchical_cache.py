@@ -182,6 +182,8 @@ class TestHiCache(CustomTestCase):
             run_eval(args)
             hicache_file = run_command(f"ls /tmp/hicache")
             self.assertNotEqual(hicache_file, None)
+            hicache_file_size = run_command(f"du -s /tmp/hicache | cut -f1")
+            self.assertGreater(int(hicache_file_size), 0)
             run_command(f"rm -rf /tmp/hicache")
         finally:
             kill_process_tree(self.process.pid)
