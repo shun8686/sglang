@@ -28,6 +28,41 @@ class TestNPULoggingBase(CustomTestCase):
     --gc-warning-threshold-secs
     """
 
+    @staticmethod
+    def get_lines_with_keyword(filename, keyword):
+        """Find and return lines matching a regex keyword from a specified file, with line numbers and content.
+
+        Function Description:
+            Reads the target file line by line, uses the input keyword as a regular expression pattern to match each line's content.
+            For each line that matches the regex pattern, encapsulates the line number (1-indexed) and content into a dictionary,
+            and finally returns a list of dictionaries containing all matched lines.
+
+        Args:
+            filename (str): Path to the file to be read
+            keyword (str): Regular expression pattern for matching
+
+        Returns:
+            List[Dict[str, Union[str, int]]]
+                List of dictionaries for matched lines, each dictionary contains two key-value pairs:
+                - "line_number": int - Line number of the matched line (starts from 1)
+                - "content": str - Full text content of the matched line
+        """
+        results = []
+        try:
+            with open(filename, "r", encoding="utf-8") as file:
+                for line_num, line in enumerate(file, 1):
+                    if re.match(keyword, line):
+                        results.append(
+                            {
+                                "line_number": line_num,
+                                "content": line.strip(),
+                            }
+                        )
+            return results
+        except Exception as e:
+            print(f"error:{e}")
+            return []
+
     @classmethod
     def setUpClass(cls):
         cls.model = MODEL_PATH
@@ -174,41 +209,6 @@ class TestNPULoggingBase(CustomTestCase):
         cls.labels_header = "X-Metrics-Labels"
         # Allowed custom label name (--tokenizer-metrics-allowed-custom-labels)
         cls.my_label = "business_line"
-
-    @staticmethod
-    def get_lines_with_keyword(filename, keyword):
-        """Find and return lines matching a regex keyword from a specified file, with line numbers and content.
-
-        Function Description:
-            Reads the target file line by line, uses the input keyword as a regular expression pattern to match each line's content.
-            For each line that matches the regex pattern, encapsulates the line number (1-indexed) and content into a dictionary,
-            and finally returns a list of dictionaries containing all matched lines.
-
-        Args:
-            filename (str): Path to the file to be read
-            keyword (str): Regular expression pattern for matching
-
-        Returns:
-            List[Dict[str, Union[str, int]]]
-                List of dictionaries for matched lines, each dictionary contains two key-value pairs:
-                - "line_number": int - Line number of the matched line (starts from 1)
-                - "content": str - Full text content of the matched line
-        """
-        results = []
-        try:
-            with open(filename, "r", encoding="utf-8") as file:
-                for line_num, line in enumerate(file, 1):
-                    if re.match(keyword, line):
-                        results.append(
-                            {
-                                "line_number": line_num,
-                                "content": line.strip(),
-                            }
-                        )
-            return results
-        except Exception as e:
-            print(f"error:{e}")
-            return []
 
     def _verify_inference(self, max_new_tokens=32):
         """Send a basic inference request to test inference function."""
