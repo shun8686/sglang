@@ -175,7 +175,7 @@ class TestNPULoggingBase(CustomTestCase):
         # Allowed custom label name (--tokenizer-metrics-allowed-custom-labels)
         cls.my_label = "business_line"
 
-    def _test_inference_function(self, max_new_tokens=32):
+    def _verify_inference(self, max_new_tokens=32):
         """Send a basic inference request to test inference function."""
         response = requests.post(
             f"{self.base_url}/generate",
@@ -227,7 +227,7 @@ class TestNPULoggingBase(CustomTestCase):
             print(f"error:{e}")
             return []
 
-    def _test_log_requests_level(self, log_requests_level, out_log_file):
+    def _verify_log_requests_level(self, log_requests_level, out_log_file):
         """
         Validate that log content complies with expectations for different --log-requests-level configurations.
 
@@ -285,7 +285,7 @@ class TestNPULoggingBase(CustomTestCase):
                 token_id_count = len([x.strip() for x in re.split(r",\s*", output_ids_list_str) if x.strip()])
                 self.assertTrue(token_id_count > 2048)
 
-    def _test_log_exclude_prefixes(self, if_enable, out_log_file):
+    def _verify_log_exclude_prefixes(self, if_enable, out_log_file):
         """Validate that Uvicorn access logs exclude requests with specified path prefixes when the
         --uvicorn-access-log-exclude-prefixes configuration is active.
 
@@ -308,7 +308,7 @@ class TestNPULoggingBase(CustomTestCase):
             self.assertIn(health_message, content)
             self.assertIn(get_server_info_message, content)
 
-    def _test_log_requests_target(self):
+    def _verify_log_requests_target(self):
         """Validate that request logs are correctly output to the target files configured via --log-requests-target."""
         log_files = list(Path(self.temp_dir).glob("*.log"))
         self.assertGreater(len(log_files), 0)
@@ -324,7 +324,7 @@ class TestNPULoggingBase(CustomTestCase):
         self.assertIn("Receive:", file_content)
         self.assertIn("Finish:", file_content)
 
-    def _test_metrics(
+    def _verify_metrics_and_bucket_boundary(
         self,
         expected_time_to_first_token_bucket=None,
         expected_inter_token_latency_bucket=None,
@@ -358,7 +358,7 @@ class TestNPULoggingBase(CustomTestCase):
                 self.assertIn(message, metrics_content)
         return metrics_content
 
-    def _test_enable_metrics_for_all_scheduler(self, if_enable):
+    def _verify_enable_metrics_for_all_scheduler(self, if_enable):
         """Validate that the --enable-metrics-for-all-scheduler parameter controls per-TP-rank scheduler request metric collection.
 
         Args:
@@ -377,7 +377,7 @@ class TestNPULoggingBase(CustomTestCase):
         else:
             self.assertNotIn(message_1, response.text)
 
-    def _test_log_metrics_tokenizer_label(self):
+    def _verify_log_metrics_tokenizer_label(self):
         """Validate independent statistical aggregation of requests with custom labels via tokenizer metrics label parameters."""
         response = requests.post(
             f"{self.base_url}/generate",
@@ -405,7 +405,7 @@ class TestNPULoggingBase(CustomTestCase):
         message = f'sglang:e2e_request_latency_seconds_bucket{{{self.my_label}='
         self.assertIn(message, metrics_content)
 
-    def _test_gc_warning_threshold(self, err_log_file):
+    def _verify_gc_warning_threshold(self, err_log_file):
         """Validate SGLang logs GC warnings when GC duration exceeds --gc-warning-threshold-secs threshold.
 
         Core Functionality:

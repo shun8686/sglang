@@ -73,18 +73,18 @@ class TestNPULoggingCase0(TestNPULoggingBase):
         )
 
     def test_logging_case_0(self):
-        self._test_inference_function()
+        self._verify_inference()
 
-        self._test_log_requests_level(self.log_requests_level, self.out_log_file)
+        self._verify_log_requests_level(self.log_requests_level, self.out_log_file)
 
-        self._test_log_requests_target()
+        self._verify_log_requests_target()
 
         # test --uvicorn-access-log-exclude-prefixes
-        self._test_log_exclude_prefixes(False, self.out_log_file)
+        self._verify_log_exclude_prefixes(False, self.out_log_file)
 
-        self._test_enable_metrics_for_all_scheduler(False)
+        self._verify_enable_metrics_for_all_scheduler(False)
 
-        self._test_metrics(
+        self._verify_metrics_and_bucket_boundary(
             expected_time_to_first_token_bucket=self.default_time_to_first_token_bucket,
             expected_inter_token_latency_bucket=self.default_inter_token_latency_bucket,
             expected_e2e_request_latency_bucket=self.default_e2e_request_latency_bucket,
@@ -92,9 +92,9 @@ class TestNPULoggingCase0(TestNPULoggingBase):
             expected_generation_tokens_bucket=self.default_tokens_bucket,
         )
 
-        self._test_log_requests_target()
+        self._verify_log_requests_target()
 
-        self._test_gc_warning_threshold(self.err_log_file)
+        self._verify_gc_warning_threshold(self.err_log_file)
 
     @classmethod
     def tearDownClass(cls):

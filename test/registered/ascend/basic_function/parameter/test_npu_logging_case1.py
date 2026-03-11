@@ -62,16 +62,16 @@ class TestNPULoggingCase1(TestNPULoggingBase):
         )
 
     def test_logging_case_1(self):
-        self._test_inference_function()
+        self._verify_inference()
 
-        self._test_log_requests_level(self.log_requests_level, self.out_log_file)
+        self._verify_log_requests_level(self.log_requests_level, self.out_log_file)
 
         # test --uvicorn-access-log-exclude-prefixes
-        self._test_log_exclude_prefixes(True, self.out_log_file)
+        self._verify_log_exclude_prefixes(True, self.out_log_file)
 
-        self._test_enable_metrics_for_all_scheduler(True)
+        self._verify_enable_metrics_for_all_scheduler(True)
 
-        self._test_metrics(
+        self._verify_metrics_and_bucket_boundary(
             expected_time_to_first_token_bucket=self.my_bucket,
             expected_inter_token_latency_bucket=self.my_bucket,
             expected_e2e_request_latency_bucket=self.my_bucket,

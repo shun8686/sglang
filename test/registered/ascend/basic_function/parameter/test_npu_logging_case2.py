@@ -52,11 +52,11 @@ class TestNPULoggingCase2(TestNPULoggingBase):
         )
 
     def test_logging_case_2(self):
-        self._test_inference_function()
+        self._verify_inference()
 
-        self._test_log_requests_level(self.log_requests_level, self.out_log_file)
+        self._verify_log_requests_level(self.log_requests_level, self.out_log_file)
 
-        self._test_metrics(
+        self._verify_metrics_and_bucket_boundary(
             expected_prompt_tokens_bucket=self.my_tse_bucket,
             expected_generation_tokens_bucket=self.my_tse_bucket,
         )

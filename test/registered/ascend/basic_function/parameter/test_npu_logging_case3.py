@@ -51,12 +51,12 @@ class TestNPULoggingCase3(TestNPULoggingBase):
         )
 
     def test_logging_case_3(self):
-        self._test_inference_function()
+        self._verify_inference()
 
-        self._test_log_requests_level(self.log_requests_level, self.out_log_file)
+        self._verify_log_requests_level(self.log_requests_level, self.out_log_file)
 
         # test --tokenizer-metrics-custom-labels-header、--tokenizer-metrics-allowed-custom-labels
-        self._test_log_metrics_tokenizer_label()
+        self._verify_log_metrics_tokenizer_label()
 
 
 if __name__ == "__main__":
