@@ -37,8 +37,6 @@ class TestApiRelatedApiKey(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
-            "--api-key",
-            cls.api_key,
             "--served-model-name",
             cls.custom_model_name,
             "--weight-version",
@@ -65,12 +63,14 @@ class TestApiRelatedApiKey(CustomTestCase):
         self.assertIn("data", result)
         logging.warning(f"*******{result}")
         self.assertEqual(result["data"][0]["id"], self.custom_model_name)
-        self.assertEqual(result["data"][0]["weight_version"], self.weight_version)
         logging.warning(f"Request with api-key auth succeeded: {result['text'][:50]}")
+
+        response1 = requests.get(f"{self.base_url}/model_info")
+        result = response1.json()
+        self.assertEqual(result["data"][0]["weight_version"], self.weight_version)
         logging.warning(f"Weight version works: {result['text'][:50]}")
 
     def test_template_name(self):
-        headers = {"Authorization": f"Bearer {self.api_key}"}
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -79,7 +79,6 @@ class TestApiRelatedApiKey(CustomTestCase):
                     "max_new_tokens": 64,
                 },
             },
-            headers = headers,
         )
         result = response.json()
 
@@ -116,6 +115,10 @@ class TestApiRelatedStoragePath(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process)
 
     def test_storage_path(self):
         args = SimpleNamespace(
@@ -161,6 +164,10 @@ class TestApiRelatedChatTemplate(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process)
 
     def test_chat_template(self):
         response = requests.post(
