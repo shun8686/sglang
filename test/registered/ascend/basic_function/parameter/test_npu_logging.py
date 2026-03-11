@@ -175,23 +175,6 @@ class TestNPULoggingBase(CustomTestCase):
         # Allowed custom label name (--tokenizer-metrics-allowed-custom-labels)
         cls.my_label = "business_line"
 
-    def _verify_inference(self, max_new_tokens=32):
-        """Send a basic inference request to test inference function."""
-        response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": self.test_prompt,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": max_new_tokens,
-                },
-            },
-            timeout=60,
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn(self.expected_output, response.text)
-        return response.text
-
     @staticmethod
     def get_lines_with_keyword(filename, keyword):
         """Find and return lines matching a regex keyword from a specified file, with line numbers and content.
@@ -226,6 +209,23 @@ class TestNPULoggingBase(CustomTestCase):
         except Exception as e:
             print(f"error:{e}")
             return []
+
+    def _verify_inference(self, max_new_tokens=32):
+        """Send a basic inference request to test inference function."""
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": self.test_prompt,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": max_new_tokens,
+                },
+            },
+            timeout=60,
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.expected_output, response.text)
+        return response.text
 
     def _verify_log_requests_level(self, log_requests_level, out_log_file):
         """
