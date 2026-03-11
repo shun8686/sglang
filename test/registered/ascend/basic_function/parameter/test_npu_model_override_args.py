@@ -5,6 +5,7 @@ import time
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -12,14 +13,12 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestModelOverrideBaisc(CustomTestCase):
+class TestModelOverrideArgs(CustomTestCase):
     """Test model override functionality on NPU environment.
 
     [Test Category] Functional
@@ -81,17 +80,27 @@ class TestModelOverrideBaisc(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         return response.json()
 
-    def test_001_override_prefferred_combination(self):
-        """Test the num_hidden_layers parameter."""
-        logging.warning("\n=== Test 001: num_hidden_layers parameter ===")
-        self.process = self._launch_server_with_hicache()
+    def test_001_model_override_args(self):
+        """Test multiple configuration parameters simultaneously overriding, batch processing requests."""
+        logging.warning("\n=== Test 001: Override multiple parameters ===")
+        self.process = self._launch_server_with_hicache(
+            model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
+            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 128,  "min_new_tokens": 1}'
+        )
 
         try:
             time.sleep(5)
-            result = self._test_basic_inference()
-            self.assertIn("text", result)
-            self.assertGreater(len(result["text"]), 0)
-            logging.warning(f"Inference num_hidden_layers override, {result['text'][:50]}...")
+            response = requests.get(f"{self.base_url}/model_info")
+            result = response.json()
+            self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)
+            self.assertEqual(result["preferred_sampling_params"]["min_new_tokens"], 1)
+            self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 128)
+
+            result1 = self._test_basic_inference()
+            self.assertIn("text", result1)
+            self.assertGreater(len(result1["text"]), 0)
+
+            logging.warning(f"Inference with multiple overrides: {result1['text'][:50]}...")
 
             args = SimpleNamespace(
                 num_shots=5,
@@ -104,35 +113,19 @@ class TestModelOverrideBaisc(CustomTestCase):
             )
             run_eval(args)
             logging.warning(f"Batch processing requests successful.")
+
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
 
-    def test_002_override_prefferred_combination(self):
-        """Test multiple configuration parameters simultaneously overriding."""
-        logging.warning("\n=== Test 002: Override multiple parameters ===")
+    def test_002_model_override_args(self):
+        """Test configuration with multiple sampling parameters."""
+        logging.warning("\n=== Test 002: multiple sampling parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
-            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 128,  "min_new_tokens": 1}'
-        )
-        try:
-            time.sleep(5)
-            result = self._test_basic_inference()
-            self.assertIn("text", result)
-            self.assertGreater(len(result["text"]), 0)
-            logging.warning(f"Inference with multiple overrides: {result['text'][:50]}...")
-
-        finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
-
-    def test_003_override_prefferred_combination(self):
-        """Test configuration with multiple sampling parameters ."""
-        logging.warning("\n=== Test 003: multiple sampling parameters ===")
-        self.process = self._launch_server_with_hicache(
-            model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50}',
             preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256}'
         )
+
         try:
             time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")
@@ -151,13 +144,14 @@ class TestModelOverrideBaisc(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
-    def test_004_override_prefferred_combination(self):
-        """Test configuration with multiple sampling penalty parameters."""
-        logging.warning("\n=== Test 004: multiple sampling penalty parameters ===")
+    def test_003_model_override_args(self):
+        """Test configuration with multiple sampling penalty parameters, long sequence request."""
+        logging.warning("\n=== Test 003: multiple sampling penalty parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "max_new_tokens": 64, "frequency_penalty": 0.5, "presence_penalty": 0.3, "repetition_penalty": 1.2}'
         )
+
         try:
             time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")
@@ -168,7 +162,7 @@ class TestModelOverrideBaisc(CustomTestCase):
             self.assertEqual(result["preferred_sampling_params"]["presence_penalty"], 0.3)
             self.assertEqual(result["preferred_sampling_params"]["repetition_penalty"], 1.2)
 
-            long_prompt = "Explain the concept of machine learning in detail. " * 10
+            long_prompt = "Explain the concept of machine learning in detail. " * 100
             response1 = requests.post(
                 f"{self.base_url}/generate",
                 json={

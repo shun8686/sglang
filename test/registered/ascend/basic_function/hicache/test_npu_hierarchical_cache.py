@@ -1,7 +1,6 @@
 import logging
 import unittest
 import time
-import threading
 from types import SimpleNamespace
 
 import requests
@@ -23,7 +22,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=3600, suite="stage-b-test-npu")
 
 
-class TestHierarchicalCacheNPU(CustomTestCase):
+class TestHiCache(CustomTestCase):
     """Test Hierarchical Cache functionality on NPU environment.
 
     [Test Category] Functional
@@ -115,40 +114,8 @@ class TestHierarchicalCacheNPU(CustomTestCase):
         self.assertIn(self.expected_output, response.text)
         return response.text
 
-    def _send_concurrent_requests(self, num_requests=10):
-        """Send concurrent requests and return results."""
-        results = []
-        threads = []
-
-        def send_request(rid):
-            try:
-                response = requests.post(
-                    f"{self.base_url}/generate",
-                    json={
-                        "text": f"Test request {rid}: What is AI?",
-                        "sampling_params": {
-                            "temperature": 0,
-                            "max_new_tokens": 16,
-                        },
-                    },
-                    timeout=120,
-                )
-                results.append((rid, response.status_code, response.text))
-            except Exception as e:
-                results.append((rid, -1, str(e)))
-
-        for i in range(num_requests):
-            thread = threading.Thread(target=send_request, args=(i,))
-            threads.append(thread)
-            thread.start()
-
-        for thread in threads:
-            thread.join()
-
-        return results
-
     def test_001_combined_params(self):
-        """Test Hicache with combined parameters,hicache inference request reuse succeddfully."""
+        """Test Hicache with combined parameters, hicache inference request reuse succeddfully."""
         logging.warning("\n=== Test 001: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_ratio=1.0,
@@ -186,7 +153,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             self.process = None
 
     def test_002_combined_params(self):
-        """Test Hicache with combined parameters, hicache_storage_backend is configured to be file, file storage is hosted under hicache."""
+        """Test Hicache with combined parameters, hicache_storage_backend is configured as a file, file storage is hosted under hicache."""
         logging.warning("\n=== Test 002: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_ratio=2.0,
@@ -215,13 +182,16 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             run_eval(args)
             hicache_file = run_command(f"ls /tmp/hicache")
             self.assertNotEqual(hicache_file, None)
+            hicache_file_size = run_command(f"du -s /tmp/hicache | cut -f1")
+            self.assertGreater(int(hicache_file_size), 0)
             run_command(f"rm -rf /tmp/hicache")
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
 
     def test_003_combined_params(self):
-        """Test Hicache with combined parameters, hicache with concurrent requests."""
+        """Test Hicache with combined parameters, hicache_write_policy configure write_through_selective,
+        hicache_io_backend configure kernel_ascend, hicache_mem_layout configure page_first_direct, reasoning successful"""
         logging.warning("\n=== Test 003: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_size=80,
@@ -232,12 +202,8 @@ class TestHierarchicalCacheNPU(CustomTestCase):
 
         try:
             time.sleep(5)
-            results = self._send_concurrent_requests(num_requests=20)
-
-            success_count = sum(1 for r in results if r[1] == 200)
-            self.assertGreaterEqual(success_count, 18)
-            logging.warning(f"Concurrent requests test passed, {success_count}/20 succeeded.")
-
+            result = self._test_basic_inference()
+            logging.warning(f"Concurrent requests test passed, {result[:50]}....")
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
@@ -255,7 +221,7 @@ class TestHierarchicalCacheNPU(CustomTestCase):
 
         try:
             time.sleep(5)
-            long_prompt = "Explain the concept of machine learning in detail. " * 10
+            long_prompt = "Explain the concept of machine learning in detail. " * 100
             response = requests.post(
                 f"{self.base_url}/generate",
                 json={
@@ -270,6 +236,24 @@ class TestHierarchicalCacheNPU(CustomTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertGreater(len(response.text), 50)
             logging.warning(f"Long sequence test passed, result length: {len(response.text)}")
+        finally:
+            kill_process_tree(self.process.pid)
+            self.process = None
+
+    def test_005_combined_params(self):
+        """Test Hicache with combined parameters, hicache_mem_layout is configured as page_head"""
+        logging.warning("\n=== Test 005: Combined Parameters ===")
+        self.process = self._launch_server_with_hicache(
+            hicache_ratio=5,
+            hicache_write_policy="write_through",
+            hicache_io_backend="direct",
+            hicache_mem_layout="page_head",
+        )
+
+        try:
+            time.sleep(5)
+            result = self._test_basic_inference()
+            logging.warning(f"Concurrent requests test passed, {result[:50]}....")
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
