@@ -3,7 +3,7 @@ import tempfile
 import unittest
 import requests
 
-from test_ascend_logging import TestNPULoggingBase
+from test_npu_logging import TestNPULoggingBase
 
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
