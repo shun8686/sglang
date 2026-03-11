@@ -79,5 +79,6 @@ class TestNPULoggingCase1(TestNPULoggingBase):
             expected_generation_tokens_bucket=self.my_tokens_bucket,
         )
 
+
 if __name__ == "__main__":
     unittest.main()
