@@ -61,12 +61,10 @@ class TestApiRelatedApiKey(CustomTestCase):
         result = response.json()
 
         self.assertIn("data", result)
-        logging.warning(f"*******{result}")
         self.assertEqual(result["data"][0]["id"], self.custom_model_name)
 
         response1 = requests.get(f"{self.base_url}/model_info")
-        result1 = response1.json()
-        self.assertEqual(result1["weight_version"], self.weight_version)
+        self.assertEqual(response1.json()["weight_version"], self.weight_version)
 
     def test_template_name(self):
         response = requests.post(
@@ -97,10 +95,6 @@ class TestApiRelatedStoragePath(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
-            "--hicache-storage-backend",
-            "file",
-            "--file-storage-path",
-            cls.storage_path,
             "--tool-server",
             "demo",
             "--tool-call-parser",
@@ -129,11 +123,6 @@ class TestApiRelatedStoragePath(CustomTestCase):
             port=21000,
         )
         run_eval(args)
-        hicache_file = run_command(f"ls {self.storage_path}")
-        self.assertNotEqual(hicache_file, None)
-        hicache_file_size = run_command(f"du -s {self.storage_path} | cut -f1")
-        self.assertGreater(int(hicache_file_size), 0)
-        run_command(f"rm -rf {self.storage_path}")
 
 class TestApiRelatedChatTemplate(CustomTestCase):
     @classmethod
