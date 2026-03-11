@@ -76,6 +76,11 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], 0.5)
 
+    def test_server_info(self):
+        response = requests.get(f"{self.base_url}/get_server_info")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(self.mode, response.text)
+
 
 class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "auto"
