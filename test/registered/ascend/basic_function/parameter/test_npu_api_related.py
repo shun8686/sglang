@@ -18,12 +18,17 @@ register_npu_ci(est_time=600, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestApiRelatedGHFChat(CustomTestCase):
+    """The API test with combined parameters returned the correct values for model_name and weight_version, indicating successful inference.
+
+    [Test Category] Functional
+    [Test Target] Api related on NPU
+    --served-model-name; --weight-version; --hf-chat-template-name
+    """
 
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.api_key = "test-api-key-12345"
         cls.custom_model_name = "Llama3.2"
         cls.weight_version = "v1.0.0"
         cls.hf_chat_template_name = "tool_use"
@@ -54,6 +59,7 @@ class TestApiRelatedGHFChat(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_served_model_weight_version(self):
+        """Verify the weight version identifier and the served-model-name covered model name."""
         response = requests.get(f"{self.base_url}/v1/models")
         result = response.json()
 
@@ -64,6 +70,7 @@ class TestApiRelatedGHFChat(CustomTestCase):
         self.assertEqual(response1.json()["weight_version"], self.weight_version)
 
     def test_chat_template_name(self):
+        """Send inference request"""
         response = requests.post(
             f"{self.base_url}/generate",
             json={
@@ -80,6 +87,13 @@ class TestApiRelatedGHFChat(CustomTestCase):
         logging.warning(f"Request with succeeded: {result['text'][:50]}")
 
 class TestApiRelatedToolCallParser(CustomTestCase):
+    """Test combined parameter tool-server and tool-call-parser, indicating successful inference.
+
+    [Test Category] Functional
+    [Test Target] Api related on NPU
+    --tool-server; --tool-call-parser
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -109,6 +123,7 @@ class TestApiRelatedToolCallParser(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_tool_call_parser(self):
+        """Send batch request"""
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -121,6 +136,13 @@ class TestApiRelatedToolCallParser(CustomTestCase):
         run_eval(args)
 
 class TestApiRelatedSamplingDefaults(CustomTestCase):
+    """Test --chat-template, indicating successful inference.
+
+    [Test Category] Functional
+    [Test Target] Api related on NPU
+    --chat-template
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -151,7 +173,7 @@ class TestApiRelatedSamplingDefaults(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_sampling_defaults(self):
+    def test_chat_template(self):
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -167,6 +189,13 @@ class TestApiRelatedSamplingDefaults(CustomTestCase):
         logging.warning(f"Builtin chat template works: {result['choices'][0]['message']['content'][:50]}...")
 
 class TestApiRelatedCacheReport(CustomTestCase):
+    """Test verify set --enable-cache-report, sent openai request prompt_tokens_details will return cached_tokens.
+
+    [Test Category] Functional
+    [Test Target] Api related on NPU
+    --chat-template
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -194,7 +223,7 @@ class TestApiRelatedCacheReport(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_sampling_defaults(self):
+    def test_cache_report(self):
         for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
