@@ -54,7 +54,7 @@ class TestApiRelatedApiKey(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process)
+        kill_process_tree(cls.process.pid)
 
     def test_served_model_weight_version(self):
         response = requests.get(f"{self.base_url}/v1/models")
@@ -63,12 +63,10 @@ class TestApiRelatedApiKey(CustomTestCase):
         self.assertIn("data", result)
         logging.warning(f"*******{result}")
         self.assertEqual(result["data"][0]["id"], self.custom_model_name)
-        logging.warning(f"Request with api-key auth succeeded: {result['text'][:50]}")
 
         response1 = requests.get(f"{self.base_url}/model_info")
-        result = response1.json()
-        self.assertEqual(result["data"][0]["weight_version"], self.weight_version)
-        logging.warning(f"Weight version works: {result['text'][:50]}")
+        result1 = response1.json()
+        self.assertEqual(result1["weight_version"], self.weight_version)
 
     def test_template_name(self):
         response = requests.post(
@@ -118,7 +116,7 @@ class TestApiRelatedStoragePath(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process)
+        kill_process_tree(cls.process.pid)
 
     def test_storage_path(self):
         args = SimpleNamespace(
@@ -167,7 +165,7 @@ class TestApiRelatedChatTemplate(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process)
+        kill_process_tree(cls.process.pid)
 
     def test_chat_template(self):
         response = requests.post(
