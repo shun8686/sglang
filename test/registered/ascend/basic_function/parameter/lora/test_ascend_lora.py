@@ -237,7 +237,7 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
             "2",
             "--enable-lora",
             "--lora-path",
-            f"lora_1={cls.lora_a}",
+            f"lora_a={cls.lora_a}",
             "--max-load-loras",
             "2",
             "--lora-eviction-policy",
@@ -268,7 +268,7 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
-                "lora_path": self.lora_b,
+                "lora_path": "lora_b",
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -282,7 +282,7 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
-                "lora_path": self.lora_b,
+                "lora_path": "lora_b",
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -326,8 +326,8 @@ class TestLoraKVCache(CustomTestCase):
             "2",
             "--enable-lora",
             "--lora-path",
-            f"lora_1={cls.lora_a}",
-            f"lora_2={cls.lora_b}",
+            f"lora_a={cls.lora_a}",
+            f"lora_b={cls.lora_b}",
             "--lora-target-modules",
             "all",
             "--attention-backend",
@@ -368,7 +368,7 @@ class TestLoraKVCache(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
-                "lora_path": self.lora_b,
+                "lora_path": "lora_b",
             },
         )
 
@@ -395,9 +395,9 @@ class TestLoraMaxLoraRank(CustomTestCase):
             "2",
             "--enable-lora",
             "--lora-path",
-            f"lora_1={cls.lora_a}",
-            f"lora_2={cls.lora_b}",
-            f"lora_3={cls.lora_c}",
+            f"lora_a={cls.lora_a}",
+            f"lora_b={cls.lora_b}",
+            f"lora_c={cls.lora_c}",
             "--max-load-rank",
             "2",
             "--lora-target-modules",
@@ -426,7 +426,7 @@ class TestLoraMaxLoraRank(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
-                "lora_path": self.lora_a,
+                "lora_path":"lora_a",
             },
         )
         self.assertEqual(response.status_code, 200)
