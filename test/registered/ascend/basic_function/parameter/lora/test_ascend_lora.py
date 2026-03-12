@@ -225,9 +225,9 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --lora-eviction-policy
     """
-    lora_a = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-    lora_b = "/home/weights/codelion/FastLlama-3.2-LoRA"
-    lora_c = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
+    lora_a = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
+    lora_b = "LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH"
+    lora_c = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
     lora_eviction_policy = "fifo"
 
     @classmethod
@@ -314,8 +314,8 @@ class TestLoraKVCache(CustomTestCase):
     [Test Target] --enable-lora, --enable-radix-cache
     """
 
-    lora_a = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-    lora_b = "/home/weights/codelion/FastLlama-3.2-LoRA"
+    lora_a = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
+    lora_b = "LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH"
 
     @classmethod
     def setUpClass(cls):
