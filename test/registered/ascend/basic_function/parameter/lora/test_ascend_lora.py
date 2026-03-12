@@ -411,7 +411,6 @@ class TestLoraMaxLoraRank(CustomTestCase):
     lora_b = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
     lora_c = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
 
-    # case13
     @classmethod
     def setUpClass(cls):
         other_args = [
