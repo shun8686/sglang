@@ -4,11 +4,11 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import (
-#     LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH,
-#     LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH,
-#     LLAMA_3_2_1B_WEIGHTS_PATH,
-# )
+from sglang.test.ascend.test_ascend_utils import (
+    LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH,
+    LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH,
+    LLAMA_3_2_1B_WEIGHTS_PATH,
+)
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -19,8 +19,6 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
-LLAMA_3_2_1B_WEIGHTS_PATH = "/home/weights/LLM-Research/Llama-3.2-1B-Instruct"
-
 
 class TestLoraBasicFunction(CustomTestCase):
     """Testcase：Verify the use different lora, inference request succeeded.
@@ -29,8 +27,8 @@ class TestLoraBasicFunction(CustomTestCase):
     [Test Target] --enable-lora, --lora-path,
     """
 
-    lora_a = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-    lora_b = "/home/weights/codelion/FastLlama-3.2-LoRA"
+    lora_a = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
+    lora_b = LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -46,8 +44,6 @@ class TestLoraBasicFunction(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
-            "--base-gpu-id",
-            "6",
         ]
         cls.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
@@ -60,10 +56,7 @@ class TestLoraBasicFunction(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-
-'''
     def test_lora_use_different_lora(self):
-        # case1 case2
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -145,9 +138,8 @@ class TestLoraBasicFunction(CustomTestCase):
                 stream_text += data.get("text", "")
         self.assertIn(text_lora_a, stream_text)
 
-
     def test_batch_with_different_loras(self):
-        #test different loras in batch requests can work normally
+        # test different loras in batch requests can work normally
         prompts = [
             "What is AI",
             "Explain neural network",
@@ -173,29 +165,29 @@ class TestLoraBasicFunction(CustomTestCase):
             self.assertGreater(len(result["text"]), 0)
 
     def test_lora_with_sampling_parameters(self):
-    #test loras with temperature
-    response_texts = []
-    for i in range(2):
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0.8,
-                    "max_new_tokens": 32,
+        # test loras with temperature
+        response_texts = []
+        for i in range(2):
+            response = requests.post(
+                f"{DEFAULT_URL_FOR_TEST}/generate",
+                json={
+                    "text": "The capital of France is",
+                    "sampling_params": {
+                        "temperature": 0.8,
+                        "max_new_tokens": 32,
+                    },
+                    "lora_path": "lora_a",
                 },
-                "lora_path": "lora_a",
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        response_text = response.json()["text"]
-        response_texts.append(response_text)
-    first_text = response_texts[0]
-    for idx, text in enumerate(response_texts[1:], start=2):
-        self.assertNotEqual(text, first_text, f"same response_text")
+            )
+            self.assertEqual(response.status_code, 200)
+            response_text = response.json()["text"]
+            response_texts.append(response_text)
+        first_text = response_texts[0]
+        for idx, text in enumerate(response_texts[1:], start=2):
+            self.assertNotEqual(text, first_text, f"same response_text")
 
     def test_lora_with_json_schema(self):
-        #test lora and json schema can work normally
+        # test lora and json schema can work normally
         json_schema = json.dumps({
             "type": "object",
             "properties": {
@@ -218,7 +210,6 @@ class TestLoraBasicFunction(CustomTestCase):
                 "lora_path": "lora_a",
             },
         )
-        print(response.json())
         self.assertEqual(response.status_code, 200)
         result = response.json()
         self.assertIn("text", result)
@@ -226,77 +217,6 @@ class TestLoraBasicFunction(CustomTestCase):
         self.assertIn("name", parsed_json)
         self.assertIn("age", parsed_json)
         self.assertIn("city", parsed_json)
-'''
-
-'''
-class TestLoraKVCache(CustomTestCase):
-    """Testcase：Verify the LoRA adapter can work properly with Radix Cache
-
-    [Test Category] Parameter
-    [Test Target] --enable-lora, --enable-radix-cache
-    """
-    #case 14
-    lora_a = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-    lora_b = "/home/weights/codelion/FastLlama-3.2-LoRA"
-    lora_c = "/home/weights/codelion/FastLlama-3.2-LoRA"
-    lora_d = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-
-    @classmethod
-    def setUpClass(cls):
-        other_args = [
-            "--tp-size"
-            "2"
-            "--enable-lora",
-            "--lora-path",
-            f"lora_1={cls.lora_a}",
-            f"lora_2={cls.lora_b}",
-            "--enable-radix-cache",
-            "--lora-target-modules",
-            "all",
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-        ]
-        cls.process = popen_launch_server(
-            LLAMA_3_2_1B_WEIGHTS_PATH,
-            DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def test_lora(self):
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "lora_path": self.lora_a,
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Paris", response.text)
-
-         response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "lora_path": self.lora_b,
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Paris", response.text)
-'''
 
 
 class TestLoraMemoryEvictionFifo(CustomTestCase):
@@ -308,7 +228,8 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
     lora_a = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
     lora_b = "/home/weights/codelion/FastLlama-3.2-LoRA"
     lora_c = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-    lora_eviction_policy="fifo"
+    lora_eviction_policy = "fifo"
+
     @classmethod
     def setUpClass(cls):
         other_args = [
@@ -380,10 +301,12 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
+
 class TestLoraMemoryEvictionLru(CustomTestCase):
     lora_eviction_policy = "lru"
 
-'''
+
 class TestLoraSessionManagement(CustomTestCase):
     """Testcase：Verify the functionality and parameter effectiveness when --lora-target-modules=all is set for Llama-3.2-1B
 
@@ -422,7 +345,6 @@ class TestLoraSessionManagement(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_lora(self):
-
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
@@ -436,9 +358,8 @@ class TestLoraSessionManagement(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-'''
 
-'''
+
 class TestLoraMaxLoraRank(CustomTestCase):
     """Testcase：Verify the functionality and parameter effectiveness when --lora-target-modules=all is set for Llama-3.2-1B
 
@@ -449,7 +370,7 @@ class TestLoraMaxLoraRank(CustomTestCase):
     lora_b = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
     lora_c = "LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
 
-    #case13
+    # case13
     @classmethod
     def setUpClass(cls):
         other_args = [
@@ -493,7 +414,77 @@ class TestLoraMaxLoraRank(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-'''
+
+
+class TestLoraKVCache(CustomTestCase):
+    """Testcase：Verify the LoRA adapter can work properly with Radix Cache
+
+    [Test Category] Parameter
+    [Test Target] --enable-lora, --enable-radix-cache
+    """
+
+    lora_a = "LAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
+    lora_b = "LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH,"
+    lora_c = "LAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH"
+    lora_d = "LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH,"
+
+    @classmethod
+    def setUpClass(cls):
+        other_args = [
+            "--tp-size"
+            "2"
+            "--enable-lora",
+            "--lora-path",
+            f"lora_1={cls.lora_a}",
+            f"lora_2={cls.lora_b}",
+            "--enable-radix-cache",
+            "--lora-target-modules",
+            "all",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+        ]
+        cls.process = popen_launch_server(
+            LLAMA_3_2_1B_WEIGHTS_PATH,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_lora(self):
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+                "lora_path": self.lora_a,
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
+
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+                "lora_path": self.lora_b,
+            },
+        )
+
+    self.assertEqual(response.status_code, 200)
+    self.assertIn("Paris", response.text)
+
 
 if __name__ == "__main__":
     unittest.main()
