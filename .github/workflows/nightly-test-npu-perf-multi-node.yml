@@ -61,8 +61,8 @@ jobs:
     container:
       image: swr.ap-southeast-1.myhuaweicloud.com/base_image/ascend-ci/sglang:main-x86
       env:
-        KUBECONFIG: /data/ascend-ci-share-pkking-sglang/.cache/kb.yaml
-        KUBECTL: /data/ascend-ci-share-pkking-sglang/.cache/kubectl
+        KUBECONFIG: /root/.cache/.cache/kb.yaml
+        KUBECTL: /root/.cache/.cache/kubectl
         NAMESPACE: sgl-project
         KUBE_JOB_NAME: ascend-sglang-perf-test
         SGLANG_IS_IN_CI: true

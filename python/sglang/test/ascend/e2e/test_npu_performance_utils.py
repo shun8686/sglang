@@ -64,6 +64,10 @@ QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = (
 )
 GLM_4_6_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
 
+QWEN3_VL_8B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-8B-Instruct"
+)
+
 ROUND_ROBIN = "round_robin"
 
 DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH = 3600
@@ -161,13 +165,15 @@ def run_bench_serving(
     model_path=None,
     backend="sglang",
     dataset_name=None,
+    dataset_path=None,
     request_rate=None,
     max_concurrency=None,
     num_prompts=None,
     input_len=None,
     output_len=None,
     random_range_ratio=1,
-    dataset_path=None,
+    image_resolution=None,
+    image_count=None,
 ):
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
@@ -205,6 +211,10 @@ def run_bench_serving(
         cmd_args.extend(["--random-output-len", str(output_len)])
     if random_range_ratio:
         cmd_args.extend(["--random-range-ratio", str(random_range_ratio)])
+    if image_resolution:
+        cmd_args.extend(["--image-resolution", str(image_resolution)])
+    if image_count:
+        cmd_args.extend(["--image-count", str(image_count)])
     logger.info(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
@@ -262,6 +272,8 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     input_len = None
     output_len = None
     random_range_ratio = None
+    image_resolution = None
+    image_count = None
     ttft = None
     tpot = None
     output_token_throughput = None
@@ -341,6 +353,8 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             "input_len": self.input_len,
             "output_len": self.output_len,
             "random_range_ratio": self.random_range_ratio,
+            "image_resolution": self.image_resolution,
+            "image_count": self.image_count,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -363,6 +377,8 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     input_len = None
     output_len = None
     random_range_ratio = None
+    image_resolution = None
+    image_count = None
     ttft = None
     tpot = None
     output_token_throughput = None
@@ -458,6 +474,8 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             "input_len": self.input_len,
             "output_len": self.output_len,
             "random_range_ratio": self.random_range_ratio,
+            "image_resolution": self.image_resolution,
+            "image_count": self.image_count,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -480,6 +498,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     input_len = None
     output_len = None
     random_range_ratio = 1
+    image_resolution = None
+    image_count = None
     ttft = None
     tpot = None
     output_token_throughput = None
@@ -592,6 +612,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             "input_len": self.input_len,
             "output_len": self.output_len,
             "random_range_ratio": self.random_range_ratio,
+            "image_resolution": self.image_resolution,
+            "image_count": self.image_count,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
