@@ -328,7 +328,6 @@ class TestLoraKVCache(CustomTestCase):
             "--lora-path",
             f"lora_1={cls.lora_a}",
             f"lora_2={cls.lora_b}",
-            "--enable-radix-cache",
             "--lora-target-modules",
             "all",
             "--attention-backend",
