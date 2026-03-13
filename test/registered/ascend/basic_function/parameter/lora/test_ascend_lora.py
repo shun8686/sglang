@@ -451,7 +451,6 @@ class TestLoraMaxLoraRank(CustomTestCase):
 
     lora_a = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
     lora_b = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
-    lora_c = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
 
     @classmethod
     def setUpClass(cls):
@@ -462,7 +461,6 @@ class TestLoraMaxLoraRank(CustomTestCase):
             "--lora-path",
             f"lora_a={cls.lora_a}",
             f"lora_b={cls.lora_b}",
-            f"lora_c={cls.lora_c}",
             "--max-lora-rank",
             "64",
             "--lora-target-modules",
@@ -492,6 +490,20 @@ class TestLoraMaxLoraRank(CustomTestCase):
                     "max_new_tokens": 32,
                 },
                 "lora_path": "lora_a",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
+
+        esponse = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+                "lora_path": "lora_b",
             },
         )
         self.assertEqual(response.status_code, 200)
