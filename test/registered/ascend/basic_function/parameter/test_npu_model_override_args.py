@@ -85,7 +85,7 @@ class TestModelOverrideArgs(CustomTestCase):
         logging.warning("\n=== Test 001: Override multiple parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
-            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 128,  "min_new_tokens": 1}'
+            preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 127, "min_p": 1}'
         )
 
         try:
@@ -93,7 +93,7 @@ class TestModelOverrideArgs(CustomTestCase):
             response = requests.get(f"{self.base_url}/model_info")
             result = response.json()
             self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)
-            self.assertEqual(result["preferred_sampling_params"]["min_new_tokens"], 1)
+            self.assertEqual(result["preferred_sampling_params"]["min_p"], 1)
             self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 128)
 
             result1 = self._test_basic_inference()
@@ -123,7 +123,7 @@ class TestModelOverrideArgs(CustomTestCase):
         logging.warning("\n=== Test 002: multiple sampling parameters ===")
         self.process = self._launch_server_with_hicache(
             model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
-            preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256}'
+            preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256, "min_new_tokens": 1}'
         )
 
         try:
