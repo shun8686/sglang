@@ -265,7 +265,7 @@ class TestApiRelatedReasoningParser(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_CODER_1_3_B_BASE_PATH
+        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
@@ -291,7 +291,7 @@ class TestApiRelatedReasoningParser(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test__reasoning_requests(self):
+    def test_reasoning_requests(self):
         """Send inference request"""
         response = requests.post(
             f"{self.base_url}/generate",
@@ -304,7 +304,10 @@ class TestApiRelatedReasoningParser(CustomTestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        return response.json()
+        result = response.json()
+        self.assertIn("text", result)
+        self.assertGreater(len(result["text"]), 0)
+        logging.warning(f"Request with succeeded: {result['text'][:50]}")
 
 
 if __name__ == "__main__":
