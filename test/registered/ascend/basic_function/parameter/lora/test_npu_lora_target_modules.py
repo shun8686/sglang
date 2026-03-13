@@ -73,7 +73,7 @@ class TestLoraTargetModulesAll(CustomTestCase):
         self.assertIn("Paris", response.text)
 
         # Verify lora_target_modules parameter is correctly set in server info
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
+        response = requests.get(DEFAULT_URL_FOR_TEST + "/server_info")
         self.assertEqual(response.status_code, 200)
         expected_modules = [
             "k_proj",

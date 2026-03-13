@@ -96,3 +96,7 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
         response = requests.get(DEFAULT_URL_FOR_TEST + "/server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["lora_eviction_policy"], self.lora_eviction_policy)
+
+
+class TestLoraMemoryEvictionLru(CustomTestCase):
+    lora_eviction_policy = "lru"

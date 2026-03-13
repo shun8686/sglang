@@ -66,7 +66,7 @@ class TestLoraPaths(CustomTestCase):
         self.assertIn("Paris", response.text)
 
         # Verify max_loras_per_batch parameter is correctly set in server info
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
+        response = requests.get(DEFAULT_URL_FOR_TEST + "/server_info")
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["max_loras_per_batch"], 1)
 

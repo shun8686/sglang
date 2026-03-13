@@ -352,8 +352,7 @@ class TestLoraBasicFunction(CustomTestCase):
 
 
 
-class TestLoraMemoryEvictionLru(CustomTestCase):
-    lora_eviction_policy = "lru"
+
 
 
 class TestLoraMaxLoraRank(CustomTestCase):
