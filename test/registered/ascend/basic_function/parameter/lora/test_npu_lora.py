@@ -142,6 +142,32 @@ class TestLoraBasicFunction(CustomTestCase):
                 stream_text += data.get("text", "")
         self.assertIn(text_lora_a, stream_text)
 
+    def test_batch_with_different_loras(self):
+        # test different loras in batch requests can work properly
+        prompts = [
+            "What is AI",
+            "Explain neural network",
+            "What is deep learning",
+        ]
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": prompts,
+                "sampling_params": {
+                    "temperature": 0.7,
+                    "max_new_tokens": 64,
+                },
+                "lora_path": ["lora_a", "lora_b"],
+            },
+        )
+        results = response.json()
+
+        self.assertEqual(len(results), len(prompts))
+
+        for i, result in enumerate(results):
+            self.assertEqual("text", result)
+            self.assertGreater(len(result["text"]), 0)
+
     def test_lora_with_sampling_parameters(self):
         # test loras with temperature
         response_texts = []
