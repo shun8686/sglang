@@ -351,7 +351,6 @@ class TestLoraBasicFunction(CustomTestCase):
                 },
                 "session_params": {
                     "id": session_id_second,
-                    # "rid": rid_third,
                 },
                 "lora_path": "lora_a",
 
