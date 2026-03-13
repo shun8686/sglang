@@ -464,7 +464,7 @@ class TestLoraMaxLoraRank(CustomTestCase):
             f"lora_b={cls.lora_b}",
             f"lora_c={cls.lora_c}",
             "--max-lora-rank",
-            "2",
+            "64",
             "--lora-target-modules",
             "all",
             "--attention-backend",
