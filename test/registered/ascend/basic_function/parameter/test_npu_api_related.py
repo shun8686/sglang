@@ -4,7 +4,7 @@ import unittest
 import requests
 from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH, DEEPSEEK_CODER_1_3_B_BASE_PATH
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -69,7 +69,7 @@ class TestApiRelatedGHFChat(CustomTestCase):
         response1 = requests.get(f"{self.base_url}/model_info")
         self.assertEqual(response1.json()["weight_version"], self.weight_version)
 
-    def test_chat_template_name(self):
+    def test_chat_template_request(self):
         """Send inference request"""
         response = requests.post(
             f"{self.base_url}/generate",
@@ -85,6 +85,7 @@ class TestApiRelatedGHFChat(CustomTestCase):
         self.assertIn("text", result)
         self.assertGreater(len(result["text"]), 0)
         logging.warning(f"Request with succeeded: {result['text'][:50]}")
+
 
 class TestApiRelatedToolCallParser(CustomTestCase):
     """Test combined parameter tool-server and tool-call-parser, indicating successful inference.
@@ -135,12 +136,13 @@ class TestApiRelatedToolCallParser(CustomTestCase):
         )
         run_eval(args)
 
+
 class TestApiRelatedSamplingDefaults(CustomTestCase):
     """Test --chat-template, indicating successful inference.
 
     [Test Category] Functional
     [Test Target] Api related on NPU
-    --chat-template
+    --sampling-defaults; --chat-template; --tool-call-parser
     """
 
     @classmethod
@@ -173,7 +175,8 @@ class TestApiRelatedSamplingDefaults(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_chat_template(self):
+    def test_chat_template_requests(self):
+        """Send requests using the /v1/chat/completions interface."""
         response = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
@@ -188,12 +191,13 @@ class TestApiRelatedSamplingDefaults(CustomTestCase):
         self.assertGreater(len(result["choices"]), 0)
         logging.warning(f"Builtin chat template works: {result['choices'][0]['message']['content'][:50]}...")
 
+
 class TestApiRelatedCacheReport(CustomTestCase):
     """Test verify set --enable-cache-report, sent openai request prompt_tokens_details will return cached_tokens.
 
     [Test Category] Functional
     [Test Target] Api related on NPU
-    --chat-template
+    --chat-template; --enable-cache-report
     """
 
     @classmethod
@@ -224,6 +228,7 @@ class TestApiRelatedCacheReport(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_cache_report(self):
+        """Return number of cached tokens in prompt_tokens_details for each openai request."""
         for i in range(2):
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
@@ -250,9 +255,57 @@ class TestApiRelatedCacheReport(CustomTestCase):
                 self.assertEqual(256, cached_tokens)
 
 
+class TestApiRelatedReasoningParser(CustomTestCase):
+    """Test for reasoning content API with DeepSeek R1 reasoning parser.
+
+    [Test Category] Functional
+    [Test Target] Api related on NPU
+    --reasoning-parser; --completion-template
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model = DEEPSEEK_CODER_1_3_B_BASE_PATH
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--reasoning-parser",
+            "deepseek-r1",
+            "--completion-template",
+            "deepseek_coder"
+        ]
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test__reasoning_requests(self):
+        """Send inference request"""
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "What is the capital of France?",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        return response.json()
+
+
 if __name__ == "__main__":
     unittest.main()
-
-
-
-
