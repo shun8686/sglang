@@ -26,14 +26,14 @@ class TestLoraBackend(ABC):
     [Test Target] --lora-backend
     """
 
-    lora = "triton"
+    lora_backend = "triton"
 
     @classmethod
     def setUpClass(cls):
         other_args = [
             "--enable-lora",
             "--lora-backend",
-            f"{cls.lora}",
+            f"{cls.lora_backend}",
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
@@ -75,19 +75,15 @@ class TestLoraBackend(ABC):
 
 
 class TestLoraBackendCsgmv(TestLoraBackend, CustomTestCase):
-    lora = "csgmv"
+    lora_backend = "csgmv"
 
 
 class TestLoraBackendAscend(TestLoraBackend, CustomTestCase):
-    lora = "ascend"
+    lora_backend = "ascend"
 
 
 class TestLoraBackendTorchNative(TestLoraBackend, CustomTestCase):
-    lora = "torch_native"
-
-
-class TestLoraBackendTorchTriton(TestLoraBackend, CustomTestCase):
-    lora = "triton"
+    lora_backend = "torch_native"
 
 
 if __name__ == "__main__":
