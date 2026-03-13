@@ -197,6 +197,8 @@ QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
 
 DEEPSEEK_R1_DISTILL_QWEN_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-R1-Distill-Qwen-7B"
+)
+
 QWEN3_30B_MODELSLIM_INT4_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Eco-Tech/Qwen3-30B-A3B-w4a4-LAOS"
 )
