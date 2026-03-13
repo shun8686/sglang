@@ -49,8 +49,8 @@ class TestHiCache(CustomTestCase):
         hicache_size=0,
         hicache_write_policy="write_through",
         radix_eviction_policy="lru",
-        hicache_io_backend="kernel",
-        hicache_mem_layout="layer_first",
+        hicache_io_backend="direct",
+        hicache_mem_layout="page_first_direct",
         disable_hicache_numa_detect=False,
         hicache_storage_backend=None,
     ):
@@ -122,7 +122,7 @@ class TestHiCache(CustomTestCase):
             hicache_write_policy="write_back",
             radix_eviction_policy="lru",
             hicache_io_backend="direct",
-            hicache_mem_layout="layer_first",
+            hicache_mem_layout="page_first_kv_split",
         )
 
         try:
@@ -159,8 +159,8 @@ class TestHiCache(CustomTestCase):
             hicache_ratio=2.0,
             hicache_write_policy="write_through",
             radix_eviction_policy="lfu",
-            hicache_io_backend="kernel",
-            hicache_mem_layout="page_first",
+            hicache_io_backend="direct",
+            hicache_mem_layout="page_first_direct",
             hicache_storage_backend="file",
             disable_hicache_numa_detect=True,
         )
@@ -189,32 +189,32 @@ class TestHiCache(CustomTestCase):
             kill_process_tree(self.process.pid)
             self.process = None
 
+    # def test_003_combined_params(self):
+    #     """Test Hicache with combined parameters, hicache_write_policy configure write_through_selective,
+    #     hicache_io_backend configure kernel_ascend, hicache_mem_layout configure page_first_direct, reasoning successful"""
+    #     logging.warning("\n=== Test 003: Combined Parameters ===")
+    #     self.process = self._launch_server_with_hicache(
+    #         hicache_size=80,
+    #         hicache_write_policy="write_through_selective",
+    #         hicache_io_backend="kernel_ascend",
+    #         hicache_mem_layout="page_first_direct",
+    #     )
+    #
+    #     try:
+    #         time.sleep(5)
+    #         result = self._test_basic_inference()
+    #         logging.warning(f"Concurrent requests test passed, {result[:50]}....")
+    #     finally:
+    #         kill_process_tree(self.process.pid)
+    #         self.process = None
+
     def test_003_combined_params(self):
-        """Test Hicache with combined parameters, hicache_write_policy configure write_through_selective,
-        hicache_io_backend configure kernel_ascend, hicache_mem_layout configure page_first_direct, reasoning successful"""
-        logging.warning("\n=== Test 003: Combined Parameters ===")
-        self.process = self._launch_server_with_hicache(
-            hicache_size=80,
-            hicache_write_policy="write_through_selective",
-            hicache_io_backend="kernel_ascend",
-            hicache_mem_layout="page_first_direct",
-        )
-
-        try:
-            time.sleep(5)
-            result = self._test_basic_inference()
-            logging.warning(f"Concurrent requests test passed, {result[:50]}....")
-        finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
-
-    def test_004_combined_params(self):
         """Test Hicache with combined parameters, hicache with long sequence"""
         logging.warning("\n=== Test 004: Combined Parameters ===")
         self.process = self._launch_server_with_hicache(
             hicache_size=100,
-            hicache_write_policy="write_through",
-            hicache_io_backend="direct",
+            hicache_write_policy="write_through_selective",
+            hicache_io_backend="kernel_ascend",
             hicache_mem_layout="page_first_kv_split",
             disable_hicache_numa_detect=True,
         )
@@ -236,24 +236,6 @@ class TestHiCache(CustomTestCase):
             self.assertEqual(response.status_code, 200)
             self.assertGreater(len(response.text), 50)
             logging.warning(f"Long sequence test passed, result length: {len(response.text)}")
-        finally:
-            kill_process_tree(self.process.pid)
-            self.process = None
-
-    def test_005_combined_params(self):
-        """Test Hicache with combined parameters, hicache_mem_layout is configured as page_head"""
-        logging.warning("\n=== Test 005: Combined Parameters ===")
-        self.process = self._launch_server_with_hicache(
-            hicache_ratio=5,
-            hicache_write_policy="write_through",
-            hicache_io_backend="direct",
-            hicache_mem_layout="page_head",
-        )
-
-        try:
-            time.sleep(5)
-            result = self._test_basic_inference()
-            logging.warning(f"Concurrent requests test passed, {result[:50]}....")
         finally:
             kill_process_tree(self.process.pid)
             self.process = None

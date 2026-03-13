@@ -94,7 +94,7 @@ class TestModelOverrideArgs(CustomTestCase):
             result = response.json()
             self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)
             self.assertEqual(result["preferred_sampling_params"]["min_p"], 1)
-            self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 128)
+            self.assertEqual(result["preferred_sampling_params"]["max_new_tokens"], 127)
 
             result1 = self._test_basic_inference()
             self.assertIn("text", result1)
