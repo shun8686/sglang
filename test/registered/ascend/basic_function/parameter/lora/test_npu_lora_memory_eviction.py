@@ -1,3 +1,5 @@
+import unittest
+
 import requests
 
 from sglang.srt.utils import kill_process_tree
@@ -97,3 +99,7 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
 
 class TestLoraMemoryEvictionLru(CustomTestCase):
     lora_eviction_policy = "lru"
+
+
+if __name__ == "__main__":
+    unittest.main()

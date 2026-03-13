@@ -1,3 +1,5 @@
+import unittest
+
 import requests
 
 from sglang.srt.utils import kill_process_tree
@@ -99,3 +101,7 @@ class TestLoraMaxLoraRankFault(TestLoraMaxLoraRank):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
         )
+
+
+if __name__ == "__main__":
+    unittest.main()
