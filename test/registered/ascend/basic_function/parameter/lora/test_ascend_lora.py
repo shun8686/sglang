@@ -495,7 +495,7 @@ class TestLoraMaxLoraRank(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-        esponse = requests.post(
+        response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": "The capital of France is",
