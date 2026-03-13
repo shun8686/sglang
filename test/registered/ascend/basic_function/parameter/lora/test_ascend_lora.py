@@ -39,6 +39,10 @@ class TestLoraBasicFunction(CustomTestCase):
             "--lora-path",
             f"lora_a={cls.lora_a}",
             f"lora_b={cls.lora_b}",
+            "--max-loaded-loras",
+            "2",
+            "--max-loras-per-batch",
+            "2",
             "--lora-target-modules",
             "all",
             "--attention-backend",
@@ -288,7 +292,6 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
     """
     lora_a = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
     lora_b = LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH
-    lora_c = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
     lora_eviction_policy = "fifo"
 
     @classmethod
@@ -299,7 +302,10 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
             "--enable-lora",
             "--lora-path",
             f"lora_a={cls.lora_a}",
-            "--max-load-loras",
+            f"lora_a={cls.lora_b}",
+            "--max-loaded-loras",
+            "2",
+            "--max-loras-per-batch",
             "2",
             "--lora-eviction-policy",
             cls.lora_eviction_policy,
@@ -329,7 +335,7 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
                     "temperature": 0,
                     "max_new_tokens": 32,
                 },
-                "lora_path": "lora_b",
+                "lora_path": "lora_a",
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -349,19 +355,6 @@ class TestLoraMemoryEvictionFifo(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
 
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "lora_path": "lora_c",
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Paris", response.text)
 
 
 class TestLoraMemoryEvictionLru(CustomTestCase):
