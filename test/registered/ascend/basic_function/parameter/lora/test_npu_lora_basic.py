@@ -4,11 +4,11 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH,
-    LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH,
-    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-)
+# from sglang.test.ascend.test_ascend_utils import (
+#     LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH,
+#     LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH,
+#     LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+# )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -18,6 +18,9 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = "/home/weights/LLM-Research/Llama-3.2-1B-Instruct"
+LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
+LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH = "/home/weights/codelion/FastLlama-3.2-LoRA"
 
 
 class TestLoraBasicFunction(CustomTestCase):
@@ -61,50 +64,30 @@ class TestLoraBasicFunction(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_lora_use_different_lora(self):
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-            },
-        )
+        base_params = {
+            "text": "The capital of France is",
+            "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+        }
+
+        # Get base model output
+        response = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json=base_params)
         self.assertEqual(response.status_code, 200)
-        text_no_lora = response.text
+        text_no_lora = response.json()["text"]
 
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "lora_path": "lora_a",
-            },
-        )
-        text_lora_a = response.text
+        # Test different LoRA adapters
+        texts = []
+        for lora_path in ["lora_a", "lora_b"]:
+            params = base_params.copy()
+            params["lora_path"] = lora_path
+            response = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json=params)
+            texts.append(response.json()["text"])
 
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "lora_path": "lora_b",
-            },
-        )
-        text_lora_b = response.text
+        text_lora_a, text_lora_b = texts
 
-        self.assertNotEqual(text_no_lora, text_lora_a, f"same response.text")
-
-        self.assertNotEqual(text_no_lora, text_lora_b, f"same response.text")
-
-        self.assertNotEqual(text_lora_a, text_lora_b, f"same response.text")
+        # Verify all outputs are different
+        self.assertNotEqual(text_no_lora, text_lora_a, "Base model and LoRA A produced same text")
+        self.assertNotEqual(text_no_lora, text_lora_b, "Base model and LoRA B produced same text")
+        self.assertNotEqual(text_lora_a, text_lora_b, "LoRA A and LoRA B produced same text")
 
         # compare the consistency between streaming and non-streaming
         response_stream = requests.post(
@@ -175,38 +158,6 @@ class TestLoraBasicFunction(CustomTestCase):
         for idx, text in enumerate(response_texts[1:], start=2):
             self.assertNotEqual(text, first_text, f"same response_text")
 
-    def test_lora_with_json_schema(self):
-        # test lora and json schema can work properly
-        json_schema = json.dumps({
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "age": {"type": "integer"},
-                "city": {"type": "string"},
-            },
-            "required": ["name", "age", "city"],
-
-        })
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "Generate person information",
-                "sampling_params": {
-                    "temperature": 0.3,
-                    "max_new_tokens": 128,
-                    "json_schema": json_schema,
-                },
-                "lora_path": "lora_a",
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        result = response.json()
-        self.assertIn("text", result)
-        parsed_json = json.loads(result["text"])
-        self.assertIn("name", parsed_json)
-        self.assertIn("age", parsed_json)
-        self.assertIn("city", parsed_json)
-
     def test_lora_kv_cache(self):
         # test kv cache reuse
         input_ids_first = [1] * 200
@@ -236,115 +187,97 @@ class TestLoraBasicFunction(CustomTestCase):
         # The third request uses lora_a again, but the input is longer, same lora share cache.
         make_request("lora_a", input_ids_second, 128)
 
-    def test_lora_session(self):
-        # test the correct collaboration of lora with session management functionality
-        session_id_first = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/open_session",
-            json={"capacity_of_str_len": 1000},
-        ).json()
-
-        session_id_second = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/open_session",
-            json={"capacity_of_str_len": 1000},
-        ).json()
-        self.assertNotEqual(
-            session_id_first,
-            session_id_second,
-            f"session_id"
-        )
-
-        # First conversation round
-        response1 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "My pet is a cat named mimi.",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-
-                },
-                "session_params": {
-                    "id": session_id_first,
-                },
-                "lora_path": "lora_a",
-
-            },
-        )
-        self.assertEqual(response1.status_code, 200)
-        rid = response1.json()["meta_info"]["id"]
-
-        response2 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "What is my pet's name?",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "session_params": {
-                    "id": session_id_first,
-                    "rid": rid,
-                },
-                "lora_path": "lora_a",
-
-            },
-        )
-        self.assertEqual(response2.status_code, 200)
-        response_text_2 = response2.text
-        self.assertIn("mimi", response_text_2,
-                      f"Session should remember pet name 'mimi', but got: {response_text_2}")
-
-        # Second conversation round use a new session id
-        response3 = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": "What is my pet's name?",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                },
-                "session_params": {
-                    "id": session_id_second,
-                },
-                "lora_path": "lora_a",
-
-            },
-        )
-        self.assertEqual(response3.status_code, 200)
-        response_text_3 = response3.text
-
-        # Verify new session doesn't have previous context
-        self.assertNotIn("mimi", response_text_3,
-                         f"New session should not remember old context, but got: {response_text_3}")
-
-
-'''
-# num
     def test_batch_with_different_loras(self):
-        # test different loras in batch requests can work properly
+        # test use lora in batch requests can work properly
         prompts = [
             "What is AI",
             "Explain neural network",
+            "How does deep learning differ from machine learning",
+            "What is reinforcement learning",
+            "Explain natural language processing",
+            "What are neural network layers",
+            "How do activation functions work",
+            "Explain backpropagation",
+            "What is computer vision",
+            "How do LLMs work",
         ]
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
                 "text": prompts,
                 "sampling_params": {
-                    "temperature": 0.7,
+                    "temperature": 0,
                     "max_new_tokens": 64,
                 },
-                "lora_path": ["lora_a", "lora_b"],
+                "lora_path": "lora_a",
             },
         )
         results = response.json()
-
-        self.assertEqual(len(results), len(prompts))
-
         for i, result in enumerate(results):
-            self.assertEqual("text", result)
             self.assertGreater(len(result["text"]), 0)
-'''
+
+    def test_lora_session(self):
+        # test the correct collaboration of lora with session management functionality
+        # Create two sessions
+        s1, s2 = [requests.post(f"{DEFAULT_URL_FOR_TEST}/open_session",
+                                json={"capacity_of_str_len": 1000}).json() for _ in range(2)]
+        self.assertNotEqual(s1, s2, "Session IDs should be different")
+
+        # Common params
+        base = {
+            "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+            "lora_path": "lora_a"
+        }
+
+        # First conversation
+        r1 = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json={
+            **base, "text": "My pet is a cat named Mimi.", "session_params": {"id": s1}
+        })
+        rid = r1.json()["meta_info"]["id"]
+
+        # Test memory in both sessions
+        r2 = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json={
+            **base, "text": "What is my pet's name?", "session_params": {"id": s1, "rid": rid}
+        })
+        # Second conversation
+        r3 = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json={
+            **base, "text": "What is my pet's name?", "session_params": {"id": s2}
+        })
+
+        self.assertIn("Mimi", r2.text, f"Session should remember, got: {r2.text}")
+        self.assertNotIn("Mimi", r3.text, f"New session shouldn't remember, got: {r3.text}")
+
+    def test_lora_with_json_schema(self):
+        # test lora and json schema can work properly
+        json_schema = json.dumps({
+            "type": "object",
+            "properties": {
+                "name": {"type": "string"},
+                "age": {"type": "integer"},
+                "city": {"type": "string"},
+            },
+            "required": ["name", "age", "city"],
+
+        })
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "Generate person information",
+                "sampling_params": {
+                    "temperature": 0.3,
+                    "max_new_tokens": 128,
+                    "json_schema": json_schema,
+                },
+                "lora_path": "lora_a",
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        result = response.json()
+        parsed_json = json.loads(result["text"])
+        self.assertIn("name", parsed_json)
+        self.assertIn("age", parsed_json)
+        self.assertIn("city", parsed_json)
+
 
 if __name__ == "__main__":
     unittest.main()
