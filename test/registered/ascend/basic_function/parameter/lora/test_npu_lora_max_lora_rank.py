@@ -1,3 +1,4 @@
+import os
 import unittest
 
 import requests
@@ -15,7 +16,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLoraMaxLoraRank(CustomTestCase):
@@ -32,7 +33,7 @@ class TestLoraMaxLoraRank(CustomTestCase):
     def setUpClass(cls):
         other_args = [
             "--tp-size",
-            "2",
+            "1",
             "--enable-lora",
             "--lora-path",
             f"lora_a={cls.lora_a}",
@@ -72,36 +73,67 @@ class TestLoraMaxLoraRank(CustomTestCase):
         self.assertEqual(response.json()["max_lora_rank"], 64)
 
 
-class TestLoraMaxLoraRankFault(TestLoraMaxLoraRank):
-    """Testcase：Verify set the --max-load-rank parameter, can't load lora no corresponding to the number of ranks, service startup failed .
+class TestLoraMaxLoraRankErr(CustomTestCase):
+    """Testcase：Verify set the --max-load-rank parameter, load lora that the number of ranks not match, inference failed.
 
     [Test Category] Parameter
     [Test Target] --max-load-rank
     """
 
+    lora_a = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
     max_lora_rank = "32"
 
-    @classmethod
-    def setUpClass(cls):
+    def test_max_loaded_loras_error(self):
         other_args = [
             "--tp-size",
-            "2",
+            "1",
             "--enable-lora",
             "--lora-path",
-            f"lora_a={cls.lora_a}",
+            f"lora_a={self.lora_a}",
             "--max-lora-rank",
-            cls.max_lora_rank,
+            self.max_lora_rank,
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
         ]
-        cls.process = popen_launch_server(
+
+        out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
+        err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
+        self.process = popen_launch_server(
             LLAMA_3_2_1B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
+            return_stdout_stderr=(out_log_file, err_log_file),
         )
-
+        try:
+            requests.post(
+                f"{DEFAULT_URL_FOR_TEST}/generate",
+                json={
+                    "text": "The capital of France is",
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 32,
+                    },
+                    "lora_path": "lora_a",
+                },
+            )
+        except Exception as e:
+            self.assertIn(
+                "Connection aborted",
+                str(e),
+            )
+        finally:
+            err_log_file.seek(0)
+            content = err_log_file.read()
+            error_message = "not match weight shape"
+            self.assertIn(error_message, content)
+            out_log_file.close()
+            err_log_file.close()
+            os.remove("./cache_out_log.txt")
+            os.remove("./cache_err_log.txt")
+            if self.process:
+                kill_process_tree(self.process.pid)
 
 
 if __name__ == "__main__":
