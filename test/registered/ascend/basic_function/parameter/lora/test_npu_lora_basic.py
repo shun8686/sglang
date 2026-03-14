@@ -82,9 +82,15 @@ class TestLoraBasicFunction(CustomTestCase):
         text_lora_a, text_lora_b = texts
 
         # Verify all outputs are different
-        self.assertNotEqual(text_no_lora, text_lora_a, "Base model and LoRA A produced same text")
-        self.assertNotEqual(text_no_lora, text_lora_b, "Base model and LoRA B produced same text")
-        self.assertNotEqual(text_lora_a, text_lora_b, "LoRA A and LoRA B produced same text")
+        self.assertNotEqual(
+            text_no_lora, text_lora_a, "Base model and LoRA A produced same text"
+        )
+        self.assertNotEqual(
+            text_no_lora, text_lora_b, "Base model and LoRA B produced same text"
+        )
+        self.assertNotEqual(
+            text_lora_a, text_lora_b, "LoRA A and LoRA B produced same text"
+        )
 
         # compare the consistency between streaming and non-streaming
         response_stream = requests.post(
@@ -173,7 +179,9 @@ class TestLoraBasicFunction(CustomTestCase):
                 },
             )
             self.assertEqual(response.status_code, 200)
-            self.assertEqual(response.json()["meta_info"]["cached_tokens"], expected_cached_tokens)
+            self.assertEqual(
+                response.json()["meta_info"]["cached_tokens"], expected_cached_tokens
+            )
 
         # For the first request, using lora_a, the expected cache size is 0.
         make_request("lora_a", input_ids_first, 0)
@@ -216,46 +224,71 @@ class TestLoraBasicFunction(CustomTestCase):
     def test_lora_session(self):
         # test the correct collaboration of lora with session management functionality
         # Create two sessions
-        s1, s2 = [requests.post(f"{DEFAULT_URL_FOR_TEST}/open_session",
-                                json={"capacity_of_str_len": 1000}).json() for _ in range(2)]
+        s1, s2 = [
+            requests.post(
+                f"{DEFAULT_URL_FOR_TEST}/open_session",
+                 json={"capacity_of_str_len": 1000}
+            ).json()
+            for _ in range(2)
+        ]
         self.assertNotEqual(s1, s2, "Session IDs should be different")
 
         # Common params
         base = {
             "sampling_params": {"temperature": 0, "max_new_tokens": 32},
-            "lora_path": "lora_a"
+            "lora_path": "lora_a",
         }
 
         # First conversation
-        r1 = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json={
-            **base, "text": "My pet is a cat named Mimi.", "session_params": {"id": s1}
-        })
+        r1 = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                **base,
+                "text": "My pet is a cat named Mimi.",
+                "session_params": {"id": s1},
+            },
+        )
         rid = r1.json()["meta_info"]["id"]
 
         # Test memory in both sessions
-        r2 = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json={
-            **base, "text": "What is my pet's name?", "session_params": {"id": s1, "rid": rid}
-        })
+        r2 = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                **base,
+                "text": "What is my pet's name?",
+                "session_params": {"id": s1, "rid": rid},
+            },
+        )
         # Second conversation
-        r3 = requests.post(f"{DEFAULT_URL_FOR_TEST}/generate", json={
-            **base, "text": "What is my pet's name?", "session_params": {"id": s2}
-        })
+        r3 = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                **base,
+                "text": "What is my pet's name?",
+                "session_params": {"id": s2},
+            },
+        )
 
         self.assertIn("Mimi", r2.text, f"Session should remember, got: {r2.text}")
-        self.assertNotIn("Mimi", r3.text, f"New session shouldn't remember, got: {r3.text}")
+        self.assertNotIn(
+            "Mimi",
+            r3.text,
+            f"New session shouldn't remember, got: {r3.text}"
+        )
 
     def test_lora_with_json_schema(self):
         # test lora and json schema can work properly
-        json_schema = json.dumps({
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"},
-                "age": {"type": "integer"},
-                "city": {"type": "string"},
-            },
+        json_schema = json.dumps(
+            {
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"},
+                    "age": {"type": "integer"},
+                    "city": {"type": "string"},
+                },
             "required": ["name", "age", "city"],
-
-        })
+            }
+        )
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
