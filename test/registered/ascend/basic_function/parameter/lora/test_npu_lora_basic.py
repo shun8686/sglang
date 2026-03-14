@@ -271,7 +271,7 @@ class TestLoraBasicFunction(CustomTestCase):
 
         self.assertIn("Mimi", r2.text, f"Session should remember, got: {r2.text}")
         self.assertNotIn(
-            "Mimi",r3.text,f"New session shouldn't remember, got: {r3.text}"
+            "Mimi", r3.text, f"New session shouldn't remember, got: {r3.text}"
         )
 
     def test_lora_with_json_schema(self):
