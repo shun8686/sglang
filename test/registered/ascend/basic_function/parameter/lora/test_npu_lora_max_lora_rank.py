@@ -20,7 +20,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLoraMaxLoraRank(CustomTestCase):
-    """Testcase：Verify set the --max-load-rank parameter, can load lora corresponding to the number of ranks, inference request succeeded.
+    """Testcase：Verify set the --max-load-rank parameter, load lora that match the number of ranks, inference request succeeded.
 
     [Test Category] Parameter
     [Test Target] --max-load-rank
