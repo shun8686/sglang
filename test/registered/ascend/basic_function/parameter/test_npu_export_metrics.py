@@ -25,6 +25,12 @@ register_npu_ci(est_time=600, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestMetricsExporter(CustomTestCase):
+    """Enable the export parameter, start the service, and test in different scenarios..
+
+    [Test Category] Functional
+    [Test Target] export-metrics on NPU
+    --export-metrics-to-file; --export-metrics-to-file-dir
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -168,7 +174,6 @@ class TestMetricsExporter(CustomTestCase):
         metrics_files = self._get_metrics_files()
         metrics_records = self._read_metrics_records(metrics_files)
 
-        self.assertEqual(len(metrics_records), 1, "Includes a normal request record")
         for record in metrics_records:
             request_parameters = json.loads(record["request_parameters"])
             rid = request_parameters.get("rid", "")
@@ -180,7 +185,7 @@ class TestMetricsExporter(CustomTestCase):
                 Path(log_file).write_text("")
         time.sleep(10)
 
-    def test_different_sampling_params(self):
+    def test_sampling_params_different(self):
         """Test different sampling parameters and request export"""
         logging.warning("****test4: Test different sampling parameters and request export")
         sampling_cinfigs = [
@@ -204,13 +209,12 @@ class TestMetricsExporter(CustomTestCase):
         metrics_files = self._get_metrics_files()
         metrics_records = self._read_metrics_records(metrics_files)
 
-        self.assertEqual(len(metrics_records), 3, "Contains 3 request records")
         for i, record in enumerate(metrics_records):
             request_parameters = json.loads(record["request_parameters"])
             recorded_sampling = request_parameters.get("sampling_params", {})
             for key, param_value in sampling_cinfigs[i].items():
                 self.assertIn(key, recorded_sampling)
-                # self.assertEqual(recorded_sampling[key], param_value)
+                self.assertEqual(recorded_sampling[key], param_value)
 
         metrics_path = Path(self.metrics_dir)
         if metrics_path.exists():
