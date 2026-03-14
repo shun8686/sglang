@@ -160,9 +160,12 @@ class TestLoraBasicFunction(CustomTestCase):
         actual_modules = response.json()["lora_target_modules"]
 
         self.assertEqual(len(actual_modules), len(expected_modules))
+        # Verify max_loras_per_batch parameter is correctly set in server info
+        self.assertEqual(response.json()["max_loras_per_batch"], 2)
 
         for module in expected_modules:
             self.assertIn(module, actual_modules)
+
 
 
     def test_lora_with_sampling_parameters(self):
