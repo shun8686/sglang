@@ -107,7 +107,7 @@ PERSIMMON_8B_CHAT_WEIGHTS_PATH = os.path.join(
 PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "microsoft/Phi-4-multimodal-instruct"
 )
-+QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(
+QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen2.5-7B-Instruct"
 )
 QWEN3_0_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B")
