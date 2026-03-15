@@ -68,6 +68,7 @@ QWEN3_VL_8B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-8B-In
 QWEN3_VL_235B_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-235B-A22B-Instruct"
 )
+KIMI_K2_5_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Kimi-K2.5-w4a8"
 
 ROUND_ROBIN = "round_robin"
 
@@ -175,6 +176,7 @@ def run_bench_serving(
     random_range_ratio=1,
     image_resolution=None,
     image_count=None,
+    warmup_requests=None,
 ):
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
@@ -216,6 +218,8 @@ def run_bench_serving(
         cmd_args.extend(["--image-resolution", str(image_resolution)])
     if image_count:
         cmd_args.extend(["--image-count", str(image_count)])
+    if warmup_requests:
+        cmd_args.extend(["--warmup-requests", str(warmup_requests)])
     logger.info(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
@@ -275,6 +279,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     random_range_ratio = None
     image_resolution = None
     image_count = None
+    warmup_requests = None
     ttft = None
     tpot = None
     output_token_throughput = None
@@ -356,6 +361,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             "random_range_ratio": self.random_range_ratio,
             "image_resolution": self.image_resolution,
             "image_count": self.image_count,
+            "warmup_requests": self.warmup_requests,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -380,6 +386,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     random_range_ratio = None
     image_resolution = None
     image_count = None
+    warmup_requests = None
     ttft = None
     tpot = None
     output_token_throughput = None
@@ -477,6 +484,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             "random_range_ratio": self.random_range_ratio,
             "image_resolution": self.image_resolution,
             "image_count": self.image_count,
+            "warmup_requests": self.warmup_requests,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -501,6 +509,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     random_range_ratio = 1
     image_resolution = None
     image_count = None
+    warmup_requests = None
     ttft = None
     tpot = None
     output_token_throughput = None
@@ -615,6 +624,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             "random_range_ratio": self.random_range_ratio,
             "image_resolution": self.image_resolution,
             "image_count": self.image_count,
+            "warmup_requests": self.warmup_requests,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
