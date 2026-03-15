@@ -1,5 +1,5 @@
 cp -r /root/.cache/.cache/opencv /tmp
-cd /tmp
+cd /tmp/opencv
 
 # 层级1：最基础的配置/核心库（无任何依赖）
 dpkg -i libdrm-common*.deb libsensors-config*.deb libx11-data*.deb
