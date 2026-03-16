@@ -1,8 +1,8 @@
 import logging
 import unittest
-
-import requests
 from types import SimpleNamespace
+import requests
+
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -44,7 +44,7 @@ class TestApiRelatedGHFChat(CustomTestCase):
             "--weight-version",
             cls.weight_version,
             "--hf-chat-template-name",
-            cls.hf_chat_template_name
+            cls.hf_chat_template_name,
         ]
 
         cls.process = popen_launch_server(
@@ -183,13 +183,15 @@ class TestApiRelatedSamplingDefaults(CustomTestCase):
                 "model": "llama-3.2",
                 "messages": [
                     {"role": "user", "content": "Hello, how are you?"},
-                ]
+                ],
             },
         )
         result = response.json()
         self.assertIn("choices", result)
         self.assertGreater(len(result["choices"]), 0)
-        logging.warning(f"Builtin chat template works: {result['choices'][0]['message']['content'][:50]}...")
+        logging.warning(
+            f"Builtin chat template works: {result['choices'][0]['message']['content'][:50]}..."
+        )
 
 
 class TestApiRelatedCacheReport(CustomTestCase):
@@ -213,7 +215,7 @@ class TestApiRelatedCacheReport(CustomTestCase):
             "--disable-cuda-graph",
             "--chat-template",
             "llama-2",
-            "--enable-cache-report"
+            "--enable-cache-report",
         ]
 
         cls.process = popen_launch_server(
@@ -234,24 +236,25 @@ class TestApiRelatedCacheReport(CustomTestCase):
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
                     "prompt": "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
                     "max_tokens": 260,
-
                 },
             )
             self.assertEqual(response.status_code, 200)
             if i == 1:
-                cached_tokens = response.json()["usage"]['prompt_tokens_details']['cached_tokens']
+                cached_tokens = response.json()["usage"]['prompt_tokens_details'][
+                    'cached_tokens'
+                ]
                 self.assertEqual(256, cached_tokens)
 
 
@@ -277,7 +280,7 @@ class TestApiRelatedReasoningParser(CustomTestCase):
             "--reasoning-parser",
             "deepseek-r1",
             "--completion-template",
-            "deepseek_coder"
+            "deepseek_coder",
         ]
 
         cls.process = popen_launch_server(

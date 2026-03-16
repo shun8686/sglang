@@ -1,18 +1,17 @@
-import os
 import json
+import logging
+import os
 import shutil
 import tempfile
 import time
 import unittest
 from pathlib import Path
-
-import logging
-import requests
 from types import SimpleNamespace
+import requests
 
-from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -68,16 +67,14 @@ class TestMetricsExporter(CustomTestCase):
         files = []
         if os.path.exists(self.metrics_dir):
             for file in os.listdir(self.metrics_dir):
-                if file.startswith("sglang-request-metrics-") and file.endswith(
-                    ".log"
-                ):
+                if file.startswith("sglang-request-metrics-") and file.endswith(".log"):
                     files.append(os.path.join(self.metrics_dir, file))
         return sorted(files)
 
     def _read_metrics_records(self, files):
         records = []
         for file in files:
-            with open(file, 'r', encoding="utf-8") as f:
+            with open(file, "r", encoding="utf-8") as f:
                 for line in f:
                     line = line.strip()
                     if line:
@@ -95,10 +92,7 @@ class TestMetricsExporter(CustomTestCase):
             f"{self.base_url}/generate",
             json={
                 "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 100
-                },
+                "sampling_params": {"temperature": 0, "max_new_tokens": 100},
             },
         )
 
@@ -174,7 +168,9 @@ class TestMetricsExporter(CustomTestCase):
         for record in metrics_records:
             request_parameters = json.loads(record["request_parameters"])
             rid = request_parameters.get("rid", "")
-            self.assertNotIn("HEALTH_CHECK", rid, "Health check requests should not be included.")
+            self.assertNotIn(
+                "HEALTH_CHECK", rid, "Health check requests should not be included."
+            )
 
         metrics_path = Path(self.metrics_dir)
         if metrics_path.exists():
@@ -184,7 +180,9 @@ class TestMetricsExporter(CustomTestCase):
 
     def test_sampling_params_different(self):
         """Test different sampling parameters and request export"""
-        logging.warning("****test4: Test different sampling parameters and request export")
+        logging.warning(
+            "****test4: Test different sampling parameters and request export"
+        )
         sampling_cinfigs = [
             {"temperature": 0, "max_new_tokens": 32},
             {"temperature": 0.5, "max_new_tokens": 64},
