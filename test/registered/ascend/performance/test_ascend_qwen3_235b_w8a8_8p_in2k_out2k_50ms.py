@@ -17,12 +17,18 @@ register_npu_ci(
 QWEN3_235B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-    "HCCL_BUFFSIZE": "2100",
+    "HCCL_BUFFSIZE": "450",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "147456",
+    "SGLANG_NPU_FUSED_MOE_MODE": "2",
+    "SGLANG_NPU_PROFILING": "0",
+    "SGLANG_NPU_PROFILING_BS": "39",
 }
 
 QWEN3_235B_OTHER_ARGS = [
@@ -38,49 +44,58 @@ QWEN3_235B_OTHER_ARGS = [
     "--quantization",
     "modelslim",
     "--max-running-requests",
-    480,
+    624,
     "--context-length",
     8192,
     "--dtype",
     "bfloat16",
     "--chunked-prefill-size",
-    -1,
+    73728,
     "--max-prefill-tokens",
-    4096,
-    "--speculative-draft-model-quantization",
-    "unquant",
-    "--speculative-algorithm",
+    458880,
+    "--ep-dispatch-algorithm",
+    "static",
+    "--disable-radix-cache",
+    "--moe-a2a-backend",
+    "ascend_fuseep",
+    "--ep-dispatch-algorithm"
+    "static", 
+    "--init-expert-location",
+    $EXPERTS_PATH 
+    "--speculative-algorithm"
     "EAGLE3",
     "--speculative-draft-model-path",
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
     3,
     "--speculative-eagle-topk",
-    1,
+    1, 
     "--speculative-num-draft-tokens",
     4,
-    "--disable-radix-cache",
-    "--moe-a2a-backend",
-    "deepep",
-    "--deepep-mode",
-    "auto",
-    "--tp-size",
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--tp",
     16,
     "--dp-size",
     16,
     "--enable-dp-attention",
     "--enable-dp-lm-head",
     "--mem-fraction-static",
-    0.75,
+    0.83
     "--cuda-graph-bs",
-    6,
+    4,
     8,
-    10,
-    12,
-    15,
-    18,
+    16,
+    24,
     28,
+    29,
     30,
+    32,
+    34,
+    36,
+    37,
+    38,
+    39,
 ]
 
 
@@ -89,14 +104,14 @@ class TestQwen235B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
-    max_concurrency = 480
-    num_prompts = 480
+    max_concurrency = 624
+    num_prompts = 2496
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 43.3
+    tpot = 47.56
     # T: 205@50ms.   800I: 1.8*T
-    output_token_throughput = 5787
+    output_token_throughput = 9522
 
     def test_qwen3_235b(self):
         self.run_throughput()
