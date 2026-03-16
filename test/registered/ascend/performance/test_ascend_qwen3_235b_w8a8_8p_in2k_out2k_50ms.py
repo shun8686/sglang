@@ -61,7 +61,7 @@ QWEN3_235B_OTHER_ARGS = [
     "--ep-dispatch-algorithm"
     "static", 
     "--init-expert-location",
-    $EXPERTS_PATH 
+    "/home/weights/hot_map/235B_2k_decode.pt",
     "--speculative-algorithm"
     "EAGLE3",
     "--speculative-draft-model-path",
