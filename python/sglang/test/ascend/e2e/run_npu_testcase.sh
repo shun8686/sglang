@@ -75,7 +75,13 @@ fi
 rm -rf ${log_path}
 mkdir -p ${log_path}
 echo "Log path: ${log_path}"
-python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
+
+if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
+    python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log || true
+    sleep 3600
+else
+    python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
+fi
 echo "Finished test case ${test_case}"
 
 source_plog_path="/root/ascend/log/debug/plog"
@@ -88,8 +94,4 @@ if [ -d "$source_plog_path" ];then
     rm -rf ${target_plog_path}
     mkdir -p ${target_plog_path}
     cp ${source_plog_path}/* ${target_plog_path}
-fi
-
-if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
-    sleep 3600
 fi
