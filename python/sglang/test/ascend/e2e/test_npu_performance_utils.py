@@ -98,6 +98,16 @@ PACKAGE_FILTER_KEYWORDS = [
     "memfabric_hybrid",
 ]
 
+if os.environ.get("ASCEND_RT_VISIBLE_DEVICES"):
+    DEFAULT_SERVER_PORT_FOR_TEST = (
+        20000 + int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0]) * 1000
+    )
+else:
+    DEFAULT_SERVER_PORT_FOR_TEST = (
+        20000 + int(os.environ.get("ASCEND_VISIBLE_DEVICES", "0")[0]) * 1000
+    )
+DEFAULT_URL_FOR_TEST = f"http://127.0.0.1:{DEFAULT_SERVER_PORT_FOR_TEST + 1000}"
+
 
 def get_cann_version():
     """Get CANN version info.
