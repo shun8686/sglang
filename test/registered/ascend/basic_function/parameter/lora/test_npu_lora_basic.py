@@ -116,6 +116,7 @@ class TestLoraBasicFunction(CustomTestCase):
                 stream_text += data.get("text", "")
         self.assertIn(text_lora_a, stream_text)
 
+    def test_lora_lora_target_modules(self):
         # Verify lora_target_modules parameter is correctly
         response = requests.get(DEFAULT_URL_FOR_TEST + "/server_info")
         self.assertEqual(response.status_code, 200)

@@ -32,8 +32,6 @@ class TestLoraMaxLoraRank(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         other_args = [
-            "--tp-size",
-            "1",
             "--enable-lora",
             "--lora-path",
             f"lora_a={cls.lora_a}",
@@ -85,8 +83,6 @@ class TestLoraMaxLoraRankErr(CustomTestCase):
 
     def test_max_loaded_loras_error(self):
         other_args = [
-            "--tp-size",
-            "1",
             "--enable-lora",
             "--lora-path",
             f"lora_a={self.lora_a}",

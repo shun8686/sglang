@@ -20,17 +20,15 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestMaxLoadedLoras(CustomTestCase):
-    """Testcase: Test configuration for max-loaded-loras inference successful
+    """Testcase: Test The number of LoRA paths exceed max_loaded_loras, service start failed.
 
-    [Test Category] --lora-backend
+    [Test Category] Parameter
     [Test Target] --max-loaded-loras
     """
 
     @classmethod
     def setUpClass(cls):
         other_args = [
-            "--tp-size",
-            "1",
             "--enable-lora",
             "--max-loaded-loras",
             3,
@@ -73,7 +71,7 @@ class TestMaxLoadedLoras(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        response = requests.get(DEFAULT_URL_FOR_TEST + "/get_server_info")
+        response = requests.get(DEFAULT_URL_FOR_TEST + "/server_info")
         self.assertEqual(response.status_code, 200)
 
         self.assertEqual(
@@ -83,14 +81,14 @@ class TestMaxLoadedLoras(CustomTestCase):
 
 
 class TestMaxLoadedLorasError(CustomTestCase):
-    """Testcase: Test The number of LoRA paths should exceed max_loaded_loras
+    """Testcase: Test The number of LoRA paths exceed max_loaded_loras, service start failed.
 
-    [Test Category] --lora-backend
+    [Test Category] Parameter
     [Test Target] --max-loaded-loras
     """
 
     def test_max_loaded_loras_error(self):
-        error_message = "The number of LoRA paths should not exceed max_loaded_loras."
+        error_message = "The number of LoRA paths should not exceed max_loaded_loras,"
         other_args = [
             "--enable-lora",
             "--max-loaded-loras",

@@ -1,5 +1,4 @@
 import unittest
-from abc import ABC
 
 import requests
 
@@ -19,7 +18,7 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestLoraBackend(ABC):
+class TestLoraBackend(CustomTestCase):
     """Testcase: Test configuration of lora-backend parameters, and inference request successful.
 
     [Test Category] Parameter
@@ -31,8 +30,6 @@ class TestLoraBackend(ABC):
     @classmethod
     def setUpClass(cls):
         other_args = [
-            "--tp-size",
-            "1",
             "--enable-lora",
             "--lora-backend",
             f"{cls.lora_backend}",
@@ -74,15 +71,15 @@ class TestLoraBackend(ABC):
         self.assertEqual(response.json()["lora_backend"], f"{self.lora_backend}")
 
 
-class TestLoraBackendCsgmv(TestLoraBackend, CustomTestCase):
+class TestLoraBackendCsgmv(TestLoraBackend):
     lora_backend = "csgmv"
 
 
-class TestLoraBackendAscend(TestLoraBackend, CustomTestCase):
+class TestLoraBackendAscend(TestLoraBackend):
     lora_backend = "ascend"
 
 
-class TestLoraBackendTorchNative(TestLoraBackend, CustomTestCase):
+class TestLoraBackendTorchNative(TestLoraBackend):
     lora_backend = "torch_native"
 
 

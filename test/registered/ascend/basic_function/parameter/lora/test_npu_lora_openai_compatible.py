@@ -1,18 +1,3 @@
-"""
-End-to-end tests for OpenAI-compatible LoRA adapter usage.
-
-Tests the model:adapter syntax and backward compatibility with explicit lora_path.
-
-Usage:
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_model_adapter_syntax
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_explicit_lora_path
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_priority_model_over_explicit
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_base_model_no_adapter
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_completions_api_with_adapter
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRAOpenAICompatible.test_streaming_with_adapter
-    python3 -m unittest openai_server.features.test_lora_openai_compatible.TestLoRADisabledError.test_lora_disabled_error
-"""
-
 import logging
 import unittest
 
@@ -60,8 +45,6 @@ def setup_class(cls, enable_lora=True):
     cls.lora_adapter_path = get_real_lora_adapter()
 
     other_args = [
-        "--tp-size",
-        "1",
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
