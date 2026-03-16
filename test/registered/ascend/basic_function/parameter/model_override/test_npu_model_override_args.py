@@ -1,5 +1,4 @@
 import logging
-import time
 import unittest
 from types import SimpleNamespace
 
@@ -182,7 +181,6 @@ class TestModelOverrideArgs(CustomTestCase):
         )
 
         try:
-            time.sleep(5)
             response = requests.get(f"{self.base_url}/model_info")
             result = response.json()
             self.assertEqual(result["preferred_sampling_params"]["temperature"], 0.7)

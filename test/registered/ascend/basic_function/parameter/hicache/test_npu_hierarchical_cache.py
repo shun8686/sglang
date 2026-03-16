@@ -1,5 +1,4 @@
 import logging
-import time
 import unittest
 from types import SimpleNamespace
 
