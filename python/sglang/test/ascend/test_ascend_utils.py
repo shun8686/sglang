@@ -3,6 +3,7 @@
 import asyncio
 import copy
 import os
+import requests as _requests
 import shlex
 import subprocess
 from types import SimpleNamespace
@@ -791,3 +792,83 @@ def execute_serving_performance_test(
     )
 
     return {"mean_ttft": mean_ttft, "mean_tpot": mean_tpot, "total_tps": total_tps}
+
+def send_inference_request(base_url: str, model: str, prompt: str, max_tokens: int = 128) -> dict:
+    """
+    POST a single-turn chat completion request to a running SGLang server.
+
+    Args:
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000".
+        model: Absolute path to the model weights directory, used as the model ID.
+        prompt: User message content for the single-turn request.
+        max_tokens: Maximum number of tokens to generate. Valid range: [1, context_length].
+
+    Returns:
+        Parsed JSON dict from POST /v1/chat/completions.
+
+    Raises:
+        requests.HTTPError: On non-2xx HTTP status.
+    """
+    url = f"{base_url}/v1/chat/completions"
+    payload = {
+        "model": model,
+        "messages": [{"role": "user", "content": prompt}],
+        "max_tokens": max_tokens,
+        "temperature": 0,
+    }
+    response = _requests.post(url, json=payload, timeout=60)
+    response.raise_for_status()
+    return response.json()
+
+
+def get_avg_spec_accept_length(base_url: str) -> float:
+    """
+    Return avg_spec_accept_length from the first scheduler's internal state.
+
+    Calls GET /get_server_info and reads internal_states[0]["avg_spec_accept_length"].
+    avg_spec_accept_length is the running average of draft tokens accepted per
+    speculative decoding step across all completed requests.
+
+    Args:
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000".
+
+    Returns:
+        Float value of avg_spec_accept_length, or 0.0 if the field is absent.
+
+    Raises:
+        requests.HTTPError: On non-2xx HTTP status.
+    """
+    response = _requests.get(f"{base_url}/get_server_info", timeout=10)
+    response.raise_for_status()
+    info = response.json()
+    internal_states = info.get("internal_states", [])
+    if internal_states and isinstance(internal_states, list):
+        return float(internal_states[0].get("avg_spec_accept_length", 0.0))
+    return 0.0
+
+
+def assert_spec_decoding_active(test_case, base_url: str, threshold: float = 1.0) -> None:
+    """
+    Assert that avg_spec_accept_length > threshold.
+
+    The default threshold of 1.0 is the minimum meaningful signal: a value of
+    exactly 1.0 means only one draft token is accepted per target forward pass,
+    equivalent to non-speculative decoding with extra draft model overhead.
+    A value > 1.0 proves genuine multi-token acceptance and real speedup.
+
+    Args:
+        test_case: The unittest.TestCase instance used to call assertGreater.
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000".
+        threshold: Exclusive lower bound for avg_spec_accept_length.
+                   Valid range: [0.0, speculative_num_draft_tokens].
+
+    Raises:
+        AssertionError: If avg_spec_accept_length <= threshold.
+    """
+    avg_len = get_avg_spec_accept_length(base_url)
+    test_case.assertGreater(
+        avg_len,
+        threshold,
+        f"avg_spec_accept_length={avg_len:.3f} must be > {threshold}: "
+        "speculative decoding is not active or not contributing speedup.",
+    )
