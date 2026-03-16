@@ -12,6 +12,7 @@ Please remember to sort by variable name within each section.
 """
 
 import os
+import subprocess
 
 # Model weights storage directory
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
