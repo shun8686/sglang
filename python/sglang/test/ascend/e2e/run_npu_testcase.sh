@@ -77,10 +77,10 @@ mkdir -p ${log_path}
 echo "Log path: ${log_path}"
 
 if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
-    python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
+    ( python3 -u ${test_case} 2>&1 || true ) | tee -a ${log_path}/${tc_name}.log
     sleep 3600
 else
-    ( python3 -u ${test_case} 2>&1 || true )| tee -a ${log_path}/${tc_name}.log
+    python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
 fi
 echo "Finished test case ${test_case}"
 
