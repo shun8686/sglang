@@ -89,3 +89,7 @@ if [ -d "$source_plog_path" ];then
     mkdir -p ${target_plog_path}
     cp ${source_plog_path}/* ${target_plog_path}
 fi
+
+if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
+    sleep 3600
+fi

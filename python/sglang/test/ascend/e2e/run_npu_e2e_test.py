@@ -499,6 +499,7 @@ def run_npu_e2e_test_case(
     sglang_is_in_ci=False,
     install_sglang_from_source=False,
     env="debug",
+    trouble_shorting=False,
 ):
     """The method for running a npu e2e test case.
     Args:
@@ -546,6 +547,7 @@ def run_npu_e2e_test_case(
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
+                "trouble_shorting": trouble_shorting,
             }
             create_kube_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
@@ -566,6 +568,7 @@ def run_npu_e2e_test_case(
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
+                "trouble_shorting": trouble_shorting,
             }
             template_key = (
                 KUBE_JOB_MULTI_PD_MIX_GREEN if env == "green" else kube_job_type
@@ -591,6 +594,7 @@ def run_npu_e2e_test_case(
                 "sglang_is_in_ci": sglang_is_in_ci,
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
+                "trouble_shorting": trouble_shorting,
             }
             template_key = (
                 KUBE_JOB_MULTI_PD_SEPARATION_GREEN if env == "green" else kube_job_type
