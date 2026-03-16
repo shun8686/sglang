@@ -151,6 +151,7 @@ def write_pkg_info_to_file(result_file):
         ]
 
         # Write to result file
+        os.makedirs(os.path.dirname(os.path.abspath(result_file)), exist_ok=True)
         with open(result_file, "w", encoding="utf-8") as f:
             for pkg in filtered_packages:
                 f.write(pkg + "\n")
