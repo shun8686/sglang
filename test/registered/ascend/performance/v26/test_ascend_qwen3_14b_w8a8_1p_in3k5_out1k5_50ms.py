@@ -94,7 +94,7 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    warmup_requests = 2
+    warmup_requests = 144
     tpot = 40
     output_token_throughput = 2147
 
