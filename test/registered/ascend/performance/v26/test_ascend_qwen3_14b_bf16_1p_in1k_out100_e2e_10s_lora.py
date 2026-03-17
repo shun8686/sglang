@@ -67,7 +67,8 @@ QWEN3_14B_OTHER_ARGS = [
     "up_proj",
     "down_proj",
     "--lora-paths",
-    f"Copilot={QWEN3_14B_LORA_MODEL_PATH}" "--max-lora-rank",
+    f"Copilot={QWEN3_14B_LORA_MODEL_PATH}",
+    "--max-lora-rank",
     8,
 ]
 
