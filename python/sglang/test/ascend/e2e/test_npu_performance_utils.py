@@ -301,8 +301,8 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
     request_rate = None
-    max_concurrency = 8
-    num_prompts = int(max_concurrency) * PROMPTS_MULTIPLIER
+    max_concurrency = None
+    num_prompts = None
     input_len = None
     output_len = None
     random_range_ratio = None
