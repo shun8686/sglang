@@ -199,6 +199,7 @@ def run_bench_serving(
     image_resolution=None,
     image_count=None,
     warmup_requests=None,
+    seed=None,
 ):
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
@@ -242,6 +243,8 @@ def run_bench_serving(
         cmd_args.extend(["--image-count", str(image_count)])
     if warmup_requests:
         cmd_args.extend(["--warmup-requests", str(warmup_requests)])
+    if seed:
+        cmd_args.extend(["--seed", str(seed)])
     logger.info(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
@@ -306,6 +309,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     image_resolution = None
     image_count = None
     warmup_requests = None
+    seed = None
     ttft = None
     tpot = None
     mean_e2e_latency = None
@@ -394,6 +398,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             "image_resolution": self.image_resolution,
             "image_count": self.image_count,
             "warmup_requests": self.warmup_requests,
+            "seed": self.seed,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -419,6 +424,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     image_resolution = None
     image_count = None
     warmup_requests = None
+    seed = None
     ttft = None
     tpot = None
     mean_e2e_latency = None
@@ -523,6 +529,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             "image_resolution": self.image_resolution,
             "image_count": self.image_count,
             "warmup_requests": self.warmup_requests,
+            "seed": self.seed,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
@@ -548,6 +555,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     image_resolution = None
     image_count = None
     warmup_requests = None
+    seed = None
     ttft = None
     tpot = None
     mean_e2e_latency = None
@@ -669,6 +677,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             "image_resolution": self.image_resolution,
             "image_count": self.image_count,
             "warmup_requests": self.warmup_requests,
+            "seed": self.seed,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 
