@@ -98,6 +98,9 @@ MINICPM3_4B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "OpenBMB/MiniCPM3-4B"
 MISTRAL_7B_INSTRUCT_V0_2_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "mistralai/Mistral-7B-Instruct-v0.2"
 )
+OLMO_2_1124_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "allenai/OLMo-2-1124-7B-Instruct"
+)
 OLMOE_1B_7B_0924_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "allenai/OLMoE-1B-7B-0924"
 )
@@ -133,20 +136,15 @@ QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-
 QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "aleoyang/Qwen3-32B-w8a8-MindIE"
 )
-QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "vllm-ascend/Qwen3-235B-A22B-W8A8"
-)
-QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
-)
-QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "Qwen/Qwen3-Next-80B-A3B-Instruct"
-)
 QWQ_32B_W8A8_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "vllm-ascend/QWQ-32B-W8A8")
 SMOLLM_1_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "HuggingFaceTB/SmolLM-1.7B")
+SOLAR_10_7B_INSTRUCT_V1_0_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "upstage/SOLAR-10.7B-Instruct-v1.0"
+)
 STABLELM_2_1_6B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "stabilityai/stablelm-2-1_6b"
 )
+STARCODER2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bigcode/starcoder2-7b")
 XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-MoE-A36B")
 
 # VLM model weights path
