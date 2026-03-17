@@ -6,6 +6,27 @@ on:
       - main
     paths:
       - ".github/workflows/release-test-npu.yml"
+    inputs:
+      ref:
+        description: 'Git ref (branch, tag, or SHA) to test. If not provided, uses the default branch.'
+        required: false
+        type: string
+        default: ''
+      job_filter:
+        description: 'Select which job to run (leave empty or "all" to run all jobs)'
+        required: false
+        type: string
+        default: 'all'
+      image:
+        description: 'The running docker image of the test task.'
+        required: false
+        type: string
+        default: 'swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3'
+      is_daily_image:
+        description: 'Identifies whether the test target is a daily build image package, defaulting to false.'
+        required: false
+        type: boolean
+        default: true
   workflow_dispatch:
     inputs:
       ref:
@@ -36,7 +57,7 @@ concurrency:
 jobs:
   call-nighly-test-npu:
     name: nightly-test-npu
-    if: ${{ (github.repository == 'sgl-project/sglang') }}
+    if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     uses: ./.github/workflows/nightly-test-npu.yml
     with:
       ref:  ${{ inputs.ref }}
@@ -45,7 +66,7 @@ jobs:
       is_daily_image: ${{ inputs.default }}
 
   release-1-npu-a3:
-    if: ${{ (github.repository == 'sgl-project/sglang' && github.event_name != 'workflow_call') }}
+    if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     runs-on: linux-aarch64-a3-2
     container:
       image: ${{ inputs.image }}
@@ -102,7 +123,7 @@ jobs:
           python3 run_suite.py --hw npu --suite release-1-npu-a3 --nightly --continue-on-error --timeout-per-file 3600
 
   release-2-npu-a3:
-    if: ${{ (github.repository == 'sgl-project/sglang' && github.event_name != 'workflow_call') }}
+    if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     runs-on: linux-aarch64-a3-2
     container:
       image: ${{ inputs.image }}
