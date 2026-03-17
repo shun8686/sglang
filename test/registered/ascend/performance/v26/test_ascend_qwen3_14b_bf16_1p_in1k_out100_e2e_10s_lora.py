@@ -72,7 +72,7 @@ QWEN3_14B_OTHER_ARGS = [
     8,
 ]
 
-# ===============当前版本需要规避,回退这个PR:18046==============
+# ===============依赖PR:17794的合入,当前版本需要规避,回退这个PR:18046==============
 import os
 
 
@@ -113,7 +113,7 @@ try:
     delete_specific_lines(target_file, 157, 160)
 except Exception as e:
     print(f"Operation failed: {e}")
-# ===============当前版本需要规避,回退这个PR:18046==============
+# ===============依赖PR:17794的合入,当前版本需要规避,回退这个PR:18046==============
 
 
 class TestQwen14B(TestAscendPerformanceTestCaseBase):
