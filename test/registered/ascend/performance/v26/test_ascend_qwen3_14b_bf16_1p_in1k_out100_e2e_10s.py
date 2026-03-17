@@ -62,6 +62,7 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_14B_OTHER_ARGS
     envs = QWEN3_14B_ENVS
     dataset_name = "random"
+    backend = "sglang-oai-chat"
     max_concurrency = 96
     num_prompts = int(max_concurrency) * 4
     input_len = 1024
