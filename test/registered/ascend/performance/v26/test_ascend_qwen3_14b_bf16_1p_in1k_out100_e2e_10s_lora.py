@@ -1,6 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    QWEN3_14B_LORA_MODEL_PATH,
     QWEN3_14B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -40,6 +41,8 @@ QWEN3_14B_OTHER_ARGS = [
     "--disable-radix-cache",
     "--mem-fraction-static",
     0.85,
+    "--cuda-graph-bs",
+    96,
     "--tp-size",
     2,
     "--dp-size",
@@ -52,8 +55,20 @@ QWEN3_14B_OTHER_ARGS = [
     "Qwen3-14B",
     "--chunked-prefill-size",
     -1,
-    "--cuda-graph-bs",
-    96,
+    "--enable-lora",
+    "--lora-backend",
+    "torch_native",
+    "--lora-target-modules",
+    "q_proj",
+    "k_proj",
+    "v_proj",
+    "o_proj",
+    "gate_proj",
+    "up_proj",
+    "down_proj",
+    "--lora-paths",
+    f"Copilot={QWEN3_14B_LORA_MODEL_PATH}" "--max-lora-rank",
+    8,
 ]
 
 
