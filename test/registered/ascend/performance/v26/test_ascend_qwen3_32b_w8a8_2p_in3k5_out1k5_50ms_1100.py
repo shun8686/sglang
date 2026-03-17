@@ -35,8 +35,8 @@ QWEN3_32B_OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    # "--quantization",
-    # "modelslim",
+    "--quantization",
+    "modelslim",
     "--max-running-requests",
     101,
     "--disable-radix-cache",
@@ -83,12 +83,12 @@ QWEN3_32B_OTHER_ARGS = [
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
     # model = QWEN3_32B_W8A8_MODEL_PATH
     # model = "/home/weights/Qwen/Qwen3-32B"
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-w8a8"
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
     max_concurrency = 162
-    num_prompts = 624
+    num_prompts = 324
     input_len = 3584
     output_len = 1536
     random_range_ratio = 1
