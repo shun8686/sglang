@@ -93,6 +93,7 @@ TPOT_THRESHOLD = 50
 TPOT_TOLERANCE_LOW = 1.0  # +1 second
 TPOT_TOLERANCE_HIGH = 1.02  # +2%
 TTFT_TOLERANCE = 1.02  # +2%
+E2E_TOLERANCE = 1.02  # +2%
 OUTPUT_TOKEN_THROUGHPUT_TOLERANCE = 0.98  # -2%
 
 # Package filtering keywords
@@ -267,6 +268,10 @@ def run_bench_serving(
                     parts = stripped_line.split()
                     if len(parts) >= 5:
                         metrics["total_tps"] = parts[4]
+                elif "Mean E2E Latency" in stripped_line:
+                    parts = stripped_line.split()
+                    if len(parts) >= 5:
+                        metrics["mean_e2e_latency"] = parts[4]
         process.wait()
         if process.returncode != 0:
             logger.error(
@@ -300,6 +305,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     warmup_requests = None
     ttft = None
     tpot = None
+    mean_e2e_latency = None
     output_token_throughput = None
 
     @classmethod
@@ -359,6 +365,11 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
+        if self.mean_e2e_latency:
+            self.assertLessEqual(
+                float(metrics["mean_e2e_latency"]),
+                self.mean_e2e_latency * E2E_TOLERANCE,
+            )
 
     def run_throughput(self, run_cycles=2):
         parsed_url = urlparse(self.base_url)
@@ -407,6 +418,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     warmup_requests = None
     ttft = None
     tpot = None
+    mean_e2e_latency = None
     output_token_throughput = None
 
     @classmethod
@@ -455,6 +467,11 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             self.assertLessEqual(
                 float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
+            )
+        if self.mean_e2e_latency:
+            self.assertLessEqual(
+                float(metrics["mean_e2e_latency"]),
+                self.mean_e2e_latency * E2E_TOLERANCE,
             )
 
     @classmethod
@@ -530,6 +547,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     warmup_requests = None
     ttft = None
     tpot = None
+    mean_e2e_latency = None
     output_token_throughput = None
 
     @classmethod
@@ -587,6 +605,11 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             self.assertLessEqual(
                 float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
+            )
+        if self.mean_e2e_latency:
+            self.assertLessEqual(
+                float(metrics["mean_e2e_latency"]),
+                self.mean_e2e_latency * E2E_TOLERANCE,
             )
 
     @classmethod
