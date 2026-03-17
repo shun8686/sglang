@@ -133,7 +133,7 @@ class TestApiRelatedToolCallParser(CustomTestCase):
             max_new_tokens=512,
             parallel=128,
             host="http://127.0.0.1",
-            port=21000,
+            port=int(self.base_url.split(":")[-1]),
         )
         run_eval(args)
 
@@ -254,7 +254,7 @@ class TestApiRelatedCacheReport(CustomTestCase):
             self.assertEqual(response.status_code, 200)
             if i == 1:
                 cached_tokens = response.json()["usage"]['prompt_tokens_details'][
-                    'cached_tokens'
+                    "cached_tokens"
                 ]
                 self.assertEqual(256, cached_tokens)
 

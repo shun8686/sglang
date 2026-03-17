@@ -259,7 +259,7 @@ class TestMetricsExporter(CustomTestCase):
             max_new_tokens=512,
             parallel=128,
             host="http://127.0.0.1",
-            port=21000,
+            port=int(self.base_url.split(":")[-1]),
         )
         run_eval(args)
         metrics_files = self._get_metrics_files()
