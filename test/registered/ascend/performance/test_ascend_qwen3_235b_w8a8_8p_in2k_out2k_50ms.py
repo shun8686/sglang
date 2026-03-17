@@ -81,7 +81,7 @@ QWEN3_235B_OTHER_ARGS = [
     "--enable-dp-attention",
     "--enable-dp-lm-head",
     "--mem-fraction-static",
-    0.83
+    0.83,
     "--cuda-graph-bs",
     4,
     8,
