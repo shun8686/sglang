@@ -43,6 +43,7 @@ jobs:
       job_filter: 'all'
       image: 'swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3'
       is_daily_image: true
+    secrets: inherit
 
 #  release-1-npu-a3:
 #    if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
