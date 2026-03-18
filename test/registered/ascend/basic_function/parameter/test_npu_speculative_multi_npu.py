@@ -23,7 +23,8 @@ Server configuration:
 [Model] aleoyang/Qwen3-32B-w8a8-MindIE; Qwen/Qwen3-32B-Eagle3
 """
 import sys
-
+import os
+import unittest
 # ============【本地路径覆盖 - 仅影响本文件】============
 # 配置：服务器实际模型根目录
 LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
@@ -52,8 +53,7 @@ utils.LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     LOCAL_MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct"
 )
 # ====================================================
-import os
-import unittest
+
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (

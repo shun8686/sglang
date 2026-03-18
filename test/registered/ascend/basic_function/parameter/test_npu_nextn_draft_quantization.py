@@ -20,7 +20,8 @@ rate toward zero, making avg_spec_accept_length the only reliable detection sign
 [Model] Qwen/Qwen3-30B-A3B-w8a8; Qwen/Qwen3-0.6B
 """
 import sys
-
+import os
+import unittest
 # ============【本地路径覆盖 - 仅影响本文件】============
 # 配置：服务器实际模型根目录
 LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
@@ -49,8 +50,7 @@ utils.LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     LOCAL_MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct"
 )
 # ====================================================
-import os
-import unittest
+
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (

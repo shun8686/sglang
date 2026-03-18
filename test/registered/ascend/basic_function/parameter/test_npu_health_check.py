@@ -1,5 +1,8 @@
 import sys
+import unittest
 
+import requests
+import os
 # ============【本地路径覆盖 - 仅影响本文件】============
 # 配置：服务器实际模型根目录
 LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
@@ -29,9 +32,7 @@ utils.LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 )
 # ====================================================
 
-import unittest
 
-import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
