@@ -46,7 +46,7 @@ jobs:
       image_a3: ${{ steps.set-vars.outputs.image_a3 }}
       daily_image_flag: ${{ steps.set-vars.outputs.daily_image_flag }}
     steps:
-      # 当pr触发时，没有inputs参数，默认使用社区最新代码测试。
+      # When triggered by a PR, no inputs parameters are used. The latest community code is tested by default.
       - name: Set image config
         id: set-vars
         run: |

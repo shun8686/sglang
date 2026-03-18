@@ -42,12 +42,12 @@ jobs:
       image_a3: ${{ steps.set-vars.outputs.image_a3 }}
       daily_image_flag: ${{ steps.set-vars.outputs.daily_image_flag }}
     steps:
-      # 当pr触发时，没有inputs参数，默认使用社区最新代码测试。
+      # When triggered by a PR, no inputs parameters are used. The latest community code is tested by default.
       - name: Set image config
         id: set-vars
         run: |
           if [ -z "${{ inputs.ref }}" ]; then
-            echo "ref=''" >> $GITHUB_OUTPUT
+            echo "ref=" >> $GITHUB_OUTPUT
           else
             echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
           fi
@@ -76,9 +76,9 @@ jobs:
     if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     uses: ./.github/workflows/nightly-test-npu.yml
     with:
-      ref:  ''
-      job_filter: 'all'
-      image_a3: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11'
+      ref:  ${{ needs.set-image-config.outputs.ref }}
+      job_filter: ${{ needs.set-image-config.outputs.job_filter }}
+      image_a3: ${{ needs.set-image-config.outputs.image_a3 }}
       daily_image_flag: ${{ needs.set-image-config.outputs.daily_image_flag }}
     secrets: inherit
 
