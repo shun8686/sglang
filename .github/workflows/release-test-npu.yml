@@ -22,7 +22,7 @@ on:
         description: 'The running docker image of the test task.'
         required: false
         type: string
-        default: 'swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3'
+        default: swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3
       daily_image_flag:
         description: 'Identifies whether the test target is a daily build image package, defaulting to false.'
         required: false
@@ -41,7 +41,7 @@ jobs:
     with:
       ref:  ''
       job_filter: 'all'
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3'
+      image: swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3
       is_daily_image: true
     secrets: inherit
 
@@ -49,7 +49,7 @@ jobs:
     if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     runs-on: linux-aarch64-a3-2
     container:
-      image: 'swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3'
+      image: swr.cn-southwest-2.myhuaweicloud.com/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
