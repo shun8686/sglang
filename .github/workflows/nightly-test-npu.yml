@@ -50,25 +50,25 @@ jobs:
       - name: Set image config
         id: set-vars
         run: |
-          if [ -z ${{ inputs.ref }} ]; then
+          if [ -z "${{ inputs.ref }}" ]; then
             echo "ref=''" >> $GITHUB_OUTPUT
           else
             echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
           fi
 
-          if [ -z ${{ inputs.job_filter }} ]; then
+          if [ -z "${{ inputs.job_filter }}" ]; then
             echo "job_filter=all" >> $GITHUB_OUTPUT
           else
             echo "job_filter=${{ inputs.job_filter }}" >> $GITHUB_OUTPUT
           fi
 
-          if [ -z ${{ inputs.image_a3 }} ]; then
+          if [ -z "${{ inputs.image_a3 }}" ]; then
             echo "image_a3=swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11" >> $GITHUB_OUTPUT
           else
             echo "image_a3=${{ inputs.image_a3 }}" >> $GITHUB_OUTPUT
           fi
 
-          if [ -z ${{ inputs.daily_image_flag }} ]; then
+          if [ -z "${{ inputs.daily_image_flag }}" ]; then
             echo "daily_image_flag=false" >> $GITHUB_OUTPUT
           else
             echo "daily_image_flag=${{ inputs.daily_image_flag }}" >> $GITHUB_OUTPUT
