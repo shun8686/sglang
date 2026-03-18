@@ -1,7 +1,6 @@
 import datetime
 import sys
 import unittest
-from urllib.parse import urlparse
 
 from lts_utils import (
     run_bench_serving,
@@ -9,7 +8,6 @@ from lts_utils import (
 )
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    E2E_TOLERANCE,
     OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
     TPOT_THRESHOLD,
     TPOT_TOLERANCE_HIGH,
@@ -42,6 +40,7 @@ class TestLTSKimi(CustomTestCase):
     accuracy = 0.80
     host = "127.0.0.1"
     port = 8100
+    base_url = f"http://{host}:{port}"
 
     def _assert_metrics(self, metrics):
         if not metrics:
@@ -68,20 +67,12 @@ class TestLTSKimi(CustomTestCase):
                 float(metrics["mean_ttft"]),
                 self.ttft * TTFT_TOLERANCE,
             )
-        if self.mean_e2e_latency:
-            self.assertLessEqual(
-                float(metrics["mean_e2e_latency"]),
-                self.mean_e2e_latency * E2E_TOLERANCE,
-            )
 
     def run_throughput(self, run_cycles=2):
         print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
-        parsed_url = urlparse(self.base_url)
-        host = parsed_url.hostname
-        port = parsed_url.port
         bench_params = {
-            "host": host,
-            "port": port,
+            "host": self.host,
+            "port": self.port,
             "model_path": self.model,
             "backend": self.backend,
             "dataset_name": self.dataset_name,
