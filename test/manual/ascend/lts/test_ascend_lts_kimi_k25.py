@@ -1,29 +1,15 @@
 import datetime
+import os
 import sys
 import unittest
 
-from lts_utils import (
-    run_bench_serving,
-    run_gsm8k,
-)
-
-from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    TPOT_THRESHOLD,
-    TPOT_TOLERANCE_HIGH,
-    TPOT_TOLERANCE_LOW,
-    TTFT_TOLERANCE,
-)
-from sglang.test.test_utils import CustomTestCase
+from lts_utils import TestAscendLtsTestCaseBase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Kimi-K2.5-w4a8"
 
 
-class TestLTSKimi(CustomTestCase):
+class TestLTSKimi(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
-    dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    backend = "sglang"
     request_rate = None
     max_concurrency = 96
     num_prompts = 96
@@ -38,85 +24,19 @@ class TestLTSKimi(CustomTestCase):
     tpot = 55
     output_token_throughput = 1350
     accuracy = 0.80
-    host = "127.0.0.1"
-    port = 8100
-    base_url = f"http://{host}:{port}"
 
-    def _assert_metrics(self, metrics):
-        if not metrics:
-            self.fail("No metrics obtained from benchmark")
-
-        if self.tpot:
-            if self.tpot < TPOT_THRESHOLD:
-                self.assertLessEqual(
-                    float(metrics["mean_tpot"]),
-                    self.tpot + TPOT_TOLERANCE_LOW,
-                )
-            else:
-                self.assertLessEqual(
-                    float(metrics["mean_tpot"]),
-                    self.tpot * TPOT_TOLERANCE_HIGH,
-                )
-        if self.output_token_throughput:
-            self.assertGreaterEqual(
-                float(metrics["total_tps"]),
-                self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-            )
-        if self.ttft:
-            self.assertLessEqual(
-                float(metrics["mean_ttft"]),
-                self.ttft * TTFT_TOLERANCE,
-            )
-
-    def run_throughput(self, run_cycles=2):
-        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
-        bench_params = {
-            "host": self.host,
-            "port": self.port,
-            "model_path": self.model,
-            "backend": self.backend,
-            "dataset_name": self.dataset_name,
-            "dataset_path": self.dataset_path,
-            "request_rate": self.request_rate,
-            "max_concurrency": self.max_concurrency,
-            "num_prompts": self.num_prompts,
-            "input_len": self.input_len,
-            "output_len": self.output_len,
-            "random_range_ratio": self.random_range_ratio,
-            "image_resolution": self.image_resolution,
-            "image_count": self.image_count,
-            "warmup_requests": self.warmup_requests,
-            "seed": self.seed,
-        }
-        print(f"Starting benchmark with parameters: {bench_params}")
-
-        metrics = None
-        for i in range(run_cycles):
-            print(f"Running benchmark, {i + 1}/{run_cycles}")
-            metrics = run_bench_serving(**bench_params)
-
-        self._assert_metrics(metrics)
-        print("res_ttft is " + str(metrics["mean_ttft"]))
-        print("res_tpot is " + str(metrics["mean_tpot"]))
-        print("res_output_token_throughput is " + str(metrics["total_tps"]))
-        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
-
-    def run_gsm8k(self):
-        metrics = run_gsm8k(host=f"http://{self.host}", port=self.port)
-        self.assertGreater(
-            metrics["accuracy"],
-            self.accuracy,
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
-        )
-        print(f"========== gsm8k test PASSED ==========\n")
+    @classmethod
+    def setUpClass(cls):
+        cls.host = "127.0.0.1"
+        cls.port = 8100
 
     def test_lts_kimi_k25(self):
         i = 0
         while True:
             i = i + 1
-            time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
-                f"=============={time_str_1}  Execute the {i}-th long-term stability test=============="
+                f"\n=============={current_time}  Execute the {i}-th long-term stability test=============="
             )
             self.run_throughput()
             self.run_gsm8k()
@@ -124,7 +44,10 @@ class TestLTSKimi(CustomTestCase):
 
 if __name__ == "__main__":
     time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    log_file = "./log/lts_test_deepseek_r1_" + time_str + ".log"
+    os.makedirs("log", exist_ok=True)
+    log_file = (
+        f"./log/lts_{os.path.splitext(os.path.basename(__file__))[0]}_{time_str}.log"
+    )
 
     with open(log_file, "w", encoding="utf-8") as f:
         original_stdout = sys.stdout

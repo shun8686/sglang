@@ -2,19 +2,12 @@ import datetime
 import os
 import unittest
 
-from lts_utils import (
-    run_bench_serving,
-    run_command,
-    run_gsm8k,
-    run_long_seq_bench_serving,
-)
+from lts_utils import TestAscendLtsTestCaseBase
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
+from sglang.test.ascend.e2e.test_npu_performance_utils import DEFAULT_URL_FOR_TEST
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
-    CustomTestCase,
     popen_launch_server,
 )
 
@@ -90,26 +83,9 @@ QWEN3_235B_ENVS = {
 }
 
 
-def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
-    command = (
-        f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
-        f"--request-rate 1 --max-concurrency 1 --num-prompts 1 "
-        f"--random-input-len {input_len} --random-output-len {output_len} "
-        f"--random-range-ratio 1"
-    )  # 固定长度，不随机
-    print(f"{seq_type} single long sequence test command:{command}")
-    metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
-    return metrics
-
-
-class TestLTSQwen3235B(CustomTestCase):
+class TestLTSQwen3235B(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
-    dataset_name = "random"
-    dataset_path = (
-        "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
-    )
     other_args = OTHER_ARGS
-    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = QWEN3_235B_ENVS
     request_rate = 5.5
     max_concurrency = 8
@@ -140,61 +116,13 @@ class TestLTSQwen3235B(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def run_throughput(self):
-        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
-        metrics = run_bench_serving(
-            host=host,
-            port=port,
-            dataset_name=self.dataset_name,
-            dataset_path=self.dataset_path,
-            request_rate=self.request_rate,
-            max_concurrency=self.max_concurrency,
-            num_prompts=self.num_prompts,
-            input_len=self.input_len,
-            output_len=self.output_len,
-            random_range_ratio=self.random_range_ratio,
-        )
-        print("metrics is " + str(metrics))
-        res_ttft = run_command(
-            "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
-        )
-        res_tpot = run_command(
-            "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
-        )
-        res_output_token_throughput = run_command(
-            "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
-        )
-        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
-
-    def run_gsm8k(self):
-        metrics = run_gsm8k("http://127.0.0.1", int(self.base_url.split(":")[-1]))
-
-        self.assertGreater(
-            metrics["accuracy"],
-            self.accuracy,
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
-        )
-        print(f"========== gsm8k test PASSED ==========\n")
-
-    def run_all_long_seq_verify(self):
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
-        run_long_seq_bench_serving(
-            host=host,
-            port=port,
-            dataset_name=self.dataset_name,
-            dataset_path=self.dataset_path,
-        )
-
     def test_lts_qwen3_235b(self):
         i = 0
         while True:
             i = i + 1
-            time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
-                f"=============={time_str_1}  Execute the {i}-th long-term stability test=============="
+                f"=============={current_time}  Execute the {i}-th long-term stability test=============="
             )
             self.run_throughput()
             self.run_gsm8k()

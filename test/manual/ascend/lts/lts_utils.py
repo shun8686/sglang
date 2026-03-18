@@ -1,8 +1,27 @@
+import logging
 import subprocess
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import run_bench_serving
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    E2E_TOLERANCE,
+    OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
+    TPOT_THRESHOLD,
+    TPOT_TOLERANCE_HIGH,
+    TPOT_TOLERANCE_LOW,
+    TTFT_TOLERANCE,
+    run_bench_serving,
+)
 from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.test_utils import CustomTestCase
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
 
 
 def run_command(cmd, shell=True):
@@ -17,7 +36,6 @@ def run_command(cmd, shell=True):
 
 
 def run_gsm8k(host="http://127.0.0.1", port=6688, expect_accuracy=None):
-    print(f"========== Start gsm8k test ==========\n")
     args = SimpleNamespace(
         num_shots=8,
         data_path=None,
@@ -104,3 +122,139 @@ def run_long_seq_bench_serving(
         #     res_error, "",
         #     f"{seq_type} request failed with error: {res_error}"
         # )
+
+
+def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
+    command = (
+        f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
+        f"--request-rate 1 --max-concurrency 1 --num-prompts 1 "
+        f"--random-input-len {input_len} --random-output-len {output_len} "
+        f"--random-range-ratio 1"
+    )  # 固定长度，不随机
+    print(f"{seq_type} single long sequence test command:{command}")
+    metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
+    return metrics
+
+
+class TestAscendLtsTestCaseBase(CustomTestCase):
+    host = "127.0.0.1"
+    port = 8100
+    base_url = f"http://{host}:{port}"
+    model = None
+    backend = "sglang"
+    dataset_name = "random"
+    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    other_args = None
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+    envs = None
+    request_rate = None
+    max_concurrency = None
+    num_prompts = None
+    input_len = None
+    output_len = None
+    random_range_ratio = None
+    image_resolution = None
+    image_count = None
+    warmup_requests = None
+    seed = None
+    ttft = None
+    tpot = None
+    mean_e2e_latency = None
+    output_token_throughput = None
+    accuracy = None
+
+    def _assert_metrics(self, metrics):
+        """Assert benchmark metrics against expected values.
+
+        Args:
+            metrics (dict): Benchmark metrics dictionary.
+        """
+        if not metrics:
+            self.fail("No metrics obtained from benchmark")
+
+        if self.tpot:
+            if self.tpot < TPOT_THRESHOLD:
+                self.assertLessEqual(
+                    float(metrics["mean_tpot"]),
+                    self.tpot + TPOT_TOLERANCE_LOW,
+                )
+            else:
+                self.assertLessEqual(
+                    float(metrics["mean_tpot"]),
+                    self.tpot * TPOT_TOLERANCE_HIGH,
+                )
+        if self.output_token_throughput:
+            self.assertGreaterEqual(
+                float(metrics["total_tps"]),
+                self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
+            )
+        if self.ttft:
+            self.assertLessEqual(
+                float(metrics["mean_ttft"]),
+                self.ttft * TTFT_TOLERANCE,
+            )
+        if self.mean_e2e_latency:
+            self.assertLessEqual(
+                float(metrics["mean_e2e_latency"]),
+                self.mean_e2e_latency * E2E_TOLERANCE,
+            )
+
+    def run_throughput(self, run_cycles=2):
+        parsed_url = urlparse(self.base_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+        bench_params = {
+            "host": host,
+            "port": port,
+            "model_path": self.model,
+            "backend": self.backend,
+            "dataset_name": self.dataset_name,
+            "dataset_path": self.dataset_path,
+            "request_rate": self.request_rate,
+            "max_concurrency": self.max_concurrency,
+            "num_prompts": self.num_prompts,
+            "input_len": self.input_len,
+            "output_len": self.output_len,
+            "random_range_ratio": self.random_range_ratio,
+            "image_resolution": self.image_resolution,
+            "image_count": self.image_count,
+            "warmup_requests": self.warmup_requests,
+            "seed": self.seed,
+        }
+        logger.info(f"Starting benchmark with parameters: {bench_params}")
+
+        metrics = None
+        for i in range(run_cycles):
+            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
+            metrics = run_bench_serving(**bench_params)
+
+        self._assert_metrics(metrics)
+
+    def run_gsm8k(self):
+        print(f"---------- Start gsm8k accuracy test ----------")
+        args = SimpleNamespace(
+            num_shots=8,
+            data_path=None,
+            num_questions=1319,
+            max_new_tokens=512,
+            parallel=128,
+            host=self.host,
+            port=self.port,
+        )
+        metrics = run_eval(args)
+        self.assertGreater(
+            metrics["accuracy"],
+            self.accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+        )
+        print(f"---------- Gsm8k accuracy test PASSED ----------")
+
+    def run_all_long_seq_verify(self):
+        _, host, port = self.base_url.split(":")
+        host = host[2:]
+        run_long_seq_bench_serving(
+            host=host,
+            port=port,
+            dataset_name=self.dataset_name,
+            dataset_path=self.dataset_path,
+        )

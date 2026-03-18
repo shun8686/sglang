@@ -1,21 +1,17 @@
 import datetime
 import os
 import unittest
-from types import SimpleNamespace
 
-from lts_utils import run_bench_serving, run_command
+from lts_utils import TestAscendLtsTestCaseBase
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
-from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    CustomTestCase,
     popen_launch_server,
 )
 
-# MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
-MODEL_PATH = "/home/weights/Qwen3-30B-A3B-W8A8"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+# MODEL_PATH = "/home/weights/Qwen3-30B-A3B-W8A8"
 
 OTHER_ARGS = [
     "--trust-remote-code",
@@ -66,14 +62,9 @@ ENVS = {
 }
 
 
-class TestLTSQwen332B(CustomTestCase):
+class TestLTSQwen332B(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
-    dataset_name = "random"
-    dataset_path = (
-        "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"  # the path of test dataset
-    )
     other_args = OTHER_ARGS
-    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 10
     envs = ENVS
     request_rate = 5.5
     max_concurrency = 16
@@ -106,70 +97,13 @@ class TestLTSQwen332B(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def run_throughput(self):
-        print(f"========== Start 3.5k/1.5k benchmark test ==========\n")
-        metrics = run_bench_serving(
-            host=self.host,
-            port=self.port,
-            dataset_name=self.dataset_name,
-            dataset_path=self.dataset_path,
-            request_rate=self.request_rate,
-            max_concurrency=self.max_concurrency,
-            num_prompts=self.num_prompts,
-            input_len=self.input_len,
-            output_len=self.output_len,
-            random_range_ratio=self.random_range_ratio,
-        )
-        print("metrics is " + str(metrics))
-        res_ttft = run_command(
-            "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
-        )
-        res_tpot = run_command(
-            "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
-        )
-        res_output_token_throughput = run_command(
-            "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
-        )
-        print(f"========== 3.5k/1.5k benchmark test PASSED ==========\n")
-        # self.assertLessEqual(
-        #     float(res_ttft),
-        #     self.ttft,
-        # )
-        # self.assertLessEqual(
-        #     float(res_tpot),
-        #     self.tpot,
-        # )
-        # self.assertGreaterEqual(
-        #     float(res_output_token_throughput),
-        #     self.output_token_throughput,
-        # )
-
-    def run_gsm8k(self):
-        print(f"========== Start gsm8k test ==========\n")
-        args = SimpleNamespace(
-            num_shots=5,
-            data_path="/tmp/test.jsonl",
-            num_questions=1319,
-            max_new_tokens=512,
-            parallel=128,
-            host=f"http://{self.host}",
-            port=self.port,
-        )
-        metrics = run_eval(args)
-        # self.assertGreater(
-        #     metrics["accuracy"],
-        #     self.accuracy,
-        #     f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
-        # )
-        print(f"========== gsm8k test PASSED ==========\n")
-
-    def test_lts_qwen3_32b(self):
+    def test_lts_qwen3_30b(self):
         i = 0
         while True:
             i = i + 1
-            time_str_1 = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
             print(
-                f"=============={time_str_1}  Execute the {i}-th long-term stability test=============="
+                f"=============={current_time}  Execute the {i}-th long-term stability test=============="
             )
             self.run_throughput()
             self.run_gsm8k()
