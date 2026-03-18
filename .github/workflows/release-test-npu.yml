@@ -78,8 +78,8 @@ jobs:
     with:
       ref:  ''
       job_filter: 'all'
-      image_a3: 'image_a3=swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11'
-      daily_image_flag: false
+      image_a3: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11'
+      daily_image_flag: ${{ needs.set-image-config.outputs.daily_image_flag }}
     secrets: inherit
 
   release-1-npu-a3:
