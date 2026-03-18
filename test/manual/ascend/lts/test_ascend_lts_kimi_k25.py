@@ -23,7 +23,7 @@ class TestLTSKimi(TestAscendLtsTestCaseBase):
     ttft = 15000
     tpot = 55
     output_token_throughput = 1350
-    accuracy = 0.80
+    accuracy = 0.90
 
     @classmethod
     def setUpClass(cls):
