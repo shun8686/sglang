@@ -76,10 +76,10 @@ jobs:
     if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     uses: ./.github/workflows/nightly-test-npu.yml
     with:
-      ref:  ${{ needs.set-image-config.outputs.ref }}
-      job_filter: ${{ needs.set-image-config.outputs.job_filter }}
-      image_a3: ${{ needs.set-image-config.outputs.image_a3 }}
-      daily_image_flag: ${{ needs.set-image-config.outputs.daily_image_flag }}
+      ref:  ''
+      job_filter: 'all'
+      image_a3: 'image_a3=swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11'
+      daily_image_flag: false
     secrets: inherit
 
   release-1-npu-a3:
