@@ -256,17 +256,17 @@ class TestApiRelatedCacheReport(CustomTestCase):
                 f"{DEFAULT_URL_FOR_TEST}/v1/completions",
                 json={
                     "prompt": "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
-                              "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, "
+                    "just return me a string with of 5000 characters,just return me a string with of 5000 characters, ",
                     "max_tokens": 260,
                 },
             )
