@@ -4,19 +4,17 @@ from types import SimpleNamespace
 
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval
-from sglang.test.server_fixtures.disaggregation_fixture import (
-    PDDisaggregationServerBase,
-)
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_pd_server,
 )
+from test.ascend.disaggregation_utils import TestDisaggregationBase
 from test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
-class TestDisaggregationPrefillPPAccuracy(PDDisaggregationServerBase):
+class TestDisaggregationPrefillPPAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when only prefill enables PP parallelism in PD disaggregation scenario
 
     [Test Category] Parameter
@@ -98,7 +96,7 @@ class TestDisaggregationPrefillPPAccuracy(PDDisaggregationServerBase):
         time.sleep(5)
 
 
-class TestDisaggregationPrefillPPDynamicChunkAccuracy(PDDisaggregationServerBase):
+class TestDisaggregationPrefillPPDynamicChunkAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when prefill enables "dynamic chunking + PP parallelism" in PD disaggregation scenario
 
     [Test Category] Parameter
@@ -181,7 +179,7 @@ class TestDisaggregationPrefillPPDynamicChunkAccuracy(PDDisaggregationServerBase
         time.sleep(5)
 
 
-class TestDisaggregationDecodePPAccuracy(PDDisaggregationServerBase):
+class TestDisaggregationDecodePPAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when both prefill and decode enable PP parallelism in PD disaggregation scenario
 
     [Test Category] Parameter
@@ -212,7 +210,7 @@ class TestDisaggregationDecodePPAccuracy(PDDisaggregationServerBase):
             "2",
             "--pp-size",
             "2",
-            "--pp-async-batch-size",
+            "--pp-async-batch-depth",
             "2",
             "--pp-max-micro-batch-size",
             "2",

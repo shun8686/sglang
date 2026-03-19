@@ -328,7 +328,11 @@ class TestModelFileVerifierWithRealModel(_RealModelTestCase):
                 model=self.test_dir,
                 base_url=DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=["--model-checksum", checksum_arg],
+                other_args=[
+                    "--model-checksum", checksum_arg,
+                    "--attention-backend",
+                    "ascend",
+                ],
                 return_stdout_stderr=(stdout_io, stderr_io),
             )
 

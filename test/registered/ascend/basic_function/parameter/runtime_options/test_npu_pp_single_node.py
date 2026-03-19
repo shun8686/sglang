@@ -150,7 +150,6 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        # cls.model = DEFAULT_MODEL_NAME_FOR_TEST_VL_PP
         cls.model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = "http://127.0.0.1:23333"
         cls.process = popen_launch_server(
@@ -331,8 +330,7 @@ class TestQwenMoePPAccuracy(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:23336"  # different ports to avoid conflicts
-        # cls.model_name = "Qwen/Qwen3-30B-A3B"  # replace with your Qwen Model if needed
-        cls.model_name = QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
+        cls.model_name = QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH  # replace with your Qwen Model if needed
 
     def run_gsm8k_test(self, pp_size):
         process = popen_launch_server(
@@ -391,10 +389,7 @@ class TestQwen35PPAccuracy(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:23337"  # different ports to avoid conflicts
-        # cls.model_name = (
-        #     "Qwen/Qwen3.5-35B-A3B"  # replace with your Qwen Model if needed
-        # )
-        cls.model_name = QWEN3_32B_WEIGHTS_PATH
+        cls.model_name = QWEN3_32B_WEIGHTS_PATH # replace with your Qwen Model if needed
 
     def run_gsm8k_test(self, pp_size):
         process = popen_launch_server(
@@ -487,12 +482,10 @@ class TestGLM41VPPAccuracy(unittest.TestCase):
     """
     @classmethod
     def setUpClass(cls):
-        # cls.model = DEFAULT_MODEL_NAME_FOR_TEST_GLM_41V_PP
         cls.model = GLM_4_5V_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
-            # DEFAULT_MODEL_NAME_FOR_TEST_GLM_41V_PP,
-            GLM_4_5V_WEIGHTS_PATH,
+            cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
