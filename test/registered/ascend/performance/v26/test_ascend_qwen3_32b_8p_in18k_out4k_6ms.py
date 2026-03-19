@@ -2,7 +2,7 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_W8A8_MODEL_PATH,
+    QWEN3_32B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -81,9 +81,9 @@ QWEN3_32B_OTHER_ARGS = [
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    # model = QWEN3_32B_W8A8_MODEL_PATH
+    model = QWEN3_32B_MODEL_PATH
     # model = "/home/weights/Qwen/Qwen3-32B"
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
+    # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
