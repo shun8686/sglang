@@ -20,10 +20,16 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestNpuDebugTensorDumps(CustomTestCase):
+    """Tensor dump verification of all parameter combinations in TP+PP scenarios
+
+    [Test Category] Functional
+    [Test Target] Debug Tensor Dumps on NPU
+    --debug-tensor-dump-output-folder; --debug-tensor-dump-layers
+    """
+
     TP_SIZE = 2
     PP_SIZE = 2
     TP_DIR_NUM = TP_SIZE * PP_SIZE
-    FILE_PATTERN_PP0 = "/TP0_PP0_Rank0_pid*"
     dump_folder = tempfile.mkdtemp(prefix="tensor_folder")
     # dump_file = tempfile.mkstemp(prefix="input", suffix=".json")
     # input_data = {
