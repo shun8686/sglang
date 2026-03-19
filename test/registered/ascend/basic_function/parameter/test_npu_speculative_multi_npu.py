@@ -80,7 +80,7 @@ _SERVER_ARGS = [
     "--speculative-algorithm", "EAGLE3",
     "--speculative-draft-model-path", QWEN3_32B_EAGLE3_WEIGHTS_PATH,
     "--speculative-num-steps", "4",
-    "--speculative-eagle-topk", "4",
+    "--speculative-eagle-topk", "1",
     "--speculative-num-draft-tokens", "5",
     "--speculative-attention-mode", "decode",
     # --tp-size 2: shard the 32B model across 2 NPU cards; tests TP-aware

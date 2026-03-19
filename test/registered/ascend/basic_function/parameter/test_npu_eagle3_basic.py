@@ -83,7 +83,7 @@ _SERVER_ARGS = [
     # --speculative-num-steps 4: draft head runs 4 auto-regressive steps per iteration.
     "--speculative-num-steps", "4",
     # --speculative-eagle-topk 1: single beam; required by SpecV2 overlap scheduler.
-    "--speculative-eagle-topk", "4",
+    "--speculative-eagle-topk", "1",
     # --speculative-num-draft-tokens 5: maximum draft tokens submitted for verification.
     "--speculative-num-draft-tokens", "5",
     # --speculative-attention-mode decode: draft attention in single-token decode mode.
