@@ -793,7 +793,7 @@ def execute_serving_performance_test(
 
     return {"mean_ttft": mean_ttft, "mean_tpot": mean_tpot, "total_tps": total_tps}
 
-def send_inference_request(base_url: str, model: str, prompt: str, max_tokens: int = 128) -> dict:
+def send_inference_request(base_url: str, model: str, prompt: str, max_tokens: int =1024) -> dict:
     """
     POST a single-turn chat completion request to a running SGLang server.
 
@@ -866,6 +866,10 @@ def assert_spec_decoding_active(test_case, base_url: str, threshold: float = 1.0
         AssertionError: If avg_spec_accept_length <= threshold.
     """
     avg_len = get_avg_spec_accept_length(base_url)
+
+    print(f"\n[Spec Decoding] avg_spec_accept_length={avg_len:.3f}, threshold={threshold:.3f}, "
+          f"result={'PASS' if avg_len > threshold else 'FAIL'}")
+
     test_case.assertGreater(
         avg_len,
         threshold,
