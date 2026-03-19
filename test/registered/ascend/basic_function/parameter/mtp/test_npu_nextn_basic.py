@@ -24,7 +24,7 @@ _ASCEND_BACKEND = "ascend"
 _SERVER_ARGS = [
     "--trust-remote-code",
     "--attention-backend", _ASCEND_BACKEND,
-    "--quantization", "modelslim",
+    #"--quantization", "modelslim",
     "--disable-radix-cache",
     "--speculative-draft-model-quantization", "unquant",
     # --speculative-algorithm NEXTN: use an independent smaller draft LLM.
