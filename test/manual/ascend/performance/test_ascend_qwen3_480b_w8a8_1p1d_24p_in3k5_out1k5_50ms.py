@@ -12,6 +12,7 @@ MODEL_CONFIG = {
         "SGLANG_SET_CPU_AFFINITY": "1",
         "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
         "STREAMS_PER_DEVICE": "32",
+        "SGLANG_NPU_FUSED_MOE_MODE": "2",
         "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "327680",
         "HCCL_BUFFSIZE": "1550",
         "TASK_QUEUE_ENABLE": "2",
