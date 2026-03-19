@@ -7,8 +7,8 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
-    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
     C4AI_COMMAND_R_V01_WEIGHTS_PATH,
+    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval
