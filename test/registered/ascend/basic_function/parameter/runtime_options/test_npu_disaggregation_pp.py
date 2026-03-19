@@ -8,10 +8,8 @@ from sglang.test.server_fixtures.disaggregation_fixture import (
     PDDisaggregationServerBase,
 )
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_pd_server,
-    try_cached_model,
 )
 from test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 
@@ -179,7 +177,7 @@ class TestDisaggregationDecodePPAccuracy(PDDisaggregationServerBase):
     """Test Case: Verify the accuracy of base model when both prefill and decode enable PP parallelism in PD disaggregation scenario
 
     [Test Category] Parameter
-    [Test Target] --pp-size
+    [Test Target] --pp-size; --pp-max-micro-batch-size; --pp-max-micro-batch-size
     """
     @classmethod
     def setUpClass(cls):

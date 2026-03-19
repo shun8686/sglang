@@ -6,7 +6,12 @@ from sglang.test.run_combined_tests import run_combined_tests
 from sglang.test.test_utils import ModelLaunchSettings
 from test.ascend.test_ascend_utils import DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH
 
-register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=400,
+    suite="nightly-8-npu-a3",
+    nightly=True,
+    disabled="https://github.com/Ascend/sglang/issues/94"
+)
 
 DEEPSEEK_V32_EXP_MODEL_PATH = DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH
 
@@ -52,9 +57,10 @@ CP_ROUND_ROBIN_ARGS = [
 
 
 class TestDeepseekV32CPSingleNode(unittest.TestCase):
-    """Test Case: 针对搭载NSA上下文并行技术的DeepSeek V3.2模型，测试结合DP（数据并行）+MTP（推测执行）的上下文并行（CP）模式：
-    - in-seq-split：序列内拆分式上下文并行模式
-    - round-robin-split：轮询拆分式上下文并行模式
+    """Test Case: Test DeepSeek V3.2 model with NSA context parallelism,testing context parallel (CP) modes
+    combined with DP (data parallel) + MTP (speculative decoding):
+    - in-seq-split: In-sequence split context parallel mode
+    - round-robin-split: Round-robin split context parallel mode
 
     [Test Category] Parameter
     [Test Target] --attn-cp-size
