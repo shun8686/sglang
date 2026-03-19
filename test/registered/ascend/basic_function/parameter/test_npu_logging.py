@@ -264,6 +264,7 @@ class TestNPULoggingBase(CustomTestCase):
         self.assertIsNotNone(re.search(self.log_request_message_dict[str(log_requests_level)], content))
         # The total number of generated tokens should equal the configured maximum number of generated tokens
         lines = self.get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
+        self.assertTrue(len(lines) > 0)
         finish_message = lines[0]["content"]
         self.assertIn(f"'completion_tokens': {max_new_token}", finish_message)
 
