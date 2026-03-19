@@ -40,7 +40,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
             "16",
             "--enable-dp-attention",
             "--dp",
-            "1",
+            "2",
             "--enable-torch-compile",
             "--torch-compile-max-bs",
             "2",
@@ -127,7 +127,8 @@ if __name__ == "__main__":
         # unittest.main()
         loader = unittest.TestLoader()
         suite = unittest.TestSuite()
-        suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionShortestQueue))
+        # suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionShortestQueue))
         # suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionMinimumTokens))
+        suite.addTests(loader.loadTestsFromTestCase(TestDPAttentionRoundBinLoadBalance))
         runner = unittest.TextTestRunner()
         runner.run(suite)

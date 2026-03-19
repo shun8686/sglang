@@ -40,7 +40,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
             "16",
             "--enable-dp-attention",
             "--dp",
-            "1",
+            "2",
             "--enable-torch-compile",
             "--torch-compile-max-bs",
             "2",
