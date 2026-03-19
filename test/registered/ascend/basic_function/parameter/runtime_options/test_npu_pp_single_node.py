@@ -45,6 +45,8 @@ class TestPPAccuracy(unittest.TestCase):
                 "2",
                 "--chunked-prefill-size",
                 "256",
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -117,6 +119,8 @@ class TestDPAttentionDP2PP2(CustomTestCase):
                 "--enable-dp-attention",
                 "--dp",
                 "2",
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -161,6 +165,8 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
                 "--chunked-prefill-size",
                 "8192",
                 "--enable-multimodal",
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -219,6 +225,8 @@ class TestQwenPPAccuracy(unittest.TestCase):
                 pp_size,
                 "--chunked-prefill-size",
                 256,
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -276,6 +284,8 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
                 pp_size,
                 "--chunked-prefill-size",
                 256,
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -334,6 +344,8 @@ class TestQwenMoePPAccuracy(unittest.TestCase):
                 pp_size,
                 "--chunked-prefill-size",
                 256,
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -394,6 +406,8 @@ class TestQwen35PPAccuracy(unittest.TestCase):
                 pp_size,
                 "--chunked-prefill-size",
                 256,
+                "--attention-backend",
+                "ascend",
             ],
         )
 
@@ -453,6 +467,8 @@ class TestFixedBugs(unittest.TestCase):
             "256",
             "--max-running-requests",
             "2",
+            "--attention-backend",
+            "ascend",
         ]
         run_bench_one_batch_server(
             model,
@@ -489,6 +505,8 @@ class TestGLM41VPPAccuracy(unittest.TestCase):
                 "--enable-multimodal",
                 "--reasoning-parser",
                 "glm45",
+                "--attention-backend",
+                "ascend",
             ],
         )
 

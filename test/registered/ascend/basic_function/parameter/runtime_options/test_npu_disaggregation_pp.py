@@ -48,6 +48,8 @@ class TestDisaggregationPrefillPPAccuracy(PDDisaggregationServerBase):
             "--pp-size",
             "2",
             "--disable-overlap-schedule",
+            "--attention-backend",
+            "ascend",
         ]
         prefill_args += cls.transfer_backend + cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
@@ -67,6 +69,8 @@ class TestDisaggregationPrefillPPAccuracy(PDDisaggregationServerBase):
             "2",
             "--base-gpu-id",
             "4",
+            "--attention-backend",
+            "ascend",
         ]
         decode_args += cls.transfer_backend + cls.rdma_devices
         cls.process_decode = popen_launch_pd_server(
@@ -127,6 +131,8 @@ class TestDisaggregationPrefillPPDynamicChunkAccuracy(PDDisaggregationServerBase
             "2",
             "--disable-overlap-schedule",
             "--enable-dynamic-chunking",
+            "--attention-backend",
+            "ascend",
         ]
         prefill_args += cls.transfer_backend + cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
@@ -146,6 +152,8 @@ class TestDisaggregationPrefillPPDynamicChunkAccuracy(PDDisaggregationServerBase
             "2",
             "--base-gpu-id",
             "4",
+            "--attention-backend",
+            "ascend",
         ]
         decode_args += cls.transfer_backend + cls.rdma_devices
         cls.process_decode = popen_launch_pd_server(
@@ -209,6 +217,8 @@ class TestDisaggregationDecodePPAccuracy(PDDisaggregationServerBase):
             "--pp-max-micro-batch-size",
             "2",
             "--disable-overlap-schedule",
+            "--attention-backend",
+            "ascend",
         ]
         prefill_args += cls.transfer_backend + cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
@@ -230,6 +240,8 @@ class TestDisaggregationDecodePPAccuracy(PDDisaggregationServerBase):
             "2",
             "--base-gpu-id",
             "4",
+            "--attention-backend",
+            "ascend",
         ]
         decode_args += cls.transfer_backend + cls.rdma_devices
         cls.process_decode = popen_launch_pd_server(
