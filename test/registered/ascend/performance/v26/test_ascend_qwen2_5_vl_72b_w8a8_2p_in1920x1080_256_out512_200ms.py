@@ -71,8 +71,8 @@ class TestQwen25Vl72B(TestAscendPerformanceTestCaseBase):
     output_len = 512
     random_range_ratio = 1
     seed = 1000
-    tpot = 164
-    output_token_throughput = 389
+    tpot = 140
+    output_token_throughput = 450
 
     def test_qwen25_vl_72b(self):
         self.run_throughput()
