@@ -12,6 +12,8 @@ DEEPSEEK_V32_EXP_MODEL_PATH = DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH
 
 BASE_ARGS = [
     "--trust-remote-code",
+    "--attention-backend",
+    "ascend",
     "--model-loader-extra-config",
     '{"enable_multithread_load": true, "num_threads": 64}',
 ]
