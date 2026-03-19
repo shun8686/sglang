@@ -37,11 +37,11 @@ utils.MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
 utils.HF_MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
 
 # 覆盖 5 个模型路径常量（使用服务器实际路径）
-utils.QWEN3_32B_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B"
+utils.QWEN3_14B_WEIGHTS_PATH = os.path.join(
+    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-14B"
 )
-utils.QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-W8A8"  # 注意：实际是大写 W8A8
+utils.QWEN3_32B_WEIGHTS_PATH = os.path.join(
+    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B"  # 注意：实际是大写 W8A8
 )
 utils.QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(
     LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Eagle3-Qwen3-32B-zh"  # 注意：实际目录名不同
@@ -57,8 +57,8 @@ utils.LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_0_6B_WEIGHTS_PATH,
-    QWEN3_30B_A3B_W8A8_WEIGHTS_PATH,
+    QWEN3_14B_WEIGHTS_PATH,
+    QWEN3_32B_WEIGHTS_PATH,
     assert_spec_decoding_active,
     send_inference_request,
 )
@@ -79,7 +79,7 @@ _SERVER_ARGS = [
     "--speculative-draft-model-quantization", "unquant",
     # --speculative-algorithm NEXTN: use an independent smaller draft LLM.
     "--speculative-algorithm", "NEXTN",
-    "--speculative-draft-model-path", QWEN3_30B_A3B_W8A8_WEIGHTS_PATH,
+    "--speculative-draft-model-path", QWEN3_14B_WEIGHTS_PATH,
     # --speculative-num-steps 4: draft model runs 4 auto-regressive steps per iteration.
     "--speculative-num-steps", "4",
     # --speculative-eagle-topk 2: retain 2 candidate paths per step.
@@ -109,7 +109,7 @@ class TestNpuNextnBasic(CustomTestCase):
     def setUpClass(cls) -> None:
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
-            QWEN3_30B_A3B_W8A8_WEIGHTS_PATH,
+            QWEN3_32B_WEIGHTS_PATH,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 5,
             other_args=_SERVER_ARGS,
@@ -128,7 +128,7 @@ class TestNpuNextnBasic(CustomTestCase):
           3. Assert avg_spec_accept_length > 1.0 (multi-token acceptance confirmed).
         """
         response = send_inference_request(
-            self.base_url, QWEN3_30B_A3B_W8A8_WEIGHTS_PATH,
+            self.base_url, QWEN3_32B_WEIGHTS_PATH,
             "List 3 programming languages and their primary use cases.",
         )
 

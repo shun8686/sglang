@@ -83,7 +83,7 @@ _SERVER_ARGS = [
     # Allowed values: unquant, modelslim, or any other backend-supported scheme.
     "--speculative-draft-model-quantization", "unquant",
     "--speculative-attention-mode", "decode",
-    "--tp-size", "1",
+    "--tp-size", "4",
     "--mem-fraction-static", "0.7",
     "--disable-cuda-graph",
     "--dtype", "bfloat16",
