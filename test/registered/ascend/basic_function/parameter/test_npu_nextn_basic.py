@@ -55,12 +55,12 @@ _SERVER_ARGS = [
     # 启用 NEXTN 算法（即 MTP）
     "--speculative-algorithm", "EAGLE",
     # 注意：DeepSeek-V3.2 内置 MTP，不需要指定 --speculative-draft-model-path
-    "--speculative-num-steps", "5",          # 推测步数（DeepSeek 推荐值）
+    "--speculative-num-steps", "2",          # 推测步数（DeepSeek 推荐值）
     "--speculative-eagle-topk", "1",         # 分支因子
-    "--speculative-num-draft-tokens", "8",   # 最大验证容量
+    "--speculative-num-draft-tokens", "3",   # 最大验证容量
     "--speculative-attention-mode", "decode",
     "--tp-size", "16",                         # 根据实际卡数调整（8卡示例）
-    "--mem-fraction-static", "0.5",           # KV 缓存内存比例
+    "--mem-fraction-static", "0.85",           # KV 缓存内存比例
     "--disable-cuda-graph",
     "--dtype", "bfloat16",
     # 模型已量化 (W8A8)，无需额外 --quantization 参数
