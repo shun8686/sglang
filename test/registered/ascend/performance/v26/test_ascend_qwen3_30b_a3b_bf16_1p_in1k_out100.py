@@ -1,20 +1,20 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_MODEL_PATH,
+    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-16-npu-a3",
+    suite="nightly-2-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
 
-QWEN3_32B_ENVS = {
+ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -25,7 +25,7 @@ QWEN3_32B_ENVS = {
     "SGLANG_NPU_USE_DEEPGEMM": "1",
 }
 
-QWEN3_32B_OTHER_ARGS = [
+OTHER_ARGS = [
     "--trust-remote-code",
     "--nnodes",
     "1",
@@ -36,48 +36,54 @@ QWEN3_32B_OTHER_ARGS = [
     "--device",
     "npu",
     "--max-running-requests",
-    1,
+    132,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    65536,
+    8300,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
-    QWEN3_32B_EAGLE_MODEL_PATH,
+    QWEN3_A3B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
-    4,
+    3,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    5,
+    4,
     "--tp-size",
-    16,
+    2,
     "--mem-fraction-static",
-    0.72,
+    0.85,
     "--cuda-graph-bs",
     1,
+    12,
+    36,
+    66,
     "--dtype",
     "bfloat16",
 ]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_32B_MODEL_PATH
-    # model = "/home/weights/Qwen/Qwen3-32B"
-    # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B"
-    other_args = QWEN3_32B_OTHER_ARGS
-    envs = QWEN3_32B_ENVS
+    # model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
+    # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
+    # model = QWEN3_30B_A3B_MODEL_PATH
+    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    other_args = OTHER_ARGS
+    envs = ENVS
     dataset_name = "random"
-    max_concurrency = 1
-    num_prompts = 1
-    input_len = 18432
-    output_len = 4096
+    max_concurrency = 162
+    num_prompts = 324
+    input_len = 1000
+    output_len = 100
     random_range_ratio = 1
-    # tpot = 6
+    # E2E < 10s
+    # tpot = ?
+    # output_token_throughput = 1040
     tpot = 100
     output_token_throughput = 0
 
