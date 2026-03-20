@@ -101,11 +101,6 @@ class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalanc
 class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "total_tokens"
 
-class _TestDPAttentionShortestQueue(TestDPAttentionRoundBinLoadBalance):
-    mode = "shortest_queue"
-
-class _TestDPAttentionMinimumTokens(TestDPAttentionRoundBinLoadBalance):
-    mode = "minimum_tokens"
 
 
 if __name__ == "__main__":
@@ -127,8 +122,6 @@ if __name__ == "__main__":
         # unittest.main()
         loader = unittest.TestLoader()
         suite = unittest.TestSuite()
-        # suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionShortestQueue))
-        # suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionMinimumTokens))
-        suite.addTests(loader.loadTestsFromTestCase(TestDPAttentionRoundBinLoadBalance))
+        suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionFollowBootstrapRoomLoadBalance))
         runner = unittest.TextTestRunner()
         runner.run(suite)
