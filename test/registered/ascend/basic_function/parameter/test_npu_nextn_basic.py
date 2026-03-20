@@ -78,7 +78,7 @@ _SERVER_ARGS = [
     "--disable-radix-cache",
     "--speculative-draft-model-quantization", "unquant",
     # --speculative-algorithm NEXTN: use an independent smaller draft LLM.
-    "--speculative-algorithm", "NEXTN",
+    "--speculative-algorithm", "STANDALONE",
     "--speculative-draft-model-path", QWEN3_14B_WEIGHTS_PATH,
     # --speculative-num-steps 4: draft model runs 4 auto-regressive steps per iteration.
     "--speculative-num-steps", "4",
