@@ -81,8 +81,8 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     dataset_name = "random"
     max_concurrency = 16
     num_prompts = 16
-    input_len = 1024
-    output_len = 300
+    input_len = 6144
+    output_len = 1500
     random_range_ratio = 1
     tpot = 10
     output_token_throughput = 9999
