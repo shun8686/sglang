@@ -1,7 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    # QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_30B_A3B_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -23,6 +24,8 @@ ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_NPU_USE_DEEPGEMM": "1",
+    "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
+    "SGLANG_CONTEXT_LENGTH": "262144",
 }
 
 OTHER_ARGS = [
@@ -68,14 +71,16 @@ OTHER_ARGS = [
     66,
     "--dtype",
     "bfloat16",
+    "--context-length",
+    262144,
 ]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
     # model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
     # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
-    # model = QWEN3_30B_A3B_MODEL_PATH
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = QWEN3_30B_A3B_MODEL_PATH
+    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"

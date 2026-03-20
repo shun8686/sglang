@@ -16,7 +16,7 @@ MODEL_CONFIG = {
         "SGLANG_NPU_USE_MLAPO": "1",
         "SGLANG_USE_FIA_NZ": "1",
         "ENABLE_MOE_NZ": "1",
-        "HCCL_BUFFSIZE": "1536",
+        "HCCL_BUFFSIZE": "2600",
         "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
         "TASK_QUEUE_ENABLE": "2",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
@@ -31,9 +31,8 @@ MODEL_CONFIG = {
         "ENABLE_MOE_NZ": "1",
         "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
         "SGLANG_ENABLE_SPEC_V2": "1",
-        "HCCL_BUFFSIZE": "720",
-        "SGLANG_DP_ROUND_ROBIN": "1",
-        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "96",
+        "HCCL_BUFFSIZE": "900",
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "112",
         "TASK_QUEUE_ENABLE": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
@@ -48,18 +47,18 @@ MODEL_CONFIG = {
         "--tp-size",
         16,
         "--mem-fraction-static",
-        0.6,
+        0.7,
         "--quantization",
         "modelslim",
         "--max-running-requests",
-        8,
+        32,
         "--context-length",
         8192,
         "--disable-radix-cache",
         "--chunked-prefill-size",
-        32768,
+        -1,
         "--max-prefill-tokens",
-        28680,
+        10240,
         "--moe-a2a-backend",
         "deepep",
         "--deepep-mode",
@@ -73,7 +72,7 @@ MODEL_CONFIG = {
         "--speculative-num-draft-tokens",
         2,
         "--dp-size",
-        2,
+        8,
         "--enable-dp-attention",
         "--disable-shared-experts-fusion",
         "--dtype",
@@ -91,7 +90,7 @@ MODEL_CONFIG = {
         "--mem-fraction-static",
         0.8,
         "--max-running-requests",
-        384,
+        448,
         "--quantization",
         "modelslim",
         "--moe-a2a-backend",
@@ -101,6 +100,9 @@ MODEL_CONFIG = {
         "low_latency",
         "--enable-dp-lm-head",
         "--cuda-graph-bs",
+        2,
+        4,
+        6,
         8,
         10,
         12,
@@ -110,6 +112,8 @@ MODEL_CONFIG = {
         20,
         22,
         24,
+        26,
+        28,
         "--watchdog-timeout",
         9000,
         "--context-length",
@@ -138,15 +142,15 @@ MODEL_CONFIG = {
 class TestDeepSeekR1W4A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
-    request_rate = 8
-    max_concurrency = 400
+    request_rate = 32
+    max_concurrency = 448
     num_prompts = int(max_concurrency) * 8
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 44.2
+    tpot = 48.3
     # T：143@50ms.  800I A3: 2*T
-    output_token_throughput = 7812
+    output_token_throughput = 8956
 
     def test_throughput(self):
         self.run_throughput()
