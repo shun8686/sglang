@@ -9,7 +9,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-4-npu-a3",
+    suite="nightly-16-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
@@ -35,46 +35,31 @@ QWEN3_32B_OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    # "--quantization",
-    # "modelslim",
     "--max-running-requests",
-    101,
+    1,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    35000,
+    65536,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
     QWEN3_32B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
-    3,
+    4,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    4,
+    5,
     "--tp-size",
     16,
     "--mem-fraction-static",
-    0.843,
+    0.72,
     "--cuda-graph-bs",
-    16,
-    32,
-    64,
-    72,
-    88,
-    90,
-    92,
-    94,
-    96,
-    97,
-    98,
-    99,
-    100,
-    101,
+    1,
     "--dtype",
     "bfloat16",
 ]
@@ -87,7 +72,7 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 162
+    max_concurrency = 1
     num_prompts = 1
     input_len = 18432
     output_len = 4096

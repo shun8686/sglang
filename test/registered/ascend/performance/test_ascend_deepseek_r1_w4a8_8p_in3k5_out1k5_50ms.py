@@ -14,20 +14,22 @@ register_npu_ci(
 )
 
 MODEL_ENVS = {
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "36",
-    "HCCL_BUFFSIZE": "1600",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "56",
+    "HCCL_BUFFSIZE": "1200",
+    "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
+    "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "SGLANG_NPU_USE_MLAPO": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_USE_FIA_NZ": "1",
-    "ENABLE_MOE_NZ": "1",
 }
 
 MODEL_OTHER_ARGS = [
@@ -43,30 +45,28 @@ MODEL_OTHER_ARGS = [
     "--watchdog-timeout",
     "9000",
     "--cuda-graph-bs",
+    4,
     8,
-    16,
-    24,
-    28,
-    32,
-    36,
+    12,
+    14,
     "--mem-fraction-static",
-    0.71,
+    0.77,
     "--max-running-requests",
-    144,
+    244,
     "--context-length",
     8188,
     "--disable-radix-cache",
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    9000,
+    3000,
     "--moe-a2a-backend",
     "deepep",
     "--deepep-mode",
     "auto",
     "--enable-dp-attention",
     "--dp-size",
-    4,
+    16,
     "--enable-dp-lm-head",
     "--speculative-algorithm",
     "NEXTN",
@@ -86,14 +86,14 @@ class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    max_concurrency = 144
-    num_prompts = int(max_concurrency) * 4
+    max_concurrency = 244
+    num_prompts = 896
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 44.9
+    tpot = 50.36
     # T: 146@50ms. 800I A3：1.1*T
-    output_token_throughput = 2761
+    output_token_throughput = 3547
 
     def test_throughput(self):
         self.run_throughput()

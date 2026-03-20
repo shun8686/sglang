@@ -14,13 +14,14 @@ register_npu_ci(
 )
 
 MODEL_ENVS = {
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "80",
     "HCCL_BUFFSIZE": "1600",
     "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
     "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
@@ -29,7 +30,6 @@ MODEL_ENVS = {
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_USE_FIA_NZ": "1",
-    "ENABLE_MOE_NZ": "1",
 }
 
 MODEL_OTHER_ARGS = [
@@ -48,10 +48,11 @@ MODEL_OTHER_ARGS = [
     4,
     8,
     16,
+    20,
     "--mem-fraction-static",
-    0.74,
+    0.755,
     "--max-running-requests",
-    256,
+    320,
     "--disable-radix-cache",
     "--chunked-prefill-size",
     "-1",
@@ -83,14 +84,14 @@ class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    max_concurrency = 256
+    max_concurrency = 320
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 44.7
+    tpot = 50.26
     # T: 143@50ms. 800I A3: 1.8*T
-    output_token_throughput = 4500
+    output_token_throughput = 5696
 
     def test_throughput(self):
         self.run_throughput()

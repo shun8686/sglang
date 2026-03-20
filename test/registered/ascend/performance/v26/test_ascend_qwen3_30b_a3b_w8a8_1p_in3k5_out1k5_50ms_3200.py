@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_W8A8_MODEL_PATH,
+    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -49,7 +49,7 @@ OTHER_ARGS = [
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
-    QWEN3_32B_EAGLE_MODEL_PATH,
+    QWEN3_A3B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
     3,
     "--speculative-eagle-topk",
@@ -59,32 +59,42 @@ OTHER_ARGS = [
     "--tp-size",
     2,
     "--mem-fraction-static",
-    0.85,
+    0.87,
     "--cuda-graph-bs",
     1,
-    12,
-    36,
-    66,
+    5,
+    15,
+    40,
+    70,
+    100,
+    120,
+    130,
+    140,
+    146,
+    150,
+    154,
+    156,
+    158,
+    160,
+    162,
     "--dtype",
     "bfloat16",
 ]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    # model = QWEN3_32B_W8A8_MODEL_PATH
-    # model = "/home/weights/Qwen/Qwen3-32B"
-    model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-W8A8"
+    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 162
-    num_prompts = 324
+    max_concurrency = 320
+    num_prompts = 320
     input_len = 3584
     output_len = 1536
     random_range_ratio = 1
     # tpot = 50
+    # output_token_throughput = 3200
     tpot = 100
-    # output_token_throughput = 1100
     output_token_throughput = 0
 
     def test_qwen3_32b(self):
