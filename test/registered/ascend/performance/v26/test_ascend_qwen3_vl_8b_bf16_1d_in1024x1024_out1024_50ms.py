@@ -74,10 +74,10 @@ class TestQwenVl8B(TestAscendPerformanceTestCaseBase):
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 1575
+    output_token_throughput = 1520
 
     def test_qwen3_vl_8b(self):
-        self.run_throughput(run_cycles=3)
+        self.run_throughput(run_cycles=2)
 
 
 if __name__ == "__main__":

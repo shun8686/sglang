@@ -57,7 +57,7 @@ QWEN3_32B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     4,
     "--tp-size",
-    4,
+    2,
     "--mem-fraction-static",
     0.845,
     "--cuda-graph-bs",
@@ -87,8 +87,8 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 162
-    num_prompts = 324
+    max_concurrency = 128
+    num_prompts = 256
     input_len = 3584
     output_len = 1536
     random_range_ratio = 1

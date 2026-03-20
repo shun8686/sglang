@@ -48,6 +48,9 @@ QWEN3_14B_W8A8_MODEL_PATH = (
 QWEN3_14B_EAGLE_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/AngelSlim/Qwen3-14B_eagle3"
 )
+QWEN3_30B_A3B_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
+)
 QWEN3_30B_A3B_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
 )
@@ -329,11 +332,15 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 logger.info(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
 
+        other_args = list(cls.other_args)
+        if not "--model-type" in other_args:
+            other_args += ["--model-type", "llm"]
+
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=cls.timeout,
-            other_args=cls.other_args,
+            other_args=other_args,
             env=env,
         )
 
