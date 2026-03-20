@@ -65,19 +65,19 @@ class TestQwenVl8B(TestAscendPerformanceTestCaseBase):
     envs = QWEN3_VL_8B_ENVS
     backend = "sglang-oai-chat"
     dataset_name = "image"
+    dataset_path = None
     image_resolution = "1024x1024"
     image_count = 1
-    request_rate = 30
     max_concurrency = 96
     num_prompts = 384
-    input_len = 0
+    input_len = 1
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
     output_token_throughput = 1575
 
     def test_qwen3_vl_8b(self):
-        self.run_throughput()
+        self.run_throughput(run_cycles=3)
 
 
 if __name__ == "__main__":

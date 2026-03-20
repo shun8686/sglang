@@ -1,10 +1,10 @@
 cp -r /root/.cache/.cache/opencv /tmp
 cd /tmp/opencv
 
-echo "\n======Begin to install opencv======"
+echo "\n====== [Begin] 临时规避：安装OpenGL ======"
 ls *.deb | xargs dpkg -i
 
 dpkg --configure -a
 
-echo -e "\n===== 最终安装状态验证 ====="
+echo -e "\n====== [End] 临时规避：安装OpenGL ======"
 dpkg -l libgl1-mesa-dri libgl1-mesa-glx libgl1 libglx0 | grep -E "ii|Name"
