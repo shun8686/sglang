@@ -78,6 +78,10 @@ class TestNpuNextnDeepSeek(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.base_url = DEFAULT_URL_FOR_TEST
+        os.environ.update({
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+        })
         cls.process = popen_launch_server(
             DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH,
             cls.base_url,
