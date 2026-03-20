@@ -33,8 +33,18 @@ class TestAscendDeepseekV31(CustomTestCase):
             "output_throughput": 30,
         },
     }
-    extra_args = ["--mem-fraction-static", 0.9, ]
-    envs = {}
+    extra_args = ["--mem-fraction-static", 0.77, ]
+    envs = {
+        "SGLANG_SCHEDULER_DECREASE_PREFILE_IDLE": "1",
+        "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
+
+        "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "80",
+        "HCCL_BUFFSIZE": "1600",
+        "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
+        "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
+
+
+    }
     num_shots = 5
 
     @classmethod
