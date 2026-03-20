@@ -329,11 +329,15 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 logger.info(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
 
+        other_args = list(cls.other_args)
+        if not "--model-type" in other_args:
+            other_args += ["--model-type", "llm"]
+
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=cls.timeout,
-            other_args=cls.other_args,
+            other_args=other_args,
             env=env,
         )
 
