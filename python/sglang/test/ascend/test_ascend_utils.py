@@ -795,7 +795,7 @@ def execute_serving_performance_test(
 
     return {"mean_ttft": mean_ttft, "mean_tpot": mean_tpot, "total_tps": total_tps}
 
-def send_inference_request(base_url: str, model: str, prompt: str, max_tokens: int =1024) -> dict:
+def send_inference_request(base_url: str, model: str, prompt: str, max_tokens: int =512) -> dict:
     """
     POST a single-turn chat completion request to a running SGLang server.
 
@@ -818,7 +818,7 @@ def send_inference_request(base_url: str, model: str, prompt: str, max_tokens: i
         "max_tokens": max_tokens,
         "temperature": 0,
     }
-    response = _requests.post(url, json=payload, timeout=60)
+    response = _requests.post(url, json=payload, timeout=300)
     response.raise_for_status()
     return response.json()
 
