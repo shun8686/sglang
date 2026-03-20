@@ -59,7 +59,7 @@ QWEN3_32B_OTHER_ARGS = [
     "--tp-size",
     4,
     "--mem-fraction-static",
-    0.843,
+    0.845,
     "--cuda-graph-bs",
     16,
     32,
