@@ -1,7 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    # QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_30B_A3B_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -74,8 +75,8 @@ OTHER_ARGS = [
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
     # model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
     # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
-    # model = QWEN3_30B_A3B_MODEL_PATH
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = QWEN3_30B_A3B_MODEL_PATH
+    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
