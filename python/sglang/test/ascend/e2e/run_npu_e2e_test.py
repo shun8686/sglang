@@ -632,8 +632,14 @@ def run_npu_e2e_test_case(
         )
     finally:
         if os.path.exists(kube_yaml_file):
-            delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
-            os.remove(kube_yaml_file)
+            # Don't delete pod when trouble_shotting is enabled
+            if not trouble_shotting:
+                delete_pod(yaml_file=kube_yaml_file, namespace=kube_name_space)
+                os.remove(kube_yaml_file)
+            else:
+                logger.info(
+                    f"Trouble shooting mode enabled, keeping pod {final_kube_job_name} alive"
+                )
 
 
 if __name__ == "__main__":

@@ -77,8 +77,9 @@ mkdir -p ${log_path}
 echo "Log path: ${log_path}"
 
 if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
+    echo "TROUBLE_SHOTTING=true, the pod will keep alive for four hour."
     ( python3 -u ${test_case} 2>&1 || true ) | tee -a ${log_path}/${tc_name}.log
-    sleep 3600
+    sleep 14400
 else
     python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
 fi

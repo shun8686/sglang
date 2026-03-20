@@ -67,7 +67,7 @@ QWEN3_235B_OTHER_ARGS = [
 
 
 class TestQwen235B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_235B__MODEL_PATH
+    model = QWEN3_235B_MODEL_PATH
     other_args = QWEN3_235B_OTHER_ARGS
     envs = QWEN3_235B_ENVS
     dataset_name = "random"
