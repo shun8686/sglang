@@ -1,27 +1,22 @@
-import os
 import random
-import tempfile
 import unittest
 import time
-from time import sleep
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
 import requests
-from sglang.bench_serving import get_tokenizer
 
 from sglang.srt.utils import kill_process_tree
 # from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
-from sglang.test.server_fixtures.disaggregation_fixture import PDDisaggregationServerBase
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     is_in_ci,
     popen_launch_server,
-    popen_with_error_check, popen_launch_pd_server,
+    popen_with_error_check,
 )
 
 register_npu_ci(est_time=500, suite="nightly-16-npu-a3", nightly=True)
@@ -41,7 +36,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model_path = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
-        cls.model_path = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
+        cls.model_path =  "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
         # cls.model_path = "/home/weights/DeepSeek-R1-0528-W8A8"
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
@@ -77,7 +72,6 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mgsm_en(self):
-        sleep(600)
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model_path,
@@ -100,100 +94,83 @@ class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
 
 
 class _TestDPAttentionFollowBootstrapRoomLoadBalance(
-    PDDisaggregationServerBase
+    TestDPAttentionRoundBinLoadBalance
 ):
     mode = "follow_bootstrap_room"
 
     @classmethod
     def setUpClass(cls):
-        super().setUpClass()
-
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-8B"
-
-        cls.tokenizer = get_tokenizer(cls.model)
-        cls.temp_dir = tempfile.mkdtemp()
-        cls.start_prefill()
-        cls.start_decode()
-
-        # Block until both
-        cls.wait_server_ready(cls.prefill_url + "/health")
-        cls.wait_server_ready(cls.decode_url + "/health")
-
-        cls.launch_lb()
-
-    @classmethod
-    def start_prefill(cls):
-        prefill_args = [
+        cls.model_path = "/home/weights/DeepSeek-R1-0528-W8A8"
+        cls.worker_url = "http://127.0.0.1:22222"
+        other_args = [
             "--trust-remote-code",
-            "--attention-backend",
-            "ascend",
-            "--device",
-            "npu",
-            "--disaggregation-transfer-backend",
-            "ascend",
-            "--disaggregation-mode",
-            "prefill",
             "--tp",
-            "2",
+            "16",
             "--enable-dp-attention",
             "--dp",
             "2",
-            "--enable-piecewise-cuda-graph",
+            "--enable-torch-compile",
+            "--torch-compile-max-bs",
+            "2",
             "--load-balance-method",
             cls.mode,
-
-        ]
-        prefill_args += cls.transfer_backend + cls.rdma_devices
-        cls.process_prefill = popen_launch_pd_server(
-            cls.model,
-            cls.prefill_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=prefill_args,
-        )
-
-    @classmethod
-    def start_decode(cls):
-        decode_args = [
-            "--trust-remote-code",
             "--attention-backend",
             "ascend",
-            "--device",
-            "npu",
-            "--disaggregation-transfer-backend",
-            "ascend",
-            "--disaggregation-mode",
-            "decode",
-            "--tp",
-            "2",
-            "--enable-dp-attention",
-            "--dp",
-            "2",
-            "--load-balance-method",
-            cls.mode,
-
-            "--base-gpu-id",
-            "8",
+            "--disable-cuda-graph",
+            "--quantization",
+            "modelslim",
+            "--mem-fraction-static",
+            "0.75",
         ]
-        decode_args += cls.transfer_backend + cls.rdma_devices
-        cls.process_decode = popen_launch_pd_server(
+
+        cls.process = popen_launch_server(
+            cls.model_path,
+            cls.worker_url,
+            timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+        cls.wait_server_ready(cls.worker_url + "/health")
+
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(cls.base_url)
+
+        router_command = [
+            "python3",
+            "-m",
+            "sglang_router.launch_router",
+            "--worker-urls",
+            cls.worker_url,
+            "--host",
+            cls.url.hostname,
+            "--port",
+            str(cls.url.port),
+            "--model-path",
             cls.model,
-            cls.decode_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=decode_args,
-        )
+        ]
+        cls.router_process = popen_with_error_check(router_command)
+        cls.wait_server_ready(cls.base_url + "/health")
 
-    def test_mgsm_en(self):
-        sleep(600)
-        args = SimpleNamespace(
-            base_url=self.lb_url,
-            model=self.model,
-            eval_name="mgsm_en",
-            num_examples=10,
-            num_threads=1024,
-        )
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.router_process.pid)
+        kill_process_tree(cls.worker_process.pid)
 
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+    @classmethod
+    def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
+        start_time = time.perf_counter()
+        while True:
+            try:
+                response = requests.get(url)
+                if response.status_code == 200:
+                    return
+            except Exception:
+                pass
+
+            if time.perf_counter() - start_time > timeout:
+                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
+
+            time.sleep(5)
 
 
 class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
