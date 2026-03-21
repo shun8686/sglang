@@ -125,6 +125,10 @@ class _TestDPAttentionFollowBootstrapRoomLoadBalance(
     def start_prefill(cls):
         prefill_args = [
             "--trust-remote-code",
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
             "--disaggregation-mode",
             "prefill",
             "--tp",
@@ -150,6 +154,10 @@ class _TestDPAttentionFollowBootstrapRoomLoadBalance(
     def start_decode(cls):
         decode_args = [
             "--trust-remote-code",
+            "--attention-backend",
+            "ascend",
+            "--device",
+            "npu",
             "--disaggregation-mode",
             "decode",
             "--tp",
