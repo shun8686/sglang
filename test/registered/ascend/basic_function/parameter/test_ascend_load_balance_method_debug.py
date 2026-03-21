@@ -100,7 +100,7 @@ class _TestDPAttentionFollowBootstrapRoomLoadBalance(
 
     @classmethod
     def setUpClass(cls):
-        cls.model_path = "/home/weights/DeepSeek-R1-0528-W8A8"
+        cls.model_path = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
         cls.worker_url = "http://127.0.0.1:22222"
         other_args = [
             "--trust-remote-code",
