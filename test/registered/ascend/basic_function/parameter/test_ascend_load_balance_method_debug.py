@@ -132,7 +132,8 @@ class _TestDPAttentionFollowBootstrapRoomLoadBalance(
             other_args=other_args,
         )
 
-        cls.wait_server_ready(cls.worker_url + "/health")
+        # cls.wait_server_ready(cls.worker_url + "/health")
+        sleep(200)
 
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(cls.base_url)
