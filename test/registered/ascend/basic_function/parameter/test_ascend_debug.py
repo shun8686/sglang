@@ -1,93 +1,63 @@
-import os
-import unittest
+# 单机混布
+# cpu高性能
+echo performance | tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor
+sysctl -w vm.swappiness=0
+sysctl -w kernel.numa_balancing=0
+sysctl -w kernel.sched_migration_cost_ns=50000
+# 绑核
+export SGLANG_SET_CPU_AFFINITY=1
+# 设置PYTHONPATH
+cd /home/l00890003/codes/sglang-npu-nn-xx
+export PYTHONPATH=${PWD}/python:$PYTHONPATH
+unset https_proxy
+unset http_proxy
+unset HTTPS_PROXY
+unset HTTP_PROXY
+unset ASCEND_LAUNCH_BLOCKING
+source /usr/local/Ascend/ascend-toolkit/set_env.sh
+source /usr/local/Ascend/nnal/atb/set_env.sh
+export PATH=/usr/local/Ascend/8.5.0/compiler/bishengir/bin:$PATH
+# 内存碎片
+export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
+export STREAMS_PER_DEVICE=32
+export SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE=1
+export SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES=200
+# 网卡
+export HCCL_SOCKET_IFNAME=lo
+export GLOO_SOCKET_IFNAME=lo
+# 通信buffer
+export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=80
+export HCCL_BUFFSIZE=1600
+export DEEPEP_NORMAL_LONG_SEQ_ROUND=10
+export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 
-import requests
+# mtp quant path
+MODEL_PATH=/home/weights/deepseekr1_w4a8_pertoken
+export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
+export SGLANG_NPU_USE_MLAPO=1
+export SGLANG_ENABLE_SPEC_V2=1
+export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
+#export SGLANG_NPU_USE_MULTI_STREAM=1
 
-from types import SimpleNamespace
+export SGLANG_USE_FIA_NZ=1
+#export ENABLE_MOE_NZ=1
+# export SGLANG_NPU_PROFILING=1
+# export SGLANG_NPU_PROFILING_BS=20
+python3 -m sglang.launch_server --model-path ${MODEL_PATH} \
+--tp 16 \
+--trust-remote-code \
+--attention-backend ascend \
+--device npu \
+--quantization modelslim \
+--watchdog-timeout 9000 \
+--host 127.0.0.1 --port 6699 \
+--cuda-graph-bs 4 8 16 20 \
+--mem-fraction-static 0.755 \
+--max-running-requests 320 \
+--disable-radix-cache --chunked-prefill-size -1 --max-prefill-tokens 1500 \
+--moe-a2a-backend deepep --deepep-mode auto \
+--enable-dp-attention --dp-size 16 --enable-dp-lm-head \
+--speculative-algorithm NEXTN --speculative-num-steps 3 --speculative-eagle-topk 1 --speculative-num-draft-tokens 4 \
+--dtype bfloat16
 
-from sglang.test.run_eval import run_eval
-
-from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
-    CustomTestCase,
-    popen_launch_server,
-)
-
-register_npu_ci(est_time=50, suite="nightly-1-npu-a3", nightly=True)
-
-
-class TestSkipServerWarmup(CustomTestCase):
-    """
-    Testcase：Verify that if --skip-server-warmup parameter set, skip warmup.
-
-    [Test Category] Parameter
-    [Test Target] --skip-server-warmup
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        # cls.model_path = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        cls.model_path = "/home/weights/Qwen/Qwen3-0.6B"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = [
-            "--skip-server-warmup",
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-        ]
-
-        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
-        cls.process = popen_launch_server(
-            cls.model_path,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        cls.out_log_file.close()
-        cls.err_log_file.close()
-        os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
-
-    # def test_skip_server_warmup(self):
-    #     response = requests.post(
-    #         f"{self.base_url}/generate",
-    #         json={
-    #             "text": "The capital of France is",
-    #             "sampling_params": {"temperature": 0, "max_new_tokens": 32},
-    #         },
-    #     )
-    #     # Verify that inference is correct when warming up is skipped
-    #     self.assertEqual(response.status_code, 200)
-    #     self.assertIn("Paris", response.text)
-    #     self.out_log_file.seek(0)
-    #
-    #     # warm up will send a GET /get_model_info request and a generate request to warm up server.
-    #     content = self.out_log_file.read()
-    #     self.assertTrue(len(content) > 0)
-    #     self.assertNotIn("GET /model_info HTTP/1.1", content)
-
-    def test_mgsm_en(self):
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model_path,
-            eval_name="mgsm_en",
-            num_examples=10,
-            num_threads=1024,
-        )
-
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.01)
-
-
-if __name__ == "__main__":
-    unittest.main()
+exit 1
