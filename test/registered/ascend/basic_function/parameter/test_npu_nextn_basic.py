@@ -33,6 +33,7 @@ utils.DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
 # ======================================
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_ascend_utils import (
     DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH,
     assert_spec_decoding_active,
@@ -45,6 +46,8 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
+
 _ASCEND_BACKEND = "ascend"
 
 # DeepSeek-V3.2 推荐参数（根据 SGLang 官方建议）
@@ -53,13 +56,13 @@ _SERVER_ARGS = [
     "--attention-backend", _ASCEND_BACKEND,
     "--disable-radix-cache",
     # 启用 NEXTN 算法（即 MTP）
-    "--speculative-algorithm", "NEXTN",# or EAGLE
+    "--speculative-algorithm", "EAGLE",# or EAGLE
     # 注意：DeepSeek-V3.2 内置 MTP，不需要指定 --speculative-draft-model-path
-    "--speculative-num-steps", "2",  # or 3        # 推测步数（DeepSeek 推荐值）
+    "--speculative-num-steps", "3",  # or 3        # 推测步数（DeepSeek 推荐值）
     "--speculative-eagle-topk", "1",         # 分支因子
-    "--speculative-num-draft-tokens", "3", #or 5   # 最大验证容量
+    "--speculative-num-draft-tokens", "5", #or 5   # 最大验证容量
     "--speculative-attention-mode", "decode",
-    "--tp-size", "16",                         # 根据实际卡数调整（8卡示例）
+    "--tp-size", "8",                         # 根据实际卡数调整（8卡示例）
     "--mem-fraction-static", "0.9",  #0.85         # KV 缓存内存比例
     "--disable-cuda-graph",
     "--dtype", "bfloat16",

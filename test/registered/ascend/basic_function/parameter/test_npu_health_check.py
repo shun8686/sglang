@@ -44,7 +44,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=50, suite="nightly-1-npu-a3", nightly=False)
+register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestHealthCheckEndpoint(CustomTestCase):
