@@ -100,18 +100,20 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
             expected_buckets: 期望的桶值列表
         """
         metrics_lines = self._get_metrics_lines()
+        # 定义目标特征字符串（指标名 + _bucket{）
+        target_metric_feature = f"{metric_name}_bucket{{"
 
         # 筛选所有包含目标指标桶配置的行（关键修正：用in替代startswith）
         target_lines = [
             line for line in metrics_lines
-            if metric_name in line and 'le="' in line
+            if target_metric_feature in line and 'le="' in line
         ]
 
         # 验证至少找到一行目标行
         self.assertNotEqual(
             len(target_lines), 0,
             f"No lines found for metric {metric_name} in /metrics response. "
-            f"Checked feature: {metric_name}"
+            f"Checked feature: {target_metric_feature}"
         )
 
         # 提取所有le标签的值
@@ -137,13 +139,13 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
         """Test bucket parameters take effect accurately"""
         # 验证forward passes桶配置
         self._check_bucket_in_metric_line(
-            "prefill_delayer_forward_passes_bucket",
+            "prefill_delayer_forward_passes",
             self.forward_passes_buckets
         )
 
         # 验证wait seconds桶配置
         self._check_bucket_in_metric_line(
-            "prefill_delayer_wait_seconds_bucket",
+            "prefill_delayer_wait_seconds",
 
             self.wait_seconds_buckets
         )
