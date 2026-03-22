@@ -221,6 +221,8 @@ class TestPrefillDelayerThroughputOnlineServing(CustomTestCase):
                 # Not really needed, only to test support non-FCFS algorithms
                 "--schedule-policy",
                 "lpm",
+                "--attention-backend",
+                "ascend",
             ],
             other_benchmark_args=dict(
                 num_prompts=500,
@@ -237,7 +239,7 @@ class TestPrefillDelayerThroughputOfflineGen(CustomTestCase):
         _run_throughput_comparison(
             self,
             test_name="offline_gen",
-            other_launch_args=["--max-total-tokens", "200000"],
+            other_launch_args=["--max-total-tokens", "200000", "--attention-backend", "ascend",],
             other_benchmark_args=dict(
                 num_prompts=800,
                 random_input_len=30000,
@@ -351,7 +353,7 @@ class TestPrefillDelayerTokenUsageLowWatermark(CustomTestCase):
         self._run(token_usage_low_watermark=None)
 
     def _run(self, token_usage_low_watermark):
-        model = "Qwen/Qwen3-0.6B"
+        model = QWEN3_0_6B_WEIGHTS_PATH
         base_url = DEFAULT_URL_FOR_TEST
         world_size = int(WORLD_SIZE)
 
