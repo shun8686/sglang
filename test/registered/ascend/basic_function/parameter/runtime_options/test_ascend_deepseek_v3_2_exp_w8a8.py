@@ -32,6 +32,10 @@ class TestDeepSeekV32(GSM8KAscendMixin, CustomTestCase):
         "--disable-radix-cache",
         "--attn-cp-size",
         "4",
+        "--dp-size",
+        "2",
+        "--enable-dp-attention",
+        "--enable-nsa-prefill-context-parallel",
     ]
 
 
