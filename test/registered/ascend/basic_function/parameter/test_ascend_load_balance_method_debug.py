@@ -1,208 +1,145 @@
-import random
+import os
 import unittest
-import time
-from types import SimpleNamespace
-from urllib.parse import urlparse
-
 import requests
+import logging
 
-from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
+from sglang.test.test_disaggregation_utils import TestDisaggregationBase
+# from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    CustomTestCase,
-    is_in_ci,
-    popen_launch_server,
-    popen_with_error_check,
+    popen_launch_pd_server,
 )
 
-register_npu_ci(est_time=500, suite="nightly-16-npu-a3", nightly=True)
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[logging.StreamHandler()]
+)
+logger = logging.getLogger(__name__)
+
+base_port = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0")[0])
+BASE_PORT_FOR_ASCEND_MF = 20000 + base_port * 1000 + 66
+os.environ["ASCEND_MF_STORE_URL"] = f"tcp://127.0.0.1:{BASE_PORT_FOR_ASCEND_MF}"
+
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
-class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
-    """
-    Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
-    follow_bootstrap_room, total_requests, total_tokens
+class TestDisaggregationDecodeTp(TestDisaggregationBase):
+    """Testcase：Verify the correctness of --disaggregation-decode-tp=2 and Prefill/Decode disaggregated services availability on Ascend NPU backend.
 
     [Test Category] Parameter
-    [Test Target] --load-balance-method
+    [Test Target] --disaggregation-decode-tp; --disaggregation-mode; --disaggregation-transfer-backend
     """
 
-    mode = "round_robin"
-
     @classmethod
     def setUpClass(cls):
-        # cls.model_path = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
-        cls.model_path =  "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
-        # cls.model_path = "/home/weights/DeepSeek-R1-0528-W8A8"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = [
-            "--trust-remote-code",
-            "--tp",
-            "16",
-            "--enable-dp-attention",
-            "--dp",
-            "2",
-            "--enable-torch-compile",
-            "--torch-compile-max-bs",
-            "2",
-            "--load-balance-method",
-            cls.mode,
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--quantization",
-            "modelslim",
-            "--mem-fraction-static",
-            "0.75",
-        ]
+        """Test class initialization: Launch Prefill/Decode disaggregated services and load balancer, then wait for services to be ready"""
+        logger.info(os.environ.get("ASCEND_RT_VISIBLE_DEVICES"))
+        super().setUpClass()
+        cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
 
-        cls.process = popen_launch_server(
-            cls.model_path,
-            cls.base_url,
-            timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
+        cls.env = os.environ.copy()
+
+        # Non blocking start servers
+        cls.start_prefill()
+        cls.start_decode()
+
+        # Block until both
+        cls.wait_server_ready(cls.prefill_url + "/health")
+        cls.wait_server_ready(cls.decode_url + "/health")
+
+        cls.launch_lb()
+
+    @classmethod
+    def start_prefill(cls):
+        # Launch the Prefill service with --disaggregation-decode-tp=2 configuration for Ascend NPU
+        prefill_args = (
+            [
+                "--disaggregation-mode",
+                "prefill",
+                "--disaggregation-decode-tp",
+                "2",
+                "--disaggregation-transfer-backend",
+                "ascend",
+                "--disable-cuda-graph",
+                "--attention-backend",
+                "ascend",
+                "--mem-fraction-static",
+                0.8,
+            ]
+        )
+        env = os.environ.copy()
+
+        cls.process_prefill = popen_launch_pd_server(
+            cls.model,
+            cls.prefill_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=prefill_args,
+            env=env,
         )
 
     @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def test_mgsm_en(self):
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model_path,
-            eval_name="mgsm_en",
-            num_examples=10,
-            num_threads=1024,
+    def start_decode(cls):
+        # Launch the Decode service with specified configuration for Ascend NPU (disaggregated architecture)
+        ascend_devices = os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0,1,2,3")
+        os.environ["ASCEND_RT_VISIBLE_DEVICES"] = ascend_devices
+        base_gpu_id = ascend_devices.split(",")[2] if len(ascend_devices.split(",")) >= 3 else "2"
+        decode_args = (
+            [
+                "--disaggregation-mode",
+                "decode",
+                "--base-gpu-id",
+                base_gpu_id,
+                "--disaggregation-transfer-backend",
+                "ascend",
+                "--disable-cuda-graph",
+                "--attention-backend",
+                "ascend",
+                "--mem-fraction-static",
+                0.8,
+            ]
+        )
+        env = os.environ.copy()
+        cls.process_decode = popen_launch_pd_server(
+            cls.model,
+            cls.decode_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=decode_args,
+            env=env,
         )
 
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+    def test_disaggregation_decode_tp(self):
+        """Test core functionality of disaggregation-decode-tp parameter.
 
-    def test_server_info(self):
-        response = requests.get(f"{self.base_url}/get_server_info")
+        Test Steps:
+        1. Verify LB service health (basic availability check)
+        2. Validate inference correctness (France capital = Paris)
+        3. Confirm disaggregation_decode_tp=2 in Prefill server info (parameter validation)
+        """
+
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/health_generate")
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.mode, response.text)
 
-
-class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "auto"
-
-
-class _TestDPAttentionFollowBootstrapRoomLoadBalance(
-    TestDPAttentionRoundBinLoadBalance
-):
-    mode = "follow_bootstrap_room"
-
-    @classmethod
-    def setUpClass(cls):
-        cls.model_path = "/root/.cache/modelscope/hub/models/vllm-ascend/DeepSeek-R1-0528-W8A8"
-        cls.worker_url = "http://127.0.0.1:22222"
-        other_args = [
-            "--trust-remote-code",
-            "--tp",
-            "16",
-            "--enable-dp-attention",
-            "--dp",
-            "2",
-            "--enable-torch-compile",
-            "--torch-compile-max-bs",
-            "2",
-            "--load-balance-method",
-            cls.mode,
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--quantization",
-            "modelslim",
-            "--mem-fraction-static",
-            "0.75",
-        ]
-
-        cls.process = popen_launch_server(
-            cls.model_path,
-            cls.worker_url,
-            timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+            },
         )
-
-        cls.wait_server_ready(cls.worker_url + "/health")
-
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(cls.base_url)
-
-        router_command = [
-            "python3",
-            "-m",
-            "sglang_router.launch_router",
-            "--worker-urls",
-            cls.worker_url,
-            "--host",
-            cls.url.hostname,
-            "--port",
-            str(cls.url.port),
-            "--model-path",
-            cls.model_path,
-        ]
-        cls.router_process = popen_with_error_check(router_command)
-        cls.wait_server_ready(cls.base_url + "/health")
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
+        response = requests.get(self.prefill_url + "/get_server_info")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["disaggregation_decode_tp"], 2)
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.router_process.pid)
-        kill_process_tree(cls.process.pid)
-
-    @classmethod
-    def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
-        start_time = time.perf_counter()
-        while True:
-            try:
-                response = requests.get(url)
-                if response.status_code == 200:
-                    return
-            except Exception:
-                pass
-
-            if time.perf_counter() - start_time > timeout:
-                raise RuntimeError(f"Server {url} failed to start in {timeout}s")
-
-            time.sleep(5)
-
-
-class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "total_requests"
-
-
-class _TestDPAttentionTotalTokensLoadBalance(TestDPAttentionRoundBinLoadBalance):
-    mode = "total_tokens"
+        os.environ.pop("ASCEND_MF_STORE_URL")
+        super().tearDownClass()
 
 
 if __name__ == "__main__":
-    # To reduce the CI execution time.
-    if is_in_ci():
-        loader = unittest.TestLoader()
-        suite = unittest.TestSuite()
-        RUN_FLAG = [
-            TestDPAttentionRoundBinLoadBalance,
-            _TestDPAttentionAutoLoadBalance,
-            _TestDPAttentionFollowBootstrapRoomLoadBalance,
-            _TestDPAttentionTotalRequestsLoadBalance,
-            _TestDPAttentionTotalTokensLoadBalance,
-        ]
-        suite.addTests(loader.loadTestsFromTestCase(random.choice(RUN_FLAG)))
-        runner = unittest.TextTestRunner()
-        runner.run(suite)
-    else:
-        # unittest.main()
-        loader = unittest.TestLoader()
-        suite = unittest.TestSuite()
-        suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionFollowBootstrapRoomLoadBalance))
-        suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionFollowBootstrapRoomLoadBalance))
-        suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionFollowBootstrapRoomLoadBalance))
-        suite.addTests(loader.loadTestsFromTestCase(_TestDPAttentionFollowBootstrapRoomLoadBalance))
-        runner = unittest.TextTestRunner()
-        runner.run(suite)
+    unittest.main()
