@@ -126,6 +126,19 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
         self.assertIn("Paris", response.text)
         return response.text
 
+    def test_mgsm_en(self):
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model_path,
+            eval_name="mgsm_en",
+            num_examples=10,
+            num_threads=1024,
+        )
+
+        metrics = run_eval(args)
+        self.assertGreater(metrics["score"], 0.5)
+
+
     @classmethod
     def tearDownClass(cls):
         os.environ.pop("ASCEND_MF_STORE_URL")
