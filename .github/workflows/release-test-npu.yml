@@ -1,11 +1,6 @@
 name: Release Test (NPU)
 
 on:
-  pull_request:
-    branches:
-      - main
-    paths:
-      - ".github/workflows/release-test-npu.yml"
   workflow_dispatch:
     inputs:
       ref:
@@ -23,8 +18,8 @@ on:
         required: false
         type: string
         default: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11'
-      daily_image_flag:
-        description: 'Identifies whether the test target is a daily build image package, defaulting to false.'
+      skip_install_flag:
+        description: 'Indicates whether to skip the installation of sglang, defaulting to false.'
         required: false
         type: string
         default: 'false'
@@ -40,7 +35,7 @@ jobs:
       ref: ${{ steps.set-vars.outputs.ref }}
       job_filter: ${{ steps.set-vars.outputs.job_filter }}
       image_a3: ${{ steps.set-vars.outputs.image_a3 }}
-      daily_image_flag: ${{ steps.set-vars.outputs.daily_image_flag }}
+      skip_install_flag: ${{ steps.set-vars.outputs.skip_install_flag }}
     steps:
       # When triggered by PR, no inputs parameters are used. The latest community code is tested by default.
       - name: Set image config
@@ -64,10 +59,10 @@ jobs:
             echo "image_a3=${{ inputs.image_a3 }}" >> $GITHUB_OUTPUT
           fi
 
-          if [ -z "${{ inputs.daily_image_flag }}" ]; then
-            echo "daily_image_flag=false" >> $GITHUB_OUTPUT
+          if [ -z "${{ inputs.skip_install_flag }}" ]; then
+            echo "skip_install_flag=false" >> $GITHUB_OUTPUT
           else
-            echo "daily_image_flag=${{ inputs.daily_image_flag }}" >> $GITHUB_OUTPUT
+            echo "skip_install_flag=${{ inputs.skip_install_flag }}" >> $GITHUB_OUTPUT
           fi
 
   nighly-test-npu:
@@ -79,7 +74,7 @@ jobs:
       ref:  ${{ needs.set-image-config.outputs.ref }}
       job_filter: ${{ needs.set-image-config.outputs.job_filter }}
       image_a3: ${{ needs.set-image-config.outputs.image_a3 }}
-      daily_image_flag: ${{ needs.set-image-config.outputs.daily_image_flag }}
+      skip_install_flag: ${{ needs.set-image-config.outputs.skip_install_flag }}
     secrets: inherit
 
   release-1-npu-a3:
@@ -102,7 +97,7 @@ jobs:
           pip config set global.index-url http://${CACHING_URL}/pypi/simple
           pip config set global.trusted-host "${CACHING_URL}"
 
-          if [ ${{ needs.set-image-config.outputs.daily_image_flag }} != "true" ];then
+          if [ ${{ needs.set-image-config.outputs.skip_install_flag }} != "true" ];then
             bash scripts/ci/npu/npu_ci_install_dependency.sh a3
           fi
 
@@ -160,7 +155,7 @@ jobs:
           pip config set global.index-url http://${CACHING_URL}/pypi/simple
           pip config set global.trusted-host "${CACHING_URL}"
 
-          if [ ${{ needs.set-image-config.outputs.daily_image_flag }} != "true" ];then
+          if [ ${{ needs.set-image-config.outputs.skip_install_flag }} != "true" ];then
             bash scripts/ci/npu/npu_ci_install_dependency.sh a3
           fi
 
@@ -218,7 +213,7 @@ jobs:
           pip config set global.index-url http://${CACHING_URL}/pypi/simple
           pip config set global.trusted-host "${CACHING_URL}"
 
-          if [ ${{ needs.set-image-config.outputs.daily_image_flag }} != "true" ];then
+          if [ ${{ needs.set-image-config.outputs.skip_install_flag }} != "true" ];then
             bash scripts/ci/npu/npu_ci_install_dependency.sh a3
           fi
 
@@ -276,7 +271,7 @@ jobs:
           pip config set global.index-url http://${CACHING_URL}/pypi/simple
           pip config set global.trusted-host "${CACHING_URL}"
 
-          if [ ${{ needs.set-image-config.outputs.daily_image_flag }} != "true" ];then
+          if [ ${{ needs.set-image-config.outputs.skip_install_flag }} != "true" ];then
             bash scripts/ci/npu/npu_ci_install_dependency.sh a3
           fi
 
