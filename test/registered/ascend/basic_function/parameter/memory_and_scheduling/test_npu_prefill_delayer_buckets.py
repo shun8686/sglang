@@ -99,9 +99,9 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
         le_has_inf = False
 
         for line in target_lines:
-            matches = re.findall(r'le="([\d\.]+|Inf)"', line)
+            matches = re.findall(r'le="([\d\.]+|\+?Inf)"', line)
             for match in matches:
-                if match == "Inf":
+                if match == "+Inf":
                     le_has_inf = True
                 else:
                     le_numeric_values.append(float(match))
@@ -120,7 +120,7 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
 
         self.assertTrue(
             le_has_inf,
-            f"+Inf (Inf) bucket is missing in metric {metric_name} (required)"
+            f"+Inf bucket is missing in metric {metric_name} (required)"
         )
 
     def test_buckets_params(self):
