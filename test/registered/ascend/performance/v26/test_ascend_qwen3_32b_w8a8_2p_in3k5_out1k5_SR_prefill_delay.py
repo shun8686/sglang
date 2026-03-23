@@ -26,6 +26,7 @@ QWEN3_32B_ENVS = {
 
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
+
 }
 
 QWEN3_32B_OTHER_ARGS = [
@@ -60,7 +61,7 @@ QWEN3_32B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     4,
     "--tp-size",
-    2,
+    4,
     "--mem-fraction-static",
     0.845,
     "--cuda-graph-bs",
