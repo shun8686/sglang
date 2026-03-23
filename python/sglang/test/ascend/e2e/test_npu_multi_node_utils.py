@@ -392,8 +392,8 @@ def launch_pd_mix_node(model_config):
     for sa in special_args:
         other_args.append(sa)
 
-    if not "--model-type" in other_args:
-        other_args += ["--model-type", "llm"]
+    # if not "--model-type" in other_args:
+    #     other_args += ["--model-type", "llm"]
 
     for key, value in model_config["node_envs"].items():
         logger.info(f"ENV_VAR_CASE {key}:{value}")
@@ -536,8 +536,8 @@ def launch_pd_separation_node(model_config):
         "npu",
         "--disaggregation-transfer-backend",
         "ascend",
-        "--model-type",
-        "llm",
+        # "--model-type",
+        # "llm",
     ]
 
     other_args.extend(service_args)
