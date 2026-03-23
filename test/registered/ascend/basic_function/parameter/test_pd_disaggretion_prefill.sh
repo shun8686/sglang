@@ -9,6 +9,7 @@ python -m sglang.launch_server \
     --trust-remote-code \
     --base-gpu-id 4 \
     --tp-size 2 \
+    --enable-dp-attention --dp-size 2 \
     --mem-fraction-static 0.9 \
     --attention-backend ascend \
     --device npu \
