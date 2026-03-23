@@ -33,7 +33,7 @@ export SGLANG_ENABLE_SPEC_V2=1
 export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
 
 python3 -m sglang.launch_server \
-        --model-path /data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen-0.6B \
+        --model-path /data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-0.6B \
         --attention-backend ascend \
         --device npu \
         --tp-size 4 --nnodes 1 --node-rank 0 \
