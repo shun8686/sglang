@@ -18,3 +18,4 @@ python -m sglang.launch_server \
     --disaggregation-transfer-backend ascend \
     --num-reserved-decode-tokens 1024 \
     --attention-backend ascend \
+    --dist-init-addr 127.0.0.1:10000
