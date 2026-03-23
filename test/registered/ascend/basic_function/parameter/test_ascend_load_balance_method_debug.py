@@ -79,6 +79,8 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "decode",
                 "--base-gpu-id",
                 8,
+                "--tp-size",
+                "2",
                 "--enable-dp-attention",
                 "--dp",
                 "2",
