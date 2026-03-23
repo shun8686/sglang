@@ -46,7 +46,7 @@ python3 -m sglang.launch_server \
         --port 8000 \
         --cuda-graph-bs 1 2 3 4 8 9 10 11 12 13 14 15 16 \
         --enable-multimodal  \
-        --mm-attention-backend  --moe-a2a-backend deepep --deepep-mode auto \
+        --mm-attention-backend ascend_attn --moe-a2a-backend deepep --deepep-mode auto \
         --max-total-tokens 1200000 \
         --dtype bfloat16 --mamba-ssm-dtype bfloat16 --disaggregation-mode decode --disaggregation-transfer-backend ascend \
         --speculative-draft-model-quantization unquant --speculative-num-steps 3 --speculative-eagle-topk 1 --speculative-num-draft-tokens 4

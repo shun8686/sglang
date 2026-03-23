@@ -43,7 +43,7 @@ python3 -m sglang.launch_server \
         --port 8000 \
         --cuda-graph-bs 2 4 6 8 10 16 20 24 28 32  \
         --enable-multimodal \
-        --mm-attention-backend  --moe-a2a-backend deepep --deepep-mode auto \
+        --mm-attention-backend ascend_attn  --moe-a2a-backend deepep --deepep-mode auto \
         --dtype bfloat16 --dp-size 2 --enable-dp-attention \
 	    --disaggregation-bootstrap-port 8998 --disaggregation-mode prefill --disaggregation-transfer-backend ascend
 
