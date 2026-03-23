@@ -28,7 +28,7 @@ export SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=3600
 export SGLANG_DISAGGREGATION_WAITING_TIMEOUT=3600
 export SGLANG_ENABLE_SPEC_V2=1
 export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
-python3 -m sglang.launch server \
+python3 -m sglang.launch_server \
 --model-path /root/.cache/modelscope/hub/models/Qwen/Qwen-0.6B \
 --attention-backend ascendr \
 --device npu \
