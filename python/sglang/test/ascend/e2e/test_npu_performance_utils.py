@@ -331,9 +331,6 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             for key, value in cls.envs.items():
                 logger.info(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
-        if "SGLANG_SET_CPU_AFFINITY" not in env:
-            env["SGLANG_SET_CPU_AFFINITY"] = "1"
-            logger.info(f"ENV_VAR_AUTO SGLANG_SET_CPU_AFFINITY:1")
 
         other_args = list(cls.other_args)
         # if not "--model-type" in other_args:
