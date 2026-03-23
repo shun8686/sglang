@@ -30,7 +30,7 @@ export ASCEND_MF_STORE_URL="tcp://61.47.19.76:24669"
 export SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=3600
 export SGLANG_DISAGGREGATION_WAITING_TIMEOUT=3600
 python3 -m sglang.launch_server \
-        --model-path /root/.cache/modelscope/hub/models/Qwen/Qwen-0.6B \
+        --model-path Qwen/Qwen-0.6B \
         --attention-backend ascend \
         --device npu \
         --tp-size 4 --nnodes 1 --node-rank 0 \
