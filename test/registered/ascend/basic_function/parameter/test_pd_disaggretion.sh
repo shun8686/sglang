@@ -55,10 +55,10 @@ python3 -m sglang.launch_server --model-path ${MODEL_PATH} \
 --host 127.0.0.1 --port 10000 \
 --cuda-graph-bs 4 8 12 16 20 24 28 32 36 40 44 48 52 56 60 \
 --enable-multimodal \
---enable-mutimodal \
+--enable-multimodal \
 --mm-attention-backend ascend_attn --max-total-tokens 600000 \
 --dtype bfloat16 --mamba-ssm-dtype bfloat16 --disaggregation-mode prefill --disaggregation-transfer-backend ascend \
---base-gpu-id 0
+--base-gpu-id 0 \
 --watchdog-timeout 9000 \
 --enable-dp-attention --dp-size 2 --enable-dp-lm-head \
 
