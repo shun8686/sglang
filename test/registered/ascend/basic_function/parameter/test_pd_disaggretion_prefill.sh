@@ -31,9 +31,10 @@ export SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=3600
 export SGLANG_DISAGGREGATION_WAITING_TIMEOUT=3600
 python3 -m sglang.launch_server \
         --model-path /data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-0.6B \
+        --quantization modelslim \
         --attention-backend ascend \
         --device npu \
-        --tp-size 4 --nnodes 1 --node-rank 0 \
+        --tp-size 16 --nnodes 1 --node-rank 0 \
         --chunked-prefill-size -1 --max-prefill-tokens 16384 \
         --disable-radix-cache \
         --trust-remote-code \
@@ -42,7 +43,7 @@ python3 -m sglang.launch_server \
         --port 8000 \
         --cuda-graph-bs 2 4 6 8 10 16 20 24 28 32  \
         --enable-multimodal \
-        --mm-attention-backend ascend_attn \
+        --mm-attention-backend  --moe-a2a-backend deepep --deepep-mode auto \
         --dtype bfloat16 --dp-size 2 --enable-dp-attention \
 	    --disaggregation-bootstrap-port 8998 --disaggregation-mode prefill --disaggregation-transfer-backend ascend
 

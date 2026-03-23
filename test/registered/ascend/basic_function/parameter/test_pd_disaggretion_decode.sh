@@ -34,6 +34,7 @@ export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
 
 python3 -m sglang.launch_server \
         --model-path /data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Qwen/Qwen3-0.6B \
+        --quantization modelslim \
         --attention-backend ascend \
         --device npu \
         --tp-size 4 --nnodes 1 --node-rank 0 \
@@ -45,8 +46,10 @@ python3 -m sglang.launch_server \
         --port 8000 \
         --cuda-graph-bs 1 2 3 4 8 9 10 11 12 13 14 15 16 \
         --enable-multimodal  \
-        --mm-attention-backend ascend_attn --max-total-tokens 1200000 \
+        --mm-attention-backend  --moe-a2a-backend deepep --deepep-mode auto \
+        --max-total-tokens 1200000 \
         --dtype bfloat16 --mamba-ssm-dtype bfloat16 --disaggregation-mode decode --disaggregation-transfer-backend ascend \
+        --speculative-draft-model-quantization unquant --speculative-num-steps 3 --speculative-eagle-topk 1 --speculative-num-draft-tokens 4
 
 
 
