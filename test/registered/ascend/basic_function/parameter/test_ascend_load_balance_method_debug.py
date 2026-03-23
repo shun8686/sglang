@@ -6,7 +6,8 @@ from types import SimpleNamespace
 # from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH, get_device_ids
 
 from sglang.test.run_eval import run_eval
-from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+# from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+from disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
