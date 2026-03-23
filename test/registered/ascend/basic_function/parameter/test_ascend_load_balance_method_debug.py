@@ -4,6 +4,7 @@ import requests
 from types import SimpleNamespace
 
 # from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH, get_device_ids
+
 from sglang.test.run_eval import run_eval
 from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.test_utils import (
@@ -17,12 +18,11 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestNumReservedDecodeTokens(TestDisaggregationBase):
-    """Testcase: Verify that in the PD disaggregation scenario, the model accuracy remains
-    uncompromised when the Decode service is launched with the parameters --num-reserved-decode-tokens 128
-    and --disaggregation-decode-polling-interval 2 configured.
+    """Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
+    total_requests, total_tokens
 
     [Test Category] Parameter
-    [Test Target] --num-reserved-decode-tokens; --disaggregation-decode-polling-interval
+    [Test Target] --load-balance-method
     """
 
     @classmethod
@@ -48,7 +48,6 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
             [
                 "--disaggregation-mode",
                 "prefill",
-                # "--disaggregation-decode-tp",
                 "--tp-size",
                 "2",
                 "--enable-dp-attention",
@@ -84,7 +83,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "--disaggregation-mode",
                 "decode",
                 "--base-gpu-id",
-                6,
+                2,
                 "--tp-size",
                 "2",
                 "--enable-dp-attention",

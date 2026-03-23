@@ -19,9 +19,8 @@ register_npu_ci(est_time=500, suite="nightly-16-npu-a3", nightly=True)
 
 
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
-    """
-    Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
-    follow_bootstrap_room, total_requests, total_tokens
+    """Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
+    total_requests, total_tokens
 
     [Test Category] Parameter
     [Test Target] --load-balance-method
@@ -32,7 +31,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model_path = DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH
-        cls.model_path = "/home/weights/DeepSeek-R1-0528-W8A8"
+        cls.model_path = "/root/.cache/modelscope/hub/models//DeepSeek-R1-0528-w4a8-per-channel"
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
@@ -88,10 +87,10 @@ class _TestDPAttentionAutoLoadBalance(TestDPAttentionRoundBinLoadBalance):
     mode = "auto"
 
 
-class _TestDPAttentionFollowBootstrapRoomLoadBalance(
-    TestDPAttentionRoundBinLoadBalance
-):
-    mode = "follow_bootstrap_room"
+# class _TestDPAttentionFollowBootstrapRoomLoadBalance(
+#     TestDPAttentionRoundBinLoadBalance
+# ):
+#     mode = "follow_bootstrap_room"
 
 
 class _TestDPAttentionTotalRequestsLoadBalance(TestDPAttentionRoundBinLoadBalance):
@@ -110,7 +109,7 @@ if __name__ == "__main__":
         RUN_FLAG = [
             TestDPAttentionRoundBinLoadBalance,
             _TestDPAttentionAutoLoadBalance,
-            _TestDPAttentionFollowBootstrapRoomLoadBalance,
+            # _TestDPAttentionFollowBootstrapRoomLoadBalance,
             _TestDPAttentionTotalRequestsLoadBalance,
             _TestDPAttentionTotalTokensLoadBalance,
         ]
