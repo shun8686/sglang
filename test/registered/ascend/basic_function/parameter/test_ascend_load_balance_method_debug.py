@@ -28,7 +28,8 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
+        # cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
+        cls.model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
         # Non blocking start servers
@@ -64,6 +65,8 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 0.8,
                 "--dist-init-addr",
                 "127.0.0.1:10100",
+                "--base-gpu-id",
+                4,
             ]
         )
 
@@ -81,7 +84,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
                 "--disaggregation-mode",
                 "decode",
                 "--base-gpu-id",
-                8,
+                6,
                 "--tp-size",
                 "2",
                 "--enable-dp-attention",
