@@ -65,7 +65,7 @@ spec:
               {% if env == "green" %}
               huawei.com/Ascend910: {{ npu_size }}
               {% endif %}
-              cpu: "46"
+              cpu: "6"
               memory: 128Gi
             limits:
               {% if env in ["ci", "debug"] %}
@@ -74,7 +74,7 @@ spec:
               {% if env == "green" %}
               huawei.com/Ascend910: {{ npu_size }}
               {% endif %}
-              cpu: "46"
+              cpu: "6"
               memory: 128Gi
           volumeMounts:
           - name: ascend-driver
