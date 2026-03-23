@@ -59,7 +59,7 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
             [
                 "--disaggregation-mode",
                 "prefill",
-                "--disaggregation-decode-tp",
+                "--tp",
                 "2",
                 "--disaggregation-transfer-backend",
                 "ascend",
