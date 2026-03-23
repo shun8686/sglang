@@ -93,6 +93,8 @@ class TestDisaggregationDecodeTp(TestDisaggregationBase):
         base_gpu_id = ascend_devices.split(",")[2] if len(ascend_devices.split(",")) >= 3 else "2"
         decode_args = (
             [
+                "--tp",
+                "2",
                 "--enable-dp-attention",
                 "--dp",
                 "2",
