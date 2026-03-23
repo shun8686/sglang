@@ -7,7 +7,7 @@ python -m sglang.launch_server \
     --host 127.0.0.1 \
     --port 8080 \
     --trust-remote-code \
-    --base-gpu-id 14 \
+    --base-gpu-id 4 \
     --tp-size 2 \
     --mem-fraction-static 0.9 \
     --attention-backend ascend \
