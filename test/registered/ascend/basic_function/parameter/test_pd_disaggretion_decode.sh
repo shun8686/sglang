@@ -29,21 +29,17 @@ export SGLANG_DISAGGREGATION_WAITING_TIMEOUT=3600
 export SGLANG_ENABLE_SPEC_V2=1
 export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
 python3 -m sglang.launch_server \
---model-path /home/weights/Qwen3.5-397B-A17B-w8a8 \
+--model-path /root/.cache/modelscope/hub/models/Qwen/Qwen-0.6B \
 --attention-backend ascend \
 --device npu \
---tp-size 16 --nnodes 1 --node rank 0 \
+--tp-size 4 --nnodes 1 --node rank 0 \
 --chunked-prefill-size -1 --max-prefill-tokens 65536 \
 --disable radix-cache \
 --trust-remote-code \
 --host 0.0.0.0 --max-running requests 256 \
---moe-a2a-backend deepep \
---deepep-mode low_latency \
 --mem-fraction-static 0.85 \
 --port 8000 \
 --cuda-graph-bs 1 2 3 4 8 9 10 11 12 13 14 15 16 \
---quantization modelslim \
 --enable-multimodal \
 --mm-attention-backend ascend attn --max-total-tokens 1200000 \
 --dtype bfloat16 --mamba-ssm-dtype bfloat16 --disaggregation-mode decode --disaggregation-transfer-backend ascend \
---speculative-draft-model-quantization unquant --speculative-algorithm NEXTN --speculative-num-steps 3 --speculative-eagle-topk 1 --speculative-num-draft-tokens 4
