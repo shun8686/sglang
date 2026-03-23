@@ -28,10 +28,10 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         cls.model = QWEN3_0_6B_WEIGHTS_PATH
-        cls.forward_passes_buckets = [10.0, 20.0, 30.0]
-        cls.wait_seconds_buckets = [10.0, 20.0, 30.0]
-        forward_buckets_args = [str(int(b)) for b in cls.forward_passes_buckets]
-        wait_seconds_args = [str(int(b)) for b in cls.wait_seconds_buckets]
+        forward_buckets_args = [str(int(b)) for b in [10.0, 20.0, 30.0]]
+        wait_seconds_args = [str(int(b)) for b in [10.0, 20.0, 30.0]]
+        cls.forward_passes_buckets = [0.0, 10.0, 20.0, 30.0, 99.0]
+        cls.wait_seconds_buckets = [0.0, 10.0, 20.0, 30.0]
         other_args = [
             "--tp-size",
             "2",
@@ -77,7 +77,7 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
         except requests.exceptions.RequestException as e:
             self.fail(f"Failed to fetch metrics: {str(e)}")
 
-    def _check_bucket_in_metric_line(self, metric_name, expected_buckets):
+    def _check_bucket_in_metric_line(self, metric_name, expected_numeric_buckets):
         metrics_lines = self._get_metrics_lines()
         # Define target feature string (metric name + _bucket{)
         target_metric_feature = f"{metric_name}_bucket{{"
@@ -95,24 +95,33 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
         )
 
         # Extract all values of the le label
-        le_values = []
+        le_numeric_values = []
+        le_has_inf = False
+
         for line in target_lines:
-            matches = re.findall(r'le="([\d\.]+)"', line)
-            le_values.extend([float(v) for v in matches])
+            matches = re.findall(r'le="([\d\.]+|Inf)"', line)
+            for match in matches:
+                if match == "Inf":
+                    le_has_inf = True
+                else:
+                    le_numeric_values.append(float(match))
 
-        print(le_values)
-
-        unique_le_values = sorted(list(set(le_values)))
-        expected_buckets_sorted = sorted(expected_buckets)
+        unique_le_numeric = sorted(list(set(le_numeric_values)))
+        expected_numeric_sorted = sorted(expected_numeric_buckets)
 
         # Verify all expected bucket values exist
-        for bucket in expected_buckets_sorted:
+        for bucket in expected_numeric_sorted:
             self.assertIn(
                 bucket,
-                unique_le_values,
-                f"Expected bucket {bucket} not found in {metric_name}. "
-                f"Expected: {expected_buckets_sorted}, Actual: {unique_le_values}"
+                unique_le_numeric,
+                f"Expected numeric bucket {bucket} not found in {metric_name}. "
+                f"Expected: {expected_numeric_sorted}, Actual: {unique_le_numeric}"
             )
+
+        self.assertTrue(
+            le_has_inf,
+            f"+Inf (Inf) bucket is missing in metric {metric_name} (required)"
+        )
 
     def test_buckets_params(self):
         # Verify forward passes buckets take effect
