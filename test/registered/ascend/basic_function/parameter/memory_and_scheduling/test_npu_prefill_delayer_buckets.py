@@ -29,7 +29,7 @@ class TestNpuPrefillDelayerBuckets(CustomTestCase):
     def setUpClass(cls):
         cls.model = QWEN3_0_6B_WEIGHTS_PATH
         cls.forward_passes_buckets = [10.0, 20.0, 30.0]
-        cls.wait_seconds_buckets = [1.0, 5.0, 10.0]
+        cls.wait_seconds_buckets = [10.0, 20.0, 30.0]
         forward_buckets_args = [str(int(b)) for b in cls.forward_passes_buckets]
         wait_seconds_args = [str(int(b)) for b in cls.wait_seconds_buckets]
         other_args = [
