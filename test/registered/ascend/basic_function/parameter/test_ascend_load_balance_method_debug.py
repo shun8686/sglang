@@ -30,7 +30,8 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
     def setUpClass(cls):
         super().setUpClass()
         # cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        cls.model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
+        # cls.model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
+        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
         # Non blocking start servers
