@@ -20,4 +20,4 @@ python -m sglang.launch_server \
     --log-level-http debug \
     --disaggregation-bootstrap-port 8998 \
     --dtype bfloat16 \
-    --dist-init-addr 127.0.0.1:10001
+    --dist-init-addr 127.0.0.1:10100
