@@ -46,7 +46,8 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
             [
                 "--disaggregation-mode",
                 "prefill",
-                "--disaggregation-decode-tp",
+                # "--disaggregation-decode-tp",
+                "--tp-size",
                 "2",
                 "--disaggregation-transfer-backend",
                 "ascend",
