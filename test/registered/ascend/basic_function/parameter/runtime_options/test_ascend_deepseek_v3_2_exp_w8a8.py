@@ -36,6 +36,8 @@ class TestDeepSeekV32(GSM8KAscendMixin, CustomTestCase):
         "1",
         "--enable-dp-attention",
         "--enable-nsa-prefill-context-parallel",
+        "--nsa-prefill-cp-mode",
+        "in-seq-split",
     ]
 
 

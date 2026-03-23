@@ -5,7 +5,7 @@ from sglang.test.ascend.test_ascend_utils import GPT_OSS_120B_bf16_DRAFT_WEIGHTS
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True, disabled="https://github.com/sgl-project/sglang/pull/18032")
 
 
 class TestNpuSwa(GSM8KAscendMixin, CustomTestCase):

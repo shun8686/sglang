@@ -13,11 +13,11 @@ from sglang.test.test_utils import (
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True, disabled="https://github.com/Ascend/sglang/issues/134")
 
 
 class TestNpuMoeDpSize(CustomTestCase):
-    """Test Case: Verify that the accuracy of the DeepSeek-V2-Lite-W8A8 model on the GSM8K dataset does not degrade after configuring the --moe-dp-size parameter.
+    """Test Case: Verify that the accuracy of the DeepSeek-V2-Lite model on the GSM8K dataset does not degrade after configuring the --moe-dp-size parameter.
 
     [Test Category] Parameter
     [Test Target] --moe-dp-size

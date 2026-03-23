@@ -42,7 +42,7 @@ DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite-W8A8"
 )
 DEEPSEEK_V2_LITE_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "vllm-ascend/DeepSeek-V2-Lite"
+    MODEL_WEIGHTS_DIR, "deepseek-ai/DeepSeek-V2-Lite"
 )
 
 QWEN2_5_7B_INSTRUCT_WEIGHTS_PATH = os.path.join(
