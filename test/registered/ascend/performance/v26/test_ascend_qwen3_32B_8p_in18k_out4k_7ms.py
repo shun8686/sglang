@@ -76,10 +76,10 @@ MODEL_CONFIG = {
 class TestGlm46W8A8(TestAscendPerfMultiNodePdMixTestCaseBase):
     model_config = MODEL_CONFIG
     dataset_name = "random"
-    max_concurrency = 256
-    num_prompts = int(max_concurrency) * 256
-    input_len = 3200
-    output_len = 1000
+    max_concurrency = 100
+    num_prompts = 400
+    input_len = 18000
+    output_len = 4000
     random_range_ratio = 1
     tpot = 50
     # T: None   800I: xxxxx.     dev：3192/16@51.19ms
