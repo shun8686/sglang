@@ -1,6 +1,8 @@
 import unittest
 from types import SimpleNamespace
 
+import json
+
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -53,6 +55,35 @@ class TestLlama4LoRA(CustomTestCase):
                         "ascend",
                     ],
                 )
+
+                json_schema = json.dumps({
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                        "city": {"type": "string"},
+                    },
+                    "required": ["name", "age", "city"],
+
+                })
+                response = requests.post(
+                    f"{DEFAULT_URL_FOR_TEST}/generate",
+                    json={
+                        "text": "Generate person information",
+                        "sampling_params": {
+                            "temperature": 0.3,
+                            "max_new_tokens": 128,
+                            "json_schema": json_schema,
+                        },
+                        "lora_path": "lora_a",
+                    },
+                )
+                self.assertEqual(response.status_code, 200)
+                result = response.json()
+                parsed_json = json.loads(result["text"])
+                self.assertIn("name", parsed_json)
+                self.assertIn("age", parsed_json)
+                self.assertIn("city", parsed_json)
             except Exception as e:
                 print(f"Error testing {model.model}: {e}")
                 self.fail(f"Test failed for {model.model}: {e}")
