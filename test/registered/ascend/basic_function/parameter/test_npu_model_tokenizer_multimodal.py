@@ -1,5 +1,6 @@
 import os
 import json
+import unittest
 
 import requests
 
@@ -91,6 +92,10 @@ class TestNpuModelTokenizerMultimodal(CustomTestCase):
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
         self.assertIn("type=Qwen3VLForConditionalGeneration", content)
-        self.assertIn("Multimodal attention backend not set", content)
+        self.assertIn("Using sdpa as multimodal attention backend", content)
         self.out_log_file.close()
         self.err_log_file.close()
+
+
+if __name__ == "__main__":
+    unittest.main()
