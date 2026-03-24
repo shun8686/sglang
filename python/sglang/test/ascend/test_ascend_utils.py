@@ -902,7 +902,7 @@ def send_score_request(
     label_token_ids,
     apply_softmax=False,
     item_first=False,
-    timeout=120,
+    timeout=180,
 ):
     """Send a POST request to the /v1/score endpoint.
 
@@ -926,7 +926,7 @@ def send_score_request(
         item_first (bool): If True, concatenate item before query when building the
             prompt in single-item scoring mode. This parameter is ignored when
             --multi-item-scoring-delimiter is active on the server. Default: False.
-        timeout (int): HTTP request timeout in seconds. Default: 120.
+        timeout (int): HTTP request timeout in seconds. Default: 180.
 
     Returns:
         requests.Response: The raw HTTP response. Callers should check
