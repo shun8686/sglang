@@ -61,23 +61,21 @@ spec:
             requests:
               {% if env in ["ci", "debug"] %}
               huawei.com/ascend-1980: {{ npu_size }}
-              cpu: "4"
               {% endif %}
               {% if env == "green" %}
               huawei.com/Ascend910: {{ npu_size }}
-              cpu: "46"
               memory: 128Gi
               {% endif %}
+              cpu: "46"
             limits:
               {% if env in ["ci", "debug"] %}
               huawei.com/ascend-1980: {{ npu_size }}
-              cpu: "4"
               {% endif %}
               {% if env == "green" %}
               huawei.com/Ascend910: {{ npu_size }}
-              cpu: "46"
               memory: 128Gi
               {% endif %}
+              cpu: "46"
           volumeMounts:
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver
