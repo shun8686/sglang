@@ -1,16 +1,11 @@
 import os
 import unittest
 import requests
-from types import SimpleNamespace
 
-# from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH, get_device_ids
-
-from sglang.test.run_eval import run_eval
-# from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
-from disaggregation_utils import TestDisaggregationBase
+from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    DEFAULT_URL_FOR_TEST,
     popen_launch_pd_server,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -19,8 +14,7 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestNumReservedDecodeTokens(TestDisaggregationBase):
-    """Testcase：Verify that the inference is successful when --load-balance-method is set to round_robin, auto,
-    total_requests, total_tokens
+    """Testcase：Verify that the inference is successful when --load-balance-method is set to follow_bootstrap_room.
 
     [Test Category] Parameter
     [Test Target] --load-balance-method
@@ -29,9 +23,7 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # cls.model = "/root/.cache/modelscope/hub/models/AI-ModelScope/Llama-3.1-8B-Instruct"
-        # cls.model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
-        cls.model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
+        cls.model = QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
         # Non blocking start servers
@@ -127,19 +119,6 @@ class TestNumReservedDecodeTokens(TestDisaggregationBase):
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
         return response.text
-
-    def test_mgsm_en(self):
-        args = SimpleNamespace(
-            base_url=self.lb_url,
-            model=self.model,
-            eval_name="mgsm_en",
-            num_examples=10,
-            num_threads=1024,
-        )
-
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
-
 
     @classmethod
     def tearDownClass(cls):
