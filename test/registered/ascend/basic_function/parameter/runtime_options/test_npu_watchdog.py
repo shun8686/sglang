@@ -25,17 +25,13 @@ class TestBaseTestWatchdog(CustomTestCase):
         cls.stdout = io.StringIO()
         cls.stderr = io.StringIO()
 
-        # cls.extra_envs = {
-        #     "SGLANG_TEST_STUCK_DETOKENIZER": "0",
-        # }
-        # os.environ.update(cls.extra_envs)
         cls.process = popen_launch_server(
             QWEN3_0_6B_WEIGHTS_PATH,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--watchdog-timeout",
-                1,
+                10,
                 "--skip-server-warmup",
                 "--attention-backend",
                 "ascend",
@@ -62,7 +58,6 @@ class TestBaseTestWatchdog(CustomTestCase):
 
         # Logs contain service crash keywords
         combined_output = self.stdout.getvalue() + self.stderr.getvalue()
-        print
         expected_timeout_message = "Scheduler watchdog timeout (self.watchdog_timeout=1.0, self.soft=False)"
         expected_crash_message = "SIGQUIT received."
         self.assertIn(
@@ -82,35 +77,14 @@ class TestBaseTestWatchdog(CustomTestCase):
             f"Process should exit after watchdog timeout, but still running"
         )
 
+class TestWatchdogSchedulerInit(BaseTestWatchdog, CustomTestCase):
+    """Test Case: Verify that Scheduler initialization blocking triggers watchdog timeout and the service crashes
 
-# class TestWatchdogDetokenizer(BaseTestWatchdog, CustomTestCase):
-#     """Test Case: Verify that Detokenizer blocking triggers watchdog timeout and the service crashes
-#
-#     [Test Category] Parameter
-#     [Test Target] --watchdog-timeout
-#     """
-#     env_override = lambda: envs.SGLANG_TEST_STUCK_DETOKENIZER.override(30)
-#     expected_crash_message = "DetokenizerManager watchdog timeout, crashing server to prevent hanging"
-#
-#
-# class TestWatchdogTokenizer(BaseTestWatchdog, CustomTestCase):
-#     """Test Case: Verify that Tokenizer blocking triggers watchdog timeout and the service crashes
-#
-#     [Test Category] Parameter
-#     [Test Target] --watchdog-timeout
-#     """
-#     env_override = lambda: envs.SGLANG_TEST_STUCK_TOKENIZER.override(30)
-#     expected_crash_message = "TokenizerManager watchdog timeout, crashing server to prevent hanging"
-#
-#
-# class TestWatchdogSchedulerInit(BaseTestWatchdog, CustomTestCase):
-#     """Test Case: Verify that Scheduler initialization blocking triggers watchdog timeout and the service crashes
-#
-#     [Test Category] Parameter
-#     [Test Target] --watchdog-timeout
-#     """
-#     env_override = lambda: envs.SGLANG_TEST_STUCK_SCHEDULER_INIT.override(30)
-#     expected_crash_message = "Scheduler watchdog timeout, crashing server to prevent hanging"
+    [Test Category] Parameter
+    [Test Target] --watchdog-timeout
+    """
+    env_override = lambda: envs.SGLANG_TEST_STUCK_SCHEDULER_INIT.override(30)
+    expected_crash_message = "Scheduler watchdog timeout, crashing server to prevent hanging"
 
 
 if __name__ == "__main__":
