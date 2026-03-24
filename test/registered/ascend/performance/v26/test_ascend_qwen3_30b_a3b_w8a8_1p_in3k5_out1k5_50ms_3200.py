@@ -87,8 +87,8 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 256
+    max_concurrency = 162
+    num_prompts = 624
     input_len = 3584
     output_len = 1536
     random_range_ratio = 1
