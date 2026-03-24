@@ -528,17 +528,17 @@ def launch_pd_separation_node(model_config):
     host_ip = get_host_ip()
     logger.info(f"Starting {role} node on {host_ip} with args: {service_args}")
 
-    other_args = [
-        "--trust-remote-code",
-        "--attention-backend",
-        "ascend",
-        "--device",
-        "npu",
-        "--disaggregation-transfer-backend",
-        "ascend",
-        # "--model-type",
-        # "llm",
-    ]
+    other_args = list()
+    if "--trust-remote-code" not in service_args:
+        other_args.extend(["--trust-remote-code"])
+    if "--attention-backend" not in service_args:
+        other_args.extend(["--attention-backend", "ascend"])
+    if "--device" not in service_args:
+        other_args.extend(["--device", "npu"])
+    if "--disaggregation-transfer-backend" not in service_args:
+        other_args.extend(["--disaggregation-transfer-backend", "ascend"])
+    # if "--model-type" not in service_args:
+    #     other_args.extend(["--model-type", "llm"])
 
     other_args.extend(service_args)
 

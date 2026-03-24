@@ -334,7 +334,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
 
         other_args = list(cls.other_args)
         # if not "--model-type" in other_args:
-        #     other_args += ["--model-type", "llm"]
+        #     other_args.extend(["--model-type", "llm"])
 
         cls.process = popen_launch_server(
             cls.model,
