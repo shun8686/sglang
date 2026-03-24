@@ -69,12 +69,12 @@ class TestQwen480B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_480B_OTHER_ARGS
     envs = QWEN3_480B_ENVS
     dataset_name = "random"
-    max_concurrency = 1
-    num_prompts = 1
+    max_concurrency = 80
+    num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 20
+    tpot = 50
     # T: 143@50ms.   800I: 1.1*T
     output_token_throughput = 1470
 
