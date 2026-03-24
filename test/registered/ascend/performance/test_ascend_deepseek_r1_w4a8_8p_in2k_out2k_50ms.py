@@ -14,7 +14,6 @@ register_npu_ci(
 )
 
 MODEL_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
