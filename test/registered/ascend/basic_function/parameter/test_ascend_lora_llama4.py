@@ -17,8 +17,8 @@ MODELS = [
     ),
 ]
 
-LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
-LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH = "/home/weights/codelion/FastLlama-3.2-LoRA"
+LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH = "/root/.cache/modelscope/hub/models/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
+LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH = "/root/.cache/modelscope/hub/models/codelion/FastLlama-3.2-LoRA"
 
 
 @unittest.skipIf(is_in_ci(), "To reduce the CI execution time.")
