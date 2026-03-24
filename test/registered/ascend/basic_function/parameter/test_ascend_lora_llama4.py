@@ -17,9 +17,14 @@ MODELS = [
     ),
 ]
 
+LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH = "/home/weights/codelion/Llama-3.2-1B-Instruct-tool-calling-lora"
+LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH = "/home/weights/codelion/FastLlama-3.2-LoRA"
+
 
 @unittest.skipIf(is_in_ci(), "To reduce the CI execution time.")
 class TestLlama4LoRA(CustomTestCase):
+    lora_a = LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH
+    lora_b = LLAMA_3_2_1B_INSTRUCT_TOOL_FAST_LORA_WEIGHTS_PATH
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -35,6 +40,9 @@ class TestLlama4LoRA(CustomTestCase):
                         "--enable-lora",
                         "--max-lora-rank",
                         "64",
+                        "--lora-path",
+                        f"lora_a={self.lora_a}",
+                        f"lora_b={self.lora_b}",
                         "--lora-target-modules",
                         "all",
                         "--tp-size",
