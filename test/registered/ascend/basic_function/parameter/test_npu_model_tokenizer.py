@@ -153,7 +153,8 @@ class TestNpuModelTokenizer(CustomTestCase):
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
 
-    def test_model_tokenizer_concurrent_request(self):
+    def test_model_tokenizer_request(self):
+        # Concurrent requests
         text1 = "The capital of France is"
         for i in range(5):
             response = requests.post(
