@@ -6,9 +6,7 @@ import json
 from shutil import copy2
 
 import requests
-
 import tempfile
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -22,6 +20,12 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 class TestNpuTokenizer(CustomTestCase):
+    """The test of combining the nodel and token parameters showed that the inference of sending a long request was successful.
+
+    [Test Category] Functional
+    [Test Target] model & tokenizer on NPU
+    --model-path; --tokenizer-path; --tokenizer-worker-num; --tokenizer-mode; --load-format
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -102,7 +106,13 @@ class TestNpuTokenizer(CustomTestCase):
 
 
 class TestNpuModelTokenizer(CustomTestCase):
-    # Send concurrent requests
+    """The test of combining the nodel and token parameters showed that the inference of sending concurrent request was successful.
+
+    [Test Category] Functional
+    [Test Target] model & tokenizer on NPU
+    --tokenizer-mode; --load-format; --model-loader-extra-config; --context-length; --model-impl
+    """
+
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -124,7 +134,6 @@ class TestNpuModelTokenizer(CustomTestCase):
             "1000",
             "--model-impl",
             "sglang",
-            # "--is-embedding",
         ]
         cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
         cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
@@ -187,6 +196,12 @@ class TestNpuModelTokenizer(CustomTestCase):
             logging.warning(f"Error testing: {e}")
 
 class TestNpuModelTokenizerMultimodal(CustomTestCase):
+    """The combination of nodel and token parameters was tested, and the streaming request inference was successful.
+
+    [Test Category] Functional
+    [Test Target] model & tokenizer on NPU
+    --enable-multimodal; --revision; --model-impl
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -259,6 +274,12 @@ class TestNpuModelTokenizerMultimodal(CustomTestCase):
         self.err_log_file.close()
 
 class TestNpuSkipTokenizerInit(CustomTestCase):
+    """The skip configuration test was successful; requests are now being sent using input_ids instead of text.
+
+    [Test Category] Functional
+    [Test Target] model & tokenizer on NPU
+    --skip-tokenizer-init
+    """
 
     @classmethod
     def setUpClass(cls):
@@ -292,12 +313,13 @@ class TestNpuSkipTokenizerInit(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_model_tokenizer_error_request(self):
-        long_prompt = "Explain the concept of machine learning in detail."
+        # The request failed to send using text.
+        prompt = "Explain the concept of machine learning in detail."
         try:
             response = requests.post(
                 f"{DEFAULT_URL_FOR_TEST}/generate",
                 json={
-                    "text": long_prompt,
+                    "text": prompt,
                     "sampling_params": {
                         "temperature": 0,
                         "max_new_tokens": 100,
@@ -310,6 +332,7 @@ class TestNpuSkipTokenizerInit(CustomTestCase):
             logging.warning(f"Error testing: {e}")
 
     def test_model_skip_tokenizer_request(self):
+        # Request sent successfully using input_ids
         response = requests.post(
             f"{DEFAULT_URL_FOR_TEST}/generate",
             json={
