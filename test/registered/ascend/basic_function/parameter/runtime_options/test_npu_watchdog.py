@@ -1,6 +1,7 @@
 import os
 import unittest
 
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -20,13 +21,25 @@ class TestWatchdogTimeout(CustomTestCase):
     [Test Target] --watchdog-timeout
     """
 
+    @classmethod
+    def setUpClass(cls):
+        cls.expected_timeout_message = "Scheduler watchdog timeout (self.watchdog_timeout=1.0, self.soft=False)"
+        cls.expected_crash_message = "SIGQUIT received."
+        cls.out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
+        cls.err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+        cls.out_log_file.close()
+        cls.err_log_file.close()
+        os.remove("./out_log.txt")
+        os.remove("./err_log.txt")
+
     def test_watchdog_timeout(self):
-        expected_timeout_message = "Scheduler watchdog timeout (self.watchdog_timeout=1.0, self.soft=False)"
-        expected_crash_message = "SIGQUIT received."
-        out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
-        err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
+
         try:
-            popen_launch_server(
+            self.process = popen_launch_server(
                 QWEN3_0_6B_WEIGHTS_PATH,
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -37,27 +50,24 @@ class TestWatchdogTimeout(CustomTestCase):
                     "--attention-backend",
                     "ascend",
                 ],
-                return_stdout_stderr=(out_log_file, err_log_file),
+                return_stdout_stderr=(self.out_log_file, self.err_log_file),
             )
         except Exception as e:
             print(f"Server launch failed as expects:{e}")
         finally:
-            err_log_file.seek(0)
-            content = err_log_file.read()
+            self.err_log_file.seek(0)
+            content = self.err_log_file.read()
             self.assertIn(
-                expected_timeout_message,
+                self.expected_timeout_message,
                 content,
-                f"Expected timeout message '{expected_timeout_message}' not found in logs"
+                f"Expected timeout message '{self.expected_timeout_message}' not found in logs"
             )
             self.assertIn(
-                expected_crash_message,
+                self.expected_crash_message,
                 content,
-                f"Expected crash message '{expected_crash_message}' not found in logs"
+                f"Expected crash message '{self.expected_crash_message}' not found in logs"
             )
-            out_log_file.close()
-            err_log_file.close()
-            os.remove("./cache_out_log.txt")
-            os.remove("./cache_err_log.txt")
+
 
 
 if __name__ == "__main__":
