@@ -11,7 +11,6 @@ from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
-    DEFAULT_MODEL_NAME_FOR_TEST_VL_PP,
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -47,6 +46,8 @@ class TestPPAccuracy(unittest.TestCase):
                 "256",
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -113,14 +114,16 @@ class TestDPAttentionDP2PP2(CustomTestCase):
             other_args=[
                 "--trust-remote-code",
                 "--tp",
-                "2",
+                "4",
                 "--pp-size",
                 "4",
                 "--enable-dp-attention",
                 "--dp",
-                "2",
+                "4",
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -153,7 +156,7 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
         cls.model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = "http://127.0.0.1:23333"
         cls.process = popen_launch_server(
-            DEFAULT_MODEL_NAME_FOR_TEST_VL_PP,
+            cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
@@ -166,6 +169,8 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
                 "--enable-multimodal",
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -226,6 +231,8 @@ class TestQwenPPAccuracy(unittest.TestCase):
                 256,
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -285,6 +292,8 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
                 256,
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -344,6 +353,8 @@ class TestQwenMoePPAccuracy(unittest.TestCase):
                 256,
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -403,6 +414,8 @@ class TestQwen35PPAccuracy(unittest.TestCase):
                 256,
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
@@ -464,6 +477,8 @@ class TestFixedBugs(unittest.TestCase):
             "2",
             "--attention-backend",
             "ascend",
+            "--mem-fraction-static",
+            "0.8",
         ]
         run_bench_one_batch_server(
             model,
@@ -500,6 +515,8 @@ class TestGLM41VPPAccuracy(unittest.TestCase):
                 "glm45",
                 "--attention-backend",
                 "ascend",
+                "--mem-fraction-static",
+                "0.8",
             ],
         )
 
