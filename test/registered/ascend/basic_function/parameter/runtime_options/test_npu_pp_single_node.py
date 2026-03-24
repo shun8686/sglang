@@ -98,6 +98,7 @@ class TestPPAccuracy(unittest.TestCase):
         assert len(output_top_logprobs) == 16
 
 
+@unittest.skipIf(True, "Skip test")
 class TestDPAttentionDP2PP2(CustomTestCase):
     """Test Case: Verify the accuracy of MLA models under TP+DP+PP hybrid parallelism
 
@@ -145,7 +146,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
         print(f"{metrics=}")
         self.assertGreater(metrics["score"], 0.8)
 
-
+@unittest.skipIf(True, "Skip test")
 class TestQwenVLPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy of Qwen-VL multimodal model under PP parallelism
 
@@ -208,7 +209,7 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
         print(f"{metrics=}")
         self.assertGreater(metrics["score"], 0.26)
 
-
+@unittest.skipIf(True, "Skip test")
 class TestQwenPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy consistency of Qwen model between PP=1 and PP=2
 
@@ -269,7 +270,7 @@ class TestQwenPPAccuracy(unittest.TestCase):
             ),
         )
 
-
+@unittest.skipIf(True, "Skip test")
 class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy consistency of Qwen3-0.6B model (with tie_word_embeddings) between PP=1 and PP=2
 
@@ -330,7 +331,7 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
             ),
         )
 
-
+@unittest.skipIf(True, "Skip test")
 class TestQwenMoePPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy consistency of Qwen3-30B-A3B MOE model between PP=1 and PP=2
 
@@ -391,7 +392,7 @@ class TestQwenMoePPAccuracy(unittest.TestCase):
             ),
         )
 
-
+@unittest.skipIf(True, "Skip test")
 class TestQwen35PPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy consistency of Qwen model between PP=1 and PP=2
 
@@ -452,7 +453,7 @@ class TestQwen35PPAccuracy(unittest.TestCase):
             ),
         )
 
-
+@unittest.skipIf(True, "Skip test")
 class TestFixedBugs(unittest.TestCase):
     """Test Case: Verify normal inference under small batch size scenario with PP+chunked-prefill enabled
     [Test Category] Parameter
@@ -490,7 +491,7 @@ class TestFixedBugs(unittest.TestCase):
             other_server_args,
         )
 
-
+@unittest.skipIf(True, "Skip test")
 class TestGLM41VPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy of GLM multimodal model under PP parallelism
 

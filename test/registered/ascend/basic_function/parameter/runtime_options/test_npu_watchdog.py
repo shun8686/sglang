@@ -23,6 +23,7 @@ class TestWatchdogTimeout(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
+        cls.process = None
         cls.watchdog_timeout = 1e-05
         cls.expected_timeout_message = f"Scheduler watchdog timeout (self.watchdog_timeout={cls.watchdog_timeout}, self.soft=False)"
         cls.out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
@@ -30,7 +31,8 @@ class TestWatchdogTimeout(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+        if cls.process.pid:
+            kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
         cls.err_log_file.close()
         os.remove("./out_log.txt")
