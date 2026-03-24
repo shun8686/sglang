@@ -90,8 +90,8 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     dataset_path = "/data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl"
     max_concurrency = 162
     num_prompts = 624
-    input_len = 3584
-    output_len = 1536
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 1
     # tpot = 50
     # output_token_throughput = 3200
