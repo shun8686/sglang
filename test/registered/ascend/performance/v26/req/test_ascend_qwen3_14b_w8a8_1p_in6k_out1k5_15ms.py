@@ -88,7 +88,7 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     output_token_throughput = 795
 
     def test_qwen3_14b(self):
-        self.run_throughput()
+        self.run_throughput(run_cycles=3)
 
 
 if __name__ == "__main__":
