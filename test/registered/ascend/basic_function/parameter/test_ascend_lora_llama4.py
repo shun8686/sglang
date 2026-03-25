@@ -36,9 +36,9 @@ class TestLlama4LoRA(CustomTestCase):
                     other_args=[
                         "--mem-fraction-static",
                         0.8,
-                        "--cuda-graph-max-bs",
-                        16,
-                        # "--disable-cuda-graph",
+                        # "--cuda-graph-max-bs",
+                        # 16,
+                        "--disable-cuda-graph",
                         # "--enable-lora",
                         # "--max-lora-rank",
                         # "64",
