@@ -51,7 +51,7 @@ jobs:
         id: set-vars
         run: |
           if [ -z "${{ inputs.ref }}" ]; then
-            echo "ref=" >> $GITHUB_OUTPUT
+            echo "ref=''" >> $GITHUB_OUTPUT
           else
             echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
           fi
