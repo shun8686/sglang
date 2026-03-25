@@ -16,18 +16,25 @@ register_npu_ci(
 )
 
 ENVS = {
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+    "ASCEND_USE_FIA": "0",
+
+    "ASCEND_LAUNCH_BLOCKING": "0",
+
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
+
     "INF_NAN_MODE_FORCE_DISABLE": "1",
     "HCCL_ALGO": "level0:NA;level1:ring",
     "DP_ROUND_ROBIN": "1",
     "SGLANG_USE_MAX_DP_ATT" : "1",
+
     "ENABLE_PROFILING": "0",
     "PROFILING_BS": "66",
     "PROFILING_STAGE": "decode",
     "PROFILING_STEP": "10",
+
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
