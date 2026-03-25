@@ -39,6 +39,7 @@ class TestLlama4LoRA(CustomTestCase):
                         # "--cuda-graph-max-bs",
                         # 16,
                         "--disable-cuda-graph",
+                        "--disable-radix-cache"
                         # "--enable-lora",
                         # "--max-lora-rank",
                         # "64",
