@@ -6,6 +6,7 @@ import os
 import requests as _requests
 import shlex
 import subprocess
+import threading as _threading
 from types import SimpleNamespace
 from typing import Awaitable, Callable, NamedTuple, Optional
 
@@ -947,4 +948,105 @@ def send_score_request(
         json=payload,
         headers={"Content-Type": "application/json"},
         timeout=timeout,
+    )
+
+def send_concurrent_requests(
+    base_url: str,
+    num_requests: int,
+    num_concurrent: int = 8,
+    input_text: str = "The capital of France is",
+    max_new_tokens: int = 32,
+    temperature: float = 0.0,
+    request_timeout: int = 60,
+) -> list:
+    """Send multiple concurrent HTTP POST requests to the /generate endpoint.
+
+    Uses threading (NOT asyncio + blocking calls) to achieve true concurrency.
+    asyncio.gather() combined with synchronous requests.post() does not produce
+    real parallelism; threading is required for concurrent blocking I/O.
+
+    Parameters:
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000"
+        num_requests: Total number of requests to send
+        num_concurrent: Maximum in-flight requests at any given time (semaphore)
+        input_text: Text prompt sent to every request
+        max_new_tokens: Maximum new tokens to generate per request
+        temperature: Sampling temperature (0 = greedy / deterministic)
+        request_timeout: Per-request HTTP timeout in seconds; raises on exceed
+
+    Returns:
+        Unsorted list of result dicts, one per request, each with:
+          task_id (int)    -- zero-based request index
+          status_code (int)-- HTTP status code, or -1 on exception
+          text (str)       -- response body, or exception message on failure
+    """
+
+
+    results: list = []
+    lock = _threading.Lock()
+    semaphore = _threading.Semaphore(num_concurrent)
+
+    def _send_one(task_id: int) -> None:
+        semaphore.acquire()
+        try:
+            response = _requests.post(
+                f"{base_url}/generate",
+                json={
+                    "text": input_text,
+                    "sampling_params": {
+                        "temperature": temperature,
+                        "max_new_tokens": max_new_tokens,
+                    },
+                },
+                timeout=request_timeout,
+            )
+            with lock:
+                results.append(
+                    {
+                        "task_id": task_id,
+                        "status_code": response.status_code,
+                        "text": response.text,
+                    }
+                )
+        except Exception as exc:
+            with lock:
+                results.append(
+                    {
+                        "task_id": task_id,
+                        "status_code": -1,
+                        "text": str(exc),
+                    }
+                )
+        finally:
+            semaphore.release()
+
+    threads = [
+        _threading.Thread(target=_send_one, args=(i,)) for i in range(num_requests)
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    return results
+
+def verify_process_terminated(process, test_name: str = "") -> None:
+    """Verify server process has been terminated after tearDownClass.
+
+    Coding standard rule 8: test environment must be restored after each test.
+    Call this at the end of tearDownClass, after kill_process_tree.
+    A short sleep is included to allow OS-level process cleanup to complete.
+
+    Args:
+        process: subprocess.Popen object returned by popen_launch_server.
+        test_name: Optional label used in the assertion error message.
+
+    Raises:
+        AssertionError: If the process is still running after cleanup.
+    """
+    import time as _time
+    _time.sleep(2)
+    assert process.poll() is not None, (
+        f"{test_name}: Server process (pid={process.pid}) "
+        "is still running after tearDownClass."
     )

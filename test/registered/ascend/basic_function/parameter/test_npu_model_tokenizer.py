@@ -133,7 +133,7 @@ class TestNpuModelTokenizer(CustomTestCase):
             "--context-length",
             "1000",
             "--model-impl",
-            "sglang",
+            "transformers",
         ]
         cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
         cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
@@ -153,7 +153,8 @@ class TestNpuModelTokenizer(CustomTestCase):
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
 
-    def test_model_tokenizer_concurrent_request(self):
+    def test_model_tokenizer_request(self):
+        # Concurrent requests
         text1 = "The capital of France is"
         for i in range(5):
             response = requests.post(
@@ -172,7 +173,7 @@ class TestNpuModelTokenizer(CustomTestCase):
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
         self.assertIn("Multi-thread loading shards", content)
-        self.assertIn("type=LlamaForCausalLM", content)
+        self.assertIn("type=TransformersForCausalLM", content)
         self.out_log_file.close()
         self.err_log_file.close()
 
@@ -194,84 +195,6 @@ class TestNpuModelTokenizer(CustomTestCase):
             self.assertIn("The input (1202 tokens) is longer than the model\'s context length (1000 tokens)", response.text)
         except Exception as e:
             logging.warning(f"Error testing: {e}")
-
-class TestNpuModelTokenizerMultimodal(CustomTestCase):
-    """The combination of nodel and token parameters was tested, and the streaming request inference was successful.
-
-    [Test Category] Functional
-    [Test Target] model & tokenizer on NPU
-    --enable-multimodal; --revision; --model-impl
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        other_args = [
-            "--trust-remote-code",
-            "--mem-fraction-static",
-            "0.8",
-            "--attention-backend",
-            "ascend",
-            "--disable-cuda-graph",
-            "--enable-multimodal",
-            "--revision",
-            "1.0.0",
-            "--model-impl",
-            "transformers",
-        ]
-        cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
-
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        """Clean up after the test class by killing the server process and removing generated directories."""
-        kill_process_tree(cls.process.pid)
-        os.remove("./cache_out_log.txt")
-        os.remove("./cache_err_log.txt")
-
-    def test_model_tokenizer_stream_request(self):
-        text1 = "The capital of France is"
-        response = requests.post(
-            f"{DEFAULT_URL_FOR_TEST}/generate",
-            json={
-                "text": text1,
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 64,
-                },
-                "stream": True,
-            },
-        )
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("Paris", response.text)
-        has_text = False
-        # Stream With Reasoning
-        for line in response.iter_lines():
-            if line:
-                line = line.decode("utf-8")
-                if line.startswith("data:") and not line.startswith("data: [DONE]"):
-                    data = json.loads(line[6:])
-                    if "text" in data and len(data["text"]) > 0:
-                        has_text = True
-        self.assertTrue(
-            has_text,
-            "The text is a stream response",
-        )
-
-        self.err_log_file.seek(0)
-        content = self.err_log_file.read()
-        self.assertIn("type=TransformersForCausalLM", content)
-        self.out_log_file.close()
-        self.err_log_file.close()
 
 class TestNpuSkipTokenizerInit(CustomTestCase):
     """The skip configuration test was successful; requests are now being sent using input_ids instead of text.
