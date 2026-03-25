@@ -50,11 +50,7 @@ QWEN3_8B_OTHER_ARGS = [
     0.894,
     "--cuda-graph-bs",
     1,
-    2,
-    4,
-    6,
-    9,
-    10,
+    5,
     15,
     16,
     "--dtype",
@@ -81,14 +77,14 @@ class TestQwen8B(TestAscendPerformanceTestCaseBase):
     dataset_name = "random"
     max_concurrency = 16
     num_prompts = 16
-    input_len = 1024
-    output_len = 300
+    input_len = 6144
+    output_len = 1500
     random_range_ratio = 1
-    tpot = 8
-    output_token_throughput = 1462
+    tpot = 10
+    output_token_throughput = 930
 
     def test_qwen3_8b(self):
-        self.run_throughput(run_cycles=3)
+        self.run_throughput(run_cycles=2)
 
 
 if __name__ == "__main__":

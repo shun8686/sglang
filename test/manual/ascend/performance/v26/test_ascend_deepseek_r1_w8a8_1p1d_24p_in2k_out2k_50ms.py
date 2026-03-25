@@ -150,7 +150,7 @@ class TestDeepSeekR1W8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     dataset_name = "random"
     request_rate = 24
     max_concurrency = 1088
-    num_prompts = int(max_concurrency) * 4
+    num_prompts = 12800
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1

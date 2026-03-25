@@ -15,6 +15,7 @@ register_npu_ci(
 )
 
 QWEN3_32B_ENVS = {
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -63,7 +64,8 @@ QWEN3_32B_OTHER_ARGS = [
     "--cuda-graph-bs",
     1,
     4,
-    8,
+    10,
+    15,
     16,
     "--dtype",
     "bfloat16",
@@ -77,11 +79,11 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     dataset_name = "random"
     max_concurrency = 16
     num_prompts = 16
-    input_len = 1024
-    output_len = 300
+    input_len = 6144
+    output_len = 1500
     random_range_ratio = 1
-    tpot = 14.21
-    output_token_throughput = 718
+    tpot = 17.9
+    output_token_throughput = 506
 
     def test_qwen3_32b(self):
         self.run_throughput(run_cycles=3)

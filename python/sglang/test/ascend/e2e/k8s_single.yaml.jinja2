@@ -12,7 +12,9 @@ spec:
   policies:
     - event: PodEvicted
       action: RestartJob
+  {% if env == "green" %}
   queue: default
+  {% endif %}
   tasks:
   - name: "pod"
     replicas: 1
@@ -47,8 +49,6 @@ spec:
             value: "{{ metrics_data_file }}"
           - name: KUBECONFIG
             value: "{{ kube_config }}"
-          - name: NAMESPACE
-            value: "ascend-sglang-single"
           - name: HF_ENDPOINT
             value: "https://hf-mirror.com"
           - name: TROUBLE_SHOTTING
@@ -64,25 +64,23 @@ spec:
               {% endif %}
               {% if env == "green" %}
               huawei.com/Ascend910: {{ npu_size }}
-              {% endif %}
-              cpu: "6"
               memory: 128Gi
+              {% endif %}
+              cpu: "46"
             limits:
               {% if env in ["ci", "debug"] %}
               huawei.com/ascend-1980: {{ npu_size }}
               {% endif %}
               {% if env == "green" %}
               huawei.com/Ascend910: {{ npu_size }}
+              memory: 128Gi
               {% endif %}
               cpu: "46"
-              memory: 128Gi
           volumeMounts:
           - name: ascend-driver
             mountPath: /usr/local/Ascend/driver
           - name: shm-volume
             mountPath: /dev/shm
-          - name: info
-            mountPath: /etc/ascend_install.info
           - name: localtime
             mountPath: /etc/localtime
           - name: share
@@ -110,9 +108,6 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: "16Gi"
-        - name: info
-          hostPath:
-            path: /etc/ascend_install.info
         - name: localtime
           hostPath:
             path: /etc/localtime
