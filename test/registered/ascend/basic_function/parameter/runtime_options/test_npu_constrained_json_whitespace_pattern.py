@@ -94,7 +94,7 @@ class TestJSONModeMixin:
         # Detect newline whitespace (\n) in JSON string (matching pattern [\n]?)
         has_newline_whitespace = bool(re.search(r'\n', json_str))
         # Detect any whitespace characters
-        has_any_whitespace = bool(re.search(r'[\n\t ]', json_str))
+        has_space_or_tab = bool(re.search(r'[ \t]', json_str))
 
         if self.backend in ["outlines", "llguidance"]:
             # Expect newline whitespace (parameter takes effect)
@@ -102,11 +102,18 @@ class TestJSONModeMixin:
                 has_newline_whitespace,
                 f"[{self.backend}] --constrained-json-whitespace-pattern=[\\n]? should take effect, but no newline whitespace in JSON! JSON: {json_str}"
             )
+            self.assertFalse(
+                has_space_or_tab,
+                f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
+            )
         else:
             # Expect no whitespace (parameter has no effect, e.g. xgrammar)
-            self.assertFalse(
-                # has_any_whitespace,
+            self.assertTrue(
                 has_newline_whitespace,
+                f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
+            )
+            self.assertTrue(
+                has_space_or_tab,
                 f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
             )
 
