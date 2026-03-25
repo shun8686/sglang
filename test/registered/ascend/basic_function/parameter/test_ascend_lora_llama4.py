@@ -16,7 +16,7 @@ MODELS = [
     SimpleNamespace(
         # model="/root/.cache/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct",
         model="/root/.cache/modelscope/hub/models/meta-llama/Llama-4-Scout-17B-16E-Instruct",
-        tp_size=8,
+        tp_size=16,
     ),
 ]
 
@@ -34,6 +34,11 @@ class TestLlama4LoRA(CustomTestCase):
                     self.base_url,
                     timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                     other_args=[
+                        "--mem-fraction-static",
+                        0.8,
+                        "--cuda-graph-max-bs",
+                        16,
+                        # "--disable-cuda-graph",
                         # "--enable-lora",
                         # "--max-lora-rank",
                         # "64",
