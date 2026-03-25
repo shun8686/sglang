@@ -326,4 +326,9 @@ def main():
 
 
 if __name__ == "__main__":
+    print(
+        "DEPRECATION NOTICE: The folder `test/srt` should be deprecated as soon as possible. "
+        "Migrate tests to the new CI registry system described in `test/README.md`.",
+        flush=True,
+    )
     main()

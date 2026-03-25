@@ -92,6 +92,10 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
 
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
+
       - name: Install dependencies
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
@@ -139,6 +143,10 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
 
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
+
       - name: Install dependencies
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
@@ -181,6 +189,10 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: ${{ inputs.ref || github.ref }}
+
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
 
       - name: Install dependencies
         env:
@@ -226,6 +238,10 @@ jobs:
         with:
           ref: ${{ inputs.ref || github.ref }}
 
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
+
       - name: Install dependencies
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
@@ -266,6 +282,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
 
       - name: Install dependencies
         env:
@@ -309,6 +329,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
+
       - name: Install dependencies
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
@@ -350,6 +374,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Mark repository safe
+        run: |
+          git config --system --add safe.directory ${GITHUB_WORKSPACE}
 
       - name: Install dependencies
         run: |
