@@ -25,7 +25,7 @@ export PROFILING_step=10
 
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 
-MODEL_PATH=/home/weights/Qwen/Qwen3-30B-A3B-W8A8
+MODEL_PATH=/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8w8
 
 export SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT=600
 
@@ -61,5 +61,5 @@ python -m sglang.launch_server --model-path $MODEL_PATH \
     --chunked-prefill-size -1 --max-prefill-tokens 35000 \
     --tp-size 2 --mem-fraction-static 0.87 --cuda-graph-bs 1 5 15 40 70 100 120 130 140 146 150 154 156 158 160 162 --dtype bfloat16 --base-gpu-id 14
 
-python -m sglang.bench_serving --dataset-name random --backend sglang --host 127.0.0.1 --port 7788 --max-concurrency 162 --random-input-len 3500 --random-output-len 1500 --num-prompts 624 --random-range-ratio 1 --dataset-path /home/h00848570/qwen3-30b/GSM8K-in3500-bs3000_qwen3-30b.jsonl
+#python -m sglang.bench_serving --dataset-name random --backend sglang --host 127.0.0.1 --port 7788 --max-concurrency 162 --random-input-len 3500 --random-output-len 1500 --num-prompts 624 --random-range-ratio 1 --dataset-path /data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl
 
