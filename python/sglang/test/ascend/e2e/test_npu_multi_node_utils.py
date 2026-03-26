@@ -10,8 +10,6 @@ from types import SimpleNamespace
 from typing import Iterable, Union
 
 import requests
-from kubernetes import client, config
-from kubernetes.client.rest import ApiException
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
@@ -159,6 +157,8 @@ def get_host_ip():
 
 
 def get_k8s_api():
+    from kubernetes import client, config
+
     kube_config = os.environ.get("KUBECONFIG")
     config.load_kube_config(kube_config)
     return client.CoreV1Api()
@@ -175,6 +175,8 @@ def query_configmap(name, namespace):
     Returns:
         V1ConfigMap: ConfigMap object, or None if failed.
     """
+    from kubernetes.client.rest import ApiException
+
     k8s_api = get_k8s_api()
     try:
         configmap = k8s_api.read_namespaced_config_map(name, namespace)
