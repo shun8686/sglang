@@ -7,6 +7,11 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
+from sglang.test.test_utils import (
+    DEFAULT_URL_FOR_TEST,
+)
+
+
 register_npu_ci(
     est_time=1800,
     suite="nightly-2-npu-a3",
@@ -105,6 +110,10 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
 
     def test_qwen3_32b(self):
         self.run_throughput(run_cycles=1)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
 
 
 if __name__ == "__main__":
