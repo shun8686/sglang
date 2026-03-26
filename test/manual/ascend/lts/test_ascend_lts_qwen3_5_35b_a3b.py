@@ -10,7 +10,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-MODEL_PATH = "/home/weights/Qwen3.5-35B-A3B"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-35B-A3B"
 
 ENVS = {
     "ASCEND_LAUNCH_BLOCKING": "1",
