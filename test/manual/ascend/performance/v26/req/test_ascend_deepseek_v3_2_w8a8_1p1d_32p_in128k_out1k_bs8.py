@@ -31,9 +31,7 @@ MODEL_CONFIG = {
         "HCCL_BUFFSIZE": "400",
         "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "8",
     },
-    "router_envs": {
-        "SGLANG_DP_ROUND_ROBIN": "1",
-    },
+    "router_envs": {},
     "prefill_args": [
         "--nnodes",
         2,
