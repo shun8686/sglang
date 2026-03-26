@@ -24,7 +24,8 @@ class TestDtype(CustomTestCase):
 
     def test_dtype_options(self):
         # for kv_cache_dtype in ["bfloat16"]:
-        for kv_cache_dtype in ["fp8_e5m2"]:
+        # for kv_cache_dtype in ["fp8_e5m2"]:
+        for kv_cache_dtype in ["fp8_e4m3"]:
             other_args = [
                 "--dtype",
                 "auto",
