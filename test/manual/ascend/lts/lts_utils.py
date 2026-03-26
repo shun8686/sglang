@@ -24,6 +24,30 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+LONG_SEQ_DEFAULT_CONFIGS = {
+    "64k+1k": {
+        "input": 65536,
+        "output": 1024,
+        "ttft": 100000,
+        "tpot": 350,
+        "tps": 10,
+    },
+    "32k+1k": {
+        "input": 32768,
+        "output": 1024,
+        "ttft": 70000,
+        "tpot": 250,
+        "tps": 10,
+    },
+    "16k+1k": {
+        "input": 16384,
+        "output": 1024,
+        "ttft": 40000,
+        "tpot": 200,
+        "tps": 10,
+    },
+}
+
 
 def run_command(cmd, shell=True):
     try:
@@ -37,96 +61,41 @@ def run_command(cmd, shell=True):
 
 
 def run_long_seq_bench_serving(
-    host=None, port=None, dataset_name="random", dataset_path=None
+    host=None,
+    port=None,
+    dataset_name="random",
+    dataset_path=None,
+    seq_config=None,
 ):
-    """依次验证16k+1k、32k+1k、64k+1k三种单条长序列"""
-    # 新增：三种长序列配置（16k+1k/32k+1k/64k+1k）
-    long_seq_configs = {
-        "64k+1k": {
-            "input_len": 65536,
-            "output_len": 1024,
-            "ttft_threshold": 100000,
-            "tpot_threshold": 350,
-        },
-        "32k+1k": {
-            "input_len": 32768,
-            "output_len": 1024,
-            "ttft_threshold": 70000,
-            "tpot_threshold": 250,
-        },
-        "16k+1k": {
-            "input_len": 16384,
-            "output_len": 1024,
-            "ttft_threshold": 40000,
-            "tpot_threshold": 200,
-        },
-    }
-    for seq_type, config in long_seq_configs.items():
-        logger.info(
-            f"\n========== Start {seq_type} single long sequence test =========="
-        )
-        # 执行单条长序列请求
-        metrics = run_bench_serving(
-            host=host,
-            port=port,
-            input_len=config["input_len"],
-            output_len=config["output_len"],
-            dataset_name=dataset_name,
-            dataset_path=dataset_path,
-            request_rate=1,
-            max_concurrency=1,
-            num_prompts=2,
-            random_range_ratio=1,
-        )
-        logger.info(f"{seq_type} metrics: {metrics}")
+    if seq_config is None:
+        logger.warning(f"seq_config is None")
+        return
 
-        res_ttft = run_command(
-            "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
-        )
-        res_tpot = run_command(
-            "cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'"
-        )
-        res_output_token_throughput = run_command(
-            "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
-        )
-        res_ttft = res_ttft.strip() if res_ttft else "0"
-        res_tpot = res_tpot.strip() if res_tpot else "0"
+    metrics = run_bench_serving(
+        host=host,
+        port=port,
+        input_len=seq_config["input_len"],
+        output_len=seq_config["output_len"],
+        dataset_name=dataset_name,
+        dataset_path=dataset_path,
+        request_rate=1,
+        max_concurrency=1,
+        num_prompts=2,
+        random_range_ratio=1,
+    )
+    logger.info(f"metrics: {metrics}")
 
-        logger.info("res_ttft is " + str(res_ttft))
-        logger.info("res_tpot is " + str(res_tpot))
-        logger.info(
-            "res_output_token_throughput is " + str(res_output_token_throughput)
-        )
-        logger.info(
-            f"========== {seq_type} single long sequence test PASSED ==========\n"
-        )
-        # self.assertLessEqual(
-        #     float(res_ttft),
-        #     config["ttft_threshold"],
-        #     f"{seq_type} TTFT {res_ttft}ms exceeds threshold {config['ttft_threshold']}ms"
-        # )
-        # self.assertLessEqual(
-        #     float(res_tpot),
-        #     config["tpot_threshold"],
-        #     f"{seq_type} TPOT {res_tpot}ms exceeds threshold {config['tpot_threshold']}ms"
-        # )
-        # # 验证无错误日志
-        # self.assertEqual(
-        #     res_error, "",
-        #     f"{seq_type} request failed with error: {res_error}"
-        # )
+    res_ttft = run_command("cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'")
+    res_tpot = run_command("cat ./bench_log.txt | grep 'Mean TPOT' | awk '{print $4}'")
+    res_output_token_throughput = run_command(
+        "cat ./bench_log.txt | grep 'Output token throughput' | awk '{print $5}'"
+    )
+    res_ttft = res_ttft.strip() if res_ttft else "0"
+    res_tpot = res_tpot.strip() if res_tpot else "0"
 
-
-def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
-    command = (
-        f"python3 -m sglang.bench_serving --backend sglang --host {host} --port {port} --dataset-name random "
-        f"--request-rate 1 --max-concurrency 1 --num-prompts 1 "
-        f"--random-input-len {input_len} --random-output-len {output_len} "
-        f"--random-range-ratio 1"
-    )  # 固定长度，不随机
-    logger.info(f"{seq_type} single long sequence test command:{command}")
-    metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
-    return metrics
+    logger.info("res_ttft is " + str(res_ttft))
+    logger.info("res_tpot is " + str(res_tpot))
+    logger.info("res_output_token_throughput is " + str(res_output_token_throughput))
 
 
 class TestAscendLtsTestCaseBase(CustomTestCase):
@@ -243,6 +212,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         logger.info(f"---------- Gsm8k accuracy test PASSED ----------")
 
     def test_mmlu(self):
+        logger.info(f"---------- Start mmlu accuracy test ----------")
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
@@ -257,13 +227,18 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             self.accuracy["mmlu"],
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy["mmlu"]}',
         )
+        logger.info(f"---------- Mmlu accuracy test PASSED ----------")
 
-    def run_all_long_seq_verify(self):
-        _, host, port = self.base_url.split(":")
-        host = host[2:]
-        run_long_seq_bench_serving(
-            host=host,
-            port=port,
-            dataset_name=self.dataset_name,
-            dataset_path=self.dataset_path,
-        )
+    def run_all_long_seq_verify(self, long_seq_configs=None):
+        if long_seq_configs is None:
+            long_seq_configs = LONG_SEQ_DEFAULT_CONFIGS
+        for seq_type, seq_config in long_seq_configs.items():
+            logger.info(f"---------- Start long seq test: {seq_type} ----------")
+            run_long_seq_bench_serving(
+                host=self.host,
+                port=self.port,
+                dataset_name=self.dataset_name,
+                dataset_path=self.dataset_path,
+                seq_config=seq_config,
+            )
+            logger.info(f"---------- Finish long seq test: {seq_type} ----------")

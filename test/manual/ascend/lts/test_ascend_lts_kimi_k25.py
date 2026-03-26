@@ -29,6 +29,7 @@ class TestLTSKimi(TestAscendLtsTestCaseBase):
     def setUpClass(cls):
         cls.host = "127.0.0.1"
         cls.port = 8100
+        cls.base_url = f"http://{cls.host}:{cls.port}"
 
     def test_lts_kimi_k25(self):
         i = 0

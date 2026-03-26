@@ -117,7 +117,7 @@ class TestLTSQwen3235B(TestAscendLtsTestCaseBase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_lts_qwen3_235b(self):
+    def testLtsQwen235b(self):
         i = 0
         while True:
             i = i + 1
