@@ -23,7 +23,8 @@ class TestDtype(CustomTestCase):
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 
     def test_dtype_options(self):
-        for kv_cache_dtype in ["bfloat16"]:
+        # for kv_cache_dtype in ["bfloat16"]:
+        for kv_cache_dtype in ["fp8_e5m2"]:
             other_args = [
                 "--dtype",
                 "auto",
