@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -15,6 +15,11 @@ register_npu_ci(
 )
 
 ENVS = {
+    "ASCEND_LAUNCH_BLOCKING": "0",
+    "ENABLE_PROFILING": "0",
+    "PROFILING_BS": "162",
+    "PROFILING_STAGE": "decode",
+    "PROFILING_STEP": "10",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -25,11 +30,6 @@ ENVS = {
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
     "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
     "HCCL_BUFFSIZE": "400",
-    "ENABLE_PROFILING": "0",
-    "PROFILING_BS": "162",
-    "PROFILING_STAGE": "decode",
-    "PROFILING_STEP": "10",
-    "ASCEND_LAUNCH_BLOCKING": "0",
 }
 
 OTHER_ARGS = [
@@ -90,14 +90,15 @@ OTHER_ARGS = [
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
+    dataset_path = "/data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl"
     max_concurrency = 1
     num_prompts = 1
-    input_len = 3584
-    output_len = 1536
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 1
     tpot = 10
 
