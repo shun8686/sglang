@@ -89,9 +89,9 @@ class TestLTSQwen332B(TestAscendLtsTestCaseBase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:21000"
+        cls.base_url = "http://127.0.0.1:31555"
         cls.host = "127.0.0.1"
-        cls.port = 21000
+        cls.port = 31555
         env = os.environ.copy()
         env.update(cls.envs)
 
