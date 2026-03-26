@@ -85,7 +85,7 @@ class TestLTSQwen3527BW8A8(TestAscendLtsTestCaseBase):
     random_range_ratio = 1
     tpot = 50
     output_token_throughput = 0
-    accuracy = 0.7
+    accuracy = {"gsm8k": 0.7}
 
     @classmethod
     def setUpClass(cls):
