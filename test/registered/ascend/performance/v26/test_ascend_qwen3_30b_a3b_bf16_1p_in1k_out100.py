@@ -1,7 +1,6 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    # QWEN3_30B_A3B_W8A8_MODEL_PATH,
     QWEN3_30B_A3B_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
@@ -17,24 +16,19 @@ register_npu_ci(
 
 ENVS = {
     "ASCEND_USE_FIA": "0",
-
     "ASCEND_LAUNCH_BLOCKING": "0",
-
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-
     "INF_NAN_MODE_FORCE_DISABLE": "1",
     "HCCL_ALGO": "level0:NA;level1:ring",
     "DP_ROUND_ROBIN": "1",
     "SGLANG_USE_MAX_DP_ATT" : "1",
-
     "ENABLE_PROFILING": "0",
     "PROFILING_BS": "66",
     "PROFILING_STAGE": "decode",
     "PROFILING_STEP": "10",
-
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
@@ -90,15 +84,12 @@ OTHER_ARGS = [
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    # model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
-    # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
     model = QWEN3_30B_A3B_MODEL_PATH
-    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
     max_concurrency = 162
-    num_prompts = 324
+    num_prompts = 624
     input_len = 1000
     output_len = 100
     random_range_ratio = 1
