@@ -14,49 +14,60 @@ from sglang.test.ci.ci_register import register_npu_ci
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
-class TestDtype(CustomTestCase):
-    """Testcase：Verify set --dtype is half or float16 or bfloat16, request inference successful.
+class TestNPUKVCacheDtype(CustomTestCase):
+    """Testcase：Verify set --kv_cache_dtype is auto、 bf16 or bfloat16, request inference successful.
 
-       [Test Category] Parameter
-       [Test Target] --dtype
-       """
+    [Test Category] Parameter
+    [Test Target] --kv_cache_dtype
+    """
+
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+    kv_cache_dtype = "auto"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--dtype",
+            "auto",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--kv-cache-dtype",
+            cls.kv_cache_dtype,
+        ]
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
     def test_dtype_options(self):
-        # for kv_cache_dtype in ["bfloat16"]: T
-        # for kv_cache_dtype in ["fp8_e5m2"]: F
-        # for kv_cache_dtype in ["fp8_e4m3"]: F
-        # for kv_cache_dtype in ["bf16"]: T
-        # for kv_cache_dtype in ["fp4_e2m1"]:
-        for kv_cache_dtype in ["auto"]:
-            other_args = [
-                "--dtype",
-                "auto",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--kv-cache-dtype",
-                kv_cache_dtype,
-            ]
-            process = popen_launch_server(
-                self.model,
-                DEFAULT_URL_FOR_TEST,
-                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-                other_args=other_args,
-            )
-            response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": "The capital of France is",
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 32,
-                    },
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
                 },
-            )
-            self.assertEqual(response.status_code, 200)
-            self.assertIn("Paris", response.text)
-            kill_process_tree(process.pid)
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
+
+
+class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
+    kv_cache_dtype = "bf16"
+
+
+class TestNPUKVCacheDtypeBfloat16(TestNPUKVCacheDtype):
+    kv_cache_dtype = "bfloat16"
 
 
 if __name__ == "__main__":
