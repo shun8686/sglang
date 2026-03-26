@@ -13,7 +13,8 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     TTFT_TOLERANCE,
     run_bench_serving,
 )
-from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import CustomTestCase
 
 logging.basicConfig(
@@ -31,22 +32,8 @@ def run_command(cmd, shell=True):
         )
         return result.stdout
     except subprocess.CalledProcessError as e:
-        print(f"command error: {e}")
+        logger.info(f"command error: {e}")
         return None
-
-
-def run_gsm8k(host="http://127.0.0.1", port=6688, expect_accuracy=None):
-    args = SimpleNamespace(
-        num_shots=8,
-        data_path=None,
-        num_questions=1319,
-        max_new_tokens=512,
-        parallel=128,
-        host=host,
-        port=port,
-    )
-    metrics = run_eval(args)
-    return metrics
 
 
 def run_long_seq_bench_serving(
@@ -75,7 +62,9 @@ def run_long_seq_bench_serving(
         },
     }
     for seq_type, config in long_seq_configs.items():
-        print(f"\n========== Start {seq_type} single long sequence test ==========")
+        logger.info(
+            f"\n========== Start {seq_type} single long sequence test =========="
+        )
         # 执行单条长序列请求
         metrics = run_bench_serving(
             host=host,
@@ -89,7 +78,7 @@ def run_long_seq_bench_serving(
             num_prompts=2,
             random_range_ratio=1,
         )
-        print(f"{seq_type} metrics: {metrics}")
+        logger.info(f"{seq_type} metrics: {metrics}")
 
         res_ttft = run_command(
             "cat ./bench_log.txt | grep 'Mean TTFT' | awk '{print $4}'"
@@ -103,10 +92,14 @@ def run_long_seq_bench_serving(
         res_ttft = res_ttft.strip() if res_ttft else "0"
         res_tpot = res_tpot.strip() if res_tpot else "0"
 
-        print("res_ttft is " + str(res_ttft))
-        print("res_tpot is " + str(res_tpot))
-        print("res_output_token_throughput is " + str(res_output_token_throughput))
-        print(f"========== {seq_type} single long sequence test PASSED ==========\n")
+        logger.info("res_ttft is " + str(res_ttft))
+        logger.info("res_tpot is " + str(res_tpot))
+        logger.info(
+            "res_output_token_throughput is " + str(res_output_token_throughput)
+        )
+        logger.info(
+            f"========== {seq_type} single long sequence test PASSED ==========\n"
+        )
         # self.assertLessEqual(
         #     float(res_ttft),
         #     config["ttft_threshold"],
@@ -131,15 +124,15 @@ def run_single_long_seq_test(host, port, input_len, output_len, seq_type):
         f"--random-input-len {input_len} --random-output-len {output_len} "
         f"--random-range-ratio 1"
     )  # 固定长度，不随机
-    print(f"{seq_type} single long sequence test command:{command}")
+    logger.info(f"{seq_type} single long sequence test command:{command}")
     metrics = run_command(f"{command} | tee ./single_long_seq_{seq_type}_log.txt")
     return metrics
 
 
 class TestAscendLtsTestCaseBase(CustomTestCase):
-    host = "127.0.0.1"
-    port = 8100
-    base_url = f"http://{host}:{port}"
+    host = None
+    port = None
+    base_url = None
     model = None
     backend = "sglang"
     dataset_name = "random"
@@ -161,7 +154,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
     tpot = None
     mean_e2e_latency = None
     output_token_throughput = None
-    accuracy = None
+    accuracy = {"gsm8k": 1, "mmlu": 1}
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
@@ -231,7 +224,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         self._assert_metrics(metrics)
 
     def run_gsm8k(self):
-        print(f"---------- Start gsm8k accuracy test ----------")
+        logger.info(f"---------- Start gsm8k accuracy test ----------")
         args = SimpleNamespace(
             num_shots=8,
             data_path=None,
@@ -241,13 +234,29 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             host=self.host,
             port=self.port,
         )
-        metrics = run_eval(args)
+        metrics = run_eval_gsm8k(args)
         self.assertGreater(
             metrics["accuracy"],
-            self.accuracy,
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+            self.accuracy["gsm8k"],
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy["gsm8k"]}',
         )
-        print(f"---------- Gsm8k accuracy test PASSED ----------")
+        logger.info(f"---------- Gsm8k accuracy test PASSED ----------")
+
+    def test_mmlu(self):
+        args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model,
+            eval_name="mmlu",
+            num_examples=64,
+            num_threads=32,
+        )
+
+        metrics = run_eval(args)
+        self.assertGreater(
+            metrics["score"],
+            self.accuracy["mmlu"],
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy["mmlu"]}',
+        )
 
     def run_all_long_seq_verify(self):
         _, host, port = self.base_url.split(":")

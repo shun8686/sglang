@@ -24,7 +24,7 @@ source /usr/local/Ascend/nnal/atb/set_env.sh
 export PYTORCH_NPU_ALLOC_CONF=expandable_segments:True
 export STREAMS_PER_DEVICE=32
 
-MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
+MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-V3.2-W8A8"
 
 export SGLANG_NPU_USE_MULTI_STREAM=1
 export SGLANG_NPU_USE_MLAPO=1
@@ -33,6 +33,8 @@ export SGLANG_SCHEDULER_SKIP_ALL_GATHER=1
 export TASK_QUEUE_ENABLE=0
 export SGLANG_ENABLE_OVERLAP_PLAN_STREAM=1
 export SGLANG_ENABLE_SPEC_V2=1
+export HCCL_BUFFSIZE=400
+export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=8
 
 PIPs=('your prefill ip1' 'your prefill ip2')
 
@@ -55,21 +57,16 @@ done
 
 export HCCL_SOCKET_IFNAME=${IFNAMES[$VC_TASK_INDEX]}
 export GLOO_SOCKET_IFNAME=${HCCL_SOCKET_IFNAME}
-nnodes=${#DIPs[@]}
-tp_size=`expr 16 \* ${nnodes}`
 export ASCEND_MF_STORE_URL=tcp://${PIPs[0]}:24667
 
-CHUNKED_SIZE=65536
-DP=8
-export HCCL_BUFFSIZE=400
-export SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK=8
+nnodes=${#DIPs[@]}
+tp_size=`expr 16 \* ${nnodes}`
 
 mkdir -p log
 DECODE_LOG_FILE="./log/launch_decode_$(date +'%Y-%m-%d-%H:%M').log"
-
 nohup python3 -m sglang.launch_server --model-path ${MODEL_PATH} \
 --tp $tp_size \
---dp ${DP} \
+--dp 8 \
 --ep $tp_size \
 --moe-dense-tp-size 1 \
 --enable-dp-attention \

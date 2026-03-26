@@ -10,7 +10,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-w8a8"
 # MODEL_PATH = "/home/weights/Qwen3-30B-A3B-W8A8"
 
 OTHER_ARGS = [
@@ -75,13 +75,13 @@ class TestLTSQwen332B(TestAscendLtsTestCaseBase):
     ttft = 10000
     tpot = 50
     output_token_throughput = 350
-    accuracy = 0.80
+    accuracy = {"gsm8k": 0.80, "mmlu": 0.80}
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://0.0.0.0:30000"
         cls.host = "0.0.0.0"
         cls.port = 30000
+        cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
         env.update(cls.envs)
 

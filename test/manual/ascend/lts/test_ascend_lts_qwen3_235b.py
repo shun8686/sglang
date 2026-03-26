@@ -6,7 +6,6 @@ from lts_utils import TestAscendLtsTestCaseBase
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
-from sglang.test.ascend.e2e.test_npu_performance_utils import DEFAULT_URL_FOR_TEST
 from sglang.test.test_utils import (
     popen_launch_server,
 )
@@ -96,11 +95,13 @@ class TestLTSQwen3235B(TestAscendLtsTestCaseBase):
     ttft = 10000
     tpot = 50
     output_token_throughput = 8314
-    accuracy = 0.00
+    accuracy = {"gsm8k": 0.80, "mmlu": 0.80}
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.host = "0.0.0.0"
+        cls.port = 30050
+        cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
         env.update(cls.envs)
 

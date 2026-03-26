@@ -75,13 +75,13 @@ class TestLTSQwen332B(TestAscendLtsTestCaseBase):
     ttft = 10000
     tpot = 50
     output_token_throughput = 350
-    accuracy = 0.80
+    accuracy = {"gsm8k": 0.80, "mmlu": 0.80}
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = "http://0.0.0.0:30020"
         cls.host = "0.0.0.0"
         cls.port = 30020
+        cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
         env.update(cls.envs)
 

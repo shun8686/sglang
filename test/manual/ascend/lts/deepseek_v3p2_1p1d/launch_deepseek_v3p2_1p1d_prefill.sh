@@ -29,7 +29,7 @@ export HCCL_BUFFSIZE=1024
 export DEEPEP_NORMAL_LONG_SEQ_ROUND=5
 export DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS=512
 
-MODEL_PATH=xxx
+MODEL_PATH="/root/.cache/modelscope/hub/models/DeepSeek-V3.2-W8A8"
 
 export SGLANG_NPU_USE_MLAPO=1
 export DEEP_NORMAL_MODE_USE_INT8_QUANT=1
@@ -72,7 +72,7 @@ nohup python3 -m sglang.launch_server --model-path ${MODEL_PATH} \
 --watchdog-timeout 9000 \
 --host ${PIPs[$VC_TASK_INDEX]} --port 8000 \
 --mem-fraction-static 0.73 \
---disable-radix-cache --chunked-prefill-size -1 --max-prefill-tokens 68000 \
+--chunked-prefill-size -1 --max-prefill-tokens 68000 \
 --max-running-requests 1 \
 --moe-a2a-backend deepep --deepep-mode normal \
 --quantization modelslim \
@@ -85,6 +85,8 @@ nohup python3 -m sglang.launch_server --model-path ${MODEL_PATH} \
 --speculative-algorithm NEXTN --speculative-num-steps 1 --speculative-eagle-topk 1 --speculative-num-draft-tokens 2 \
 --dist-init-addr ${PIPs[0]}:10000 \
 > $PREFILL_LOG_FILE 2>&1 &
+
+pause
 
 # launch router node
 ROUTER_LOG_FILE="./log/launch_router_$(date +'%Y-%m-%d-%H:%M').log"
