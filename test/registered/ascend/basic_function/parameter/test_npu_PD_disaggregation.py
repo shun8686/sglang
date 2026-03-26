@@ -16,6 +16,7 @@ from sglang.test.server_fixtures.disaggregation_fixture import (
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_pd_server,
+    popen_with_error_check,
 )
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
@@ -38,12 +39,13 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         cls.temp_dir = tempfile.mkdtemp()
         cls.start_prefill()
         cls.start_decode()
+        cls.bootstrap_port = "8996"
 
         # Block until both
         cls.wait_server_ready(cls.prefill_url + "/health")
         cls.wait_server_ready(cls.decode_url + "/health")
 
-        cls.launch_lb()
+        cls.launch_router()
 
     @classmethod
     def start_prefill(cls):
@@ -57,7 +59,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "--disaggregation-transfer-backend",
             "ascend",
             "disaggregation-bootstrap-port",
-            8996,
+            cls.bootstrap_port,
             "--tp-size",
             "2",
             "--enable-hierarchical-cache",
@@ -93,6 +95,28 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     @classmethod
     def start_decode(cls):
         pass
+
+    @classmethod
+    def launch_router(cls):
+        lb_command = [
+            "python3",
+            "-m",
+            "sglang_router.launch_router",
+            "--pd-disaggregation",
+            "--mini-lb",
+            "--prefill",
+            cls.prefill_url,
+            cls.bootstrap_port,
+            "--decode",
+            cls.decode_url,
+            "--host",
+            cls.base_host,
+            "--port",
+            cls.lb_port,
+        ]
+
+        cls.process_lb = popen_with_error_check(lb_command)
+        cls.wait_server_ready(cls.lb_url + "/health")
 
     def gen_prompt(self, token_num: int) -> str:
         all_available_tokens = list(self.tokenizer.get_vocab().values())
