@@ -34,10 +34,10 @@ class TestDtype(CustomTestCase):
                 "--log-level",
                 "debug",
             ]
-            out_log_name = "./log_requests_level_out_log.txt"
-            cls.err_log_name = "./log_requests_level_err_log.txt"
-            cls.out_log_file = open(cls.out_log_name, "w+", encoding="utf-8")
-            cls.err_log_file = open(cls.err_log_name, "w+", encoding="utf-8")
+            # out_log_name = "./log_requests_level_out_log.txt"
+            # cls.err_log_name = "./log_requests_level_err_log.txt"
+            # cls.out_log_file = open(cls.out_log_name, "w+", encoding="utf-8")
+            # cls.err_log_file = open(cls.err_log_name, "w+", encoding="utf-8")
             process = popen_launch_server(
                 self.model,
                 DEFAULT_URL_FOR_TEST,
