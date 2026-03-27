@@ -1,4 +1,6 @@
+import os
 import unittest
+import logging
 
 import requests
 
@@ -24,6 +26,7 @@ class TestNPUKVCacheDtype(CustomTestCase):
 
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     kv_cache_dtype = "auto"
+    using_kv_cache_dtype = "torch.bfloat16"
 
     @classmethod
     def setUpClass(cls):
@@ -37,6 +40,14 @@ class TestNPUKVCacheDtype(CustomTestCase):
             "--kv-cache-dtype",
             cls.kv_cache_dtype,
         ]
+
+        cls.old_stdout = os.dup(1)
+        cls.old_stderr = os.dup(2)
+        cls.pipe_out, cls.pipe_in = os.pipe()
+        cls.pipe_err_out, cls.pipe_err_in = os.pipe()
+        os.dup2(cls.pipe_in, 1)
+        os.dup2(cls.pipe_err_in, 2)
+
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -61,6 +72,26 @@ class TestNPUKVCacheDtype(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
+
+        response = requests.get(
+            f"{self.base_url}/server_info",
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(f'"kv_cache_dtype":"{self.kv_cache_dtype}"', response.text)
+
+        os.dup2(self.old_stdout, 1)
+        os.dup2(self.old_stderr, 2)
+        os.close(self.pipe_in)
+        os.close(self.pipe_err_in)
+
+        output = os.read(self.pipe_out, 1024 * 1024).decode("utf-8")
+        error = os.read(self.pipe_err_out, 1024 * 1024).decode("utf-8")
+        os.close(self.pipe_out)
+        os.close(self.pipe_err_out)
+        logger = logging.getLogger()
+        logger.info(output)
+        logger.info(error)
+        self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", error)
 
 
 class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
