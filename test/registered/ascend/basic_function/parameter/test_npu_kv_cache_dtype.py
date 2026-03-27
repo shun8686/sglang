@@ -26,7 +26,7 @@ register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()],
+    # handlers=[logging.StreamHandler()],
     filename='kv_cache_dtype.log',
 )
 logger = logging.getLogger(__name__)
