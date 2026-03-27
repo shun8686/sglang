@@ -37,8 +37,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         cls.model = QWEN3_32B_WEIGHTS_PATH
 
         cls.tokenizer = get_tokenizer(cls.model)
-        cls.temp_dir = tempfile.mkdtemp()
-        logging.warning(f"****************cls.temp_dir = {cls.temp_dir}")
         cls.bootstrap_port = "8996"
         cls.start_prefill()
         cls.start_decode()
@@ -82,9 +80,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         ]
         env = {
             **os.environ,
-            "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
-            "SGLANG_LOGGING_CONFIG_PATH": "./cache_err_log.txt"
         }
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
@@ -196,7 +192,6 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
 
         env = {
             **os.environ,
-            "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
         cls.process_decode = popen_launch_pd_server(
@@ -243,7 +238,6 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
 
     @classmethod
     def tearDownClass(cls):
-        os.environ.pop("ASCEND_MF_STORE_URL")
         super().tearDownClass()
 
 
