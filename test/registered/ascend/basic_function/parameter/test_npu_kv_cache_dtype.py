@@ -50,7 +50,7 @@ class TestNPUKVCacheDtype(CustomTestCase):
             "--enable-metrics",
         ]
 
-        cls.logger = logging.getLogger("sglang.srt.model_executor.model_runner")
+        cls.logger = logging.getLogger("python.sglang.srt.model_executor.model_runner")
         cls.log_capture_string = StringIO()
         ch = logging.StreamHandler(cls.log_capture_string)
         ch.setLevel(logging.DEBUG)
