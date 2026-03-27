@@ -65,6 +65,8 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             cls.bootstrap_port,
             "--tp-size",
             "2",
+            "--base-gpu-id",
+            4,
             "--enable-hierarchical-cache",
             "--hicache-io-backend",
             "kernel_ascend",
