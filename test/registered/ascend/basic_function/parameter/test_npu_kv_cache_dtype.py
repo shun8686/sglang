@@ -211,7 +211,7 @@ class TestNPUKVCacheDtype(CustomTestCase):
         # print(self.output_buffer.getvalue())
         # self.assertTrue(len(content) > 0)
         # self.assertIn(f"Using KV Cache dtype: {self.using_kv_cache_dtype}", output)
-        self.assertIn(f"Using KV Cache dtype: {self.using_kv_cache_dtype}", error)
+        self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", error)
 
 #
 # class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
