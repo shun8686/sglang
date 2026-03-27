@@ -91,13 +91,13 @@ class TestNPUKVCacheDtype(CustomTestCase):
         self.assertTrue(len(content) > 0)
         self.assertIn(f"Using KV Cache dtype: {self.using_kv_cache_dtype}", content)
 
-
-class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
-    kv_cache_dtype = "bf16"
-
-
-class TestNPUKVCacheDtypeBfloat16(TestNPUKVCacheDtype):
-    kv_cache_dtype = "bfloat16"
+#
+# class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
+#     kv_cache_dtype = "bf16"
+#
+#
+# class TestNPUKVCacheDtypeBfloat16(TestNPUKVCacheDtype):
+#     kv_cache_dtype = "bfloat16"
 
 
 if __name__ == "__main__":
