@@ -43,8 +43,7 @@ class TestNPUKVCacheDtype(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--dtype",
-            # "auto",
-            "float16",
+            "auto",
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
