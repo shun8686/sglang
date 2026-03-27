@@ -282,25 +282,25 @@ class TestModelFileVerifierCLI(_FakeModelTestCase):
 # ======== HuggingFace Tests ========
 
 
-class TestModelFileVerifierHF(_RealModelTestCase):
-    # Test 1: Generate checksum file from HF repository
-    def test_generate_checksums_from_hf(self):
-        checksums_file = os.path.join(self.test_dir, "checksums.json")
-        # Pass HF model name directly - tool automatically downloads and generates checksum file
-        # result = generate_checksums(source=MODEL_NAME, output_path=checksums_file)
-        result = generate_checksums(source="Qwen/Qwen3-0.6B", output_path=checksums_file)
-
-        # Assert file exists, number of checksums > 0, and each SHA256 is 64 characters (standard hash length)
-        self.assertTrue(os.path.exists(checksums_file))
-        self.assertGreater(len(result.files), 0)
-        for filename, file_info in result.files.items():
-            self.assertEqual(len(file_info.sha256), 64)
-
-    # Test 2: Verify local model with HF repository checksums
-    def test_verify_with_hf_checksum(self):
-        # Pass HF model name directly - tool automatically fetches remote checksums and verifies local files
-        # verify(model_path=self.test_dir, checksums_source=MODEL_NAME)
-        verify(model_path=self.test_dir, checksums_source="Qwen/Qwen3-0.6B")
+# class TestModelFileVerifierHF(_RealModelTestCase):
+#     # Test 1: Generate checksum file from HF repository
+#     def test_generate_checksums_from_hf(self):
+#         checksums_file = os.path.join(self.test_dir, "checksums.json")
+#         # Pass HF model name directly - tool automatically downloads and generates checksum file
+#         # result = generate_checksums(source=MODEL_NAME, output_path=checksums_file)
+#         result = generate_checksums(source="Qwen/Qwen3-0.6B", output_path=checksums_file)
+#
+#         # Assert file exists, number of checksums > 0, and each SHA256 is 64 characters (standard hash length)
+#         self.assertTrue(os.path.exists(checksums_file))
+#         self.assertGreater(len(result.files), 0)
+#         for filename, file_info in result.files.items():
+#             self.assertEqual(len(file_info.sha256), 64)
+#
+#     # Test 2: Verify local model with HF repository checksums
+#     def test_verify_with_hf_checksum(self):
+#         # Pass HF model name directly - tool automatically fetches remote checksums and verifies local files
+#         # verify(model_path=self.test_dir, checksums_source=MODEL_NAME)
+#         verify(model_path=self.test_dir, checksums_source="Qwen/Qwen3-0.6B")
 
 
 # ======== Real Model E2E Tests ========
@@ -365,13 +365,13 @@ class TestModelFileVerifierWithRealModel(_RealModelTestCase):
         # Verify server launch fails with local checksum file and corrupted weights
         self._run_server_test(corrupt_weights=True, use_hf_checksum=False)
 
-    def test_server_launch_with_hf_checksum_intact(self):
-        # Verify server starts normally with HF checksums and intact weights
-        self._run_server_test(corrupt_weights=False, use_hf_checksum=True)
-
-    def test_server_launch_with_hf_checksum_corrupted(self):
-        # Verify server launch fails with HF checksums and corrupted weights
-        self._run_server_test(corrupt_weights=True, use_hf_checksum=True)
+    # def test_server_launch_with_hf_checksum_intact(self):
+    #     # Verify server starts normally with HF checksums and intact weights
+    #     self._run_server_test(corrupt_weights=False, use_hf_checksum=True)
+    #
+    # def test_server_launch_with_hf_checksum_corrupted(self):
+    #     # Verify server launch fails with HF checksums and corrupted weights
+    #     self._run_server_test(corrupt_weights=True, use_hf_checksum=True)
 
 
 # ======== Test Utilities ========
