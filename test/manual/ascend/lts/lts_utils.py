@@ -106,6 +106,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    output_file = None
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -182,6 +183,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             "image_count": self.image_count,
             "warmup_requests": self.warmup_requests,
             "seed": self.seed,
+            "output_file": self.output_file,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
 

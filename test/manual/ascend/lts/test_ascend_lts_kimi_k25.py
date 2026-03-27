@@ -23,7 +23,7 @@ class TestLTSKimi(TestAscendLtsTestCaseBase):
     ttft = 15000
     tpot = 55
     output_token_throughput = 1350
-    accuracy = 0.90
+    accuracy = {"gsm8k": 0.90, "mmlu": 0.80}
 
     @classmethod
     def setUpClass(cls):
@@ -61,5 +61,3 @@ if __name__ == "__main__":
         finally:
             sys.stdout = original_stdout
             sys.stderr = original_stderr
-
-    print(f"Test log saved to {log_file}")

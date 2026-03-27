@@ -10,7 +10,7 @@ MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 
 class TestLTSDeepSeekV32(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
-    max_concurrency = 64
+    max_concurrency = 8
     num_prompts = int(max_concurrency) * 4
     input_len = 512
     output_len = 512
@@ -18,7 +18,7 @@ class TestLTSDeepSeekV32(TestAscendLtsTestCaseBase):
     ttft = 10000
     tpot = 100
     output_token_throughput = 5000
-    accuracy = 0.80
+    accuracy = {"gsm8k": 0.80, "mmlu": 0.80}
 
     @classmethod
     def setUpClass(cls):

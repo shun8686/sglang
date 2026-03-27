@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 import unittest
 
 from lts_utils import TestAscendLtsTestCaseBase
@@ -63,13 +64,16 @@ OTHER_ARGS = [
     "--mamba-ssm-dtype",
     "bfloat16",
     "--disable-radix-cache",
+    "--base-gpu-id",
+    0,
 ]
 
 
-class TestLTSQwen332B(TestAscendLtsTestCaseBase):
+class TestLtsQwen35(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
+    output_file = "./log/bench_results.jsonl"
     max_concurrency = 16
     num_prompts = 16
     input_len = 3500
@@ -77,7 +81,7 @@ class TestLTSQwen332B(TestAscendLtsTestCaseBase):
     random_range_ratio = 1
     tpot = 50
     output_token_throughput = 0
-    accuracy = 0.8
+    accuracy = {"gsm8k": 0.80, "mmlu": 0.80}
 
     @classmethod
     def setUpClass(cls):
@@ -99,7 +103,7 @@ class TestLTSQwen332B(TestAscendLtsTestCaseBase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def testLtsQwen35b(self):
+    def testLtsQwen35(self):
         i = 0
         while True:
             i = i + 1
@@ -112,4 +116,20 @@ class TestLTSQwen332B(TestAscendLtsTestCaseBase):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    os.makedirs("log", exist_ok=True)
+    log_file = (
+        f"./log/lts_{os.path.splitext(os.path.basename(__file__))[0]}_{time_str}.log"
+    )
+
+    with open(log_file, "w", encoding="utf-8") as f:
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        sys.stdout = f
+        sys.stderr = f
+
+        try:
+            unittest.main(verbosity=2)
+        finally:
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr

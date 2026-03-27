@@ -1,5 +1,6 @@
 import datetime
 import os
+import sys
 import unittest
 
 from lts_utils import TestAscendLtsTestCaseBase
@@ -106,11 +107,11 @@ OTHER_ARGS = [
     "--quantization",
     "modelslim",
     "--base-gpu-id",
-    8,
+    6,
 ]
 
 
-class TestLTSQwen3Next(TestAscendLtsTestCaseBase):
+class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
@@ -144,7 +145,7 @@ class TestLTSQwen3Next(TestAscendLtsTestCaseBase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def testLtsQwen3Next(self):
+    def testLtsQwen3CoderNext(self):
         i = 0
         while True:
             i = i + 1
@@ -157,4 +158,20 @@ class TestLTSQwen3Next(TestAscendLtsTestCaseBase):
 
 
 if __name__ == "__main__":
-    unittest.main(verbosity=2)
+    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
+    os.makedirs("log", exist_ok=True)
+    log_file = (
+        f"./log/lts_{os.path.splitext(os.path.basename(__file__))[0]}_{time_str}.log"
+    )
+
+    with open(log_file, "w", encoding="utf-8") as f:
+        original_stdout = sys.stdout
+        original_stderr = sys.stderr
+        sys.stdout = f
+        sys.stderr = f
+
+        try:
+            unittest.main(verbosity=2)
+        finally:
+            sys.stdout = original_stdout
+            sys.stderr = original_stderr

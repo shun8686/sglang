@@ -212,6 +212,7 @@ def run_bench_serving(
     image_count=None,
     warmup_requests=None,
     seed=None,
+    output_file=None,
 ):
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
@@ -257,6 +258,8 @@ def run_bench_serving(
         cmd_args.extend(["--warmup-requests", str(warmup_requests)])
     if seed:
         cmd_args.extend(["--seed", str(seed)])
+    if output_file:
+        cmd_args.extend(["--output-file", str(output_file)])
     logger.info(f"Command: {' '.join(cmd_args)}")
 
     # Run benchmark command and capture output
