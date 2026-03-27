@@ -94,7 +94,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             other_args=prefill_args,
             env=env,
             return_stdout_stderr=(out_log_file, err_log_file),
-            pd_separated=True,
         )
 
     @classmethod
@@ -211,7 +210,6 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             other_args=decode_args,
             env=env,
             return_stdout_stderr=(decode_out_log_file, decode_err_log_file),
-            pd_separated=True,
         )
 
     def test_multi_turn_conversation_cache(self):
