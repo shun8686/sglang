@@ -1,6 +1,7 @@
 import logging
 import os
 import random
+import shutil
 import tempfile
 import time
 import unittest
@@ -37,6 +38,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         cls.model = QWEN3_32B_WEIGHTS_PATH
 
         cls.tokenizer = get_tokenizer(cls.model)
+        cls.temp_dir = tempfile.mkdtemp()
         cls.bootstrap_port = "8996"
         cls.start_prefill()
         cls.start_decode()
@@ -80,6 +82,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         ]
         env = {
             **os.environ,
+            "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
         }
         cls.process_prefill = popen_launch_pd_server(
@@ -173,7 +176,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             "--mem-fraction-static",
             "0.9",
             "--base-gpu-id",
-            2,
+            6,
             # cls.base_gpu_id,
             "--disaggregation-decode-enable-offload-kvcache",
             "--hicache-io-backend",
@@ -192,6 +195,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
 
         env = {
             **os.environ,
+            "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
         cls.process_decode = popen_launch_pd_server(
@@ -212,15 +216,15 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
         previous_cached_tokens = 0
 
         for turn in range(2, 5):
-            print(f"\nTurn {turn}: Continuing from previous context")
+            logging.warning(f"\nTurn {turn}: Continuing from previous context")
 
             response = self.send_request(
                 current_context, max_tokens=200, temperature=0.1
             )
             cached_tokens = response["meta_info"]["cached_tokens"]
 
-            print(f"Turn {turn} cached tokens: {cached_tokens}")
-            print(f"Improvement: {cached_tokens - previous_cached_tokens} tokens")
+            logging.warning(f"Turn {turn} cached tokens: {cached_tokens}")
+            logging.warning(f"Improvement: {cached_tokens - previous_cached_tokens} tokens")
 
             # Assert cache improvement
             self.assertGreater(
@@ -239,6 +243,8 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
+        if os.path.exists(cls.temp_dir):
+            shutil.rmtree(cls.temp_dir)
 
 
 if __name__ == "__main__":
