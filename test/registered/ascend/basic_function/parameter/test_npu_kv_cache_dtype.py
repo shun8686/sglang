@@ -47,10 +47,10 @@ class TestNPUKVCacheDtype(CustomTestCase):
             "--disable-cuda-graph",
             "--kv-cache-dtype",
             cls.kv_cache_dtype,
-            "--enable-metrics",
+            # "--enable-metrics",
         ]
 
-        cls.logger = logging.getLogger("sglang.srt.model_executor.model_runner")
+        # cls.logger = logging.getLogger("sglang.srt.model_executor.model_runner")
         # cls.log_capture_string = StringIO()
         # ch = logging.StreamHandler(cls.log_capture_string)
         # ch.setLevel(logging.DEBUG)
@@ -63,6 +63,7 @@ class TestNPUKVCacheDtype(CustomTestCase):
         redirect_stdout(cls.f)
         redirect_stderr(cls.f)
 
+        # old_stdout = cls.f.getvalue().strip()
 
         # cls.out_log_file_obj = tempfile.NamedTemporaryFile(
         #     mode="w+", encoding="utf-8", delete=False, suffix=".txt"
@@ -76,8 +77,8 @@ class TestNPUKVCacheDtype(CustomTestCase):
         # cls.err_log_file = cls.err_log_file_obj
         cls.out_log_name = "./log_requests_level_out_log.txt"
         cls.err_log_name = "./log_requests_level_err_log.txt"
-        cls.out_log_file = open(cls.out_log_name, "w+", encoding="utf-8")
-        cls.err_log_file = open(cls.err_log_name, "w+", encoding="utf-8")
+        cls.out_log_file = open(cls.out_log_name, "a+", encoding="utf-8")
+        cls.err_log_file = open(cls.err_log_name, "a+", encoding="utf-8")
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
