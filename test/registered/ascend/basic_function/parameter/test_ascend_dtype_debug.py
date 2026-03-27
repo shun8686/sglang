@@ -25,7 +25,8 @@ class TestDtype(CustomTestCase):
 
     def test_dtype_options(self):
         # for i in ["half", "float16", "bfloat16"]:
-        for i in ["bfloat16"]:
+        # for i in ["bfloat16"]:
+        for i in ["float32"]:
             other_args = [
                 "--dtype",
                 i,
