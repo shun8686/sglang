@@ -20,7 +20,8 @@ class TestDtype(CustomTestCase):
        [Test Category] Parameter
        [Test Target] --dtype
        """
-    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+    # model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+    model = "/home/weights/LLM-Research/Llama-3.2-1B-Instruct"
 
     def test_dtype_options(self):
         # for i in ["half", "float16", "bfloat16"]:
