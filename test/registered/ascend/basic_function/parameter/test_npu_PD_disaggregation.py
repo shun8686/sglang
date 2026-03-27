@@ -50,8 +50,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
         cls.launch_router()
         cls.wait_server_ready(cls.lb_url + "/health")
-        cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
 
     @classmethod
     def start_prefill(cls):
@@ -87,15 +85,15 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
             "SGLANG_LOGGING_CONFIG_PATH": "./cache_err_log.txt"
         }
-
+        out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
+        err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
         cls.process_prefill = popen_launch_server(
             cls.model,
             cls.prefill_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=prefill_args,
             env=env,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-            pd_separated=True,
+            return_stdout_stderr=(out_log_file, err_log_file),
         )
 
     @classmethod
@@ -203,14 +201,15 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
+        decode_out_log_file = open("./decode_cache_out_log.txt", "w+", encoding="utf-8")
+        decode_err_log_file = open("./decode_cache_err_log.txt", "w+", encoding="utf-8")
         cls.process_decode = popen_launch_server(
             cls.model,
             cls.decode_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=decode_args,
             env=env,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
-            pd_separated=True,
+            return_stdout_stderr=(decode_out_log_file, decode_err_log_file),
         )
 
     def test_multi_turn_conversation_cache(self):

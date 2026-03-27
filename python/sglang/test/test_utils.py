@@ -739,6 +739,7 @@ def _launch_server_process(
             env=child_env,
             text=True,
             bufsize=1,
+            errors="ignore",
         )
 
         def _dump(src, sinks):
