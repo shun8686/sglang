@@ -97,13 +97,15 @@ class TestNPUKVCacheDtype(CustomTestCase):
         stdout_result = os.read(cls.stdout_pipe[0], 1024 * 1024).decode()
         stderr_result = os.read(cls.stderr_pipe[0], 1024 * 1024).decode()
 
+
+
+        os.close(cls.stdout_pipe[0])
+        os.close(cls.stderr_pipe[0])
+
         print("========================================================")
         print(stdout_result)
         print("========================================================")
         print(stderr_result)
-
-        os.close(cls.stdout_pipe[0])
-        os.close(cls.stderr_pipe[0])
 
     def test_dtype_options(self):
         response = requests.post(
