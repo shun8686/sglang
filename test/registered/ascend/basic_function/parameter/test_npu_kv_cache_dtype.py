@@ -103,9 +103,9 @@ class TestNPUKVCacheDtype(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
-        os.remove(cls.out_log_name)
+        # os.remove(cls.out_log_name)
         cls.err_log_file.close()
-        os.remove(cls.err_log_name)
+        # os.remove(cls.err_log_name)
 
         # sys.stdout.close()
         # sys.stderr.close()
