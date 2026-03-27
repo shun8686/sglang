@@ -17,6 +17,7 @@ from sglang.test.server_fixtures.disaggregation_fixture import (
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_pd_server,
+    popen_launch_server,
     popen_with_error_check,
 )
 
@@ -49,6 +50,8 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
         cls.launch_router()
         cls.wait_server_ready(cls.lb_url + "/health")
+        cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
+        cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
 
     @classmethod
     def start_prefill(cls):
@@ -82,14 +85,17 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
-            "SGLANG_LOGGING_CONFIG_PATH": cls.temp_dir
+            "SGLANG_LOGGING_CONFIG_PATH": "./cache_err_log.txt"
         }
-        cls.process_prefill = popen_launch_pd_server(
+
+        cls.process_prefill = popen_launch_server(
             cls.model,
             cls.prefill_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=prefill_args,
             env=env,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+            pd_separated=True,
         )
 
     @classmethod
@@ -197,18 +203,20 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
             "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
         }
-        cls.process_decode = popen_launch_pd_server(
+        cls.process_decode = popen_launch_server(
             cls.model,
             cls.decode_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=decode_args,
             env=env,
+            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+            pd_separated=True,
         )
 
     def test_multi_turn_conversation_cache(self):
         logging.warning("====================Testing request=======================")
+        time.sleep(10)
         initial_prompt = self.gen_prompt(800)
-        logging.warning(f"initial_prompt = {initial_prompt}")
         response1 = self.send_request(initial_prompt, max_tokens=200, temperature=0.1)
         current_context = initial_prompt + response1["text"]
 
@@ -238,19 +246,6 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
 
             # Flush prefill cache
             self.trigger_offloading_and_flush()
-
-    # def test_prefill_cache_hit(self):
-    #     """Test that prefill cache works with repeated queries"""
-    #
-    #     repeated_prompt = self.gen_prompt(800)
-    #
-    #     # First request - should miss cache
-    #     self.send_request(repeated_prompt, max_tokens=100)
-    #     # Flush cache
-    #     # Second request - should hit cache (faster)
-    #     response2 = self.send_request(repeated_prompt, max_tokens=100)
-    #     # Assert cached tokens cnt
-    #     self.assertGreater(response2["meta_info"]["cached_tokens"], 700)
 
     @classmethod
     def tearDownClass(cls):
