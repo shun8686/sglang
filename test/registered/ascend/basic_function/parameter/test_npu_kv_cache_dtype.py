@@ -92,16 +92,16 @@ class TestNPUKVCacheDtype(CustomTestCase):
         # )
         # cls.err_log_name = cls.err_log_file_obj.name
         # cls.err_log_file = cls.err_log_file_obj
-        cls.out_log_name = "./log_requests_level_out_log.txt"
-        cls.err_log_name = "./log_requests_level_err_log.txt"
-        cls.out_log_file = open(cls.out_log_name, "a+", encoding="utf-8")
-        cls.err_log_file = open(cls.err_log_name, "a+", encoding="utf-8")
+        # cls.out_log_name = "./log_requests_level_out_log.txt"
+        # cls.err_log_name = "./log_requests_level_err_log.txt"
+        # cls.out_log_file = open(cls.out_log_name, "a+", encoding="utf-8")
+        # cls.err_log_file = open(cls.err_log_name, "a+", encoding="utf-8")
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
-            return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+            # return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
         # cls.output_buffer = StringIO()
@@ -125,9 +125,9 @@ class TestNPUKVCacheDtype(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        cls.out_log_file.close()
+        # cls.out_log_file.close()
         # os.remove(cls.out_log_name)
-        cls.err_log_file.close()
+        # cls.err_log_file.close()
         # os.remove(cls.err_log_name)
 
 
@@ -179,15 +179,15 @@ class TestNPUKVCacheDtype(CustomTestCase):
 
         # response = requests.get(f"{self.base_url}/metrics", timeout=10)
 
-        # sys.stdout = sys.__stdout__
-        self.out_log_file.seek(0)
-        content = self.out_log_file.read()
-        print("========================================================")
-        print(content)
-        self.err_log_file.seek(0)
-        content = self.out_log_file.read()
-        print("========================================================")
-        print(content)
+        # # sys.stdout = sys.__stdout__
+        # self.out_log_file.seek(0)
+        # content = self.out_log_file.read()
+        # print("========================================================")
+        # print(content)
+        # self.err_log_file.seek(0)
+        # content = self.out_log_file.read()
+        # print("========================================================")
+        # print(content)
         print("========================================================")
         os.dup2(self.old_stdout, 1)
         os.dup2(self.old_stderr, 2)
