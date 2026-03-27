@@ -192,8 +192,8 @@ class TestNPUKVCacheDtype(CustomTestCase):
         print("========================================================")
         os.dup2(self.old_stdout, 1)
         os.dup2(self.old_stderr, 2)
-        os.close(cls.pipe_in)
-        os.close(cls.pipe_err_in)
+        os.close(self.pipe_in)
+        os.close(self.pipe_err_in)
 
         output = os.read(self.pipe_out, 1024 * 1024).decode("utf-8")
         error = os.read(self.pipe_err_out, 1024 * 1024).decode("utf-8")
