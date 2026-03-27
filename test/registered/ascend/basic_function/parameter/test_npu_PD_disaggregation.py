@@ -51,6 +51,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
         cls.launch_router()
         cls.wait_server_ready(cls.lb_url + "/health")
+        time.sleep(10)
 
     @classmethod
     def start_prefill(cls):
@@ -221,8 +222,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
     def test_multi_turn_conversation_cache(self):
         # Test multi-turn conversation scenario with cache hit improvement
         logging.warning("====================Testing request=======================")
-        time.sleep(10)
-        initial_prompt = self.gen_prompt(800)
+        initial_prompt = self.gen_prompt(300)
         response1 = self.send_request(initial_prompt, max_tokens=200, temperature=0.1)
         current_context = initial_prompt + response1["text"]
 
