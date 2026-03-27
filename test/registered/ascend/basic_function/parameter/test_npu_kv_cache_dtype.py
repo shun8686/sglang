@@ -135,6 +135,9 @@ class TestNPUKVCacheDtype(CustomTestCase):
         # sys.stderr.close()
         sys.stdout = cls.old_stdout
         sys.stderr = cls.old_stderr
+        print()
+        print(cls.out.getvalue())
+        print(cls.err.getvalue())
         #
         # stdout_result = os.read(cls.stdout_pipe[0], 1024 * 1024).decode()
         # stderr_result = os.read(cls.stderr_pipe[0], 1024 * 1024).decode()
