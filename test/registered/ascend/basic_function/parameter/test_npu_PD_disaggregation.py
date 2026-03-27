@@ -25,10 +25,12 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class DisaggregationHiCacheBase(PDDisaggregationServerBase):
-    """Testcase: Test with offload enabled, cached_tokens continue to grow.
+    """Testcase: All parameters for testing the PD_disaggregation feature were configured, inference was successful, and cache_tokens continued to grow..
 
-    [Test Category] Parameter
-    [Test Target] --disaggregation-decode-enable-offload-kvcache
+    [Test Category] Functional
+    [Test Target] PD disaggregatio on NPU
+    --disaggregation-mode; --disaggregation-transfer-backend; --disaggregation-decode-polling-interval;
+    --disaggregation-decode-enable-offload-kvcache; --num-reserved-decode-tokens; --disaggregation-bootstrap-port;
     """
 
     @classmethod
@@ -65,8 +67,6 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             cls.bootstrap_port,
             "--tp-size",
             "2",
-            "--base-gpu-id",
-            4,
             "--enable-hierarchical-cache",
             "--hicache-io-backend",
             "kernel_ascend",
@@ -118,6 +118,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         cls.wait_server_ready(cls.lb_url + "/health")
 
     def gen_prompt(self, token_num: int) -> str:
+        # Generate a string consisting of random tokens.
         all_available_tokens = list(self.tokenizer.get_vocab().values())
         selected_tokens = random.choices(all_available_tokens, k=token_num)
         return self.tokenizer.decode(selected_tokens)
@@ -157,7 +158,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
 
 class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
-    """Decode startup parameters, enable offload-kvcache"""
+    """Decode startup parameters"""
     ascend_devices = os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0,1,2,3")
     base_gpu_id = ascend_devices.split(",")[2] if len(ascend_devices.split(",")) >= 3 else "2"
 
@@ -176,8 +177,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             "--mem-fraction-static",
             "0.9",
             "--base-gpu-id",
-            6,
-            # cls.base_gpu_id,
+            cls.base_gpu_id,
             "--disaggregation-decode-enable-offload-kvcache",
             "--hicache-io-backend",
             "kernel_ascend",
@@ -206,7 +206,20 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             env=env,
         )
 
+    def test_prefill_cache_hit(self):
+        """Test that prefill cache works with repeated queries"""
+        repeated_prompt = self.gen_prompt(800)
+        self.send_request(repeated_prompt, max_tokens=100)
+        # Flush cache
+        self.trigger_offloading_and_flush()
+
+        # Second request - should hit cache (faster)
+        response2 = self.send_request(repeated_prompt, max_tokens=100)
+        # Assert cached tokens cnt
+        self.assertGreater(response2["meta_info"]["cached_tokens"], 700)
+
     def test_multi_turn_conversation_cache(self):
+        # Test multi-turn conversation scenario with cache hit improvement
         logging.warning("====================Testing request=======================")
         time.sleep(10)
         initial_prompt = self.gen_prompt(800)
