@@ -43,11 +43,6 @@ class TestNPUKVCacheDtype(CustomTestCase):
             "--disable-cuda-graph",
             "--kv-cache-dtype",
             cls.kv_cache_dtype,
-            "--log-level",
-            "debug",
-            "--log-requests",
-            "--log-requests-level",
-            "0",
         ]
 
 
