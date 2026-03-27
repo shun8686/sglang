@@ -23,13 +23,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    # handlers=[logging.StreamHandler()],
-    filename='kv_cache_dtype.log',
-)
-logger = logging.getLogger(__name__)
+
 
 class TestNPUKVCacheDtype(CustomTestCase):
     """Testcase：Verify set --kv_cache_dtype is auto, bf16 or bfloat16, request inference successful.
@@ -55,6 +49,14 @@ class TestNPUKVCacheDtype(CustomTestCase):
             cls.kv_cache_dtype,
             "--enable-metrics",
         ]
+
+        cls.logger = logging.getLogger("sglang.srt.model_executor.model_runner")
+        cls.log_capture_string = StringIO()
+        ch = logging.StreamHandler(cls.log_capture_string)
+        ch.setLevel(logging.DEBUG)
+        formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+        ch.setFormatter(formatter)
+        cls.logger.addHandler(ch)
 
 
 
@@ -146,6 +148,8 @@ class TestNPUKVCacheDtype(CustomTestCase):
         print("========================================================")
         print(content)
         print("========================================================")
+        log_contents = self.log_capture_string.getvalue().strip()
+        print(log_contents)
         # print(response.text)
         # print(self.output_buffer.getvalue())
         # self.assertTrue(len(content) > 0)
