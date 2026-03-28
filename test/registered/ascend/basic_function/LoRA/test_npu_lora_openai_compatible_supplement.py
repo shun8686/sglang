@@ -23,7 +23,7 @@ class TestLoRAOpenAICompatible(CustomTestCase):
     """Testcase：Test that model:adapter syntax takes precedence over explicit lora_path.
 
     [Test Category] Parameter
-    [Test Target] --enable-lora;--lora-paths
+    [Test Target] --enable-lora, --lora-paths
     """
 
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
