@@ -26,7 +26,7 @@ class TestLTSDeepSeekR1(TestAscendLtsTestCaseBase):
         cls.host = "127.0.0.1"
         cls.port = 6688
 
-    def test_lts_deepseek_r1(self):
+    def testLtsDeepSeekR1(self):
         i = 0
         while True:
             i = i + 1

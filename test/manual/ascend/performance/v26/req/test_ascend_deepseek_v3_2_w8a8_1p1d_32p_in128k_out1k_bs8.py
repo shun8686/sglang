@@ -119,7 +119,6 @@ MODEL_CONFIG = {
         "ascend",
         "--disaggregation-mode",
         "decode",
-        "--prefill-round-robin-balance",
     ],
     "router_args": [
         "--mini-lb",
