@@ -180,7 +180,9 @@ class TestNPUKVCacheDtype(CustomTestCase):
         # os.dup2(self.old_stderr, 2)
         # os.close(self.pipe_in)
         # os.close(self.pipe_err_in)
-        #
+
+
+
         # output = os.read(self.pipe_out, 1024 * 1024).decode("utf-8")
         # error = os.read(self.pipe_err_out, 1024 * 1024).decode("utf-8")
         # os.close(self.pipe_out)
@@ -190,9 +192,11 @@ class TestNPUKVCacheDtype(CustomTestCase):
         # logger.info(error)
         # self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", error)
         output = self.__class__.capturer.get_output() +self.__class__.capturer.get_error()
-        print("=========================================================================")
-        print(output)
-        print("=========================================================================")
+        with open("output.log", "w", encoding="utf-8") as f:
+            f.write(output)
+        # print("=========================================================================")
+        # print(output)
+        # print("=========================================================================")
         # self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", self.tee_stdout.getvalue() + self.tee_stderr.getvalue())
 
 
