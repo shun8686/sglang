@@ -1050,3 +1050,50 @@ def verify_process_terminated(process, test_name: str = "") -> None:
         f"{test_name}: Server process (pid={process.pid}) "
         "is still running after tearDownClass."
     )
+
+
+def get_server_info(base_url: str) -> dict:
+    """Return the full server info dictionary from GET /get_server_info.
+
+    Calls the /get_server_info endpoint and returns the parsed JSON body.
+    Useful for asserting mode flags such as encoder_only, language_only,
+    disaggregation_mode, and disaggregation_prefill_pp.
+
+    Args:
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000".
+
+    Returns:
+        Parsed JSON dict from GET /get_server_info.
+
+    Raises:
+        requests.HTTPError: On non-2xx HTTP status.
+    """
+    response = _requests.get(f"{base_url}/get_server_info", timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+
+def assert_server_info_field(test_case, base_url: str, field: str, expected) -> None:
+    """Assert that a specific field in /get_server_info matches the expected value.
+
+    Fetches server info and asserts the named field equals expected.
+    Use this to verify mode flags after server startup, e.g. encoder_only=True.
+
+    Args:
+        test_case: The unittest.TestCase instance (for calling assertEqual).
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000".
+        field: Key name to check in the server info JSON.
+        expected: Expected value for the field.
+
+    Raises:
+        AssertionError: If the field value does not equal expected.
+        requests.HTTPError: On non-2xx HTTP status from /get_server_info.
+    """
+    info = get_server_info(base_url)
+    actual = info.get(field)
+    test_case.assertEqual(
+        actual,
+        expected,
+        f"Server info field '{field}': expected={expected!r}, got={actual!r}. "
+        f"Full server info: {info}",
+    )
