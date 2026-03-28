@@ -1,16 +1,19 @@
-import unittest
-import requests
 import time
+import unittest
 
-from sglang.test.ascend.test_ascend_utils import QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST
+import requests
+
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST,
+)
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=500, suite="nightly-8-npu-a3", nightly=True)
 
@@ -39,12 +42,12 @@ class TestMambaCache(CustomTestCase):
             kill_process_tree(cls.process.pid)
 
     def _launch_server_with_mamba_params(
-        self,
-        max_mamba_cache_size=None,
-        mamba_ssm_dtye=None,
-        mamba_full_memory_ratio=0.9,
-        mamba_scheduler_strategy="auto",
-        mamba_track_interval=256,
+            self,
+            max_mamba_cache_size=None,
+            mamba_ssm_dtye=None,
+            mamba_full_memory_ratio=0.9,
+            mamba_scheduler_strategy="auto",
+            mamba_track_interval=256,
     ):
         other_args = [
             "--trust-remote-code",
@@ -95,9 +98,7 @@ class TestMambaCache(CustomTestCase):
         return response.text
 
     def test_mamba_long_sequence(self):
-        self.process = self._launch_server_with_mamba_params(
-            max_mamba_cache_size=1024
-        )
+        self.process = self._launch_server_with_mamba_params(max_mamba_cache_size=1024)
         try:
             time.sleep(5)
             long_prompt = "Explain the concept of machine learning in detail." * 10
@@ -118,9 +119,7 @@ class TestMambaCache(CustomTestCase):
             kill_process_tree(self.process.pid)
 
     def test_mamba_track_interval(self):
-        self.process = self._launch_server_with_mamba_params(
-            mamba_track_interval=128
-        )
+        self.process = self._launch_server_with_mamba_params(mamba_track_interval=128)
         try:
             time.sleep(5)
             self._tes_basic_inference()
