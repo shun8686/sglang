@@ -364,8 +364,6 @@ class TestNPULoggingBase(CustomTestCase):
         # The total number of generated tokens should equal the configured maximum number of generated tokens
         lines = self.get_lines_with_keyword(self.out_log_name, self.keyword_Finish)
         self.assertGreater(len(lines), 0, "Did not find finish message in log.")
-        self.assertGreater(len(lines), 0,
-                           f"Did not find finish message in log. {out_log_file.name=} \n{content=}\n{len(lines)=}")
         finish_message = lines[-1]["content"]
         self.assertIn(f"'completion_tokens': {max_new_token}", finish_message)
 
@@ -426,12 +424,12 @@ class TestNPULoggingBase(CustomTestCase):
             self.assertIn(get_server_info_message, content)
 
     def _verify_metrics_and_bucket_boundary(
-            self,
-            expected_time_to_first_token_bucket=None,
-            expected_inter_token_latency_bucket=None,
-            expected_e2e_request_latency_bucket=None,
-            expected_prompt_tokens_bucket=None,
-            expected_generation_tokens_bucket=None,
+        self,
+        expected_time_to_first_token_bucket=None,
+        expected_inter_token_latency_bucket=None,
+        expected_e2e_request_latency_bucket=None,
+        expected_prompt_tokens_bucket=None,
+        expected_generation_tokens_bucket=None,
     ):
         """Validate that metrics buckets align with expected boundaries when --enable-metrics and bucket configuration parameters are set."""
         response = requests.get(f"{self.base_url}/metrics", timeout=10)
