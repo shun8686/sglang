@@ -43,7 +43,7 @@ class TestMaxLoadedLorasError(CustomTestCase):
             f"lora_4={LLAMA_3_2_1B_INSTRUCT_TOOL_CALLING_LORA_WEIGHTS_PATH}",
         ]
         with tempfile.NamedTemporaryFile(
-                mode="w+", delete=True, suffix="out.log"
+            mode="w+", delete=True, suffix="out.log"
         ) as out_log_file, tempfile.NamedTemporaryFile(
             mode="w+", delete=True, suffix="out.log"
         ) as err_log_file:
