@@ -523,9 +523,9 @@ class TestNPULoggingBase(CustomTestCase):
             err_log_file (file object): Open file object of the error log file
         """
         prompt_template = (
-            "just return me a string with of 10000 characters: " + "A" * 5000
+            "just return me a string with of 10000 characters: " + "A" * 10000
         )
-        max_token = 1000
+        max_token = 10000
 
         def send_request():
             requests.post(
@@ -537,11 +537,10 @@ class TestNPULoggingBase(CustomTestCase):
             )
 
         threads = []
-        for _ in range(200):
+        for _ in range(1000):
             t = threading.Thread(target=send_request)
             t.start()
             threads.append(t)
-            sleep(0.01)
 
         for t in threads:
             t.join()
