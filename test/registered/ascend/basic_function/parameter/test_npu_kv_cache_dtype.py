@@ -1,6 +1,8 @@
 import os
+import sys
 import unittest
 import logging
+from io import StringIO
 
 import requests
 
@@ -15,6 +17,23 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=150, suite="nightly-1-npu-a3", nightly=True)
+
+class TeeStream:
+    def __init__(self, original_stream):
+        self.original = original_stream
+        self.buffer = StringIO()
+
+    def write(self, data):
+        self.original.write(data)  # 正常打印到控制台
+        self.buffer.write(data)  # 同时写入捕获缓冲区
+        self.original.flush()  # 强制立即打印，不卡顿
+
+    def flush(self):
+        self.original.flush()
+        self.buffer.flush()
+
+    def getvalue(self):
+        return self.buffer.getvalue()
 
 
 class TestNPUKVCacheDtype(CustomTestCase):
@@ -41,12 +60,22 @@ class TestNPUKVCacheDtype(CustomTestCase):
             cls.kv_cache_dtype,
         ]
 
-        cls.old_stdout = os.dup(1)
-        cls.old_stderr = os.dup(2)
-        cls.pipe_out, cls.pipe_in = os.pipe()
-        cls.pipe_err_out, cls.pipe_err_in = os.pipe()
-        os.dup2(cls.pipe_in, 1)
-        os.dup2(cls.pipe_err_in, 2)
+        # cls.old_stdout = os.dup(1)
+        # cls.old_stderr = os.dup(2)
+        # cls.pipe_out, cls.pipe_in = os.pipe()
+        # cls.pipe_err_out, cls.pipe_err_in = os.pipe()
+        # os.dup2(cls.pipe_in, 1)
+        # os.dup2(cls.pipe_err_in, 2)
+        cls.original_stdout = sys.stdout
+        cls.original_stderr = sys.stderr
+
+        # 创建双输出流（打印+捕获）
+        cls.tee_stdout = TeeStream(sys.stdout)
+        cls.tee_stderr = TeeStream(sys.stderr)
+
+        # 重定向
+        sys.stdout = cls.tee_stdout
+        sys.stderr = cls.tee_stderr
 
         cls.process = popen_launch_server(
             cls.model,
@@ -58,6 +87,8 @@ class TestNPUKVCacheDtype(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        sys.stdout = cls.original_stdout
+        sys.stderr = cls.original_stderr
 
     def test_dtype_options(self):
         response = requests.post(
@@ -79,19 +110,21 @@ class TestNPUKVCacheDtype(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn(f'"kv_cache_dtype":"{self.kv_cache_dtype}"', response.text)
 
-        os.dup2(self.old_stdout, 1)
-        os.dup2(self.old_stderr, 2)
-        os.close(self.pipe_in)
-        os.close(self.pipe_err_in)
+        # os.dup2(self.old_stdout, 1)
+        # os.dup2(self.old_stderr, 2)
+        # os.close(self.pipe_in)
+        # os.close(self.pipe_err_in)
+        #
+        # output = os.read(self.pipe_out, 1024 * 1024).decode("utf-8")
+        # error = os.read(self.pipe_err_out, 1024 * 1024).decode("utf-8")
+        # os.close(self.pipe_out)
+        # os.close(self.pipe_err_out)
+        # logger = logging.getLogger()
+        # logger.info(output)
+        # logger.info(error)
+        # self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", error)
+        self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", self.tee_stdout.getvalue() + self.tee_stderr.getvalue())
 
-        output = os.read(self.pipe_out, 1024 * 1024).decode("utf-8")
-        error = os.read(self.pipe_err_out, 1024 * 1024).decode("utf-8")
-        os.close(self.pipe_out)
-        os.close(self.pipe_err_out)
-        logger = logging.getLogger()
-        logger.info(output)
-        logger.info(error)
-        self.assertIn(f"Using KV cache dtype: {self.using_kv_cache_dtype}", error)
 
 
 class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
@@ -100,6 +133,8 @@ class TestNPUKVCacheDtypeBf16(TestNPUKVCacheDtype):
 
 class TestNPUKVCacheDtypeBfloat16(TestNPUKVCacheDtype):
     kv_cache_dtype = "bfloat16"
+
+
 
 
 if __name__ == "__main__":
