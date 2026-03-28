@@ -94,7 +94,7 @@ class TestLoraMaxLoraRankErr(CustomTestCase):
         ]
 
         with tempfile.NamedTemporaryFile(
-                mode="w+", delete=True, suffix="out.log"
+            mode="w+", delete=True, suffix="out.log"
         ) as out_log_file, tempfile.NamedTemporaryFile(
             mode="w+", delete=True, suffix="out.log"
         ) as err_log_file:
