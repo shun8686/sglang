@@ -194,7 +194,7 @@ class TestNpuModelTokenizer(CustomTestCase):
             )
             self.assertEqual(response.status_code, 400)
             self.assertIn(
-                "The input (1202 tokens) is longer than the model\'s context length (1000 tokens)",
+                "The input (1202 tokens) is longer than the model's context length (1000 tokens)",
                 response.text,
             )
         except Exception as e:
