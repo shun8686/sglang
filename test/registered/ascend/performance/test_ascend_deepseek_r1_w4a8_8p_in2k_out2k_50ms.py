@@ -46,12 +46,13 @@ MODEL_OTHER_ARGS = [
     "--cuda-graph-bs",
     4,
     8,
-    16,
     20,
+    21,
+    22,
     "--mem-fraction-static",
-    0.755,
+    0.78,
     "--max-running-requests",
-    320,
+    352,
     "--disable-radix-cache",
     "--chunked-prefill-size",
     "-1",
@@ -68,11 +69,11 @@ MODEL_OTHER_ARGS = [
     "--speculative-algorithm",
     "NEXTN",
     "--speculative-num-steps",
-    3,
+    2,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    4,
+    3,
     "--dtype",
     "bfloat16",
 ]
@@ -83,14 +84,14 @@ class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    max_concurrency = 320
+    max_concurrency = 352
     num_prompts = int(max_concurrency) * 4
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    tpot = 50.26
+    tpot = 50
     # T: 143@50ms. 800I A3: 1.8*T
-    output_token_throughput = 5696
+    output_token_throughput = 5894
 
     def test_throughput(self):
         self.run_throughput()
