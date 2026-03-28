@@ -55,7 +55,9 @@ class TestEncoderUrlsBase(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
+        env = os.environ.copy()
+        env["SGLANG_MM_SKIP_COMPUTE_HASH"] = "True"
+        cls.model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             # language-only is the natural counterpart for --encoder-urls:
@@ -77,6 +79,7 @@ class TestEncoderUrlsBase(CustomTestCase):
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            env=env,
             other_args=other_args,
         )
 

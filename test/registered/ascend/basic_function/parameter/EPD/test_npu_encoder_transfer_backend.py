@@ -47,7 +47,7 @@ class TestEncoderTransferBackendBase(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
+        cls.model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             # Enable encoder-only mode to exercise encoder disaggregation parameters

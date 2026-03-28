@@ -3,6 +3,15 @@ import unittest
 import requests
 
 import os
+import base64
+_INLINE_IMAGE_B64 = (
+    "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4b"
+    "AAAAbUlEQVRYhe3VsQ2AMAxE0Y/lIgNQULD/OqyCMgCihCKSG4yRuKuiNH6JLsoEbMACOGB"
+    "cua9HOR7Y6w6swBwMy0qLTpkeI77qdEBpBFAHBBDAGH8WrwJKI4AAegUCfAKgEgpQDvh3CR"
+    "3oQCuav58qlAw73kKCSgAAAABJRU5ErkJggg=="
+)
+
+_IMAGE_URL = f"data:image/png;base64,{_INLINE_IMAGE_B64}"
 
 # ============ [Local path override - for local debugging only] ============
 LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
@@ -51,12 +60,15 @@ class TestEncoderOnly(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
+        env = os.environ.copy()
+        env["SGLANG_MM_SKIP_COMPUTE_HASH"] = "True"
+        cls.model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            env=env,
             other_args=[
                 "--encoder-only",
                 "--tp-size",
@@ -94,29 +106,30 @@ class TestEncoderOnly(CustomTestCase):
             "loaded correctly with tp-size=2.",
         )
 
-    def test_encoder_only_does_not_support_generate(self):
-        """Verify an encoder-only server returns a non-2xx response for text generation.
+    def test_encoder_processes_image_request(self):
+        """Verify the encoder-only server can process an image encoding request.
 
-        An encoder-only server has no language model, so /generate requests must fail.
-        This test guards against accidental false passing: if /generate returns 200
-        on an encoder-only server, the server was not actually configured in encoder-only
-        mode (a safety check against fake pass).
+        The /encode endpoint is the primary functional interface of an encoder-only
+        server. A 200 response confirms the visual encoder model loaded correctly
+        and can perform forward pass on image input.
         """
+        payload = {
+            "mm_items": [_IMAGE_URL],
+            "req_id": "test-req-001",
+            "num_parts": 1,
+            "part_idx": 0,
+        }
         response = requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {"temperature": 0, "max_new_tokens": 8},
-            },
-            timeout=30,
+            f"{self.base_url}/encode",
+            json=payload,
+            timeout=60,
         )
-        # An encoder-only server must reject text generation; anything other than
-        # 2xx is acceptable (400, 404, 500, etc.)
-        self.assertNotEqual(
-            response.status_code // 100,
-            2,
-            "Encoder-only server unexpectedly accepted a /generate request; "
-            "--encoder-only may not have taken effect.",
+        # 200 means encoder model ran forward pass successfully
+        self.assertEqual(
+            response.status_code,
+            200,
+            f"Encoder-only server /encode returned {response.status_code}; "
+            "visual encoder may not have initialized correctly.",
         )
 
 

@@ -3,6 +3,16 @@ import unittest
 import requests
 import os
 
+import base64
+_INLINE_IMAGE_B64 = (
+    "iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAACXBIWXMAAA7EAAAOxAGVKw4b"
+    "AAAAbUlEQVRYhe3VsQ2AMAxE0Y/lIgNQULD/OqyCMgCihCKSG4yRuKuiNH6JLsoEbMACOGB"
+    "cua9HOR7Y6w6swBwMy0qLTpkeI77qdEBpBFAHBBDAGH8WrwJKI4AAegUCfAKgEgpQDvh3CR"
+    "3oQCuav58qlAw73kKCSgAAAABJRU5ErkJggg=="
+)
+
+_IMAGE_URL = f"data:image/png;base64,{_INLINE_IMAGE_B64}"
+
 # ============ [Local path override - for local debugging only] ============
 LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
 import sglang.test.ascend.test_ascend_utils as _utils
@@ -51,7 +61,7 @@ class TestLanguageOnly(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH
+        cls.model = QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -116,6 +126,41 @@ class TestLanguageOnly(CustomTestCase):
             f"Language-only server returned unexpected output: '{generated_text}'. "
             "Expected 'Paris' for the capital of France.",
         )
+
+    def test_language_only_rejects_image_without_encoder(self):
+        """Verify language-only server returns error for image requests when no encoder is configured.
+
+        A language-only server without --encoder-urls cannot process images;
+        it should return a non-2xx error rather than hanging or crashing.
+        This guards against silent data loss where images are silently dropped.
+        """
+        payload = {
+            "model": self.model,
+            "messages": [
+                {
+                    "role": "user",
+                    "content": [
+                        {"type": "image_url", "image_url": {"url": _IMAGE_URL}},
+                        {"type": "text", "text": "Describe this image."},
+                    ],
+                }
+            ],
+            "max_tokens": 32,
+            "temperature": 0,
+        }
+        response = requests.post(
+            f"{self.base_url}/v1/chat/completions",
+            json=payload,
+            timeout=30,
+        )
+        # Without encoder servers, image requests must not return 2xx silently
+        self.assertNotEqual(
+            response.status_code // 100,
+            2,
+            "Language-only server without encoder-urls accepted an image request; "
+            "this would cause silent data loss.",
+        )
+
 
 
 if __name__ == "__main__":
