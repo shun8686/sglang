@@ -1,13 +1,12 @@
-import json
 import logging
+import unittest
 import os
 import shutil
-import tempfile
-import unittest
+import json
 from shutil import copy2
 
 import requests
-
+import tempfile
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -193,10 +192,8 @@ class TestNpuModelTokenizer(CustomTestCase):
                 },
             )
             self.assertEqual(response.status_code, 400)
-            self.assertIn(
-        "The input (1202 tokens) is longer than the model\'s context length (1000 tokens)",
-                response.text,
-            )
+            self.assertIn("The input (1202 tokens) is longer than the model\'s context length (1000 tokens)",
+                          response.text)
         except Exception as e:
             logging.warning(f"Error testing: {e}")
 
@@ -255,10 +252,8 @@ class TestNpuSkipTokenizerInit(CustomTestCase):
                 },
             )
             self.assertEqual(response.status_code, 400)
-            self.assertIn(
-        "The engine initialized with ship_tokenizer_init=True cannot accept text prompts",
-                response.text,
-            )
+            self.assertIn("The engine initialized with ship_tokenizer_init=True cannot accept text prompts",
+                          response.text)
         except Exception as e:
             logging.warning(f"Error testing: {e}")
 
