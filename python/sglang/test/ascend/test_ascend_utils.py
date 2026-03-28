@@ -1,4 +1,15 @@
-"""Common utilities for testing and benchmarking on NPU"""
+"""
+Common utilities for testing and benchmarking on NPU.
+
+This file contains the following weight path categories:
+- LLM model weights path
+- VLM model weights path
+- Embedding model weights path
+- Rerank model weights path
+- Reward model weights path
+
+Please remember to sort by variable name within each section.
+"""
 
 import asyncio
 import copy
@@ -93,9 +104,6 @@ INTERNLM2_7B_WEIGHTS_PATH = os.path.join(
 )
 KIMI_K2_THINKING_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Kimi/Kimi-K2-Thinking")
 LING_LITE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "inclusionAI/Ling-lite")
-LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "meta-llama/Llama-4-Scout-17B-16E-Instruct"
-)
 LLAMA_2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-2-7B")
 MIMO_7B_RL_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "XiaomiMiMo/MiMo-7B-RL")
 MINICPM3_4B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "OpenBMB/MiniCPM3-4B")
@@ -115,15 +123,19 @@ QWEN3_0_6B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B")
 QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-Instruct-2507"
 )
-QWEN3_32B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B")
-QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-Eagle3")
-QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "aleoyang/Qwen3-32B-w8a8-MindIE"
+QWEN3_1_7B_GPTQ_INT8_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen3-1.7B-GPTQ-Int8"
 )
 QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "vllm-ascend/Qwen3-235B-A22B-W8A8"
 )
 QWEN3_8B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-8B")
+QWEN3_8B_EAGLE3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-8B_eagle3")
+QWEN3_32B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B")
+QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-Eagle3")
+QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "aleoyang/Qwen3-32B-w8a8-MindIE"
+)
 QWEN3_CODER_480B_A35B_INSTRUCT_W8A8_QUAROT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen3-Coder-480B-A35B-Instruct-w8a8-QuaRot"
 )
@@ -136,12 +148,7 @@ STABLELM_2_1_6B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "stabilityai/stablelm-2-1_6b"
 )
 XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-MoE-A36B")
-EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "sglang-EAGLE3-LLaMA3.1-Instruct-8B"
-)
-DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "DeepSeek-R1-0528-w4a8-per-channel"
-)
+MINIMAX_M2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "cyankiwi/MiniMax-M2-BF16")
 
 # VLM model weights path
 DEEPSEEK_VL2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-vl2")
@@ -233,10 +240,6 @@ SKYWORK_REWARD_GEMMA_2_27B_V0_2_WEIGHTS_PATH = os.path.join(
 )
 INTERNLM2_7B_REWARD_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b-reward"
-)
-SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(
-    HF_MODEL_WEIGHTS_DIR,
-    "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1",
 )
 QWEN2_5_1_5B_APEACH_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Howeee/Qwen2.5-1.5B-apeach"
