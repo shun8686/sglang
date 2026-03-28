@@ -42,12 +42,12 @@ class TestMambaCache(CustomTestCase):
             kill_process_tree(cls.process.pid)
 
     def _launch_server_with_mamba_params(
-            self,
-            max_mamba_cache_size=None,
-            mamba_ssm_dtye=None,
-            mamba_full_memory_ratio=0.9,
-            mamba_scheduler_strategy="auto",
-            mamba_track_interval=256,
+        self,
+        max_mamba_cache_size=None,
+        mamba_ssm_dtye=None,
+        mamba_full_memory_ratio=0.9,
+        mamba_scheduler_strategy="auto",
+        mamba_track_interval=256,
     ):
         other_args = [
             "--trust-remote-code",

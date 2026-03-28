@@ -18,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestMambaCache(CustomTestCase):
-    """Testcase：Verify the test kv cache reuse, when use mamba cache.
+    """Testcase：Verify the test Radix Cache reuse, when use mamba cache.
 
     [Test Category] Parameter
     [Test Target] --disable-radix-cache
