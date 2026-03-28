@@ -1,9 +1,10 @@
 import os
+import shutil
 import tempfile
 import unittest
-import shutil
-import torch
+
 import requests
+import torch
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
@@ -18,7 +19,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 class TestNpuDebugTensorDumps(CustomTestCase):
@@ -93,7 +94,11 @@ class TestNpuDebugTensorDumps(CustomTestCase):
         self.assertEqual(int(res), self.TP_DIR_NUM)
 
         # Verify the directory structure of tensor_dump
-        subdirs = [d for d in os.listdir(self.dump_folder) if os.path.isdir(os.path.join(self.dump_folder, d))]
+        subdirs = [
+            d
+            for d in os.listdir(self.dump_folder)
+            if os.path.isdir(os.path.join(self.dump_folder, d))
+        ]
         self.assertGreater(len(subdirs), 0)
 
         # Verify that the contents of tensor_dump exist as .pt format files.
