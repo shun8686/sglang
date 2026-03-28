@@ -22,7 +22,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNpuTokenizer(CustomTestCase):
-    """The test of combining the nodel and token parameters showed that the inference of sending a long request was successful.
+    """The test of combining the model and token parameters showed that the inference of sending a long request was successful.
 
     [Test Category] Functional
     [Test Target] model & tokenizer on NPU
@@ -107,7 +107,7 @@ class TestNpuTokenizer(CustomTestCase):
 
 
 class TestNpuModelTokenizer(CustomTestCase):
-    """The test of combining the nodel and token parameters showed that the inference of sending concurrent request was successful.
+    """The test of combining the model and token parameters showed that the inference of sending concurrent request was successful.
 
     [Test Category] Functional
     [Test Target] model & tokenizer on NPU

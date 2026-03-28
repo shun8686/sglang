@@ -18,7 +18,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNpuModelTokenizerMultimodal(CustomTestCase):
-    """The combination of nodel and token parameters was tested, and the streaming request inference was successful.
+    """The combination of model and token parameters was tested, and the streaming request inference was successful.
 
     [Test Category] Functional
     [Test Target] model & tokenizer on NPU
