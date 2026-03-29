@@ -74,7 +74,7 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
         )
 
         metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+        self.assertGreater(metrics["score"], 0.95)
 
     def test_server_info(self):
         response = requests.get(f"{self.base_url}/get_server_info")

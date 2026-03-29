@@ -23,6 +23,8 @@ class TestNPULoadBalanceMethodFollowBootstrapRoom(TestDisaggregationBase):
     [Test Target] --load-balance-method
     """
 
+    load_balance_method = "follow_bootstrap_room"
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -50,7 +52,8 @@ class TestNPULoadBalanceMethodFollowBootstrapRoom(TestDisaggregationBase):
             "--dp",
             "2",
             "--load-balance-method",
-            "follow_bootstrap_room",
+            # "follow_bootstrap_room",
+            cls.load_balance_method,
             "--disaggregation-transfer-backend",
             "ascend",
             "--disable-cuda-graph",
@@ -124,6 +127,18 @@ class TestNPULoadBalanceMethodFollowBootstrapRoom(TestDisaggregationBase):
     def tearDownClass(cls):
         os.environ.pop("ASCEND_MF_STORE_URL")
         super().tearDownClass()
+
+
+class _TestNPULoadBalanceMethodAuto(TestNPULoadBalanceMethodFollowBootstrapRoom):
+    load_balance_method = "auto"
+
+
+class _TestNPULoadBalanceMethodTotalRequests(TestNPULoadBalanceMethodFollowBootstrapRoom):
+    load_balance_method = "total_requests"
+
+
+class _TestNPULoadBalanceMethodTotalTokens(TestNPULoadBalanceMethodFollowBootstrapRoom):
+    load_balance_method = "total_tokens"
 
 
 if __name__ == "__main__":
