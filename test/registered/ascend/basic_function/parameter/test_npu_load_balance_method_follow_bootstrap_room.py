@@ -1,3 +1,4 @@
+import itertools
 import os
 import unittest
 from types import SimpleNamespace
@@ -28,8 +29,8 @@ class TestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
 
     # load_balance_method = "follow_bootstrap_room"
     # load_balance_method = "round_robin"
-    prefill_load_balance_method = "auto"
-    decode_load_balance_method = "auto"
+    # prefill_load_balance_method = "auto"
+    # decode_load_balance_method = "auto"
 
     @classmethod
     def setUpClass(cls):
@@ -38,14 +39,14 @@ class TestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
         # Non blocking start servers
-        cls.start_prefill()
-        cls.start_decode()
-
-        # Block until both
-        cls.wait_server_ready(cls.prefill_url + "/health")
-        cls.wait_server_ready(cls.decode_url + "/health")
-
-        cls.launch_lb()
+        # cls.start_prefill()
+        # cls.start_decode()
+        #
+        # # Block until both
+        # cls.wait_server_ready(cls.prefill_url + "/health")
+        # cls.wait_server_ready(cls.decode_url + "/health")
+        #
+        # cls.launch_lb()
         cls.url = urlparse(cls.lb_url)
 
     @classmethod
@@ -112,95 +113,116 @@ class TestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
             other_args=decode_args,
         )
 
-    # def test_gsm8k(self):
-    #     args = SimpleNamespace(
-    #         num_shots=5,
-    #         data_path=None,
-    #         num_questions=200,
-    #         max_new_tokens=512,
-    #         parallel=128,
-    #         host=f"http://{self.url.hostname}",
-    #         port=int(self.url.port),
-    #     )
-    #
-    #     metrics = run_eval_few_shot_gsm8k(args)
-    #     self.assertGreaterEqual(
-    #         metrics["accuracy"],
-    #         0.95,
-    #     )
+    def test_load_balance_method(self):
+        option_list = ["auto", "round_robin", "total_requests", "total_tokens" "follow_bootstrap_room"]
 
-    def test_server_info(self):
+        for self.prefill_load_balance_method, self.decode_load_balance_method in list(itertools.product(option_list, repeat=2)):
+            try:
+                # Non blocking start servers
+                self.start_prefill()
+                self.start_decode()
+
+                # Block until both
+                self.wait_server_ready(self.prefill_url + "/health")
+                self.wait_server_ready(self.decode_url + "/health")
+
+                self.launch_lb()
+
+                self._test_server_info()
+                self._test_gsm8k()
+            finally:
+                self.tearDownClass()
+
+    def _test_gsm8k(self):
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
+
+        metrics = run_eval_few_shot_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            0.95,
+        )
+
+    def _test_server_info(self):
         response = requests.get(f"{self.lb_url}/get_server_info")
         self.assertEqual(response.status_code, 200)
-        # self.assertIn(self.load_balance_method, response.text)
-        print(response.text)
+        self.assertIn(self.prefill_load_balance_method, response.text)
+        self.assertIn(self.decode_load_balance_method, response.text)
+        # print(response.text)
 
     @classmethod
     def tearDownClass(cls):
         os.environ.pop("ASCEND_MF_STORE_URL")
         super().tearDownClass()
-
-
-class _TestNPULoadBalanceMethodPrefillAutoDecodeRoundRobin(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "auto"
-    decode_load_balance_method = "round_robin"
-
-
-class _TestNPULoadBalanceMethodPrefillAutoDecodeTotalRequests(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "auto"
-    decode_load_balance_method = "total_requests"
-
-
-class _TestNPULoadBalanceMethodPrefillAutoDecodeTotalTokens(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "auto"
-    decode_load_balance_method = "total_tokens"
-
-
-class _TestNPULoadBalanceMethodPrefillAutoDecodeFollowBootstrapRoom(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "auto"
-    decode_load_balance_method = "follow_bootstrap_room"
-
-
-class _TestNPULoadBalanceMethodPrefillRoundRobinDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "round_robin"
-    decode_load_balance_method = "auto"
-
-
-class _TestNPULoadBalanceMethodPrefillTotalRequestsDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "total_requests"
-    decode_load_balance_method = "auto"
-
-
-class _TestNPULoadBalanceMethodPrefillTotalTokensDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "total_tokens"
-    decode_load_balance_method = "auto"
-
-
-class _TestNPULoadBalanceMethodPrefillFollowBootstrapRoomDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
-    prefill_load_balance_method = "follow_bootstrap_room"
-    decode_load_balance_method = "auto"
-
+#
+#
+# class _TestNPULoadBalanceMethodPrefillAutoDecodeRoundRobin(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "auto"
+#     decode_load_balance_method = "round_robin"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillAutoDecodeTotalRequests(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "auto"
+#     decode_load_balance_method = "total_requests"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillAutoDecodeTotalTokens(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "auto"
+#     decode_load_balance_method = "total_tokens"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillAutoDecodeFollowBootstrapRoom(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "auto"
+#     decode_load_balance_method = "follow_bootstrap_room"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillRoundRobinDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "round_robin"
+#     decode_load_balance_method = "auto"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillTotalRequestsDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "total_requests"
+#     decode_load_balance_method = "auto"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillTotalTokensDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "total_tokens"
+#     decode_load_balance_method = "auto"
+#
+#
+# class _TestNPULoadBalanceMethodPrefillFollowBootstrapRoomDecodeAuto(TestNPULoadBalanceMethodDPDisaggregation):
+#     prefill_load_balance_method = "follow_bootstrap_room"
+#     decode_load_balance_method = "auto"
+#
 
 if __name__ == "__main__":
-    # unittest.main()
-    loader = unittest.TestLoader()
-    suite = unittest.TestSuite()
-    RUN_FLAG = [
-        TestNPULoadBalanceMethodDPDisaggregation,
-        _TestNPULoadBalanceMethodPrefillAutoDecodeRoundRobin,
-        _TestNPULoadBalanceMethodPrefillAutoDecodeTotalRequests,
-        _TestNPULoadBalanceMethodPrefillAutoDecodeTotalTokens,
-        # _TestNPULoadBalanceMethodPrefillAutoDecodeFollowBootstrapRoom,
-    ]
-    # suite.addTests(loader.loadTestsFromTestCase(random.choice(RUN_FLAG)))
-    # suite.addTests(loader.loadTestsFromTestCase(TestNPULoadBalanceMethodDPDisaggregation))
-    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeRoundRobin))
-    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeTotalRequests))
-    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeTotalTokens))
-    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeFollowBootstrapRoom))
-    suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillRoundRobinDecodeAuto))
-    suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillTotalRequestsDecodeAuto))
-    suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillTotalTokensDecodeAuto))
-    suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillFollowBootstrapRoomDecodeAuto))
-    runner = unittest.TextTestRunner()
-    runner.run(suite)
+    unittest.main()
+    # loader = unittest.TestLoader()
+    # suite = unittest.TestSuite()
+    # RUN_FLAG = [
+    #     TestNPULoadBalanceMethodDPDisaggregation,
+    #     _TestNPULoadBalanceMethodPrefillAutoDecodeRoundRobin,
+    #     _TestNPULoadBalanceMethodPrefillAutoDecodeTotalRequests,
+    #     _TestNPULoadBalanceMethodPrefillAutoDecodeTotalTokens,
+    #     # _TestNPULoadBalanceMethodPrefillAutoDecodeFollowBootstrapRoom,
+    # ]
+    # # suite.addTests(loader.loadTestsFromTestCase(random.choice(RUN_FLAG)))
+    # # suite.addTests(loader.loadTestsFromTestCase(TestNPULoadBalanceMethodDPDisaggregation))
+    # # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeRoundRobin))
+    # # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeTotalRequests))
+    # # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeTotalTokens))
+    # # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillAutoDecodeFollowBootstrapRoom))
+    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillRoundRobinDecodeAuto))
+    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillTotalRequestsDecodeAuto))
+    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillTotalTokensDecodeAuto))
+    # suite.addTests(loader.loadTestsFromTestCase(_TestNPULoadBalanceMethodPrefillFollowBootstrapRoomDecodeAuto))
+    # runner = unittest.TextTestRunner()
+    # runner.run(suite)
