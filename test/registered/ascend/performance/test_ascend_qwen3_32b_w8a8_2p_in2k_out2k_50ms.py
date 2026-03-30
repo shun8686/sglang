@@ -60,7 +60,7 @@ QWEN3_32B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     4,
     "--tp-size",
-    4,
+    2,
     "--mem-fraction-static",
     0.915,
     "--cuda-graph-bs",
