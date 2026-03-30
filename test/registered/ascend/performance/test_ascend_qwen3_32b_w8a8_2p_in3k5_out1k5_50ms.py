@@ -16,12 +16,15 @@ register_npu_ci(
 
 QWEN3_32B_ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-    "HCCL_BUFFSIZE": "400",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
+    "SGLANG_NPU_USE_DEEPGEMM": "1",
 }
 
 QWEN3_32B_OTHER_ARGS = [
@@ -37,10 +40,14 @@ QWEN3_32B_OTHER_ARGS = [
     "--quantization",
     "modelslim",
     "--max-running-requests",
-    78,
+    101,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    35000,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
@@ -51,21 +58,25 @@ QWEN3_32B_OTHER_ARGS = [
     1,
     "--speculative-num-draft-tokens",
     4,
-    "--chunked-prefill-size",
-    -1,
-    "--max-prefill-tokens",
-    49152,
     "--tp-size",
     4,
     "--mem-fraction-static",
-    0.72,
+    0.845,
     "--cuda-graph-bs",
     16,
     32,
     64,
-    68,
     72,
-    78,
+    88,
+    90,
+    92,
+    94,
+    96,
+    97,
+    98,
+    99,
+    100,
+    101,
     "--dtype",
     "bfloat16",
 ]
@@ -76,14 +87,14 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 78
-    num_prompts = 312
+    max_concurrency = 100
+    num_prompts = 400
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 39.8
+    tpot = 50
     # T: 387. 800I A3: 1.8*T=696.6
-    output_token_throughput = 1490
+    output_token_throughput = 1650
 
     def test_qwen3_32b(self):
         self.run_throughput()
