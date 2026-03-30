@@ -32,7 +32,7 @@ class TestSetForwardHooks(CustomTestCase):
     """
 
     hook_function_path = (
-         "sglang.test.ascend.test_ascend_utils:create_attention_monitor_hook_factory"
+        "sglang.test.ascend.test_ascend_utils:create_attention_monitor_hook_factory"
     )
     model = QWEN3_32B_WEIGHTS_PATH
     hooks_spec = [

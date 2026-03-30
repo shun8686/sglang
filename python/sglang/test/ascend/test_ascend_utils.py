@@ -20,13 +20,14 @@ import time
 from types import SimpleNamespace
 from typing import Awaitable, Callable, NamedTuple, Optional
 from urllib.parse import urlparse
+
 from sglang.bench_serving import run_benchmark
 from sglang.srt.utils import kill_process_tree
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
-    _wait_for_server_health,
     _create_clean_subprocess_env,
+    _wait_for_server_health,
     auto_config_device,
     popen_launch_server,
 )
