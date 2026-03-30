@@ -32,7 +32,8 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
     [Test Target] --load-balance-method
     """
 
-    params = None
+    # params = None
+    params = ("round_robin", "total_requests")
 
     # load_balance_method = "follow_bootstrap_room"
     # load_balance_method = "round_robin"
@@ -154,17 +155,16 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
         sleep(30)
 
 
-
-# def create_test_class(param_tuple, index):
-for index, param_tuple in enumerate(all_params):
-    prefill_load_balance_method, decode_load_balance_method = param_tuple
-    class_name = f"Test_{index:02d}_prefill_{prefill_load_balance_method}_decode_{decode_load_balance_method}"
-    new_class = type(
-        class_name,
-        (BaseTestNPULoadBalanceMethodDPDisaggregation, ),
-        {"params": param_tuple}
-    )
-    globals()[class_name] = new_class
+#
+# for index, param_tuple in enumerate(all_params):
+#     prefill_load_balance_method, decode_load_balance_method = param_tuple
+#     class_name = f"Test_{index:02d}_prefill_{prefill_load_balance_method}_decode_{decode_load_balance_method}"
+#     new_class = type(
+#         class_name,
+#         (BaseTestNPULoadBalanceMethodDPDisaggregation, ),
+#         {"params": param_tuple}
+#     )
+#     globals()[class_name] = new_class
 
 
 
