@@ -23,7 +23,7 @@ register_npu_ci(est_time=200, suite="nightly-4-npu-a3", nightly=True)
 load_balance_method_options = ["auto", "round_robin", "total_requests", "total_tokens", "follow_bootstrap_room"]
 all_params = list(itertools.product(load_balance_method_options, repeat=2))
 
-class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
+class _BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
     """Testcase：Verify that the inference is successful when --load-balance-method is set to follow_bootstrap_room.
 
     [Test Category] Parameter
@@ -155,7 +155,7 @@ def create_test_class(param_tuple, index):
     class_name = f"Test_{index:02d}_prefill_{prefill_load_balance_method}_decode_{decode_load_balance_method}"
     new_class = type(
         class_name,
-        (BaseTestNPULoadBalanceMethodDPDisaggregation, ),
+        (_BaseTestNPULoadBalanceMethodDPDisaggregation, ),
         {"params": param_tuple}
     )
     return new_class
