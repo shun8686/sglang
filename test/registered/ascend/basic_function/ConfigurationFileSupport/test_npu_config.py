@@ -1,5 +1,4 @@
 import tempfile
-
 import unittest
 
 import requests
@@ -35,10 +34,7 @@ class TestConfig(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.process = popen_launch_server_with_config_yaml(
-            cls.config,
-            DEFAULT_URL_FOR_TEST,
-            DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+        cls.process = popen_launch_server_with_config_yaml(cls.config, DEFAULT_URL_FOR_TEST, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
         )
 
     @classmethod
