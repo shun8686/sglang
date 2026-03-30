@@ -89,8 +89,8 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     dataset_name = "random"
     max_concurrency = 100
     num_prompts = 400
-    input_len = 3500
-    output_len = 1500
+    input_len = 3584
+    output_len = 1536
     random_range_ratio = 1
     tpot = 50
     # T: 387. 800I A3: 1.8*T=696.6

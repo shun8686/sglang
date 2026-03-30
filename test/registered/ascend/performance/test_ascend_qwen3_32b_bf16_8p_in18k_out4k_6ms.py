@@ -2,14 +2,14 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_32B_EAGLE_MODEL_PATH,
-    QWEN3_32B_W8A8_MODEL_PATH,
+    QWEN3_32B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-4-npu-a3",
+    suite="nightly-16-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
@@ -23,8 +23,7 @@ QWEN3_32B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
-    "SGLANG_NPU_USE_DEEPGEMM": "1",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
 }
 
 QWEN3_32B_OTHER_ARGS = [
@@ -37,65 +36,49 @@ QWEN3_32B_OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    "--quantization",
-    "modelslim",
     "--max-running-requests",
-    101,
+    1,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    35000,
+    65536,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
     QWEN3_32B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
-    3,
+    4,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    4,
+    5,
     "--tp-size",
-    4,
-    "--mem-fraction-static",
-    0.845,
-    "--cuda-graph-bs",
     16,
-    32,
-    64,
-    72,
-    88,
-    90,
-    92,
-    94,
-    96,
-    97,
-    98,
-    99,
-    100,
-    101,
+    "--mem-fraction-static",
+    0.72,
+    "--cuda-graph-bs",
+    1,
     "--dtype",
     "bfloat16",
 ]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_32B_W8A8_MODEL_PATH
-    # model = "/home/weights/Qwen/Qwen3-32B"
-    # model = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-32B-W8A8"
+    model = QWEN3_32B_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 100
-    num_prompts = 400
-    input_len = 3584
-    output_len = 1536
+    max_concurrency = 1
+    num_prompts = 1
+    input_len = 18000
+    output_len = 4000
     random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 1100
+    tpot = 6
+    # 800I A3：79.64
+    output_token_throughput = 171
 
     def test_qwen3_32b(self):
         self.run_throughput()
