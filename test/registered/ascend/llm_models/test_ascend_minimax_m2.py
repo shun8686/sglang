@@ -21,6 +21,7 @@ class TestMiniMaxM2(GSM8KAscendMixin, CustomTestCase):
 
     model = MINIMAX_M2_WEIGHTS_PATH
     accuracy = 0.9
+    timeout_for_server_launch = 3000
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
