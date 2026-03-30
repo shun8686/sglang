@@ -162,7 +162,7 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
         baseline = self.run_gsm8k_test(interval=1)
         print("============================baseline=====================================")
         print(baseline)
-        pp_metrics = self.run_gsm8k_test(interval=100)
+        pp_metrics = self.run_gsm8k_test(interval=10000)
         print("============================100===========================================")
         print(pp_metrics)
 
@@ -171,12 +171,25 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
 
 
 
-        # self.assertGreaterEqual(baseline["accuracy"], 0.38)
-        # self.assertGreaterEqual(
-        #     pp_metrics["accuracy"],
-        #     baseline["accuracy"] - 0.02,
-        #     msg=(
-        #         f"PP accuracy dropped more than 2% compared to baseline. "
-        #         f"Baseline: {baseline['accuracy']:.2%}, PP: {pp_metrics['accuracy']:.2%}"
-        #     ),
-        # )
+        self.assertGreaterEqual(baseline["accuracy"], 0.38)
+        self.assertGreaterEqual(
+            pp_metrics["accuracy"],
+            baseline["accuracy"] - 0.02,
+            msg=(
+                f"PP accuracy dropped more than 2% compared to baseline. "
+                f"Baseline: {baseline['accuracy']:.2%}, PP: {pp_metrics['accuracy']:.2%}"
+            ),
+        )
+        self.assertGreaterEqual(baseline["accuracy"], 0.38)
+        self.assertGreaterEqual(
+            pp_metrics["accuracy"],
+            baseline["accuracy"] - 0.02,
+            msg=(
+                f"PP accuracy dropped more than 2% compared to baseline. "
+                f"Baseline: {baseline['accuracy']:.2%}, PP: {pp_metrics['accuracy']:.2%}"
+            ),
+        )
+        self.assertGreaterEqual(pp_metrics["latency"], baseline["latency"])
+
+if __name__ == "__main__":
+    unittest.main()
