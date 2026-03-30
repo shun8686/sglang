@@ -19,28 +19,45 @@ DATASET_DIR_DEFAULT = "/tmp/ddataset/"
 
 def run_evalscope_accuracy_test(
     model,
-    eval_type="openai_ai",
+    eval_type="openai_api",
     api_url=None,
     api_key="EMPTY",
-    generation_config=None,
     datasets=None,
+    dataset_hub=None,
     dataset_dir=None,
+    dataset_args=None,
     eval_batch_size=128,
+    generation_config=None,
     limit=10,
 ):
     if generation_config is None:
         generation_config = GENERATION_CONFIG_DEFAULT
-    if dataset_dir is None:
-        dataset_dir = DATASET_DIR_DEFAULT
+    if datasets is None:
+        datasets = ["gsm8k", "mmlu", "mmlu_pro", "aime24", "math_500", "gpqa_diamond", "bfcl_v3"]
+    # if dataset_dir is None:
+    #     dataset_dir = DATASET_DIR_DEFAULT
+    # if dataset_hub is None:
+    #     dataset_hub = "Local"
+    if dataset_args is None:
+        dataset_args = {
+            "gsm8k": {},
+            "mmlu": {},
+            "mmlu_pro": {},
+            "aime24": {},
+            "math_500": {},
+            "gpqa_diamond": {},
+            "bfcl_v3": {},
+        }
     task_config = TaskConfig(
         model=model,
         eval_type=eval_type,
         api_url=api_url,
         api_key=api_key,
-        generation_config=generation_config,
         datasets=datasets,
-        dataset_dir=dataset_dir,
+        dataset_args=dataset_args,
+        # dataset_dir=dataset_dir,
         eval_batch_size=eval_batch_size,
+        generation_config=generation_config,
         limit=limit,
     )
 
