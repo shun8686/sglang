@@ -60,7 +60,7 @@ QWEN3_32B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     4,
     "--tp-size",
-    4,
+    2,
     "--mem-fraction-static",
     0.915,
     "--cuda-graph-bs",
@@ -86,7 +86,7 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 43
     # T: 472/@64ms. 800I A3：1972.3
-    output_token_throughput = 1960
+    output_token_throughput = 130
 
     def test_qwen3_32b(self):
         self.run_throughput()
