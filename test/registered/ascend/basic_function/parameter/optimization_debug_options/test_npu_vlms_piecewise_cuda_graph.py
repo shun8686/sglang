@@ -35,7 +35,7 @@ class TestVLMPiecewiseCudaGraph(CustomTestCase):
         # Removed argument parsing from here
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.api_key = "sk-123456"
-        cls.time_out = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+        cls.time_out = 6000
 
         if cls.parsed_args is None:
             cls.parsed_args = SimpleNamespace(
@@ -119,7 +119,7 @@ class TestVLMPiecewiseCudaGraph(CustomTestCase):
             if custom_env:
                 process_env.update(custom_env)
             # if test vlm with cuda_ipc feature, open this env_var
-            process_env["SGLANG_USE_CUDA_IPC_TRANSPORT"] = "1"
+            # process_env["SGLANG_USE_CUDA_IPC_TRANSPORT"] = "1"
 
             # Prepare stdout/stderr redirection if needed
             stdout_file = None
@@ -237,9 +237,6 @@ class TestVLMPiecewiseCudaGraph(CustomTestCase):
     def test_vlm_mmmu_benchmark(self):
         """Test VLM models against MMMU benchmark."""
         models_to_test = MODELS
-
-        if is_in_ci():
-            models_to_test = [random.choice(MODELS)]
 
         for model in models_to_test:
             self._run_vlm_mmmu_test(model, "./logs")

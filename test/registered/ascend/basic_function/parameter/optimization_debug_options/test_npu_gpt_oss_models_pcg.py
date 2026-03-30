@@ -39,7 +39,7 @@ class TestGptOssPiecewiseCudaGraph(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--tp",
-                "2",
+                "8",
                 "--trust-remote-code",
                 "--reasoning-parser",
                 "gpt-oss",

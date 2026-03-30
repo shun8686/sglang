@@ -92,7 +92,7 @@ class TestDeepseekV32CPInSeqSplit(CustomTestCase):
             "8",
             "--enable-dp-attention",
             "--dp",
-            "2",
+            "1",
             "--attn-cp-size",
             "4",
             "--enable-nsa-prefill-context-parallel",
