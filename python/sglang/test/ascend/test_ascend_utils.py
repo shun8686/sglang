@@ -144,6 +144,7 @@ SMOLLM_1_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "HuggingFaceTB/SmolLM
 STABLELM_2_1_6B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "stabilityai/stablelm-2-1_6b"
 )
+TRINITY_MINI_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/Trinity-Mini")
 XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-MoE-A36B")
 EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "sglang-EAGLE3-LLaMA3.1-Instruct-8B"

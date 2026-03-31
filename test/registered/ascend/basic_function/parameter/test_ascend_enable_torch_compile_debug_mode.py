@@ -21,8 +21,7 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
     [Test Target] --enable-torch-compile-debug-mode
     """
 
-    #model = QWEN3_32B_WEIGHTS_PATH
-    model = "/home/weights/Qwen/Qwen3-32B"
+    model = QWEN3_32B_WEIGHTS_PATH
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
