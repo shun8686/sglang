@@ -1,36 +1,7 @@
-"""
-Verify NEXTN (MTP) speculative decoding on DeepSeek-V3.2-W8A8 (NPU).
-
-DeepSeek-V3.2-W8A8 natively supports Multi-Token Prediction (MTP) and can be used
-with the NEXTN algorithm without an external draft model.
-
-[Test Category] Parameter
-[Test Target] --speculative-algorithm; --speculative-num-steps;
-              --speculative-eagle-topk; --speculative-num-draft-tokens;
-              --speculative-attention-mode; --attention-backend
-[Model] DeepSeek-V3.2-W8A8 (vllm-ascend/DeepSeek-V3.2-W8A8)
-"""
-import sys
 import os
 import unittest
 
-# ============【本地路径覆盖】============
-LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
 
-import sglang.test.ascend.test_ascend_utils as utils
-
-# 覆盖模型根目录
-utils.MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
-utils.HF_MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
-
-# 覆盖 DeepSeek-V3.2-W8A8 路径（服务器实际路径）
-# 注意：原始常量可能包含 "vllm-ascend/DeepSeek-V3.2-W8A8"，这里直接覆盖为实际路径
-utils.DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "DeepSeek-V3.2-W8A8"
-)
-
-# 可选：如果脚本中还用到了其他常量，可一并覆盖（本例中未使用）
-# ======================================
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
@@ -46,7 +17,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 _ASCEND_BACKEND = "ascend"
 

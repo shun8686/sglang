@@ -1,58 +1,6 @@
-
-"""
-Verify EAGLE3 speculative decoding basic functionality on a single Ascend NPU card.
-
-EAGLE3 uses a lightweight draft head (a small MLP trained on the target model's
-hidden states) to propose candidate tokens. The target model verifies all candidates
-in one forward pass. Compared to EAGLE/EAGLE2, EAGLE3 improves draft head training
-to capture token dependencies more accurately, achieving a higher acceptance rate.
-
-Server configuration follows the reference performance test configuration:
-  target model : aleoyang/Qwen3-32B-w8a8-MindIE  (W8A8 quantized)
-  draft head   : Qwen/Qwen3-32B-Eagle3            (full precision)
-  tp-size      : 1  (single NPU card)
-
-SGLANG_ENABLE_SPEC_V2 enables the SpecV2 overlap scheduler, which is required
-when --speculative-eagle-topk 1 is used.
-
-[Test Category] Parameter
-[Test Target] --speculative-algorithm; --speculative-draft-model-path;
-              --speculative-num-steps; --speculative-eagle-topk;
-              --speculative-num-draft-tokens; --speculative-attention-mode;
-              --speculative-draft-model-quantization; --attention-backend
-[Model] aleoyang/Qwen3-32B-w8a8-MindIE; Qwen/Qwen3-32B-Eagle3
-"""
-import sys
 import os
 import unittest
-# ============【本地路径覆盖 - 仅影响本文件】============
-# 配置：服务器实际模型根目录
-LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
 
-# 在导入 test_ascend_utils 之后，立即覆盖其中的路径常量
-import sglang.test.ascend.test_ascend_utils as utils
-
-# 覆盖根目录常量（可选，如果其他代码依赖这个）
-utils.MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
-utils.HF_MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
-
-# 覆盖 5 个模型路径常量（使用服务器实际路径）
-utils.QWEN3_0_6B_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B"
-)
-utils.QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-W8A8"  # 注意：实际是大写 W8A8
-)
-utils.QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Eagle3-Qwen3-32B-zh"  # 注意：实际目录名不同
-)
-utils.QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-w8a8-MindIE"  # 注意：实际父目录是 Qwen 不是 aleoyang
-)
-utils.LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct"
-)
-# ====================================================
 
 
 from sglang.srt.utils import kill_process_tree
@@ -75,8 +23,6 @@ register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 _ASCEND_BACKEND = "ascend"
 
 _SERVER_ARGS = [
-    "--base-gpu-id", "0",
-    "--gpu-id-step", "1",
     "--trust-remote-code",
     "--attention-backend", _ASCEND_BACKEND,
     "--quantization", "modelslim",
@@ -114,7 +60,6 @@ class TestNpuEagle3Basic(CustomTestCase):
     def setUpClass(cls) -> None:
         cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
-        os.environ["ASCEND_RT_VISIBLE_DEVICES"] = os.environ.get("VISIBLE_DEVICES", "2,3,4,5,6,7")
         os.environ.update({
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",

@@ -1,58 +1,5 @@
-
-"""
-Verify EAGLE3 speculative decoding under tensor parallelism on Ascend NPU (2 cards).
-
-Tensor parallelism (TP) shards model weights across multiple NPU cards. Each layer
-requires an all-reduce collective to aggregate partial results before the next layer
-can proceed. EAGLE3 consumes the target model's hidden states to predict draft tokens:
-if the TP shard alignment between the draft head and the target model is incorrect,
-draft token predictions become random noise and avg_spec_accept_length collapses to
-near zero without any server error or response failure. This test specifically
-validates the TP-aware hidden state handoff in the EAGLE3 draft-verify loop.
-
-Server configuration:
-  target model : aleoyang/Qwen3-32B-w8a8-MindIE  (W8A8 quantized)
-  draft head   : Qwen/Qwen3-32B-Eagle3            (full precision)
-  tp-size      : 2  (2 NPU cards)
-
-[Test Category] Parameter
-[Test Target] --tp-size; --speculative-algorithm; --speculative-draft-model-path;
-              --speculative-num-steps; --speculative-eagle-topk;
-              --speculative-num-draft-tokens; --speculative-attention-mode;
-              --attention-backend
-[Model] aleoyang/Qwen3-32B-w8a8-MindIE; Qwen/Qwen3-32B-Eagle3
-"""
-import sys
 import os
 import unittest
-# ============【本地路径覆盖 - 仅影响本文件】============
-# 配置：服务器实际模型根目录
-LOCAL_MODEL_WEIGHTS_DIR = "/home/weights"
-
-# 在导入 test_ascend_utils 之后，立即覆盖其中的路径常量
-import sglang.test.ascend.test_ascend_utils as utils
-
-# 覆盖根目录常量（可选，如果其他代码依赖这个）
-utils.MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
-utils.HF_MODEL_WEIGHTS_DIR = LOCAL_MODEL_WEIGHTS_DIR
-
-# 覆盖 5 个模型路径常量（使用服务器实际路径）
-utils.QWEN3_0_6B_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-0.6B"
-)
-utils.QWEN3_30B_A3B_W8A8_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-W8A8"  # 注意：实际是大写 W8A8
-)
-utils.QWEN3_32B_EAGLE3_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Eagle3-Qwen3-32B-zh"  # 注意：实际目录名不同
-)
-utils.QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "Qwen/Qwen3-32B-w8a8-MindIE"  # 注意：实际父目录是 Qwen 不是 aleoyang
-)
-utils.LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
-    LOCAL_MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct"
-)
-# ====================================================
 
 
 from sglang.srt.utils import kill_process_tree
