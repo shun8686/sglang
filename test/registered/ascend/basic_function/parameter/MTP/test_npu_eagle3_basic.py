@@ -75,7 +75,7 @@ register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 _ASCEND_BACKEND = "ascend"
 
 _SERVER_ARGS = [
-    "--base-gpu-id", "2",
+    "--base-gpu-id", "0",
     "--gpu-id-step", "1",
     "--trust-remote-code",
     "--attention-backend", _ASCEND_BACKEND,
@@ -114,6 +114,7 @@ class TestNpuEagle3Basic(CustomTestCase):
     def setUpClass(cls) -> None:
         cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
+        os.environ["ASCEND_RT_VISIBLE_DEVICES"] = os.environ.get("VISIBLE_DEVICES", "2,3,4,5,6,7")
         os.environ.update({
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
