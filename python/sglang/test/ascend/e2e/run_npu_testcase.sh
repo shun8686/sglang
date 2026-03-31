@@ -1,7 +1,7 @@
 test_case=$1
 
 sglang_source_path=/root/sglang
-cd ${sglang_source_path}
+cd ${sglang_source_path} || exit
 if [ ! -f "${test_case}" ];then
   echo "The test case file is not exist: $test_case"
   exit 0
@@ -33,7 +33,7 @@ export HCCL_NPU_SOCKET_PORT_RANGE="auto"
 visibe_devices=$ASCEND_VISIBLE_DEVICES
 echo "ASCEND_VISIBLE_DEVICES=$ASCEND_VISIBLE_DEVICES"
 if [ "${visibe_devices}" != "" ];then
-    ASCEND_RT_VISIBLE_DEVICES=$(echo $ASCEND_VISIBLE_DEVICES | tr ',' '\n' | sort -n | tr '\n' ',')
+    ASCEND_RT_VISIBLE_DEVICES=$(echo "$ASCEND_VISIBLE_DEVICES" | tr ',' '\n' | sort -n | tr '\n' ',')
     export ASCEND_RT_VISIBLE_DEVICES=${ASCEND_RT_VISIBLE_DEVICES%,}
     echo "ASCEND_RT_VISIBLE_DEVICES=$ASCEND_RT_VISIBLE_DEVICES"
     export ASCEND_VISIBLE_DEVICES=""
@@ -53,9 +53,9 @@ else
     echo "Use sglang from docker image"
     sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
     ascend_test_util_path=${sglang_pkg_path}/sglang/test/ascend
-    mkdir -p ${ascend_test_util_path}
-    mv ${ascend_test_util_path} ${ascend_test_util_path}_bak
-    cp -r ${sglang_source_path}/python/sglang/test/ascend ${ascend_test_util_path}
+    mkdir -p "${ascend_test_util_path}"
+    mv "${ascend_test_util_path}" "${ascend_test_util_path}_bak"
+    cp -r ${sglang_source_path}/python/sglang/test/ascend "${ascend_test_util_path}"
 fi
 
 # set environment of cann
@@ -70,16 +70,16 @@ log_path="/root/sglang/debug/logs/log/${current_date}/${tc_name}/${HOSTNAME}"
 if [ "${SGLANG_IS_IN_CI}" = "true" ] || [ "${SGLANG_IS_IN_CI}" = "True" ];then
     log_path="/root/.cache/tests/logs/log/${current_date}/${tc_name}/${HOSTNAME}"
 fi
-rm -rf ${log_path}
-mkdir -p ${log_path}
+rm -rf "${log_path}"
+mkdir -p "${log_path}"
 echo "Log path: ${log_path}"
 
 if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
     echo "TROUBLE_SHOTTING=true, the pod will keep alive for four hour."
-    ( python3 -u ${test_case} 2>&1 || true ) | tee -a ${log_path}/${tc_name}.log
+    ( python3 -u "${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
     sleep 14400
 else
-    python3 -u ${test_case} 2>&1 | tee -a ${log_path}/${tc_name}.log
+    python3 -u "${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
 fi
 echo "Finished test case ${test_case}"
 
@@ -90,7 +90,7 @@ if [ -d "$source_plog_path" ];then
     if [ "${SGLANG_IS_IN_CI}" = "true" ] || [ "${SGLANG_IS_IN_CI}" = "True" ];then
         target_plog_path="/root/.cache/tests/logs/plog/${tc_name}/${HOSTNAME}"
     fi
-    rm -rf ${target_plog_path}
-    mkdir -p ${target_plog_path}
-    cp ${source_plog_path}/* ${target_plog_path}
+    rm -rf "${target_plog_path}"
+    mkdir -p "${target_plog_path}"
+    cp ${source_plog_path}/* "${target_plog_path}"
 fi

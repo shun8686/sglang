@@ -9,7 +9,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-4-npu-a3",
+    suite="nightly-2-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
@@ -60,7 +60,7 @@ QWEN3_32B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     4,
     "--tp-size",
-    4,
+    2,
     "--mem-fraction-static",
     0.915,
     "--cuda-graph-bs",
@@ -86,7 +86,7 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 43
     # T: 472/@64ms. 800I A3：1972.3
-    output_token_throughput = 1960
+    output_token_throughput = 1300
 
     def test_qwen3_32b(self):
         self.run_throughput()
