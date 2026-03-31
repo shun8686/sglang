@@ -1,7 +1,10 @@
 import unittest
 
 from sglang.test.ascend.gsm8k_ascend_mixin import GSM8KAscendMixin
-from sglang.test.ascend.test_ascend_utils import GROK_2_WEIGHTS_PATH, GROK_2_WEIGHTS_TOKENIZER_PATH
+from sglang.test.ascend.test_ascend_utils import (
+    GROK_2_WEIGHTS_PATH,
+    GROK_2_WEIGHTS_TOKENIZER_PATH,
+)
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 

@@ -18,9 +18,7 @@ register_npu_ci(
     nightly=True,
 )
 
-MODELS = [
-    (CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH, 1, 0.22)
-]
+MODELS = [(CLIP_VIT_LARGE_PATCH14_336_WEIGHTS_PATH, 1, 0.22)]
 TORCH_DTYPES = [torch.float16]
 
 

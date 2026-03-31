@@ -48,29 +48,29 @@ class TestE5Mistral7b(CustomTestCase):
         return truncated_prompts
 
     def assert_close_prefill_logits(
-            self,
-            prompts,
-            model_path,
-            tp_size,
-            torch_dtype,
-            prefill_tolerance,
+        self,
+        prompts,
+        model_path,
+        tp_size,
+        torch_dtype,
+        prefill_tolerance,
     ) -> None:
         truncated_prompts = self._truncate_prompts(prompts, model_path)
 
         with HFRunner(
-                model_path,
-                torch_dtype=torch_dtype,
-                model_type="embedding",
+            model_path,
+            torch_dtype=torch_dtype,
+            model_type="embedding",
         ) as hf_runner:
             hf_outputs = hf_runner.forward(truncated_prompts)
 
         attention_backend = "ascend"
         with SRTRunner(
-                model_path,
-                tp_size=tp_size,
-                torch_dtype=torch_dtype,
-                model_type="embedding",
-                attention_backend=attention_backend,
+            model_path,
+            tp_size=tp_size,
+            torch_dtype=torch_dtype,
+            model_type="embedding",
+            attention_backend=attention_backend,
         ) as srt_runner:
             srt_outputs = srt_runner.forward(truncated_prompts)
 

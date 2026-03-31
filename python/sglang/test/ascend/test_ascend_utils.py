@@ -71,7 +71,9 @@ GRANITE_3_1_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "ibm-granite/granite-3.1-8b-instruct"
 )
 GROK_2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "huihui-ai/grok-2")
-GROK_2_WEIGHTS_TOKENIZER_PATH = os.path.join(MODEL_WEIGHTS_DIR, "huihui-ai/grok-2/tokenizer.tok.json")
+GROK_2_WEIGHTS_TOKENIZER_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "huihui-ai/grok-2/tokenizer.tok.json"
+)
 INTERNLM2_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b"
 )
