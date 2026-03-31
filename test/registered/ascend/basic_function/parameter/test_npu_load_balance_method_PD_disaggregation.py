@@ -26,7 +26,7 @@ load_balance_method_options = [
     "round_robin",
     "total_requests",
     "total_tokens",
-    "follow_bootstrap_room"
+    "follow_bootstrap_room",
 ]
 all_params = list(itertools.product(load_balance_method_options, repeat=2))
 
@@ -151,7 +151,7 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
                 if self.prefill_load_balance_method == "auto"
                 else self.prefill_load_balance_method
             ),
-            data.get("prefill")[0].get("load_balance_method")
+            data.get("prefill")[0].get("load_balance_method"),
         )
         self.assertEqual(
             (
@@ -159,7 +159,7 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
                 if self.decode_load_balance_method == "auto"
                 else self.decode_load_balance_method
             ),
-            data.get("decode")[0].get("load_balance_method")
+            data.get("decode")[0].get("load_balance_method"),
         )
 
     @classmethod
