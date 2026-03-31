@@ -48,6 +48,9 @@ QWEN3_14B_W8A8_MODEL_PATH = (
 QWEN3_14B_EAGLE_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/AngelSlim/Qwen3-14B_eagle3"
 )
+QWEN3_5_27B_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-27B"
+)
 QWEN3_30B_A3B_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
 )
