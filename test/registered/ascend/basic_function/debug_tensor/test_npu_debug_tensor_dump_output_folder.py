@@ -128,7 +128,7 @@ class TestDebugTensorDumpOutputFolder(
         self.assertEqual(int(res), TP_DIR_NUM)
 
         model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
-        # Keep it consistent with num_hidden_layers in the model's condig.json file.
+        # Keep it consistent with num_hidden_layers in the model's config.json file.
         self.assertEqual(len(model_layers_list), 64)
         self.assertEqual(model_layers_list, list(range(64)))
 
