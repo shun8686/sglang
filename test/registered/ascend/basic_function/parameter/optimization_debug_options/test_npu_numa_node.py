@@ -75,7 +75,8 @@ class TestAscendWarmups(CustomTestCase):
             # 用 /sys  filesystem 获取 NUMA 节点（最可靠）
             with open(f"/sys/devices/system/cpu/cpu{first_cpu}/numa_node", "r") as f:
                 return f.read().strip()
-        except:
+        except Exception as e:
+            print(f"获取NUMA节点失败: {e}")
             return None
 
     def _get_process_numa_nodes(self, pid):
@@ -103,15 +104,29 @@ class TestAscendWarmups(CustomTestCase):
             return []
 
     def _get_used_npu_devices(self):
-        """获取当前进程使用的NPU设备数量"""
-        # 从日志提取NPU设备信息
-        self.err_log_file.seek(0)
-        log_content = self.err_log_file.read()
-
-        # 匹配 NPU device ID
-        npu_matches = re.findall(r"Using NPU device (\d+)", log_content)
-        npu_list = sorted(list(set(npu_matches)))
-        return npu_list
+        """
+        通过 npu-smi info 获取当前进程占用的NPU设备（最权威）
+        """
+        server_pid = self.process.pid
+        used_npus = set()
+        try:
+            # 执行 npu-smi info 获取所有NPU设备及进程信息
+            result = subprocess.run(
+                ["npu-smi", "info"],
+                capture_output=True, text=True
+            )
+            output = result.stdout
+            # 匹配NPU ID和对应的进程PID
+            # 示例匹配行：| NPU 0 | xxx | xxx | PID: 12345 | ...
+            pattern = re.compile(r"\|\s*NPU\s+(\d+)\s*\|\s*.*?\|\s*.*?\|\s*PID:\s*(\d+)\s*\|")
+            matches = pattern.findall(output)
+            for npu_id, pid in matches:
+                if int(pid) == server_pid:
+                    used_npus.add(npu_id)
+            return sorted(list(used_npus))
+        except Exception as e:
+            print(f"通过npu-smi获取NPU设备失败: {e}")
+            return []
 
     def test_multi_npu_multi_numa_binding(self):
         """验证：多NPU + 多NUMA 绑定完全正确"""
