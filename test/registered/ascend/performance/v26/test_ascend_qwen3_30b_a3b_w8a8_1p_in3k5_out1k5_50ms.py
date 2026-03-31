@@ -111,10 +111,5 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     def test_qwen3_32b(self):
         self.run_throughput(run_cycles=1)
 
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
-
-
 if __name__ == "__main__":
     unittest.main()
