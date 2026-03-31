@@ -84,7 +84,7 @@ class TestNpuApiRelated(CustomTestCase):
         # Verify the weight version identifier and the served-model-name covered model name.
         response = requests.get(
             f"{DEFAULT_URL_FOR_TEST}/v1/models",
-            headers={"Authorization": "Bearer sk-123456"}
+            headers={"Authorization": "Bearer sk-123456"},
         )
         result = response.json()
 
@@ -93,7 +93,7 @@ class TestNpuApiRelated(CustomTestCase):
 
         response1 = requests.get(
             f"{DEFAULT_URL_FOR_TEST}/model_info",
-            headers={"Authorization": "Bearer sk-123456"}
+            headers={"Authorization": "Bearer sk-123456"},
         )
         self.assertEqual(response1.json()["weight_version"], self.weight_version)
 
