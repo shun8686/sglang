@@ -89,7 +89,7 @@ class TestNpuNextnDeepSeek(CustomTestCase):
         self.assertGreater(len(response["choices"]), 0)
         self.assertGreater(len(content.strip()), 0)
 
-        # 验证投机解码生效
+
         assert_spec_decoding_active(self, self.base_url, threshold=1.0)
 
 
