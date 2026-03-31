@@ -1,106 +1,160 @@
 import os
 import time
+import unittest
 import subprocess
-import signal
 
-MODEL_PATH = "QWEN3_0_6B_WEIGHTS_PATH"  # 替换成你的模型路径
-BASE_URL = "http://localhost:30000"
-LOG_FILE = "server_log.txt"
+import requests
 
-def run_server_with_args(extra_args):
-    """启动服务并捕获 stdout + stderr，返回进程"""
-    cmd = [
-        "python", "-m", "sglang.launch_server",
-        "--model", MODEL_PATH,
-        "--trust-remote-code",
-        "--tp-size", "1",
-        "--mem-fraction-static", "0.7",
-        "--attention-backend", "ascend",
-    ] + extra_args
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import MINICPM_O_2_6_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import (
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
+)
 
-    print(f"\n🚀 启动命令: {' '.join(cmd)}")
+register_npu_ci(
+    est_time=500,
+    suite="nightly-4-npu-a3",
+    nightly=True,
+    disabled=False,
+)
 
-    # 启动并将日志输出到文件
-    with open(LOG_FILE, "w", encoding="utf-8") as f:
-        proc = subprocess.Popen(
-            cmd,
-            stdout=f,
-            stderr=f,
-            text=True
+
+class TestAscendCudaGraphGC(unittest.TestCase):
+    """Testcase: Verify the function of --enable-cudagraph-gc parameter.
+
+    [Test Category] Parameter
+    [Test Target] --enable-cudagraph-gc
+    """
+
+    model = MINICPM_O_2_6_WEIGHTS_PATH
+    base_url = DEFAULT_URL_FOR_TEST
+    log_file = "./cudagraph_gc_log.txt"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.time_records = {}
+
+    @classmethod
+    def tearDownClass(cls):
+        if os.path.exists(cls.log_file):
+            os.remove(cls.log_file)
+
+    def _launch_and_measure_time(self, enable_cudagraph_gc: bool):
+        """Launch server with/without --enable-cudagraph-gc and measure startup time."""
+        extra_args = [
+            "--trust-remote-code",
+            "--tp-size", "1",
+            "--mem-fraction-static", "0.7",
+            "--attention-backend", "ascend",
+            "--cuda-graph-max-bs",
+            "16",
+        ]
+        if enable_cudagraph_gc:
+            extra_args.append("--enable-cudagraph-gc")
+
+        # Start server and log
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            start = time.time()
+            proc = popen_launch_server(
+                self.model,
+                self.base_url,
+                timeout=3600,
+                other_args=extra_args,
+                return_stdout_stderr=(f, f),
+            )
+
+            # Wait for CUDA graph capture
+            time.sleep(45)
+
+        # Record time
+        elapsed = time.time() - start
+        kill_process_tree(proc.pid)
+        time.sleep(10)
+        return elapsed
+
+    def _check_cuda_graph_log(self):
+        """Check if CUDA graph is captured in log."""
+        if not os.path.exists(self.log_file):
+            return False
+        with open(self.log_file, "r", encoding="utf-8") as f:
+            content = f.read()
+        return "Capturing batches" in content
+
+    def test_enable_cudagraph_gc_performance(self):
+        """Test that enabling cudagraph-gc slows down CUDA graph capture (GC not frozen)."""
+
+        # Test 1: default (disable --enable-cudagraph-gc, GC frozen, fast)
+        time_off = self._launch_and_measure_time(enable_cudagraph_gc=False)
+        self.assertTrue(self._check_cuda_graph_log(), "CUDA graph not captured")
+
+        # Test 2: enable --enable-cudagraph-gc (GC not frozen, slow)
+        time_on = self._launch_and_measure_time(enable_cudagraph_gc=True)
+        self.assertTrue(self._check_cuda_graph_log(), "CUDA graph not captured")
+
+        # Record
+        self.time_records["gc_disabled"] = time_off
+        self.time_records["gc_enabled"] = time_on
+
+        # Verify: gc enabled → slower startup
+        self.assertGreater(
+            time_on, time_off,
+            f"Enable cudagraph-gc should be slower. Off: {time_off:.2f}s, On: {time_on:.2f}s"
         )
 
-    # 等待 CUDA Graph 捕获完成（根据你的模型调整时间）
-    print("⏳ 等待 CUDA Graph 捕获...")
-    time.sleep(40)
+        # Output result
+        print("\n" + "=" * 60)
+        print("             CUDA Graph GC Test Result")
+        print("=" * 60)
+        print(f"GC disabled (default): {time_off:.2f}s")
+        print(f"GC enabled: {time_on:.2f}s")
+        print(f"Slowdown: {time_on - time_off:.2f}s")
+        print("=" * 60)
 
-    return proc
+    def test_server_healthy(self):
+        """Verify server can start and generate normally."""
+        extra_args = [
+            "--trust-remote-code",
+            "--tp-size", "1",
+            "--mem-fraction-static", "0.7",
+            "--attention-backend", "ascend",
+            "--enable-cudagraph-gc",
+        ]
 
-def watch_cuda_graph_capture_speed():
-    """读取日志，判断 CUDA Graph 捕获速度（直接反映 GC 是否冻结）"""
-    with open(LOG_FILE, "r", encoding="utf-8") as f:
-        lines = f.read()
+        with open(self.log_file, "w", encoding="utf-8") as f:
+            proc = popen_launch_server(
+                self.model,
+                self.base_url,
+                timeout=3600,
+                other_args=extra_args,
+                return_stdout_stderr=(f, f),
+            )
+            time.sleep(45)
 
-    # 捕获 CUDA Graph 相关日志
-    capture_lines = [
-        line for line in lines.split("\n")
-        if "Capturing batches" in line
-    ]
+        try:
+            # Check server info
+            resp = requests.get(f"{self.base_url}/get_server_info", timeout=10)
+            self.assertEqual(resp.status_code, 200)
 
-    if not capture_lines:
-        print("⚠️ 未检测到 CUDA Graph 捕获日志，可能已禁用 CUDA Graph")
-        return
+            # Check generate
+            resp = requests.post(
+                f"{self.base_url}/generate",
+                json={
+                    "text": "The capital of France is",
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 32,
+                    },
+                },
+            )
+            self.assertEqual(resp.status_code, 200)
+            self.assertIn("Paris", resp.text)
+        finally:
+            kill_process_tree(proc.pid)
+            time.sleep(10)
 
-    print(f"\n📊 检测到 {len(capture_lines)} 条 CUDA Graph 捕获记录")
-    for line in capture_lines[:5]:
-        print(line.strip())
 
-    # 特征判断
-    if "avail_mem" in lines:
-        print("\n✅ CUDA Graph 捕获功能正常")
-
-def kill_server(proc):
-    """杀死服务进程"""
-    try:
-        os.kill(proc.pid, signal.SIGTERM)
-        time.sleep(5)
-    except:
-        pass
-
-# ===================== 测试开始 =====================
-print("=" * 80)
-print("           端到端测试 --enable-cudagraph-gc 功能")
-print("=" * 80)
-
-# -------------------
-# 测试 1：默认（关闭 cudagraph-gc → GC 冻结）
-# -------------------
-print("\n" + "=" * 60)
-print("测试 1：默认（不加 --enable-cudagraph-gc）")
-print("预期：CUDA Graph 捕获快，GC 冻结")
-print("=" * 60)
-proc1 = run_server_with_args([])
-watch_cuda_graph_capture_speed()
-kill_server(proc1)
-
-# -------------------
-# 测试 2：开启 --enable-cudagraph-gc → GC 不冻结
-# -------------------
-print("\n" + "=" * 60)
-print("测试 2：添加 --enable-cudagraph-gc")
-print("预期：CUDA Graph 捕获变慢，GC 正常运行")
-print("=" * 60)
-proc2 = run_server_with_args(["--enable-cudagraph-gc"])
-watch_cuda_graph_capture_speed()
-kill_server(proc2)
-
-# ===================== 最终结论 =====================
-print("\n" + "=" * 80)
-print("                      测试结论")
-print("=" * 80)
-print("【不加参数】CUDA Graph 捕获快  → GC 冻结（生效）")
-print("【加参数】  CUDA Graph 捕获慢  → GC 未冻结（生效）")
-print("\n✅ --enable-cudagraph-gc 功能验证完成！")
-
-# 清理日志
-if os.path.exists(LOG_FILE):
-    os.remove(LOG_FILE)
+if __name__ == "__main__":
+    unittest.main()
