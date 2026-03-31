@@ -5,7 +5,12 @@ from sglang.test.ascend.test_ascend_utils import GROK_2_WEIGHTS_PATH, GROK_2_WEI
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(
+    est_time=400,
+    suite="nightly-16-npu-a3",
+    nightly=False,
+    disabled="https://github.com/Ascend/sglang/issues/25",
+)
 
 
 class TestGrok2(GSM8KAscendMixin, CustomTestCase):
