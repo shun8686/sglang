@@ -145,8 +145,8 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
         response = requests.get(f"{self.lb_url}/get_server_info")
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.text)
-        self.assertEqual(self.prefill_load_balance_method, data["prefill"]["load_balance_method"])
-        self.assertEqual(self.decode_load_balance_method, data["decode"]["load_balance_method"])
+        self.assertEqual(self.prefill_load_balance_method, data.get("prefill")[0].get("load_balance_method"))
+        self.assertEqual(self.decode_load_balance_method, data.get("decode")[0].get("load_balance_method"))
         # with open("test.log", "w", encoding="utf-8") as f:
         #     f.write(response.text)
         # # self.assertIn(self.prefill_load_balance_method, response.text)
