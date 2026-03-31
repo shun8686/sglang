@@ -52,7 +52,6 @@ _ASCEND_BACKEND = "ascend"
 
 # DeepSeek-V3.2 推荐参数（根据 SGLang 官方建议）
 _SERVER_ARGS = [
-    "--base-gpu-id", "0",
     "--trust-remote-code",
     "--attention-backend", _ASCEND_BACKEND,
     "--disable-radix-cache",
@@ -65,8 +64,8 @@ _SERVER_ARGS = [
     # Maximum draft tokens to verify per step
     "--speculative-num-draft-tokens", "5", # 3 for NEXTN
     "--speculative-attention-mode", "decode",
-    "--tp-size", "8",   # Tensor parallelism – adjust according to available NPUs）
-    "--mem-fraction-static", "0.8",  #0.9 for NEXTN
+    "--tp-size", "16",   # Tensor parallelism – adjust according to available NPUs）
+    "--mem-fraction-static", "0.5",  #0.9 for NEXTN
     "--disable-cuda-graph",
     "--dtype", "bfloat16",
 ]
