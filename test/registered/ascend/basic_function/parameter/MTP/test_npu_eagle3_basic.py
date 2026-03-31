@@ -111,6 +111,7 @@ class TestNpuEagle3Basic(CustomTestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.base_url = DEFAULT_URL_FOR_TEST
+        env = os.environ.copy()
         os.environ.update({
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
@@ -120,7 +121,7 @@ class TestNpuEagle3Basic(CustomTestCase):
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 5,
             other_args=_SERVER_ARGS,
-            env=os.environ.copy(),
+            env=env,
         )
 
     @classmethod
