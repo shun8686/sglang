@@ -17,7 +17,6 @@ from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_pd_server,
-    popen_with_error_check,
 )
 
 register_npu_ci(est_time=200, suite="nightly-4-npu-a3", nightly=True)
@@ -140,8 +139,6 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
         response = requests.get(f"{self.lb_url}/get_server_info")
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.text)
-        # print(data.get("prefill")[0].get("load_balance_method"))
-        # print(data.get("decode")[0].get("load_balance_method"))
         self.assertEqual(
             "follow_bootstrap_room" if self.prefill_load_balance_method == "auto" else self.prefill_load_balance_method,
             data.get("prefill")[0].get("load_balance_method")
