@@ -114,7 +114,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
         return model_layers_list
 
 
-class TestDebugTensorDumpOutputFolder0(
+class TestDebugTensorDumpOutputFolder(
     TestDebugTensorDumpOutputFolderBase, CustomTestCase
 ):
     """
@@ -128,11 +128,12 @@ class TestDebugTensorDumpOutputFolder0(
         self.assertEqual(int(res), TP_DIR_NUM)
 
         model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
+        # Keep it consistent with num_hidden_layers in the model's condig.json file.
         self.assertEqual(len(model_layers_list), 64)
         self.assertEqual(model_layers_list, list(range(64)))
 
 
-class TestDebugTensorDumpOutputFolder1(
+class TestDumpLayersSingle(
     TestDebugTensorDumpOutputFolderBase, CustomTestCase
 ):
     """
@@ -144,7 +145,7 @@ class TestDebugTensorDumpOutputFolder1(
         "1",
     ]
 
-    def test_debug_tensor_dump_output_folder(self):
+    def test_dump_layers_single(self):
         """Test that tensor dumps are generated only for layer 1."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
@@ -155,7 +156,7 @@ class TestDebugTensorDumpOutputFolder1(
         self.assertEqual(model_layers_list[0], 1)
 
 
-class TestDebugTensorDumpOutputFolder2(
+class TestDumpLayersMultiple(
     TestDebugTensorDumpOutputFolderBase, CustomTestCase
 ):
     """
@@ -169,7 +170,7 @@ class TestDebugTensorDumpOutputFolder2(
         "4",
     ]
 
-    def test_debug_tensor_dump_output_folder(self):
+    def test_dump_layers_multiple(self):
         """Test that tensor dumps are generated for layers 2, 3, and 4."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
@@ -182,7 +183,7 @@ class TestDebugTensorDumpOutputFolder2(
         self.assertEqual(model_layers_list[2], 4)
 
 
-class TestDebugTensorDumpOutputFolder3(
+class TestDumpLayersNonConsecutiveLayers(
     TestDebugTensorDumpOutputFolderBase, CustomTestCase
 ):
     """
@@ -196,7 +197,7 @@ class TestDebugTensorDumpOutputFolder3(
         "10",
     ]
 
-    def test_debug_tensor_dump_output_folder(self):
+    def test_dump_layers_non_consecutive_layers(self):
         """Test that tensor dumps are generated for layers 0, 5, and 10."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
@@ -209,7 +210,7 @@ class TestDebugTensorDumpOutputFolder3(
         self.assertEqual(model_layers_list[2], 10)
 
 
-class TestDebugTensorDumpOutputFolder4(
+class TestDumpLayersOutOFRange(
     TestDebugTensorDumpOutputFolderBase, CustomTestCase
 ):
     """
@@ -221,7 +222,7 @@ class TestDebugTensorDumpOutputFolder4(
         "500",
     ]
 
-    def test_debug_tensor_dump_output_folder(self):
+    def test_dump_layers_out_of_range(self):
         """Test that no tensor dumps are generated when specifying layer 500 (out of range)."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
@@ -231,7 +232,7 @@ class TestDebugTensorDumpOutputFolder4(
         self.assertEqual(len(model_layers_list), 0)
 
 
-class TestDebugTensorDumpOutputFolder5(
+class TestDebugTensorNoDumpOutputFolder(
     TestDebugTensorDumpOutputFolderBase, CustomTestCase
 ):
     """
@@ -252,7 +253,7 @@ class TestDebugTensorDumpOutputFolder5(
         "--skip-server-warmup",
     ]
 
-    def test_debug_tensor_dump_output_folder(self):
+    def test_no_dump_output_folder(self):
         """Test that no tensor dump directories are created when output folder is not specified."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
