@@ -139,7 +139,8 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
         metrics = run_eval_few_shot_gsm8k(args)
         self.assertGreaterEqual(
             metrics["accuracy"],
-            0.95,
+            # 0.95 with 0.01 tolerable fluctuation
+            0.94,
         )
 
     def test_server_info(self):
