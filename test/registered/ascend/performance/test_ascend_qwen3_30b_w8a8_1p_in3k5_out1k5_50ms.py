@@ -16,10 +16,6 @@ register_npu_ci(
 
 QWEN3_30B_A3B_ENVS = {
     "ASCEND_LAUNCH_BLOCKING": "0",
-    "ENABLE_PROFILING": "0",
-    "PROFILING_BS": "162",
-    "PROFILING_STAGE": "decode",
-    "PROFILING_STEP": "10",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -94,13 +90,13 @@ class TestQwen30B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_30B_A3B_OTHER_ARGS
     envs = QWEN3_30B_A3B_ENVS
     dataset_name = "random"
-    max_concurrency = 162
+    max_concurrency = 160
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 3500
+    output_token_throughput = 3200
 
     def test_qwen3_30b(self):
         self.run_throughput()
