@@ -136,6 +136,8 @@ class TestVLMPiecewiseCudaGraph(CustomTestCase):
                 api_key=self.api_key,
                 other_args=[
                     "--trust-remote-code",
+                    "--torch-compile-max-bs",
+                    "2",
                     "--piecewise-cuda-graph-max-tokens",
                     "8192",
                     "--enforce-piecewise-cuda-graph",
