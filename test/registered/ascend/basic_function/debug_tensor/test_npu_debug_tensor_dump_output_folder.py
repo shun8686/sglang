@@ -133,9 +133,7 @@ class TestDebugTensorDumpOutputFolder(
         self.assertEqual(model_layers_list, list(range(64)))
 
 
-class TestDumpLayersSingle(
-    TestDebugTensorDumpOutputFolderBase, CustomTestCase
-):
+class TestDumpLayersSingle(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     """
     Testcase： Verify that tensor dumps are generated only for a single specified layer.
     """
@@ -156,9 +154,7 @@ class TestDumpLayersSingle(
         self.assertEqual(model_layers_list[0], 1)
 
 
-class TestDumpLayersMultiple(
-    TestDebugTensorDumpOutputFolderBase, CustomTestCase
-):
+class TestDumpLayersMultiple(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     """
     Testcase： Verify that tensor dumps are generated for multiple consecutive layers.
     """
@@ -210,9 +206,7 @@ class TestDumpLayersNonConsecutiveLayers(
         self.assertEqual(model_layers_list[2], 10)
 
 
-class TestDumpLayersOutOFRange(
-    TestDebugTensorDumpOutputFolderBase, CustomTestCase
-):
+class TestDumpLayersOutOFRange(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
     """
     Testcase： Verify that no tensor dumps are generated when an out-of-range layer is specified.
     """
