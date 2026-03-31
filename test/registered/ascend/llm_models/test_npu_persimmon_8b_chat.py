@@ -8,7 +8,7 @@ from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(
     est_time=400,
-    suite="release-1-npu-a3",
+    suite="full-1-npu-a3",
     nightly=False,
 )
 

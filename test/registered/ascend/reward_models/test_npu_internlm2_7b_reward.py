@@ -13,7 +13,7 @@ from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(
     est_time=400,
-    suite="release-4-npu-a3",
+    suite="full-4-npu-a3",
     nightly=True,
 )
 
