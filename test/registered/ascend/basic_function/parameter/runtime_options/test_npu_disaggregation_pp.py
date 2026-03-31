@@ -15,7 +15,7 @@ from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_P
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
-@unittest.skipIf(True, "skip")#
+@unittest.skipIf(True, "skip")
 class TestDisaggregationPrefillPPAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when only prefill enables PP parallelism in PD disaggregation scenario
 
@@ -228,10 +228,9 @@ class TestDisaggregationDecodePPAccuracy(TestDisaggregationBase):
             "--disaggregation-mode",
             "prefill",
             "--tp-size",
-            "1",
-            "--pp-size",
-            # "4",
             "2",
+            "--pp-size",
+            "4",
             "--pp-async-batch-depth",
             "2",
             "--pp-max-micro-batch-size",
@@ -255,12 +254,11 @@ class TestDisaggregationDecodePPAccuracy(TestDisaggregationBase):
             "--disaggregation-mode",
             "decode",
             "--tp-size",
-            "1",
-            "--pp-size",
-            # "4",
             "2",
-            "--base-gpu-id",
+            "--pp-size",
             "4",
+            "--base-gpu-id",
+            "8",
             "--attention-backend",
             "ascend",
         ]
