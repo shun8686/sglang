@@ -16,10 +16,6 @@ register_npu_ci(
 
 ENVS = {
     "ASCEND_LAUNCH_BLOCKING": "0",
-    "ENABLE_PROFILING": "0",
-    "PROFILING_BS": "162",
-    "PROFILING_STAGE": "decode",
-    "PROFILING_STEP": "10",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -89,12 +85,12 @@ OTHER_ARGS = [
 ]
 
 
-class TestQwen32B(TestAscendPerformanceTestCaseBase):
+class TestQwen30B(TestAscendPerformanceTestCaseBase):
     model = QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    dataset_path = "/data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl"
+    # dataset_path = "/data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl"
     max_concurrency = 1
     num_prompts = 1
     input_len = 3500
@@ -102,7 +98,7 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 10
 
-    def test_qwen3_32b(self):
+    def test_qwen3_30b(self):
         self.run_throughput()
 
 

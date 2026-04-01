@@ -29,9 +29,9 @@ QWEN3_30B_ENVS = {
 QWEN3_30B_OTHER_ARGS = [
     "--trust-remote-code",
     "--nnodes",
-    "1",
+    1,
     "--node-rank",
-    "0",
+    0,
     "--attention-backend",
     "ascend",
     "--device",
@@ -93,8 +93,8 @@ class TestQwen30B(TestAscendPerformanceTestCaseBase):
     input_len = 6144
     output_len = 1500
     random_range_ratio = 1
-    tpot = 10.25
-    output_token_throughput = 9999
+    tpot = 9.1
+    output_token_throughput = 980
 
     def test_qwen3_30b(self):
         self.run_throughput(run_cycles=3)

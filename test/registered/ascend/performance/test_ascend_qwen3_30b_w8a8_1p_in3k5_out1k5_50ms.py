@@ -16,20 +16,16 @@ register_npu_ci(
 
 QWEN3_30B_A3B_ENVS = {
     "ASCEND_LAUNCH_BLOCKING": "0",
-    "ENABLE_PROFILING": "0",
-    "PROFILING_BS": "162",
-    "PROFILING_STAGE": "decode",
-    "PROFILING_STEP": "10",
-    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
-    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
-    "HCCL_BUFFSIZE": "400",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
+    "HCCL_BUFFSIZE": "400",
 }
 
 QWEN3_30B_A3B_OTHER_ARGS = [
@@ -45,14 +41,14 @@ QWEN3_30B_A3B_OTHER_ARGS = [
     "--quantization",
     "modelslim",
     "--max-running-requests",
-    192,
+    162,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    32768,
+    35000,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
@@ -66,17 +62,24 @@ QWEN3_30B_A3B_OTHER_ARGS = [
     "--tp-size",
     2,
     "--mem-fraction-static",
-    0.86,
+    0.87,
     "--cuda-graph-bs",
-    42,
-    88,
-    96,
-    132,
-    144,
+    1,
+    5,
+    15,
+    40,
+    70,
+    100,
+    120,
+    130,
+    140,
+    146,
+    150,
+    154,
     156,
-    172,
-    178,
-    192,
+    158,
+    160,
+    162,
     "--dtype",
     "bfloat16",
 ]
@@ -87,7 +90,8 @@ class TestQwen30B(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_30B_A3B_OTHER_ARGS
     envs = QWEN3_30B_A3B_ENVS
     dataset_name = "random"
-    max_concurrency = 156
+    dataset_path = "/data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl"
+    max_concurrency = 160
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500

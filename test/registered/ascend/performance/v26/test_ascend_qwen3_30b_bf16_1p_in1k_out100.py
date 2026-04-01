@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_30B_A3B_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -9,24 +9,29 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-4-npu-a3",
+    suite="nightly-2-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
 
-QWEN3_30B_ENVS = {
-    "SGLANG_SET_CPU_AFFINITY": "1",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+ENVS = {
+    "ASCEND_LAUNCH_BLOCKING": "0",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-    "HCCL_BUFFSIZE": "400",
+    "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "HCCL_OP_EXPANSION_MODE": "AIV",
+    "INF_NAN_MODE_FORCE_DISABLE": "1",
+    "HCCL_ALGO": "level0:NA;level1:ring",
+    "DP_ROUND_ROBIN": "1",
+    "SGLANG_USE_MAX_DP_ATT" : "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
+    "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
 
-QWEN3_30B_OTHER_ARGS = [
+OTHER_ARGS = [
     "--trust-remote-code",
     "--nnodes",
     "1",
@@ -36,68 +41,57 @@ QWEN3_30B_OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    "--quantization",
-    "modelslim",
     "--max-running-requests",
-    16,
+    132,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    8300,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
     QWEN3_A3B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
-    4,
+    3,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    5,
-    "--chunked-prefill-size",
-    -1,
-    "--max-prefill-tokens",
-    35000,
+    4,
     "--tp-size",
     2,
+    "--enable-dp-attention",
+    "--dp-size",
+    2,
     "--mem-fraction-static",
-    0.6,
+    0.85,
     "--cuda-graph-bs",
     1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8,
-    9,
-    10,
-    11,
     12,
-    13,
-    14,
-    15,
-    16,
+    36,
+    66,
     "--dtype",
     "bfloat16",
 ]
 
 
-class TestQwen30B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
-    other_args = QWEN3_30B_OTHER_ARGS
-    envs = QWEN3_30B_ENVS
+class TestQwen32B(TestAscendPerformanceTestCaseBase):
+    model = QWEN3_30B_A3B_MODEL_PATH
+    other_args = OTHER_ARGS
+    envs = ENVS
     dataset_name = "random"
-    max_concurrency = 16
-    num_prompts = 16
-    input_len = 1024
-    output_len = 300
+    max_concurrency = 162
+    num_prompts = 624
+    input_len = 1000
+    output_len = 100
     random_range_ratio = 1
-    tpot = 7.47
-    output_token_throughput = 9999
+    mean_e2e_latency=10000
+    output_token_throughput = 2000
 
-    def test_qwen3_30b(self):
-        self.run_throughput(run_cycles=3)
+    def test_qwen3_32b(self):
+        self.run_throughput()
 
 
 if __name__ == "__main__":
