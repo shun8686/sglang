@@ -65,8 +65,16 @@ class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
     ):
         """Validate that metrics buckets align with expected boundaries when --enable-metrics and bucket configuration parameters are set."""
         # inference twice to monitor inter_token_latency_seconds_bucket
-        TestNPUMetricsDefaultBucketBoundary._inference_once(testcase, url)
-        TestNPUMetricsDefaultBucketBoundary._inference_once(testcase, url)
+        # TestNPUMetricsDefaultBucketBoundary._inference_once(testcase, url)
+        # TestNPUMetricsDefaultBucketBoundary._inference_once(testcase, url)
+        response = requests.post(
+            f"{url}/generate",
+            json={
+                "text": f"just return me a long string, generate as much as possible.",
+                "sampling_params": {"temperature": 0, "max_new_tokens": 10000},
+            },
+        )
+        testcase.assertEqual(response.status_code, 200)
 
         response = requests.get(f"{url}/metrics", timeout=10)
         testcase.assertEqual(response.status_code, 200)
