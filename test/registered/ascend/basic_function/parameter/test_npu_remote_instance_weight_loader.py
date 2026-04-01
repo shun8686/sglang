@@ -1,6 +1,7 @@
 """Test loading weights from remote instance
 Backend: transfer_engine
 """
+from sglang.test.ci.ci_register import register_npu_ci
 
 import gc
 import os
@@ -11,7 +12,6 @@ import requests
 import torch
 import torch.multiprocessing as mp
 
-import sglang as sgl
 from sglang.test.test_utils import (
     DEFAULT_PORT_FOR_SRT_TEST_RUNNER,
     DEFAULT_SMALL_MODEL_NAME_FOR_TEST,
@@ -27,8 +27,9 @@ mp.set_start_method("spawn", force=True)
 
 register_npu_ci(est_time=300, suite="nightly-2-npu-a3", nightly=True)
 
+
 def verify_params_close(params1, params2, error_msg):
-    """Verify if two parameter arrays are close enough. """
+    """Verify if two parameter arrays are close enough."""
     try:
         assert np.allclose(np.array(params1), np.array(params2)), error_msg
     except Exception as e:
@@ -339,7 +340,7 @@ class TestLoadWeightsFromRemoteInstance(CustomTestCase):
                 "127.0.0.1",
                 DEFAULT_PORT_FOR_SRT_TEST_RUNNER + 1000,
                 60010,
-                remote_backend
+                remote_backend,
             )
 
 
