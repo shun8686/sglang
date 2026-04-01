@@ -48,8 +48,7 @@ class BaseTestNPULoadBalanceMethodDPDisaggregation(TestDisaggregationBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.prefill_load_balance_method, cls.decode_load_balance_method = cls.params
-        # cls.model = QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
-        cls.model = "/home/weights/Qwen/Qwen3-30B-A3B-Instruct-2507"
+        cls.model = QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
 
         # Non blocking start servers
@@ -206,17 +205,4 @@ if __name__ == "__main__":
         runner = unittest.TextTestRunner(verbosity=2)
         runner.run(suite)
     else:
-        RUN_COUNT = 3
-        loader = unittest.TestLoader()
-        suite = unittest.TestSuite()
-
-        selected_classes = random.sample(
-            all_test_classes, min(RUN_COUNT, len(all_test_classes))
-        )
-
-        for cls in selected_classes:
-            suite.addTests(loader.loadTestsFromTestCase(cls))
-
-        runner = unittest.TextTestRunner(verbosity=2)
-        runner.run(suite)
-        # unittest.main()
+        unittest.main()
