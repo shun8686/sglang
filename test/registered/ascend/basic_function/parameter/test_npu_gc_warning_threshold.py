@@ -63,7 +63,8 @@ class TestNPUGCWarningThreshold(TestNPULoggingBase):
 
         GC_info = "LONG GARBAGE COLLECTION DETECTED"
         self.out_log_file.seek(0)
-        content = self.err_log_file.read() + self.err_log_file.read()
+        self.err_log_file.seek(0)
+        content = self.out_log_file.read() + self.err_log_file.read()
         self.assertTrue(len(content) > 0)
         self.assertIn(GC_info, content)
 
