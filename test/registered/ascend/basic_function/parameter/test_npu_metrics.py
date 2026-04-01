@@ -3,7 +3,8 @@ import unittest
 from sglang.test.ascend.test_npu_logging import TestNPULoggingBase
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=100, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+
 
 class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
     """Test case for verifying the functionality of the metrics-related parameter group.
@@ -34,7 +35,42 @@ class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
     --collect-tokens-histogram; --prompt-tokens-buckets; --generation-tokens-buckets;
     """
 
-
+    @staticmethod
+    def _verify_metrics_and_bucket_boundary(
+            testcase,
+            model,
+            url,
+            expected_time_to_first_token_bucket=None,
+            expected_inter_token_latency_bucket=None,
+            expected_e2e_request_latency_bucket=None,
+            expected_prompt_tokens_bucket=None,
+            expected_generation_tokens_bucket=None,
+    ):
+        """Validate that metrics buckets align with expected boundaries when --enable-metrics and bucket configuration parameters are set."""
+        response = requests.get(f"{url}/metrics", timeout=10)
+        testcase.assertEqual(response.status_code, 200)
+        metrics_content = response.text
+        if expected_time_to_first_token_bucket:
+            for le in expected_time_to_first_token_bucket:
+                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{model}"}}'
+                testcase.assertIn(message, metrics_content)
+        if expected_inter_token_latency_bucket:
+            for le in expected_inter_token_latency_bucket:
+                message = f'sglang:inter_token_latency_seconds_bucket{{le="{le}",model_name="{model}"}}'
+                testcase.assertIn(message, metrics_content)
+        if expected_e2e_request_latency_bucket:
+            for le in expected_e2e_request_latency_bucket:
+                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{model}"}}'
+                testcase.assertIn(message, metrics_content)
+        if expected_prompt_tokens_bucket:
+            for le in expected_prompt_tokens_bucket:
+                message = f'sglang:prompt_tokens_histogram_bucket{{le="{le}",model_name="{model}"}}'
+                testcase.assertIn(message, metrics_content)
+        if expected_generation_tokens_bucket:
+            for le in expected_generation_tokens_bucket:
+                message = f'sglang:generation_tokens_histogram_bucket{{le="{le}",model_name="{model}"}}'
+                testcase.assertIn(message, metrics_content)
+        return metrics_content
 
     @classmethod
     def setUpClass(cls):
@@ -157,8 +193,11 @@ class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
             "1.1e+06",
         ]
 
-    def test__bucket_boundary(self):
-        self._verify_metrics_and_bucket_boundary(
+    def test_bucket_boundary(self):
+        TestNPUMetricsDefaultBucketBoundary._verify_metrics_and_bucket_boundary(
+            self,
+            self.model,
+            self.base_url,
             expected_time_to_first_token_bucket=self.default_time_to_first_token_bucket,
             expected_inter_token_latency_bucket=self.default_inter_token_latency_bucket,
             expected_e2e_request_latency_bucket=self.default_e2e_request_latency_bucket,
@@ -166,42 +205,8 @@ class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
             expected_generation_tokens_bucket=self.default_tokens_bucket,
         )
 
-    def _verify_metrics_and_bucket_boundary(
-            self,
-            expected_time_to_first_token_bucket=None,
-            expected_inter_token_latency_bucket=None,
-            expected_e2e_request_latency_bucket=None,
-            expected_prompt_tokens_bucket=None,
-            expected_generation_tokens_bucket=None,
-    ):
-        """Validate that metrics buckets align with expected boundaries when --enable-metrics and bucket configuration parameters are set."""
-        response = requests.get(f"{self.base_url}/metrics", timeout=10)
-        self.assertEqual(response.status_code, 200)
-        metrics_content = response.text
-        if expected_time_to_first_token_bucket:
-            for le in expected_time_to_first_token_bucket:
-                message = f'sglang:time_to_first_token_seconds_bucket{{le="{le}",model_name="{self.model}"}}'
-                self.assertIn(message, metrics_content)
-        if expected_inter_token_latency_bucket:
-            for le in expected_inter_token_latency_bucket:
-                message = f'sglang:inter_token_latency_seconds_bucket{{le="{le}",model_name="{self.model}"}}'
-                self.assertIn(message, metrics_content)
-        if expected_e2e_request_latency_bucket:
-            for le in expected_e2e_request_latency_bucket:
-                message = f'sglang:e2e_request_latency_seconds_bucket{{le="{le}",model_name="{self.model}"}}'
-                self.assertIn(message, metrics_content)
-        if expected_prompt_tokens_bucket:
-            for le in expected_prompt_tokens_bucket:
-                message = f'sglang:prompt_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
-                self.assertIn(message, metrics_content)
-        if expected_generation_tokens_bucket:
-            for le in expected_generation_tokens_bucket:
-                message = f'sglang:generation_tokens_histogram_bucket{{le="{le}",model_name="{self.model}"}}'
-                self.assertIn(message, metrics_content)
-        return metrics_content
 
-
-class TestNPUMetricsCustomBucketBoundary(TestNPUMetricsDefaultBucketBoundary):
+class TestNPUMetricsCustomBucketBoundary(TestNPULoggingBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -211,7 +216,6 @@ class TestNPUMetricsCustomBucketBoundary(TestNPUMetricsDefaultBucketBoundary):
         cls.other_args.extend(["--bucket-time-to-first-token", *cls.my_bucket])
         cls.other_args.extend(["--bucket-inter-token-latency", *cls.my_bucket])
         cls.other_args.extend(["--bucket-e2e-request-latency", *cls.my_bucket])
-        cls.other_args.extend(["--collect-tokens-histogram"])
         cls.other_args.extend(
             ["--prompt-tokens-buckets", "custom", *cls.my_tokens_bucket]
         )
@@ -236,7 +240,10 @@ class TestNPUMetricsCustomBucketBoundary(TestNPUMetricsDefaultBucketBoundary):
         ]
 
     def test__bucket_boundary(self):
-        self._verify_metrics_and_bucket_boundary(
+        TestNPUMetricsDefaultBucketBoundary._verify_metrics_and_bucket_boundary(
+            self,
+            self.model,
+            self.base_url,
             expected_time_to_first_token_bucket=self.my_bucket,
             expected_inter_token_latency_bucket=self.my_bucket,
             expected_e2e_request_latency_bucket=self.my_bucket,
@@ -245,7 +252,7 @@ class TestNPUMetricsCustomBucketBoundary(TestNPUMetricsDefaultBucketBoundary):
         )
 
 
-class TestNPUMetricsTSEBucketBoundary(TestNPUMetricsDefaultBucketBoundary):
+class TestNPUMetricsTSEBucketBoundary(TestNPULoggingBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -275,7 +282,10 @@ class TestNPUMetricsTSEBucketBoundary(TestNPUMetricsDefaultBucketBoundary):
         ]
 
     def test__bucket_boundary(self):
-        self._verify_metrics_and_bucket_boundary(
+        TestNPUMetricsDefaultBucketBoundary._verify_metrics_and_bucket_boundary(
+            self,
+            self.model,
+            self.base_url,
             expected_prompt_tokens_bucket=self.my_tse_bucket,
             expected_generation_tokens_bucket=self.my_tse_bucket,
         )
