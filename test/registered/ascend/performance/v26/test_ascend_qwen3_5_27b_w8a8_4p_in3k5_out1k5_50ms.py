@@ -29,6 +29,8 @@ ENVS = {
     "SGLANG_DISAGGREGATION_WAITING_TIMEOUT": "3600",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+
+    "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
 
 OTHER_ARGS = [
@@ -42,7 +44,7 @@ OTHER_ARGS = [
     "--device",
     "npu",
     "--tp-size",
-    4,
+    8,
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
@@ -50,7 +52,6 @@ OTHER_ARGS = [
     "--disable-radix-cache",
     "--max-total-tokens",
     800000,
-
     "--max-running-requests",
     32,
     "--mem-fraction-static",

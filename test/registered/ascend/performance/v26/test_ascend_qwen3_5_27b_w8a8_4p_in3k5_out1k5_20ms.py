@@ -14,19 +14,23 @@ register_npu_ci(
 )
 
 ENVS = {
-    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "ASCEND_LAUNCH_BLOCKING": "0",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
     "HCCL_BUFFSIZE": "3000",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
+    "SGLANG_NPU_PROFILING": "0",
+    "SGLANG_NPU_PROFILING_STAGE": "prefill",
     "DEEPEP_NORMAL_LONG_SEQ_ROUND": "32",
     "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "3584",
     "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24669",
     "SGLANG_DISAGGREGATION_WAITING_TIMEOUT": "3600",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+
+    "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
 
 OTHER_ARGS = [
@@ -39,31 +43,17 @@ OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    # "--quantization",
-    # "modelslim",
-    "--max-running-requests",
-    32,
-    "--disable-radix-cache",
-    "--speculative-draft-model-quantization",
-    "unquant",
-    "--chunked-prefill-size",
-    -1,
-    "--max-total-tokens",
-    800000,
-    "--max-prefill-tokens",
-    100000,
-    "--speculative-algorithm",
-    "NEXTN",
-    "--speculative-draft-model-path",
-    QWEN3_A3B_EAGLE_MODEL_PATH,
-    "--speculative-num-steps",
-    3,
-    "--speculative-eagle-topk",
-    1,
-    "--speculative-num-draft-tokens",
-    4,
     "--tp-size",
     8,
+    "--chunked-prefill-size",
+    -1,
+    "--max-prefill-tokens",
+    100000,
+    "--disable-radix-cache",
+    "--max-total-tokens",
+    800000,
+    "--max-running-requests",
+    32,
     "--mem-fraction-static",
     0.75,
     "--cuda-graph-bs",
@@ -81,12 +71,23 @@ OTHER_ARGS = [
     64,
     96,
     112,
+    "--enable-multimodal",
+    "--quantization",
+    "modelslim",
     "--mm-attention-backend",
     "ascend_attn",
-    "--mamba-ssm-dtype",
-    "bfloat16",
     "--dtype",
     "bfloat16",
+    "--mamba-ssm-dtype",
+    "bfloat16",
+    "--speculative-algorithm",
+    "NEXTN",
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
 ]
 
 
@@ -100,7 +101,7 @@ class TestQwen3527B(TestAscendPerformanceTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 20
+    tpot = 50
 
     def test_qwen3_5_27b(self):
         self.run_throughput()
