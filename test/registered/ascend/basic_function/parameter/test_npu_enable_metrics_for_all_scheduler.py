@@ -20,6 +20,7 @@ class TestNPUEnableMetricsForAllScheduler(TestNPULoggingBase):
     [Test Category] Parameter
     [Test Target] --enable-metrics-for-all-scheduler;
     """
+
     if_enable_metrics_for_all_scheduler = True
 
     @classmethod
