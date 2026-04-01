@@ -1,7 +1,4 @@
-import os
 import unittest
-
-
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
@@ -32,6 +29,7 @@ class TestDynamicBatchTokenizerTimeout0(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --enable-dynamic-batch-tokenizer; --dynamic-batch-tokenizer-batch-timeout
     """
+
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     batch_timeout = 0
 
@@ -93,6 +91,7 @@ class TestDynamicBatchTokenizerTimeout001(TestDynamicBatchTokenizerTimeout0):
     [Test Category] Parameter
     [Test Target] --enable-dynamic-batch-tokenizer; --dynamic-batch-tokenizer-batch-timeout
     """
+
     batch_timeout = 0.001
 
 
@@ -104,6 +103,7 @@ class TestDynamicBatchTokenizerTimeout01(TestDynamicBatchTokenizerTimeout0):
     [Test Category] Parameter
     [Test Target] --enable-dynamic-batch-tokenizer; --dynamic-batch-tokenizer-batch-timeout
     """
+
     batch_timeout = 0.01
 
 class TestDynamicBatchTokenizerTimeout1(TestDynamicBatchTokenizerTimeout0):
@@ -114,6 +114,7 @@ class TestDynamicBatchTokenizerTimeout1(TestDynamicBatchTokenizerTimeout0):
     [Test Category] Parameter
     [Test Target] --enable-dynamic-batch-tokenizer; --dynamic-batch-tokenizer-batch-timeout
     """
+
     batch_timeout = 0.1
 
 if __name__ == "__main__":

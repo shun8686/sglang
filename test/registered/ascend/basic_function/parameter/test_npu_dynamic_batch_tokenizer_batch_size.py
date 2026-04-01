@@ -1,4 +1,3 @@
-import os
 import unittest
 
 from sglang.srt.utils import kill_process_tree
@@ -105,6 +104,7 @@ class TestDynamicBatchTokenizerBatchSize1(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        verify_process_terminated(cls.process, cls.__name__)
 
     def test_batch_size_1(self):
         # With batch_size=1 the loop never accumulates more than one request.

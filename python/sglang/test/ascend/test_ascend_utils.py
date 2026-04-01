@@ -14,11 +14,12 @@ Please remember to sort by variable name within each section.
 import asyncio
 import copy
 import os
-import requests as _requests
-import threading as _threading
+import threading
 import subprocess
 from types import SimpleNamespace
 from typing import Awaitable, Callable, NamedTuple, Optional
+
+import requests
 
 from sglang.bench_serving import run_benchmark
 from sglang.srt.utils import kill_process_tree
@@ -584,15 +585,14 @@ def send_concurrent_requests(
           text (str)       -- response body, or exception message on failure
     """
 
-
     results: list = []
-    lock = _threading.Lock()
-    semaphore = _threading.Semaphore(num_concurrent)
+    lock = threading.Lock()
+    semaphore = threading.Semaphore(num_concurrent)
 
     def _send_one(task_id: int) -> None:
         semaphore.acquire()
         try:
-            response = _requests.post(
+            response = requests.post(
                 f"{base_url}/generate",
                 json={
                     "text": input_text,
@@ -624,7 +624,7 @@ def send_concurrent_requests(
             semaphore.release()
 
     threads = [
-        _threading.Thread(target=_send_one, args=(i,)) for i in range(num_requests)
+        threading.Thread(target=_send_one, args=(i,)) for i in range(num_requests)
     ]
     for t in threads:
         t.start()
@@ -632,6 +632,7 @@ def send_concurrent_requests(
         t.join()
 
     return results
+
 
 def verify_process_terminated(process, test_name: str = "") -> None:
     """Verify server process has been terminated after tearDownClass.
@@ -648,8 +649,8 @@ def verify_process_terminated(process, test_name: str = "") -> None:
         AssertionError: If the process is still running after cleanup.
     """
     import time as _time
+
     _time.sleep(2)
     assert process.poll() is not None, (
         f"{test_name}: Server process (pid={process.pid}) "
-        "is still running after tearDownClass."
-    )
+        "is still running after tearDownClass.")

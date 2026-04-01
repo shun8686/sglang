@@ -1,9 +1,5 @@
-import os
 import threading
 import unittest
-
-
-
 
 import requests
 
@@ -86,9 +82,7 @@ class TestDynamicBatchTokenizerSamplingParams(CustomTestCase):
             with lock:
                 results.append({"status_code": response.status_code})
 
-        threads = [
-            threading.Thread(target=_send, args=(p,)) for p in request_payloads
-        ]
+        threads = [threading.Thread(target=_send, args=(p,)) for p in request_payloads]
         for t in threads:
             t.start()
         for t in threads:

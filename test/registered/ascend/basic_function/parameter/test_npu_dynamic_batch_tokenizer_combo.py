@@ -1,10 +1,6 @@
 import json
-import os
 import threading
 import unittest
-
-
-
 
 import requests
 
@@ -89,6 +85,12 @@ class TestDynamicBatchTokenizerCombo(CustomTestCase):
             100,
             f"Expected 100 successful requests, but only {success_count} succeeded.",
         )
+        for result in results:
+            self.assertIn(
+                "Paris",
+                result["text"],
+                f"Inference result does not contain 'Paris'.",
+            )
 
     def test_mixed_text_lengths(self):
         # Concurrent requests with short / medium / long prompts.
@@ -160,9 +162,7 @@ class TestDynamicBatchTokenizerCombo(CustomTestCase):
             "The largest planet in the solar system is",
             "The speed of light is approximately",
         ]
-        threads = [
-            threading.Thread(target=_send_stream, args=(p,)) for p in prompts
-        ]
+        threads = [threading.Thread(target=_send_stream, args=(p,)) for p in prompts]
         for t in threads:
             t.start()
         for t in threads:
