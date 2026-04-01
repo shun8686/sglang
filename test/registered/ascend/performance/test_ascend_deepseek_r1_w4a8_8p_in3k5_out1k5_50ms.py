@@ -20,7 +20,7 @@ MODEL_ENVS = {
     "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "56",
     "HCCL_BUFFSIZE": "1200",
     "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
     "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
@@ -51,7 +51,7 @@ MODEL_OTHER_ARGS = [
     "--mem-fraction-static",
     0.77,
     "--max-running-requests",
-    244,
+    224,
     "--context-length",
     8188,
     "--disable-radix-cache",
@@ -85,7 +85,7 @@ class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
     dataset_name = "random"
-    max_concurrency = 244
+    max_concurrency = 224
     num_prompts = 896
     input_len = 3500
     output_len = 1500
