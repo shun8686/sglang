@@ -21,39 +21,39 @@ class TestEnableTorchCompileDebugMode(CustomTestCase):
     [Test Target] --enable-torch-compile-debug-mode
     """
 
-    # model = QWEN3_32B_WEIGHTS_PATH
-    # other_args = [
-    #     "--trust-remote-code",
-    #     "--mem-fraction-static",
-    #     "0.8",
-    #     "--attention-backend",
-    #     "ascend",
-    #     "--disable-cuda-graph",
-    #     "--tp-size",
-    #     "4",
-    # ]
-    # enable_args = [
-    #     "--enable-torch-compile-debug-mode",
-    #     "--enable-piecewise-cuda-graph",
-    #     "--piecewise-cuda-graph-tokens",
-    #     "64",
-    # ]
-    model = QWEN3_14B_WEIGHTS_PATH
+    model = QWEN3_32B_WEIGHTS_PATH
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",
-        "0.7",
+        "0.8",
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--disable-radix-cache",
+        "--tp-size",
+        "4",
     ]
     enable_args = [
         "--enable-torch-compile-debug-mode",
         "--enable-piecewise-cuda-graph",
-        "--piecewise-cuda-graph-max-tokens",
+        "--piecewise-cuda-graph-tokens",
         "64",
     ]
+    # model = QWEN3_14B_WEIGHTS_PATH
+    # other_args = [
+    #     "--trust-remote-code",
+    #     "--mem-fraction-static",
+    #     "0.7",
+    #     "--attention-backend",
+    #     "ascend",
+    #     "--disable-cuda-graph",
+    #     "--disable-radix-cache",
+    # ]
+    # enable_args = [
+    #     "--enable-torch-compile-debug-mode",
+    #     "--enable-piecewise-cuda-graph",
+    #     "--piecewise-cuda-graph-max-tokens",
+    #     "64",
+    # ]
 
     def setUp(self):
         self.base_url = DEFAULT_URL_FOR_TEST
