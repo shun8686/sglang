@@ -1,18 +1,23 @@
 import os
-import unittest
-import time
-import requests
 import threading
-from typing import List, Dict, Any
+import time
+import unittest
+from typing import Any, Dict, List
 
+import requests
+
+from sglang.srt.server_args import ServerArgs
 from sglang.srt.utils import (
     configure_logger,
     kill_process_tree,
 )
 from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.test_utils import CustomTestCase, DEFAULT_URL_FOR_TEST, popen_launch_server
-from sglang.srt.server_args import ServerArgs
+from sglang.test.test_utils import (
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
+)
 
 register_npu_ci(
     est_time=500,
@@ -42,12 +47,17 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
 
     base_args = [
         "--trust-remote-code",
-        "--tp-size", "1",
-        "--mem-fraction-static", "0.8",
-        "--attention-backend", "ascend",
+        "--tp-size",
+        "1",
+        "--mem-fraction-static",
+        "0.8",
+        "--attention-backend",
+        "ascend",
         "--disable-cuda-graph",
-        "--tokenizer-mode", "auto",
-        "--revision", "main",
+        "--tokenizer-mode",
+        "auto",
+        "--revision",
+        "main",
     ]
 
     def setUp(self):
@@ -103,7 +113,9 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
         }
 
         try:
-            response = requests.post(f"{self.base_url}/generate", json=payload, timeout=30)
+            response = requests.post(
+                f"{self.base_url}/generate", json=payload, timeout=30
+            )
             if response.status_code == 200:
                 result = response.json()
                 text = result["text"]
@@ -145,7 +157,9 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
         threads = []
 
         def worker(request_id):
-            skip_special = skip_special_first if request_id % 2 == 1 else not skip_special_first
+            skip_special = (
+                skip_special_first if request_id % 2 == 1 else not skip_special_first
+            )
             result = self._send_single_request(skip_special, request_id)
             results.append(result)
 
@@ -164,12 +178,18 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
         total = len(results)
         success = sum(1 for r in results if r["status"] == "success")
         bad_cases = [
-            r for r in results
-            if r["status"] == "success" and r["skip_special_tokens"] and r["has_special"]
+            r
+            for r in results
+            if r["status"] == "success"
+            and r["skip_special_tokens"]
+            and r["has_special"]
         ]
         special_in_no_skip = [
-            r for r in results
-            if r["status"] == "success" and not r["skip_special_tokens"] and r["has_special"]
+            r
+            for r in results
+            if r["status"] == "success"
+            and not r["skip_special_tokens"]
+            and r["has_special"]
         ]
 
         return {
@@ -185,7 +205,10 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
 
         test_cases = [
             {"name": "Without --disable-tokenizer-batch-decode", "extra_args": []},
-            {"name": "With --disable-tokenizer-batch-decode", "extra_args": ["--disable-tokenizer-batch-decode"]},
+            {
+                "name": "With --disable-tokenizer-batch-decode",
+                "extra_args": ["--disable-tokenizer-batch-decode"]
+            },
         ]
 
         results_by_case = {}
@@ -202,8 +225,16 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
 
             # Analyze results
             analysis = self._analyze_results(results)
-            self.assertEqual(analysis["bad_cases"], 0, f"{case['name']} contains skip=True but outputs special tokens")
-            self.assertEqual(analysis["special_in_no_skip"], 0, f"{case['name']} contains skip=False but outputs special tokens")
+            self.assertEqual(
+                analysis["bad_cases"],
+                0,
+                f"{case['name']} contains skip=True but outputs special tokens",
+            )
+            self.assertEqual(
+                analysis["special_in_no_skip"],
+                0,
+                f"{case['name']} contains skip=False but outputs special tokens",
+            )
 
         # Compare results between the two cases (take the first request)
         case1 = results_by_case["Without --disable-tokenizer-batch-decode"][0]
@@ -214,7 +245,7 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
             self.assertEqual(
                 case1["text"],
                 case2["text"],
-                "Output inconsistency between batch decode and disable batch decode"
+                "Output inconsistency between batch decode and disable batch decode",
             )
 
     def test_batch_decode_grouping_logic(self):
@@ -228,12 +259,17 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
         # Verify grouping handling
         skip_true = [r for r in results if r["skip_special_tokens"]]
         skip_false = [r for r in results if not r["skip_special_tokens"]]
-        self.assertTrue(len(skip_true) > 0, "There should be at least one skip=True request")
-        self.assertTrue(len(skip_false) > 0, "There should be at least one skip=False request")
+        self.assertTrue(
+            len(skip_true) > 0, "There should be at least one skip=True request"
+        )
+        self.assertTrue(
+            len(skip_false) > 0, "There should be at least one skip=False request"
+        )
 
         # Verify results are not None
         for r in results:
             self.assertIn(r["status"], ["success", "exception"])
+
 
 if __name__ == "__main__":
     unittest.main()

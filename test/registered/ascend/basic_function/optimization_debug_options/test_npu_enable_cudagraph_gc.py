@@ -39,9 +39,12 @@ class TestAscendCudaGraphGC(unittest.TestCase):
     def _launch_and_get_avail_mem(self, enable_cudagraph_gc: bool) -> float:
         other_args = [
             "--trust-remote-code",
-            "--tp-size", "1",
-            "--mem-fraction-static", "0.7",
-            "--attention-backend", "ascend",
+            "--tp-size",
+            "1",
+            "--mem-fraction-static",
+            "0.7",
+            "--attention-backend",
+            "ascend",
         ]
 
         if enable_cudagraph_gc:
@@ -68,7 +71,9 @@ class TestAscendCudaGraphGC(unittest.TestCase):
         kill_process_tree(self.server_process.pid)
         self.server_process = None
 
-        print(f"[CudaGraph GC] enable={enable_cudagraph_gc}, available memory={avail_mem:.2f} GB")
+        print(
+            f"[CudaGraph GC] enable={enable_cudagraph_gc}, available memory={avail_mem:.2f} GB"
+        )
         return avail_mem
 
     def test_gc_avail_mem_comparison(self):
@@ -80,9 +85,10 @@ class TestAscendCudaGraphGC(unittest.TestCase):
 
         # Assert available memory increases when GC is enabled
         self.assertGreaterEqual(
-            mem_on, mem_off,
+            mem_on,
+            mem_off,
             f"Available memory with GC should be >= without GC.\n"
-            f"Disabled: {mem_off:.2f} GB\nEnabled: {mem_on:.2f} GB"
+            f"Disabled: {mem_off:.2f} GB\nEnabled: {mem_on:.2f} GB",
         )
 
 

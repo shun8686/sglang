@@ -66,7 +66,6 @@ class TestNpuEagle3(CustomTestCase):
             "SGLANG_ENABLE_SPEC_V2": "1",
             "SGLANG_SPEC_NAN_DETECTION": "1",
             "SGLANG_SPEC_OOB_DETECTION": "1",
-
         }
         os.environ.update(cls.extra_envs)
 

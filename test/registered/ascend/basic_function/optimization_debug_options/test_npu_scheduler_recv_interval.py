@@ -7,8 +7,10 @@ from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-    popen_launch_server, DEFAULT_URL_FOR_TEST,
+    DEFAULT_URL_FOR_TEST,
+    popen_launch_server,
 )
+
 register_npu_ci(est_time=800, suite="nightly-1-npu-a3", nightly=True)
 from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 
@@ -37,8 +39,10 @@ class TestSchedulerRecvIntervalConsistency(unittest.TestCase):
             self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
-                "--scheduler-recv-interval", str(scheduler_recv_interval),
-                "--attention-backend", "ascend",
+                "--scheduler-recv-interval",
+                str(scheduler_recv_interval),
+                "--attention-backend",
+                "ascend",
                 "--disable-radix-cache",
             ],
         )
@@ -62,19 +66,21 @@ class TestSchedulerRecvIntervalConsistency(unittest.TestCase):
         baseline_metrics = self._run_gsm8k_evaluation(scheduler_recv_interval=1)
         test_metrics = self._run_gsm8k_evaluation(scheduler_recv_interval=50000)
 
-        self.assertGreaterEqual(baseline_metrics["accuracy"], 0.38,
-                                msg="Baseline accuracy is too low.")
+        self.assertGreaterEqual(
+            baseline_metrics["accuracy"], 0.38, msg="Baseline accuracy is too low."
+        )
 
         self.assertGreaterEqual(
             test_metrics["accuracy"],
             baseline_metrics["accuracy"] - 0.02,
-            msg=f"Accuracy dropped by more than 2%! Baseline: {baseline_metrics['accuracy']:.2%}, Test: {test_metrics['accuracy']:.2%}"
+            msg=f"Accuracy dropped by more than 2%! Baseline: {baseline_metrics['accuracy']:.2%}, Test: {test_metrics['accuracy']:.2%}",
         )
 
         # When --scheduler-recv-interval is set to 50000, the inference latency increases compared to 1
         self.assertGreaterEqual(
-            test_metrics["latency"], baseline_metrics["latency"],
-            msg="Test latency should be >= baseline latency."
+            test_metrics["latency"],
+            baseline_metrics["latency"],
+            msg="Test latency should be >= baseline latency.",
         )
 
 

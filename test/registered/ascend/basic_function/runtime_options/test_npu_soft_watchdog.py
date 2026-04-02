@@ -1,9 +1,10 @@
 import io
-import os
 import logging
+import os
 import unittest
-import requests
 from contextlib import contextmanager
+
+import requests
 
 from sglang.srt.environ import envs
 from sglang.srt.utils import kill_process_tree
@@ -19,8 +20,8 @@ from sglang.test.test_utils import (
 # Initialize logging configuration (replace print)
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[logging.StreamHandler()]
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    handlers = [logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
@@ -28,10 +29,7 @@ logger = logging.getLogger(__name__)
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 # ===================== Common Env Var Management Functions =====================
-TEST_RELATED_ENVS = [
-    "SGLANG_IS_IN_CI",
-    "SGLANG_TEST_STUCK_DETOKENIZER"
-]
+TEST_RELATED_ENVS = ["SGLANG_IS_IN_CI", "SGLANG_TEST_STUCK_DETOKENIZER"]
 
 @contextmanager
 def temporary_test_envs(ci_mode: bool = None, stuck_detokenizer: int = None):
@@ -50,18 +48,22 @@ def temporary_test_envs(ci_mode: bool = None, stuck_detokenizer: int = None):
             else:
                 os.environ[var_name] = original_val
 
+
 class BaseTestDetokenizerWatchdog:
     """Testcase: Ensure that soft-watchdog-timeout is set by default in the CI environment, and in non-CI environments it is not set by default and needs to be set manually.
 
     [Test Category] Parameter
     [Test Target] --soft-watchdog-timeout
     """
+
     ci_mode = None
     set_soft_watchdog = None
     soft_watchdog_value = 10
     stuck_seconds = 350
     expected_log = None
-    expected_assert_error = "stuck tester can be enabled only if soft watchdog is enabled"
+    expected_assert_error = (
+            "stuck tester can be enabled only if soft watchdog is enabled"
+    )
 
     @classmethod
     def setUpClass(cls):
@@ -77,7 +79,11 @@ class BaseTestDetokenizerWatchdog:
             other_args.extend(["--soft-watchdog-timeout", str(cls.soft_watchdog_value)])
 
         # Scenario 4 timeout set to 20 seconds (ensure complete log printing)
-        timeout = 20 if (cls.ci_mode is False and cls.set_soft_watchdog is False) else DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+        timeout = (
+            20
+            if (cls.ci_mode is False and cls.set_soft_watchdog is False)
+            else DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+        )
         
         try:
             # Simulate detokenizer blocking
@@ -98,13 +104,14 @@ class BaseTestDetokenizerWatchdog:
             # Check if contains expected AssertionError string
             if cls.expected_assert_error in combined_log:
                 cls.error_found_in_log = True
-                logger.info(f"\n[Scenario 4] Found expected error in logs: {cls.expected_assert_error}")
+                logger.info(
+                    f"\n[Scenario 4] Found expected error in logs: {cls.expected_assert_error}"
+                )
                 # Print complete logs for troubleshooting
                 logger.info(f"\n[Scenario 4] Complete logs:\n{combined_log}")
             else:
                 # Expected error not found, raise timeout error
                 raise
-
 
     @classmethod
     def tearDownClass(cls):
@@ -121,15 +128,16 @@ class BaseTestDetokenizerWatchdog:
         if self.ci_mode is False and self.set_soft_watchdog is False:
             self.assertTrue(
                 self.error_found_in_log,
-                f"Scenario 4: Expected error not found in logs: {self.expected_assert_error}"
+                f"Scenario 4: Expected error not found in logs: {self.expected_assert_error}",
             )
-            logger.info("[Scenario 4] Test passed: Found expected AssertionError string in logs")
+            logger.info(
+                "[Scenario 4] Test passed: Found expected AssertionError string in logs"
+            )
             return
 
         # Scenarios 1-3: Launch success → call API and verify timeout logs
         self.assertTrue(self.launch_success, "Server launch failed")
-        
-        logger.info("Start call /generate API", extra={'flush': True})
+        logger.info("Start call /generate API", extra={"flush": True})
         requests.post(
             DEFAULT_URL_FOR_TEST + "/generate",
             json={
@@ -138,16 +146,19 @@ class BaseTestDetokenizerWatchdog:
             },
             timeout=40,
         )
-        logger.info("End call /generate API", extra={'flush': True})
+        logger.info("Start call /generate API", extra={"flush": True})
 
         # Merge output and verify expected logs
         combined_output = self.stdout.getvalue() + self.stderr.getvalue()
         self.assertIn(
             self.expected_log,
             combined_output,
-            f"Expected log not found: {self.expected_log}"
+            f"Expected log not found: {self.expected_log}",
         )
-        logger.info(f"[Scenario {self.__class__.__name__}] Test passed: Found expected log {self.expected_log}")
+        logger.info(
+            f"[Scenario {self.__class__.__name__}] Test passed: Found expected log {self.expected_log}"
+        )
+
 
 # ===================== Test Subclasses for Four Scenarios =====================
 # Scenario 1: CI environment + no soft-watchdog (default 300s) → block 350s
@@ -157,6 +168,7 @@ class TestCIWithoutSoftWatchdog(BaseTestDetokenizerWatchdog, CustomTestCase):
     stuck_seconds = 350
     expected_log = "DetokenizerManager watchdog timeout"
 
+
 # Scenario 2: CI environment + set soft-watchdog (20s) → block 30s
 class TestCIWithSoftWatchdog(BaseTestDetokenizerWatchdog, CustomTestCase):
     ci_mode = True
@@ -164,6 +176,7 @@ class TestCIWithSoftWatchdog(BaseTestDetokenizerWatchdog, CustomTestCase):
     soft_watchdog_value = 20
     stuck_seconds = 30
     expected_log = "DetokenizerManager watchdog timeout"
+
 
 # Scenario 3: Non-CI environment + set soft-watchdog (20s) → block 30s
 class TestNonCIWithSoftWatchdog(BaseTestDetokenizerWatchdog, CustomTestCase):
@@ -173,10 +186,12 @@ class TestNonCIWithSoftWatchdog(BaseTestDetokenizerWatchdog, CustomTestCase):
     stuck_seconds = 30
     expected_log = "DetokenizerManager watchdog timeout"
 
+
 # Scenario 4: Non-CI environment + no soft-watchdog (verify AssertionError in logs)
 class TestNonCIWithoutSoftWatchdog(BaseTestDetokenizerWatchdog, CustomTestCase):
     ci_mode = False
     set_soft_watchdog = False
+
 
 # ===================== Test Execution Function =====================
 def run_test_scenario(test_case_cls):
@@ -185,20 +200,29 @@ def run_test_scenario(test_case_cls):
         suite = unittest.TestLoader().loadTestsFromTestCase(test_case_cls)
         unittest.TextTestRunner(verbosity=2).run(suite)
 
+
 # ===================== Main Function (Execute Four Scenarios) =====================
 if __name__ == "__main__":
     # Scenario 1: CI + no soft-watchdog
-    logger.info("=== Scenario 1: CI Environment - No soft-watchdog ===")
+    logger.info(
+        "=== Scenario 1: CI Environment - No soft-watchdog ==="
+    )
     run_test_scenario(TestCIWithoutSoftWatchdog)
 
     # Scenario 2: CI + set soft-watchdog(20s) → block 30s
-    logger.info("\n=== Scenario 2: CI Environment - Set soft-watchdog(20s), block 30s ===")
+    logger.info(
+        "\n=== Scenario 2: CI Environment - Set soft-watchdog(20s), block 30s ==="
+    )
     run_test_scenario(TestCIWithSoftWatchdog)
 
     # Scenario 3: Non-CI + set soft-watchdog(20s) → block 30s
-    logger.info("\n=== Scenario 3: Non-CI Environment - Set soft-watchdog(20s), block 30s ===")
+    logger.info(
+        "\n=== Scenario 3: Non-CI Environment - Set soft-watchdog(20s), block 30s ==="
+    )
     run_test_scenario(TestNonCIWithSoftWatchdog)
 
     # Scenario 4: Non-CI + no soft-watchdog (verify AssertionError)
-    logger.info("\n=== Scenario 4: Non-CI Environment - No soft-watchdog (Verify AssertionError) ===")
+    logger.info(
+        "\n=== Scenario 4: Non-CI Environment - No soft-watchdog (Verify AssertionError) ==="
+    )
     run_test_scenario(TestNonCIWithoutSoftWatchdog)

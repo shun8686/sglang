@@ -1,5 +1,5 @@
-import unittest
 import time
+import unittest
 
 from sglang.test.ascend.test_ascend_utils import PHI_4_MULTIMODAL_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ascend.vlm_utils import TestVLMModels
@@ -43,7 +43,11 @@ class TestPhi4MultimodalLatencyCompare(TestVLMModels):
         time_on = self._run_and_measure_time(["--keep-mm-feature-on-device"])
 
         # Latency should decrease after enabling --keep-mm-feature-on-device
-        self.assertLess(time_on, time_off, "Latency did not decrease after enabling --keep-mm-feature-on-device")
+        self.assertLess(
+            time_on,
+            time_off,
+            "Latency did not decrease after enabling --keep-mm-feature-on-device",
+        )
 
 
 if __name__ == "__main__":

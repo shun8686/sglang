@@ -1,6 +1,6 @@
 import re
-import unittest
 import subprocess
+import unittest
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
@@ -20,6 +20,7 @@ class BaseNumaBindingTest(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --numa-node
     """
+
     TP_SIZE = 2
     CONFIG_NUMA_LIST = None
 
@@ -28,11 +29,15 @@ class BaseNumaBindingTest(CustomTestCase):
         cls.model = QWEN3_0_6B_WEIGHTS_PATH
         cls.other_args = [
             "--trust-remote-code",
-            "--tp-size", str(cls.TP_SIZE),
-            "--mem-fraction-static", "0.8",
-            "--attention-backend", "ascend",
+            "--tp-size",
+            str(cls.TP_SIZE),
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
             "--disable-cuda-graph",
-            "--numa-node", *cls.CONFIG_NUMA_LIST,
+            "--numa-node",
+            *cls.CONFIG_NUMA_LIST,
         ]
         cls.process = popen_launch_server(
             cls.model,
@@ -68,9 +73,13 @@ class BaseNumaBindingTest(CustomTestCase):
         # When binding to the same NUMA node, the CPU ranges should be the same;
         # when binding to different NUMA nodes, the CPU ranges should be different.
         if self.CONFIG_NUMA_LIST[0] == self.CONFIG_NUMA_LIST[1]:
-            self.assertEqual(cpu0, cpu1, "The same NUMA node should bind to the same CPU range")
+            self.assertEqual(
+                cpu0, cpu1, "The same NUMA node should bind to the same CPU range"
+            )
         else:
-            self.assertNotEqual(cpu0, cpu1, "Different NUMA nodes should bind to different CPU ranges")
+            self.assertNotEqual(
+                cpu0, cpu1, "Different NUMA nodes should bind to different CPU ranges"
+            )
 
 
 class TestNumaDifferent(BaseNumaBindingTest):
