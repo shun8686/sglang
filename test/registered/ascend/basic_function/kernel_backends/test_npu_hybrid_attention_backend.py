@@ -5,7 +5,7 @@ from types import SimpleNamespace
 import requests
 from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.srt.utils import kill_process_tree
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -86,16 +86,15 @@ class TestHybridAttnBackendBase(CustomTestCase):
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
             data_path=GSM_DATASET_PATH,
+            eval_name="gsm8k",
         )
-        metrics = run_eval_few_shot_gsm8k(args)
-        print(f"{metrics=}")
+        metrics = run_eval(args)
 
         # Use the appropriate metric key based on the test class
         metric_key = "accuracy"
         self.assertGreater(metrics[metric_key], self.accuracy_threshold)
 
         response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
-        print(f"get_server_info：{response.json()}")
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -111,7 +110,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
         )
         self.assertEqual(
             response.json()["internal_states"][0]["attention_backend"],
-            "cutlass_mla",
+            "as",
         )
 
 
