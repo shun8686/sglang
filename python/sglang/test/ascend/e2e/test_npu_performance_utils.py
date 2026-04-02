@@ -3,9 +3,8 @@ import os
 import subprocess
 import threading
 import time
+from functools import wraps
 from urllib.parse import urlparse
-
-import wraps
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
