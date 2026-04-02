@@ -60,6 +60,12 @@ class TestNpuModelTokenizerMultimodal(CustomTestCase):
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
 
+    def test_revision_server_info(self):
+        # The revision value was verified to be 1.0.0.
+        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/server_info")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()["revision"], "1.0.0")
+
     def test_model_tokenizer_stream_request(self):
         text1 = "The capital of France is"
         response = requests.post(
