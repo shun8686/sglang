@@ -1,15 +1,12 @@
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_30b_a3b_w8a8_1p_in3k5_out1k5_50ms.py
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_30b_w8a8_1p_in3k5_out1k5_10ms.py
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_30b_bf16_1p_in1k_out100.py
-
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_14b_w8a8_1p_in3k5_out1k5_50ms.py
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_14b_w8a8_1p_in3k5_out1k5_10ms.py
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_14b_bf16_1p_in1k_out100_e2e_10s.py
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_14b_bf16_1p_in1k_out100_e2e_10s_lora.py
-
 1|test/registered/ascend/performance/v26/test_ascend_qwen3_8b_w8a8_1d_in3k5_out1k5_50ms.py
 2|test/registered/ascend/performance/v26/test_ascend_qwen3_8b_w8a8_1p_in3k5_out1k5_5ms.py
-
 16|test/registered/ascend/performance/v26/test_ascend_qwen3_vl_235b_bf16_8p_in1024x1024_out1024_100ms.py
 1|test/registered/ascend/performance/v26/test_ascend_qwen3_vl_8b_bf16_1d_in1024x1024_out1024_50ms.py
 4|test/registered/ascend/performance/v26/test_ascend_qwen2_5_vl_72b_w8a8_2p_in1920x1080_256_out512_200ms.py

@@ -1,0 +1,2 @@
+2|test/registered/ascend/performance/test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms.py
+2|test/registered/ascend/performance/test_ascend_qwen3_235b_w8a8_16p_in2k_out2k_50ms.py
