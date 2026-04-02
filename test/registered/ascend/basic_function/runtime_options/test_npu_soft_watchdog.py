@@ -21,7 +21,7 @@ from sglang.test.test_utils import (
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers = [logging.StreamHandler()],
+    handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 # ===================== Common Env Var Management Functions =====================
 TEST_RELATED_ENVS = ["SGLANG_IS_IN_CI", "SGLANG_TEST_STUCK_DETOKENIZER"]
+
 
 @contextmanager
 def temporary_test_envs(ci_mode: bool = None, stuck_detokenizer: int = None):
@@ -62,7 +63,7 @@ class BaseTestDetokenizerWatchdog:
     stuck_seconds = 350
     expected_log = None
     expected_assert_error = (
-            "stuck tester can be enabled only if soft watchdog is enabled"
+        "stuck tester can be enabled only if soft watchdog is enabled"
     )
 
     @classmethod
@@ -84,7 +85,7 @@ class BaseTestDetokenizerWatchdog:
             if (cls.ci_mode is False and cls.set_soft_watchdog is False)
             else DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
         )
-        
+
         try:
             # Simulate detokenizer blocking
             with envs.SGLANG_TEST_STUCK_DETOKENIZER.override(cls.stuck_seconds):
@@ -204,9 +205,7 @@ def run_test_scenario(test_case_cls):
 # ===================== Main Function (Execute Four Scenarios) =====================
 if __name__ == "__main__":
     # Scenario 1: CI + no soft-watchdog
-    logger.info(
-        "=== Scenario 1: CI Environment - No soft-watchdog ==="
-    )
+    logger.info("=== Scenario 1: CI Environment - No soft-watchdog ===")
     run_test_scenario(TestCIWithoutSoftWatchdog)
 
     # Scenario 2: CI + set soft-watchdog(20s) → block 30s

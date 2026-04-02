@@ -207,7 +207,7 @@ class TestTokenizerBatchDecodeBehavior(CustomTestCase):
             {"name": "Without --disable-tokenizer-batch-decode", "extra_args": []},
             {
                 "name": "With --disable-tokenizer-batch-decode",
-                "extra_args": ["--disable-tokenizer-batch-decode"]
+                "extra_args": ["--disable-tokenizer-batch-decode"],
             },
         ]
 
