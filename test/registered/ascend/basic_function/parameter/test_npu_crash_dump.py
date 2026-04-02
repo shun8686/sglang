@@ -9,6 +9,7 @@ import requests
 
 from sglang.srt.environ import envs
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_cuda_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -36,19 +37,16 @@ class TestNPUCrashDump(CustomTestCase):
         cls.crash_dump_folder = tempfile.mkdtemp(prefix="crash_dump_test_")
 
         with envs.SGLANG_TEST_CRASH_AFTER_STREAM_OUTPUTS.override(
-            cls.NUM_REQUESTS_BEFORE_CRASH * cls.MAX_NEW_TOKENS + 10
+                cls.NUM_REQUESTS_BEFORE_CRASH * cls.MAX_NEW_TOKENS + 10
         ):
             cls.process = popen_launch_server(
-                # "Qwen/Qwen3-0.6B",
-                "/home/weights/Qwen/Qwen3-0.6B",
+                QWEN3_0_6B_WEIGHTS_PATH,
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=[
                     "--crash-dump-folder",
                     cls.crash_dump_folder,
                     "--skip-server-warmup",
-                    "--base-gpu-id",
-                    4,
                 ],
             )
 
