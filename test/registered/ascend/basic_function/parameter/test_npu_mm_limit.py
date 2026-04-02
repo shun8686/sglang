@@ -31,25 +31,26 @@ def popen_launch_server_wrapper(base_url, model, other_args):
     )
     return process
 
+
 def _send_parallel_request_task1(base_url, image_url):
-        import requests
-        requests.packages.urllib3.disable_warnings()
-        import ssl
-        ssl._create_default_https_context = ssl._create_unverified_context
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "image_url", "image_url": {"url": image_url}},
-                    {"type": "text", "text": "Describe this video."},
-                ]
-            }
-        ]
-        resp = requests.post(
-            f"{base_url}/chat/completions",
-            json={"messages": messages, "temperature": 0, "max_completion_tokens": 512}
-        )
-        assert resp.status_code == 200
+    import requests
+    requests.packages.urllib3.disable_warnings()
+    import ssl
+    ssl._create_default_https_context = ssl._create_unverified_context
+    messages = [
+        {
+            "role": "user",
+            "content": [ 
+                {"type": "image_url", "image_url": {"url": image_url}},
+                {"type": "text", "text": "Describe this video."},
+            ]
+        }
+    ] 
+    resp = requests.post(
+        f"{base_url}/chat/completions",
+        json={"messages": messages, "temperature": 0, "max_completion_tokens": 512}
+    )
+    assert resp.status_code == 200
 
 class TestLimitMMDatePerRequest(CustomTestCase):
     """Testcase: Configuring Multi-Modal to send different multimodal inference requests,
@@ -112,11 +113,11 @@ class TestLimitMMDatePerRequest(CustomTestCase):
             },
         ]
         response = requests.post(
-            self.base_url + '/chat/completions',
+            self.base_url + "/chat/completions",
             json={
                 "messages": messages,
                 "temperature": 0,
-                "max_completion_tokens": 1024
+                "max_completion_tokens": 1024,
             },
         )
         assert response.status_code == 200
@@ -144,25 +145,24 @@ class TestLimitMMDatePerRequest(CustomTestCase):
             },
         ]
         response2 = requests.post(
-            self.base_url + '/chat/completions',
+            self.base_url + "/chat/completions",
             json={
                 "messages": messages2,
                 "temperature": 0,
-                "max_completion_tokens": 1024
+                "max_completion_tokens": 1024,
             },
         )
         assert response2.status_code == 400
-
 
     def _run_parallel_two_requests(self):
 
         p1 = mp.Process(
             target=_send_parallel_request_task1,
-            args=(self.base_url, IMAGE_MAN_IRONING_URL)
+            args=(self.base_url, IMAGE_MAN_IRONING_URL),
         )
         p2 = mp.Process(
             target=_send_parallel_request_task1,
-            args=(self.base_url, IMAGE_MAN_IRONING_URL)
+            args=(self.base_url, IMAGE_MAN_IRONING_URL),
         )
 
         p1.start()
@@ -172,7 +172,6 @@ class TestLimitMMDatePerRequest(CustomTestCase):
 
         self.assertEqual(p1.exitcode, 0)
         self.assertEqual(p2.exitcode, 0)
-    
 
     def test_vlm(self):
         self._run_multi_turn_request()
@@ -182,4 +181,3 @@ class TestLimitMMDatePerRequest(CustomTestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
