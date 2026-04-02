@@ -1,6 +1,6 @@
 import multiprocessing as mp
 from abc import ABC
-from typing import Optional, List, Tuple
+from typing import List, Optional, Tuple
 
 import torch
 from transformers import AutoConfig, AutoTokenizer
@@ -12,7 +12,9 @@ from sglang.test.test_utils import get_similarities
 class BaseEmbeddingTest(ABC):
     """Base test class for embedding model tests"""
 
-    MODELS: List[Tuple[str, int, float]]  # [(model_path, tp_size, prefill_tolerance), ...]
+    MODELS: List[
+        Tuple[str, int, float]
+    ]  # [(model_path, tp_size, prefill_tolerance), ...]
     TORCH_DTYPES: List[torch.dtype] = [torch.float16]
     DEFAULT_PROMPTS: List[str] = DEFAULT_PROMPTS
     DEFAULT_MAX_LENGTH: int = 2048

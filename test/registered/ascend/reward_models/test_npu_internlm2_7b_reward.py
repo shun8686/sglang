@@ -4,8 +4,8 @@ os.environ["PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION"] = "python"
 import unittest
 
 from sglang.test.ascend.test_ascend_utils import INTERNLM2_7B_REWARD_WEIGHTS_PATH
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.base_no_hf_reward_test import BaseNoHFRewardModelTest
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(

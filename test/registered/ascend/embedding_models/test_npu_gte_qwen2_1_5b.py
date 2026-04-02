@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.test_ascend_utils import GTE_QWEN2_1_5B_INSTRUCT_WEIGHTS_PATH
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.test_embedding_base import BaseEmbeddingTest
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(

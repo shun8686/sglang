@@ -5,7 +5,9 @@ import torch
 
 from sglang.test.runners import SRTRunner
 
-PROMPT = "What is the range of the numeric output of a sigmoid node in a neural network?"
+PROMPT = (
+    "What is the range of the numeric output of a sigmoid node in a neural network?"
+)
 RESPONSE1 = "The output of a sigmoid node is bounded between -1 and 1."
 RESPONSE2 = "The output of a sigmoid node is bounded between 0 and 1."
 
@@ -45,10 +47,10 @@ class BaseNoHFRewardModelTest(ABC):
         }
 
         with SRTRunner(
-                self.model_path,
-                torch_dtype=self.torch_dtype,
-                model_type="reward",
-                **srt_runner_kwargs
+            self.model_path,
+            torch_dtype=self.torch_dtype,
+            model_type="reward",
+            ** srt_runner_kwargs,
         ) as srt_runner:
             prompts = srt_runner.tokenizer.apply_chat_template(CONVS, tokenize=False)
             srt_outputs = srt_runner.forward(prompts)

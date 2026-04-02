@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.test_ascend_utils import QWEN2_5_1_5B_APEACH_WEIGHTS_PATH
-from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.ascend.base_no_hf_reward_test import BaseNoHFRewardModelTest
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(
