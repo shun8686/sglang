@@ -48,6 +48,8 @@ class BaseTestRequestLogger:
             "--log-requests-target",
             "stdout",
             cls.temp_dir,
+            "--base-gpu-id",
+            "4",
         ]
         # Set env vars and save old values for restoration
         cls._old_env_vars = {}
