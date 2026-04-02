@@ -39,13 +39,16 @@ class TestNPUCrashDump(CustomTestCase):
             cls.NUM_REQUESTS_BEFORE_CRASH * cls.MAX_NEW_TOKENS + 10
         ):
             cls.process = popen_launch_server(
-                "Qwen/Qwen3-0.6B",
+                # "Qwen/Qwen3-0.6B",
+                "/home/weights/Qwen/Qwen3-0.6B",
                 DEFAULT_URL_FOR_TEST,
                 timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
                 other_args=[
                     "--crash-dump-folder",
                     cls.crash_dump_folder,
                     "--skip-server-warmup",
+                    "--base-gpu-id",
+                    4,
                 ],
             )
 
