@@ -40,6 +40,8 @@ class TestGpuId(CustomTestCase):
             "--attention-backend",
             "ascend",
             "--disable-cuda-graph",
+            "--dist-timeout",
+            3000,
         ]
 
         cls.process = popen_launch_server(
