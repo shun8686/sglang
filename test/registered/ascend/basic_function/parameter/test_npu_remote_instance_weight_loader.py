@@ -197,7 +197,7 @@ def init_process_dst(
             "--remote-instance-weight-loader-send-weights-group-ports",
             f"[{','.join(str(port) for port in ports)}]",
             "--load-format",
-            "remote_instance",
+            "auto",
             "--remote-instance-weight-loader-backend",
             remote_instance_loader_backend,
             "--weight-loader-disable-mmap",
