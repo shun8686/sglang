@@ -75,6 +75,8 @@ class TestNPULoggingBase(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--log-requests",
+            "--base-gpu-id",
+            "10",
         ]
         cls.out_log_file_obj = tempfile.NamedTemporaryFile(
             mode="w+", encoding="utf-8", delete=False, suffix=".txt"
@@ -106,3 +108,18 @@ class TestNPULoggingBase(CustomTestCase):
             other_args=cls.other_args,
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
+
+    def inference_once(self):
+        response = requests.post(
+            f"{self.base_url}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+
+        self.assertEqual(response.status_code, 200, "Failed to call generate API")
+        self.assertIn("Paris", response.text, "Inference out error.")
