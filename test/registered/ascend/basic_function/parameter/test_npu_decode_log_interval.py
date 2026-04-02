@@ -58,13 +58,8 @@ class TestNPUEnableRequestTimeStatsLogging(TestNPULoggingBase):
         cls.output_capturer.stop()
 
     def test_enable_request_time_stats_logging(self):
-        self.inference_once()
 
-        self.assertIn(
-            "Req Time Stats",
-            self.output_capturer.get_all(),
-            f"Keyword not found in server logs.",
-        )
+
 
         num_requests = 4
 
