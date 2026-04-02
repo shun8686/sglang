@@ -111,14 +111,14 @@ class TestNPULoggingBase(CustomTestCase):
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
         )
 
-    def inference_once(self):
+    def inference_once(self, max_tokens=32):
         response = requests.post(
             f"{self.base_url}/generate",
             json={
                 "text": "The capital of France is",
                 "sampling_params": {
                     "temperature": 0,
-                    "max_new_tokens": 32,
+                    "max_new_tokens": max_tokens,
                 },
             },
         )
