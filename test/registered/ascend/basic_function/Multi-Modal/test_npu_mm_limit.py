@@ -56,13 +56,16 @@ def _send_parallel_request_task1(base_url, image_url):
     assert resp.status_code == 200
 
 
-class TestLimitMMDatePerRequest(CustomTestCase):
+class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
     """Testcase: Configuring Multi-Modal to send different multimodal inference requests,
        each containing multiple multimodal input data.
 
     [Test Category] Parameter
     [Test Target] --mm-max-concurrent-calls; --mm-per-request-timeout; --enable-broadcast-mm-inputs-process; --limit-mm-data-per-request
     """
+
+    model = QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
+    mmmu_accuracy = 0.2
 
     @classmethod
     def setUpClass(cls):
