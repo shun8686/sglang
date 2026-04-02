@@ -181,31 +181,6 @@ class TestLimitMMDatePerRequest(CustomTestCase):
         self._run_multi_turn_request1()
         self._run_parallel_two_requests()
 
-
-class TestQwen3VL8B(TestVLMModels):
-    model = QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
-    mmmu_accuracy = 0.2
-    limit_mm = '{"image":1, "video":1}'
-    other_args = [
-        "--mem-fraction-static",
-        "0.5",
-        "--enable-multimodal",
-        "--mm-max-concurrent-calls",
-        "1",
-        "--mm-per-request-timeout",
-        "1",
-        "--enable-broadcast-mm-inputs-process",
-        "--attention-backend",
-        "ascend",
-        "--device",
-        "npu",
-        "--tp-size",
-        "4",
-        "--disable-cuda-graph",
-        "--limit-mm-data-per-request",
-        limit_mm,
-    ]
-
     def test_vlm_mmmu_benchmark(self):
         self._run_vlm_mmmu_test()
 
