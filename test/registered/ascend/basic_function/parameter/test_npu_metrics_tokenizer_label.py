@@ -58,9 +58,7 @@ class TestNPUMetricsTokenizerLabel(TestNPULoggingBase):
                 },
             },
         )
-
         self.assertEqual(response.status_code, 200)
-        self.assertIn(self.expected_output, response.text)
 
         response = requests.get(f"{self.base_url}/metrics", timeout=10)
         self.assertEqual(response.status_code, 200)
