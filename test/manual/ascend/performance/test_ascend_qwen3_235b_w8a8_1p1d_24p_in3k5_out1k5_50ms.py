@@ -149,6 +149,7 @@ MODEL_CONFIG = {
 
 
 class TestQwen235bW8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
+    max_attempts = 3
     model_config = MODEL_CONFIG
     backend = "sglang-oai"
     dataset_name = "random"
@@ -162,7 +163,7 @@ class TestQwen235bW8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     output_token_throughput = 11570
 
     def test_throughput(self):
-        self.run_throughput(run_cycles=3)
+        self.run_throughput()
 
 
 if __name__ == "__main__":

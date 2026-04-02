@@ -77,7 +77,7 @@ class TestQwenVl8B(TestAscendPerformanceTestCaseBase):
     output_token_throughput = 1520
 
     def test_qwen3_vl_8b(self):
-        self.run_throughput(run_cycles=2)
+        self.run_throughput()
 
 
 if __name__ == "__main__":

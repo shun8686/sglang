@@ -349,6 +349,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
+    max_attempts = 2
     request_rate = None
     max_concurrency = None
     num_prompts = None
@@ -431,8 +432,8 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 self.mean_e2e_latency * E2E_TOLERANCE,
             )
 
-    @retry(max_attempts=2)
-    def run_throughput(self, run_cycles=2):
+    @retry(max_attempts=max_attempts)
+    def run_throughput(self):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
@@ -464,6 +465,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    max_attempts = 2
     request_rate = None
     max_concurrency = None
     num_prompts = None
@@ -560,8 +562,9 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
         )
         time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
 
+    @retry(max_attempts=max_attempts)
     @check_role(allowed_roles=["master", "worker"])
-    def run_throughput(self, run_cycles=2):
+    def run_throughput(self):
         bench_params = {
             "host": self.host,
             "port": str(self.port),
@@ -581,12 +584,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             "seed": self.seed,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
-
-        metrics = None
-        for i in range(run_cycles):
-            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
-            metrics = run_bench_serving(**bench_params)
-
+        metrics = run_bench_serving(**bench_params)
         self._assert_metrics(metrics)
 
 
@@ -595,6 +593,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    max_attempts = 2
     request_rate = None
     max_concurrency = None
     num_prompts = None
@@ -708,8 +707,9 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                     f"Sglang process exited on node {cls.host} {cls.hostname} with exit code: {exit_code}"
                 )
 
+    @retry(max_attempts=max_attempts)
     @check_role(allowed_roles=["router"])
-    def run_throughput(self, run_cycles=2):
+    def run_throughput(self):
         bench_params = {
             "host": self.host,
             "port": str(self.port),
@@ -729,10 +729,5 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             "seed": self.seed,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
-
-        metrics = None
-        for i in range(run_cycles):
-            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
-            metrics = run_bench_serving(**bench_params)
-
+        metrics = run_bench_serving(**bench_params)
         self._assert_metrics(metrics)

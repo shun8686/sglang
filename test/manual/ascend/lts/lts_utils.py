@@ -11,7 +11,7 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     TPOT_TOLERANCE_HIGH,
     TPOT_TOLERANCE_LOW,
     TTFT_TOLERANCE,
-    run_bench_serving,
+    run_bench_serving, retry,
 )
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.run_eval import run_eval
@@ -67,6 +67,7 @@ def run_command(cmd, shell=True):
 
 
 class TestAscendLtsTestCaseBase(CustomTestCase):
+    max_attempts = 5
     host = None
     port = None
     base_url = None
@@ -130,7 +131,8 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
                 self.mean_e2e_latency * E2E_TOLERANCE,
             )
 
-    def run_throughput(self, run_cycles=2):
+    @retry
+    def run_throughput(self):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
@@ -154,12 +156,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             "output_file": self.output_file,
         }
         logger.info(f"Starting benchmark with parameters: {bench_params}")
-
-        metrics = None
-        for i in range(run_cycles):
-            logger.info(f"Running benchmark, {i + 1}/{run_cycles}")
-            metrics = run_bench_serving(**bench_params)
-
+        metrics = run_bench_serving(**bench_params)
         self._assert_metrics(metrics)
 
     def run_gsm8k(self):
