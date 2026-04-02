@@ -3,8 +3,10 @@ import unittest
 from types import SimpleNamespace
 
 import requests
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -12,31 +14,28 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 GSM_DATASET_PATH = None
 
 # Default server arguments shared across all tests
-DEFAULT_SERVER_ARGS = (
-    [
-        "--trust-remote-code",
-        "--cuda-graph-max-bs",
-        "8",
-        "--prefill-attention-backend",
-        "ascend",
-        "--decode-attention-backend",
-        "ascend",
-        "--attention-backend",
-        "cutlass_mla",
-        "--disable-cuda-graph",
-        "--mem-fraction-static",
-        0.9,
-        "--tp-size",
-        2,
-    ]
-)
+DEFAULT_SERVER_ARGS = [
+    "--trust-remote-code",
+    "--cuda-graph-max-bs",
+    "8",
+    "--prefill-attention-backend",
+    "ascend",
+    "--decode-attention-backend",
+    "ascend",
+    "--attention-backend",
+    "cutlass_mla",
+    "--disable-cuda-graph",
+    "--mem-fraction-static",
+    0.9,
+    "--tp-size",
+    2,
+]
 
 
 @unittest.skipIf(
@@ -45,9 +44,9 @@ DEFAULT_SERVER_ARGS = (
 class TestHybridAttnBackendBase(CustomTestCase):
     """Testcase：Verify set --prefill-attention-backend, --decode-attention-backend, the inference request is successfully processed.
 
-       [Test Category] Parameter
-       [Test Target] --prefill-attention-backend, --decode-attention-backend
-       """
+    [Test Category] Parameter
+    [Test Target] --prefill-attention-backend, --decode-attention-backend
+    """
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
     accuracy_threshold = 0.65  # derived tests need to override this
