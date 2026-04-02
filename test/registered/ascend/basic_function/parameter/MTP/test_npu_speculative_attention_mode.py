@@ -83,7 +83,7 @@ class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
     def start_prefill(cls):
         prefill_args = [
             "--base-gpu-id",
-            "4",
+            "12",
             "--disaggregation-mode",
             "prefill",
             "--disaggregation-decode-tp",
