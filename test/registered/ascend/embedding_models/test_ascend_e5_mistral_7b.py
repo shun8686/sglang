@@ -12,11 +12,7 @@ from sglang.test.test_utils import (
     get_similarities,
 )
 
-register_npu_ci(
-    est_time=400,
-    suite="nightly-1-npu-a3",
-    nightly=True,
-)
+register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
 MODELS = [
     (E5_MISTRAL_7B_INSTRUCT_WEIGHTS_PATH, 1, 1e-5),

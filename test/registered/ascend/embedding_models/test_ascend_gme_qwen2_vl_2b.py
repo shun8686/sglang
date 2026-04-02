@@ -12,6 +12,7 @@ register_npu_ci(
     est_time=400,
     suite="nightly-1-npu-a3",
     nightly=True,
+    disabled="https://github.com/Ascend/sglang/issues/29",
 )
 
 TEXTS = "two Subway Series sandwiches with meats, cheese, lettuce, tomatoes, and onions on a black background, accompanied by the Subway Series logo, highlighting a new sandwich series."
