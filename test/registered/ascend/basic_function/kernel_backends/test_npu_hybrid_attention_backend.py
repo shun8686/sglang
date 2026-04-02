@@ -47,6 +47,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --prefill-attention-backend, --decode-attention-backend
     """
+
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
     accuracy_threshold = 0.65  # derived tests need to override this
