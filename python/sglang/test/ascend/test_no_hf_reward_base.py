@@ -27,7 +27,7 @@ class BaseNoHFRewardModelTest(ABC):
     model_path: str
 
     # Optional attributes with defaults
-    torch_dtype: torch.dtype = torch.float16  # 提供默认值
+    torch_dtype: torch.dtype = torch.float16
     tp_size: int = 4
     trust_remote_code: bool = True
     disable_cuda_graph: bool = True
