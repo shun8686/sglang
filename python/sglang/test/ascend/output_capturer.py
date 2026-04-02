@@ -78,6 +78,13 @@ class OutputCapturer:
                 self.stop()
                 break
 
+    def get_all(self):
+        """Get all captured stdout and stderr as UTF-8 string
+
+        Return: Decoded stdout and stderr string (ignore decoding errors)
+        """
+        return self.get_output() + self.get_error()
+
     def get_output(self):
         """Get all captured stdout as UTF-8 string
 
