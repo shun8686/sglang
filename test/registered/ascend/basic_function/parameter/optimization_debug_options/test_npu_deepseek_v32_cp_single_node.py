@@ -88,6 +88,8 @@ class TestDeepseekV32CPInSeqSplit(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         other_args = [
             "--trust-remote-code",
+            "--quantization",
+            "modelslim",
             "--tp",
             "16",
             "--enable-dp-attention",

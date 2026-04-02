@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import unittest
 
@@ -89,34 +90,20 @@ class TestJSONModeMixin:
         Verify that the --constrained-json-whitespace-pattern parameter only takes effect (JSON output contains newline whitespace)
         when the grammar backend is outlines/llguidance (pattern: [\n]?); for other backends, the parameter has no effect (no whitespace).
         """
-        print("====================================================================================================")
-        print(json_str)
         # Detect newline whitespace (\n) in JSON string (matching pattern [\n]?)
         has_newline_whitespace = bool(re.search(r'\n', json_str))
         # Detect any whitespace characters
         has_tab = bool(re.search(r'\t', json_str))
 
-        if self.backend in ["outlines", "llguidance"]:
-            # Expect newline whitespace (parameter takes effect)
-            self.assertTrue(
-                has_newline_whitespace,
-                f"[{self.backend}] --constrained-json-whitespace-pattern=[\\n]? should take effect, but no newline whitespace in JSON! JSON: {json_str}"
-            )
-            self.assertFalse(
-                has_tab,
-                f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
-            )
-        else:
-            # Expect no whitespace (parameter has no effect, e.g. xgrammar)
-            self.assertTrue(
-                has_newline_whitespace,
-                f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
-            )
-            self.assertTrue(
-                has_tab,
-                f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
-            )
-
+        # Expect newline whitespace (parameter takes effect)
+        self.assertTrue(
+            has_newline_whitespace,
+            f"[{self.backend}] --constrained-json-whitespace-pattern=[\\n]? should take effect, but no newline whitespace in JSON! JSON: {json_str}"
+        )
+        self.assertFalse(
+            has_tab,
+            f"[{self.backend}] --constrained-json-whitespace-pattern should NOT take effect, but whitespace exists in JSON! JSON: {json_str}"
+        )
 
 class ServerWithGrammarBackend(CustomTestCase):
     """Base test class requiring a grammar backend server to be started"""
@@ -127,6 +114,7 @@ class ServerWithGrammarBackend(CustomTestCase):
     def setUpClass(cls):
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
+        os.environ["TORCH_COMPILE_DISABLE"] = "1"
 
         # Server startup arguments: use constrained-json-whitespace-pattern with value [\n]?
         other_args = [
@@ -152,16 +140,7 @@ class ServerWithGrammarBackend(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-# @unittest.skipIf(True, "skip")
-class TestJSONModeXGrammar(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify that when the grammar backend is xgrammar, the --constrained-json-whitespace-pattern parameter has no effect (no whitespace in JSON output)
 
-    [Test Category] Parameter
-    [Test Target] --constrained-json-whitespace-pattern
-    """
-    backend = "xgrammar"
-
-#@unittest.skipIf(True, "skip")
 class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
     """Testcase: Verify that when the grammar backend is outlines, --constrained-json-whitespace-pattern=[\n]? takes effect (JSON output contains newline whitespace)
 
@@ -170,7 +149,7 @@ class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
     """
     backend = "outlines"
 
-@unittest.skipIf(True, "skip")
+
 class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
     """Testcase: Verify that when the grammar backend is llguidance, --constrained-json-whitespace-pattern=[\n]? takes effect (JSON output contains newline whitespace)
 

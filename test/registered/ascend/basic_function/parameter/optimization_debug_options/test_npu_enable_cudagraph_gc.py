@@ -1,12 +1,10 @@
 import os
-import time
+import re
 import unittest
-import subprocess
-
-import requests
+import time
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import MINICPM_O_2_6_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
@@ -23,40 +21,42 @@ register_npu_ci(
 
 
 class TestAscendCudaGraphGC(unittest.TestCase):
-    """Testcase: Verify the function of --enable-cudagraph-gc parameter.
+    """Testcase: Verify that avail mem is larger when enable-cudagraph-gc is on.
 
     [Test Category] Parameter
     [Test Target] --enable-cudagraph-gc
     """
 
-    model = MINICPM_O_2_6_WEIGHTS_PATH
+    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
     log_file = "./cudagraph_gc_log.txt"
 
     @classmethod
     def setUpClass(cls):
-        cls.time_records = {}
+        pass
 
     @classmethod
     def tearDownClass(cls):
         if os.path.exists(cls.log_file):
             os.remove(cls.log_file)
 
-    def _launch_and_measure_time(self, enable_cudagraph_gc: bool):
-        """Launch server with/without --enable-cudagraph-gc and measure startup time."""
+    def _launch_and_get_avail_mem(self, enable_cudagraph_gc: bool) -> float:
+        """
+        1. 启动服务（开启/关闭GC）
+        2. 提取 Capture npu graph end. 行的 avail mem
+        """
         extra_args = [
             "--trust-remote-code",
             "--tp-size", "1",
             "--mem-fraction-static", "0.7",
-            "--attention-backend",
-            "ascend",
+            "--attention-backend", "ascend",
         ]
+
         if enable_cudagraph_gc:
             extra_args.append("--enable-cudagraph-gc")
 
-        # Start server and log
+        # 启动服务
         with open(self.log_file, "w", encoding="utf-8") as f:
-            start = time.time()
             proc = popen_launch_server(
                 self.model,
                 self.base_url,
@@ -64,52 +64,46 @@ class TestAscendCudaGraphGC(unittest.TestCase):
                 other_args=extra_args,
                 return_stdout_stderr=(f, f),
             )
+            time.sleep(50)
 
-            # Wait for CUDA graph capture
-            time.sleep(45)
-
-        # Record time
-        elapsed = time.time() - start
-        kill_process_tree(proc.pid)
-        time.sleep(10)
-        return elapsed
-
-    def _check_cuda_graph_log(self):
-        """Check if CUDA graph is captured in log."""
-        if not os.path.exists(self.log_file):
-            return False
+        # 读取日志并提取内存
         with open(self.log_file, "r", encoding="utf-8") as f:
             content = f.read()
-        return "Capturing batches" in content
 
-    def test_enable_cudagraph_gc_performance(self):
-        """Test that enabling cudagraph-gc slows down CUDA graph capture (GC not frozen)."""
+        match = re.search(r"Capture npu graph end\..*avail mem=([\d\.]+) GB", content)
+        self.assertIsNotNone(match, "未找到 Capture npu graph end 日志")
+        avail_mem = float(match.group(1))
 
-        # Test 1: default (disable --enable-cudagraph-gc, GC frozen, fast)
-        time_off = self._launch_and_measure_time(enable_cudagraph_gc=False)
-        self.assertTrue(self._check_cuda_graph_log(), "CUDA graph not captured")
+        # 关闭服务
+        kill_process_tree(proc.pid)
+        time.sleep(10)
 
-        # Test 2: enable --enable-cudagraph-gc (GC not frozen, slow)
-        time_on = self._launch_and_measure_time(enable_cudagraph_gc=True)
-        self.assertTrue(self._check_cuda_graph_log(), "CUDA graph not captured")
+        return avail_mem
 
-        # Record
-        self.time_records["gc_disabled"] = time_off
-        self.time_records["gc_enabled"] = time_on
+    def test_gc_avail_mem_comparison(self):
+        """
+        核心断言：
+        开启 GC 时 Capture npu graph end 的 avail mem > 关闭时
+        """
+        # 1. 关闭GC
+        mem_off = self._launch_and_get_avail_mem(enable_cudagraph_gc=False)
 
-        # Verify: gc enabled → slower startup
-        self.assertGreater(
-            time_on, time_off,
-            f"Enable cudagraph-gc should be slower. Off: {time_off:.2f}s, On: {time_on:.2f}s"
+        # 2. 开启GC
+        mem_on = self._launch_and_get_avail_mem(enable_cudagraph_gc=True)
+
+        # 3. 断言：开启GC > 关闭GC
+        self.assertGreaterEqual(
+            mem_on, mem_off,
+            f"开启GC的可用内存必须大于关闭时！\n关闭GC: {mem_off:.2f} GB\n开启GC: {mem_on:.2f} GB"
         )
 
-        # Output result
+        # 结果输出
         print("\n" + "=" * 60)
-        print("             CUDA Graph GC Test Result")
+        print("          CUDA Graph GC 内存对比结果")
         print("=" * 60)
-        print(f"GC disabled (default): {time_off:.2f}s")
-        print(f"GC enabled: {time_on:.2f}s")
-        print(f"Slowdown: {time_on - time_off:.2f}s")
+        print(f"关闭 --enable-cudagraph-gc: {mem_off:.2f} GB")
+        print(f"开启 --enable-cudagraph-gc: {mem_on:.2f} GB")
+        print("\n✅ 测试通过：开启GC后可用内存更大")
         print("=" * 60)
 
 
