@@ -72,10 +72,10 @@ QWEN3_30B_OTHER_ARGS = [
 
 
 class TestQwen30B(TestAscendPerformanceTestCaseBase):
+    max_attempts = 5
     model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     other_args = QWEN3_30B_OTHER_ARGS
     envs = QWEN3_30B_ENVS
-    max_attempts = 5
     dataset_name = "random"
     max_concurrency = 16
     num_prompts = 16

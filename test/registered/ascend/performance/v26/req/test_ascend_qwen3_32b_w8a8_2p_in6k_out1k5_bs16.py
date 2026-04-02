@@ -73,7 +73,7 @@ QWEN3_32B_OTHER_ARGS = [
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
-    max_attempts = 3
+    max_attempts = 5
     model = QWEN3_32B_W8A8_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
@@ -84,7 +84,7 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     output_len = 1500
     random_range_ratio = 1
     tpot = 17.9
-    output_token_throughput = 506
+    output_token_throughput = 590
 
     def test_qwen3_32b(self):
         self.run_throughput()

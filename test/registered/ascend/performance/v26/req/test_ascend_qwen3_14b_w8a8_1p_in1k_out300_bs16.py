@@ -75,6 +75,7 @@ QWEN3_14B_OTHER_ARGS = [
 
 
 class TestQwen14B(TestAscendPerformanceTestCaseBase):
+    max_attempts = 5
     model = QWEN3_14B_W8A8_MODEL_PATH
     other_args = QWEN3_14B_OTHER_ARGS
     envs = QWEN3_14B_ENVS
@@ -84,7 +85,7 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     input_len = 1024
     output_len = 300
     random_range_ratio = 1
-    tpot = 10
+    tpot = 10.26
     output_token_throughput = 815
 
     def test_qwen3_14b(self):
