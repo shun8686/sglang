@@ -78,7 +78,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
         }
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
@@ -157,7 +157,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,
@@ -221,7 +221,7 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
         env = {
             **os.environ,
             "SGLANG_HICACHE_FILE_BACKEND_STORAGE_DIR": cls.temp_dir,
-            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667"
+            "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24667",
         }
         cls.process_decode = popen_launch_pd_server(
             cls.model,
