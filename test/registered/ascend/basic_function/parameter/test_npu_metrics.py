@@ -87,8 +87,7 @@ class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.other_args.extend(["--enable-metrics"])
-        cls.other_args.extend(["--collect-tokens-histogram"])
+        cls.other_args.extend(["--enable-metrics", "--collect-tokens-histogram"])
         cls.set_default_bucket()
         cls.launch_server()
 
