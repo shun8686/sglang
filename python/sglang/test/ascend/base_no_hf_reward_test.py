@@ -50,7 +50,7 @@ class BaseNoHFRewardModelTest(ABC):
             self.model_path,
             torch_dtype=self.torch_dtype,
             model_type="reward",
-            ** srt_runner_kwargs,
+            **srt_runner_kwargs,
         ) as srt_runner:
             prompts = srt_runner.tokenizer.apply_chat_template(CONVS, tokenize=False)
             srt_outputs = srt_runner.forward(prompts)
