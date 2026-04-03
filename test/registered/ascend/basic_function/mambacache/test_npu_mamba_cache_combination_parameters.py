@@ -128,7 +128,7 @@ class TestMambaCache(CustomTestCase):
             kill_process_tree(self.process.pid)
 
     def test_mamba_batch_scheduler_strategy_no_buffer_full_memory_ratio_0_5_ssm_dtype_bfloat16(
-            self,
+        self,
     ):
         self.process = self._launch_server_with_mamba_params(
             max_mamba_cache_size=512,

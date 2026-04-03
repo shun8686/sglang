@@ -55,7 +55,9 @@ class TestConfig(CustomTestCase):
         ]
         env = _create_clean_subprocess_env(os.environ.copy())
         cls.process = subprocess.Popen(command, stdout=None, stderr=None, env=env)
-        _wait_for_server_health(cls.process, DEFAULT_URL_FOR_TEST, None, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH)
+        _wait_for_server_health(
+            cls.process, DEFAULT_URL_FOR_TEST, None, DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+        )
 
     @classmethod
     def tearDownClass(cls):
@@ -93,7 +95,7 @@ class TestConfigPriority(CustomTestCase):
         # will use false model path (/nonexistent/Qwen/Qwen3-32B) service start fail
         error_message = "Repo id must be in the form 'repo_name' or 'namespace/repo_name': '/nonexistent/Qwen/Qwen3-32B'."
         with tempfile.NamedTemporaryFile(
-            mode="w+", delete=True, suffix="out.log"
+                mode="w+", delete=True, suffix="out.log"
         ) as out_log_file, tempfile.NamedTemporaryFile(
             mode="w+", delete=True, suffix="out.log"
         ) as err_log_file:

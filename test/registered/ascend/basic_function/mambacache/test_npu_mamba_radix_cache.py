@@ -60,7 +60,7 @@ class TestMambaCache(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mamba_cache_kv_cache(self):
-        # test kv cache reuse
+        # test kv cache reuse, prompt need meets page size (128) requirement
         input_ids_first = [1] * 200
         input_ids_second = input_ids_first + [2] * 70
 
@@ -80,33 +80,23 @@ class TestMambaCache(CustomTestCase):
                 response.json()["meta_info"]["cached_tokens"], expected_cached_tokens
             )
 
+        # First request: no cache
         make_request(input_ids_first, 0)
+        # Second request: cache reused, cache token is reused in multiples of 128
         make_request(input_ids_second, 128)
 
 
 class TestMambaCacheHierarchicalCache(TestMambaCache):
     # test hi cache reuse
-    BASE_ARGS = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.5",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--device",
-        "npu",
-        "--tp-size",
-        "8",
-        "--mamba-ssm-dtype",
-        "float32",
-        "--mamba-full-memory-ratio",
-        "0.5",
-        "--mamba-scheduler-strategy",
-        "auto",
-        "--mamba-track-interval",
-        "256",
-        "--enable-hierarchical-cache",
-    ]
+    @classmethod
+    def setUpClass(cls):
+        other_args = cls.BASE_ARGS + ["--enable-hierarchical-cache"]
+        cls.process = popen_launch_server(
+            cls.model,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
 
 
 if __name__ == "__main__":
