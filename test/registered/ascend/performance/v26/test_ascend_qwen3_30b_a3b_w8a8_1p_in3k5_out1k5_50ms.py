@@ -94,7 +94,6 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    dataset_path = "/data/l30081563/GSM8K-in3500-bs3000_qwen3-30b.jsonl"
     max_concurrency = 162
     num_prompts = 624
     input_len = 3500
