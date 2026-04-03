@@ -131,7 +131,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
                 self.mean_e2e_latency * E2E_TOLERANCE,
             )
 
-    @retry
+    @retry()
     def run_throughput(self):
         logger.info(f"---------- Start benchserving test ----------")
         parsed_url = urlparse(self.base_url)
