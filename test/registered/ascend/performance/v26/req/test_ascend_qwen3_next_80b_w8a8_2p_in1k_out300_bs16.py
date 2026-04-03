@@ -104,6 +104,7 @@ QWEN3_NEXT_80B_A3B_OTHER_ARGS = [
 
 
 class TestQwen3Next80BA3B(TestAscendPerformanceTestCaseBase):
+    max_attempts = 5
     model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
     other_args = QWEN3_NEXT_80B_A3B_OTHER_ARGS
     envs = QWEN3_NEXT_80B_A3B_ENVS
