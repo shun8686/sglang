@@ -56,7 +56,7 @@ OTHER_ARGS = [
     "--watchdog-timeout",
     9000,
     "--mem-fraction-static",
-    0.8,
+    0.85,
     "--disable-radix-cache",
     # 如开启radix cache , 需增加
     "--max-prefill-tokens",
