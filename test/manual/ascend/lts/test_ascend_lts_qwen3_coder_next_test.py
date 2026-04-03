@@ -1,17 +1,12 @@
 import datetime
 import os
-import sys
 import unittest
 
 from lts_utils import TestAscendLtsTestCaseBase
 
-from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
-)
-from sglang.test.test_utils import (
-    popen_launch_server,
 )
 
 # MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
@@ -143,20 +138,4 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
 
 
 if __name__ == "__main__":
-    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    os.makedirs("log", exist_ok=True)
-    log_file = (
-        f"./log/lts_{os.path.splitext(os.path.basename(__file__))[0]}_{time_str}.log"
-    )
-
-    with open(log_file, "w", encoding="utf-8") as f:
-        original_stdout = sys.stdout
-        original_stderr = sys.stderr
-        sys.stdout = f
-        sys.stderr = f
-
-        try:
-            unittest.main(verbosity=2)
-        finally:
-            sys.stdout = original_stdout
-            sys.stderr = original_stderr
+    unittest.main()

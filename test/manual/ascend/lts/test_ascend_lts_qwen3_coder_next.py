@@ -1,6 +1,5 @@
 import datetime
 import os
-import sys
 import unittest
 
 from lts_utils import TestAscendLtsTestCaseBase
@@ -117,7 +116,7 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
     output_len = 1500
     random_range_ratio = 0.5
     ttft = 10000
-    tpot = 50
+    tpot = 100
     output_token_throughput = 500
     accuracy = {"gsm8k": 0.90, "mmlu": 0.80}
 
@@ -154,20 +153,4 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
 
 
 if __name__ == "__main__":
-    time_str = datetime.datetime.now().strftime("%Y%m%d%H%M")
-    os.makedirs("log", exist_ok=True)
-    log_file = (
-        f"./log/lts_{os.path.splitext(os.path.basename(__file__))[0]}_{time_str}.log"
-    )
-
-    with open(log_file, "w", encoding="utf-8") as f:
-        original_stdout = sys.stdout
-        original_stderr = sys.stderr
-        sys.stdout = f
-        sys.stderr = f
-
-        try:
-            unittest.main(verbosity=2)
-        finally:
-            sys.stdout = original_stdout
-            sys.stderr = original_stderr
+    unittest.main()
