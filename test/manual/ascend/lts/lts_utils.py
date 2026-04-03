@@ -161,9 +161,10 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
     def run_gsm8k(self):
         logger.info(f"---------- Start gsm8k accuracy test ----------")
+        logger.info(f"host:{self.host}, port:{self.port}")
         args = SimpleNamespace(
             num_shots=8,
-            data_path=None,
+            data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
