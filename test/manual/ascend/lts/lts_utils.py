@@ -174,6 +174,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             port=self.port,
         )
         metrics = run_eval_gsm8k(args)
+        logger.info(f"{metrics}")
         self.assertGreater(
             metrics["accuracy"],
             self.accuracy["gsm8k"],
@@ -192,6 +193,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         )
 
         metrics = run_eval(args)
+        logger.info(f"{metrics}")
         self.assertGreater(
             metrics["score"],
             self.accuracy["mmlu"],
