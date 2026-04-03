@@ -43,7 +43,7 @@ OTHER_ARGS = [
     "--dtype",
     "bfloat16",
     "--max-mamba-cache-size",
-    36,
+    33,
     "--mamba-ssm-dtype",
     "bfloat16",
     "--speculative-algorithm",
