@@ -16,8 +16,9 @@ fi
 if [ -z "$image" ];then
   image=swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B092
 fi
+echo "image: $image"
 
-test_set=$(cat testcase_v26_req_single.txt)
+test_set=$(cat "${sglang_source_path}/test/registered/ascend/performance/temp/testcase_v26_req_single.txt")
 
 count=0
 for tc_info in $test_set

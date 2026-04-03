@@ -1,7 +1,7 @@
 #!/bin/bash
 
-CONCURRENCY=4
-kube_job_type=single
+CONCURRENCY=1
+kube_job_type=multi-pd-separation
 
 sglang_source_path=$1
 install_sglang_from_source=$2
@@ -18,20 +18,21 @@ if [ -z "$image" ];then
 fi
 echo "image: $image"
 
-test_set=$(cat "${sglang_source_path}/test/registered/ascend/performance/temp/testcase_v25_baseline_single.txt")
+test_set=$(cat "${sglang_source_path}/test/manual/ascend/performance/temp/testcase_v26_baseline_multi_pd_separation.txt")
 
 count=0
 for tc_info in $test_set
 do
-  npu_size=$(echo "$tc_info" | cut -d'|' -f1)
-  test_case=$(echo "$tc_info" | cut -d'|' -f2)
+  prefill_size=$(echo $tc_info | cut -d'|' -f1)
+  decode_size=$(echo $tc_info | cut -d'|' -f2)
+  test_case=$(echo "$tc_info" | cut -d'|' -f3)
   echo "Testcase: $test_case"
-
-  bash run_k8s_test_base.sh $sglang_source_path $test_case $image $install_sglang_from_source $kube_job_type $npu_size > log/${test_case##*/}.log 2>&1 &
+   
+  bash run_k8s_test_base.sh $sglang_source_path $test_case $image $install_sglang_from_source $kube_job_type $prefill_size $decode_size > log/${test_case##*/}.log 2>&1 &
   sleep 30
 
   count=$((count + 1))
-
+   
   if [ "$count" -ge "$CONCURRENCY" ]; then
     wait
     count=0
