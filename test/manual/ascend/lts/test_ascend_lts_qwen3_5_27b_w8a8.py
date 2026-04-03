@@ -10,7 +10,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-MODEL_PATH = "/home/weights/Qwen3.5-27B-W8A8"
+MODEL_PATH = "/home/weights/Eco-Tech/Qwen3.5-27B-W8A8"
 
 OTHER_ARGS = [
     "--attention-backend",
@@ -52,6 +52,8 @@ OTHER_ARGS = [
     "1",
     "--speculative-num-draft-tokens",
     "4",
+    "--base-gpu-id",
+    "2",
 ]
 
 ENVS = {
