@@ -133,6 +133,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
     @retry
     def run_throughput(self):
+        logger.info(f"---------- Start benchserving test ----------")
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
@@ -158,6 +159,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         logger.info(f"Starting benchmark with parameters: {bench_params}")
         metrics = run_bench_serving(**bench_params)
         self._assert_metrics(metrics)
+        logger.info(f"---------- Benchserving test finished ----------")
 
     def run_gsm8k(self):
         logger.info(f"---------- Start gsm8k accuracy test ----------")
@@ -177,7 +179,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             self.accuracy["gsm8k"],
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy["gsm8k"]}',
         )
-        logger.info(f"---------- Gsm8k accuracy test PASSED ----------")
+        logger.info(f"---------- Gsm8k accuracy test finished ----------")
 
     def run_mmlu(self):
         logger.info(f"---------- Start mmlu accuracy test ----------")
@@ -195,7 +197,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             self.accuracy["mmlu"],
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy["mmlu"]}',
         )
-        logger.info(f"---------- Mmlu accuracy test PASSED ----------")
+        logger.info(f"---------- Mmlu accuracy test finished ----------")
 
     def run_long_seq_testcase(self, long_seq_configs=None):
         if long_seq_configs is None:
