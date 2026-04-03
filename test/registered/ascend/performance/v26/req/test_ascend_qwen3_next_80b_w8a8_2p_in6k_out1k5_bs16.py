@@ -54,7 +54,7 @@ QWEN3_NEXT_80B_A3B_OTHER_ARGS = [
     "--watchdog-timeout",
     9000,
     "--mem-fraction-static",
-    0.8,
+    0.85,
     "--disable-radix-cache",
     "--max-prefill-tokens",
     28672,
