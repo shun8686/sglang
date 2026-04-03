@@ -42,7 +42,7 @@ OTHER_ARGS = [
     "ascend_attn",
     "--dtype",
     "bfloat16",
-    "--max-mamda-cache-size",
+    "--max-mamba-cache-size",
     36,
     "--mamba-ssm-dtype",
     "bfloat16",
