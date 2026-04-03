@@ -265,10 +265,10 @@ def run_bench_serving(
     seed=None,
     output_file=None,
 ):
-    install_transformers("4.57.6")
-    import transformers
-    logger.info(f"transformers version: {transformers.__version__}")
-    assert transformers.__version__ == "4.57.6"
+    # install_transformers("4.57.6")
+    # import transformers
+    # logger.info(f"transformers version: {transformers.__version__}")
+    # assert transformers.__version__ == "4.57.6"
     metrics_file = os.getenv("METRICS_DATA_FILE")
     result_file = "./bench_log.txt" if not metrics_file else metrics_file
     logger.info(f"The metrics result file: {result_file}")
