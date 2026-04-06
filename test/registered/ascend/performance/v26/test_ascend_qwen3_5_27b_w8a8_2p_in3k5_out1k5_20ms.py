@@ -14,7 +14,7 @@ register_npu_ci(
 )
 
 ENVS = {
-    "ASCEND_LAUNCH_BLOCKING": "0",
+    "ASCEND_LAUNCH_BLOCKING": "1",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
     "HCCL_BUFFSIZE": "3000",
@@ -72,8 +72,8 @@ OTHER_ARGS = [
     96,
     112,
     "--enable-multimodal",
-    # "--quantization",
-    # "modelslim",
+    "--quantization",
+    "modelslim",
     "--mm-attention-backend",
     "ascend_attn",
     "--dtype",
