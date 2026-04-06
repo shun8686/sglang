@@ -15,8 +15,16 @@ pip3 install --no-index --find-links=/tmp/kubernetes/ kubernetes
 
 python -m venv test_env_transformers_v4 --system-site-packages
 #source test_env_transformers_v4/bin/activate
-#cp -r /root/.cache/.cache/transformers /tmp/
-test_env_transformers_v4/bin/pip install --no-index --find-links=/tmp/transformers/4.57.6 transformers==4.57.6
+TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
+TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
+  echo "The dependent transformers package does not exist: ${TRANSFORMERS_PKG_PATH_SOURCE}"
+  exit 1
+fi
+TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
+cp ${TRANSFORMERS_PKG_PATH}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
+test_env_transformers_v4/bin/pip install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
 #deactivate
 
 # =============temp step====================
