@@ -36,9 +36,9 @@ else
   mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
   cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
   test_env_transformers_v4/bin/pip install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
-  echo "Transformers version for test tools: $(test_env_transformers_v4/bin/pip show transformers | grep Version | cut -d: -f2)"
-  echo "Transformers version for sglang: $(pip show transformers | grep Version | cut -d: -f2)"
 fi
+echo "Transformers version for test tools: $(test_env_transformers_v4/bin/pip show transformers | grep Version | cut -d: -f2)"
+echo "Transformers version for sglang: $(pip show transformers | grep Version | cut -d: -f2)"
 echo "===== Install transformers in virtual env for test tools - End ====="
 
 # =============temp step====================
