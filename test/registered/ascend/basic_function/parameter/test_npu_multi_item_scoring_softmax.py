@@ -14,7 +14,6 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -22,26 +21,27 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# CI Registration
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
-# Test Constants
-_DELIMITER_TOKEN_ID = 151643  # Qwen3 vocab
-_LABEL_TOKEN_IDS = [9454, 2753]  # Yes/No tokens
+# Qwen3 <|endoftext|> token ID, used as multi-item scoring delimiter.
+_DELIMITER_TOKEN_ID = 151643
+# Token IDs for "Yes" (9454) and "No" (2753), used as label_token_ids.
+_LABEL_TOKEN_IDS = [9454, 2753]
+
 _QUERY = "Is this the correct result of 1 plus 2? "
 _ITEMS = ["It is 3", "It is 4", "It is 5"]
 
 
 def send_score_request(
-        base_url,
-        query,
-        items,
-        label_token_ids,
-        apply_softmax=False,
-        item_first=False,
-        timeout=180,
+    base_url,
+    query,
+    items,
+    label_token_ids,
+    apply_softmax=False,
+    item_first=False,
+    timeout=180,
 ):
-    """Send scoring request to the server."""
+    """Send a POST request to /v1/score and return the raw Response."""
     return requests.post(
         url=f"{base_url}/v1/score",
         json={
@@ -57,13 +57,16 @@ def send_score_request(
 
 
 class TestMultiItemScoringBasic(CustomTestCase):
-    """Test multi-item scoring with various parameters including softmax and item_first."""
+    """Test multi-item scoring: basic functionality, softmax normalization,
+    tokenized input, and item_first parameter.
+
+    [Test Category] Feature
+    [Test Target] --multi-item-scoring-delimiter; /v1/score
+    """
 
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
-
-        # Launch server with inline args (no separate _SERVER_ARGS list)
         cls.process = popen_launch_server(
             model=QWEN3_32B_WEIGHTS_PATH,
             base_url=cls.base_url,
@@ -79,18 +82,23 @@ class TestMultiItemScoringBasic(CustomTestCase):
                 "--multi-item-scoring-delimiter", str(_DELIMITER_TOKEN_ID),
             ],
         )
-        logger.info("Server started.")
-
-        # Initialize tokenizer for tokenized tests
         cls.tokenizer = get_tokenizer(QWEN3_32B_WEIGHTS_PATH)
+        logger.info("Server and tokenizer ready.")
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
         logger.info("Server terminated.")
 
-    def test_semantic_correctness_with_softmax(self):
-        """Verify that Yes/No probabilities reflect correctness of each item."""
+    def test_softmax_true_text_input(self):
+        """apply_softmax=True with text input: verify structure, normalization, and semantic ordering.
+
+        Checks:
+          - HTTP 200, 'scores' field present, shape == (len(items), len(label_token_ids)).
+          - Each sub-list sums to 1.0 (softmax guarantee).
+          - Correct item ("It is 3"): Yes-prob > No-prob.
+          - Wrong items ("It is 4", "It is 5"): Yes-prob < No-prob.
+        """
         response = send_score_request(
             base_url=self.base_url,
             query=_QUERY,
@@ -101,40 +109,34 @@ class TestMultiItemScoringBasic(CustomTestCase):
         self.assertEqual(response.status_code, 200)
         scores = response.json()["scores"]
 
-        # Structure checks
         self.assertEqual(len(scores), len(_ITEMS))
-        for i, score_list in enumerate(scores):
+        for idx, score_list in enumerate(scores):
             self.assertEqual(len(score_list), len(_LABEL_TOKEN_IDS))
             self.assertTrue(all(isinstance(v, float) for v in score_list))
+            self.assertAlmostEqual(
+                sum(score_list), 1.0, places=5,
+                msg=f"scores[{idx}] must sum to 1.0 with apply_softmax=True.",
+            )
 
-        # Semantic ordering
-        self.assertGreater(scores[0][0], scores[0][1], "Correct item: Yes > No")
-        self.assertLess(scores[1][0], scores[1][1], "Wrong item 1: Yes < No")
-        self.assertLess(scores[2][0], scores[2][1], "Wrong item 2: Yes < No")
-        logger.info("Semantic correctness verified.")
-
-    def test_softmax_true_text_input(self):
-        """apply_softmax=True => each item's scores sum to 1.0."""
-        response = send_score_request(
-            base_url=self.base_url,
-            query=_QUERY,
-            items=_ITEMS,
-            label_token_ids=_LABEL_TOKEN_IDS,
-            apply_softmax=True,
-        )
-        self.assertEqual(response.status_code, 200)
-        scores = response.json()["scores"]
-        for i, score_list in enumerate(scores):
-            self.assertAlmostEqual(sum(score_list), 1.0, places=5,
-                                   msg=f"Item {i} scores do not sum to 1.0")
-        logger.info("Softmax=True normalization verified.")
+        self.assertGreater(scores[0][0], scores[0][1],
+                           "Correct item 'It is 3': Yes-prob should exceed No-prob.")
+        self.assertLess(scores[1][0], scores[1][1],
+                        "Wrong item 'It is 4': Yes-prob should be less than No-prob.")
+        self.assertLess(scores[2][0], scores[2][1],
+                        "Wrong item 'It is 5': Yes-prob should be less than No-prob.")
+        logger.info("Softmax=True verified: normalization + semantic ordering correct.")
 
     def test_softmax_false_tokenized_input(self):
-        """apply_softmax=False with tokenized input => values in [0,1] and differs from softmax=True."""
-        query_tokens = self.tokenizer.encode(_QUERY, add_special_tokens=False)
-        items_tokens = [self.tokenizer.encode(item, add_special_tokens=False) for item in _ITEMS]
+        """apply_softmax=False with pre-tokenized input: values in [0, 1].
 
-        # Request with apply_softmax=False
+        Also cross-checks that softmax=True and softmax=False produce different values
+        for the same tokenized input, confirming the normalization path differs.
+        """
+        query_tokens = self.tokenizer.encode(_QUERY, add_special_tokens=False)
+        items_tokens = [
+            self.tokenizer.encode(item, add_special_tokens=False) for item in _ITEMS
+        ]
+
         response_false = send_score_request(
             base_url=self.base_url,
             query=query_tokens,
@@ -144,14 +146,16 @@ class TestMultiItemScoringBasic(CustomTestCase):
         )
         self.assertEqual(response_false.status_code, 200)
         scores_false = response_false.json()["scores"]
-        for i, score_list in enumerate(scores_false):
-            for j, val in enumerate(score_list):
-                self.assertIsInstance(val, float)
-                self.assertGreaterEqual(val, 0.0)
-                self.assertLessEqual(val, 1.0)
         logger.info("scores (apply_softmax=False): %s", scores_false)
 
-        # Request with apply_softmax=True (same tokenized input)
+        for idx, score_list in enumerate(scores_false):
+            for j, val in enumerate(score_list):
+                self.assertIsInstance(val, float)
+                self.assertGreaterEqual(val, 0.0,
+                                        f"scores_false[{idx}][{j}] must be >= 0.0.")
+                self.assertLessEqual(val, 1.0,
+                                     f"scores_false[{idx}][{j}] must be <= 1.0.")
+
         response_true = send_score_request(
             base_url=self.base_url,
             query=query_tokens,
@@ -163,16 +167,18 @@ class TestMultiItemScoringBasic(CustomTestCase):
         scores_true = response_true.json()["scores"]
         logger.info("scores (apply_softmax=True): %s", scores_true)
 
-        # The two modes must produce different numerical values
         self.assertNotEqual(
             scores_false, scores_true,
-            "apply_softmax=True and apply_softmax=False should produce different scores."
+            "apply_softmax=True and apply_softmax=False must produce different values.",
         )
         logger.info("Softmax=False vs Softmax=True distinction verified.")
 
-
     def test_item_first_flag(self):
-        """Verify that item_first=True does not cause server error."""
+        """item_first=True is accepted by the server without error.
+
+        Note: When --multi-item-scoring-delimiter is active, item_first is ignored
+        by the server. This test verifies the parameter is accepted without error.
+        """
         response = send_score_request(
             base_url=self.base_url,
             query=_QUERY,
@@ -182,7 +188,8 @@ class TestMultiItemScoringBasic(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("scores", response.json())
-        logger.info("item_first=True accepted by server.")
+        self.assertEqual(len(response.json()["scores"]), len(_ITEMS))
+        logger.info("item_first=True accepted by server without error.")
 
 
 if __name__ == "__main__":
