@@ -19,11 +19,11 @@ on:
         required: false
         type: string
         description: image for pods
-        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:v0.5.6-ascend-a3"
+        default: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3"
       install_sglang_from_source:
         required: false
         type: boolean
-        default: true
+        default: false
         description: use sglang from source code or from docker image
 
 concurrency:
@@ -66,19 +66,12 @@ jobs:
           export METRICS_DATA_FILE=${test_data_output_path}/${tc_name}.txt
           echo "Metrics file: ${METRICS_DATA_FILE}"
 
-          # speed up by using infra cache services
-          CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
-          sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
-          pip config set global.index-url http://${CACHING_URL}/pypi/simple
-          pip config set global.extra-index-url "https://pypi.tuna.tsinghua.edu.cn/simple"
-          pip config set global.trusted-host "${CACHING_URL} pypi.tuna.tsinghua.edu.cn"
-
           # copy required file from our daily cache
           cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
           # copy download through proxy
           curl -o /tmp/test.jsonl -L https://gh-proxy.test.osinfra.cn/https://raw.githubusercontent.com/openai/grade-school-math/master/grade_school_math/data/test.jsonl
 
-          pip3 install kubernetes
+          pip3 install kubernetes -i https://pypi.tuna.tsinghua.edu.cn/simple
 
           echo "scaling_governor performance num: \
             $(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | grep performance | wc -l)"
@@ -95,8 +88,6 @@ jobs:
             commit_id=${{ github.sha }}
             echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
             export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
-            bash scripts/ci/npu/npu_ci_install_dependency.sh a3
-            bash scripts/ci/npu/npu_log_print.sh
           else
             echo "Use sglang from image: ${{ inputs.image }}"
             sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
