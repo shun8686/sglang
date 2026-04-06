@@ -168,10 +168,10 @@ class TestMultiItemScoringBasic(CustomTestCase):
             for j, val in enumerate(score_list):
                 self.assertIsInstance(val, float)
                 self.assertGreaterEqual(
-                    val, 0.0,f"scores_false[{idx}][{j}] must be >= 0.0."
+                    val, 0.0, f"scores_false[{idx}][{j}] must be >= 0.0."
                 )
                 self.assertLessEqual(
-                    val, 1.0,f"scores_false[{idx}][{j}] must be <= 1.0."
+                    val, 1.0, f"scores_false[{idx}][{j}] must be <= 1.0."
                 )
 
         response_true = send_score_request(
