@@ -21,7 +21,6 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=300, suite="nightly-2-npu-a3", nightly=True)
 
 
-
 class TestAscendGrpcModePDMixed(CustomTestCase):
     """
     Testcase：Verify that gRPC requests are correctly received and process when gRPC mode is enabled.
