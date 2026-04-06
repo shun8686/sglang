@@ -93,7 +93,7 @@ OTHER_ARGS = [
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
     # model = QWEN3_5_27B_W8A8_MODEL_PATH
-    model = "/home/weights/Qwen3.5-27B-W8A8"
+    model = "/home/weights/Eco-Tech/Qwen3.5-27B-W8A8"
     # model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Eco-Tech/Qwen3.5-27B-w8a8-mtp"
     other_args = OTHER_ARGS
     envs = ENVS
