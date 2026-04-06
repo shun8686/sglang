@@ -63,7 +63,8 @@ class BaseQwenTest(CustomTestCase):
 
     def _run_gsm8k_test(self, scenario):
         args = SimpleNamespace(
-            host="http://127.0.0.1",
+            data_path=None,
+            host="127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval(args)   # uses default parameters from few_shot_gsm8k
