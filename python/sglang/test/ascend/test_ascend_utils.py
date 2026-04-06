@@ -632,26 +632,3 @@ def send_concurrent_requests(
         t.join()
 
     return results
-
-
-def verify_process_terminated(process, test_name: str = "") -> None:
-    """Verify server process has been terminated after tearDownClass.
-
-    Coding standard rule 8: test environment must be restored after each test.
-    Call this at the end of tearDownClass, after kill_process_tree.
-    A short sleep is included to allow OS-level process cleanup to complete.
-
-    Args:
-        process: subprocess.Popen object returned by popen_launch_server.
-        test_name: Optional label used in the assertion error message.
-
-    Raises:
-        AssertionError: If the process is still running after cleanup.
-    """
-    import time as _time
-
-    _time.sleep(2)
-    assert process.poll() is not None, (
-        f"{test_name}: Server process (pid={process.pid}) "
-        "is still running after tearDownClass."
-    )

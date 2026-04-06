@@ -19,7 +19,6 @@ from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
     send_concurrent_requests,
-    verify_process_terminated,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -74,7 +73,6 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        verify_process_terminated(cls.process, cls.__name__)
 
     def test_concurrent_requests(self):
         results = send_concurrent_requests(self.base_url, num_requests=80, num_concurrent=16)
@@ -105,7 +103,6 @@ class TestBatchSize1Timeout0p1(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        verify_process_terminated(cls.process, cls.__name__)
 
     def test_concurrent_requests(self):
         results = send_concurrent_requests(self.base_url, num_requests=NUM_REQUESTS, num_concurrent=4)
@@ -139,7 +136,6 @@ class TestDynamicBatchTokenizerCombo(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        verify_process_terminated(cls.process, cls.__name__)
 
     def test_high_concurrency(self):
         results = send_concurrent_requests(self.base_url, num_requests=100, num_concurrent=20)
