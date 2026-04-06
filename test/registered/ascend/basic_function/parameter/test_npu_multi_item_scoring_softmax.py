@@ -73,13 +73,18 @@ class TestMultiItemScoringBasic(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--trust-remote-code",
-                "--mem-fraction-static", "0.8",
-                "--attention-backend", "ascend",
+                "--mem-fraction-static",
+                "0.8",
+                "--attention-backend",
+                "ascend",
                 "--disable-cuda-graph",
-                "--tp-size", "4",
+                "--tp-size",
+                "4",
                 "--disable-radix-cache",
-                "--chunked-prefill-size", "-1",
-                "--multi-item-scoring-delimiter", str(_DELIMITER_TOKEN_ID),
+                "--chunked-prefill-size",
+                "-1",
+                "--multi-item-scoring-delimiter",
+                str(_DELIMITER_TOKEN_ID),
             ],
         )
         cls.tokenizer = get_tokenizer(QWEN3_32B_WEIGHTS_PATH)
@@ -114,16 +119,27 @@ class TestMultiItemScoringBasic(CustomTestCase):
             self.assertEqual(len(score_list), len(_LABEL_TOKEN_IDS))
             self.assertTrue(all(isinstance(v, float) for v in score_list))
             self.assertAlmostEqual(
-                sum(score_list), 1.0, places=5,
+                sum(score_list),
+                1.0,
+                places=5,
                 msg=f"scores[{idx}] must sum to 1.0 with apply_softmax=True.",
             )
 
-        self.assertGreater(scores[0][0], scores[0][1],
-                           "Correct item 'It is 3': Yes-prob should exceed No-prob.")
-        self.assertLess(scores[1][0], scores[1][1],
-                        "Wrong item 'It is 4': Yes-prob should be less than No-prob.")
-        self.assertLess(scores[2][0], scores[2][1],
-                        "Wrong item 'It is 5': Yes-prob should be less than No-prob.")
+        self.assertGreater(
+            scores[0][0],
+            scores[0][1],
+            "Correct item 'It is 3': Yes-prob should exceed No-prob.",
+        )
+        self.assertLess(
+            scores[1][0],
+            scores[1][1],
+            "Wrong item 'It is 4': Yes-prob should be less than No-prob.",
+        )
+        self.assertLess(
+            scores[2][0],
+            scores[2][1],
+            "Wrong item 'It is 5': Yes-prob should be less than No-prob.",
+        )
         logger.info("Softmax=True verified: normalization + semantic ordering correct.")
 
     def test_softmax_false_tokenized_input(self):
@@ -151,10 +167,12 @@ class TestMultiItemScoringBasic(CustomTestCase):
         for idx, score_list in enumerate(scores_false):
             for j, val in enumerate(score_list):
                 self.assertIsInstance(val, float)
-                self.assertGreaterEqual(val, 0.0,
-                                        f"scores_false[{idx}][{j}] must be >= 0.0.")
-                self.assertLessEqual(val, 1.0,
-                                     f"scores_false[{idx}][{j}] must be <= 1.0.")
+                self.assertGreaterEqual(
+                    val, 0.0,f"scores_false[{idx}][{j}] must be >= 0.0."
+                )
+                self.assertLessEqual(
+                    val, 1.0,f"scores_false[{idx}][{j}] must be <= 1.0."
+                )
 
         response_true = send_score_request(
             base_url=self.base_url,
@@ -168,7 +186,8 @@ class TestMultiItemScoringBasic(CustomTestCase):
         logger.info("scores (apply_softmax=True): %s", scores_true)
 
         self.assertNotEqual(
-            scores_false, scores_true,
+            scores_false,
+            scores_true,
             "apply_softmax=True and apply_softmax=False must produce different values.",
         )
         logger.info("Softmax=False vs Softmax=True distinction verified.")
