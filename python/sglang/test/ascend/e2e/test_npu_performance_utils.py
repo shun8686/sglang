@@ -1,7 +1,6 @@
 import logging
 import os
 import subprocess
-import sys
 import threading
 import time
 from functools import wraps
@@ -28,6 +27,11 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
+
+PYTHON_FOR_TEST_TOOL = "test_env_transformers_v4/bin/python"
+if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(PYTHON_FOR_TEST_TOOL, os.X_OK):
+    PYTHON_FOR_TEST_TOOL = "python3"
+logger.info(f"PYTHON_FOR_TEST_TOOL: {PYTHON_FOR_TEST_TOOL}")
 
 DEEPSEEK_R1_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
@@ -234,62 +238,6 @@ def write_pkg_info_to_file(result_file):
         logger.error(f"Error getting packages: {e}")
 
 
-def run_in_virtualenv(venv_path: str):
-    """
-    Decorator to execute a function in an isolated Python virtual environment.
-    Automatically captures return values, prints and exceptions across processes.
-
-    Args:
-        venv_path: Path to the target virtual environment directory
-    """
-
-    def decorator(func):
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            # Serialize function code to run in the child process
-            import inspect
-            import textwrap
-            func_code = inspect.getsource(func)
-            # Remove decorator lines to avoid recursion in child process
-            func_code_lines = func_code.splitlines()
-            clean_code = []
-            for line in func_code_lines:
-                if not line.strip().startswith("@run_in_virtualenv"):
-                    clean_code.append(line)
-            func_code = "\n".join(clean_code)
-
-            # Extract function name and build execution code
-            func_name = func.__name__
-            run_code = textwrap.dedent(f"""
-            {func_code}
-            # Execute the target function
-            {func_name}()
-            """)
-
-            # Run in isolated child process
-            result = subprocess.run(
-                [f"{venv_path}/bin/python", "-c", run_code],
-                capture_output=True,
-                text=True,
-                encoding="utf-8"
-            )
-
-            if result.stdout:
-                logger.info(result.stdout)
-
-            # Handle errors
-            if result.returncode != 0:
-                logger.error(f"Error in virtualenv: {venv_path}")
-                raise RuntimeError(f"Function {func_name} failed in isolated env")
-
-            return result.returncode
-
-        return wrapper
-
-    return decorator
-
-
-# @run_in_virtualenv("test_env_transformers_v4")
 def run_bench_serving(
     host,
     port,
@@ -316,7 +264,7 @@ def run_bench_serving(
     write_pkg_info_to_file(result_file)
 
     cmd_args = [
-        "python3",
+        PYTHON_FOR_TEST_TOOL,
         "-m",
         "sglang.bench_serving",
         "--host",
@@ -490,41 +438,6 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             except Exception as e:
                 logger.error(f"Error during tearDown: {e}")
 
-    # def _assert_metrics(self, metrics):
-    #     """Assert benchmark metrics against expected values.
-    #
-    #     Args:
-    #         metrics (dict): Benchmark metrics dictionary.
-    #     """
-    #     if not metrics:
-    #         self.fail("No metrics obtained from benchmark")
-    #
-    #     if self.tpot:
-    #         if self.tpot < TPOT_THRESHOLD:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot + TPOT_TOLERANCE_LOW,
-    #             )
-    #         else:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot * TPOT_TOLERANCE_HIGH,
-    #             )
-    #     if self.output_token_throughput:
-    #         self.assertGreaterEqual(
-    #             float(metrics["total_tps"]),
-    #             self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    #         )
-    #     if self.ttft:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_ttft"]),
-    #             self.ttft * TTFT_TOLERANCE,
-    #         )
-    #     if self.mean_e2e_latency:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_e2e_latency"]),
-    #             self.mean_e2e_latency * E2E_TOLERANCE,
-    #         )
 
     @retry()
     def run_throughput(self):
@@ -592,41 +505,6 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     def tearDownClass(cls):
         pass
 
-    # def _assert_metrics(self, metrics):
-    #     """Assert benchmark metrics against expected values.
-    #
-    #     Args:
-    #         metrics (dict): Benchmark metrics dictionary.
-    #     """
-    #     if not metrics:
-    #         self.fail("No metrics obtained from benchmark")
-    #
-    #     if self.tpot:
-    #         if self.tpot < TPOT_THRESHOLD:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot + TPOT_TOLERANCE_LOW,
-    #             )
-    #         else:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot * TPOT_TOLERANCE_HIGH,
-    #             )
-    #     if self.output_token_throughput:
-    #         self.assertGreaterEqual(
-    #             float(metrics["total_tps"]),
-    #             self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    #         )
-    #     if self.ttft:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_ttft"]),
-    #             self.ttft * TTFT_TOLERANCE,
-    #         )
-    #     if self.mean_e2e_latency:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_e2e_latency"]),
-    #             self.mean_e2e_latency * E2E_TOLERANCE,
-    #         )
 
     @classmethod
     @check_role(allowed_roles=["master"])
@@ -729,41 +607,6 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             except Exception as e:
                 logger.error(f"Error during tearDown: {e}")
 
-    # def _assert_metrics(self, metrics):
-    #     """Assert benchmark metrics against expected values.
-    #
-    #     Args:
-    #         metrics (dict): Benchmark metrics dictionary.
-    #     """
-    #     if not metrics:
-    #         self.fail("No metrics obtained from benchmark")
-    #
-    #     if self.tpot:
-    #         if self.tpot < TPOT_THRESHOLD:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot + TPOT_TOLERANCE_LOW,
-    #             )
-    #         else:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot * TPOT_TOLERANCE_HIGH,
-    #             )
-    #     if self.output_token_throughput:
-    #         self.assertGreaterEqual(
-    #             float(metrics["total_tps"]),
-    #             self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    #         )
-    #     if self.ttft:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_ttft"]),
-    #             self.ttft * TTFT_TOLERANCE,
-    #         )
-    #     if self.mean_e2e_latency:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_e2e_latency"]),
-    #             self.mean_e2e_latency * E2E_TOLERANCE,
-    #         )
 
     @classmethod
     @check_role(allowed_roles=["router"])

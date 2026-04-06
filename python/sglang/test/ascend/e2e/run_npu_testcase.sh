@@ -13,9 +13,8 @@ npu-smi info
 cp -r /root/.cache/.cache/kubernetes /tmp/
 pip install --no-index --find-links=/tmp/kubernetes/ kubernetes
 
-echo "=====Install transformers in virtual env for test tools - Begin====="
+echo "===== Install transformers in virtual env for test tools - Begin ====="
 python -m venv test_env_transformers_v4 --system-site-packages
-#source test_env_transformers_v4/bin/activate
 TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
 TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
 if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
@@ -26,12 +25,9 @@ TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_TEST_T
 mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
 cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
 test_env_transformers_v4/bin/pip install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
-#deactivate
-echo "==Transformers version for test tools: "
-test_env_transformers_v4/bin/pip show transformers
-echo "==Transformers version for sglang: "
-pip show transformers
-echo "=====Install transformers in virtual env for test tools - End====="
+echo "Transformers version for test tools: $(test_env_transformers_v4/bin/pip show transformers | grep Version)"
+echo "Transformers version for sglang: $(pip show transformers | grep Version)"
+echo "===== Install transformers in virtual env for test tools - End ====="
 
 # =============temp step====================
 bash /root/sglang/python/sglang/test/ascend/e2e/temp.sh
