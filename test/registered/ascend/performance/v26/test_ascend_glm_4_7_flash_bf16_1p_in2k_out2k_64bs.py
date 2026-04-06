@@ -28,7 +28,7 @@ GLM_4_7_FLASH_OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    "tp-size",
+    "--tp-size",
     2,
     "--watchdog-timeout",
     9000,
@@ -47,8 +47,8 @@ GLM_4_7_FLASH_OTHER_ARGS = [
 
 class TestGlm47Flash(TestAscendPerformanceTestCaseBase):
     model = GLM_4_7_FLASH_MODEL_PATH
-    other_args = GLM_4_7_FLASH_ENVS
-    envs = GLM_4_7_FLASH_OTHER_ARGS
+    other_args = GLM_4_7_FLASH_OTHER_ARGS
+    envs = GLM_4_7_FLASH_ENVS
     dataset_name = "random"
     max_concurrency = 64
     num_prompts = 64
