@@ -13,11 +13,11 @@ npu-smi info
 cp -r /root/.cache/.cache/kubernetes /tmp/
 pip3 install --no-index --find-links=/tmp/kubernetes/ kubernetes
 
-python -m venv test_env_transformers_v4
-source test_env_transformers_v4/bin/activate
-cp -r /root/.cache/.cache/transformers /tmp/
-pip3 install --no-index --find-links=/tmp/transformers/4.57.6 transformers==4.57.6
-deactivate
+python -m venv test_env_transformers_v4 --system-site-packages
+#source test_env_transformers_v4/bin/activate
+#cp -r /root/.cache/.cache/transformers /tmp/
+test_env_transformers_v4/bin/pip install --no-index --find-links=/tmp/transformers/4.57.6 transformers==4.57.6
+#deactivate
 
 # =============temp step====================
 bash /root/sglang/python/sglang/test/ascend/e2e/temp.sh
