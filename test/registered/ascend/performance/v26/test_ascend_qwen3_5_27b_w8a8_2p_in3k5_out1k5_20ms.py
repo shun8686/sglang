@@ -30,7 +30,7 @@ ENVS = {
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 
-    "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
+    # "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
 
 OTHER_ARGS = [
@@ -104,7 +104,7 @@ class TestQwen3527B(TestAscendPerformanceTestCaseBase):
     output_len = 1500
     random_range_ratio = 1
     tpot = 21
-    output_token_throughput = 90
+    output_token_throughput = 900
 
 
     def test_qwen3_5_27b(self):
