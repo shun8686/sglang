@@ -92,17 +92,20 @@ OTHER_ARGS = [
 
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_5_27B_W8A8_MODEL_PATH
+    # model = QWEN3_5_27B_W8A8_MODEL_PATH
+    model = "/home/weights/Eco-Tech/Qwen3.5-27B-W8A8"
     # model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/Eco-Tech/Qwen3.5-27B-w8a8-mtp"
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 10
+    max_concurrency = 16
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
+    tpot = 21
+    output_token_throughput = 90
+
 
     def test_qwen3_5_27b(self):
         self.run_throughput()
