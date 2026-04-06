@@ -289,7 +289,7 @@ def run_in_virtualenv(venv_path: str):
     return decorator
 
 
-@run_in_virtualenv("test_env_transformers_v4")
+# @run_in_virtualenv("test_env_transformers_v4")
 def run_bench_serving(
     host,
     port,
