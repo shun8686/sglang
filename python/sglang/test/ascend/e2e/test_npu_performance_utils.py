@@ -274,14 +274,12 @@ def run_in_virtualenv(venv_path: str):
                 encoding="utf-8"
             )
 
-            # Print output from child process
             if result.stdout:
-                print(result.stdout, end="")
+                logger.info(result.stdout)
 
             # Handle errors
             if result.returncode != 0:
-                logger.error(f"Error in virtualenv: {venv_path}", file=sys.stderr)
-                print(result.stderr, file=sys.stderr)
+                logger.error(f"Error in virtualenv: {venv_path}")
                 raise RuntimeError(f"Function {func_name} failed in isolated env")
 
             return result.returncode
