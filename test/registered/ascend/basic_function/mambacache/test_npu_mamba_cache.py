@@ -26,13 +26,12 @@ class TestMambaCacheBase(CustomTestCase):
         - other_args: list of server arguments
     """
 
-    model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST.model_path
     other_args = []
 
     @classmethod
     def setUpClass(cls):
         cls.process = popen_launch_server(
-            cls.model,
+            QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST.model_path,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.other_args,
@@ -42,6 +41,7 @@ class TestMambaCacheBase(CustomTestCase):
     def tearDownClass(cls):
         if cls.process:
             kill_process_tree(cls.process.pid)
+
 
 '''
 class TestMambaCacheBasic(GSM8KAscendMixin, TestMambaCacheBase):
@@ -72,7 +72,6 @@ class TestMambaCacheBasic(GSM8KAscendMixin, TestMambaCacheBase):
         "--disable-radix-cache",
     ]
 '''
-
 
 
 class TestMambaCacheParameters(TestMambaCacheBase):
