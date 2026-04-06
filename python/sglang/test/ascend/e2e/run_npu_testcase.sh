@@ -14,7 +14,7 @@ cp -r /root/.cache/.cache/kubernetes /tmp/
 pip3 install --no-index --find-links=/tmp/kubernetes/ kubernetes
 
 python -m venv test_env_transformers_v4
-test_env_transformers_v4\Scripts\activate
+source test_env_transformers_v4/bin/activate
 cp -r /root/.cache/.cache/transformers /tmp/
 pip3 install --no-index --find-links=/tmp/transformers/4.57.6 transformers==4.57.6
 deactivate
