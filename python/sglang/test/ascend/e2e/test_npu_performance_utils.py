@@ -1,6 +1,7 @@
 import logging
 import os
 import subprocess
+import sys
 import threading
 import time
 from functools import wraps
@@ -233,24 +234,71 @@ def write_pkg_info_to_file(result_file):
         logger.error(f"Error getting packages: {e}")
 
 
-def run_in_virtualenv(venv_path, code):
+def run_in_virtualenv(venv_path: str):
     """
-    Core safe method:
-    Start a new independent Python process in the specified virtual environment and execute code
-    Fully isolated, no impact on main program or cross-contamination
-    """
-    python_path = f"{venv_path}/bin/python"
-    result = subprocess.run(
-        [python_path, "-c", code],
-        capture_output=True,
-        text=True,
-        encoding="utf-8"
-    )
-    if result.returncode != 0:
-        logger.error(result.stderr)
-        raise AssertionError(f"Test step failed in environment: {venv_path}")
-    return result.stdout
+    Decorator to execute a function in an isolated Python virtual environment.
+    Automatically captures return values, prints and exceptions across processes.
 
+    Args:
+        venv_path: Path to the target virtual environment directory
+    """
+
+    def decorator(func):
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            # Get Python interpreter path for the virtualenv
+            python_exe = (
+                f"{venv_path}/Scripts/python.exe"
+                if sys.platform == "win32"
+                else f"{venv_path}/bin/python"
+            )
+
+            # Serialize function code to run in the child process
+            import inspect
+            import textwrap
+            func_code = inspect.getsource(func)
+            # Remove decorator lines to avoid recursion in child process
+            func_code_lines = func_code.splitlines()
+            clean_code = []
+            for line in func_code_lines:
+                if not line.strip().startswith("@run_in_virtualenv"):
+                    clean_code.append(line)
+            func_code = "\n".join(clean_code)
+
+            # Extract function name and build execution code
+            func_name = func.__name__
+            run_code = textwrap.dedent(f"""
+            {func_code}
+            # Execute the target function
+            {func_name}()
+            """)
+
+            # Run in isolated child process
+            result = subprocess.run(
+                [python_exe, "-c", run_code],
+                capture_output=True,
+                text=True,
+                encoding="utf-8"
+            )
+
+            # Print output from child process
+            if result.stdout:
+                print(result.stdout, end="")
+
+            # Handle errors
+            if result.returncode != 0:
+                logger.error(f"Error in virtualenv: {venv_path}", file=sys.stderr)
+                print(result.stderr, file=sys.stderr)
+                raise RuntimeError(f"Function {func_name} failed in isolated env")
+
+            return result.returncode
+
+        return wrapper
+
+    return decorator
+
+
+@run_in_virtualenv("test_env_transformer_v4")
 def run_bench_serving(
     host,
     port,

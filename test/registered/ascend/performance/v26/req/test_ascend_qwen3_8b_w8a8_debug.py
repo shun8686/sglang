@@ -5,7 +5,7 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_8B_EAGLE_MODEL_PATH,
     QWEN3_8B_W8A8_MODEL_PATH,
-    TestAscendPerformanceTestCaseBase,
+    TestAscendPerformanceTestCaseBase, run_in_virtualenv,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -83,7 +83,7 @@ class TestQwen8B(TestAscendPerformanceTestCaseBase):
 
     def test_qwen3_8b(self):
         self.run_throughput()
-        time.sleep(3600)
+        # time.sleep(3600)
         # evalscope_utils.run_evalscope_accuracy_test(
         #     model=self.model,
         #     api_url=self.base_url,
