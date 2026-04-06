@@ -92,7 +92,8 @@ OTHER_ARGS = [
 
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_5_27B_W8A8_MODEL_PATH
+    # model = QWEN3_5_27B_W8A8_MODEL_PATH
+    model = "/home/weights/Qwen3.5-27B-W8A8"
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"

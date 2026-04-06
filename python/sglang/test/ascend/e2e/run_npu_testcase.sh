@@ -10,11 +10,39 @@ fi
 echo "NPU info:"
 npu-smi info
 
-cp -r /root/.cache/.cache/kubernetes /tmp/
-pip3 install --no-index --find-links=/tmp/kubernetes/ kubernetes
+echo "===== Install kubernetes - Begin ====="
+KUBERNETES_PKG_PATH_SOURCE=/root/.cache/.cache/kubernetes
+if [ ! -d "${KUBERNETES_PKG_PATH_SOURCE}" ]; then
+  echo "Install kubernetes online."
+  pip install kubernetes -i -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+else
+  echo "Install kubernetes locally."
+  cp -r ${KUBERNETES_PKG_PATH_SOURCE} /tmp/
+  pip install --no-index --find-links=/tmp/kubernetes/ kubernetes
+fi
+echo "===== Install kubernetes - End ====="
+
+echo "===== Install transformers in virtual env for test tools - Begin ====="
+python -m venv test_env_transformers_v4 --system-site-packages
+TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
+TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
+  echo "The dependent transformers package does not exist: ${TRANSFORMERS_PKG_PATH_SOURCE}."
+  echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} online."
+  test_env_transformers_v4/bin/pip install transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+else
+  echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} locally."
+  TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+  mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
+  cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
+  test_env_transformers_v4/bin/pip install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+  echo "Transformers version for test tools: $(test_env_transformers_v4/bin/pip show transformers | grep Version | cut -d: -f2)"
+  echo "Transformers version for sglang: $(pip show transformers | grep Version | cut -d: -f2)"
+fi
+echo "===== Install transformers in virtual env for test tools - End ====="
 
 # =============temp step====================
-bash /root/sglang/python/sglang/test/ascend/e2e/temp.sh
+#bash /root/sglang/python/sglang/test/ascend/e2e/temp.sh
 
 # copy or download required file
 cp /root/.cache/huggingface/hub/datasets--anon8231489123--ShareGPT_Vicuna_unfiltered/snapshots/192ab2185289094fc556ec8ce5ce1e8e587154ca/ShareGPT_V3_unfiltered_cleaned_split.json /tmp

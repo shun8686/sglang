@@ -28,6 +28,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+PYTHON_FOR_TEST_TOOL = "test_env_transformers_v4/bin/python"
+if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(PYTHON_FOR_TEST_TOOL, os.X_OK):
+    PYTHON_FOR_TEST_TOOL = "python3"
+logger.info(f"PYTHON_FOR_TEST_TOOL: {PYTHON_FOR_TEST_TOOL}")
+
 DEEPSEEK_R1_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Howeee/DeepSeek-R1-0528-w8a8"
 )
@@ -233,24 +238,6 @@ def write_pkg_info_to_file(result_file):
         logger.error(f"Error getting packages: {e}")
 
 
-def run_in_virtualenv(venv_path, code):
-    """
-    Core safe method:
-    Start a new independent Python process in the specified virtual environment and execute code
-    Fully isolated, no impact on main program or cross-contamination
-    """
-    python_path = f"{venv_path}/bin/python"
-    result = subprocess.run(
-        [python_path, "-c", code],
-        capture_output=True,
-        text=True,
-        encoding="utf-8"
-    )
-    if result.returncode != 0:
-        logger.error(result.stderr)
-        raise AssertionError(f"Test step failed in environment: {venv_path}")
-    return result.stdout
-
 def run_bench_serving(
     host,
     port,
@@ -277,7 +264,7 @@ def run_bench_serving(
     write_pkg_info_to_file(result_file)
 
     cmd_args = [
-        "python3",
+        PYTHON_FOR_TEST_TOOL,
         "-m",
         "sglang.bench_serving",
         "--host",
@@ -451,41 +438,6 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
             except Exception as e:
                 logger.error(f"Error during tearDown: {e}")
 
-    # def _assert_metrics(self, metrics):
-    #     """Assert benchmark metrics against expected values.
-    #
-    #     Args:
-    #         metrics (dict): Benchmark metrics dictionary.
-    #     """
-    #     if not metrics:
-    #         self.fail("No metrics obtained from benchmark")
-    #
-    #     if self.tpot:
-    #         if self.tpot < TPOT_THRESHOLD:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot + TPOT_TOLERANCE_LOW,
-    #             )
-    #         else:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot * TPOT_TOLERANCE_HIGH,
-    #             )
-    #     if self.output_token_throughput:
-    #         self.assertGreaterEqual(
-    #             float(metrics["total_tps"]),
-    #             self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    #         )
-    #     if self.ttft:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_ttft"]),
-    #             self.ttft * TTFT_TOLERANCE,
-    #         )
-    #     if self.mean_e2e_latency:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_e2e_latency"]),
-    #             self.mean_e2e_latency * E2E_TOLERANCE,
-    #         )
 
     @retry()
     def run_throughput(self):
@@ -553,41 +505,6 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     def tearDownClass(cls):
         pass
 
-    # def _assert_metrics(self, metrics):
-    #     """Assert benchmark metrics against expected values.
-    #
-    #     Args:
-    #         metrics (dict): Benchmark metrics dictionary.
-    #     """
-    #     if not metrics:
-    #         self.fail("No metrics obtained from benchmark")
-    #
-    #     if self.tpot:
-    #         if self.tpot < TPOT_THRESHOLD:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot + TPOT_TOLERANCE_LOW,
-    #             )
-    #         else:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot * TPOT_TOLERANCE_HIGH,
-    #             )
-    #     if self.output_token_throughput:
-    #         self.assertGreaterEqual(
-    #             float(metrics["total_tps"]),
-    #             self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    #         )
-    #     if self.ttft:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_ttft"]),
-    #             self.ttft * TTFT_TOLERANCE,
-    #         )
-    #     if self.mean_e2e_latency:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_e2e_latency"]),
-    #             self.mean_e2e_latency * E2E_TOLERANCE,
-    #         )
 
     @classmethod
     @check_role(allowed_roles=["master"])
@@ -690,41 +607,6 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             except Exception as e:
                 logger.error(f"Error during tearDown: {e}")
 
-    # def _assert_metrics(self, metrics):
-    #     """Assert benchmark metrics against expected values.
-    #
-    #     Args:
-    #         metrics (dict): Benchmark metrics dictionary.
-    #     """
-    #     if not metrics:
-    #         self.fail("No metrics obtained from benchmark")
-    #
-    #     if self.tpot:
-    #         if self.tpot < TPOT_THRESHOLD:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot + TPOT_TOLERANCE_LOW,
-    #             )
-    #         else:
-    #             self.assertLessEqual(
-    #                 float(metrics["mean_tpot"]),
-    #                 self.tpot * TPOT_TOLERANCE_HIGH,
-    #             )
-    #     if self.output_token_throughput:
-    #         self.assertGreaterEqual(
-    #             float(metrics["total_tps"]),
-    #             self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
-    #         )
-    #     if self.ttft:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_ttft"]),
-    #             self.ttft * TTFT_TOLERANCE,
-    #         )
-    #     if self.mean_e2e_latency:
-    #         self.assertLessEqual(
-    #             float(metrics["mean_e2e_latency"]),
-    #             self.mean_e2e_latency * E2E_TOLERANCE,
-    #         )
 
     @classmethod
     @check_role(allowed_roles=["router"])
