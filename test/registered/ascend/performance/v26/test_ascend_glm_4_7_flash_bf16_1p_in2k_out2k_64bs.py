@@ -49,6 +49,7 @@ class TestGlm47Flash(TestAscendPerformanceTestCaseBase):
     model = GLM_4_7_FLASH_MODEL_PATH
     other_args = GLM_4_7_FLASH_OTHER_ARGS
     envs = GLM_4_7_FLASH_ENVS
+    max_attempts = 5
     dataset_name = "random"
     max_concurrency = 64
     num_prompts = 64
