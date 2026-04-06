@@ -90,8 +90,6 @@ class TestMambaCacheParameters(TestMambaCacheBase):
         "--disable-cuda-graph",
         "--mamba-ssm-dtype",
         "float16",
-        "--mamba-full-memory-ratio",
-        "0.3",
         "--mamba-scheduler-strategy",
         "no_buffer",
         "--mamba-track-interval",
