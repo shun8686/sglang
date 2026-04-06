@@ -28,7 +28,7 @@ GLM_4_7_FLASH_OTHER_ARGS = [
     "ascend",
     "--device",
     "npu",
-    "tp-size",
+    "--tp-size",
     2,
     "--watchdog-timeout",
     9000,
