@@ -11,8 +11,9 @@ echo "NPU info:"
 npu-smi info
 
 cp -r /root/.cache/.cache/kubernetes /tmp/
-pip3 install --no-index --find-links=/tmp/kubernetes/ kubernetes
+pip install --no-index --find-links=/tmp/kubernetes/ kubernetes
 
+echo "=====Install transformers in virtual env for test tools====="
 python -m venv test_env_transformers_v4 --system-site-packages
 #source test_env_transformers_v4/bin/activate
 TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
@@ -26,6 +27,7 @@ mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
 cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
 test_env_transformers_v4/bin/pip install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
 #deactivate
+pip show transformers
 
 # =============temp step====================
 bash /root/sglang/python/sglang/test/ascend/e2e/temp.sh
