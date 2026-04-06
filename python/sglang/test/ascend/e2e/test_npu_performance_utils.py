@@ -244,7 +244,7 @@ def run_in_virtualenv(venv_path: str):
     """
 
     def decorator(func):
-        @functools.wraps(func)
+        @wraps(func)
         def wrapper(*args, **kwargs):
             # Get Python interpreter path for the virtualenv
             python_exe = (
