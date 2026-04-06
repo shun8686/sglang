@@ -8,13 +8,13 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-8-npu-a3",
+    suite="nightly-4-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
 
 ENVS = {
-    "ASCEND_LAUNCH_BLOCKING": "0",
+    "ASCEND_LAUNCH_BLOCKING": "1",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
     "HCCL_BUFFSIZE": "3000",
@@ -29,8 +29,6 @@ ENVS = {
     "SGLANG_DISAGGREGATION_WAITING_TIMEOUT": "3600",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-
-    "SGLANG_ALLOW_OVERWRITE_LONGER_CONTEXT_LEN": "1",
 }
 
 OTHER_ARGS = [
@@ -44,7 +42,7 @@ OTHER_ARGS = [
     "--device",
     "npu",
     "--tp-size",
-    8,
+    4,
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
@@ -88,16 +86,18 @@ OTHER_ARGS = [
     1,
     "--speculative-num-draft-tokens",
     4,
+    "--base-gpu-id",
+    2,
 ]
 
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
-    # model = QWEN3_5_27B_W8A8_MODEL_PATH
-    model = "/home/weights/Qwen3.5-27B-W8A8"
+    model = QWEN3_5_27B_W8A8_MODEL_PATH
+    # model = "/home/weights/Qwen3.5-27B-W8A8"
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 128
+    max_concurrency = 82
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
