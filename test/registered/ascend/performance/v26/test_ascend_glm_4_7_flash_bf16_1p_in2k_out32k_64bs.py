@@ -33,7 +33,7 @@ GLM_4_7_FLASH_OTHER_ARGS = [
     "--watchdog-timeout",
     9000,
     "--mem-fraction-static",
-    0.8,
+    0.85,
     "--dtype",
     "bfloat16",
     "--chunked-prefill-size",
