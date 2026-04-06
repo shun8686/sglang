@@ -5,7 +5,7 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_8B_EAGLE_MODEL_PATH,
     QWEN3_8B_W8A8_MODEL_PATH,
-    TestAscendPerformanceTestCaseBase, run_in_virtualenv,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 

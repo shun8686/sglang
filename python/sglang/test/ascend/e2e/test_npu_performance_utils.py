@@ -246,13 +246,6 @@ def run_in_virtualenv(venv_path: str):
     def decorator(func):
         @wraps(func)
         def wrapper(*args, **kwargs):
-            # Get Python interpreter path for the virtualenv
-            python_exe = (
-                f"{venv_path}/Scripts/python.exe"
-                if sys.platform == "win32"
-                else f"{venv_path}/bin/python"
-            )
-
             # Serialize function code to run in the child process
             import inspect
             import textwrap
@@ -275,7 +268,7 @@ def run_in_virtualenv(venv_path: str):
 
             # Run in isolated child process
             result = subprocess.run(
-                [python_exe, "-c", run_code],
+                [f"{venv_path}/bin/python", "-c", run_code],
                 capture_output=True,
                 text=True,
                 encoding="utf-8"
@@ -298,7 +291,7 @@ def run_in_virtualenv(venv_path: str):
     return decorator
 
 
-# @run_in_virtualenv("test_env_transformer_v4")
+@run_in_virtualenv("test_env_transformers_v4")
 def run_bench_serving(
     host,
     port,
