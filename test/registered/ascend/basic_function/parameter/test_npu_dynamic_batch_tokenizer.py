@@ -62,6 +62,10 @@ class BaseQwenTest(CustomTestCase):
     accuracy = 0.86
 
     def _run_gsm8k_test(self, scenario):
+        os.environ['CURL_CA_BUNDLE'] = ''  # 禁用证书验证
+        os.environ['REQUESTS_CA_BUNDLE'] = ''
+        # 或者直接设置 PYTHONHTTPSVERIFY=0
+        os.environ['PYTHONHTTPSVERIFY'] = '0'
         args = SimpleNamespace(
             data_path=None,
             host="127.0.0.1",
