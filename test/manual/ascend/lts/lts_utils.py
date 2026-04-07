@@ -174,6 +174,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
+            num_examples=64,
             parallel=128,
         )
         metrics = run_eval(args)

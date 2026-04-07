@@ -156,9 +156,9 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
             )
 
             self.run_evalscope()
+            self.run_gsm8k()
             self.run_mmlu()
             self.run_throughput()
-            self.run_gsm8k()
 
             long_seq_configs = {
                 "64k+1k": {
