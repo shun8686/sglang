@@ -1,6 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
@@ -32,6 +33,8 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
         # cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
         cls.model = "/home/weights/DeepSeek-R1-0528-w4a8-per-channel"
         cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.host = urlparse(cls.base_url).hostname
+        cls.port = urlparse(cls.base_url).port
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -127,8 +130,8 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
+            host=self.host,
+            port=self.port,
             eval_name="gsm8k",
         )
         # Execute GSM8K evaluation and get metrics
