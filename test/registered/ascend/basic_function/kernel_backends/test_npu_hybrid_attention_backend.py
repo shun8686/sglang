@@ -92,8 +92,8 @@ class TestHybridAttnBackendBase(CustomTestCase):
         # Use the appropriate metric key based on the test class
         # metric_key = "accuracy"
         # self.assertGreater(metrics[metric_key], self.accuracy_threshold)
-        # self.assertGreater(metrics["gsm8k_score"], self.accuracy_threshold)
-        self.assertGreater(metrics["score"], 0)
+        self.assertGreater(metrics["score"], self.accuracy_threshold)
+        # self.assertGreater(metrics["score"], 0)
 
         response = requests.get(f"{self.base_url}/get_server_info")
         self.assertEqual(
@@ -108,10 +108,6 @@ class TestHybridAttnBackendBase(CustomTestCase):
             response.json()["internal_states"][0]["decode_attention_backend"],
             "ascend",
             "--decode-attention-backend is not taking effect.",
-        )
-        self.assertEqual(
-            response.json()["internal_states"][0]["attention_backend"],
-            "as",
         )
 
 
