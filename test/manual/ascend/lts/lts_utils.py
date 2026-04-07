@@ -11,7 +11,8 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     TPOT_TOLERANCE_HIGH,
     TPOT_TOLERANCE_LOW,
     TTFT_TOLERANCE,
-    run_bench_serving, retry,
+    retry,
+    run_bench_serving,
 )
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.run_eval import run_eval
@@ -206,6 +207,13 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             long_seq_configs = LONG_SEQ_DEFAULT_CONFIGS
         for seq_type, seq_config in long_seq_configs.items():
             logger.info(f"---------- Start long seq test: {seq_type} ----------")
+            logger.info(
+                f"host:{self.host}, port:{self.port}",
+                "input_len: {}".format(seq_config["input_len"]),
+                "output_len: {}".format(seq_config["output_len"]),
+                "max_concurrency: {}".format(seq_config["max_concurrency"]),
+                "num_prompts: {}".format(seq_config["num_prompts"]),
+            )
             metrics = run_bench_serving(
                 host=self.host,
                 port=self.port,
