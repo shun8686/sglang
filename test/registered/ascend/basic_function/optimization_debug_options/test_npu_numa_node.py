@@ -22,6 +22,7 @@ class BaseNumaBindingTest(CustomTestCase):
     """
 
     TP_SIZE = 2
+    # When binding to different NUMA nodes, the CPU ranges are different
     CONFIG_NUMA_LIST = ["0", "1"]
 
     @classmethod
@@ -108,11 +109,6 @@ class BaseNumaBindingTest(CustomTestCase):
             self.assertNotEqual(
                 cpu0, cpu1, "Different NUMA nodes should bind to different CPU ranges"
             )
-
-
-class TestNumaDifferent(BaseNumaBindingTest):
-    # When binding to different NUMA nodes, the CPU ranges are different
-    CONFIG_NUMA_LIST = ["0", "1"]
 
 
 class TestNumaSame(BaseNumaBindingTest):
