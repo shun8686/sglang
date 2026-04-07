@@ -79,15 +79,14 @@ class TestHybridAttnBackendBase(CustomTestCase):
         requests.get(self.base_url + "/flush_cache")
 
         args = SimpleNamespace(
-            num_shots=4,
-            num_examples=100,
-            max_new_tokens=512,
-            num_threads=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
-            data_path=GSM_DATASET_PATH,
-            eval_name="gsm8k",
             base_url=self.base_url,
+            model=self.model,
+            eval_name="gsm8k",
+            api="completion",
+            max_tokens=512,
+            num_examples=100,
+            num_threads=128,
+            num_shots=4,
         )
         metrics = run_eval(args)
 
