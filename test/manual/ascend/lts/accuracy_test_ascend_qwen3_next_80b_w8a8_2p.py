@@ -38,6 +38,7 @@ QWEN3_NEXT_80B_A3B_ENVS = {
     "ZBCCL_BOOTSTRAP_URL": "tcp://127.0.0.1:24669",
     "ZBCCL_NPU_ALLOC_CONF": "use_vmm_for_static_memory:True",
     "ZBCCL_ENABLE_GRAPH": "1",
+    "ASCEND_LAUNCH_BLOCKING": "1",  # 不加这个跑精度压测会报错
 }
 
 QWEN3_NEXT_80B_A3B_OTHER_ARGS = [

@@ -280,7 +280,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             "--eval-batch-size",
             "16",
             "--work-dir",
-            "./",
+            "./evalscope_result/",
         ]
         logger.info(f"Command: {' '.join(cmd_args)}")
 
