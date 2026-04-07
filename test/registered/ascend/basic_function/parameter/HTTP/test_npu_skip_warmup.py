@@ -64,7 +64,7 @@ class TestSkipServerWarmup(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
             "--base-gpu-id",
-            "12",
+            "11",
         ]
 
         cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
