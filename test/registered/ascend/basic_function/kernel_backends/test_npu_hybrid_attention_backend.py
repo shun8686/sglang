@@ -22,8 +22,8 @@ GSM_DATASET_PATH = None
 # Default server arguments shared across all tests
 DEFAULT_SERVER_ARGS = [
     "--trust-remote-code",
-    # "--cuda-graph-max-bs",
-    # "8",
+    "--cuda-graph-max-bs",
+    "8",
     "--prefill-attention-backend",
     "ascend",
     "--decode-attention-backend",
@@ -59,8 +59,8 @@ class TestHybridAttnBackendBase(CustomTestCase):
     def setUpClass(cls):
         # disable deep gemm precompile to make launch server faster
         # please don't do this if you want to make your inference workload faster
-        # os.environ["SGL_JIT_DEEPGEMM_PRECOMPILE"] = "false"
-        # os.environ["SGL_ENABLE_JIT_DEEPGEMM"] = "false"
+        os.environ["SGL_JIT_DEEPGEMM_PRECOMPILE"] = "false"
+        os.environ["SGL_ENABLE_JIT_DEEPGEMM"] = "false"
         model = cls.model
         cls.process = popen_launch_server(
             model,
