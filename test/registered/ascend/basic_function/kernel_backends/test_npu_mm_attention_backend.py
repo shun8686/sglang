@@ -48,7 +48,7 @@ class TestAscendMMAttentionBackend(TestVLMModels):
         self._run_vlm_mmmu_test()
         self.assertIn(
             f"Using {self.mm_attention_backend} as multimodal attention backend.",
-            self.output.get_all()
+            self.output.get_all(),
         )
 
     @classmethod
