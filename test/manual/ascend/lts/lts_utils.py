@@ -200,7 +200,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         self.assertGreater(
             metrics["score"],
             self.accuracy["mmlu"],
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy["mmlu"]}',
+            f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {self.accuracy["mmlu"]}',
         )
         logger.info(f"---------- Mmlu accuracy test finished ----------")
 
