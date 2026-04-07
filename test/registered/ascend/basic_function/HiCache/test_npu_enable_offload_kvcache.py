@@ -171,18 +171,15 @@ class TestDisaggregationDecodeDisableOffload(DisaggregationHiCacheBase):
     def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/tmp/test.jsonl",
+            data_path=None,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
             host="http://127.0.0.1",
-            port=21000,
+            port=self.lb_port,
         )
         metrics = run_eval(args)
         run_command(f"echo {metrics['accuracy']} > ./accuracy.txt")
-
-        print(f"*************metrics2={metrics['accuracy']}")
-
 
 class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
     """Decode startup parameters, enable offload-kvcache"""
@@ -234,16 +231,15 @@ class TestDisaggregationDecodeEnableOffload(DisaggregationHiCacheBase):
     def test_gsm8k_accuracy(self):
         args = SimpleNamespace(
             num_shots=5,
-            data_path="/tmp/test.jsonl",
+            data_path=None,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
             host="http://127.0.0.1",
-            port=21000,
+            port=self.lb_port,
         )
         metrics = run_eval(args)
         self.enable_offload_accuracy = metrics["accuracy"]
-        print(f"*************metrics1={self.enable_offload_accuracy}")
 
         # Contrast accuracy
         disable_offload_accuracy = float(run_command(f"cat ./accuracy.txt"))

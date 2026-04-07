@@ -1,3 +1,4 @@
+import logging
 import os
 import random
 import tempfile
@@ -242,15 +243,15 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
         previous_cached_tokens = 0
 
         for turn in range(2, 5):
-            print(f"\nTurn {turn}: Continuing from previous context")
+            logging.warning(f"\nTurn {turn}: Continuing from previous context")
 
             response = self.send_request(
                 current_context, max_tokens=200, temperature=0.1
             )
             cached_tokens = response["meta_info"]["cached_tokens"]
 
-            print(f"Turn {turn} cached tokens: {cached_tokens}")
-            print(f"Improvement: {cached_tokens - previous_cached_tokens} tokens")
+            logging.warning(f"Turn {turn} cached tokens: {cached_tokens}")
+            logging.warning(f"Improvement: {cached_tokens - previous_cached_tokens} tokens")
 
             # Assert cache improvement
             self.assertGreater(
