@@ -109,7 +109,7 @@ class TestQwen3Next80BA3B(TestAscendPerformanceTestCaseBase):
     output_token_throughput = 1200
 
     def test_qwen3_next_80b_a3b(self):
-        time.sleep(10000)
+        time.sleep(30000)
         # self.run_throughput()
 
 
