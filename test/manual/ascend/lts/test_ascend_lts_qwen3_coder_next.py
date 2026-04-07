@@ -101,7 +101,7 @@ OTHER_ARGS = [
     "--quantization",
     "modelslim",
     "--base-gpu-id",
-    6,
+    12,
 ]
 
 
