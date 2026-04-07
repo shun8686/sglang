@@ -32,7 +32,7 @@ class BaseNumaBindingTest(CustomTestCase):
                 ["numactl", "--hardware"],
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL,
-                check=True
+                check=True,
             )
             return True
         except (subprocess.CalledProcessError, FileNotFoundError):
@@ -46,13 +46,13 @@ class BaseNumaBindingTest(CustomTestCase):
                 ["apt", "update", "-y"],
                 check=True,
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
+                stderr=subprocess.DEVNULL,
             )
             subprocess.run(
                 ["apt", "install", "-y", "numactl"],
                 check=True,
                 stdout=subprocess.DEVNULL,
-                stderr=subprocess.DEVNULL
+                stderr=subprocess.DEVNULL,
             )
             print("numactl installed successfully.")
 
