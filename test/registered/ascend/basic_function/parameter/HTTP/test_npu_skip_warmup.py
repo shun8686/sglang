@@ -1,7 +1,7 @@
 import os
-import unittest
 import tempfile
 import time
+import unittest
 
 import requests
 
@@ -74,13 +74,15 @@ class TestSkipServerWarmup(CustomTestCase):
         timeout = 30
         content = ""
         while time.time() - start_time < timeout:
-            with open(self.out_log_file.name, 'r', encoding='utf-8') as f:
+            with open(self.out_log_file.name, "r", encoding='utf-8') as f:
                 content = f.read()
             if content:
                 break
             time.sleep(0.5)
 
-        self.assertTrue(len(content) > 0, "Log file remained empty after server startup")
+        self.assertTrue(
+            len(content) > 0, "Log file remained empty after server startup"
+        )
         self.assertNotIn("GET /model_info HTTP/1.1", content)
 
 
