@@ -1,4 +1,5 @@
 import argparse
+import json
 import logging
 
 from evalscope import TaskConfig, run_task
@@ -93,19 +94,19 @@ if __name__ == "__main__":
     parser.add_argument(
         "--api-key",
         type=str,
-        required=True,
+        required=False,
         help="API Key",
     )
     parser.add_argument(
         "--datasets",
-        type=str,
+        type=json.loads,
         required=False,
         default=None,
         help="datasets",
     )
     parser.add_argument(
         "--dataset-args",
-        type=str,
+        type=json.loads,
         required=False,
         default=None,
         help="dataset args",

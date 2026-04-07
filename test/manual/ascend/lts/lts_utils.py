@@ -168,6 +168,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         args = SimpleNamespace(
             host=self.host,
             port=self.port,
+            base_url=self.base_url,
             eval_name="gsm8k",
             num_shots=8,
             data_path="/tmp/test.jsonl",
