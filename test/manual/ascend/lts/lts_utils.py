@@ -14,7 +14,6 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     retry,
     run_bench_serving,
 )
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import CustomTestCase
 
@@ -166,15 +165,16 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         logger.info(f"---------- Start gsm8k accuracy test ----------")
         logger.info(f"host:{self.host}, port:{self.port}")
         args = SimpleNamespace(
+            host=self.host,
+            port=self.port,
+            eval_name="gsm8k",
             num_shots=8,
             data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
             parallel=128,
-            host=self.host,
-            port=self.port,
         )
-        metrics = run_eval_gsm8k(args)
+        metrics = run_eval(args)
         logger.info(f"{metrics}")
         self.assertGreater(
             metrics["accuracy"],
@@ -207,24 +207,18 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             long_seq_configs = LONG_SEQ_DEFAULT_CONFIGS
         for seq_type, seq_config in long_seq_configs.items():
             logger.info(f"---------- Start long seq test: {seq_type} ----------")
-            logger.info(
-                f"host:{self.host}, port:{self.port}",
-                "input_len: {}".format(seq_config["input_len"]),
-                "output_len: {}".format(seq_config["output_len"]),
-                "max_concurrency: {}".format(seq_config["max_concurrency"]),
-                "num_prompts: {}".format(seq_config["num_prompts"]),
-            )
             metrics = run_bench_serving(
                 host=self.host,
                 port=self.port,
+                model_path=self.model,
                 input_len=seq_config["input_len"],
                 output_len=seq_config["output_len"],
+                random_range_ratio=1,
                 dataset_name=self.dataset_name,
                 dataset_path=self.dataset_path,
                 request_rate="inf",
                 max_concurrency=seq_config["max_concurrency"],
                 num_prompts=seq_config["num_prompts"],
-                random_range_ratio=1,
             )
             logger.info(f"metrics: {metrics}")
 
