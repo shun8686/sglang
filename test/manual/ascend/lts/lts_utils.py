@@ -15,6 +15,7 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     retry,
     run_bench_serving,
 )
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import CustomTestCase
 
@@ -166,18 +167,15 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         logger.info(f"---------- Start gsm8k accuracy test ----------")
         logger.info(f"host:{self.host}, port:{self.port}")
         args = SimpleNamespace(
-            host=self.host,
-            port=self.port,
-            base_url=self.base_url,
-            eval_name="gsm8k",
             num_shots=8,
             data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
-            num_examples=64,
             parallel=128,
+            host=self.host,
+            port=self.port,
         )
-        metrics = run_eval(args)
+        metrics = run_eval_gsm8k(args)
         logger.info(f"{metrics}")
         self.assertGreater(
             metrics["accuracy"],
@@ -244,6 +242,8 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             logger.info(f"---------- Finish long seq test: {seq_type} ----------")
 
     def run_evalscope(self):
+        import json
+
         ssl._create_default_https_context = ssl._create_unverified_context
         cmd_args = [
             "evalscope/bin/python",
@@ -256,9 +256,9 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             "--eval-type",
             "openai_api",
             "--datasets",
-            str(["gsm8k"]),
+            json.dumps(["gsm8k"]),
             "--dataset-args",
-            str({"gsm8k": {}}),
+            json.dumps({"gsm8k": {}}),
             "--eval-batch-size",
             "128",
             "--work-dir",
