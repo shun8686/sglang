@@ -1,4 +1,5 @@
 import logging
+import ssl
 import subprocess
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -185,6 +186,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
     def run_mmlu(self):
         logger.info(f"---------- Start mmlu accuracy test ----------")
+        ssl._create_default_https_context = ssl._create_unverified_context
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,

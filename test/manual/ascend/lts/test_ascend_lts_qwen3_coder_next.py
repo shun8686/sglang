@@ -156,6 +156,8 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 f"====={current_time}  Execute the {i}-th long-term stability test====="
             )
 
+            self.run_mmlu()
+
             run_evalscope_accuracy_test(
                 model=self.model,
                 api_url=self.base_url,
@@ -165,7 +167,6 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 work_dir="./",
             )
 
-            self.run_mmlu()
             self.run_throughput()
             self.run_gsm8k()
 
