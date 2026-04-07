@@ -133,7 +133,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--work-dir",
-        type=int,
+        type=str,
         required=False,
         default=None,
         help="work dir",
