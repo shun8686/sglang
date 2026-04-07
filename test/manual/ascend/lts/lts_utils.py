@@ -243,6 +243,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             logger.info(f"---------- Finish long seq test: {seq_type} ----------")
 
     def run_evalscope(self):
+        ssl._create_default_https_context = ssl._create_unverified_context
         cmd_args = [
             "evalscope/bin/python",
             "-m",
