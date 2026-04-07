@@ -1,6 +1,7 @@
 import os
 import unittest
 import tempfile
+import time
 
 import requests
 
@@ -101,11 +102,19 @@ class TestSkipServerWarmup(CustomTestCase):
         # Verify that inference is correct when warming up is skipped
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        self.out_log_file.seek(0)
 
-        # warm up will send a GET /get_model_info request and a generate request to warm up server.
-        content = self.out_log_file.read()
-        self.assertTrue(len(content) > 0)
+        start_time = time.time()
+        timeout = 30
+        content = ""
+        while time.time() - start_time < timeout:
+            with open(self.out_log_file.name, 'r', encoding='utf-8') as f:
+                content = f.read()
+            if content:
+                break
+            time.sleep(0.5)
+
+
+        self.assertTrue(len(content) > 0, "Log file remained empty after server startup")
         self.assertNotIn("GET /model_info HTTP/1.1", content)
 
 
