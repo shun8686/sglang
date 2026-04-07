@@ -36,6 +36,8 @@ class TestAscendMMAttentionBackend(TestVLMModels):
         4,
         "--mm-attention-backend",
         mm_attention_backend,
+        "--base-gpu-id",
+        8,
     ]
 
     @classmethod
