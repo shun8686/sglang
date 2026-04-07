@@ -1,3 +1,4 @@
+import argparse
 import logging
 
 from evalscope import TaskConfig, run_task
@@ -39,7 +40,7 @@ def run_evalscope_accuracy_test(
     model,
     eval_type="openai_api",
     api_url=None,
-    api_key="EMPTY",
+    api_key=None,
     datasets=None,
     dataset_args=None,
     eval_batch_size=128,
@@ -63,3 +64,92 @@ def run_evalscope_accuracy_test(
 
     result = run_task(task_config)
     logger.info(result)
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Run evalscope", formatter_class=argparse.RawTextHelpFormatter
+    )
+
+    parser.add_argument(
+        "--model",
+        type=str,
+        required=True,
+        help="Model path",
+    )
+    parser.add_argument(
+        "--eval-type",
+        type=str,
+        required=False,
+        default="openai_api",
+        help="Eval type",
+    )
+    parser.add_argument(
+        "--api-url",
+        type=str,
+        required=True,
+        help="API URL",
+    )
+    parser.add_argument(
+        "--api-key",
+        type=str,
+        required=True,
+        help="API Key",
+    )
+    parser.add_argument(
+        "--datasets",
+        type=str,
+        required=False,
+        default=None,
+        help="datasets",
+    )
+    parser.add_argument(
+        "--dataset-args",
+        type=str,
+        required=False,
+        default=None,
+        help="dataset args",
+    )
+    parser.add_argument(
+        "--eval-batch-size",
+        type=int,
+        required=False,
+        default=None,
+        help="eval batch size",
+    )
+    parser.add_argument(
+        "--generation-config",
+        type=str,
+        required=False,
+        default=None,
+        help="generation config",
+    )
+    parser.add_argument(
+        "--limit",
+        type=int,
+        required=False,
+        default=None,
+        help="limit",
+    )
+    parser.add_argument(
+        "--work-dir",
+        type=int,
+        required=False,
+        default=None,
+        help="work dir",
+    )
+
+    args = parser.parse_args()
+
+    run_evalscope_accuracy_test(
+        model=args.model,
+        eval_type=args.eval_type,
+        api_url=args.api_url,
+        api_key=args.api_key,
+        datasets=args.datasets,
+        dataset_args=args.dataset_args,
+        eval_batch_size=args.eval_batch_size,
+        generation_config=args.generation_config,
+        limit=args.limit,
+        work_dir=args.work_dir,
+    )

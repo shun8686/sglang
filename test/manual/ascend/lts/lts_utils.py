@@ -240,3 +240,33 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
                     seq_config["ttft"],
                 )
             logger.info(f"---------- Finish long seq test: {seq_type} ----------")
+
+    def run_evalscope(self):
+        cmd_args = [
+            "evalscope/bin/python",
+            "-m",
+            "sglang.test.ascend.e2e.evalscope_utils",
+            "--model",
+            self.model,
+            "--api-url",
+            str(self.base_url),
+            "--eval-type",
+            "openai_api",
+            "--datasets",
+            ["gsm8k"],
+            "--dataset-args",
+            {"gsm8k": {}},
+            "--eval-batch-size",
+            128,
+            "--work-dir",
+            "./",
+        ]
+        logger.info(f"Command: {' '.join(cmd_args)}")
+
+        subprocess.Popen(
+            cmd_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )

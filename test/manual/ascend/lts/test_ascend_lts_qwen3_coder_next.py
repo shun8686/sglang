@@ -6,7 +6,6 @@ import unittest
 from lts_utils import TestAscendLtsTestCaseBase
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.e2e.evalscope_utils import run_evalscope_accuracy_test
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
@@ -157,16 +156,7 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
             )
 
             self.run_mmlu()
-
-            run_evalscope_accuracy_test(
-                model=self.model,
-                api_url=self.base_url,
-                datasets=["gsm8k", "mmlu"],
-                dataset_args={"gsm8k": {}, "mmlu": {}},
-                eval_batch_size=128,
-                work_dir="./",
-            )
-
+            self.run_evalscope()
             self.run_throughput()
             self.run_gsm8k()
 
