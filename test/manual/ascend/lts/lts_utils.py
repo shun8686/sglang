@@ -245,6 +245,22 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         import json
 
         ssl._create_default_https_context = ssl._create_unverified_context
+
+        generation_config = {
+            "do_sample": True,
+            "max_tokens": 1024,
+            "seed": 3407,
+            "top_p": 0.8,
+            "top_k": 20,
+            "temperature": 0.7,
+            "n": 1,
+            "presence_penalty": 1.5,
+            "repetition_penalty": 1.0,
+            "timeout": 3600,
+            "stream": True,
+            "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
+        }
+
         cmd_args = [
             "evalscope/bin/python",
             "-m",
@@ -255,12 +271,14 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             str(self.base_url),
             "--eval-type",
             "openai_api",
+            "--generation-config",
+            json.dumps(generation_config),
             "--datasets",
             json.dumps(["gsm8k"]),
             "--dataset-args",
             json.dumps({"gsm8k": {}}),
             "--eval-batch-size",
-            "128",
+            "16",
             "--work-dir",
             "./",
         ]

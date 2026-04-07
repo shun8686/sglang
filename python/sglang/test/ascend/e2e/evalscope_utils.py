@@ -120,7 +120,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--generation-config",
-        type=str,
+        type=json.loads,
         required=False,
         default=None,
         help="generation config",
