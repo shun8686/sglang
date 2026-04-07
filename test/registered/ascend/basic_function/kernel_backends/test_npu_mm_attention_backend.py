@@ -38,16 +38,20 @@ class TestAscendMMAttentionBackend(TestVLMModels):
         mm_attention_backend,
     ]
 
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.output = OutputCapturer()
+        cls.output.start()
+
     def test_mmmu(self):
-        output = OutputCapturer()
-        output.start()
         self._run_vlm_mmmu_test()
-        self.assertIn(f"Using {self.mm_attention_backend} as multimodal attention backend.", output.get_all())
+        self.assertIn(f"Using {self.mm_attention_backend} as multimodal attention backend.", self.output.get_all())
 
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
-        output.stop()
+        cls.output.stop()
 
 
 if __name__ == "__main__":
