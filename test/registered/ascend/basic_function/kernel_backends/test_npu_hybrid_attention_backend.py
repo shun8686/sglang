@@ -87,6 +87,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
             port=int(self.base_url.split(":")[-1]),
             data_path=GSM_DATASET_PATH,
             eval_name="gsm8k",
+            base_url=self.base_url,
         )
         metrics = run_eval(args)
 
