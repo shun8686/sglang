@@ -26,7 +26,7 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
     [Test Target] --speculative-algorithm; --deepep-mode
     """
 
-    accuracy = 0.81
+    accuracy = 0.96
 
     @classmethod
     def setUpClass(cls):
@@ -125,12 +125,14 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
             num_shots=8,
             data_path=None,
             num_questions=200,
-            max_new_tokens=128,
-            parallel=8,
+            max_new_tokens=512,
+            parallel=128,
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
+            eval_name="gsm8k",
         )
-        metrics = run_eval_gsm8k(args)
+        # Execute GSM8K evaluation and get metrics
+        metrics = run_eval(args)
         # Assertion: Ensure the GSM8K accuracy is not lower than the preset threshold
         self.assertGreaterEqual(
             metrics["accuracy"],
