@@ -1,10 +1,12 @@
 import datetime
+import logging
 import os
 import unittest
 
 from lts_utils import TestAscendLtsTestCaseBase
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.evalscope_utils import run_evalscope_accuracy_test
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
@@ -13,7 +15,13 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-# MODEL_PATH = "/root/.cache/modelscope/hub/models/aleoyang/Qwen3-32B-w8a8-MindIE"
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
+
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Coder-Next_W8A8"
 
 ENVS = {
@@ -144,8 +152,17 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
         while True:
             i = i + 1
             current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(
-                f"=============={current_time}  Execute the {i}-th long-term stability test=============="
+            logger.info(
+                f"====={current_time}  Execute the {i}-th long-term stability test====="
+            )
+
+            run_evalscope_accuracy_test(
+                model=self.model,
+                api_url=self.base_url,
+                datasets=["gsm8k", "mmlu"],
+                dataset_args={"gsm8k": {}, "mmlu": {}},
+                eval_batch_size=128,
+                work_dir="./",
             )
 
             self.run_mmlu()
