@@ -36,8 +36,6 @@ class TestAscendMMAttentionBackend(TestVLMModels):
         4,
         "--mm-attention-backend",
         mm_attention_backend,
-        "--base-gpu-id",
-        8,
     ]
 
     @classmethod
@@ -48,7 +46,10 @@ class TestAscendMMAttentionBackend(TestVLMModels):
 
     def test_mmmu(self):
         self._run_vlm_mmmu_test()
-        self.assertIn(f"Using {self.mm_attention_backend} as multimodal attention backend.", self.output.get_all())
+        self.assertIn(
+            f"Using {self.mm_attention_backend} as multimodal attention backend.",
+            self.output.get_all()
+        )
 
     @classmethod
     def tearDownClass(cls):
