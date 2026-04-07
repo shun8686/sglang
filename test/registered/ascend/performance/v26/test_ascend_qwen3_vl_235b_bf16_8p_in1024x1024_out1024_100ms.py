@@ -78,7 +78,7 @@ class TestQwenVl235B(TestAscendPerformanceTestCaseBase):
     request_rate = 512
     max_concurrency = 512
     num_prompts = 2048
-    input_len = 0
+    input_len = 1
     output_len = 1024
     random_range_ratio = 1
     seed = 1000

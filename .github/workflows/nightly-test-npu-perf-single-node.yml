@@ -108,6 +108,7 @@ jobs:
           echo "numa_balancing: $(cat /proc/sys/kernel/numa_balancing)"
           echo "sched_migration_cost_ns: $(cat /proc/sys/kernel/sched_migration_cost_ns)"
 
+          export SGLANG_TEST_MAX_RETRY=0
           export SGLANG_SET_CPU_AFFINITY=1
           echo "SGLANG_SET_CPU_AFFINITY: $SGLANG_SET_CPU_AFFINITY"
 
