@@ -100,7 +100,8 @@ class MMMUVLMEval(Eval):
         datasets = []
         for subj in subjects:
             try:
-                d = load_dataset("MMMU/MMMU", subj, split="validation")
+                # d = load_dataset("MMMU/MMMU", subj, split="validation")
+                d = load_dataset("/home/l30081563/dataset/MMMU", subj, split="validation")
                 # attach subject info via transform
                 d = d.add_column("__subject__", [subj] * len(d))
                 datasets.append(d)
