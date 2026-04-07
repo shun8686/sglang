@@ -68,6 +68,8 @@ class TestAscendFastapiRootPath(CustomTestCase):
             "ascend",
             "--fastapi-root-path",
             cls.fastapi_root_path,
+            "--base-gpu-id",
+            "13 ",
         ]
 
         cls.process = popen_launch_server(
