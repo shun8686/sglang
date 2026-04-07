@@ -126,18 +126,18 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
             base_url=self.base_url,
             num_shots=8,
             data_path=None,
-            num_questions=200,
+            num_examples=200,
             max_new_tokens=512,
-            parallel=128,
+            num_threads=128,
             eval_name="gsm8k",
         )
         # Execute GSM8K evaluation and get metrics
         metrics = run_eval(args)
         # Assertion: The GSM8K accuracy is not lower than the preset threshold (0.96)
         self.assertGreaterEqual(
-            metrics["accuracy"],
+            metrics["score"],
             self.accuracy,
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+            f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {self.accuracy}',
         )
 
 
