@@ -320,7 +320,7 @@ class TestAscendGrpcModePDDisaggregation(CustomTestCase):
 
 
 if __name__ == "__main__":
-    # 检查并安装 gRPC 模式所需的额外包（不覆盖已有依赖）
+
     try:
         import smg_grpc_servicer
     except ImportError:
@@ -328,7 +328,7 @@ if __name__ == "__main__":
             [
                 "pip",
                 "install",
-                "smg-grpc-servicer[sglang]",   # 只装这个，不指定版本，不重装其他
+                "smg-grpc-servicer[sglang]",
             ],
             check=True,
         )

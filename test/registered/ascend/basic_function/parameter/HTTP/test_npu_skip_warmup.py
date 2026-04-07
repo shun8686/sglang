@@ -1,5 +1,6 @@
 import os
 import unittest
+import tempfile
 
 import requests
 
@@ -67,8 +68,12 @@ class TestSkipServerWarmup(CustomTestCase):
             "11",
         ]
 
-        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
+        cls.out_log_file = tempfile.NamedTemporaryFile(
+            mode="w+", encoding="utf-8", delete=False, suffix=".txt"
+        )
+        cls.err_log_file = tempfile.NamedTemporaryFile(
+            mode="w+", encoding="utf-8", delete=False, suffix=".txt"
+        )
         cls.process = popen_launch_server(
             cls.model_path,
             cls.base_url,
@@ -82,8 +87,8 @@ class TestSkipServerWarmup(CustomTestCase):
         kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
         cls.err_log_file.close()
-        os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
+        os.remove(cls.out_log_file.name)
+        os.remove(cls.err_log_file.name)
 
     def test_skip_server_warmup(self):
         response = requests.post(
