@@ -22,8 +22,9 @@ class BaseNumaBindingTest(CustomTestCase):
     """
 
     TP_SIZE = 2
-    CONFIG_NUMA_LIST = None
+    CONFIG_NUMA_LIST = []
 
+    @classmethod
     def _is_numactl_installed(cls):
         try:
             subprocess.run(
