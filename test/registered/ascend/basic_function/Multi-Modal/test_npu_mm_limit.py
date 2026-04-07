@@ -4,7 +4,11 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH,
+    IMAGES_MAN_PATH,
+    IMAGES_LOGO_PATH,
+)
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -19,8 +23,8 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 MODEL = QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
 
 # image
-IMAGE_MAN_IRONING_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/man_ironing_on_back_of_suv.png"
-IMAGE_SGL_LOGO_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/sgl_logo.png"
+IMAGE_MAN_IRONING_URL = IMAGES_MAN_PATH
+IMAGE_SGL_LOGO_URL = IMAGES_LOGO_PATH
 
 
 def popen_launch_server_wrapper(base_url, model, other_args):
