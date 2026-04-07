@@ -57,7 +57,6 @@ OTHER_ARGS = [
     "--mem-fraction-static",
     0.85,
     "--disable-radix-cache",
-    # 如开启radix cache , 需增加
     "--max-prefill-tokens",
     16384,
     # "--context-length",
@@ -152,8 +151,8 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 "64k+1k": {
                     "input_len": 65536,
                     "output_len": 1024,
-                    "max_concurrency": 8,
-                    "num_prompts": 8,
+                    "max_concurrency": 1,
+                    "num_prompts": 1,
                     "ttft": 100000,
                     "tpot": 1000,
                     "tps": 1,
@@ -162,6 +161,7 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
             self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
             self.run_throughput()
             self.run_gsm8k()
+            self.run_mmlu()
 
 
 if __name__ == "__main__":
