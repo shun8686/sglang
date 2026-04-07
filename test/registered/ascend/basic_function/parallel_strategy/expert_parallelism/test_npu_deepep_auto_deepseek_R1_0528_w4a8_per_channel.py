@@ -124,9 +124,9 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
             base_url=self.base_url,
             num_shots=8,
             data_path=None,
-            num_questions=200,
+            num_examples=200,
             max_new_tokens=512,
-            parallel=128,
+            num_threads=128,
             eval_name="gsm8k",
         )
         # Execute GSM8K evaluation and get metrics
