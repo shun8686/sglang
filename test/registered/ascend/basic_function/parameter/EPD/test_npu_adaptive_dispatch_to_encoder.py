@@ -28,23 +28,10 @@ _INLINE_IMAGE_URL = (
 class TestAdaptiveDispatchToEncoder(CustomTestCase):
     """Testcase: Verify --enable-adaptive-dispatch-to-encoder on Ascend NPU.
 
-    Background
-    ----------
-    In VLM encoder-prefill disaggregation (EPD) mode, a language-only server
-    normally forwards ALL multimodal requests to remote encoder servers.
-    This creates unnecessary network overhead for single-image requests that
-    the language server can handle locally.
-
     --enable-adaptive-dispatch-to-encoder changes the routing policy:
     - Single-image requests  --> processed locally (no encoder server needed)
     - Multi-image requests   --> dispatched to remote encoder server(s)
 
-    The routing decision is made in tokenizer_manager._should_dispatch_to_encoder()
-    by comparing total multimodal item count against SGLANG_ENCODER_DISPATCH_MIN_ITEMS
-    (default = 2).
-
-    Server setup
-    ------------
     This test starts a language-only server WITHOUT any --encoder-urls.
     This is deliberate: if adaptive dispatch is working correctly, single-image
     requests never attempt to reach an encoder server, so the absence of encoder
@@ -63,7 +50,6 @@ class TestAdaptiveDispatchToEncoder(CustomTestCase):
 
         # SGLANG_MM_SKIP_COMPUTE_HASH must be set for Ascend NPU:
         # the NPU backend does not support _local_scalar_dense for UInt64,
-        # which is used in multimodal hash computation.
         # Setting this variable replaces hash computation with a random UUID.
         env = os.environ.copy()
         env["SGLANG_MM_SKIP_COMPUTE_HASH"] = "True"
@@ -76,8 +62,6 @@ class TestAdaptiveDispatchToEncoder(CustomTestCase):
             other_args=[
                 "--language-only",
                 "--enable-adaptive-dispatch-to-encoder",
-                # Intentionally omit --encoder-urls: single-image requests
-                # must be handled locally without any encoder server.
                 "--encoder-urls",
                 "http://127.0.0.1:9999",
                 "--tp-size",
@@ -93,19 +77,10 @@ class TestAdaptiveDispatchToEncoder(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        # Restore the test environment by stopping the server process (coding standard rule 8)
         kill_process_tree(cls.process.pid)
 
     def test_flag_accepted_by_server(self):
         """Verify --enable-adaptive-dispatch-to-encoder is stored in server config.
-
-        GET /get_server_info should expose the flag value.
-        This assertion does not depend on PR #18118 -- it only checks that the
-        argument parser accepted the flag and stored it in server_args.
-
-        NOTE: confirm the exact field name by running:
-            curl http://<host>:<port>/get_server_info | python3 -m json.tool
-        in the actual environment before merging, and update the field name if needed.
         """
         response = requests.get(f"{self.base_url}/get_server_info", timeout=10)
         self.assertEqual(response.status_code, 200)
@@ -120,13 +95,7 @@ class TestAdaptiveDispatchToEncoder(CustomTestCase):
     def test_single_image_processed_locally(self):
         """Verify a single-image request is processed locally without an encoder server.
 
-        Assertion rationale:
-        - HTTP 200 means the language server processed the image locally.
-        - Any non-2xx or connection timeout means either:
-            (a) the server tried to forward to a non-existent encoder (adaptive
-                dispatch not working), or
-            (b) mm_pool was empty and local processing crashed (bugfix not applied).
-        Both (a) and (b) are genuine failures this test is designed to catch.
+        Assertion rationale:- HTTP 200 means the language server processed the image locally.
         """
         payload = {
             "model": self.model,
