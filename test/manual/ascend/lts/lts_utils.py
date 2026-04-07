@@ -263,10 +263,42 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         ]
         logger.info(f"Command: {' '.join(cmd_args)}")
 
-        subprocess.Popen(
+        process = subprocess.Popen(
             cmd_args,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
         )
+        logger.info(f"Started process with PID: {process.pid}")
+
+        logger.info(f"Monitoring process {process.pid}...")
+        try:
+            while True:
+                line = process.stdout.readline()
+                if not line and process.poll() is not None:
+                    break
+                if line:
+                    logger.info(f"Process {process.pid}: {line.strip()}")
+
+            exit_code = process.wait()
+            logger.info(f"Process {process.pid} exited with code: {exit_code}")
+
+        except KeyboardInterrupt:
+            logger.info(
+                f"Keyboard interrupt received, terminating process {process.pid}..."
+            )
+            process.terminate()
+            try:
+                process.wait(timeout=5)
+                logger.info(f"Process {process.pid} terminated")
+            except subprocess.TimeoutExpired:
+                logger.warning(
+                    f"Process {process.pid} did not terminate gracefully, killing it..."
+                )
+                process.kill()
+                logger.info(f"Process {process.pid} killed")
+        except Exception as e:
+            logger.error(f"Error monitoring process {process.pid}: {e}")
+            process.terminate()
+            process.wait(timeout=5)
