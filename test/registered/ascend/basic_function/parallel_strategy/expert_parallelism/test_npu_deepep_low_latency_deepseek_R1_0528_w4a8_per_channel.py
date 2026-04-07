@@ -29,7 +29,8 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+        # cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+        cls.model = "/home/weights/DeepSeek-R1-0528-w4a8-per-channel"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
