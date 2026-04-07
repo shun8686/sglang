@@ -20,7 +20,8 @@ register_npu_ci(est_time=400, suite="full-8-npu-a3", nightly=True)
 class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+        # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+        cls.model = "/home/weights/DeepSeek-Coder-V2-Lite-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
