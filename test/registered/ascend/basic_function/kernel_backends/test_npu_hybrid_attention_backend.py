@@ -86,7 +86,6 @@ class TestHybridAttnBackendBase(CustomTestCase):
             max_tokens=512,
             num_examples=100,
             num_threads=128,
-            num_shots=4,
         )
         metrics = run_eval(args)
 
