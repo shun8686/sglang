@@ -32,6 +32,8 @@ class TestAscendMMAttentionBackend(TestVLMModels):
         4,
         "--mm-attention-backend",
         "ascend_attn",
+        "--base-gpu-id",
+        4,
     ]
 
     def test_mmmu(self):
