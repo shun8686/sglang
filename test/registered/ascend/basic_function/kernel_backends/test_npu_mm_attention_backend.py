@@ -18,7 +18,7 @@ class TestAscendMMAttentionBackend(TestVLMModels):
     mm_attention_backend = "ascend_attn"
 
     # model = GEMMA_3_4B_IT_WEIGHTS_PATH
-    model = "/home/weights/gemma-3-4b-it"
+    model = "/home/weights/gemma3-4b-it"
     mmmu_accuracy = 0.2
     other_args = [
         "--trust-remote-code",
