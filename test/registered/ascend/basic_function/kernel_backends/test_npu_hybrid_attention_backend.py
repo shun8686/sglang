@@ -81,7 +81,8 @@ class TestHybridAttnBackendBase(CustomTestCase):
             num_questions=100,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
+            # host="http://127.0.0.1",
+            host="127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
             data_path=GSM_DATASET_PATH,
         )
