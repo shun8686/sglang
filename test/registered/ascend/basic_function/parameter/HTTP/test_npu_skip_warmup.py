@@ -1,5 +1,7 @@
 import os
 import unittest
+import tempfile
+import time
 
 import requests
 
@@ -35,8 +37,12 @@ class TestSkipServerWarmup(CustomTestCase):
             "--disable-cuda-graph",
         ]
 
-        cls.out_log_file = open("./warmup_out_log.txt", "w+", encoding="utf-8")
-        cls.err_log_file = open("./warmup_err_log.txt", "w+", encoding="utf-8")
+        cls.out_log_file = tempfile.NamedTemporaryFile(
+            mode="w+", encoding="utf-8", delete=False, suffix=".txt"
+        )
+        cls.err_log_file = tempfile.NamedTemporaryFile(
+            mode="w+", encoding="utf-8", delete=False, suffix=".txt"
+        )
         cls.process = popen_launch_server(
             cls.model_path,
             cls.base_url,
@@ -50,8 +56,8 @@ class TestSkipServerWarmup(CustomTestCase):
         kill_process_tree(cls.process.pid)
         cls.out_log_file.close()
         cls.err_log_file.close()
-        os.remove("./warmup_out_log.txt")
-        os.remove("./warmup_err_log.txt")
+        os.remove(cls.out_log_file.name)
+        os.remove(cls.err_log_file.name)
 
     def test_skip_server_warmup(self):
         response = requests.post(
@@ -64,11 +70,17 @@ class TestSkipServerWarmup(CustomTestCase):
         # Verify that inference is correct when warming up is skipped
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        self.out_log_file.seek(0)
+        start_time = time.time()
+        timeout = 30
+        content = ""
+        while time.time() - start_time < timeout:
+            with open(self.out_log_file.name, 'r', encoding='utf-8') as f:
+                content = f.read()
+            if content:
+                break
+            time.sleep(0.5)
 
-        # warm up will send a GET /get_model_info request and a generate request to warm up server.
-        content = self.out_log_file.read()
-        self.assertTrue(len(content) > 0)
+        self.assertTrue(len(content) > 0, "Log file remained empty after server startup")
         self.assertNotIn("GET /model_info HTTP/1.1", content)
 
 
