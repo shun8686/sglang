@@ -33,8 +33,6 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
         # cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
         cls.model = "/home/weights/DeepSeek-R1-0528-w4a8-per-channel"
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.host = urlparse(cls.base_url).hostname
-        cls.port = urlparse(cls.base_url).port
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -125,13 +123,12 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's accuracy on GSM8K dataset (mathematical reasoning evaluation)
         args = SimpleNamespace(
+            base_url=self.base_url,
             num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host=self.host,
-            port=self.port,
             eval_name="gsm8k",
         )
         # Execute GSM8K evaluation and get metrics
