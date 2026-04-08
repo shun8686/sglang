@@ -19,32 +19,50 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+)
 logger = logging.getLogger(__name__)
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
 
 BASE_OTHER_ARGS = [
-    "--chunked-prefill-size", "256",
-    "--attention-backend", "ascend",
+    "--chunked-prefill-size",
+    "256",
+    "--attention-backend",
+    "ascend",
     "--disable-cuda-graph",
-    "--mem-fraction-static", "0.8",
-    "--tp-size", "4",
+    "--mem-fraction-static",
+    "0.8",
+    "--tp-size",
+    "4",
     "--enable-dynamic-batch-tokenizer",
-    "--log-level", "debug",
+    "--log-level",
+    "debug",
 ]
 
-def launch_server_with_params(model_name, base_url, batch_size, batch_timeout, extra_args=None):
+def launch_server_with_params(
+        model_name, base_url, batch_size, batch_timeout, extra_args=None
+):
     """ set batch_size  batch_timeout"""
     other_args = BASE_OTHER_ARGS.copy()
-    other_args.extend([
-        "--dynamic-batch-tokenizer-batch-size", str(batch_size),
-        "--dynamic-batch-tokenizer-batch-timeout", str(batch_timeout),
-    ])
+    other_args.extend(
+        [
+        "--dynamic-batch-tokenizer-batch-size",
+        str(batch_size),
+        "--dynamic-batch-tokenizer-batch-timeout",
+        str(batch_timeout),
+        ]
+    )
     if extra_args:
         other_args.extend(extra_args)
-    return popen_launch_server(model_name, base_url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH, other_args=other_args)
+    return popen_launch_server(
+        model_name,
+        base_url,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
+    )
 
 
 class TestBatchSize64Timeout0p001(CustomTestCase):
@@ -52,9 +70,11 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = launch_server_with_params(
-            QWEN3_32B_WEIGHTS_PATH, cls.base_url,
-            batch_size=64, batch_timeout=0.001,
-            extra_args=["--disable-radix-cache"]   # 与 Combo 一致
+            QWEN3_32B_WEIGHTS_PATH,
+            cls.base_url,
+            batch_size=64,
+            batch_timeout=0.001,
+            extra_args=["--disable-radix-cache"],
         )
 
     @classmethod
@@ -62,7 +82,9 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_high_concurrency(self):
-        results = send_concurrent_requests(self.base_url, num_requests=80, num_concurrent=16)
+        results = send_concurrent_requests(
+            self.base_url, num_requests=80, num_concurrent=16
+        )
         success = sum(1 for r in results if r["status_code"] == 200)
         self.assertEqual(success, 80, f"Expected 80 successes, got {success}")
         for r in results:
@@ -76,8 +98,16 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
             ("Describe the water cycle briefly.", "water"),
         ]
         long = [
-            ("Describe the history of the Roman Empire and its influence on modern culture " * 3, "Roman"),
-            ("Explain how large language models are trained, evaluated, and deployed " * 3, "trained"),
+            (
+                "Describe the history of the Roman Empire and its influence on modern culture "
+                * 3,
+                "Roman",
+            ),
+            (
+                "Explain how large language models are trained, evaluated, and deployed "
+                * 3,
+                "trained",
+            ),
         ]
         all_prompts = short + medium + long
         results, lock = [], threading.Lock()
@@ -88,10 +118,14 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
             else:
                 prompt, keyword = item, None
             try:
-                resp = requests.post(f"{self.base_url}/generate", json={
-                    "text": prompt,
-                    "sampling_params": {"temperature": 0, "max_new_tokens": 32}
-                }, timeout=60)
+                resp = requests.post(
+                    f"{self.base_url}/generate",
+                    json={
+                        "text": prompt,
+                        "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+                    },
+                    timeout=60,
+                )
                 with lock:
                     results.append((resp.status_code, resp.text, keyword))
             except Exception:
@@ -105,21 +139,34 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
             t.join()
 
         for status_code, text, keyword in results:
-            self.assertEqual(status_code, 200, f"Request failed with status {status_code}")
+            self.assertEqual(
+                status_code, 200, f"Request failed with status {status_code}"
+            )
             if keyword:
-                self.assertIn(keyword, text, f"Keyword '{keyword}' not found in: {text[:200]}...")
+                self.assertIn(
+                    keyword, text, f"Keyword '{keyword}' not found in: {text[:200]}..."
+                )
 
     def test_streaming_requests(self):
-        prompts = ["The capital of France is", "The largest planet is", "The speed of light is"]
+        prompts = [
+            "The capital of France is",
+            "The largest planet is",
+            "The speed of light is"
+        ]
         results, lock = [], threading.Lock()
 
         def send_stream(p):
             try:
-                resp = requests.post(f"{self.base_url}/generate", json={
-                    "text": p,
-                    "sampling_params": {"temperature": 0, "max_new_tokens": 32},
-                    "stream": True
-                }, stream=True, timeout=60)
+                resp = requests.post(
+                    f"{self.base_url}/generate",
+                    json={
+                        "text": p,
+                        "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+                        "stream": True,
+                    },
+                    stream=True,
+                    timeout=60,
+                )
                 has_content = any(
                     line and line.startswith(b"data: ") and line[6:] != b"[DONE]"
                     for line in resp.iter_lines()
@@ -151,9 +198,11 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
 
         def send(sp):
             try:
-                resp = requests.post(f"{self.base_url}/generate", json={
-                    "text": "The capital of France is", "sampling_params": sp
-                }, timeout=60)
+                resp = requests.post(
+                    f"{self.base_url}/generate",
+                    json={"text": "The capital of France is", "sampling_params": sp},
+                    timeout=60,
+                )
                 with lock:
                     results.append(resp.status_code)
             except Exception:
@@ -166,10 +215,16 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
         for t in threads:
             t.join()
         success = sum(1 for s in results if s == 200)
-        self.assertEqual(success, len(payloads), f"Sampling params: {success}/{len(payloads)} succeeded")
+        self.assertEqual(
+            success,
+            len(payloads),
+            f"Sampling params: {success}/{len(payloads)} succeeded",
+        )
 
     def test_disable_radix_cache(self):
-        results = send_concurrent_requests(self.base_url, num_requests=20, num_concurrent=8)
+        results = send_concurrent_requests(
+            self.base_url, num_requests=20, num_concurrent=8
+        )
         success = sum(1 for r in results if r["status_code"] == 200)
         self.assertEqual(success, 20, f"Radix cache disabled: {success}/20 succeeded")
         for r in results:
@@ -183,9 +238,14 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
         )
         metrics = run_eval(args)
         accuracy = 0.86
-        self.assertGreaterEqual(metrics["accuracy"], accuracy,
-                                f"GSM8K accuracy {metrics['accuracy']} < {accuracy}")
-        logger.info(f"GSM8K accuracy with batch_size=64 timeout=0.001: {metrics['accuracy']}")
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            accuracy,
+            f"GSM8K accuracy {metrics['accuracy']} < {accuracy}",
+        )
+        logger.info(
+            f"GSM8K accuracy with batch_size=64 timeout=0.001: {metrics['accuracy']}"
+        )
 
 
 class TestBatchSize1Timeout0p005(CustomTestCase):
@@ -193,9 +253,11 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = launch_server_with_params(
-            QWEN3_32B_WEIGHTS_PATH, cls.base_url,
-            batch_size=1, batch_timeout=0.005,
-            extra_args=["--disable-radix-cache"]
+            QWEN3_32B_WEIGHTS_PATH,
+            cls.base_url,
+            batch_size=1,
+            batch_timeout=0.005,
+            extra_args=["--disable-radix-cache"],
         )
 
     @classmethod
@@ -203,7 +265,9 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_high_concurrency(self):
-        results = send_concurrent_requests(self.base_url, num_requests=20, num_concurrent=4)
+        results = send_concurrent_requests(
+            self.base_url, num_requests=20, num_concurrent=4
+        )
         success = sum(1 for r in results if r["status_code"] == 200)
         self.assertEqual(success, 20, f"Expected 20 successes, got {success}")
         for r in results:
@@ -217,8 +281,16 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
             ("Describe the water cycle briefly.", "water"),
         ]
         long = [
-            ("Describe the history of the Roman Empire and its influence on modern culture " * 3, "Roman"),
-            ("Explain how large language models are trained, evaluated, and deployed " * 3, "trained"),
+            (
+                "Describe the history of the Roman Empire and its influence on modern culture "
+                * 3,
+                "Roman",
+            ),
+            (
+                "Explain how large language models are trained, evaluated, and deployed "
+                * 3,
+                "trained",
+            ),
         ]
         all_prompts = short + medium + long
         results, lock = [], threading.Lock()
@@ -229,10 +301,14 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
             else:
                 prompt, keyword = item, None
             try:
-                resp = requests.post(f"{self.base_url}/generate", json={
-                    "text": prompt,
-                    "sampling_params": {"temperature": 0, "max_new_tokens": 32}
-                }, timeout=60)
+                resp = requests.post(
+                    f"{self.base_url}/generate",
+                    json={
+                        "text": prompt,
+                        "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+                    },
+                    timeout=60,
+                )
                 with lock:
                     results.append((resp.status_code, resp.text, keyword))
             except Exception:
@@ -246,21 +322,34 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
             t.join()
 
         for status_code, text, keyword in results:
-            self.assertEqual(status_code, 200, f"Request failed with status {status_code}")
+            self.assertEqual(
+                status_code, 200, f"Request failed with status {status_code}"
+            )
             if keyword:
-                self.assertIn(keyword, text, f"Keyword '{keyword}' not found in: {text[:200]}...")
+                self.assertIn(
+                    keyword, text, f"Keyword '{keyword}' not found in: {text[:200]}..."
+                )
 
     def test_streaming_requests(self):
-        prompts = ["The capital of France is", "The largest planet is", "The speed of light is"]
+        prompts = [
+            "The capital of France is"
+            "The largest planet is",
+            "The speed of light is",
+        ]
         results, lock = [], threading.Lock()
 
         def send_stream(p):
             try:
-                resp = requests.post(f"{self.base_url}/generate", json={
-                    "text": p,
-                    "sampling_params": {"temperature": 0, "max_new_tokens": 32},
-                    "stream": True
-                }, stream=True, timeout=60)
+                resp = requests.post(
+                    f"{self.base_url}/generate",
+                    json={
+                        "text": p,
+                        "sampling_params": {"temperature": 0, "max_new_tokens": 32},
+                        "stream": True,
+                    },
+                    stream=True,
+                    timeout=60,
+                )
                 has_content = any(
                     line and line.startswith(b"data: ") and line[6:] != b"[DONE]"
                     for line in resp.iter_lines()
@@ -292,9 +381,11 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
 
         def send(sp):
             try:
-                resp = requests.post(f"{self.base_url}/generate", json={
-                    "text": "The capital of France is", "sampling_params": sp
-                }, timeout=60)
+                resp = requests.post(
+                    f"{self.base_url}/generate",
+                    json={"text": "The capital of France is", "sampling_params": sp},
+                    timeout=60,
+                )
                 with lock:
                     results.append(resp.status_code)
             except Exception:
@@ -307,10 +398,16 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
         for t in threads:
             t.join()
         success = sum(1 for s in results if s == 200)
-        self.assertEqual(success, len(payloads), f"Sampling params: {success}/{len(payloads)} succeeded")
+        self.assertEqual(
+            success,
+            len(payloads),
+            f"Sampling params: {success}/{len(payloads)} succeeded",
+        )
 
     def test_disable_radix_cache(self):
-        results = send_concurrent_requests(self.base_url, num_requests=20, num_concurrent=8)
+        results = send_concurrent_requests(
+            self.base_url, num_requests=20, num_concurrent=8
+        )
         success = sum(1 for r in results if r["status_code"] == 200)
         self.assertEqual(success, 20, f"Radix cache disabled: {success}/20 succeeded")
         for r in results:
@@ -323,9 +420,15 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
         )
         metrics = run_eval(args)
         accuracy = 0.86
-        self.assertGreaterEqual(metrics["accuracy"], accuracy,
-                                f"GSM8K accuracy {metrics['accuracy']} < {accuracy}")
-        logger.info(f"GSM8K accuracy with batch_size=1 timeout=0.005: {metrics['accuracy']}")
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            accuracy,
+            f"GSM8K accuracy {metrics['accuracy']} < {accuracy}",
+        )
+        logger.info(
+            f"GSM8K accuracy with batch_size=1 timeout=0.005: {metrics['accuracy']}"
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
