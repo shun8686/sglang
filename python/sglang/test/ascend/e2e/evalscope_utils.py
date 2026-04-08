@@ -49,8 +49,14 @@ def run_evalscope_accuracy_test(
     limit=None,
     work_dir=None,
 ):
+    if generation_config is not None and not isinstance(generation_config, dict):
+        try:
+            generation_config = generation_config.model_dump()
+        except AttributeError:
+            pass
+
     task_config = TaskConfig(model=model, eval_type=eval_type, api_url=api_url)
-    task_config.api_key = "EMPTY" if generation_config is None else api_key
+    task_config.api_key = "EMPTY" if api_key is None else api_key
     task_config.datasets = DATASET_DEFAULT if datasets is None else datasets
     task_config.dataset_args = (
         DATASET_ARGS_DEFAULT if dataset_args is None else dataset_args
