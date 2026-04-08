@@ -1,15 +1,9 @@
-import datetime
 import logging
-import os
 import unittest
 
-from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
-)
-from sglang.test.test_utils import (
-    popen_launch_server,
 )
 
 logging.basicConfig(
@@ -29,7 +23,7 @@ ENVS = {
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "200",
     "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
-    "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "6560",
+    "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "360",
     "DEEPEP_NORMAL_COMBINE_ENABLE_LONG_SEQ": "1",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "TASK_QUEUE_ENABLE": "1",
@@ -64,11 +58,11 @@ OTHER_ARGS = [
     0.85,
     "--disable-radix-cache",
     "--max-prefill-tokens",
-    65536,
-    # "--context-length",
-    # 26384,
+    3600,
+    "--context-length",
+    26384,
     "--max-total-tokens",
-    1700000,
+    870000,
     "--dp-size",
     2,
     "--enable-dp-attention",
@@ -86,16 +80,18 @@ OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-running-requests",
-    100,
+    340,
     "--cuda-graph-bs",
     2,
     4,
     8,
     16,
-    20,
-    36,
+    32,
     48,
-    50,
+    96,
+    128,
+    140,
+    170,
     "--mamba-ssm-dtype",
     "bfloat16",
     "--moe-a2a-backend",
@@ -111,71 +107,21 @@ OTHER_ARGS = [
 ]
 
 
-class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
+class TestQwen3CoderNext(TestAscendLtsTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
-    max_concurrency = 80
+    dataset_name = "random"
+    max_concurrency = 340
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
-    random_range_ratio = 0.5
-    ttft = 10000
+    random_range_ratio = 1
     tpot = 100
-    output_token_throughput = 500
-    accuracy = {"gsm8k": 0.90, "mmlu": 0.80}
+    output_token_throughput = 9999
 
-    @classmethod
-    def setUpClass(cls):
-        cls.host = "0.0.0.0"
-        cls.port = 30010
-        cls.base_url = f"http://{cls.host}:{cls.port}"
-        env = os.environ.copy()
-        for key, value in env.items():
-            print(f"ENV_VAR_SYS {key}:{value}")
-        if cls.envs:
-            for key, value in cls.envs.items():
-                print(f"ENV_VAR_CASE {key}:{value}")
-                env[key] = value
-
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=cls.timeout,
-            other_args=cls.other_args,
-            env=env,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def testLtsQwen3CoderNext(self):
-        i = 0
-        while True:
-            i = i + 1
-            current_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            logger.info(
-                f"====={current_time}  Execute the {i}-th long-term stability test====="
-            )
-
-            long_seq_configs = {
-                "64k+1k": {
-                    "input_len": 65536,
-                    "output_len": 1024,
-                    "max_concurrency": 1,
-                    "num_prompts": 1,
-                    "ttft": 100000,
-                    "tpot": 1000,
-                    "tps": 1,
-                }
-            }
-            self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
-
-            self.run_mmlu()
-            self.run_gsm8k()
-            self.run_throughput()
-            # self.run_evalscope()
+    def testQwen3CoderNext(self):
+        self.run_throughput()
 
 
 if __name__ == "__main__":
