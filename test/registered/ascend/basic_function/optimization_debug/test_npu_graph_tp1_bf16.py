@@ -38,6 +38,8 @@ class TestAscendGraphTp1Bf16(CustomTestCase):
             0.8,
             "--attention-backend",
             "ascend",
+            "--base-gpu-id",
+            8,
         ]
 
     def test_a_gsm8k(self):
