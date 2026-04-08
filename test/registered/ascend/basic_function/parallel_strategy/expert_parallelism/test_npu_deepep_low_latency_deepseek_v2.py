@@ -47,6 +47,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 0.7,
             ],
             env={
+                "ASCEND_LAUNCH_BLOCKING": "1",
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
                 "HCCL_BUFFSIZE": "2048",
