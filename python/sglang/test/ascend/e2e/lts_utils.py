@@ -271,8 +271,6 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             str(self.base_url),
             "--eval-type",
             "openai_api",
-            "--generation-config",
-            json.dumps(generation_config),
             "--datasets",
             json.dumps(["gsm8k"]),
             "--dataset-args",
