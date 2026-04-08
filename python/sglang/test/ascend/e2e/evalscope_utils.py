@@ -60,9 +60,9 @@ def run_evalscope_accuracy_test(
         "--eval-type",
         eval_type,
         "--datasets",
-        json.dumps(datasets),
+        datasets,
         "--dataset-args",
-        json.dumps(dataset_args),
+        dataset_args,
         "--api-url",
         api_url,
         "--api-key",
@@ -72,9 +72,9 @@ def run_evalscope_accuracy_test(
     ]
 
     if generation_config is not None:
-        cmd_args.extend(["--generation-config", json.dumps(generation_config)])
+        cmd_args.extend(["--generation-config", generation_config])
     else:
-        cmd_args.extend(["--generation-config", json.dumps(GENERATION_CONFIG_DEFAULT)])
+        cmd_args.extend(["--generation-config", GENERATION_CONFIG_DEFAULT])
 
     if limit is not None:
         cmd_args.extend(["--limit", str(limit)])
@@ -84,7 +84,7 @@ def run_evalscope_accuracy_test(
     else:
         cmd_args.extend(["--work-dir", WORK_DIR_DEFAULT])
 
-    logger.info(f"Executing command: {' '.join(cmd_args)}")
+    logger.info(f"Executing command: {cmd_args}")
 
     process = subprocess.Popen(
         cmd_args,
