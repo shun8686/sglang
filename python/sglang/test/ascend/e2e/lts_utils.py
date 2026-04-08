@@ -277,6 +277,8 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             json.dumps({"gsm8k": {}}),
             "--eval-batch-size",
             "16",
+            "--generation-config",
+            json.dumps(generation_config),
             "--work-dir",
             "./evalscope_result/",
         ]
