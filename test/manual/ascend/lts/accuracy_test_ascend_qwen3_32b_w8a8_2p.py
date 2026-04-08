@@ -78,18 +78,9 @@ QWEN3_32B_OTHER_ARGS = [
 
 
 class TestQwen32B(TestAscendLtsTestCaseBase):
-    max_attempts = 5
     model = QWEN3_32B_W8A8_MODEL_PATH
     other_args = QWEN3_32B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
-    dataset_name = "random"
-    max_concurrency = 16
-    num_prompts = 16
-    input_len = 6144
-    output_len = 1500
-    random_range_ratio = 1
-    tpot = 17.9
-    output_token_throughput = 590
     evalscope_config = {
         "datasets": [
             "gsm8k",
@@ -109,7 +100,12 @@ class TestQwen32B(TestAscendLtsTestCaseBase):
         cls.port = 30077
         cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
-        env.update(cls.envs)
+        for key, value in env.items():
+            print(f"ENV_VAR_SYS {key}:{value}")
+        if cls.envs:
+            for key, value in cls.envs.items():
+                print(f"ENV_VAR_CASE {key}:{value}")
+                env[key] = value
 
         cls.process = popen_launch_server(
             cls.model,

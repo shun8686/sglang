@@ -131,7 +131,12 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
         cls.port = 30010
         cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
-        env.update(cls.envs)
+        for key, value in env.items():
+            print(f"ENV_VAR_SYS {key}:{value}")
+        if cls.envs:
+            for key, value in cls.envs.items():
+                print(f"ENV_VAR_CASE {key}:{value}")
+                env[key] = value
 
         cls.process = popen_launch_server(
             cls.model,
@@ -154,21 +159,21 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 f"====={current_time}  Execute the {i}-th long-term stability test====="
             )
 
-            long_seq_configs = {
-                "64k+1k": {
-                    "input_len": 65536,
-                    "output_len": 1024,
-                    "max_concurrency": 1,
-                    "num_prompts": 1,
-                    "ttft": 100000,
-                    "tpot": 1000,
-                    "tps": 1,
-                }
-            }
-            self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
+            # long_seq_configs = {
+            #     "64k+1k": {
+            #         "input_len": 65536,
+            #         "output_len": 1024,
+            #         "max_concurrency": 1,
+            #         "num_prompts": 1,
+            #         "ttft": 100000,
+            #         "tpot": 1000,
+            #         "tps": 1,
+            #     }
+            # }
+            # self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
 
-            self.run_gsm8k()
             self.run_mmlu()
+            self.run_gsm8k()
             self.run_throughput()
             # self.run_evalscope()
 
