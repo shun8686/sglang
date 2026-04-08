@@ -35,8 +35,9 @@ class TestQwen3Next(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        # cls.base_url = DEFAULT_URL_FOR_TEST
         cls.model = "/home/weights/Qwen3-Next-80B-A3B-Instruct"
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.base_url = "http://127.0.0.1:6666"
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
