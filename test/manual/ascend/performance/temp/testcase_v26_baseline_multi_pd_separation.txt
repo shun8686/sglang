@@ -1,1 +1,2 @@
 2|2|test/manual/ascend/performance/test_ascend_deepseek_v3_2_w8a8_1p1d_32p_in128k_out1k_26ms.py
+1|2|test/manual/ascend/performance/v26/test_ascend_deepseek_r1_w8a8_1p1d_24p_in2k_out2k_50ms.py
