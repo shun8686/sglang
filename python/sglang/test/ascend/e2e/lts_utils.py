@@ -102,8 +102,8 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         "dataset_args": {"math_500": {}},
         "eval_batch_size": 16,
     }
-    # datasets = ["aime24", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
-    # dataset_args = {"aime24": {}, "math_500": {}, "gpqa_diamaond": {}, "gsm8k": {}, "ceval": {}, "mmlu": {}, "mmlu_pro": {}},
+    # datasets = ["aime25", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
+    # dataset_args = {"aime25": {}, "math_500": {}, "gpqa_diamaond": {}, "gsm8k": {}, "ceval": {}, "mmlu": {}, "mmlu_pro": {}},
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.

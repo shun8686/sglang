@@ -117,7 +117,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
     output_token_throughput = 1200
     evalscope_config = {
         "datasets": [
-            "aime24",
+            "aime25",
             "math_500",
             "gpqa_diamond",
             "gsm8k",
@@ -126,7 +126,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
             "mmlu_pro",
         ],
         "dataset_args": {
-            "aime24": {"few_shot_num": 0},
+            "aime25": {"few_shot_num": 0},
             "math_500": {
                 "few_shot_num": 0,
                 "subset_list": ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"],
@@ -139,7 +139,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         },
         "eval_batch_size": 16,
         "generation_config": {
-            "aime24": {
+            "aime25": {
                 "max_tokens": 25000,
                 "top_p": 0.95,
                 "temperature": 0.6,

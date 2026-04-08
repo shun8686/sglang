@@ -154,11 +154,6 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 f"====={current_time}  Execute the {i}-th long-term stability test====="
             )
 
-            self.run_evalscope()
-            self.run_gsm8k()
-            self.run_mmlu()
-            self.run_throughput()
-
             long_seq_configs = {
                 "64k+1k": {
                     "input_len": 65536,
@@ -171,6 +166,11 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 }
             }
             self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
+
+            self.run_gsm8k()
+            self.run_mmlu()
+            self.run_throughput()
+            # self.run_evalscope()
 
 
 if __name__ == "__main__":
