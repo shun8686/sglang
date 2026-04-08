@@ -133,8 +133,8 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
             },
             "gpqa_diamond": {"subset_list": ["default"]},
             "gsm8k": {"few_shot_num": 8},
-            "ceval": {},
-            "mmlu": {},
+            "ceval": {"few_shot_num": 5},
+            "mmlu": {"few_shot_num": 5},
             "mmlu_pro": {},
         },
         "eval_batch_size": 16,
@@ -163,9 +163,9 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
                 "temperature": 0.0,
                 "n": 1,
             },
-            "ceval": {},
-            "mmlu": {},
-            "mmlu_pro": {},
+            "ceval": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
+            "mmlu": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
+            "mmlu_pro": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
         },
     }
 

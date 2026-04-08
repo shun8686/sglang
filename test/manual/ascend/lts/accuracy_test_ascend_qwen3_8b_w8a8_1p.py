@@ -90,24 +90,30 @@ class TestQwen8B(TestAscendLtsTestCaseBase):
     output_token_throughput = 930
     evalscope_config = {
         "datasets": [
+            "gsm8k",
             "aime24",
             "math_500",
-            "gpqa_diamaond",
-            "gsm8k",
+            "gpqa_diamond",
             "ceval",
             "mmlu",
-            "mmlu_pro",
         ],
         "dataset_args": {
-            "aime24": {},
-            "math_500": {},
-            "gpqa_diamaond": {},
-            "gsm8k": {},
-            "ceval": {},
-            "mmlu": {},
-            "mmlu_pro": {},
+            "gsm8k": {"few_shot_num": 8},
+            "aime24": {"few_shot_num": 0},
+            "math_500": {"few_shot_num": 0},
+            "gpqa_diamond": {"few_shot_num": 0},
+            "ceval": {"few_shot_num": 5},
+            "mmlu": {"few_shot_num": 5},
         },
         "eval_batch_size": 16,
+        "generation_config": {
+            "gsm8k": {"max_tokens": 2048, "temperature": 0.0, "top_p": 1.0},
+            "aime24": {"max_tokens": 8192, "temperature": 0.6, "top_p": 0.95},
+            "math_500": {"max_tokens": 8192, "temperature": 0.6, "top_p": 0.95},
+            "gpqa_diamond": {"max_tokens": 8192, "temperature": 0.6, "top_p": 0.95},
+            "ceval": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
+            "mmlu": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
+        },
     }
 
     @classmethod
