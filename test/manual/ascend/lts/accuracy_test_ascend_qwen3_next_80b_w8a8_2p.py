@@ -119,7 +119,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         "datasets": [
             "aime24",
             "math_500",
-            "gpqa_diamaond",
+            "gpqa_diamond",
             "gsm8k",
             "ceval",
             "mmlu",
@@ -131,7 +131,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
                 "few_shot_num": 0,
                 "subset_list": ["Level 1", "Level 2", "Level 3", "Level 4", "Level 5"],
             },
-            "gpqa_diamaond": {"subset_list": ["default"]},
+            "gpqa_diamond": {"subset_list": ["default"]},
             "gsm8k": {"few_shot_num": 8},
             "ceval": {},
             "mmlu": {},
@@ -139,10 +139,33 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         },
         "eval_batch_size": 16,
         "generation_config": {
-            "max_tokens": 25000,
-            "top_p": 0.95,
-            "temperature": 0.6,
-            "n": 1,
+            "aime24": {
+                "max_tokens": 25000,
+                "top_p": 0.95,
+                "temperature": 0.6,
+                "n": 1,
+            },
+            "math_500": {
+                "max_tokens": 25000,
+                "top_p": 0.95,
+                "temperature": 0.6,
+                "n": 1,
+            },
+            "gpqa_diamond": {
+                "max_tokens": 25000,
+                "top_p": 0.95,
+                "temperature": 0.6,
+                "n": 1,
+            },
+            "gsm8k": {
+                "max_tokens": 2048,
+                "top_p": 1.0,
+                "temperature": 0.0,
+                "n": 1,
+            },
+            "ceval": {},
+            "mmlu": {},
+            "mmlu_pro": {},
         },
     }
 
