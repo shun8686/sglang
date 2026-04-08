@@ -34,7 +34,8 @@ class TestQwen3Next(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        # cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        cls.model = "/home/weights/Qwen3-Next-80B-A3B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -55,7 +56,12 @@ class TestQwen3Next(CustomTestCase):
                 "--watchdog-timeout",
                 9000,
                 "--disable-radix-cache",
-                "--disable-cuda-graph",
+                # "--disable-cuda-graph",
+                "--cuda-graph-bs",
+                2,
+                4,
+                6,
+                8,
                 "--chunked-prefill-size",
                 1024,
                 "--max-prefill-tokens",
@@ -68,6 +74,7 @@ class TestQwen3Next(CustomTestCase):
                 "low_latency",
             ],
             env={
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
                 "HCCL_OP_EXPANSION_MODE": "AIV",
