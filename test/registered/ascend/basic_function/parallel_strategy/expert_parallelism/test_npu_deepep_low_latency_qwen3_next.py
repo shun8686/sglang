@@ -74,6 +74,7 @@ class TestQwen3Next(CustomTestCase):
                 "low_latency",
             ],
             env={
+                "ASCEND_LAUNCH_BLOCKING": "1",
                 "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "3000",
                 "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
                 "SGLANG_DEEPEP_BF16_DISPATCH": "1",
