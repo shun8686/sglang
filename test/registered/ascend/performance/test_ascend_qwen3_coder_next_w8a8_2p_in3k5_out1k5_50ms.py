@@ -1,9 +1,9 @@
 import logging
 import unittest
 
-from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 
 logging.basicConfig(
@@ -107,7 +107,7 @@ OTHER_ARGS = [
 ]
 
 
-class TestQwen3CoderNext(TestAscendLtsTestCaseBase):
+class TestQwen3CoderNext(TestAscendPerformanceTestCaseBase):
     model = MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
