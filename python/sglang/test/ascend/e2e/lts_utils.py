@@ -4,6 +4,7 @@ import subprocess
 from types import SimpleNamespace
 from urllib.parse import urlparse
 
+from sglang.test.ascend.e2e.evalscope_utils import run_evalscope_accuracy_test
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     E2E_TOLERANCE,
@@ -244,8 +245,6 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
     def run_evalscope(self):
         import json
 
-        ssl._create_default_https_context = ssl._create_unverified_context
-
         generation_config = {
             "do_sample": True,
             "max_tokens": 1024,
@@ -261,65 +260,15 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
         }
 
-        cmd_args = [
-            "evalscope/bin/python",
-            "-m",
-            "sglang.test.ascend.e2e.evalscope_utils",
-            "--model",
-            self.model,
-            "--api-url",
-            str(self.base_url),
-            "--eval-type",
-            "openai_api",
-            "--datasets",
-            json.dumps(["gsm8k"]),
-            "--dataset-args",
-            json.dumps({"gsm8k": {}}),
-            "--eval-batch-size",
-            "16",
-            "--generation-config",
-            json.dumps(generation_config),
-            "--work-dir",
-            "./evalscope_result/",
-        ]
-        logger.info(f"Command: {' '.join(cmd_args)}")
-
-        process = subprocess.Popen(
-            cmd_args,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1,
+        run_evalscope_accuracy_test(
+            model=self.model,
+            api_url=self.base_url,
+            datasets=json.dumps(["gsm8k"]),
+            dataset_args=json.dumps({"gsm8k": {}}),
+            eval_type="openai_api",
+            eval_batch_size="16",
+            generation_config=json.dumps(generation_config),
+            work_dir="./evalscope_result/",
         )
-        logger.info(f"Started process with PID: {process.pid}")
 
-        logger.info(f"Monitoring process {process.pid}...")
-        try:
-            while True:
-                line = process.stdout.readline()
-                if not line and process.poll() is not None:
-                    break
-                if line:
-                    logger.info(f"Process {process.pid}: {line.strip()}")
-
-            exit_code = process.wait()
-            logger.info(f"Process {process.pid} exited with code: {exit_code}")
-
-        except KeyboardInterrupt:
-            logger.info(
-                f"Keyboard interrupt received, terminating process {process.pid}..."
-            )
-            process.terminate()
-            try:
-                process.wait(timeout=5)
-                logger.info(f"Process {process.pid} terminated")
-            except subprocess.TimeoutExpired:
-                logger.warning(
-                    f"Process {process.pid} did not terminate gracefully, killing it..."
-                )
-                process.kill()
-                logger.info(f"Process {process.pid} killed")
-        except Exception as e:
-            logger.error(f"Error monitoring process {process.pid}: {e}")
-            process.terminate()
-            process.wait(timeout=5)
+        logger.info("Finished evalscope test.")

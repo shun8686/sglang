@@ -2,8 +2,6 @@ import argparse
 import json
 import logging
 
-from evalscope import TaskConfig, run_task
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -39,38 +37,98 @@ WORK_DIR_DEFAULT = "/root/.cache/tests/output/accuracy/"
 
 def run_evalscope_accuracy_test(
     model,
+    api_url,
+    datasets,
+    dataset_args,
+    eval_batch_size,
     eval_type="openai_api",
-    api_url=None,
-    api_key=None,
-    datasets=None,
-    dataset_args=None,
-    eval_batch_size=128,
+    api_key="EMPTY",
     generation_config=None,
     limit=None,
     work_dir=None,
 ):
-    if generation_config is not None and not isinstance(generation_config, dict):
-        try:
-            generation_config = generation_config.model_dump()
-        except AttributeError:
-            pass
+    import ssl
+    import subprocess
 
-    task_config = TaskConfig(model=model, eval_type=eval_type, api_url=api_url)
-    task_config.api_key = "EMPTY" if api_key is None else api_key
-    task_config.datasets = DATASET_DEFAULT if datasets is None else datasets
-    task_config.dataset_args = (
-        DATASET_ARGS_DEFAULT if dataset_args is None else dataset_args
-    )
-    task_config.eval_batch_size = eval_batch_size
-    task_config.generation_config = (
-        GENERATION_CONFIG_DEFAULT if generation_config is None else generation_config
-    )
+    ssl._create_default_https_context = ssl._create_unverified_context
+
+    cmd_args = [
+        "evalscope/bin/evalscope",
+        "eval",
+        "--model",
+        model,
+        "--eval-type",
+        eval_type,
+        "--datasets",
+        json.dumps(datasets),
+        "--dataset-args",
+        json.dumps(dataset_args),
+        "--api-url",
+        api_url,
+        "--api-key",
+        api_key,
+        "--eval-batch-size",
+        str(eval_batch_size),
+    ]
+
+    if eval_batch_size is not None:
+        cmd_args.extend(["--eval-batch-size", str(eval_batch_size)])
+
+    if generation_config is not None:
+        cmd_args.extend(["--generation-config", json.dumps(generation_config)])
+    else:
+        cmd_args.extend(["--generation-config", json.dumps(GENERATION_CONFIG_DEFAULT)])
+
     if limit is not None:
-        task_config.limit = limit
-    task_config.work_dir = WORK_DIR_DEFAULT if work_dir is None else work_dir
+        cmd_args.extend(["--limit", str(limit)])
 
-    result = run_task(task_config)
-    logger.info(result)
+    if work_dir is not None:
+        cmd_args.extend(["--work-dir", work_dir])
+    else:
+        cmd_args.extend(["--work-dir", WORK_DIR_DEFAULT])
+
+    logger.info(f"Executing command: {' '.join(cmd_args)}")
+
+    process = subprocess.Popen(
+        cmd_args,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+
+    output_lines = []
+    try:
+        for line in iter(process.stdout.readline, ""):
+            line = line.strip()
+            logger.info(line)
+            output_lines.append(line)
+
+        process.wait()
+
+        if process.returncode != 0:
+            logger.error(f"Command failed with return code: {process.returncode}")
+            raise subprocess.CalledProcessError(process.returncode, cmd_args)
+
+        logger.info("Command executed successfully")
+        return "\n".join(output_lines)
+
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received, terminating process...")
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+            logger.info("Process terminated")
+        except subprocess.TimeoutExpired:
+            logger.warning("Process did not terminate gracefully, killing it...")
+            process.kill()
+            logger.info("Process killed")
+        raise
+    except Exception as e:
+        logger.error(f"Error executing command: {e}")
+        process.terminate()
+        process.wait(timeout=5)
+        raise
 
 
 if __name__ == "__main__":
