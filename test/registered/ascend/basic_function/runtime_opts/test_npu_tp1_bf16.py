@@ -16,7 +16,8 @@ register_npu_ci(est_time=400, suite="stage-b-test-1-npu-a2", nightly=False)
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 TEST_MODEL_MATRIX = {
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct": {
+    # "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct": {
+    "/home/weights/Qwen/Qwen2.5-7B-Instruct": {
         "accuracy": 0.84,
         "latency": 150,
         "output_throughput": 30,
@@ -38,6 +39,8 @@ class TestAscendTp1Bf16(CustomTestCase):
             0.8,
             "--attention-backend",
             "ascend",
+            "--base-gpu-id",
+            8,
         ]
 
     def test_a_gsm8k(self):
