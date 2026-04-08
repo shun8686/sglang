@@ -84,7 +84,7 @@ def run_evalscope_accuracy_test(
     else:
         cmd_args.extend(["--work-dir", WORK_DIR_DEFAULT])
 
-    logger.info(f"Executing command: {' '.join(cmd_args)}")
+    logger.info(f"Executing command: {cmd_args}")
 
     process = subprocess.Popen(
         cmd_args,
