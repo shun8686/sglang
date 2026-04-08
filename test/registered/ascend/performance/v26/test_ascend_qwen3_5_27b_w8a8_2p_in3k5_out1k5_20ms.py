@@ -14,7 +14,7 @@ register_npu_ci(
 )
 
 ENVS = {
-"SGLANG_SET_CPU_AFFINITY": "1",
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "ASCEND_LAUNCH_BLOCKING": "1",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_BUFFSIZE": "3000",
