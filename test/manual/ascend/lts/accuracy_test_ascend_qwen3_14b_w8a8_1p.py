@@ -92,11 +92,17 @@ class TestQwen14B(TestAscendLtsTestCaseBase):
     random_range_ratio = 1
     tpot = 14.92
     output_token_throughput = 723
-    evalscope_datasets = (
-        ["aime24", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
-    )
-    evalscope_dataset_args = (
-        {
+    evalscope_config = {
+        "datasets": [
+            "aime24",
+            "math_500",
+            "gpqa_diamaond",
+            "gsm8k",
+            "ceval",
+            "mmlu",
+            "mmlu_pro",
+        ],
+        "dataset_args": {
             "aime24": {},
             "math_500": {},
             "gpqa_diamaond": {},
@@ -105,8 +111,8 @@ class TestQwen14B(TestAscendLtsTestCaseBase):
             "mmlu": {},
             "mmlu_pro": {},
         },
-    )
-    evalscope_eval_batch_size = 16
+        "eval_batch_size": 16,
+    }
 
     @classmethod
     def setUpClass(cls):

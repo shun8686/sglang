@@ -115,11 +115,17 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
     random_range_ratio = 1
     tpot = 14.21
     output_token_throughput = 1200
-    evalscope_datasets = (
-        ["aime24", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
-    )
-    evalscope_dataset_args = (
-        {
+    evalscope_config = {
+        "datasets": [
+            "aime24",
+            "math_500",
+            "gpqa_diamaond",
+            "gsm8k",
+            "ceval",
+            "mmlu",
+            "mmlu_pro",
+        ],
+        "dataset_args": {
             "aime24": {},
             "math_500": {},
             "gpqa_diamaond": {},
@@ -128,8 +134,8 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
             "mmlu": {},
             "mmlu_pro": {},
         },
-    )
-    evalscope_eval_batch_size = 16
+        "eval_batch_size": 16,
+    }
 
     @classmethod
     def setUpClass(cls):
