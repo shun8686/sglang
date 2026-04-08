@@ -105,7 +105,7 @@ class TestQwen8B(TestAscendLtsTestCaseBase):
             "ceval": {"few_shot_num": 5},
             "mmlu": {"few_shot_num": 5},
         },
-        "eval_batch_size": 16,
+        "eval_batch_size": 2,
         "generation_config": {
             "gsm8k": {"max_tokens": 2048, "temperature": 0.0, "top_p": 1.0},
             "aime24": {"max_tokens": 8192, "temperature": 0.6, "top_p": 0.95},
