@@ -97,6 +97,11 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
     mean_e2e_latency = None
     output_token_throughput = None
     accuracy = {"gsm8k": 1, "mmlu": 1}
+    # evalscope_datasets = ["aime24", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
+    evalscope_datasets = ["math_500"]
+    # evalscope_dataset_args = {"aime24": {}, "math_500": {}, "gpqa_diamaond": {}, "gsm8k": {}, "ceval": {}, "mmlu": {}, "mmlu_pro": {}},
+    evalscope_dataset_args = {"math_500": {}}
+    evalscope_eval_batch_size = 16
 
     def _assert_metrics(self, metrics):
         """Assert benchmark metrics against expected values.
@@ -262,10 +267,10 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         run_evalscope_accuracy_test(
             model=self.model,
             api_url=f"{self.base_url}/v1",
-            datasets=["aime24"],
-            dataset_args={"aime24": {}},
+            datasets=self.evalscope_datasets,
+            dataset_args=self.evalscope_dataset_args,
             eval_type="openai_api",
-            eval_batch_size=16,
+            eval_batch_size=self.evalscope_eval_batch_size,
             generation_config=generation_config,
             work_dir="./evalscope_result/",
         )

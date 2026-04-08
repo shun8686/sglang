@@ -1,12 +1,14 @@
-import time
+import os
 import unittest
 
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_14B_EAGLE_MODEL_PATH,
     QWEN3_14B_W8A8_MODEL_PATH,
-    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import popen_launch_server
 
 register_npu_ci(
     est_time=1800,
@@ -77,7 +79,7 @@ QWEN3_14B_OTHER_ARGS = [
 ]
 
 
-class TestQwen14B(TestAscendPerformanceTestCaseBase):
+class TestQwen14B(TestAscendLtsTestCaseBase):
     max_attempts = 5
     model = QWEN3_14B_W8A8_MODEL_PATH
     other_args = QWEN3_14B_OTHER_ARGS
@@ -90,10 +92,44 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 14.92
     output_token_throughput = 723
+    evalscope_datasets = (
+        ["aime24", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
+    )
+    evalscope_dataset_args = (
+        {
+            "aime24": {},
+            "math_500": {},
+            "gpqa_diamaond": {},
+            "gsm8k": {},
+            "ceval": {},
+            "mmlu": {},
+            "mmlu_pro": {},
+        },
+    )
+    evalscope_eval_batch_size = 16
+
+    @classmethod
+    def setUpClass(cls):
+        cls.host = "0.0.0.0"
+        cls.port = 30077
+        cls.base_url = f"http://{cls.host}:{cls.port}"
+        env = os.environ.copy()
+        env.update(cls.envs)
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=cls.timeout,
+            other_args=cls.other_args,
+            env=env,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
 
     def test_qwen3_14b(self):
-        time.sleep(30000)
-        # self.run_throughput()
+        self.run_evalscope()
 
 
 if __name__ == "__main__":
