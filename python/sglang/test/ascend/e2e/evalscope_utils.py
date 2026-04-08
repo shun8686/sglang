@@ -59,8 +59,6 @@ def run_evalscope_accuracy_test(
         model,
         "--eval-type",
         eval_type,
-        "--datasets",
-        json.dumps(datasets),
         "--dataset-args",
         json.dumps(dataset_args),
         "--api-url",
@@ -70,6 +68,10 @@ def run_evalscope_accuracy_test(
         "--eval-batch-size",
         str(eval_batch_size),
     ]
+
+    datasets_args = ["--datasets"]
+    datasets_args.extend(datasets)
+    cmd_args.extend(datasets_args)
 
     if generation_config is not None:
         cmd_args.extend(["--generation-config", json.dumps(generation_config)])
