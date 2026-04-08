@@ -74,6 +74,8 @@ class TestQwen3Next(CustomTestCase):
                 "low_latency",
             ],
             env={
+                "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "3000",
+                "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
                 "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
