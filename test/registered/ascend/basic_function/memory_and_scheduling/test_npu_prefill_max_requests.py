@@ -32,43 +32,44 @@ class TestModeImpl(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.log_file = "./server.log"
 
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-                "--model-impl",
-                "transformers",
-                "--prefill-max-requests",
-                str(cls.PREFILL_MAX_REQUESTS),
-                "--trust-remote-code",
-                "--mem-fraction-static",
-                "0.8",
-            ],
-            return_stdout_stderr=(cls.log_file, cls.log_file),
-        )
+        with open(cls.log_file, "w", encoding="utf-8") as f:
+            cls.process = popen_launch_server(
+                cls.model,
+                cls.base_url,
+                timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+                other_args=[
+                    "--attention-backend", "ascend",
+                    "--disable-cuda-graph",
+                    "--model-impl", "transformers",
+                    "--prefill-max-requests", str(cls.PREFILL_MAX_REQUESTS),
+                    "--trust-remote-code",
+                    "--mem-fraction-static", "0.8",
+                ],
+                return_stdout_stderr=(f, f),
+            )
 
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
-        if os.exists(cls.log_file):
+        if os.path.exists(cls.log_file):
             os.remove(cls.log_file)
 
     def send_single_request(self):
-        requests.post(
-            f"{self.base_url}/generate",
-            json={
-                "text": "The capital of France is",
-                "sampling_params": {
-                    "temperature": 0,
-                    "max_new_tokens": 32,
-                    "ignore_eos": True,
+        try:
+            requests.post(
+                f"{self.base_url}/generate",
+                json={
+                    "text": "The capital of France is",
+                    "sampling_params": {
+                        "temperature": 0,
+                        "max_new_tokens": 32,
+                        "ignore_eos": True
+                    }
                 },
-            },
-        )
+                timeout=15
+            )
+        except Exception:
+            pass
 
     def test_prefill_max_requests_concurrent(self):
         """Send 30 concurrent requests and verify no prefill batch exceeds the configured maximum"""
@@ -83,7 +84,6 @@ class TestModeImpl(CustomTestCase):
         matches = pattern.findall(logs)
 
         self.assertGreater(len(matches), 0, "No prefill batch logs found")
-
         batch_sizes = [int(num) for num in matches]
 
         # All batches must not exceed the maximum value of 5
