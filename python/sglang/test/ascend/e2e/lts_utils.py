@@ -243,7 +243,6 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             logger.info(f"---------- Finish long seq test: {seq_type} ----------")
 
     def run_evalscope(self):
-        import json
 
         generation_config = {
             "do_sample": True,
@@ -263,11 +262,11 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
         run_evalscope_accuracy_test(
             model=self.model,
             api_url=self.base_url,
-            datasets=json.dumps(["gsm8k"]),
-            dataset_args=json.dumps({"gsm8k": {}}),
+            datasets=["gsm8k"],
+            dataset_args={"gsm8k": {}},
             eval_type="openai_api",
-            eval_batch_size="16",
-            generation_config=json.dumps(generation_config),
+            eval_batch_size=16,
+            generation_config=generation_config,
             work_dir="./evalscope_result/",
         )
 
