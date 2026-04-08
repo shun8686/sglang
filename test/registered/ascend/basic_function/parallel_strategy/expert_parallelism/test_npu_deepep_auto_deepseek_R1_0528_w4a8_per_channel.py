@@ -107,31 +107,25 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
         # Terminate the model server process after all tests in the class are completed
         kill_process_tree(cls.process.pid)
 
-    # def test_mmlu(self):
-    #     # Test Scenario: Verify the model's performance on MMLU dataset (general knowledge evaluation)
-    #     args = SimpleNamespace(
-    #         base_url=self.base_url,
-    #         model=self.model,
-    #         eval_name="mmlu",
-    #         num_examples=64,
-    #         num_threads=32,
-    #     )
-    #
-    #     # Execute MMLU evaluation and get metrics
-    #     metrics = run_eval(args)
-    #     self.assertGreater(metrics["score"], 0.5)
-
-    def test_gsm8k(self):
-        # Test Scenario: Verify the model's accuracy on GSM8K dataset (mathematical reasoning evaluation)
-        args_1 = SimpleNamespace(
+    def test_mmlu(self):
+        # Test Scenario: Verify the model's performance on MMLU dataset (general knowledge evaluation)
+        args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
             eval_name="mmlu",
             num_examples=64,
             num_threads=32,
         )
+
+        # Execute MMLU evaluation and get metrics
+        metrics = run_eval(args)
+        self.assertGreater(metrics["score"], 0.5)
+
+    def test_gsm8k(self):
+        # Test Scenario: Verify the model's accuracy on GSM8K dataset (mathematical reasoning evaluation)
         args = SimpleNamespace(
             base_url=self.base_url,
+            model=self.model,
             num_shots=8,
             data_path=None,
             num_examples=200,
