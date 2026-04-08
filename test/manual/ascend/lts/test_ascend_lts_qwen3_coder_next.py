@@ -27,7 +27,7 @@ ENVS = {
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "200",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "160",
     "DEEPEP_NORMAL_LONG_SEQ_ROUND": "20",
     "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "3280",
     "DEEPEP_NORMAL_COMBINE_ENABLE_LONG_SEQ": "1",
@@ -86,12 +86,8 @@ OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-running-requests",
-    100,
+    80,
     "--cuda-graph-bs",
-    2,
-    8,
-    16,
-    36,
     50,
     "--mamba-ssm-dtype",
     "bfloat16",
@@ -169,8 +165,8 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
             # }
             # self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
 
-            self.run_mmlu()
             self.run_gsm8k()
+            self.run_mmlu()
             self.run_throughput()
             # self.run_evalscope()
 

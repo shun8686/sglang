@@ -179,7 +179,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             data_path="/tmp/test.jsonl",
             num_questions=1319,
             max_new_tokens=512,
-            parallel=128,
+            parallel=32,
             host=self.host,
             port=self.port,
         )
