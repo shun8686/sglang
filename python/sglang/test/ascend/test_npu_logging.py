@@ -1,6 +1,7 @@
 import os
 import re
 import tempfile
+import time
 
 import requests
 
@@ -122,3 +123,31 @@ class TestNPULoggingBase(CustomTestCase):
 
         self.assertEqual(response.status_code, 200, "Failed to call generate API")
         self.assertIn("Paris", response.text, "Inference out error.")
+
+    def wait_for_log_content(self, timeout=30):
+        """Wait for and return the content of the specified log file, with timeout handling.
+
+        Function Description:
+            Continuously reads the target log file in a loop within the set timeout period,
+            avoids assertion failures caused by reading the log too early before log writing is completed.
+            Returns the log content immediately once the file has non-empty content,
+            otherwise waits and retries reading at intervals until the timeout is reached.
+
+        Args:
+            timeout (int, optional): Maximum waiting time in seconds, default value is 30 seconds.
+
+        Returns:
+            str
+                Full text content read from the log file:
+                - Non-empty string if log content is detected within the timeout period
+                - Empty string if no log content is found after the timeout expires
+        """
+        start_time = time.time()
+        content = ""
+        while time.time() - start_time < timeout:
+            with open(self.out_log_file.name, "r", encoding="utf-8") as f:
+                content = f.read()
+            if content:
+                break
+            time.sleep(0.5)
+        return content
