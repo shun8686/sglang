@@ -251,7 +251,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
     def run_evalscope(self):
 
-        generation_config = {
+        generation_config_default = {
             "do_sample": True,
             "max_tokens": 1024,
             "seed": 3407,
@@ -266,9 +266,15 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
             "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
         }
 
+        generation_config = (
+            self.evalscope_config["generation_config"]
+            if "generation_config" in self.evalscope_config.keys()
+            else generation_config_default
+        )
+
         run_evalscope_accuracy_test(
             model=self.model,
-            api_url=f"{self.base_url}/v1",
+            api_url=f"{self.base_url}/v1/chat/completions",
             datasets=self.evalscope_config["datasets"],
             dataset_args=self.evalscope_config["dataset_args"],
             eval_type="openai_api",

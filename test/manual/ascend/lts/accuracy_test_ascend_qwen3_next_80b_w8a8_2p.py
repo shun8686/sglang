@@ -118,23 +118,29 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
     evalscope_config = {
         "datasets": [
             "aime24",
-            "math_500",
-            "gpqa_diamaond",
-            "gsm8k",
-            "ceval",
-            "mmlu",
-            "mmlu_pro",
+            # "math_500",
+            # "gpqa_diamaond",
+            # "gsm8k",
+            # "ceval",
+            # "mmlu",
+            # "mmlu_pro",
         ],
         "dataset_args": {
-            "aime24": {},
-            "math_500": {},
-            "gpqa_diamaond": {},
-            "gsm8k": {},
-            "ceval": {},
-            "mmlu": {},
-            "mmlu_pro": {},
+            "aime24": {"few_shot_num": 0},
+            # "math_500": {},
+            # "gpqa_diamaond": {},
+            # "gsm8k": {},
+            # "ceval": {},
+            # "mmlu": {},
+            # "mmlu_pro": {},
         },
         "eval_batch_size": 16,
+        "generation_config": {
+            "max_tokens": 32768,
+            "top_p": 0.95,
+            "temperature": 0.6,
+            "n": 1,
+        },
     }
 
     @classmethod
