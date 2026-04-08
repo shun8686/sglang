@@ -261,7 +261,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
         run_evalscope_accuracy_test(
             model=self.model,
-            api_url=self.base_url,
+            api_url=f"{self.base_url}/v1",
             datasets=["gsm8k"],
             dataset_args={"gsm8k": {}},
             eval_type="openai_api",
