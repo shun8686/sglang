@@ -88,11 +88,26 @@ class TestQwen8B(TestAscendLtsTestCaseBase):
     random_range_ratio = 1
     tpot = 11.79
     output_token_throughput = 930
+    evalscope_datasets = (
+        ["aime24", "math_500", "gpqa_diamaond", "gsm8k", "ceval", "mmlu", "mmlu_pro"],
+    )
+    evalscope_dataset_args = (
+        {
+            "aime24": {},
+            "math_500": {},
+            "gpqa_diamaond": {},
+            "gsm8k": {},
+            "ceval": {},
+            "mmlu": {},
+            "mmlu_pro": {},
+        },
+    )
+    evalscope_eval_batch_size = 16
 
     @classmethod
     def setUpClass(cls):
         cls.host = "0.0.0.0"
-        cls.port = 30010
+        cls.port = 30077
         cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
         env.update(cls.envs)
