@@ -71,7 +71,7 @@ QWEN3_8B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     5,
     "--base-gpu-id",
-    12,
+    2,
 ]
 
 
