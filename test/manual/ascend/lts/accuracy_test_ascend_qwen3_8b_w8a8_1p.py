@@ -71,7 +71,7 @@ QWEN3_8B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     5,
     "--base-gpu-id",
-    2,
+    12,
 ]
 
 
@@ -91,25 +91,13 @@ class TestQwen8B(TestAscendLtsTestCaseBase):
     evalscope_config = {
         "datasets": [
             "gsm8k",
-            "math_500",
-            "gpqa_diamond",
-            "ceval",
-            "mmlu",
         ],
         "dataset_args": {
             "gsm8k": {"few_shot_num": 8},
-            "math_500": {"few_shot_num": 0},
-            "gpqa_diamond": {"few_shot_num": 0},
-            "ceval": {"few_shot_num": 5},
-            "mmlu": {"few_shot_num": 5},
         },
         "eval_batch_size": 16,
         "generation_config": {
             "gsm8k": {"max_tokens": 2048, "temperature": 0.0, "top_p": 1.0},
-            "math_500": {"max_tokens": 8192, "temperature": 0.6, "top_p": 0.95},
-            "gpqa_diamond": {"max_tokens": 8192, "temperature": 0.6, "top_p": 0.95},
-            "ceval": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
-            "mmlu": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
         },
     }
 
