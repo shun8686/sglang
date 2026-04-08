@@ -274,7 +274,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
         run_evalscope_accuracy_test(
             model=self.model,
-            api_url=f"{self.base_url}/v1/chat/completions",
+            api_url=f"{self.base_url}/v1",
             datasets=self.evalscope_config["datasets"],
             dataset_args=self.evalscope_config["dataset_args"],
             eval_type="openai_api",
