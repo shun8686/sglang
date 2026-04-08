@@ -3,7 +3,7 @@ import os
 import sys
 import unittest
 
-from lts_utils import TestAscendLtsTestCaseBase
+from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
 

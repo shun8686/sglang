@@ -1,8 +1,8 @@
 import os
 import unittest
-from test.manual.ascend.lts.lts_utils import TestAscendLtsTestCaseBase
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_8B_EAGLE_MODEL_PATH,
     QWEN3_8B_W8A8_MODEL_PATH,

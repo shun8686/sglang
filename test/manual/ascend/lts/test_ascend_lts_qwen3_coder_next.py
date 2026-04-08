@@ -3,9 +3,8 @@ import logging
 import os
 import unittest
 
-from lts_utils import TestAscendLtsTestCaseBase
-
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,

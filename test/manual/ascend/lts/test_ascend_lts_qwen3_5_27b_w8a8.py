@@ -2,9 +2,8 @@ import datetime
 import os
 import unittest
 
-from lts_utils import TestAscendLtsTestCaseBase
-
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.test_utils import (
     popen_launch_server,
@@ -34,7 +33,21 @@ OTHER_ARGS = [
     "--mem-fraction-static",
     0.75,
     "--cuda-graph-bs",
-    2, 4, 6, 8, 10, 16, 20, 24, 28, 32, 48, 56, 64, 96, 112,
+    2,
+    4,
+    6,
+    8,
+    10,
+    16,
+    20,
+    24,
+    28,
+    32,
+    48,
+    56,
+    64,
+    96,
+    112,
     "--enable-multimodal",
     "--quantization",
     "modelslim",
