@@ -159,18 +159,18 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 f"====={current_time}  Execute the {i}-th long-term stability test====="
             )
 
-            # long_seq_configs = {
-            #     "64k+1k": {
-            #         "input_len": 65536,
-            #         "output_len": 1024,
-            #         "max_concurrency": 1,
-            #         "num_prompts": 1,
-            #         "ttft": 100000,
-            #         "tpot": 1000,
-            #         "tps": 1,
-            #     }
-            # }
-            # self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
+            long_seq_configs = {
+                "64k+1k": {
+                    "input_len": 65536,
+                    "output_len": 1024,
+                    "max_concurrency": 1,
+                    "num_prompts": 1,
+                    "ttft": 100000,
+                    "tpot": 1000,
+                    "tps": 1,
+                }
+            }
+            self.run_long_seq_testcase(long_seq_configs=long_seq_configs)
 
             self.run_mmlu()
             self.run_gsm8k()
