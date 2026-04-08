@@ -85,7 +85,7 @@ class TestQwen3Next(CustomTestCase):
                 "STREAMS_PER_DEVICE": "32",
                 "HCCL_OP_EXPANSION_MODE": "AIV",
                 "HCCL_ALGO": "level0:NA;level1:ring",
-                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "80",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "160",
                 "HCCL_BUFFSIZE": "2048",
                 **os.environ,
             },
