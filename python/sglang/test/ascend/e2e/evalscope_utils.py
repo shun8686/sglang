@@ -71,9 +71,6 @@ def run_evalscope_accuracy_test(
         str(eval_batch_size),
     ]
 
-    if eval_batch_size is not None:
-        cmd_args.extend(["--eval-batch-size", str(eval_batch_size)])
-
     if generation_config is not None:
         cmd_args.extend(["--generation-config", json.dumps(generation_config)])
     else:
