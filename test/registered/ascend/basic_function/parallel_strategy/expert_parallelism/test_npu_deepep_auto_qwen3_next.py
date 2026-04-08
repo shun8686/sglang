@@ -3,9 +3,9 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
-)
+# from sglang.test.ascend.test_ascend_utils import (
+#     QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH,
+# )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.run_eval import run_eval
@@ -34,12 +34,13 @@ class TestQwen3Next(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        # cls.model = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_PATH
+        cls.model = "/home/weights/Qwen3-Next-80B-A3B-Instruct"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH * 3,
             other_args=[
                 "--trust-remote-code",
                 "--attention-backend",
@@ -55,7 +56,11 @@ class TestQwen3Next(CustomTestCase):
                 "--watchdog-timeout",
                 9000,
                 "--disable-radix-cache",
-                "--disable-cuda-graph",
+                "--cuda-graph-bs",
+                2,
+                4,
+                6,
+                8,
                 "--max-prefill-tokens",
                 28672,
                 "--max-total-tokens",
@@ -68,6 +73,7 @@ class TestQwen3Next(CustomTestCase):
                 -1,
             ],
             env={
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
                 "HCCL_OP_EXPANSION_MODE": "AIV",
