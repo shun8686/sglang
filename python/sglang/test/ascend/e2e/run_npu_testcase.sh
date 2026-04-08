@@ -1,8 +1,7 @@
 test_case=$1
 
 sglang_source_path=/root/sglang
-cd ${sglang_source_path} || exit
-if [ ! -f "${test_case}" ];then
+if [ ! -f "${sglang_source_path}/${test_case}" ];then
   echo "The test case file is not exist: $test_case"
   exit 0
 fi
@@ -104,10 +103,10 @@ echo "Log path: ${log_path}"
 
 if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
     echo "TROUBLE_SHOTTING=true, the pod will keep alive for four hour."
-    ( python3 -u "${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
+    ( python3 -u "${sglang_source_path}/${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
     sleep 14400
 else
-    python3 -u "${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
+    python3 -u "${sglang_source_path}/${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
 fi
 echo "Finished test case ${test_case}"
 
