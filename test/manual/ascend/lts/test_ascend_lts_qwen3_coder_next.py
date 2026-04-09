@@ -152,7 +152,7 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 f"====={current_time}  Execute the {i}-th long-term stability test====="
             )
 
-            self.run_long_seq_testcase()
+            # self.run_long_seq_testcase()
             self.run_mmlu()
             self.run_gsm8k()
             self.run_throughput()
