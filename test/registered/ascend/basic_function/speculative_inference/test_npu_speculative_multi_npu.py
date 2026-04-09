@@ -124,20 +124,31 @@ class TestNpuSpeculativeDraftParams(CustomTestCase):
             "speculative_draft_model_revision should be 'main'"
         )
 
-        # Optional: send a simple inference to confirm service is functional
+        prompt = "What is the capital of France?"
         resp = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH,
-                "messages": [{"role": "user", "content": "Hi"}],
-                "max_tokens": 16,
+                "messages": [{"role": "user", "content": prompt}],
+                "max_tokens": 64,
+                "temperature": 0,
             },
             timeout=60,
         )
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertIn("choices", data)
-        self.assertGreater(len(data["choices"][0]["message"]["content"].strip()), 0)
+        content = data["choices"][0]["message"]["content"]
+        self.assertGreater(len(content.strip()), 0)
+
+        self.assertIn(
+            "paris",
+            content.lower(),
+            f"Expected 'Paris' in response, but got: {content[:200]}",
+        )
+
+        print(f"Q: {prompt}")
+        print(f"A: {content}")
 
 
 if __name__ == "__main__":

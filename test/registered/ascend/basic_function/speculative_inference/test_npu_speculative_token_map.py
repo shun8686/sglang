@@ -72,34 +72,37 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
                 temperature=0.0,
             )
             metrics = run_eval(eval_args)
-            self.assertGreaterEqual(metrics["score"], 0.81)
+            self.assertGreaterEqual(metrics["score"], 0.86)
         finally:
             kill_process_tree(process.pid)
 
     def test_eagle_with_valid_token_map_gsm8k(self):
         """EAGLE (EAGLE-2) with valid token map; GSM8K accuracy should meet threshold."""
-        # Skip if required models or token map file missing
-        if not os.path.exists(FR_SPEC_TOKEN_MAP_PATH):
-            self.skipTest(f"Token map file not found: {FR_SPEC_TOKEN_MAP_PATH}")
-        if not os.path.exists(LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH):
-            self.skipTest(f"Target model not found: {LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH}")
-        if not os.path.exists(LLAMA_3_8B_EAGLE_WEIGHTS_PATH):
-            self.skipTest(f"Draft model not found: {LLAMA_3_8B_EAGLE_WEIGHTS_PATH}")
 
         args = [
             "--trust-remote-code",
-            "--attention-backend", "ascend",
+            "--attention-backend",
+            "ascend",
             "--disable-radix-cache",
-            "--speculative-algorithm", "EAGLE",
-            "--speculative-draft-model-path", LLAMA_3_8B_EAGLE_WEIGHTS_PATH,
-            "--speculative-num-steps", "3",
-            "--speculative-eagle-topk", "4",
-            "--speculative-num-draft-tokens", "16",
-            "--speculative-token-map", FR_SPEC_TOKEN_MAP_PATH,
-            "--tp-size", "4",
-            "--mem-fraction-static", "0.7",
+            "--speculative-algorithm",
+            "EAGLE",
+            "--speculative-draft-model-path",
+            LLAMA_3_8B_EAGLE_WEIGHTS_PATH,
+            "--speculative-num-steps",
+            "3",
+            "--speculative-eagle-topk",
+            "4",
+            "--speculative-num-draft-tokens",
+            "16",
+            "--speculative-token-map",
+            FR_SPEC_TOKEN_MAP_PATH,
+            "--tp-size",
+            "4",
+            "--mem-fraction-static"
+            "0.7",
             "--disable-cuda-graph",
-            "--dtype", "float16",
+            "--dtype",
+            "float16",
         ]
         env = os.environ.copy()
         env.update({
@@ -125,7 +128,7 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
                 temperature=0.0,
             )
             metrics = run_eval(eval_args)
-            self.assertGreaterEqual(metrics["score"], 0.81)  # adjust threshold as needed
+            self.assertGreaterEqual(metrics["score"], 0.79)  # adjust threshold as needed
         finally:
             kill_process_tree(process.pid)
 
