@@ -125,13 +125,13 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's mathematical reasoning accuracy on the GSM8K dataset
         args = SimpleNamespace(
+            base_url=self.base_url,
+            model=self.model,
             num_shots=8,
             data_path=None,
-            num_questions=200,
+            num_examples=200,
             max_new_tokens=512,
-            parallel=128,
-            host=self.host,
-            port=self.port,
+            num_threads=128,
             eval_name="gsm8k",
         )
         # Execute GSM8K evaluation and get metrics

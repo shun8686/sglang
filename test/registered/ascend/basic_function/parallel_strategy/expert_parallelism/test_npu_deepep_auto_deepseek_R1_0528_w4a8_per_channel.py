@@ -52,7 +52,6 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
                 "--cuda-graph-bs",
                 "4",
                 "8",
-                "16",
                 "20",
                 "21",
                 "22",
