@@ -63,6 +63,12 @@ jobs:
       max-parallel: 2
       matrix:
         test_config:
+          - name: test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms
+            test_case: test/registered/ascend/performance/v26/test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms.py
+            runner: linux-aarch64-a3-16
+          - name: test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms
+            test_case: test/registered/ascend/performance/v26/test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms.py
+            runner: linux-aarch64-a3-16
           - name: test_ascend_glm_4_7_flash_bf16_1p_in2k_out2k_64bs
             test_case: test/registered/ascend/performance/v26/test_ascend_glm_4_7_flash_bf16_1p_in2k_out2k_64bs.py
             runner: linux-aarch64-a3-2
