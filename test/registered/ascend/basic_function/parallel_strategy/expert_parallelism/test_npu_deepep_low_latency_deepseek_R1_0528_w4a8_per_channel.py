@@ -127,7 +127,7 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
-            num_shots=8,
+            num_shots=5,
             data_path=None,
             num_examples=200,
             max_new_tokens=512,
