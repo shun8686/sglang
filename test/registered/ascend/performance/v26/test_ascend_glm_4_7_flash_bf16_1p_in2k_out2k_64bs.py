@@ -10,6 +10,7 @@ register_npu_ci(
     est_time=1800,
     suite="nightly-2-npu-a3",
     nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 GLM_4_7_FLASH_ENVS = {
