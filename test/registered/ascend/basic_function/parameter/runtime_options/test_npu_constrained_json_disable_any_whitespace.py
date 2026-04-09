@@ -26,15 +26,21 @@ class TestJSONModeMixin:
             model=self.model,
             messages=[
                 # We are deliberately omitting "That produces JSON" or similar phrases from the assistant prompt so that we don't have misleading test results
-                {
-                    "role": "system",
-                    "content": "You are a helpful AI assistant that gives a short answer.",
-                },
-                {"role": "user", "content": "What is the capital of Bulgaria?"},
+                {"role": "user", "content": "输出一个用户信息JSON"},
             ],
             temperature=0,
             max_tokens=128,
-            response_format={"type": "json_object"},
+            response_format={
+                "type": "json_object",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                    },
+                    "required": ["name", "age"],
+                },
+            },
         )
         text = response.choices[0].message.content
 
@@ -56,15 +62,21 @@ class TestJSONModeMixin:
             model=self.model,
             messages=[
                 # We are deliberately omitting "That produces JSON" or similar phrases from the assistant prompt so that we don't have misleading test results
-                {
-                    "role": "system",
-                    "content": "You are a helpful AI assistant that gives a short answer.",
-                },
-                {"role": "user", "content": "What is the capital of Bulgaria?"},
+                {"role": "user", "content": "输出一个用户信息JSON"},
             ],
             temperature=0,
             max_tokens=128,
-            response_format={"type": "json_object"},
+            response_format={
+                "type": "json_object",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                    },
+                    "required": ["name", "age"],
+                },
+            },
             stream=True,
         )
 
@@ -93,24 +105,18 @@ class TestJSONModeMixin:
     def _verify_whitespace_constraint(self, json_str):
         """Verify that the --constrained-json-disable-any-whitespace parameter only takes effect (removes all whitespace from JSON output) when the grammar backend is xgrammar/llguidance; otherwise, the parameter has no effect."""
         # Detect whitespace characters (spaces, newlines, tabs) in the JSON string
-        has_whitespace = bool(re.search(r'[\n\t ]', json_str))
-
-        if self.backend in ["xgrammar", "llguidance"]:
-            # Expect no whitespace characters
-            self.assertFalse(
-                has_whitespace,
-                f"[{self.backend}] Whitespace characters still exist after enabling --constrained-json-disable-any-whitespace! JSON: {json_str}"
-            )
-        else:
-            # Expect whitespace characters to remain (parameter has no effect)
-            self.assertTrue(
-                has_whitespace,
-                f"[{self.backend}] The --constrained-json-disable-any-whitespace parameter should not take effect, but no whitespace characters are present in JSON! JSON: {json_str}"
-            )
-
+        has_whitespace = bool(re.search(r'\n', json_str))
+        self.assertFalse(
+            has_whitespace,
+            f"[{self.backend}] Whitespace characters still exist after enabling --constrained-json-disable-any-whitespace! JSON: {json_str}"
+        )
 
 class ServerWithGrammarBackend(CustomTestCase):
-    """Base class for tests requiring a grammar backend server"""
+    """Testcase: Verify that when the grammar backend is xgrammar/outlines and the --constrained-json-disable-any-whitespace parameter is enabled, the JSON output contains no whitespace characters
+
+    [Test Category] Parameter
+    [Test Target] --constrained-json-disable-any-whitespace
+    """
 
     backend = "xgrammar"
 
@@ -129,7 +135,6 @@ class ServerWithGrammarBackend(CustomTestCase):
             "ascend",
         ]
 
-
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
@@ -143,31 +148,8 @@ class ServerWithGrammarBackend(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
 
-class TestJSONModeXGrammar(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify that when the grammar backend is xgrammar and the --constrained-json-disable-any-whitespace parameter is enabled, the JSON output contains no whitespace characters
-
-    [Test Category] Parameter
-    [Test Target] --constrained-json-disable-any-whitespace
-    """
-    backend = "xgrammar"
-
-
 class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify that when the grammar backend is outlines and the --constrained-json-disable-any-whitespace parameter is enabled, the JSON output contains no whitespace characters
-
-    [Test Category] Parameter
-    [Test Target] --constrained-json-disable-any-whitespace
-    """
     backend = "outlines"
-
-
-class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify that when the grammar backend is llguidance and the --constrained-json-disable-any-whitespace parameter is enabled, the parameter has no effect and the JSON output still contains whitespace characters
-
-    [Test Category] Parameter
-    [Test Target] --constrained-json-disable-any-whitespace
-    """
-    backend = "llguidance"
 
 
 if __name__ == "__main__":

@@ -10,7 +10,6 @@ from typing import List, Optional
 import openai
 import requests
 import torch
-from openai import timeout
 
 from sglang.bench_serving import run_benchmark
 from sglang.srt.managers.prefill_delayer import PrefillDelayer
@@ -210,11 +209,11 @@ class TestPrefillDelayerNegotiate(unittest.TestCase):
         )
 
 
-
 # ============================ E2E Tests ============================
 
 class TestPrefillDelayerThroughputOnlineServing(CustomTestCase):
-    """Testcase: 在线服务场景：验证开启PrefillDelayer，对比关闭时，吞吐量至少提升5%
+    """Testcase: Online serving scenario: Verify that throughput is improved by at least 5%
+    when PrefillDelayer is enabled, compared with disabled.
 
     [Test Category] Parameter
     [Test Target] --enable-prefill-delayer
@@ -224,7 +223,6 @@ class TestPrefillDelayerThroughputOnlineServing(CustomTestCase):
             self,
             test_name="online_serving",
             other_launch_args=[
-                # Not really needed, only to test support non-FCFS algorithms
                 "--schedule-policy",
                 "lpm",
                 "--attention-backend",
@@ -241,7 +239,8 @@ class TestPrefillDelayerThroughputOnlineServing(CustomTestCase):
 
 
 class TestPrefillDelayerThroughputOfflineGen(CustomTestCase):
-    """Testcase: 离线生成场景：验证开启PrefillDelayer，对比关闭时，吞吐量至少提升20%
+    """Testcase: Offline generation scenario: Verify that throughput is improved by at least 20%
+    when PrefillDelayer is enabled, compared with disabled.
 
     [Test Category] Parameter
     [Test Target] --enable-prefill-delayer
@@ -372,8 +371,8 @@ class TestPrefillDelayerTokenUsageLowWatermark(CustomTestCase):
             model=model,
             base_url=base_url,
             prefill_delayer=True,
-            other_args=["--max-total-tokens", "50000", "--attention-backend", "ascend", "--disable-cuda-graph",],
-            max_delay_passes=100,
+            other_args=["--max-total-tokens", "50000", "--attention-backend", "ascend",],
+            max_delay_passes=400,
             token_usage_low_watermark=token_usage_low_watermark,
             timeout=6000,
         )
@@ -420,7 +419,7 @@ class TestPrefillDelayerTokenUsageLowWatermark(CustomTestCase):
                 self.assertTrue(
                     (elapsed < thresh) if enabled else (elapsed > thresh),
                     f"DP rank {dp_rank} req {req_idx}: elapsed={elapsed:.2f}s, thresh={thresh}, enabled={enabled}. "
-                    f"Maybe you need a different `max_delay_passes` when using hardware other than H200.",
+                    f"You may need a different `max_delay_passes` on non-H200 hardware.",
                 )
 
         try:
@@ -436,7 +435,8 @@ class TestPrefillDelayerTokenUsageLowWatermark(CustomTestCase):
 
 
 class TestPrefillDelayerAccuracy(CustomTestCase):
-    """Testcase: 验证启用/禁用PrefillDelayer时，模型在mgsm_en数据集上的精度均≥87%
+    """Testcase: Verify that model accuracy on mgsm_en dataset ≥ 87%
+    both when PrefillDelayer is enabled and disabled.
 
     [Test Category] Parameter
     [Test Target] --enable-prefill-delayer
@@ -455,10 +455,8 @@ class TestPrefillDelayerAccuracy(CustomTestCase):
             model=model,
             base_url=base_url,
             other_args=[
-                # Not really needed, only to test support non-FCFS algorithms
                 "--schedule-policy",
                 "lpm",
-                # Use this to ensure prefill delayer will be run
                 "--max-total-tokens",
                 "4096",
                 "--attention-backend",
