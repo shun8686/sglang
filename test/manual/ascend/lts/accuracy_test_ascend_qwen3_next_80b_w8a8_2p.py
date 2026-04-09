@@ -134,7 +134,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
                 "max_tokens": 25000,
                 "temperature": 0.6,
                 "n": 1,
-                "seed": 42,
+                # "seed": 42,
             },
             "math_500": {
                 "max_tokens": 25000,
