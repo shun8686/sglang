@@ -108,13 +108,13 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
     envs = QWEN3_NEXT_80B_A3B_ENVS
     evalscope_config = {
         "datasets": [
+            "mmlu",
+            "mmlu_pro",
             "aime25",
             "math_500",
             "gpqa_diamond",
             "gsm8k",
             "ceval",
-            "mmlu",
-            "mmlu_pro",
         ],
         "dataset_args": {
             "aime25": {"few_shot_num": 0},
@@ -134,37 +134,30 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
                 "max_tokens": 25000,
                 "temperature": 0.6,
                 "n": 1,
-                # "seed": 42,
             },
             "math_500": {
                 "max_tokens": 25000,
                 "temperature": 0.6,
-                "seed": 42,
             },
             "gpqa_diamond": {
                 "max_tokens": 25000,
                 "temperature": 0.6,
-                "seed": 42,
             },
             "gsm8k": {
                 "max_tokens": 2048,
                 "temperature": 0.0,
-                "seed": 42,
             },
             "ceval": {
                 "max_tokens": 512,
                 "temperature": 0.0,
-                "seed": 42,
             },
             "mmlu": {
                 "max_tokens": 512,
                 "temperature": 0.0,
-                "seed": 42,
             },
             "mmlu_pro": {
                 "max_tokens": 512,
                 "temperature": 0.0,
-                "seed": 42,
             },
         },
     }
