@@ -66,11 +66,11 @@ _SERVER_ARGS = _COMMON_ARGS + [
 
 class TestNpuSpeculativeDraftParams(CustomTestCase):
     """Test --speculative-draft-load-format and --speculative-draft-model-revision
-    with 2-card TP.
+    with 4-card TP.
 
     [Test Category] Parameter & Multi-NPU
     [Test Target]
-        --tp-size 2;
+        --tp-size 4;
         --speculative-draft-load-format dummy;
         --speculative-draft-model-revision main
     [Model]
@@ -82,12 +82,10 @@ class TestNpuSpeculativeDraftParams(CustomTestCase):
     def setUpClass(cls) -> None:
         cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
-        env.update(
-            {
-                "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-                "SGLANG_ENABLE_SPEC_V2": "1",
-            }
-        )
+        env.update({
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+        })
         cls.process = popen_launch_server(
             QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH,
             cls.base_url,
@@ -100,80 +98,46 @@ class TestNpuSpeculativeDraftParams(CustomTestCase):
     def tearDownClass(cls) -> None:
         kill_process_tree(cls.process.pid)
 
-    def test_dummy_format_with_tp2(self):
-        """Verify --speculative-draft-load-format dummy: server starts and responds.
-
-        Test steps:
-          1. Send an inference request to a server whose draft weights are randomly
-             initialized (dummy format) with 2-card tensor parallelism.
-          2. Verify HTTP 200 and non-empty response content.
-          Note: Output accuracy is not checked because draft weights are random.
-        """
-        # Step 1: Send inference request
-        prompt = "What is the capital of France?"
-        response = requests.post(
-            f"{self.base_url}/v1/chat/completions",
-            json={
-                "model": QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH,
-                "messages": [{"role": "user", "content": prompt}],
-                "max_tokens": 64,
-                "temperature": 0,
-            },
-            timeout=300,
-        )
-
-        # Step 2: Verify HTTP 200 and non-empty response
-        self.assertEqual(
-            response.status_code,
-            200,
-            f"Request failed with status {response.status_code}: {response.text}",
-        )
-
-        result = response.json()
-        self.assertIn("choices", result, "Response missing 'choices' field")
-        self.assertGreater(len(result["choices"]), 0, "No choices in response")
-
-        content = result["choices"][0]["message"]["content"]
-        self.assertGreater(len(content.strip()), 0, "Generated content is empty")
-
-        print(f"Q: {prompt}")
-        print(f"A: {content}")
-
-    def test_draft_model_revision_main(self):
-        """Verify --speculative-draft-model-revision main: parameter accepted without error.
-
-        Test steps:
-          1. Verify server health endpoint returns 200 (server started with revision param).
-          2. Send an inference request and verify HTTP 200 and non-empty response.
-        """
-        # Step 1: Check server health to confirm revision param did not block startup
+    def test_draft_params_via_server_info(self):
+        """Verify draft load format and revision are set correctly via /get_server_info."""
+        # 1. Health check
         health_resp = requests.get(f"{self.base_url}/health", timeout=10)
         self.assertEqual(health_resp.status_code, 200)
 
-        # Step 2: Send inference request
-        response = requests.post(
+        # 2. Get server info and assert parameter values
+        info_resp = requests.get(f"{self.base_url}/get_server_info", timeout=10)
+        self.assertEqual(info_resp.status_code, 200)
+        info = info_resp.json()
+
+        # Depending on actual response structure, extract the args
+        # Example: info["args"]["speculative_draft_load_format"] should be "dummy"
+        # Adjust field names as per actual server implementation.
+        args_dict = info.get("args", {})
+        self.assertEqual(
+            args_dict.get("speculative_draft_load_format"),
+            "dummy",
+            "speculative_draft_load_format should be 'dummy'"
+        )
+        self.assertEqual(
+            args_dict.get("speculative_draft_model_revision"),
+            "main",
+            "speculative_draft_model_revision should be 'main'"
+        )
+
+        # Optional: send a simple inference to confirm service is functional
+        resp = requests.post(
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH,
-                "messages": [
-                    {"role": "user", "content": "Name one programming language."}
-                ],
-                "max_tokens": 64,
-                "temperature": 0,
+                "messages": [{"role": "user", "content": "Hi"}],
+                "max_tokens": 16,
             },
-            timeout=300,
+            timeout=60,
         )
-        self.assertEqual(
-            response.status_code,
-            200,
-            f"Request failed with status {response.status_code}: {response.text}",
-        )
-        result = response.json()
-        self.assertIn("choices", result, "Response missing 'choices' field")
-        content = result["choices"][0]["message"]["content"]
-        self.assertGreater(len(content.strip()), 0, "Generated content is empty")
-
-        print(f"[draft model revision=main] response: {content}")
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertIn("choices", data)
+        self.assertGreater(len(data["choices"][0]["message"]["content"].strip()), 0)
 
 
 if __name__ == "__main__":

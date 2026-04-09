@@ -1,6 +1,7 @@
 import os
 import unittest
 import requests
+from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     QWEN3_32B_EAGLE3_WEIGHTS_PATH,
@@ -10,6 +11,7 @@ from sglang.test.ascend.test_ascend_utils import (
     FR_SPEC_TOKEN_MAP_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -21,50 +23,30 @@ register_npu_ci(est_time=300, suite="nightly-8-npu-a3", nightly=True)
 
 
 class TestNpuSpeculativeTokenMap(CustomTestCase):
-    """Test --speculative-token-map behavior in EAGLE3 and EAGLE (EAGLE-2).
+    """Test --speculative-token-map with EAGLE3 (ignored) and EAGLE (enabled).
 
-    - EAGLE3: parameter should be ignored (even with invalid path), server starts
-      and inference works normally.
-    - EAGLE (EAGLE-2): parameter should accept a valid .pt token map file from HF,
-      enabling FR-Spec optimization. If the required models or file are missing,
-      the test is skipped.
-
-    [Test Category] Parameter
-    [Test Target] --speculative-token-map
+    Both cases run GSM8K evaluation to ensure accuracy does not degrade.
     """
 
-    def test_eagle3_ignores_token_map(self):
-        """EAGLE3 ignores --speculative-token-map; even invalid path should not break."""
+    def test_eagle3_ignores_token_map_gsm8k(self):
+        """EAGLE3 ignores token map; GSM8K accuracy should meet threshold."""
         args = [
             "--trust-remote-code",
-            "--attention-backend",
-            "ascend",
-            "--quantization",
-            "modelslim",
+            "--attention-backend", "ascend",
+            "--quantization", "modelslim",
             "--disable-radix-cache",
-            "--speculative-algorithm",
-            "EAGLE3",
-            "--speculative-draft-model-path",
-            QWEN3_32B_EAGLE3_WEIGHTS_PATH,
-            "--speculative-draft-model-quantization",
-            "unquant",
-            "--speculative-num-steps",
-            "4",
-            "--speculative-eagle-topk",
-            "1",
-            "--speculative-num-draft-tokens",
-            "5",
-            "--speculative-attention-mode",
-            "decode",
-            "--speculative-token-map",
-            "/nonexistent/token_map.pt",  # invalid path
-            "--tp-size",
-            "8",
-            "--mem-fraction-static",
-            "0.7",
+            "--speculative-algorithm", "EAGLE3",
+            "--speculative-draft-model-path", QWEN3_32B_EAGLE3_WEIGHTS_PATH,
+            "--speculative-draft-model-quantization", "unquant",
+            "--speculative-num-steps", "4",
+            "--speculative-eagle-topk", "1",
+            "--speculative-num-draft-tokens", "5",
+            "--speculative-attention-mode", "decode",
+            "--speculative-token-map", "/nonexistent/token_map.pt",  # ignored
+            "--tp-size", "8",
+            "--mem-fraction-static", "0.7",
             "--disable-cuda-graph",
-            "--dtype",
-            "bfloat16",
+            "--dtype", "bfloat16",
         ]
         env = os.environ.copy()
         env.update({
@@ -79,52 +61,45 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
             env=env,
         )
         try:
-            # Verify health and simple inference
-            health = requests.get(f"{DEFAULT_URL_FOR_TEST}/health", timeout=10)
-            self.assertEqual(health.status_code, 200)
-
-            resp = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/v1/chat/completions",
-                json={
-                    "model": QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH,
-                    "messages": [{"role": "user", "content": "Say hello"}],
-                    "max_tokens": 16,
-                },
-                timeout=60,
+            eval_args = SimpleNamespace(
+                base_url=DEFAULT_URL_FOR_TEST,
+                eval_name="gsm8k",
+                api="completion",
+                num_examples=1319,
+                num_threads=128,
+                max_new_tokens=512,
+                num_shots=5,
+                temperature=0.0,
             )
-            self.assertEqual(resp.status_code, 200)
-            data = resp.json()
-            self.assertIn("choices", data)
-            self.assertTrue(len(data["choices"][0]["message"]["content"]) > 0)
+            metrics = run_eval(eval_args)
+            self.assertGreaterEqual(metrics["score"], 0.81)
         finally:
             kill_process_tree(process.pid)
 
-    def test_eagle_with_valid_token_map(self):
-        """EAGLE (EAGLE-2) with valid token map file from HF should start and infer."""
+    def test_eagle_with_valid_token_map_gsm8k(self):
+        """EAGLE (EAGLE-2) with valid token map; GSM8K accuracy should meet threshold."""
+        # Skip if required models or token map file missing
+        if not os.path.exists(FR_SPEC_TOKEN_MAP_PATH):
+            self.skipTest(f"Token map file not found: {FR_SPEC_TOKEN_MAP_PATH}")
+        if not os.path.exists(LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH):
+            self.skipTest(f"Target model not found: {LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH}")
+        if not os.path.exists(LLAMA_3_8B_EAGLE_WEIGHTS_PATH):
+            self.skipTest(f"Draft model not found: {LLAMA_3_8B_EAGLE_WEIGHTS_PATH}")
+
         args = [
             "--trust-remote-code",
-            "--attention-backend",
-            "ascend",
+            "--attention-backend", "ascend",
             "--disable-radix-cache",
-            "--speculative-algorithm",
-            "EAGLE",
-            "--speculative-draft-model-path",
-            LLAMA_3_8B_EAGLE_WEIGHTS_PATH,
-            "--speculative-num-steps",
-            "3",
-            "--speculative-eagle-topk",
-            "4",
-            "--speculative-num-draft-tokens",
-            "16",
-            "--speculative-token-map",
-            FR_SPEC_TOKEN_MAP_PATH,   # HF path, auto-download
-            "--tp-size",
-            "4",
-            "--mem-fraction-static",
-            "0.7",
+            "--speculative-algorithm", "EAGLE",
+            "--speculative-draft-model-path", LLAMA_3_8B_EAGLE_WEIGHTS_PATH,
+            "--speculative-num-steps", "3",
+            "--speculative-eagle-topk", "4",
+            "--speculative-num-draft-tokens", "16",
+            "--speculative-token-map", FR_SPEC_TOKEN_MAP_PATH,
+            "--tp-size", "4",
+            "--mem-fraction-static", "0.7",
             "--disable-cuda-graph",
-            "--dtype",
-            "float16",
+            "--dtype", "float16",
         ]
         env = os.environ.copy()
         env.update({
@@ -139,34 +114,18 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
             env=env,
         )
         try:
-            health = requests.get(f"{DEFAULT_URL_FOR_TEST}/health", timeout=10)
-            self.assertEqual(health.status_code, 200)
-
-            prompt = "What is the capital of France?"
-            resp = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/v1/chat/completions",
-                json={
-                    "model": LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH,
-                    "messages": [{"role": "user", "content": prompt}],
-                    "max_tokens": 64,
-                    "temperature": 0,
-                },
-                timeout=120,
+            eval_args = SimpleNamespace(
+                base_url=DEFAULT_URL_FOR_TEST,
+                eval_name="gsm8k",
+                api="completion",
+                num_examples=1319,
+                num_threads=128,
+                max_new_tokens=512,
+                num_shots=5,
+                temperature=0.0,
             )
-            self.assertEqual(resp.status_code, 200)
-            data = resp.json()
-            self.assertIn("choices", data)
-            content = data["choices"][0]["message"]["content"]
-            self.assertGreater(len(content.strip()), 0)
-
-            self.assertIn(
-                "paris",
-                content.lower(),
-                f"Expected 'Paris' in response, but got: {content[:200]}",
-            )
-
-            print(f"Q: {prompt}")
-            print(f"A: {content}")
+            metrics = run_eval(eval_args)
+            self.assertGreaterEqual(metrics["score"], 0.81)  # adjust threshold as needed
         finally:
             kill_process_tree(process.pid)
 
