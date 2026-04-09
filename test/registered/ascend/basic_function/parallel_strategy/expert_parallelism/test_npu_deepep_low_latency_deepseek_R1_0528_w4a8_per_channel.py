@@ -131,7 +131,7 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
             data_path=None,
             num_examples=200,
             max_new_tokens=512,
-            num_threads=128,
+            num_threads=300,
             eval_name="gsm8k",
         )
         # Execute GSM8K evaluation and get metrics
