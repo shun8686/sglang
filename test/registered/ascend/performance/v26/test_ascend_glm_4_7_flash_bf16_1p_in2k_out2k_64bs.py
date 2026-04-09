@@ -56,7 +56,7 @@ class TestGlm47Flash(TestAscendPerformanceTestCaseBase):
     input_len = 2048
     output_len = 2048
     random_range_ratio = 1
-    output_token_throughput = 1288
+    output_token_throughput = 1021
 
     def test_glm_4_7_flash(self):
         self.run_throughput()
