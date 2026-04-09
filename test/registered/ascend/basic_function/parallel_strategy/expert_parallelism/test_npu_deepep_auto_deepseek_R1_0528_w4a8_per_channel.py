@@ -95,7 +95,7 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "88",
                 "HCCL_BUFFSIZE": "1600",
                 "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
-                "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "3000",
+                "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "512",
                 "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
                 "SGLANG_NPU_USE_MLAPO": "1",
                 "SGLANG_USE_FIA_NZ": "1",
