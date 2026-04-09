@@ -105,7 +105,7 @@ class TestLTSQwen3527BW8A8(TestAscendLtsTestCaseBase):
     # accuracy = {"gsm8k": 0.755}
     tpot = 100
     output_token_throughput = 10
-    accuracy = {"gsm8k": 0.5}
+    accuracy = {"gsm8k": 0.50, "mmlu": 0.0}
 
     @classmethod
     def setUpClass(cls):
@@ -135,6 +135,8 @@ class TestLTSQwen3527BW8A8(TestAscendLtsTestCaseBase):
             print(
                 f"=============={current_time}  Execute the {i}-th long-term stability test=============="
             )
+            self.run_long_seq_testcase()
+            self.run_mmlu()
             self.run_throughput()
             self.run_gsm8k()
 
