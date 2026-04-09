@@ -26,15 +26,22 @@ class TestJSONModeMixin:
         response = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful AI assistant that provides concise answers.",
-                },
-                {"role": "user", "content": "What is the capital of Bulgaria?"},
+                # We are deliberately omitting "That produces JSON" or similar phrases from the assistant prompt so that we don't have misleading test results
+                {"role": "user", "content": "输出一个用户信息JSON"},
             ],
             temperature=0,
             max_tokens=128,
-            response_format={"type": "json_object"},
+            response_format={
+                "type": "json_object",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                    },
+                    "required": ["name", "age"],
+                },
+            },
         )
         text = response.choices[0].message.content
 
@@ -55,15 +62,22 @@ class TestJSONModeMixin:
         stream = self.client.chat.completions.create(
             model=self.model,
             messages=[
-                {
-                    "role": "system",
-                    "content": "You are a helpful AI assistant that provides concise answers.",
-                },
-                {"role": "user", "content": "What is the capital of Bulgaria?"},
+                # We are deliberately omitting "That produces JSON" or similar phrases from the assistant prompt so that we don't have misleading test results
+                {"role": "user", "content": "输出一个用户信息JSON"},
             ],
             temperature=0,
             max_tokens=128,
-            response_format={"type": "json_object"},
+            response_format={
+                "type": "json_object",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "age": {"type": "integer"},
+                    },
+                    "required": ["name", "age"],
+                },
+            },
             stream=True,
         )
 
@@ -106,9 +120,13 @@ class TestJSONModeMixin:
         )
 
 class ServerWithGrammarBackend(CustomTestCase):
-    """Base test class requiring a grammar backend server to be started"""
+    """Testcase: Verify that when the grammar backend is outlines/llguidance, --constrained-json-whitespace-pattern=[\n]? takes effect (JSON output contains newline whitespace)
 
-    backend = "xgrammar"
+    [Test Category] Parameter
+    [Test Target] --constrained-json-whitespace-pattern
+    """
+
+    backend = "outlines"
 
     @classmethod
     def setUpClass(cls):
@@ -141,21 +159,7 @@ class ServerWithGrammarBackend(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
 
-class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify that when the grammar backend is outlines, --constrained-json-whitespace-pattern=[\n]? takes effect (JSON output contains newline whitespace)
-
-    [Test Category] Parameter
-    [Test Target] --constrained-json-whitespace-pattern
-    """
-    backend = "outlines"
-
-
 class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
-    """Testcase: Verify that when the grammar backend is llguidance, --constrained-json-whitespace-pattern=[\n]? takes effect (JSON output contains newline whitespace)
-
-    [Test Category] Parameter
-    [Test Target] --constrained-json-whitespace-pattern
-    """
     backend = "llguidance"
 
 
