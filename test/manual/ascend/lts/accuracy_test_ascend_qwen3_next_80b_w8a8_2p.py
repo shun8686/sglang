@@ -132,7 +132,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         "generation_config": {
             "aime25": {
                 "max_tokens": 25000,
-                "top_p": 0.95,
+                # "top_p": 0.95,
                 "temperature": 0.6,
                 "n": 1,
             },
