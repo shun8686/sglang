@@ -2,7 +2,6 @@ import os
 import unittest
 from types import SimpleNamespace
 
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     FR_SPEC_TOKEN_MAP_PATH,
@@ -88,9 +87,7 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
                 temperature=0.0,
             )
             metrics = run_eval(eval_args)
-            self.assertGreaterEqual(
-                metrics["score"], 0.86
-            )
+            self.assertGreaterEqual(metrics["score"], 0.86)
         finally:
             kill_process_tree(process.pid)
 
