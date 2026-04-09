@@ -131,10 +131,9 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         "eval_batch_size": 16,
         "generation_config": {
             "aime25": {
-                "do_sample": True,
                 "max_tokens": 25000,
-                "temperature": 0.7,
-                "top_p": 1.0,
+                "temperature": 0.6,
+                "n": 1,
                 "seed": 42,
             },
             "math_500": {
