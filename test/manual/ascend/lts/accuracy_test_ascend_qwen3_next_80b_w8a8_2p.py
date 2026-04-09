@@ -132,31 +132,27 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         "generation_config": {
             "aime25": {
                 "max_tokens": 25000,
-                # "top_p": 0.95,
                 "temperature": 0.6,
                 "n": 1,
             },
             "math_500": {
                 "max_tokens": 25000,
-                "top_p": 0.95,
                 "temperature": 0.6,
                 "n": 1,
             },
             "gpqa_diamond": {
                 "max_tokens": 25000,
-                "top_p": 0.95,
                 "temperature": 0.6,
                 "n": 1,
             },
             "gsm8k": {
                 "max_tokens": 2048,
-                "top_p": 1.0,
                 "temperature": 0.0,
                 "n": 1,
             },
-            "ceval": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
-            "mmlu": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
-            "mmlu_pro": {"max_tokens": 512, "temperature": 0.0, "top_p": 1.0},
+            "ceval": {"max_tokens": 512, "temperature": 0.0},
+            "mmlu": {"max_tokens": 512, "temperature": 0.0},
+            "mmlu_pro": {"max_tokens": 512, "temperature": 0.0},
         },
     }
 

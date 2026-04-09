@@ -253,14 +253,8 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
 
         generation_config_default = {
             "do_sample": True,
-            "max_tokens": 1024,
+            "max_tokens": 4096,
             "seed": 3407,
-            "top_p": 0.8,
-            "top_k": 20,
-            "temperature": 0.7,
-            "n": 1,
-            "presence_penalty": 1.5,
-            "repetition_penalty": 1.0,
             "timeout": 3600,
             "stream": True,
             "extra_body": {"chat_template_kwargs": {"enable_thinking": False}},
