@@ -59,7 +59,6 @@ KIMI_K2_5_OTHER_ARGS = [
     "--enable-dp-attention",
     "--dp-size",
     16,
-    "--enable-dp-lm-head",
     "--moe-a2a-backend",
     "deepep",
     "--deepep-mode",

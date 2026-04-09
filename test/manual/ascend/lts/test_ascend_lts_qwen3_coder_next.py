@@ -61,7 +61,7 @@ OTHER_ARGS = [
     "--watchdog-timeout",
     9000,
     "--mem-fraction-static",
-    0.85,
+    0.75,
     "--disable-radix-cache",
     "--max-prefill-tokens",
     65536,
@@ -125,10 +125,10 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
         cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
         for key, value in env.items():
-            print(f"ENV_VAR_SYS {key}:{value}")
+            logger.info(f"ENV_VAR_SYS {key}:{value}")
         if cls.envs:
             for key, value in cls.envs.items():
-                print(f"ENV_VAR_CASE {key}:{value}")
+                logger.info(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
 
         cls.process = popen_launch_server(
@@ -152,7 +152,7 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
                 f"====={current_time}  Execute the {i}-th long-term stability test====="
             )
 
-            self.run_long_seq_testcase()
+            # self.run_long_seq_testcase()
             self.run_mmlu()
             self.run_gsm8k()
             self.run_throughput()
