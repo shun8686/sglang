@@ -31,7 +31,8 @@ class TestSchedulerRecvIntervalConsistency(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.server_process.pid)
+        if cls.server_process:
+            kill_process_tree(cls.server_process.pid)
 
     def _run_gsm8k_evaluation(self, scheduler_recv_interval: int):
         self.server_process = popen_launch_server(
@@ -47,24 +48,25 @@ class TestSchedulerRecvIntervalConsistency(unittest.TestCase):
             ],
         )
 
-        try:
-            args = SimpleNamespace(
-                num_shots=5,
-                data_path=None,
-                num_questions=200,
-                max_new_tokens=512,
-                parallel=128,
-                host=f"http://{self.url.hostname}",
-                port=int(self.url.port),
-            )
-            metrics = run_eval_few_shot_gsm8k(args)
-            return metrics
-        finally:
-            kill_process_tree(self.server_process.pid)
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=128,
+            host=f"http://{self.url.hostname}",
+            port=int(self.url.port),
+        )
+        metrics = run_eval_few_shot_gsm8k(args)
+
+        kill_process_tree(self.server_process.pid)
+        self.server_process = None
+
+        return metrics
 
     def test_scheduler_recv_interval_consistency(self):
         baseline_metrics = self._run_gsm8k_evaluation(scheduler_recv_interval=1)
-        test_metrics = self._run_gsm8k_evaluation(scheduler_recv_interval=50000)
+        test_metrics = self._run_gsm8k_evaluation(scheduler_recv_interval=90000)
 
         self.assertGreaterEqual(
             baseline_metrics["accuracy"], 0.38, msg="Baseline accuracy is too low."

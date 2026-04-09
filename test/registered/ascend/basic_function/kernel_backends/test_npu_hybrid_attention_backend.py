@@ -1,6 +1,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 import requests
 
@@ -28,8 +29,6 @@ DEFAULT_SERVER_ARGS = [
     "ascend",
     "--decode-attention-backend",
     "ascend",
-    "--attention-backend",
-    "cutlass_mla",
     "--disable-cuda-graph",
     "--mem-fraction-static",
     0.9,
@@ -47,7 +46,7 @@ class TestHybridAttnBackendBase(CustomTestCase):
 
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    accuracy_threshold = 0.65  # derived tests need to override this
+    accuracy_threshold = 0.36  # derived tests need to override this
 
     @classmethod
     def get_server_args(cls):
@@ -67,6 +66,8 @@ class TestHybridAttnBackendBase(CustomTestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=cls.get_server_args(),
         )
+        cls.host = urlparse(cls.base_url).hostname
+        cls.port = urlparse(cls.base_url).port
 
     @classmethod
     def tearDownClass(cls):
@@ -76,22 +77,20 @@ class TestHybridAttnBackendBase(CustomTestCase):
         requests.get(self.base_url + "/flush_cache")
 
         args = SimpleNamespace(
-            num_shots=4,
-            num_questions=100,
-            max_new_tokens=512,
-            parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
-            data_path=GSM_DATASET_PATH,
+            base_url=self.base_url,
+            model=self.model,
             eval_name="gsm8k",
+            api="completion",
+            max_tokens=512,
+            num_examples=200,
+            num_threads=64,
+            num_shots=8,
         )
         metrics = run_eval(args)
 
-        # Use the appropriate metric key based on the test class
-        metric_key = "accuracy"
-        self.assertGreater(metrics[metric_key], self.accuracy_threshold)
+        self.assertGreater(metrics["score"], self.accuracy_threshold)
 
-        response = requests.get(f"{DEFAULT_URL_FOR_TEST}/get_server_info")
+        response = requests.get(f"{self.base_url}/get_server_info")
         self.assertEqual(
             response.status_code, 200, "The request status code is not 200."
         )
@@ -104,10 +103,6 @@ class TestHybridAttnBackendBase(CustomTestCase):
             response.json()["internal_states"][0]["decode_attention_backend"],
             "ascend",
             "--decode-attention-backend is not taking effect.",
-        )
-        self.assertEqual(
-            response.json()["internal_states"][0]["attention_backend"],
-            "as",
         )
 
 

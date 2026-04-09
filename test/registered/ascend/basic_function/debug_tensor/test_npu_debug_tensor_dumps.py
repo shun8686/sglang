@@ -1,4 +1,5 @@
 import os
+import re
 import shutil
 import tempfile
 import unittest
@@ -101,14 +102,17 @@ class TestNpuDebugTensorDumps(CustomTestCase):
         ]
         self.assertGreater(len(subdirs), 0)
 
+        pp0_dirs = [d for d in subdirs if re.search(r"PP0[^0-9]", d)]
+        self.assertGreater(len(pp0_dirs), 0)
+
         # Verify that the contents of tensor_dump exist as .pt format files.
-        first_dump_dir = os.path.join(self.dump_folder, subdirs[0])
-        files = os.listdir(first_dump_dir)
+        first_pp0_dir = os.path.join(self.dump_folder, pp0_dirs[0])
+        files = os.listdir(first_pp0_dir)
         pass_files = [f for f in files if f.startswith("Pass") and f.endswith(".pt")]
         self.assertGreater(len(pass_files), 0)
 
         # Verify that the tensor dump file contains tensor data.
-        pt_file = os.path.join(first_dump_dir, pass_files[0])
+        pt_file = os.path.join(first_pp0_dir, pass_files[0])
         tensor_data = torch.load(pt_file)
         self.assertIn("model.layers.2.input_layernorm", tensor_data)
         self.assertIn("model.layers.3.input_layernorm", tensor_data)
