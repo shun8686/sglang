@@ -61,7 +61,7 @@ OTHER_ARGS = [
     "--watchdog-timeout",
     9000,
     "--mem-fraction-static",
-    0.85,
+    0.8,
     "--disable-radix-cache",
     "--max-prefill-tokens",
     65536,
