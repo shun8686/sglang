@@ -29,7 +29,9 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 PYTHON_FOR_TEST_TOOL = "test_env_transformers_v4/bin/python"
-if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(PYTHON_FOR_TEST_TOOL, os.X_OK):
+if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
+    PYTHON_FOR_TEST_TOOL, os.X_OK
+):
     PYTHON_FOR_TEST_TOOL = "python3"
 logger.info(f"PYTHON_FOR_TEST_TOOL: {PYTHON_FOR_TEST_TOOL}")
 
@@ -54,9 +56,7 @@ QWEN3_14B_W8A8_MODEL_PATH = (
 QWEN3_14B_EAGLE_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/AngelSlim/Qwen3-14B_eagle3"
 )
-QWEN3_5_27B_MODEL_PATH = (
-    "/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-27B"
-)
+QWEN3_5_27B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-27B"
 QWEN3_5_27B_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-27B-W8A8"
 )
@@ -103,6 +103,7 @@ QWEN2_5_VL_72B_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-VL-72B-Instruct-w8a8"
 )
 KIMI_K2_5_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Kimi-K2.5-w4a8"
+KIMI_K2_5_EAGLE3_MODEL_PATH = "/root/.cache/modelscope/hub/models/Kimi/kimi-k2.5-eagle3"
 GLM_4_7_FLASH_MODEL_PATH = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.7-Flash"
 
 ROUND_ROBIN = "round_robin"
@@ -151,6 +152,7 @@ def retry(max_attempts: int = None):
     Args:
         max_attempts (int): Maximum number of execution attempts. If None, use self.max_attempts.
     """
+
     def decorator(func):
         @wraps(func)
         def wrapper(self, *args, **kwargs):
@@ -158,13 +160,15 @@ def retry(max_attempts: int = None):
             last_exception = None
 
             # Get max_attempts from instance if not provided in decorator
-            attempts = max_attempts or getattr(self, 'max_attempts', 2)
+            attempts = max_attempts or getattr(self, "max_attempts", 2)
 
             # Execute the test up to max_attempts times
             for attempt in range(1, attempts + 1):
                 try:
                     logger.info(f"Executing test attempt {attempt}/{attempts}")
-                    return func(self, *args, **kwargs)  # Return immediately if test passes
+                    return func(
+                        self, *args, **kwargs
+                    )  # Return immediately if test passes
                 except (AssertionError, Exception) as e:
                     last_exception = e
                     logger.info(f"Test failed on attempt {attempt}")
@@ -173,7 +177,9 @@ def retry(max_attempts: int = None):
             raise last_exception
 
         return wrapper
+
     return decorator
+
 
 def get_cann_version():
     """Get CANN version info.
@@ -349,6 +355,7 @@ def run_bench_serving(
 
     return metrics
 
+
 def assert_metrics(self, metrics):
     """Assert benchmark metrics against expected values.
 
@@ -384,6 +391,7 @@ def assert_metrics(self, metrics):
             float(metrics["mean_e2e_latency"]),
             self.mean_e2e_latency * E2E_TOLERANCE,
         )
+
 
 class TestAscendPerformanceTestCaseBase(CustomTestCase):
     model = None
@@ -437,7 +445,6 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 kill_process_tree(cls.process.pid)
             except Exception as e:
                 logger.error(f"Error during tearDown: {e}")
-
 
     @retry()
     def run_throughput(self):
@@ -504,7 +511,6 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         pass
-
 
     @classmethod
     @check_role(allowed_roles=["master"])
@@ -606,7 +612,6 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 kill_process_tree(cls.process.pid)
             except Exception as e:
                 logger.error(f"Error during tearDown: {e}")
-
 
     @classmethod
     @check_role(allowed_roles=["router"])
