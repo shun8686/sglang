@@ -238,7 +238,7 @@ class TestAscendLtsTestCaseBase(CustomTestCase):
                     seq_config["tpot"],
                 )
             if "tps" in seq_config.keys():
-                self.assertLessEqual(
+                self.assertGreaterEqual(
                     float(metrics["total_tps"]),
                     seq_config["tps"],
                 )
