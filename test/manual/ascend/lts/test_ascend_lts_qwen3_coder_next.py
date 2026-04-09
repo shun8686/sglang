@@ -125,10 +125,10 @@ class TestLTSQwen3CoderNext(TestAscendLtsTestCaseBase):
         cls.base_url = f"http://{cls.host}:{cls.port}"
         env = os.environ.copy()
         for key, value in env.items():
-            print(f"ENV_VAR_SYS {key}:{value}")
+            logger.info(f"ENV_VAR_SYS {key}:{value}")
         if cls.envs:
             for key, value in cls.envs.items():
-                print(f"ENV_VAR_CASE {key}:{value}")
+                logger.info(f"ENV_VAR_CASE {key}:{value}")
                 env[key] = value
 
         cls.process = popen_launch_server(
