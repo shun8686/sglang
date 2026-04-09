@@ -100,7 +100,7 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
                 "SGLANG_USE_FIA_NZ": "1",
                 "SGLANG_ENABLE_SPEC_V2": "1",
                 "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-                # **os.environ,
+                **os.environ,
             },
 
         )
