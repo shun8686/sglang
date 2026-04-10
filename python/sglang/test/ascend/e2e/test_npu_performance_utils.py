@@ -109,6 +109,8 @@ KIMI_K2_5_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Kimi-K2
 KIMI_K2_5_EAGLE3_MODEL_PATH = "/root/.cache/modelscope/hub/models/Kimi/kimi-k2.5-eagle3"
 GLM_4_7_FLASH_MODEL_PATH = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.7-Flash"
 
+QWEN3_5_397B_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-397B-A17B-w4a8-mtp"
+
 ROUND_ROBIN = "round_robin"
 
 DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH = 3600
