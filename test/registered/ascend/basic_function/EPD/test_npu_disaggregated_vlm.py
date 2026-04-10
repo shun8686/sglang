@@ -27,7 +27,6 @@ class TestDisaggregatedVLM(TestDisaggregationBase):
     __test__ = False
     encoder_transfer_backend: str = None
     """Verify encoder-only + language-only configuration.
-    
     [Test Category] Parameter
     [Test Target] --encoder-only; --language-only; --encoder-transfer-backend;
                   --encoder-urls;
