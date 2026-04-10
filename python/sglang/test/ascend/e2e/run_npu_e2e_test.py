@@ -501,6 +501,7 @@ def run_npu_e2e_test_case(
     install_sglang_from_source=False,
     env="debug",
     trouble_shotting=False,
+    transformers_version="",
 ):
     """The method for running a npu e2e test case.
     Args:
@@ -549,6 +550,7 @@ def run_npu_e2e_test_case(
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
                 "trouble_shotting": trouble_shotting,
+                "transformers_version": transformers_version,
             }
             create_kube_yaml(
                 kube_yaml_template=KUBE_YAML_TEMPLATE.get(kube_job_type),
@@ -570,6 +572,7 @@ def run_npu_e2e_test_case(
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
                 "trouble_shotting": trouble_shotting,
+                "transformers_version": transformers_version,
             }
             template_key = (
                 KUBE_JOB_MULTI_PD_MIX_GREEN if env == "green" else kube_job_type
@@ -596,6 +599,7 @@ def run_npu_e2e_test_case(
                 "install_sglang_from_source": install_sglang_from_source,
                 "env": env,
                 "trouble_shotting": trouble_shotting,
+                "transformers_version": transformers_version,
             }
             template_key = (
                 KUBE_JOB_MULTI_PD_SEPARATION_GREEN if env == "green" else kube_job_type
@@ -765,6 +769,14 @@ if __name__ == "__main__":
         help="Used for troubleshotting issues, such as retaining pods",
     )
 
+    parser.add_argument(
+        "--transformers-version",
+        type=str,
+        required=False,
+        default="",
+        help="The transformers version number for running sglang. Use default version in image if keep empty.",
+    )
+
     args = parser.parse_args()
 
     docker_image_url = args.image
@@ -780,6 +792,7 @@ if __name__ == "__main__":
     install_sglang_from_source = args.install_sglang_from_source
     env = args.env
     trouble_shotting = args.trouble_shotting
+    transformers_version = args.transformers_version
 
     kube_name_space = args.kube_name_space
     kube_job_type = args.kube_job_type
@@ -808,4 +821,5 @@ if __name__ == "__main__":
         install_sglang_from_source=install_sglang_from_source,
         env=env,
         trouble_shotting=trouble_shotting,
+        transformers_version=transformers_version,
     )

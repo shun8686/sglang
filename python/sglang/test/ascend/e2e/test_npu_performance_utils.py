@@ -28,7 +28,7 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-PYTHON_FOR_TEST_TOOL = "test_env_transformers_v4/bin/python"
+PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
 if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
     PYTHON_FOR_TEST_TOOL, os.X_OK
 ):
