@@ -154,8 +154,8 @@ jobs:
             --test-case ${test_case} \
             --kube-name-space ${NAMESPACE} \
             --kube-job-type ${kube_job_type} \
-            --kube-job-name-prefix ${KUBE_JOB_NAME}" \
-            --transformers-version ${TRANSFORMERS_VERSION_FOR_SGLANG}
+            --kube-job-name-prefix ${KUBE_JOB_NAME} \
+            --transformers-version ${TRANSFORMERS_VERSION_FOR_SGLANG}"
 
           if [ "$prefill_decode_deployment" = "separation" ];then
             CMD="${CMD} \
