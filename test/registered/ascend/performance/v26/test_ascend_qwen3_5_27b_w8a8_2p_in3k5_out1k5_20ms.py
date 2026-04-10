@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_A3B_EAGLE_MODEL_PATH,
-    TestAscendPerformanceTestCaseBase, QWEN3_5_27B_MODEL_PATH, QWEN3_5_27B_W8A8_MODEL_PATH,
+    QWEN3_5_27B_W8A8_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -97,7 +97,6 @@ class TestQwen3527B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 21
     output_token_throughput = 900
-
 
     def test_qwen3_5_27b(self):
         self.run_throughput()

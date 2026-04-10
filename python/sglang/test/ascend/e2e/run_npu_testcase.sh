@@ -21,24 +21,49 @@ else
 fi
 echo "===== Install kubernetes - End ====="
 
+PYTHON_FOR_SGLANG="python"
+PIP_FOR_SGLANG="pip"
+if [ -n "${TRANSFORMERS_VERSION_FOR_SGLANG}" ];then
+  echo "===== Install transformers for sglang in virtual env - Begin ====="
+  python -m venv test_env_transformers_sglang --system-site-packages
+  TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_SGLANG}
+  if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
+    echo "The dependent transformers package does not exist: ${TRANSFORMERS_PKG_PATH_SOURCE}."
+    echo "Install transformers ${TRANSFORMERS_VERSION_FOR_SGLANG} online."
+    test_env_transformers_sglang/bin/pip install transformers=="${TRANSFORMERS_VERSION_FOR_SGLANG}" -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  else
+    echo "Install transformers ${TRANSFORMERS_VERSION_FOR_SGLANG} locally."
+    TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_SGLANG}
+    mkdir -p "${TRANSFORMERS_PKG_PATH_TARGET}"
+    cp "${TRANSFORMERS_PKG_PATH_SOURCE}/*" "${TRANSFORMERS_PKG_PATH_TARGET}/"
+    test_env_transformers_sglang/bin/pip install --no-index --find-links="${TRANSFORMERS_PKG_PATH_TARGET}" transformers=="${TRANSFORMERS_VERSION_FOR_SGLANG}"
+  fi
+  echo "===== Install transformers for sglang in virtual env - End ====="
+  PYTHON_FOR_SGLANG="test_env_transformers_sglang/bin/python"
+  PIP_FOR_SGLANG="test_env_transformers_sglang/bin/pip"
+fi
+
 echo "===== Install transformers in virtual env for test tools - Begin ====="
-python -m venv test_env_transformers_v4 --system-site-packages
 TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
+PYTHON_ENV_FOR_TEST_TOOL=test_env_transformers_tool
+PIP_FOR_TEST_TOOL=${PYTHON_ENV_FOR_TEST_TOOL}/bin/pip
+python -m venv ${PYTHON_ENV_FOR_TEST_TOOL} --system-site-packages
 TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
 if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
   echo "The dependent transformers package does not exist: ${TRANSFORMERS_PKG_PATH_SOURCE}."
   echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} online."
-  test_env_transformers_v4/bin/pip install transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PIP_FOR_TEST_TOOL} install transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
 else
   echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} locally."
   TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
   mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
   cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
-  test_env_transformers_v4/bin/pip install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+  ${PIP_FOR_TEST_TOOL} install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
 fi
-echo "Transformers version for test tools: $(test_env_transformers_v4/bin/pip show transformers | grep Version | cut -d: -f2)"
-echo "Transformers version for sglang: $(pip show transformers | grep Version | cut -d: -f2)"
 echo "===== Install transformers in virtual env for test tools - End ====="
+
+echo "Transformers version for sglang: $(${PIP_FOR_SGLANG} show transformers | grep Version | cut -d: -f2)"
+echo "Transformers version for test tools: $(${PIP_FOR_TEST_TOOL} show transformers | grep Version | cut -d: -f2)"
 
 # =============temp step====================
 #bash /root/sglang/python/sglang/test/ascend/e2e/temp.sh
@@ -104,10 +129,10 @@ echo "Log path: ${log_path}"
 
 if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
     echo "TROUBLE_SHOTTING=true, the pod will keep alive for four hour."
-    ( python3 -u "${sglang_source_path}/${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
+    ( ${PYTHON_FOR_SGLANG} -u "${sglang_source_path}/${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
     sleep 14400
 else
-    python3 -u "${sglang_source_path}/${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
+    ${PYTHON_FOR_SGLANG} -u "${sglang_source_path}/${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
 fi
 echo "Finished test case ${test_case}"
 
