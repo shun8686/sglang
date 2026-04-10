@@ -104,9 +104,8 @@ LLAMA_3_8B_EAGLE_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "lmsys/sglang-EAGLE-LLaMA3-Instruct-8B"
 )
 LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "meta-llama/Meta-Llama-3-8B-Instruct"
+    MODEL_WEIGHTS_DIR, "LLM-Research/Meta-Llama-3-8B-Instruct"
 )
-FR_SPEC_TOKEN_MAP_PATH = "thunlp/LLaMA3-Instruct-8B-FR-Spec/freq_32768.pt"
 LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "meta-llama/Llama-4-Scout-17B-16E-Instruct"
 )
@@ -294,6 +293,7 @@ SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(
 
 # Other
 DEEPSEEK_CODER_JSON_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/deepseek_coder.json"
+FR_SPEC_TOKEN_MAP_PATH = "thunlp/LLaMA3-Instruct-8B-FR-Spec/freq_32768.pt"
 
 
 class ModelTestConfig(NamedTuple):

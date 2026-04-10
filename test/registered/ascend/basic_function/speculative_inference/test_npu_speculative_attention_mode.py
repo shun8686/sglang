@@ -20,7 +20,6 @@ register_npu_ci(
     est_time=400,
     suite="nightly-8-npu-a3",
     nightly=True,
-    disabled="run failed",
 )
 
 
@@ -37,7 +36,7 @@ class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.model = QWEN3_32B_W8A8_MINDIE_WEIGHTS_PATH
-        cls.accuracy = 0.81
+        cls.accuracy = 0.86
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
         os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
