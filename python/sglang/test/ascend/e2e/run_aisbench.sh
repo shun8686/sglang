@@ -127,7 +127,7 @@ echo -e "\033[32m✅ Created isolated temp config:\033[0m $TMP_CFG"
 echo "IP: $IP | Port: $PORT | Model: $MODEL | Path: $PATH"
 echo "Batch: $BATCH_SIZE | Max Tokens: $MAX_OUT_LEN"
 
-source test_env_aisbench/bin/activate
+source ${PYTHON_ENV_FOR_AISBENCH}/bin/activate
 ais_bench \
   --models "$TMP_CFG" \
   --datasets "$TMP_DATASET" \
