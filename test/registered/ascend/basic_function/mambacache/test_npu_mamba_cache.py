@@ -99,7 +99,7 @@ class TestMambaCacheRadix(CustomTestCase):
         "--mamba-full-memory-ratio",
         "0.3",
         "--mamba-scheduler-strategy",
-        "extra_buffer",
+        "extra_buffer",  # To reuse Radix Cache, this parameter must be set to extra_buffer
     ]
 
     @classmethod
