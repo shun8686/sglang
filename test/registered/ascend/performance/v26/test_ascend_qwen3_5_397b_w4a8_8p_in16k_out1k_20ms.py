@@ -30,7 +30,7 @@ QWEN3_5_397B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600"
 }
-QWEN3_480B_OTHER_ARGS = [
+QWEN3_5_397B_OTHER_ARGS  = [
     "--attention-backend", "ascend",
     "--device", "npu",
     "--tp-size", "16",
