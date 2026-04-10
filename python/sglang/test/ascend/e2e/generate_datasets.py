@@ -8,15 +8,15 @@ from PIL import Image
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_VL_30B_MODEL_PATH,
-)
+from sglang.test.ascend.e2e.test_npu_performance_utils import KIMI_K2_5_W4A8_MODEL_PATH
 
 
-def generate_dataset(model_path, dataset_path, batch_size, input_len, output_file):
+def generate_dataset(
+    model_path, source_dataset_path, batch_size, input_len, output_file
+):
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     dataset = []
-    with open(dataset_path, "r", encoding="utf-8") as f:
+    with open(source_dataset_path, "r", encoding="utf-8") as f:
         for line in f:
             data = json.loads(line)
             dataset.append(data["question"])
@@ -109,21 +109,21 @@ def generate_random_images(jsonl_path, size):
 if __name__ == "__main__":
 
     batch_size = 1024
-    input_len = 1
+    input_len = 30
 
     generate_dataset(
-        model_path=QWEN3_VL_30B_MODEL_PATH,
-        dataset_path="/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl",
+        model_path=KIMI_K2_5_W4A8_MODEL_PATH,
+        source_dataset_path="/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl",
         batch_size=batch_size,
         input_len=input_len,
         output_file=f"GSM8K-in{input_len}-bs{batch_size}.jsonl",
     )
     generate_json(
         text_json=f"GSM8K-in{input_len}-bs{batch_size}.jsonl",
-        image_json="1024x1024.jsonl",
-        image_dir="/root/.cache/modelscope/hub/datasets/sglang_test",
+        image_json=f"1024x1024_${input_len}.jsonl",
+        image_dir="/root/.cache/modelscope/hub/datasets/sglang_test/1024x1024",
     )
     generate_random_images(
-        jsonl_path="1024x1024.jsonl",
+        jsonl_path=f"1024x1024_${input_len}.jsonl",
         size=(1024, 1024),
     )
