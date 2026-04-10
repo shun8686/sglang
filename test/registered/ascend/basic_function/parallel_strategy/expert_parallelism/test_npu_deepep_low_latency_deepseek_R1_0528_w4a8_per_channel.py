@@ -8,7 +8,9 @@ from sglang.srt.utils import kill_process_tree
 #     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
 # )
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval
+# from sglang.test.run_eval import run_eval
+
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -27,7 +29,6 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
     """
 
     accuracy = 0.96
-
     @classmethod
     def setUpClass(cls):
         # cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
@@ -123,24 +124,42 @@ class TestDeepepLowlatencyDeepseekR1(CustomTestCase):
         self.assertGreater(metrics["score"], 0.5)
 
     def test_gsm8k(self):
-        # Test Scenario: Verify the model's mathematical reasoning accuracy on the GSM8K dataset
+        # # Test Scenario: Verify the model's mathematical reasoning accuracy on the GSM8K dataset
+        # args = SimpleNamespace(
+        #     base_url=self.base_url,
+        #     model=self.model,
+        #     num_shots=5,
+        #     data_path=None,
+        #     num_examples=200,
+        #     max_new_tokens=512,
+        #     num_threads=300,
+        #     eval_name="gsm8k",
+        # )
+        # # Execute GSM8K evaluation and get metrics
+        # metrics = run_eval(args)
+        # # Assertion: Ensure the GSM8K accuracy is not lower than the preset threshold
+        # self.assertGreaterEqual(
+        #     metrics["score"],
+        #     self.accuracy,
+        #     f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {self.accuracy}',
+        # )
         args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model,
-            num_shots=5,
+            num_shots=8,
             data_path=None,
-            num_examples=200,
+            num_questions=200,
             max_new_tokens=512,
-            num_threads=300,
+            parallel=8,
             eval_name="gsm8k",
+            host=self.host,
+            port=self.port,
         )
         # Execute GSM8K evaluation and get metrics
         metrics = run_eval(args)
-        # Assertion: Ensure the GSM8K accuracy is not lower than the preset threshold
+        # Assertion: The GSM8K accuracy is not lower than the preset threshold (0.96)
         self.assertGreaterEqual(
-            metrics["score"],
+            metrics["accuracy"],
             self.accuracy,
-            f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {self.accuracy}',
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
         )
 
 
