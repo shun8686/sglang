@@ -480,7 +480,40 @@ def run_bench_serving(
     max_concurrency=None,
     background_task: Optional[Callable[[str, asyncio.Event], Awaitable[None]]] = None,
     lora_name: Optional[str] = None,
+    timeout_for_server_launch=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
 ):
+    """Start the service and obtain the inference results.
+
+    Parameters:
+        model: Model name
+        num_prompts: Total number of test requests
+        request_rate: Request rate
+        other_server_args: Additional configuration when starting the service
+        dataset_name: Data set name
+        dataset_path: Dataset path
+        tokenizer: tokenizer
+        random_input_len: The length of the randomly generated input prompt
+        random_output_len: The length of the randomly generated output prompt
+        sharegpt_context_len: Sharegpt dataset context length
+        disable_stream: Disable streaming output
+        disable_ignore_eos: Should eos_token be ignored?
+        need_warmup: Preheating required
+        seed: random seed
+        device: Device type
+        gsp_num_groups: Grouped Sequence Parallelism
+        gsp_prompts_per_group: Number of parallel prompts within each group
+        gsp_system_prompt_len: GSP system prompts length
+        gsp_question_len: GSP question length
+        gsp_output_len: GSP output length
+        max_concurrency: Maximum number of concurrent requests
+        background_task: Background tasks
+        lora_name: LoRA fine-tuning model path
+        timeout_for_server_launch: Raise the service timeout period
+    Returns:
+        res: Number of requests successfully completed
+
+    """
+
     if device == "auto":
         device = auto_config_device()
     # Launch the server
@@ -488,7 +521,7 @@ def run_bench_serving(
     process = popen_launch_server(
         model,
         base_url,
-        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        timeout=timeout_for_server_launch,
         other_args=other_server_args,
     )
 
