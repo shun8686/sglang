@@ -8,8 +8,8 @@ from sglang.srt.utils import kill_process_tree
 #     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
 # )
 from sglang.test.ci.ci_register import register_npu_ci
-# from sglang.test.run_eval import run_eval
-from sglang.test.few_shot_gsm8k import run_eval
+from sglang.test.run_eval import run_eval
+from sglang.test.few_shot_gsm8k import run_eval as run_eval_gsm8k
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -159,7 +159,7 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
             port=self.port,
         )
         # Execute GSM8K evaluation and get metrics
-        metrics = run_eval(args)
+        metrics = run_eval_gsm8k(args)
         # Assertion: The GSM8K accuracy is not lower than the preset threshold (0.96)
         self.assertGreaterEqual(
             metrics["accuracy"],
