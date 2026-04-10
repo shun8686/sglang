@@ -196,7 +196,7 @@ def get_cann_version():
         with open(cann_info_file, "r", encoding="utf-8") as f:
             for line in f:
                 if line.startswith("version="):
-                    cann_ver_num = line.strip().split("="[-1])
+                    cann_ver_num = line.strip().split("=")[-1]
                     break
 
         if cann_ver_num:
