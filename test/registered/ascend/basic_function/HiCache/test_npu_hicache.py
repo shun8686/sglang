@@ -177,7 +177,6 @@ class TestHiCache(CustomTestCase):
             hicache_write_policy="write_through_selective",
             hicache_io_backend="kernel_ascend",
             hicache_mem_layout="page_first_kv_split",
-            # disable_hicache_numa_detect=True,
         )
 
         try:
