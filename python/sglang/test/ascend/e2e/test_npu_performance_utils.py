@@ -361,6 +361,65 @@ def run_bench_serving(
     return metrics
 
 
+def run_aisbench(
+    host,
+    port,
+    model_path=None,
+    dataset_path=None,
+    output_len=None,
+    max_concurrency=None,
+    num_prompts=None,
+):
+    cmd_args = [
+        "bash",
+        "/root/sglang/python/sglang/test/ascend/e2e/run_aisbench.sh",
+        host,
+        str(port),
+        os.path.basename(model_path),
+        model_path,
+        dataset_path,
+        output_len,
+        max_concurrency,
+        num_prompts,
+    ]
+    process = subprocess.Popen(
+        cmd_args, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, bufsize=1
+    )
+
+    output_lines = []
+    try:
+        for line in iter(process.stdout.readline, ""):
+            line = line.strip()
+            logger.info(line)
+            output_lines.append(line)
+
+        process.wait()
+
+        if process.returncode != 0:
+            logger.error(f"Command failed with return code: {process.returncode}")
+            raise subprocess.CalledProcessError(process.returncode, cmd_args)
+
+        logger.info("Command executed successfully")
+        return "\n".join(output_lines)
+
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received, terminating process...")
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+            logger.info("Process terminated")
+        except subprocess.TimeoutExpired:
+            logger.warning("Process did not terminate gracefully, killing it...")
+            process.kill()
+            logger.info("Process killed")
+        raise
+    except Exception as e:
+        logger.error(f"Error executing command: {e}")
+        process.terminate()
+        process.wait(timeout=5)
+        raise
+
+
 def assert_metrics(self, metrics):
     """Assert benchmark metrics against expected values.
 
@@ -400,9 +459,11 @@ def assert_metrics(self, metrics):
 
 class TestAscendPerformanceTestCaseBase(CustomTestCase):
     model = None
+    benchmark_tool = "bench-serving"
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    aisbench_dataset_config = None
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -456,27 +517,39 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
-        bench_params = {
-            "host": host,
-            "port": port,
-            "model_path": self.model,
-            "backend": self.backend,
-            "dataset_name": self.dataset_name,
-            "dataset_path": self.dataset_path,
-            "request_rate": self.request_rate,
-            "max_concurrency": self.max_concurrency,
-            "num_prompts": self.num_prompts,
-            "input_len": self.input_len,
-            "output_len": self.output_len,
-            "random_range_ratio": self.random_range_ratio,
-            "image_resolution": self.image_resolution,
-            "image_count": self.image_count,
-            "warmup_requests": self.warmup_requests,
-            "seed": self.seed,
-        }
-        logger.info(f"Starting benchmark with parameters: {bench_params}")
-        metrics = run_bench_serving(**bench_params)
-        assert_metrics(self, metrics)
+        if self.benchmark_tool == "aisbench":
+            run_aisbench(
+                host=host,
+                port=port,
+                model_path=self.model,
+                dataset_path=self.aisbench_dataset_config,
+                output_len=self.output_len,
+                max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
+            )
+        else:
+
+            bench_params = {
+                "host": host,
+                "port": port,
+                "model_path": self.model,
+                "backend": self.backend,
+                "dataset_name": self.dataset_name,
+                "dataset_path": self.dataset_path,
+                "request_rate": self.request_rate,
+                "max_concurrency": self.max_concurrency,
+                "num_prompts": self.num_prompts,
+                "input_len": self.input_len,
+                "output_len": self.output_len,
+                "random_range_ratio": self.random_range_ratio,
+                "image_resolution": self.image_resolution,
+                "image_count": self.image_count,
+                "warmup_requests": self.warmup_requests,
+                "seed": self.seed,
+            }
+            logger.info(f"Starting benchmark with parameters: {bench_params}")
+            metrics = run_bench_serving(**bench_params)
+            assert_metrics(self, metrics)
 
 
 class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
