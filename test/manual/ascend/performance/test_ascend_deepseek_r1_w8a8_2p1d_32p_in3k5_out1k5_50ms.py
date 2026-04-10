@@ -107,7 +107,6 @@ MODEL_CONFIG = {
         "--enable-dp-attention",
         "--deepep-mode",
         "low_latency",
-        "--enable-dp-lm-head",
         "--moe-dense-tp",
         "1",
         "--cuda-graph-bs",
