@@ -45,3 +45,12 @@
 
 16|test/registered/ascend/performance/v26/test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms.py
 16|test/registered/ascend/performance/v26/test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms.py
+
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in128k_out1k_20ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in128k_out1k_50ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in64k_out1k_20ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in64k_out1k_50ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in16k_out1k_20ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in16k_out1k_50ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in3k5_out1k5_20ms.py
+16|test/registered/ascend/performance/v26/test_ascend_qwen3_5_397b_w4a8_8p_in3k5_out1k5_50ms.py
