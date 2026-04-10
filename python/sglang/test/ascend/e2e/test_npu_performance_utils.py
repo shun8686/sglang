@@ -133,7 +133,6 @@ PACKAGE_FILTER_KEYWORDS = [
     "sglang",
     "sgl",
     "torch",
-    "transformers",
     "deep-ep",
     "memfabric_hybrid",
 ]
@@ -197,7 +196,7 @@ def get_cann_version():
         with open(cann_info_file, "r", encoding="utf-8") as f:
             for line in f:
                 if line.startswith("version="):
-                    cann_ver_num = line.strip()
+                    cann_ver_num = line.strip().split("="[-1])
                     break
 
         if cann_ver_num:
@@ -222,6 +221,8 @@ def write_pkg_info_to_file(result_file):
     Args:
         result_file (str): Path to the result file.
     """
+    import transformers
+
     try:
         pip_output = subprocess.run(
             ["pip", "list"], capture_output=True, text=True, check=False
@@ -242,6 +243,7 @@ def write_pkg_info_to_file(result_file):
                 f.write(pkg + "\n")
                 logger.info(pkg)
             f.write(get_cann_version() + "\n")
+            f.write("transformers: " + transformers.__version__ + "\n")
 
     except Exception as e:
         logger.error(f"Error getting packages: {e}")
