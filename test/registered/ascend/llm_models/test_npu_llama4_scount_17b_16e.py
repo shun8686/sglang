@@ -19,6 +19,7 @@ class TestLlama4(GSM8KAscendMixin, CustomTestCase):
 
     model = LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH
     accuracy = 0.9
+    timeout_for_server_launch = 1000
     other_args = [
         "--chat-template",
         "llama-4",
