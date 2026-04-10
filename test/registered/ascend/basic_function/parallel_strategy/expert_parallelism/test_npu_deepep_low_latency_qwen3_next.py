@@ -72,8 +72,10 @@ class TestQwen3Next(CustomTestCase):
                 "low_latency",
             ],
             env={
+                # The product of the following two environment variables must be greater than --max-prefill-tokens
                 "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "3000",
                 "DEEPEP_NORMAL_LONG_SEQ_ROUND": "10",
+                # In NPU scenarios, operators only support BF16 precision.
                 "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",

@@ -72,6 +72,7 @@ class TestQwen3Next(CustomTestCase):
                 -1,
             ],
             env={
+                # In NPU scenarios, operators only support BF16 precision.
                 "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
