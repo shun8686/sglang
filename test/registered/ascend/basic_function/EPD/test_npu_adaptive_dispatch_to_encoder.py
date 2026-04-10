@@ -1,4 +1,5 @@
 import os
+import time
 import unittest
 
 import requests
@@ -13,7 +14,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(est_time=800, suite="nightly-8-npu-a3", nightly=True)
 
 
 _INLINE_IMAGE_URL = (
@@ -80,8 +81,7 @@ class TestAdaptiveDispatchToEncoder(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def test_flag_accepted_by_server(self):
-        """Verify --enable-adaptive-dispatch-to-encoder is stored in server config.
-        """
+        """Verify --enable-adaptive-dispatch-to-encoder is stored in server config."""
         response = requests.get(f"{self.base_url}/get_server_info", timeout=10)
         self.assertEqual(response.status_code, 200)
         info = response.json()
@@ -127,6 +127,7 @@ class TestAdaptiveDispatchToEncoder(CustomTestCase):
             f"Response body: {response.text[:300]}",
         )
 
+
 class TestAdaptiveDispatchToEncoderMultiImage(CustomTestCase):
     """Test multi-image request with adaptive dispatch: should be forwarded to encoder server.
 
@@ -152,13 +153,18 @@ class TestAdaptiveDispatchToEncoderMultiImage(CustomTestCase):
         # Start encoder-only server (with zmq_to_scheduler backend)
         encoder_args = [
             "--encoder-only",
-            "--encoder-transfer-backend", "zmq_to_scheduler",
-            "--tp-size", "2",
-            "--base-gpu-id", "2",           # Adjust if needed
-            "--attention-backend", "ascend",
+            "--encoder-transfer-backend",
+            "zmq_to_scheduler",
+            "--tp-size",
+            "2",
+            "--base-gpu-id",
+            "2",
+            "--attention-backend",
+            "ascend",
             "--disable-cuda-graph",
             "--trust-remote-code",
-            "--mem-fraction-static", "0.8",
+            "--mem-fraction-static",
+            "0.8",
         ]
         cls.encoder_process = popen_launch_server(
             cls.model,
@@ -172,15 +178,20 @@ class TestAdaptiveDispatchToEncoderMultiImage(CustomTestCase):
         language_args = [
             "--language-only",
             "--enable-adaptive-dispatch-to-encoder",
-            "--encoder-urls", cls.encoder_url,
+            "--encoder-urls",
+            cls.encoder_url,
             "--encoder-transfer-backend",
             "zmq_to_scheduler",
-            "--tp-size", "2",
-            "--base-gpu-id", "4",           # Different from encoder
-            "--attention-backend", "ascend",
+            "--tp-size",
+            "2",
+            "--base-gpu-id",
+            "4",
+            "--attention-backend",
+            "ascend",
             "--disable-cuda-graph",
             "--trust-remote-code",
-            "--mem-fraction-static", "0.8",
+            "--mem-fraction-static",
+            "0.8",
         ]
         cls.language_process = popen_launch_server(
             cls.model,
@@ -201,7 +212,6 @@ class TestAdaptiveDispatchToEncoderMultiImage(CustomTestCase):
 
     @classmethod
     def wait_server_ready(cls, url, timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH):
-        import time
         start = time.time()
         while True:
             try:
@@ -241,10 +251,16 @@ class TestAdaptiveDispatchToEncoderMultiImage(CustomTestCase):
             response.status_code,
             200,
             f"Multi-image request failed with status {response.status_code}. "
-            f"Response: {response.text[:300]}"
+            f"Response: {response.text[:300]}",
         )
-        content = response.json().get("choices", [{}])[0].get("message", {}).get("content", "")
+        content = (
+            response.json()
+            .get("choices", [{}])[0]
+            .get("message", {})
+            .get("content", "")
+        )
         self.assertGreater(len(content), 0, "Response content is empty")
+
 
 if __name__ == "__main__":
     unittest.main()

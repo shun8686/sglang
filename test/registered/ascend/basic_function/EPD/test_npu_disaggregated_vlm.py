@@ -3,7 +3,6 @@ import unittest
 
 import requests
 
-
 from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.ascend.test_ascend_utils import QWEN3_VL_30B_A3B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -27,8 +26,7 @@ _INLINE_IMAGE_URL = (
 class TestDisaggregatedVLM(TestDisaggregationBase):
     __test__ = False
     encoder_transfer_backend: str = None
-    """
-    Verify encoder-only + language-only configuration.
+    """Verify encoder-only + language-only configuration.
     
     [Test Category] Parameter
     [Test Target] --encoder-only; --language-only; --encoder-transfer-backend;
