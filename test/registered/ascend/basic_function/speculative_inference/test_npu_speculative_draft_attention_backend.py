@@ -8,7 +8,7 @@ from sglang.test.ascend.test_ascend_utils import (
     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -86,20 +86,21 @@ class TestAscendSpeculativeDraftAttentionAndMoeRunner(CustomTestCase):
 
     def test_a_gsm8k(self):
         args = SimpleNamespace(
-            num_shots=5,
-            data_path=None,
-            num_questions=1319,
+            base_url=self.base_url,
+            eval_name="gsm8k",
+            api="completion",
+            num_examples=1319,
+            num_threads=128,
             max_new_tokens=512,
-            parallel=128,
-            host=f"http://{self.url.hostname}",
-            port=int(self.url.port),
+            num_shots=5,
         )
 
-        metrics = run_eval_few_shot_gsm8k(args)
-        accuracy = metrics.get("accuracy")
-        print(f"GSM8K accuracy for {MODEL_PATH}: {accuracy:.4f}")
-        self.assertIsNotNone(accuracy, "GSM8K evaluation returned no accuracy")
-        self.assertIsInstance(accuracy, float, "Accuracy should be a float")
+        metrics = run_eval(args)
+        score = metrics["score"]
+        print(f"GSM8K score for {MODEL_PATH}: {score:.4f}")
+        self.assertIsNotNone(score, "GSM8K evaluation returned no score")
+        self.assertIsInstance(score, float, "Score should be a float")
+        self.assertGreaterEqual(score, 0.9, f"GSM8K score {score} below threshold 0.9")
 
 
 if __name__ == "__main__":
