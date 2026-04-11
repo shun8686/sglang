@@ -124,7 +124,7 @@ mm_custom_datasets = [
     dict(
         abbr='mm_custom',
         type=MMCustomDataset,
-        path=$DATASET_PATH,
+        path="$DATASET_PATH",
         mm_type="path",
         num_frames=5,
         reader_cfg=mm_custom_reader_cfg,
