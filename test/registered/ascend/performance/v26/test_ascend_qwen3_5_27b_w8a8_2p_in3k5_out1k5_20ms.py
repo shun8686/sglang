@@ -81,10 +81,13 @@ OTHER_ARGS = [
     1,
     "--speculative-num-draft-tokens",
     4,
+    "--base-gpu-id",
+    4,
 ]
 
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
+    base_url = "http://127.0.0.1:20000"
     model = QWEN3_5_27B_W8A8_MODEL_PATH
     # model = "/home/weights/Eco-Tech/Qwen3.5-27B-W8A8"
     other_args = OTHER_ARGS

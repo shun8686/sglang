@@ -504,7 +504,6 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.base_url = DEFAULT_URL_FOR_TEST
         env = os.environ.copy()
         for key, value in env.items():
             logger.info(f"ENV_VAR_SYS {key}:{value}")
