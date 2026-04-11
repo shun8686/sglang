@@ -15,13 +15,18 @@ import asyncio
 import copy
 import logging
 import os
+import random
 import subprocess
+import threading
 import time
 from types import SimpleNamespace
-from typing import Awaitable, Callable, NamedTuple, Optional
+from typing import Awaitable, Callable, List, NamedTuple, Optional
+
+import requests
 
 from sglang.bench_serving import run_benchmark
 from sglang.srt.utils import kill_process_tree
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -29,9 +34,14 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+STDERR_FILENAME = "/tmp/stderr.txt"
+STDOUT_FILENAME = "/tmp/stdout.txt"
+
 # Model weights storage directory
 MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
 HF_MODEL_WEIGHTS_DIR = "/root/.cache/huggingface/hub/"
+IMAGES_DIR = "/root/.cache/modelscope/hub/datasets/images/"
+VIDEO_DIR = "/root/.cache/modelscope/hub/datasets/video/"
 
 # LLM model weights path
 AFM_4_5B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/AFM-4.5B-Base")
@@ -102,6 +112,13 @@ LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B-Instruct"
 )
 LLAMA_3_2_1B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-3.2-1B")
+LLAMA_3_8B_EAGLE_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "lmsys/sglang-EAGLE-LLaMA3-Instruct-8B"
+)
+LLAMA_3_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "LLM-Research/Meta-Llama-3-8B-Instruct"
+)
+
 LLAMA_4_SCOUT_17B_16E_INSTRUCT_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "meta-llama/Llama-4-Scout-17B-16E-Instruct"
 )
@@ -173,6 +190,9 @@ STARCODER2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bigcode/starcoder2
 TRINITY_MINI_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/Trinity-Mini")
 XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-MoE-A36B")
 MINIMAX_M2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "cyankiwi/MiniMax-M2-BF16")
+EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "sglang-EAGLE3-LLaMA3.1-Instruct-8B"
+)
 
 # VLM model weights path
 DEEPSEEK_VL2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "deepseek-ai/deepseek-vl2")
@@ -284,13 +304,22 @@ SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(
     HF_MODEL_WEIGHTS_DIR,
     "models--Skywork--Skywork-Reward-Llama-3.1-8B-v0.2/snapshots/d4117fbfd81b72f41b96341238baa1e3e90a4ce1",
 )
+
+# Images path
+IMAGES_023_PATH = os.path.join(IMAGES_DIR, "023.jpg")
+IMAGES_MAN_PATH = os.path.join(IMAGES_DIR, "man.png")
+IMAGES_LOGO_PATH = os.path.join(IMAGES_DIR, "logo.png")
+VIDEO_JOBS_PATH = os.path.join(VIDEO_DIR, "jobs.mp4")
+INVOICE_WITH_BARCODE_LOGO_IMAGES_PATH = os.path.join(
+    IMAGES_DIR, "invoice_with_barcode_logo.jpeg"
+)
 # fmt: on
 
 # Other
 DEEPSEEK_CODER_JSON_PATH = "/__w/sglang/sglang/test/registered/ascend/basic_function/parameter/deepseek_coder.json"
-CONFIG_YAML_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "../../../test/registered/ascend/basic_function/ConfigurationFileSupport/config.yaml",
+FR_SPEC_TOKEN_MAP_PATH = "thunlp/LLaMA3-Instruct-8B-FR-Spec/freq_32768.pt"
+CONFIG_YAML_PATH = (
+    "/__w/sglang/sglang/test/registered/ascend/basic_function/config/config.yaml"
 )
 
 
@@ -385,40 +414,6 @@ def get_benchmark_args(
     header=None,
     max_concurrency=None,
 ):
-    """Constructing the parameter objects needed for inference tests
-
-    Parameters:
-        base_url: url
-        backend: Inference backend
-        dataset_name: Data set name
-        dataset_path: Dataset path
-        tokenizer: tokenizer
-        num_prompts: Total number of test requests
-        sharegpt_output_len: Output the number of tokens
-        random_input_len: The length of the randomly generated input prompt
-        random_output_len: The length of the randomly generated output prompt
-        sharegpt_context_len: Sharegpt dataset context length
-        request_rate: Request rate
-        disable_stream: Disable streaming output
-        disable_ignore_eos: Should eos_token be ignored?
-        seed: random seed
-        device: Device type
-        pd_separated: Enable PD separation
-        lora_name: LoRA fine-tuning model path
-        lora_request_distribution: LoRA request distribution strategy
-        lora_zipf_alpha: Control request distribution skewness
-        gsp_num_groups: Grouped Sequence Parallelism
-        gsp_prompts_per_group: Number of parallel prompts within each group
-        gsp_system_prompt_len: GSP system prompts length
-        gsp_question_len: GSP question length
-        gsp_output_len: GSP output length
-        gsp_num_turns: GSP Dialogue Rounds
-        header: HTTP request header
-        max_concurrency: Maximum number of concurrent requests
-    Returns:
-        The return parameter is the same as the input.
-    """
-
     return SimpleNamespace(
         backend=backend,
         base_url=base_url,
@@ -460,6 +455,7 @@ def get_benchmark_args(
         gsp_num_turns=gsp_num_turns,
         header=header,
         max_concurrency=max_concurrency,
+        ready_check_timeout_sec=0,
     )
 
 
@@ -487,6 +483,7 @@ def run_bench_serving(
     max_concurrency=None,
     background_task: Optional[Callable[[str, asyncio.Event], Awaitable[None]]] = None,
     lora_name: Optional[str] = None,
+    timeout_for_server_launch=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
 ):
     """Start the service and obtain the inference results.
 
@@ -514,6 +511,7 @@ def run_bench_serving(
         max_concurrency: Maximum number of concurrent requests
         background_task: Background tasks
         lora_name: LoRA fine-tuning model path
+        timeout_for_server_launch: Raise the service timeout period
     Returns:
         res: Number of requests successfully completed
 
@@ -526,7 +524,7 @@ def run_bench_serving(
     process = popen_launch_server(
         model,
         base_url,
-        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        timeout=timeout_for_server_launch,
         other_args=other_server_args,
     )
 
@@ -648,3 +646,211 @@ def create_attention_monitor_hook_factory(config):
         return output
 
     return attention_monitor_hook
+
+
+def read_output(output_lines: List[str], filename: str = STDERR_FILENAME):
+    """Print the output in real time with another thread."""
+    while not os.path.exists(filename):
+        time.sleep(0.01)
+
+    pt = 0
+    while pt >= 0:
+        if pt > 0 and not os.path.exists(filename):
+            break
+        try:
+            lines = open(filename).readlines()
+        except FileNotFoundError:
+            print(f"{pt=}, {os.path.exists(filename)=}")
+            raise
+        for line in lines[pt:]:
+            print(line, end="", flush=True)
+            output_lines.append(line)
+            pt += 1
+        time.sleep(0.1)
+
+
+def run_and_check_memory_leak(
+    workload_func,
+    disable_radix_cache,
+    enable_mixed_chunk,
+    disable_overlap,
+    chunked_prefill_size,
+    assert_has_abort,
+    api_key: Optional[str] = None,
+):
+    other_args = [
+        "--chunked-prefill-size",
+        str(chunked_prefill_size),
+        "--log-level",
+        "debug",
+    ]
+    if disable_radix_cache:
+        other_args += ["--disable-radix-cache"]
+    if enable_mixed_chunk:
+        other_args += ["--enable-mixed-chunk"]
+    if disable_overlap:
+        other_args += ["--disable-overlap-schedule"]
+
+    model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
+    port = random.randint(4000, 5000)
+    base_url = f"http://127.0.0.1:{port}"
+
+    # Create files and launch the server
+    stdout = open(STDOUT_FILENAME, "w")
+    stderr = open(STDERR_FILENAME, "w")
+    process = popen_launch_server(
+        model,
+        base_url,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
+        return_stdout_stderr=(stdout, stderr),
+        api_key=api_key,
+    )
+
+    # Launch a thread to stream the output
+    output_lines = []
+    t = threading.Thread(target=read_output, args=(output_lines,))
+    t.start()
+
+    # Run the workload
+    workload_func(base_url, model)
+
+    # Clean up everything
+    kill_process_tree(process.pid)
+    stdout.close()
+    stderr.close()
+    if os.path.exists(STDOUT_FILENAME):
+        os.remove(STDOUT_FILENAME)
+    if os.path.exists(STDERR_FILENAME):
+        os.remove(STDERR_FILENAME)
+    kill_process_tree(process.pid)
+    t.join()
+
+    # Assert success
+    has_new_server = False
+    has_leak = False
+    has_abort = False
+    for line in output_lines:
+        if "Uvicorn running" in line:
+            has_new_server = True
+        if "leak" in line:
+            has_leak = True
+        if "Abort" in line:
+            has_abort = True
+
+    assert has_new_server
+    assert not has_leak
+    if assert_has_abort:
+        assert has_abort
+
+
+def run_mmlu_test(
+    disable_radix_cache=False,
+    enable_mixed_chunk=False,
+    disable_overlap=False,
+    chunked_prefill_size=32,
+):
+    def workload_func(base_url, model):
+        # Run the eval
+        args = SimpleNamespace(
+            base_url=base_url,
+            model=model,
+            eval_name="mmlu",
+            num_examples=128,
+            num_threads=128,
+        )
+
+        try:
+            metrics = run_eval(args)
+            assert metrics["score"] >= 0.65, f"{metrics=}"
+        finally:
+            pass
+
+    run_and_check_memory_leak(
+        workload_func,
+        disable_radix_cache,
+        enable_mixed_chunk,
+        disable_overlap,
+        chunked_prefill_size,
+        assert_has_abort=False,
+    )
+
+
+def send_concurrent_requests(
+    base_url: str,
+    num_requests: int,
+    num_concurrent: int = 8,
+    input_text: str = "The capital of France is",
+    max_new_tokens: int = 32,
+    temperature: float = 0.0,
+    request_timeout: int = 60,
+) -> list:
+    """Send multiple concurrent HTTP POST requests to the /generate endpoint.
+
+    Uses threading (NOT asyncio + blocking calls) to achieve true concurrency.
+    asyncio.gather() combined with synchronous requests.post() does not produce
+    real parallelism; threading is required for concurrent blocking I/O.
+
+    Parameters:
+        base_url: Server base URL, e.g. "http://127.0.0.1:30000"
+        num_requests: Total number of requests to send
+        num_concurrent: Maximum in-flight requests at any given time (semaphore)
+        input_text: Text prompt sent to every request
+        max_new_tokens: Maximum new tokens to generate per request
+        temperature: Sampling temperature (0 = greedy / deterministic)
+        request_timeout: Per-request HTTP timeout in seconds; raises on exceed
+
+    Returns:
+        Unsorted list of result dicts, one per request, each with:
+          task_id (int)    -- zero-based request index
+          status_code (int)-- HTTP status code, or -1 on exception
+          text (str)       -- response body, or exception message on failure
+    """
+
+    results: list = []
+    lock = threading.Lock()
+    semaphore = threading.Semaphore(num_concurrent)
+
+    def _send_one(task_id: int) -> None:
+        semaphore.acquire()
+        try:
+            response = requests.post(
+                f"{base_url}/generate",
+                json={
+                    "text": input_text,
+                    "sampling_params": {
+                        "temperature": temperature,
+                        "max_new_tokens": max_new_tokens,
+                    },
+                },
+                timeout=request_timeout,
+            )
+            with lock:
+                results.append(
+                    {
+                        "task_id": task_id,
+                        "status_code": response.status_code,
+                        "text": response.text,
+                    }
+                )
+        except Exception as exc:
+            with lock:
+                results.append(
+                    {
+                        "task_id": task_id,
+                        "status_code": -1,
+                        "text": str(exc),
+                    }
+                )
+        finally:
+            semaphore.release()
+
+    threads = [
+        threading.Thread(target=_send_one, args=(i,)) for i in range(num_requests)
+    ]
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
+
+    return results

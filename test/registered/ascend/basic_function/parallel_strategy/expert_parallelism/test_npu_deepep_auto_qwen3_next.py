@@ -55,7 +55,11 @@ class TestQwen3Next(CustomTestCase):
                 "--watchdog-timeout",
                 9000,
                 "--disable-radix-cache",
-                "--disable-cuda-graph",
+                "--cuda-graph-bs",
+                2,
+                4,
+                6,
+                8,
                 "--max-prefill-tokens",
                 28672,
                 "--max-total-tokens",
@@ -68,6 +72,9 @@ class TestQwen3Next(CustomTestCase):
                 -1,
             ],
             env={
+                # In NPU scenarios, operators only support BF16 precision.
+                # This environment variable needs to be set for quantizing weights.
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
                 "STREAMS_PER_DEVICE": "32",
                 "HCCL_OP_EXPANSION_MODE": "AIV",
