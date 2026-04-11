@@ -109,6 +109,10 @@ KIMI_K2_5_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Kimi-K2
 KIMI_K2_5_EAGLE3_MODEL_PATH = "/root/.cache/modelscope/hub/models/Kimi/kimi-k2.5-eagle3"
 GLM_4_7_FLASH_MODEL_PATH = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.7-Flash"
 
+QWEN3_5_397B_W4A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-397B-A17B-w4a8-mtp"
+)
+
 ROUND_ROBIN = "round_robin"
 
 DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH = 3600
@@ -268,8 +272,12 @@ def run_bench_serving(
     seed=None,
     output_file=None,
 ):
-    metrics_file = os.getenv("METRICS_DATA_FILE")
-    result_file = "./bench_log.txt" if not metrics_file else metrics_file
+    metrics_path = os.getenv("METRICS_DATA_FILE")
+    result_file = (
+        "./bench_log.txt"
+        if not metrics_path
+        else f"{metrics_path}/bench_serving_metrics.txt"
+    )
     logger.info(f"The metrics result file: {result_file}")
 
     write_pkg_info_to_file(result_file)
@@ -361,6 +369,76 @@ def run_bench_serving(
     return metrics
 
 
+def run_aisbench(
+    host,
+    port,
+    model_path=None,
+    dataset_path=None,
+    output_len=None,
+    max_concurrency=None,
+    num_prompts=None,
+):
+
+    metrics_path = os.getenv("METRICS_DATA_FILE")
+    result_path = "./aisbench_result" if not metrics_path else metrics_path
+    logger.info(f"The metrics result file: {result_path}")
+
+    cmd = f"/bin/bash /root/sglang/python/sglang/test/ascend/e2e/run_aisbench.sh "
+    cmd += f"{host} "
+    cmd += f"{str(port)} "
+    cmd += f"{os.path.basename(model_path)} "
+    cmd += f"{model_path} "
+    cmd += f"{dataset_path} "
+    cmd += f"{str(output_len)} "
+    cmd += f"{str(max_concurrency)} "
+    cmd += f"{str(num_prompts)} "
+    cmd += f"{result_path}"
+
+    logger.info(f"Command: {cmd}")
+
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        shell=True,
+    )
+
+    output_lines = []
+    try:
+        for line in iter(process.stdout.readline, ""):
+            line = line.strip()
+            logger.info(line)
+            output_lines.append(line)
+
+        process.wait()
+
+        if process.returncode != 0:
+            logger.error(f"Command failed with return code: {process.returncode}")
+            raise subprocess.CalledProcessError(process.returncode, cmd)
+
+        logger.info("Command executed successfully")
+        return "\n".join(output_lines)
+
+    except KeyboardInterrupt:
+        logger.info("Keyboard interrupt received, terminating process...")
+        process.terminate()
+        try:
+            process.wait(timeout=5)
+            logger.info("Process terminated")
+        except subprocess.TimeoutExpired:
+            logger.warning("Process did not terminate gracefully, killing it...")
+            process.kill()
+            logger.info("Process killed")
+        raise
+    except Exception as e:
+        logger.error(f"Error executing command: {e}")
+        process.terminate()
+        process.wait(timeout=5)
+        raise
+
+
 def assert_metrics(self, metrics):
     """Assert benchmark metrics against expected values.
 
@@ -400,9 +478,11 @@ def assert_metrics(self, metrics):
 
 class TestAscendPerformanceTestCaseBase(CustomTestCase):
     model = None
+    benchmark_tool = "bench-serving"
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    aisbench_dataset_config = None
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -456,27 +536,39 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
-        bench_params = {
-            "host": host,
-            "port": port,
-            "model_path": self.model,
-            "backend": self.backend,
-            "dataset_name": self.dataset_name,
-            "dataset_path": self.dataset_path,
-            "request_rate": self.request_rate,
-            "max_concurrency": self.max_concurrency,
-            "num_prompts": self.num_prompts,
-            "input_len": self.input_len,
-            "output_len": self.output_len,
-            "random_range_ratio": self.random_range_ratio,
-            "image_resolution": self.image_resolution,
-            "image_count": self.image_count,
-            "warmup_requests": self.warmup_requests,
-            "seed": self.seed,
-        }
-        logger.info(f"Starting benchmark with parameters: {bench_params}")
-        metrics = run_bench_serving(**bench_params)
-        assert_metrics(self, metrics)
+        if self.benchmark_tool == "aisbench":
+            run_aisbench(
+                host=host,
+                port=port,
+                model_path=self.model,
+                dataset_path=self.aisbench_dataset_config,
+                output_len=self.output_len,
+                max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
+            )
+        else:
+
+            bench_params = {
+                "host": host,
+                "port": port,
+                "model_path": self.model,
+                "backend": self.backend,
+                "dataset_name": self.dataset_name,
+                "dataset_path": self.dataset_path,
+                "request_rate": self.request_rate,
+                "max_concurrency": self.max_concurrency,
+                "num_prompts": self.num_prompts,
+                "input_len": self.input_len,
+                "output_len": self.output_len,
+                "random_range_ratio": self.random_range_ratio,
+                "image_resolution": self.image_resolution,
+                "image_count": self.image_count,
+                "warmup_requests": self.warmup_requests,
+                "seed": self.seed,
+            }
+            logger.info(f"Starting benchmark with parameters: {bench_params}")
+            metrics = run_bench_serving(**bench_params)
+            assert_metrics(self, metrics)
 
 
 class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):

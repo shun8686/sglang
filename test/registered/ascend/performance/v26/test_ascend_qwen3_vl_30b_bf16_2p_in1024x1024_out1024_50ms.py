@@ -1,4 +1,3 @@
-import time
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
@@ -27,6 +26,7 @@ QWEN3_VL_30B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "0",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_VIT_ENABLE_CUDA_GRAPH": "1",
+    # "ASCEND_LAUNCH_BLOCKING": "1",  # 临时定位问题
 }
 
 QWEN3_VL_30B_OTHER_ARGS = [
@@ -69,6 +69,10 @@ QWEN3_VL_30B_OTHER_ARGS = [
 
 
 class TestQwen3Vl30B(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = "aisbench"
+    aisbench_dataset_config = (
+        "/root/.cache/modelscope/hub/datasets/sglang_test/1024x1024_0.jsonl"
+    )
     model = QWEN3_VL_30B_MODEL_PATH
     other_args = QWEN3_VL_30B_OTHER_ARGS
     envs = QWEN3_VL_30B_ENVS
@@ -86,7 +90,6 @@ class TestQwen3Vl30B(TestAscendPerformanceTestCaseBase):
     output_token_throughput = 6545
 
     def test_qwen3_vl_30b(self):
-        time.sleep(120)
         self.run_throughput()
 
 

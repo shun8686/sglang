@@ -130,8 +130,9 @@ jobs:
           test_case="${{ inputs.test_case }}"
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
-          metrics_data_file=${test_data_output_path}/${tc_name}.txt
-          echo "Metrics file: ${metrics_data_file}"
+          metrics_data_file=${test_data_output_path}/${tc_name}
+          mkdir -p ${METRICS_DATA_FILE}
+          echo "Metrics file path: ${metrics_data_file}"
 
           prefill_decode_deployment="${{ inputs.prefill_decode_deployment }}"
           kube_job_type=""
@@ -154,8 +155,8 @@ jobs:
             --test-case ${test_case} \
             --kube-name-space ${NAMESPACE} \
             --kube-job-type ${kube_job_type} \
-            --kube-job-name-prefix ${KUBE_JOB_NAME}" \
-            --transformers-version ${TRANSFORMERS_VERSION_FOR_SGLANG}
+            --kube-job-name-prefix ${KUBE_JOB_NAME} \
+            --transformers-version ${TRANSFORMERS_VERSION_FOR_SGLANG}"
 
           if [ "$prefill_decode_deployment" = "separation" ];then
             CMD="${CMD} \
