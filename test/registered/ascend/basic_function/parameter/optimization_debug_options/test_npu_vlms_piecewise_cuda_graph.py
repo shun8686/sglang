@@ -2,24 +2,22 @@ import argparse
 import glob
 import json
 import os
-import random
 import sys
 import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN2_5_VL_72B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_WEIGHTS_PATH
+# from sglang.test.ascend.test_ascend_utils import QWEN2_5_VL_72B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.kits.mmmu_vlm_kit import _run_lmms_eval_with_retry
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
-    is_in_ci,
     popen_launch_server,
 )
 
 MODELS = [
-    SimpleNamespace(model=QWEN2_5_VL_72B_INSTRUCT_WEIGHTS_PATH, mmmu_accuracy=0.60),
+    SimpleNamespace(model=LLAMA_3_2_1B_WEIGHTS_PATH, mmmu_accuracy=0.60),
 ]
 
 

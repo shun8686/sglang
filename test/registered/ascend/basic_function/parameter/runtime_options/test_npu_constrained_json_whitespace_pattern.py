@@ -27,7 +27,11 @@ class TestJSONModeMixin:
             model=self.model,
             messages=[
                 # We are deliberately omitting "That produces JSON" or similar phrases from the assistant prompt so that we don't have misleading test results
-                {"role": "user", "content": "输出一个用户信息JSON"},
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant that gives a short answer.",
+                },
+                {"role": "user", "content": "What is the capital of Bulgaria?"},
             ],
             temperature=0,
             max_tokens=128,
@@ -36,10 +40,13 @@ class TestJSONModeMixin:
                 "schema": {
                     "type": "object",
                     "properties": {
-                        "name": {"type": "string"},
-                        "age": {"type": "integer"},
+                        "drink_name": {"type": "string", "minLength": 3, "maxLength": 50},
+                        "origin": {"type": "string", "minLength": 2, "maxLength": 50},
+                        "main_ingredients": {"type": "array", "items":{"type": "string", "minLength": 2}, "minItems": 3, "maxItems": 6},
+                        "taste_profile": {"type": "string", "minLength": 10, "maxLength": 100},
                     },
-                    "required": ["name", "age"],
+                    "required": ["drink_name", "origin", "main_ingredients", "taste_profile"],
+                    "additionalProperties": False,
                 },
             },
         )
@@ -63,7 +70,11 @@ class TestJSONModeMixin:
             model=self.model,
             messages=[
                 # We are deliberately omitting "That produces JSON" or similar phrases from the assistant prompt so that we don't have misleading test results
-                {"role": "user", "content": "输出一个用户信息JSON"},
+                {
+                    "role": "system",
+                    "content": "You are a helpful AI assistant that gives a short answer.",
+                },
+                {"role": "user", "content": "What is the capital of Bulgaria?"},
             ],
             temperature=0,
             max_tokens=128,
@@ -72,10 +83,14 @@ class TestJSONModeMixin:
                 "schema": {
                     "type": "object",
                     "properties": {
-                        "name": {"type": "string"},
-                        "age": {"type": "integer"},
+                        "drink_name": {"type": "string", "minLength": 3, "maxLength": 50},
+                        "origin": {"type": "string", "minLength": 2, "maxLength": 50},
+                        "main_ingredients": {"type": "array", "items": {"type": "string", "minLength": 2},
+                                             "minItems": 3, "maxItems": 6},
+                        "taste_profile": {"type": "string", "minLength": 10, "maxLength": 100},
                     },
-                    "required": ["name", "age"],
+                    "required": ["drink_name", "origin", "main_ingredients", "taste_profile"],
+                    "additionalProperties": False,
                 },
             },
             stream=True,
@@ -157,6 +172,10 @@ class ServerWithGrammarBackend(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+
+
+class TestJSONModeLOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
+    backend = "outlines"
 
 
 class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
