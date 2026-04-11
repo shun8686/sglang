@@ -5,11 +5,13 @@ import unittest
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.lts_utils import TestAscendLtsTestCaseBase
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
+from sglang.test.ascend.e2e.test_npu_performance_utils import QWEN3_5_27B_W8A8_MODEL_PATH
 from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-MODEL_PATH = "/home/weights/Eco-Tech/Qwen3.5-27B-W8A8"
+# MODEL_PATH = "/root/Eco-Tech/Qwen3.5-27B-W8A8"
+MODEL_PATH = QWEN3_5_27B_W8A8_MODEL_PATH
 
 OTHER_ARGS = [
     "--attention-backend",
