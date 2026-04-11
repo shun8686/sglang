@@ -168,7 +168,7 @@ if __name__ == "__main__":
         type=str,
         required=False,
         default=os.environ.get("METRICS_DATA_FILE"),
-        help="Metrics data file",
+        help="Metrics data path",
     )
 
     parser.add_argument(
