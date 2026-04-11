@@ -22,7 +22,7 @@ from sglang.test.test_utils import (
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-MODEL_PATH = "/home/weights/Qwen3.5-27B-W8A8/"
+MODEL_PATH =  "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-27B-W8A8"
 HOST = "127.0.0.1"
 PORT = 6688
 SERVER_URL = f"http://{HOST}:{PORT}"
@@ -34,7 +34,7 @@ BENCH_NUM_PROMPTS = BENCH_MAX_CONCURRENCY * 4
 BENCH_RANDOM_INPUT_LEN = 16000
 BENCH_RANDOM_OUTPUT_LEN = 1000
 BENCH_RANDOM_RANGE_RATIO = 1.0
-BENCH_DATASET_PATH = "/home/hexq/ShareGPT_V3_unfiltered_cleaned_split.json"
+BENCH_DATASET_PATH = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
 
 # Performance thresholds — tune to ~80-90% of your baseline after first run
 MIN_OUTPUT_THROUGHPUT_TOKENS_PER_SEC = 0  # tok/s
@@ -117,6 +117,7 @@ class TestQwen35_27B_MTP_Perf(CustomTestCase):
                 "--speculative-num-steps", "3",
                 "--speculative-eagle-topk", "1",
                 "--speculative-num-draft-tokens", "4",
+                "--base-gpu-id", "4",
             ],
         )
 
