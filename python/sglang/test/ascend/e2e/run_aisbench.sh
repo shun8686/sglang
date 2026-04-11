@@ -1,4 +1,5 @@
 #!/bin/bash
+# run aisbench command
 
 set -e
 
