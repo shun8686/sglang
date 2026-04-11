@@ -92,11 +92,14 @@ OTHER_ARGS = [
     84,
     "--dtype",
     "bfloat16",
+    "--base-gpu-id",
+    8,
 ]
 
 
 class TestQwen32B(TestAscendPerformanceTestCaseBase):
     model = QWEN3_30B_A3B_MODEL_PATH
+    base_url = "http://127.0.0.1:30000"
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
