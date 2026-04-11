@@ -110,7 +110,7 @@ class TestQwen3Next(CustomTestCase):
     def test_gsm8k(self):
         expect_accuracy = 0.9
         args = SimpleNamespace(
-            num_shots=5,
+            num_shots=8,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
