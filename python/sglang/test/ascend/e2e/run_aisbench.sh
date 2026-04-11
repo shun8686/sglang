@@ -1,5 +1,4 @@
 #!/bin/bash
-# run aisbench command
 
 set -e
 
@@ -140,6 +139,6 @@ echo -e "API config file: $TMP_CFG"
 echo -e "Dataset config file: $TMP_DATASET"
 
 source ${PYTHON_ENV_FOR_AISBENCH}/bin/activate
-CMD="ais_bench --models $TMP_CFG --datasets $TMP_DATASET --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH"
+CMD="ais_bench --search --models $TMP_CFG --datasets $TMP_DATASET --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH"
 echo "Run command: ${CMD}"
 eval "${CMD}"
