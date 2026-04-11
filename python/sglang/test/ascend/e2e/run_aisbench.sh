@@ -56,6 +56,7 @@ MODEL_CONFIG_PATH=${AISBENCH_CINFG_PATH}/models
 TMP_CFG=vllm_api_${MODEL}
 /bin/cat > "${MODEL_CONFIG_PATH}/${TMP_CFG}.py" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChatStream
+from ais_bench.benchmark.utils.postprocess.model_postprocessors import extract_non_reasoning_content
 models = [
     dict(
         attr="service",
