@@ -5,18 +5,29 @@ set -e
 echo "===== Install aisbench in virtual env - Begin ====="
 PYTHON_ENV_FOR_AISBENCH=test_env_aisbench
 PIP_FOR_AISBENCH=${PYTHON_ENV_FOR_AISBENCH}/bin/pip
-/usr/bin/python -m venv ${PYTHON_ENV_FOR_AISBENCH}
+python -m venv ${PYTHON_ENV_FOR_AISBENCH}
 AISBENCH_SOURCE_PATH=/root/.cache/.cache/benchmark
+AISBENCH_PKG_PATH=/root/.cache/.cache/aisbench-packages
 if [ ! -d "${AISBENCH_SOURCE_PATH}" ]; then
-  echo "The dependent aisbench package does not exist: ${AISBENCH_SOURCE_PATH}."
+  echo "The aisbench source does not exist: ${AISBENCH_SOURCE_PATH}."
   echo "git clone https://github.com/AISBench/benchmark.git"
-  /usr/bin/git clone https://github.com/AISBench/benchmark.git
+  git clone https://github.com/AISBench/benchmark.git
   AISBENCH_SOURCE_PATH="./benchmark/"
 fi
-${PIP_FOR_AISBENCH} install -U pip -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+if [ ! -d "${AISBENCH_PKG_PATH}" ]; then
+  echo "The dependent aisbench package does not exist: ${AISBENCH_PKG_PATH}."
+  echo "Install aisbench online."
+  ${PIP_FOR_AISBENCH} install -U pip -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+else
+  echo "Install aisbench locally."
+  ${PIP_FOR_AISBENCH} install -U pip --no-index --find-links=${AISBENCH_PKG_PATH}
+  ${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 --no-index --find-links=${AISBENCH_PKG_PATH}
+  ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt --no-index --find-links=${AISBENCH_PKG_PATH}
+  ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt --no-index --find-links=${AISBENCH_PKG_PATH}
+fi
 echo "===== Install aisbench in virtual env - End ====="
 
 # Check if the correct number of arguments are provided
