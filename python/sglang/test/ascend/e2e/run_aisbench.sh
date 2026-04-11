@@ -81,6 +81,8 @@ models = [
 ]
 EOF
 
+TMP_DATASET=$DATASET_PATH
+if [ -f "$DATASET_PATH" ]; then
 
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
 /bin/mkdir -p ${DATASETS_CONFIG_PATH}
@@ -135,6 +137,7 @@ mm_custom_datasets = [
     )
 ]
 EOF
+fi
 
 
 echo "IP: $IP | Port: $PORT | Model: $MODEL | Path: $PATH"
