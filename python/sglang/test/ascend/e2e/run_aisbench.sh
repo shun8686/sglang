@@ -85,7 +85,7 @@ EOF
 
 
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
-/bin/mkdir ${DATASETS_CONFIG_PATH}
+/bin/mkdir -p ${DATASETS_CONFIG_PATH}
 TMP_DATASET=mm_custom_gen_${MODEL}
 /bin/cat > "${DATASETS_CONFIG_PATH}/${TMP_DATASET}.py" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template.icl_prompt_template_mm import MMPromptTemplate
