@@ -7,7 +7,7 @@ PYTHON_ENV_FOR_AISBENCH=test_env_aisbench
 PIP_FOR_AISBENCH=${PYTHON_ENV_FOR_AISBENCH}/bin/pip
 python -m venv ${PYTHON_ENV_FOR_AISBENCH}
 AISBENCH_SOURCE_PATH=/root/.cache/.cache/benchmark
-AISBENCH_PKG_PATH=/root/.cache/.cache/aisbench-packages-local
+AISBENCH_PKG_PATH=/root/.cache/.cache/aisbench-packages
 if [ ! -d "${AISBENCH_SOURCE_PATH}" ]; then
   echo "The aisbench source does not exist: ${AISBENCH_SOURCE_PATH}."
   echo "git clone https://github.com/AISBench/benchmark.git"
@@ -49,8 +49,12 @@ BATCH_SIZE=$7
 NUM_PROMPTS=$8
 OUTPUT_PATH=$9
 
-TMP_CFG=/tmp/vllm_api_${MODEL}.py
-/bin/cat > "$TMP_CFG" << EOF
+AISBENCH_CINFG_PATH=/tmp/ais_configs
+
+MODEL_CONFIG_PATH=${AISBENCH_CINFG_PATH}/models
+mkdir -p ${MODEL_CONFIG_PATH}
+TMP_CFG=vllm_api_${MODEL}
+/bin/cat > "${MODEL_CONFIG_PATH}/${TMP_CFG}.py" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChatStream
 models = [
     dict(
@@ -80,8 +84,10 @@ models = [
 EOF
 
 
-TMP_DATASET=/tmp/mm_custom_gen_${MODEL}.py
-/bin/cat > "$TMP_DATASET" << EOF
+DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
+mkdir ${DATASETS_CONFIG_PATH}
+TMP_DATASET=mm_custom_gen_${MODEL}
+/bin/cat > "${DATASETS_CONFIG_PATH}/${TMP_DATASET}.py" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template.icl_prompt_template_mm import MMPromptTemplate
 from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
 from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
@@ -135,10 +141,10 @@ EOF
 
 echo "IP: $IP | Port: $PORT | Model: $MODEL | Path: $PATH"
 echo "Output tokens: $MAX_OUT_LEN | Batch size: $BATCH_SIZE | Prompts num: $NUM_PROMPTS"
-echo -e "API config file: $TMP_CFG"
-echo -e "Dataset config file: $TMP_DATASET"
+echo -e "API config: $TMP_CFG"
+echo -e "Dataset config: $TMP_DATASET"
 
 source ${PYTHON_ENV_FOR_AISBENCH}/bin/activate
-CMD="ais_bench --models $TMP_CFG --datasets $TMP_DATASET --mode perf --num-prompts $NUM_PROMPTS --output-dir $OUTPUT_PATH"
+CMD="ais_bench --config-dir /tmp/ais_configs --models $TMP_CFG --datasets $TMP_DATASET --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH"
 echo "Run command: ${CMD}"
 eval "${CMD}"
