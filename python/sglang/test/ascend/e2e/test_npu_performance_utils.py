@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import subprocess
 import threading
 import time
@@ -419,7 +420,40 @@ def run_aisbench(
             raise subprocess.CalledProcessError(process.returncode, cmd)
 
         logger.info("Command executed successfully")
-        return "\n".join(output_lines)
+
+        metrics = {}
+        full_output = "\n".join(output_lines)
+
+        tpot_match = re.search(
+            r"\|\s*TPOT\s*\|\s*total\s*\|\s*([\d.]+)\s+ms", full_output
+        )
+        if tpot_match:
+            metrics["mean_tpot"] = tpot_match.group(1)
+            logger.info(f"Extracted mean_tpot: {metrics['mean_tpot']} ms")
+        else:
+            logger.warning("Could not extract mean_tpot from output")
+
+        tps_matches = re.findall(
+            r"\|\s*(?:OutputTokenThroughput|Output Token Throughput)\s*\|\s*total\s*\|\s*([\d.]+)\s+token/s",
+            full_output,
+        )
+        if len(tps_matches) >= 2:
+            metrics["total_tps"] = tps_matches[1]
+            logger.info(f"Extracted total_tps: {metrics['total_tps']} token/s")
+        elif tps_matches:
+            metrics["total_tps"] = tps_matches[0]
+            logger.info(f"Extracted total_tps: {metrics['total_tps']} token/s")
+        else:
+            logger.warning("Could not extract total_tps from output")
+
+        ttft_match = re.search(
+            r"\|\s*TTFT\s*\|\s*total\s*\|\s*([\d.]+)\s+ms", full_output
+        )
+        if ttft_match:
+            metrics["mean_ttft"] = ttft_match.group(1)
+            logger.info(f"Extracted mean_ttft: {metrics['mean_ttft']} ms")
+
+        return metrics
 
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, terminating process...")
@@ -537,7 +571,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         host = parsed_url.hostname
         port = parsed_url.port
         if self.benchmark_tool == "aisbench":
-            run_aisbench(
+            metrics = run_aisbench(
                 host=host,
                 port=port,
                 model_path=self.model,
@@ -546,6 +580,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
             )
+            assert_metrics(self, metrics)
         else:
 
             bench_params = {

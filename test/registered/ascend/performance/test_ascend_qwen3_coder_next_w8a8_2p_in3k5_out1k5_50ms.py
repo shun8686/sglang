@@ -5,6 +5,7 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
+from sglang.test.ci.ci_register import register_npu_ci
 
 logging.basicConfig(
     level=logging.INFO,
@@ -14,6 +15,13 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Coder-Next_W8A8"
+
+register_npu_ci(
+    est_time=1800,
+    suite="nightly-4-npu-a3",
+    nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
+)
 
 ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
