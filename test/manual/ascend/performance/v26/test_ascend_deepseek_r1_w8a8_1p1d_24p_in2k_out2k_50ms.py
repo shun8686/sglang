@@ -36,6 +36,7 @@ MODEL_CONFIG = {
         "SGLANG_SCHEDULER_SKIP_ALL_GATHER": "1",
         "HCCL_SOCKET_IFNAME": NIC_NAME,
         "GLOO_SOCKET_IFNAME": NIC_NAME,
+        "SGLANG_NPU_FUSED_MOE_MODE": "1",
     },
     "prefill_args": [
         "--nnodes",
