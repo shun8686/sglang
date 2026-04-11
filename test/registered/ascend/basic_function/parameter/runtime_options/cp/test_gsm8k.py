@@ -31,7 +31,7 @@ class GSM8KAscendMixin(ABC):
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host="http://172.22.3.166",
+            host="http://172.22.3.71",
             port=8001,
         )
         metrics = run_eval(args)

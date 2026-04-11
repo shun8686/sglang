@@ -15,20 +15,20 @@ export HCCL_BUFFSIZE=1536
 #export SGLANG_NPU_USE_MLP
 
 export HCCL_OP_EXPANSION_MODE=AIV
-P_HOST_IP=('172.22.3.166' '172.22.3.181')
-export ASCEND_MF_STORE_URL="tcp://172.22.3.166:30110"
+P_HOST_IP=('172.22.3.71' '172.22.3.166')
+export ASCEND_MF_STORE_URL="tcp://172.22.3.71:30110"
 export HCCL_SOCKET_IFNAME="enp23s0f3"
 export GLOO_SOCKET_IFNAME="enp23s0f3"
 
 #for i in "${!P_HOST_IP[@]}";
 #do
  python -m sglang.launch_server \
-	--host 172.22.3.181 \
+	--host 172.22.3.166 \
  	--port 8001 \
 	--attention-backend ascend \
 	--device npu \
 	--trust-remote-code \
-	--dist-init-addr 172.22.3.166:5000 \
+	--dist-init-addr 172.22.3.71:5000 \
 	--nnodes 2 \
 	--node-rank 1 \
 	--tp-size 32 \
