@@ -73,8 +73,8 @@ class TestQwen3Next(CustomTestCase):
                 # "deepep",
                 # "--deepep-mode",
                 # "low_latency",
-                "--base-gpu-id",
-                8,
+                # "--base-gpu-id",
+                # 8,
             ],
             env={
                 "ASCEND_LAUNCH_BLOCKING": "1",
