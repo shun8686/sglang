@@ -148,6 +148,10 @@ class ServerWithGrammarBackend(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
 
+class TestJSONModeXgrammar(ServerWithGrammarBackend, TestJSONModeMixin):
+    backend = "xgrammar"
+
+
 class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
     backend = "outlines"
 
