@@ -99,8 +99,6 @@ class TestDotsOcr(CustomTestCase):
             "--enable-multimodal",
             "--sampling-backend",
             "ascend",
-            "--base-gpu-id",
-            "9",
         ]
         cls.process = popen_launch_server(
             cls.model,
@@ -153,7 +151,6 @@ class TestDotsOcr(CustomTestCase):
             "0",
             "Infants",
             "Below 2 Years",
-            "0",
             "More Options",
             "Direct flights only.",
             "SEARCH FLIGHTS",
