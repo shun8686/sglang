@@ -43,7 +43,7 @@ export GLOO_SOCKET_IFNAME="enp23s0f3"
 	--enable-dp-lm-head \
 	--moe-dense-tp-size 1 \
 	--quantization modelslim \
-	--model-path /data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8 \
+	--model-path /data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8 \
         --mem-fraction-static 0.8 \
 	--chunked-prefill-size -1 \
 	--context-length 68000 \

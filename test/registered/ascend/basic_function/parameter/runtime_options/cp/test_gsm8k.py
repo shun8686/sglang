@@ -1,3 +1,4 @@
+import unittest
 import os
 from abc import ABC
 from types import SimpleNamespace
@@ -11,8 +12,8 @@ from sglang.test.test_utils import (
 )
 
 
-class GSM8KAscendMixin(ABC):
-    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/DeepSeek-V3.2-Exp-W8A8"
+class GSM8KAscendMixin(ABC, unittest.TestCase):
+    model = "/data/ascend-ci-share-pkking-sglang/modelscope/hub/models/vllm-ascend/DeepSeek-V3.2-W8A8"
     accuracy = 0.5
     gsm8k_num_shots = 5
 
@@ -27,7 +28,7 @@ class GSM8KAscendMixin(ABC):
     def test_gsm8k(self):
         args = SimpleNamespace(
             num_shots=self.gsm8k_num_shots,
-            data_path=None,
+            data_path="/tmp/test.jsonl",
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
@@ -40,3 +41,6 @@ class GSM8KAscendMixin(ABC):
             self.accuracy,
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
         )
+
+if __name__ == "__main__":
+    unittest.main()
