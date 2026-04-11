@@ -52,7 +52,7 @@ OUTPUT_PATH=$9
 AISBENCH_CINFG_PATH=/tmp/ais_configs
 
 MODEL_CONFIG_PATH=${AISBENCH_CINFG_PATH}/models
-mkdir -p ${MODEL_CONFIG_PATH}
+/bin/mkdir -p ${MODEL_CONFIG_PATH}
 TMP_CFG=vllm_api_${MODEL}
 /bin/cat > "${MODEL_CONFIG_PATH}/${TMP_CFG}.py" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChatStream
@@ -74,10 +74,7 @@ models = [
         max_out_len=$MAX_OUT_LEN,
         batch_size=$BATCH_SIZE,
         trust_remote_code=True,
-        generation_kwargs=dict(
-            temperature=0,
-            ignore_eos=True
-        )
+        generation_kwargs=dict(temperature=0,ignore_eos=True),
         pred_postprocessor=dict(type=extract_non_reasoning_content),
     )
 ]
@@ -85,7 +82,7 @@ EOF
 
 
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
-mkdir ${DATASETS_CONFIG_PATH}
+/bin/mkdir -p ${DATASETS_CONFIG_PATH}
 TMP_DATASET=mm_custom_gen_${MODEL}
 /bin/cat > "${DATASETS_CONFIG_PATH}/${TMP_DATASET}.py" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template.icl_prompt_template_mm import MMPromptTemplate
