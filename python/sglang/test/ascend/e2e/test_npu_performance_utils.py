@@ -424,7 +424,9 @@ def run_aisbench(
         metrics = {}
         full_output = "\n".join(output_lines)
 
-        tpot_match = re.search(r"\| TPOT\s+\| total\s+\| ([\d.]+) ms", full_output)
+        tpot_match = re.search(
+            r"\|\s*TPOT\s*\|\s*total\s*\|\s*([\d.]+)\s+ms", full_output
+        )
         if tpot_match:
             metrics["mean_tpot"] = tpot_match.group(1)
             logger.info(f"Extracted mean_tpot: {metrics['mean_tpot']} ms")
@@ -432,19 +434,21 @@ def run_aisbench(
             logger.warning("Could not extract mean_tpot from output")
 
         tps_matches = re.findall(
-            r"\| Output Token Throughput\s+\| total\s+\| ([\d.]+) token/s", full_output
+            r"\|\s*(?:OutputTokenThroughput|Output Token Throughput)\s*\|\s*total\s*\|\s*([\d.]+)\s+token/s",
+            full_output,
         )
         if len(tps_matches) >= 2:
-            metrics["total_tps"] = tps_matches[1]  # 获取第二处的值
+            metrics["total_tps"] = tps_matches[1]
             logger.info(f"Extracted total_tps: {metrics['total_tps']} token/s")
         elif tps_matches:
-            metrics["total_tps"] = tps_matches[0]  # 只有一处时也使用
+            metrics["total_tps"] = tps_matches[0]
             logger.info(f"Extracted total_tps: {metrics['total_tps']} token/s")
         else:
             logger.warning("Could not extract total_tps from output")
 
-        # 提取平均TTFT (ms) 作为额外信息
-        ttft_match = re.search(r"\| TTFT\s+\| total\s+\| ([\d.]+) ms", full_output)
+        ttft_match = re.search(
+            r"\|\s*TTFT\s*\|\s*total\s*\|\s*([\d.]+)\s+ms", full_output
+        )
         if ttft_match:
             metrics["mean_ttft"] = ttft_match.group(1)
             logger.info(f"Extracted mean_ttft: {metrics['mean_ttft']} ms")
