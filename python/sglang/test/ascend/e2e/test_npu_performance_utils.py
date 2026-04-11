@@ -383,7 +383,6 @@ def run_aisbench(
     result_path = "./aisbench_result" if not metrics_path else metrics_path
     logger.info(f"The metrics result file: {result_path}")
 
-    # 构造完整的命令字符串
     cmd = f"/bin/bash /root/sglang/python/sglang/test/ascend/e2e/run_aisbench.sh "
     cmd += f"{host} "
     cmd += f"{str(port)} "
