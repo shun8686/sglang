@@ -384,7 +384,7 @@ def run_aisbench(
     logger.info(f"The metrics result file: {result_file}")
 
     cmd_args = [
-        "bash",
+        "/bin/bash",
         "/root/sglang/python/sglang/test/ascend/e2e/run_aisbench.sh",
         host,
         str(port),
