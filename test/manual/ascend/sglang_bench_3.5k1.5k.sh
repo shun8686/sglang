@@ -1,0 +1,1 @@
+python3 -m sglang.bench_serving --backend sglang --model /home/weights/MiniMax-M2.5-w8a8-QuaRot --host 127.0.0.1 --port 32000 --dataset-name random --max-concurrency 1024 --num-prompts 4096 --random-input-len 3500 --random-output-len 1500 --random-range-ratio 1 --dataset-path /home/weights/ShareGPT_V3_unfiltered_cleaned_split/ShareGPT_V3_unfiltered_cleaned_split.json
