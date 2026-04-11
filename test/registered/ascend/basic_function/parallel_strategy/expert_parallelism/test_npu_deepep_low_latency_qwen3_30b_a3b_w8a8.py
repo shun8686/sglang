@@ -41,10 +41,10 @@ class TestDeepepLowlatencyQwen3(CustomTestCase):
                 "2",
                 "--quantization",
                 "modelslim",
-                # "--moe-a2a-backend",
-                # "deepep",
-                # "--deepep-mode",
-                # "low_latency",
+                "--moe-a2a-backend",
+                "deepep",
+                "--deepep-mode",
+                "low_latency",
                 "--disable-cuda-graph",
                 "--chunked-prefill-size",
                 "1024",
@@ -78,7 +78,7 @@ class TestDeepepLowlatencyQwen3(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's mathematical reasoning accuracy on the GSM8K dataset
         args = SimpleNamespace(
-            num_shots=8,
+            num_shots=5,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
