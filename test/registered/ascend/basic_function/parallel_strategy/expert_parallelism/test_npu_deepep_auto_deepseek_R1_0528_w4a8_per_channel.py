@@ -122,7 +122,7 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
     def test_gsm8k(self):
         # Test Scenario: Verify the model's accuracy on GSM8K dataset (mathematical reasoning evaluation)
         args = SimpleNamespace(
-            ase_url=self.base_url,
+            base_url=self.base_url,
             model=self.model,
             eval_name="gsm8k",
             data_path=None,
