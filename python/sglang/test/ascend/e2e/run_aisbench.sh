@@ -49,8 +49,12 @@ BATCH_SIZE=$7
 NUM_PROMPTS=$8
 OUTPUT_PATH=$9
 
+AISBENCH_CINFG_PATH=/tmp/ais_configs
+
+MODEL_CONFIG_PATH=${AISBENCH_CINFG_PATH}/models
+mkdir -p ${MODEL_CONFIG_PATH}
 TMP_CFG=vllm_api_${MODEL}
-/bin/cat > "/tmp/ais_configs/${TMP_CFG}.py" << EOF
+/bin/cat > "${MODEL_CONFIG_PATH}/${TMP_CFG}.py" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChatStream
 models = [
     dict(
@@ -80,8 +84,10 @@ models = [
 EOF
 
 
+DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
+mkdir ${DATASETS_CONFIG_PATH}
 TMP_DATASET=mm_custom_gen_${MODEL}
-/bin/cat > "/tmp/ais_configs/${TMP_DATASET}.py" << EOF
+/bin/cat > "${DATASETS_CONFIG_PATH}/${TMP_DATASET}.py" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template.icl_prompt_template_mm import MMPromptTemplate
 from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
 from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
