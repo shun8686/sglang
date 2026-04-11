@@ -40,7 +40,7 @@ QWEN3_VL_30B_OTHER_ARGS = [
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
-    416,
+    368,
     "--prefill-max-requests",
     37,
     "--chunked-prefill-size",
@@ -53,7 +53,7 @@ QWEN3_VL_30B_OTHER_ARGS = [
     "--sampling-backend",
     "ascend",
     "--cuda-graph-bs",
-    104,
+    92,
     "--tokenizer-worker-num",
     4,
     "--dtype",
@@ -80,14 +80,14 @@ class TestQwen3Vl30B(TestAscendPerformanceTestCaseBase):
     dataset_name = "image"
     image_resolution = "1024x1024"
     image_count = 1
-    max_concurrency = 416
-    num_prompts = 1664
+    max_concurrency = 368
+    num_prompts = 1472
     input_len = 1
     output_len = 1024
     random_range_ratio = 1
     seed = 1000
     tpot = 50
-    output_token_throughput = 6545
+    output_token_throughput = 6000
 
     def test_qwen3_vl_30b(self):
         self.run_throughput()

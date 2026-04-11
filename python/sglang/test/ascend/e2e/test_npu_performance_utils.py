@@ -1,5 +1,6 @@
 import logging
 import os
+import re
 import subprocess
 import threading
 import time
@@ -419,7 +420,63 @@ def run_aisbench(
             raise subprocess.CalledProcessError(process.returncode, cmd)
 
         logger.info("Command executed successfully")
-        return "\n".join(output_lines)
+
+        metrics = {}
+        full_output = "\n".join(output_lines)
+
+        simplified_output = re.sub(r"[^\w\s.]", " ", full_output)
+
+        tpot_match = re.search(r"TPOT\s+total\s+([\d.]+)\s+ms", simplified_output)
+        if tpot_match:
+            metrics["mean_tpot"] = tpot_match.group(1)
+            logger.info(f"Extracted mean_tpot: {metrics['mean_tpot']} ms")
+        else:
+            logger.warning("Could not extract mean_tpot from output")
+            logger.info(
+                f"Simplified output snippet around TPOT: {simplified_output[simplified_output.find('TPOT')-20:simplified_output.find('TPOT')+50] if 'TPOT' in simplified_output else 'TPOT not found'}"
+            )
+
+        tps_matches = re.findall(
+            r"Output\s+Token\s+Throughput\s+total\s+([\d.]+)\s+token/s",
+            simplified_output,
+        )
+        if len(tps_matches) < 2:
+            tps_matches += re.findall(
+                r"OutputTokenThroughput\s+total\s+([\d.]+)\s+token/s", simplified_output
+            )
+
+        logger.info(
+            f"Found {len(tps_matches)} matches for Output Token Throughput: {tps_matches}"
+        )
+        if len(tps_matches) >= 2:
+            metrics["total_tps"] = tps_matches[1]
+            logger.info(
+                f"Extracted total_tps: {metrics['total_tps']} token/s (from Common Metric section)"
+            )
+        elif tps_matches:
+            metrics["total_tps"] = tps_matches[0]
+            logger.info(
+                f"Extracted total_tps: {metrics['total_tps']} token/s (only one match found)"
+            )
+        else:
+            logger.warning("Could not extract total_tps from output")
+            logger.info(
+                f"Simplified output snippet around Output Token Throughput: {simplified_output[simplified_output.find('Output')-20:simplified_output.find('Output')+100] if 'Output' in simplified_output else 'Output not found'}"
+            )
+
+        ttft_match = re.search(r"TTFT\s+total\s+([\d.]+)\s+ms", simplified_output)
+        if ttft_match:
+            metrics["mean_ttft"] = ttft_match.group(1)
+            logger.info(f"Extracted mean_ttft: {metrics['mean_ttft']} ms")
+        else:
+            logger.warning("Could not extract mean_ttft from output")
+            logger.info(
+                f"Simplified output snippet around TTFT: {simplified_output[simplified_output.find('TTFT')-20:simplified_output.find('TTFT')+50] if 'TTFT' in simplified_output else 'TTFT not found'}"
+            )
+
+        logger.info(f"All extracted metrics: {metrics}")
+
+        return metrics
 
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, terminating process...")
@@ -537,7 +594,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         host = parsed_url.hostname
         port = parsed_url.port
         if self.benchmark_tool == "aisbench":
-            run_aisbench(
+            metrics = run_aisbench(
                 host=host,
                 port=port,
                 model_path=self.model,
@@ -546,6 +603,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
             )
+            assert_metrics(self, metrics)
         else:
 
             bench_params = {

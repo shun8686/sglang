@@ -56,6 +56,7 @@ MODEL_CONFIG_PATH=${AISBENCH_CINFG_PATH}/models
 TMP_CFG=vllm_api_${MODEL}
 /bin/cat > "${MODEL_CONFIG_PATH}/${TMP_CFG}.py" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChatStream
+from ais_bench.benchmark.utils.postprocess.model_postprocessors import extract_non_reasoning_content
 models = [
     dict(
         attr="service",
@@ -80,6 +81,8 @@ models = [
 ]
 EOF
 
+TMP_DATASET=$DATASET_PATH
+if [ -f "$DATASET_PATH" ]; then
 
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
 /bin/mkdir -p ${DATASETS_CONFIG_PATH}
@@ -123,7 +126,7 @@ mm_custom_datasets = [
     dict(
         abbr='mm_custom',
         type=MMCustomDataset,
-        path=$DATASET_PATH,
+        path="$DATASET_PATH",
         mm_type="path",
         num_frames=5,
         reader_cfg=mm_custom_reader_cfg,
@@ -134,6 +137,7 @@ mm_custom_datasets = [
     )
 ]
 EOF
+fi
 
 
 echo "IP: $IP | Port: $PORT | Model: $MODEL | Path: $PATH"

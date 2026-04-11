@@ -107,7 +107,7 @@ class TestLTSQwen3527BW8A8(TestAscendLtsTestCaseBase):
     # accuracy = {"gsm8k": 0.755}
     tpot = 100
     output_token_throughput = 10
-    accuracy = {"gsm8k": 0.50, "mmlu": 0.0}
+    accuracy = {"gsm8k": 0.50, "mmlu": 0.5}
 
     @classmethod
     def setUpClass(cls):

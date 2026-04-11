@@ -108,6 +108,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
     envs = QWEN3_NEXT_80B_A3B_ENVS
     evalscope_config = {
         "datasets": [
+            "longbench_v2",
             "mmlu",
             "mmlu_pro",
             "aime25",
@@ -117,6 +118,7 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
             "ceval",
         ],
         "dataset_args": {
+            "longbench_v2": {},
             "aime25": {"few_shot_num": 0},
             "math_500": {
                 "few_shot_num": 0,
@@ -130,10 +132,13 @@ class TestQwen3Next80BA3B(TestAscendLtsTestCaseBase):
         },
         "eval_batch_size": 16,
         "generation_config": {
+            "longbench_v2": {
+                "max_tokens": 25000,
+                "temperature": 0.0,
+            },
             "aime25": {
                 "max_tokens": 25000,
                 "temperature": 0.6,
-                "n": 1,
             },
             "math_500": {
                 "max_tokens": 25000,
