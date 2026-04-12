@@ -186,7 +186,7 @@ jobs:
 
           if [ "$transformers_version" != "" ];then
             CMD="${CMD} --transformers-version ${transformers_version}"
-          else 
+          else
             echo "Use default transformers version in image."
           fi
 
