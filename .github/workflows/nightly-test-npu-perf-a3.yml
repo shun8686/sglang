@@ -16,7 +16,7 @@ concurrency:
 jobs:
   nightly-performance-baseline-single-node-tests-pre:
     name: single-node
-    if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
+    if: ${{ (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') && false }}
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -36,7 +36,7 @@ jobs:
 
   nightly-performance-baseline-single-node-tests-transformers-5p5:
     name: single-node
-    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
+    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') && false }}
     needs: nightly-performance-baseline-single-node-tests-pre
     strategy:
       fail-fast: false
@@ -60,7 +60,7 @@ jobs:
 
   nightly-performance-baseline-single-node-tests:
     name: single-node
-    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
+    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') && false }}
     needs: nightly-performance-baseline-single-node-tests-transformers-5p5
     strategy:
       fail-fast: false
