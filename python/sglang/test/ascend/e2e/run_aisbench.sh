@@ -31,10 +31,10 @@ fi
 echo "===== Install aisbench in virtual env - End ====="
 
 # Check if the correct number of arguments are provided
-if [ $# -ne 9 ]; then
+if [ $# -ne 10 ]; then
     echo -e "\033[31mUsage:\033[0m"
-    echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET> <MAX_OUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
-    echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k_gen 1024 32 128 ./result"
+    echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET_TYPE> <DATASET_PATH> <MAX_OUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
+    echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k_gen /path/to/gsm8k 1024 32 128 ./result"
     exit 1
 fi
 
@@ -42,13 +42,13 @@ fi
 IP=$1
 PORT=$2
 MODEL=$3
-PATH=$4
+MODEL_PATH=$4
 DATASET_TYPE=$5
 DATASET_PATH=$6
 MAX_OUT_LEN=$7
 BATCH_SIZE=$8
 NUM_PROMPTS=$9
-OUTPUT_PATH=$10
+OUTPUT_PATH=${10}
 
 AISBENCH_CINFG_PATH=/tmp/ais_configs
 
@@ -63,7 +63,7 @@ models = [
         attr="service",
         type=VLLMCustomAPIChatStream,
         abbr='vllm-api-stream-chat',
-        path="$PATH",
+        path="$MODEL_PATH",
         model="$MODEL",
         stream=True,
         request_rate=0,
@@ -144,7 +144,7 @@ mm_custom_datasets = [
 ]
 EOF
 
-else if [ "$DATASET_TYPE" == "gsm8k" ]; then
+elif [ "$DATASET_TYPE" == "gsm8k" ]; then
     TMP_DATASET=gsm8k_gen_${MODEL}
     /bin/cat > "${DATASETS_CONFIG_PATH}/${TMP_DATASET}.py" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template import PromptTemplate
@@ -183,7 +183,7 @@ else
 fi
 
 
-echo "IP: $IP | Port: $PORT | Model: $MODEL | Path: $PATH"
+echo "IP: $IP | Port: $PORT | Model: $MODEL | Model Path: $MODEL_PATH"
 echo "Output tokens: $MAX_OUT_LEN | Batch size: $BATCH_SIZE | Prompts num: $NUM_PROMPTS"
 echo -e "Model config: $TMP_CFG"
 echo -e "Dataset config: $TMP_DATASET"

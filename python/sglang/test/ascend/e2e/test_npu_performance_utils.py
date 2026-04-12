@@ -250,7 +250,11 @@ def write_pkg_info_to_file(result_file):
                 f.write(pkg + "\n")
                 logger.info(pkg)
             f.write(get_cann_version() + "\n")
-            f.write("transformers: " + transformers.__version__ + "\n")
+            transformers_version_info = (
+                "transformers: " + transformers.__version__ + "\n"
+            )
+            f.write(transformers_version_info)
+            logger.info(transformers_version_info)
 
     except Exception as e:
         logger.error(f"Error getting packages: {e}")
@@ -446,7 +450,8 @@ def run_aisbench(
         )
         if len(tps_matches) < 2:
             tps_matches += re.findall(
-                r"OutputTokenThroughput\s+total\s+([\d.]+)\s+token\s*/?\s*s", simplified_output
+                r"OutputTokenThroughput\s+total\s+([\d.]+)\s+token\s*/?\s*s",
+                simplified_output,
             )
 
         logger.info(
@@ -544,8 +549,10 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k" # gsm8k or mm-custom-gen
-    aisbench_dataset_path = None # keep none for gsm8k; set a json config file for mm_custom_gen
+    aisbench_dataset_type = "gsm8k"  # gsm8k or mm-custom-gen
+    aisbench_dataset_path = (
+        None  # keep none for gsm8k; set a json config file for mm_custom_gen
+    )
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -642,8 +649,10 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k" # gsm8k or mm-custom-gen
-    aisbench_dataset_path = None # keep none for gsm8k; set a json config file for mm_custom_gen
+    aisbench_dataset_type = "gsm8k"  # gsm8k or mm-custom-gen
+    aisbench_dataset_path = (
+        None  # keep none for gsm8k; set a json config file for mm_custom_gen
+    )
     max_attempts = 2
     request_rate = None
     max_concurrency = None
@@ -710,8 +719,8 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     def run_throughput(self):
         if self.benchmark_tool == "aisbench":
             metrics = run_aisbench(
-                host=host,
-                port=port,
+                host=self.host,
+                port=str(self.port),
                 model_path=self.model,
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
@@ -751,8 +760,10 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k" # gsm8k or mm-custom-gen
-    aisbench_dataset_path = None # keep none for gsm8k; set a json config file for mm_custom_gen
+    aisbench_dataset_type = "gsm8k"  # gsm8k or mm-custom-gen
+    aisbench_dataset_path = (
+        None  # keep none for gsm8k; set a json config file for mm_custom_gen
+    )
     max_attempts = 2
     request_rate = None
     max_concurrency = None
@@ -836,8 +847,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     def run_throughput(self):
         if self.benchmark_tool == "aisbench":
             metrics = run_aisbench(
-                host=host,
-                port=port,
+                host=self.host,
+                port=str(self.port),
                 model_path=self.model,
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
