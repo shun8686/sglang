@@ -107,6 +107,7 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     mean_e2e_latency = 10000
     output_token_throughput = 2000
+    max_attempts = 4
 
     def test_qwen3_32b(self):
         self.run_throughput()
