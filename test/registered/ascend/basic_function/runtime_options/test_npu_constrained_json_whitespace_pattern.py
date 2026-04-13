@@ -45,22 +45,26 @@ class TestJSONModeMixin:
                         "drink_name": {
                             "type": "string",
                             "minLength": 3,
-                            "maxLength": 50
+                            "maxLength": 50,
                         },
                         "origin": {"type": "string", "minLength": 2, "maxLength": 50},
                         "main_ingredients": {
                             "type": "array",
-                            "items":{"type": "string", "minLength": 2},
+                            "items": {"type": "string", "minLength": 2},
                             "minItems": 3,
-                            "maxItems": 6
+                            "maxItems": 6,
                         },
-                        "taste_profile": {"type": "string", "minLength": 10, "maxLength": 100},
+                        "taste_profile": {
+                            "type": "string",
+                            "minLength": 10,
+                            "maxLength": 100,
+                        },
                     },
                     "required": [
                         "drink_name",
                         "origin",
                         "main_ingredients",
-                        "taste_profile"
+                        "taste_profile",
                     ],
                     "additionalProperties": False,
                 },
@@ -106,22 +110,26 @@ class TestJSONModeMixin:
                         "drink_name": {
                             "type": "string",
                             "minLength": 3,
-                            "maxLength": 50
+                            "maxLength": 50,
                         },
                         "origin": {"type": "string", "minLength": 2, "maxLength": 50},
                         "main_ingredients": {
                             "type": "array",
                             "items": {"type": "string", "minLength": 2},
                             "minItems": 3,
-                            "maxItems": 6
+                            "maxItems": 6,
                         },
-                        "taste_profile": {"type": "string", "minLength": 10, "maxLength": 100},
+                        "taste_profile": {
+                            "type": "string",
+                            "minLength": 10,
+                            "maxLength": 100,
+                        },
                     },
                     "required": [
                         "drink_name",
                         "origin",
                         "main_ingredients",
-                        "taste_profile"
+                        "taste_profile",
                     ],
                     "additionalProperties": False,
                 },

@@ -101,7 +101,7 @@ class TestJSONModeMixin:
         self._verify_whitespace_constraint(full_response)
 
     def _verify_whitespace_constraint(self, json_str):
-        has_newline = bool(re.search(r'\n', json_str))
+        has_newline = bool(re.search(r"\n", json_str))
         self.assertFalse(
             has_newline,
             f"[{self.backend}] Whitespace characters still exist after enabling --constrained-json-disable-any-whitespace! JSON: {json_str}",

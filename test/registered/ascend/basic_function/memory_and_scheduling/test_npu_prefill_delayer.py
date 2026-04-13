@@ -373,6 +373,7 @@ class TestPrefillDelayerTokenUsageLowWatermark(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --enable-prefill-delayer; --prefill-delayer-max-delay-passes; --prefill-delayer-token-usage-low-watermark
     """
+
     def test_1_with_low_watermark(self):
         # The kv cache size here is deliberately small, thus we use smaller token usage
         self._run(token_usage_low_watermark=0.5)
@@ -389,7 +390,12 @@ class TestPrefillDelayerTokenUsageLowWatermark(CustomTestCase):
             model=model,
             base_url=base_url,
             prefill_delayer=True,
-            other_args=["--max-total-tokens", "50000", "--attention-backend", "ascend",],
+            other_args=[
+                "--max-total-tokens",
+                "50000",
+                "--attention-backend",
+                "ascend",
+            ],
             max_delay_passes=400,
             token_usage_low_watermark=token_usage_low_watermark,
             timeout=6000,
