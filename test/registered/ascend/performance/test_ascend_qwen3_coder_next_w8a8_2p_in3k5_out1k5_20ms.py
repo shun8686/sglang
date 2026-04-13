@@ -120,13 +120,13 @@ class TestQwen3CoderNext(TestAscendPerformanceTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 312
-    num_prompts = int(max_concurrency) * 4
+    max_concurrency = 64
+    num_prompts = 64
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 4307
+    tpot = 20
+    output_token_throughput = 1926
 
     def testQwen3CoderNext(self):
         self.run_throughput()
