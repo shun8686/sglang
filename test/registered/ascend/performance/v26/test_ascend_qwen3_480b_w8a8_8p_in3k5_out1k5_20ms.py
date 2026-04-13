@@ -51,7 +51,7 @@ QWEN3_480B_OTHER_ARGS = [
     "16",
     "--mem-fraction-static",
     "0.78",
-    "--cuda-graph-bs", 
+    "--cuda-graph-bs",
     "1",
 ]
 
