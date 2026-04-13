@@ -67,7 +67,7 @@ class TestNPULogRequestLevel0(TestNPULoggingBase):
 
         # Step 2: Verify the log file contains level-specific keywords matching the target log_requests_level
         self.out_log_file.seek(0)
-        content = self.out_log_file.read()
+        content = self.wait_for_log_content()
         self.assertTrue(len(content) > 0)
         self.assertIsNotNone(
             re.search(
