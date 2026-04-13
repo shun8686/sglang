@@ -130,9 +130,9 @@ jobs:
           test_case="${{ inputs.test_case }}"
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
-          metrics_data_file=${test_data_output_path}/${tc_name}
-          mkdir -p ${METRICS_DATA_FILE}
-          echo "Metrics file path: ${metrics_data_file}"
+          metrics_data_path=${test_data_output_path}/${tc_name}
+          mkdir -p ${metrics_data_path}
+          echo "Metrics file path: ${metrics_data_path}"
 
           prefill_decode_deployment="${{ inputs.prefill_decode_deployment }}"
           kube_job_type=""
@@ -145,18 +145,17 @@ jobs:
             exit 1
           fi
 
-          TRANSFORMERS_VERSION_FOR_SGLANG="${{ inputs.transformers_version }}"
+          transformers_version="${{ inputs.transformers_version }}"
           cd ${ASCEND_E2E_TEST_CONFIG_PATH}
           CMD="python3 -u run_npu_e2e_test.py \
             --env ci \
             --image ${{ inputs.image }} \
             --sglang-source-relative-path ${sglang_source_relative_path} \
-            --metrics-data-file ${metrics_data_file} \
+            --metrics-data-file ${metrics_data_path} \
             --test-case ${test_case} \
             --kube-name-space ${NAMESPACE} \
             --kube-job-type ${kube_job_type} \
-            --kube-job-name-prefix ${KUBE_JOB_NAME} \
-            --transformers-version ${TRANSFORMERS_VERSION_FOR_SGLANG}"
+            --kube-job-name-prefix ${KUBE_JOB_NAME}"
 
           if [ "$prefill_decode_deployment" = "separation" ];then
             CMD="${CMD} \
@@ -183,6 +182,12 @@ jobs:
             echo "commit id: ${commit_id}" > ${test_data_output_path}/commit_id
           else
             echo "Use sglang from image: ${{ inputs.image }}"
+          fi
+
+          if [ "$transformers_version" != "" ];then
+            CMD="${CMD} --transformers-version ${transformers_version}"
+          else
+            echo "Use default transformers version in image."
           fi
 
           echo "Run command: ${CMD}"
