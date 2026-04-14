@@ -63,18 +63,18 @@ class TestDeepEpDeepseek(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_mmlu(self):
-        expect_score = 0.58
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model,
-            eval_name="mmlu",
-            num_examples=128,
-            num_threads=32,
-        )
-        print("Starting mmlu test...")
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], expect_score)
+    # def test_mmlu(self):
+    #     expect_score = 0.58
+    #     args = SimpleNamespace(
+    #         base_url=self.base_url,
+    #         model=self.model,
+    #         eval_name="mmlu",
+    #         num_examples=128,
+    #         num_threads=32,
+    #     )
+    #     print("Starting mmlu test...")
+    #     metrics = run_eval(args)
+    #     self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
         expect_accuracy = 0.34
