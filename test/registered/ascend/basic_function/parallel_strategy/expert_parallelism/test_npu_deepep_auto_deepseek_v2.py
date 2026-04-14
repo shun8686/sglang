@@ -45,6 +45,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 1024,
                 "--mem-fraction-static",
                 0.7,
+                "--base-gpu-id",
+                4,
             ],
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
