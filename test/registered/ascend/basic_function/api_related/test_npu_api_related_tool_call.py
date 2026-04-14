@@ -7,8 +7,8 @@ import requests
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-    QWEN3_32B_WEIGHTS_PATH,
     QWEN3_5_27B_MODEL_WEIGHTS_PATH,
+    QWEN3_32B_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
