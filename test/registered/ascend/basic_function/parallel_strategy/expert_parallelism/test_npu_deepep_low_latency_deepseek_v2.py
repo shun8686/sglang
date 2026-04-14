@@ -45,6 +45,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 1024,
                 "--mem-fraction-static",
                 0.7,
+                "--base-gpu-id",
+                4,
             ],
             env={
                 "ASCEND_LAUNCH_BLOCKING": "1",
@@ -52,6 +54,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
                 "HCCL_BUFFSIZE": "2048",
                 "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
                 **os.environ,
             },
         )
@@ -76,7 +79,7 @@ class TestDeepEpDeepseek(CustomTestCase):
     def test_gsm8k(self):
         expect_accuracy = 0.34
         args = SimpleNamespace(
-            num_shots=8,
+            num_shots=5,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
