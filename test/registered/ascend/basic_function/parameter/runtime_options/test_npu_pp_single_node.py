@@ -25,7 +25,7 @@ from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_P
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 
 
-@unittest.skipIf(True, "tp1pp4 ok; tp1pp2+tp2pp2+tp2pp4: Scheduler watchdog timeout")
+
 class TestPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy of LLM models under TP+PP hybrid parallelism
 
@@ -149,7 +149,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
         print(f"{metrics=}")
         self.assertGreater(metrics["score"], 0.8)
 
-@unittest.skipIf(True, "tp1pp4: triton.compiler.errors.CompilationError")
+
 class TestQwenVLPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy of Qwen-VL multimodal model under PP parallelism
 
@@ -337,7 +337,7 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
             ),
         )
 
-@unittest.skipIf(True, "tp1pp1: Not enough memory; tp2pp2: Scheduler watchdog timeout")
+
 class TestQwenMoePPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy consistency of Qwen3-30B-A3B MOE model between PP=1 and PP=2
 
@@ -501,7 +501,7 @@ class TestFixedBugs(unittest.TestCase):
             other_server_args,
         )
 
-@unittest.skipIf(True, "tp1pp4: Not enough memory; tp2pp4: The self tensor cannot be larger than 8 dimensions")
+
 class TestGLM41VPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy of GLM multimodal model under PP parallelism
 
