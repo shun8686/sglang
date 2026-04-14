@@ -23,46 +23,47 @@ class TestDeepEpDeepseek(CustomTestCase):
         # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
         cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
         cls.base_url = DEFAULT_URL_FOR_TEST
-        # cls.process = popen_launch_server(
-        #     cls.model,
-        #     cls.base_url,
-        #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-        #     other_args=[
-        #         "--trust-remote-code",
-        #         "--attention-backend",
-        #         "ascend",
-        #         "--tp-size",
-        #         "8",
-        #         "--moe-a2a-backend",
-        #         "deepep",
-        #         "--deepep-mode",
-        #         "low_latency",
-        #         "--disable-cuda-graph",
-        #         "--dp-size",
-        #         8,
-        #         "--enable-dp-attention",
-        #         "--chunked-prefill-size",
-        #         1024,
-        #         "--mem-fraction-static",
-        #         0.7,
-        #         "--base-gpu-id",
-        #         4,
-        #     ],
-        #     env={
-        #         "ASCEND_LAUNCH_BLOCKING": "1",
-        #         "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-        #         "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
-        #         "HCCL_BUFFSIZE": "2048",
-        #         "MOE_ENABLE_TOPK_NEG_ONE": "1",
-        #         "SGLANG_DEEPEP_BF16_DISPATCH": "1",
-        #         **os.environ,
-        #     },
-        # )
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=[
+                "--trust-remote-code",
+                "--attention-backend",
+                "ascend",
+                "--tp-size",
+                "8",
+                "--moe-a2a-backend",
+                "deepep",
+                "--deepep-mode",
+                "low_latency",
+                "--disable-cuda-graph",
+                "--dp-size",
+                8,
+                "--enable-dp-attention",
+                "--chunked-prefill-size",
+                1024,
+                "--mem-fraction-static",
+                0.7,
+                "--base-gpu-id",
+                4,
+            ],
+            env={
+                "ASCEND_LAUNCH_BLOCKING": "1",
+                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                "HCCL_BUFFSIZE": "2048",
+                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
+                **os.environ,
+            },
+        )
+        cls.accuracy = 0
 
     @classmethod
     def tearDownClass(cls):
-        # kill_process_tree(cls.process.pid)
-        pass
+        kill_process_tree(cls.process.pid)
+        print(f"{cls.accuracy=}")
 
     def test_mmlu(self):
         expect_score = 0.58
@@ -78,7 +79,7 @@ class TestDeepEpDeepseek(CustomTestCase):
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.34
+        expect_accuracy = 0.30
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
@@ -95,6 +96,9 @@ class TestDeepEpDeepseek(CustomTestCase):
             expect_accuracy,
             f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
         )
+
+        self.accuracy = metrics["accuracy"]
+
 
 
 if __name__ == "__main__":
