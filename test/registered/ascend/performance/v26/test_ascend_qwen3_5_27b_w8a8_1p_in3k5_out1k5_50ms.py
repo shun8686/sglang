@@ -15,16 +15,15 @@ register_npu_ci(
 
 ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
-    "ASCEND_LAUNCH_BLOCKING": "1",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_BUFFSIZE": "3000",
     "HCCL_OP_EXPANSION_MODE": "AIV",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "SGLANG_NPU_PROFILING": "0",
-    "SGLANG_DISAGGREGATION_WAITING_TIMEOUT": "3600",
     "SGLANG_ENABLE_SPEC_V2": "1",
-    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "0",
+    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
 }
 
 OTHER_ARGS = [
@@ -38,22 +37,18 @@ OTHER_ARGS = [
     "--device",
     "npu",
     "--tp-size",
-    4,
+    2,
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    186000,
-    "--enable-prefill-delayer",
-    "--prefill-delayer-max-delay-passes", "200",
+    60000,
     "--disable-radix-cache",
     "--mem-fraction-static",
-    0.94,
-    "--max-total-tokens",
-    700000,
+    0.7,
     "--max-running-requests",
-    38,
+    48,
     "--max-mamba-cache-size",
-    "200",
+    "60",
     "--quantization",
     "modelslim",
     "--dtype",
@@ -64,17 +59,11 @@ OTHER_ARGS = [
     "--mm-attention-backend",
     "ascend_attn",
     "--cuda-graph-bs",
-    1,
     2,
-    4,
     8,
-    12,
-    18,
-    24,
+    16,
     32,
-    34,
-    36,
-    38,
+    48,
     "--speculative-algorithm",
     "NEXTN",
     "--speculative-num-steps",
@@ -91,13 +80,13 @@ class TestQwen3527B(TestAscendPerformanceTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 38
+    max_concurrency = 48
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 20
-    output_token_throughput = 1100
+    tpot = 50
+    output_token_throughput = 700
 
     def test_qwen3_5_27b(self):
         self.run_throughput()
