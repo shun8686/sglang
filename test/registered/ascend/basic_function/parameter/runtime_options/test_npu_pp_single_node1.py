@@ -1,3 +1,4 @@
+import os
 import time
 import unittest
 from types import SimpleNamespace
@@ -119,7 +120,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
             other_args=[
                 "--trust-remote-code",
                 "--tp",
-                "2",
+                "4",
                 "--pp-size",
                 "4",
                 "--enable-dp-attention",
@@ -128,7 +129,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--mem-fraction-static",
-                "0.8",
+                "0.6",
                 "--disable-cuda-graph",
             ],
         )
@@ -150,8 +151,8 @@ class TestDPAttentionDP2PP2(CustomTestCase):
         print(f"{metrics=}")
         self.assertGreater(metrics["score"], 0.8)
 
-@unittest.skipIf(True, "7")
-class TestQwenVLPPAccuracy(unittest.TestCase, TestVLMModels):
+#@unittest.skipIf(True, "7")
+class TestQwenVLPPAccuracy(TestVLMModels):
     """Test Case: Verify the accuracy of Qwen-VL multimodal model under PP parallelism
 
     [Test Category] Parameter
@@ -176,6 +177,9 @@ class TestQwenVLPPAccuracy(unittest.TestCase, TestVLMModels):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http://127.0.0.1:23333"
+        cls.api_key = "sk-123456"
+        os.environ["OPENAI_API_KEY"] = cls.api_key
+        os.environ["OPENAI_API_BASE"] = f"{cls.base_url}/v1"
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
