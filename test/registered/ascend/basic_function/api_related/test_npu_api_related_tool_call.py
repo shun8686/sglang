@@ -320,7 +320,10 @@ class TestApiRelatedToolCallParserQwen(CustomTestCase):
 
         messages = [
             {"role": "system", "content": self.SYSTEM_MESSAGE},
-            {"role": "user", "content": "Tell me the temperature in Xi'an, please use celsius"},
+            {
+                "role": "user",
+                "content": "Tell me the temperature in Xi'an, please use celsius"
+            },
         ]
         response = client.chat.completions.create(
             model=self.model,
@@ -333,6 +336,7 @@ class TestApiRelatedToolCallParserQwen(CustomTestCase):
         )
 
         self.assertEqual(response.choices[0].finish_reason, "tool_calls")
+
 
 class TestApiRelatedToolCallParserQwen3Coder(TestApiRelatedToolCallParserQwen):
     tool_call_parser = "qwen3_coder"
