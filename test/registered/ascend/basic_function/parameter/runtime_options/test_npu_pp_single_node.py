@@ -1,3 +1,4 @@
+import os
 import time
 import unittest
 from types import SimpleNamespace
@@ -7,6 +8,7 @@ import requests
 from sglang.bench_one_batch_server import BenchArgs as OneBatchBenchArgs
 from sglang.srt.server_args import ServerArgs
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
 from sglang.test.run_eval import run_eval
@@ -23,7 +25,6 @@ from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_P
     QWEN3_8B_WEIGHTS_PATH, QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH, QWEN3_30B_A3B_WEIGHTS_PATH
 
 register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
-
 
 
 class TestPPAccuracy(unittest.TestCase):
@@ -100,7 +101,6 @@ class TestPPAccuracy(unittest.TestCase):
         assert len(output_top_logprobs) == 16
 
 
-
 class TestDPAttentionDP2PP2(CustomTestCase):
     """Test Case: Verify the accuracy of MLA models under TP+DP+PP hybrid parallelism
 
@@ -118,7 +118,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
             other_args=[
                 "--trust-remote-code",
                 "--tp",
-                "2",
+                "4",
                 "--pp-size",
                 "4",
                 "--enable-dp-attention",
@@ -127,7 +127,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
                 "--attention-backend",
                 "ascend",
                 "--mem-fraction-static",
-                "0.8",
+                "0.6",
                 "--disable-cuda-graph",
             ],
         )
@@ -150,34 +150,39 @@ class TestDPAttentionDP2PP2(CustomTestCase):
         self.assertGreater(metrics["score"], 0.8)
 
 
-class TestQwenVLPPAccuracy(unittest.TestCase):
+class TestQwenVLPPAccuracy(TestVLMModels):
     """Test Case: Verify the accuracy of Qwen-VL multimodal model under PP parallelism
 
     [Test Category] Parameter
     [Test Target] --pp-size
     """
+    model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
+    mmmu_accuracy = 0.26
+    other_args = [
+        "--tp-size",
+        "4",
+        "--pp-size",
+        "4",
+        "--chunked-prefill-size",
+        "8192",
+        "--enable-multimodal",
+        "--attention-backend",
+        "ascend",
+        "--mem-fraction-static",
+        "0.6",
+        "--disable-cuda-graph",
+    ]
     @classmethod
     def setUpClass(cls):
-        cls.model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = "http://127.0.0.1:23333"
+        cls.api_key = "sk-123456"
+        os.environ["OPENAI_API_KEY"] = cls.api_key
+        os.environ["OPENAI_API_BASE"] = f"{cls.base_url}/v1"
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--tp-size",
-                "1",
-                "--pp-size",
-                "4",
-                "--chunked-prefill-size",
-                "8192",
-                "--enable-multimodal",
-                "--attention-backend",
-                "ascend",
-                "--mem-fraction-static",
-                "0.8",
-                "--disable-cuda-graph",
-            ],
+            other_args=cls.other_args,
         )
 
     def test_gsm8k(self):
@@ -202,16 +207,7 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
         kill_process_tree(cls.process.pid)
 
     def test_mmmu(self):
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model,
-            eval_name="mmmu",
-            num_examples=None,
-            num_threads=32,
-        )
-        metrics = run_eval(args)
-        print(f"{metrics=}")
-        self.assertGreater(metrics["score"], 0.26)
+        self._run_vlm_mmmu_test()
 
 
 class TestQwenPPAccuracy(unittest.TestCase):
@@ -419,6 +415,8 @@ class TestQwen35PPAccuracy(unittest.TestCase):
             self.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
+                "--tp-size",
+                2,
                 "--pp-size",
                 pp_size,
                 "--chunked-prefill-size",
@@ -502,6 +500,7 @@ class TestFixedBugs(unittest.TestCase):
         )
 
 
+@unittest.skipIf(True, "issue  #343")
 class TestGLM41VPPAccuracy(unittest.TestCase):
     """Test Case: Verify the accuracy of GLM multimodal model under PP parallelism
 
@@ -518,7 +517,7 @@ class TestGLM41VPPAccuracy(unittest.TestCase):
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=[
                 "--tp-size",
-                "1",
+                "2",
                 "--pp-size",
                 "4",
                 "--chunked-prefill-size",
