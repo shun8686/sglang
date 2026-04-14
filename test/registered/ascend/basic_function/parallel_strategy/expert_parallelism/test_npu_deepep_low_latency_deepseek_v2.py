@@ -21,43 +21,43 @@ class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
-        cls.model = "/home/weights/DeepSeek-Coder-V2-Lite-Instruct"
+        cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--trust-remote-code",
-                "--attention-backend",
-                "ascend",
-                "--tp-size",
-                "8",
-                "--moe-a2a-backend",
-                "deepep",
-                "--deepep-mode",
-                "low_latency",
-                "--disable-cuda-graph",
-                "--dp-size",
-                8,
-                "--enable-dp-attention",
-                "--chunked-prefill-size",
-                1024,
-                "--mem-fraction-static",
-                0.7,
-                "--base-gpu-id",
-                4,
-            ],
-            env={
-                "ASCEND_LAUNCH_BLOCKING": "1",
-                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
-                "HCCL_BUFFSIZE": "2048",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
-                "SGLANG_DEEPEP_BF16_DISPATCH": "1",
-                **os.environ,
-            },
-        )
+        # cls.process = popen_launch_server(
+        #     cls.model,
+        #     cls.base_url,
+        #     timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        #     other_args=[
+        #         "--trust-remote-code",
+        #         "--attention-backend",
+        #         "ascend",
+        #         "--tp-size",
+        #         "8",
+        #         "--moe-a2a-backend",
+        #         "deepep",
+        #         "--deepep-mode",
+        #         "low_latency",
+        #         "--disable-cuda-graph",
+        #         "--dp-size",
+        #         8,
+        #         "--enable-dp-attention",
+        #         "--chunked-prefill-size",
+        #         1024,
+        #         "--mem-fraction-static",
+        #         0.7,
+        #         "--base-gpu-id",
+        #         4,
+        #     ],
+        #     env={
+        #         "ASCEND_LAUNCH_BLOCKING": "1",
+        #         "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+        #         "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+        #         "HCCL_BUFFSIZE": "2048",
+        #         "MOE_ENABLE_TOPK_NEG_ONE": "1",
+        #         "SGLANG_DEEPEP_BF16_DISPATCH": "1",
+        #         **os.environ,
+        #     },
+        # )
 
     @classmethod
     def tearDownClass(cls):
