@@ -50,6 +50,7 @@ class TestPPAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -127,6 +128,7 @@ class TestDPAttentionDP2PP2(CustomTestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -174,6 +176,7 @@ class TestQwenVLPPAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -236,6 +239,7 @@ class TestQwenPPAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -297,6 +301,7 @@ class TestQwenPPTieWeightsAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -360,6 +365,7 @@ class TestQwenMoePPAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -421,6 +427,7 @@ class TestQwen35PPAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 
@@ -484,6 +491,7 @@ class TestFixedBugs(unittest.TestCase):
             "ascend",
             "--mem-fraction-static",
             "0.8",
+            "--disable-cuda-graph",
         ]
         run_bench_one_batch_server(
             model,
@@ -522,6 +530,7 @@ class TestGLM41VPPAccuracy(unittest.TestCase):
                 "ascend",
                 "--mem-fraction-static",
                 "0.8",
+                "--disable-cuda-graph",
             ],
         )
 

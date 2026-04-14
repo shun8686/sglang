@@ -15,7 +15,6 @@ from sglang.test.ascend.test_ascend_utils import LLAMA_3_1_8B_INSTRUCT_WEIGHTS_P
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
-@unittest.skipIf(True, "skip")
 class TestDisaggregationPrefillPPAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when only prefill enables PP parallelism in PD disaggregation scenario
 
@@ -56,8 +55,10 @@ class TestDisaggregationPrefillPPAccuracy(TestDisaggregationBase):
             "--disable-overlap-schedule",
             "--attention-backend",
             "ascend",
+            "--disaggregation-transfer-backend",
+            "ascend",
         ]
-        prefill_args += cls.transfer_backend + cls.rdma_devices
+        prefill_args += cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
             cls.prefill_url,
@@ -77,8 +78,11 @@ class TestDisaggregationPrefillPPAccuracy(TestDisaggregationBase):
             "8",
             "--attention-backend",
             "ascend",
+            "--disaggregation-transfer-backend",
+            "ascend",
+            "--disable-cuda-graph",
         ]
-        decode_args += cls.transfer_backend + cls.rdma_devices
+        decode_args += cls.rdma_devices
         cls.process_decode = popen_launch_pd_server(
             cls.model,
             cls.decode_url,
@@ -103,7 +107,7 @@ class TestDisaggregationPrefillPPAccuracy(TestDisaggregationBase):
         # Wait a little bit so that the memory check happens.
         time.sleep(5)
 
-@unittest.skipIf(True, "skip")
+
 class TestDisaggregationPrefillPPDynamicChunkAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when prefill enables "dynamic chunking + PP parallelism" in PD disaggregation scenario
 
@@ -145,8 +149,10 @@ class TestDisaggregationPrefillPPDynamicChunkAccuracy(TestDisaggregationBase):
             "--enable-dynamic-chunking",
             "--attention-backend",
             "ascend",
+            "--disaggregation-transfer-backend",
+            "ascend",
         ]
-        prefill_args += cls.transfer_backend + cls.rdma_devices
+        prefill_args += cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
             cls.prefill_url,
@@ -166,8 +172,11 @@ class TestDisaggregationPrefillPPDynamicChunkAccuracy(TestDisaggregationBase):
             "8",
             "--attention-backend",
             "ascend",
+            "--disaggregation-transfer-backend",
+            "ascend",
+            "--disable-cuda-graph",
         ]
-        decode_args += cls.transfer_backend + cls.rdma_devices
+        decode_args += cls.rdma_devices
         cls.process_decode = popen_launch_pd_server(
             cls.model,
             cls.decode_url,
@@ -193,7 +202,6 @@ class TestDisaggregationPrefillPPDynamicChunkAccuracy(TestDisaggregationBase):
         time.sleep(5)
 
 
-# @unittest.skipIf(True, "tp1pp4: ok;   tp1pp2+tp2pp2: KVTransferError,  Scheduler watchdog timeout; tp2pp4: Server failed to start in 600s")
 class TestDisaggregationDecodePPAccuracy(TestDisaggregationBase):
     """Test Case: Verify the accuracy of base model when both prefill and decode enable PP parallelism in PD disaggregation scenario
 
@@ -238,8 +246,10 @@ class TestDisaggregationDecodePPAccuracy(TestDisaggregationBase):
             "--disable-overlap-schedule",
             "--attention-backend",
             "ascend",
+            "--disaggregation-transfer-backend",
+            "ascend",
         ]
-        prefill_args += cls.transfer_backend + cls.rdma_devices
+        prefill_args += cls.rdma_devices
         cls.process_prefill = popen_launch_pd_server(
             cls.model,
             cls.prefill_url,
@@ -261,8 +271,11 @@ class TestDisaggregationDecodePPAccuracy(TestDisaggregationBase):
             "8",
             "--attention-backend",
             "ascend",
+            "--disaggregation-transfer-backend",
+            "ascend",
+            "--disable-cuda-graph",
         ]
-        decode_args += cls.transfer_backend + cls.rdma_devices
+        decode_args += cls.rdma_devices
         cls.process_decode = popen_launch_pd_server(
             cls.model,
             cls.decode_url,
