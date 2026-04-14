@@ -46,7 +46,7 @@ OTHER_ARGS = [
     "--mem-fraction-static",
     0.7,
     "--max-running-requests",
-    48,
+    54,
     "--max-mamba-cache-size",
     "60",
     "--quantization",
@@ -64,6 +64,7 @@ OTHER_ARGS = [
     16,
     32,
     48,
+    54,
     "--speculative-algorithm",
     "NEXTN",
     "--speculative-num-steps",
@@ -80,7 +81,7 @@ class TestQwen3527B(TestAscendPerformanceTestCaseBase):
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
-    max_concurrency = 48
+    max_concurrency = 54
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
