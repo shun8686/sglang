@@ -22,7 +22,8 @@ class TestDeepEpDeepseek(CustomTestCase):
     def setUpClass(cls):
         # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
         cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        # cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.base_url = "http://127.0.0.1:8080"
         # cls.process = popen_launch_server(
         #     cls.model,
         #     cls.base_url,
@@ -71,16 +72,16 @@ class TestDeepEpDeepseek(CustomTestCase):
             base_url=self.base_url,
             model=self.model,
             eval_name="mmlu",
-            num_examples=128,
-            num_threads=32,
-            api="",
+            num_examples=1024,
+            num_threads=64,
+            api="completion",
         )
         print("Starting mmlu test...")
         metrics = run_eval(args)
         self.assertGreater(metrics["score"], expect_score)
 
     def test_gsm8k(self):
-        expect_accuracy = 0.30
+        expect_accuracy = 0.34
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
