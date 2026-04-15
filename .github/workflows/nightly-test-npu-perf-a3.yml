@@ -52,7 +52,7 @@ jobs:
     needs: nightly-performance-baseline-single-node-tests-bugfix
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         test_config:
           - name: test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms
