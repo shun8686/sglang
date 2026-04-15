@@ -168,10 +168,10 @@ gsm8k_infer_cfg = dict(
     retriever=dict(type=ZeroRetriever),
     inferencer=dict(
         type=GenInferencer,
-        max_seq_len=${INPUT_LEN},
         max_new_tokens=${OUTPUT_LEN},
-        padding=True,
-        pad_to_max_length=True
+        perf_mode=True,
+        pad_input=True,
+        pad_input_len=${INPUT_LEN},
     )
 )
 gsm8k_eval_cfg = dict(evaluator=dict(type=Gsm8kEvaluator),
