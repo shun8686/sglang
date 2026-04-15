@@ -382,6 +382,7 @@ def run_aisbench(
     model_path,
     dataset_type,
     dataset_path,
+    input_len,
     output_len,
     max_concurrency,
     num_prompts,
@@ -398,6 +399,7 @@ def run_aisbench(
     cmd += f"{model_path} "
     cmd += f"{dataset_type} "
     cmd += f"{dataset_path} "
+    cmd += f"{str(input_len)} "
     cmd += f"{str(output_len)} "
     cmd += f"{str(max_concurrency)} "
     cmd += f"{str(num_prompts)} "
@@ -613,6 +615,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 model_path=self.model,
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
+                input_len=self.input_len,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
@@ -724,6 +727,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
                 model_path=self.model,
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
+                input_len=self.input_len,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
@@ -852,6 +856,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 model_path=self.model,
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
+                input_len=self.input_len,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
