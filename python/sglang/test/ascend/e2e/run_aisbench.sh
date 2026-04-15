@@ -31,7 +31,7 @@ fi
 echo "===== Install aisbench in virtual env - End ====="
 
 # Check if the correct number of arguments are provided
-if [ $# -ne 10 ]; then
+if [ $# -ne 11 ]; then
     echo -e "\033[31mUsage:\033[0m"
     echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET_TYPE> <DATASET_PATH> <MAX_OUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
     echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k_gen /path/to/gsm8k 1024 32 128 ./result"
