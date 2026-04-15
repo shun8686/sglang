@@ -197,18 +197,18 @@ if [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
         echo "The mm-custom-gen dataset file does not exist: ${DATASET_PATH}."
         exit 1
     fi
-    dataset_file=mm_custom_gen_${MODEL}
-    gen_dataset_mm_custom_config_file "${dataset_file}"
-    echo "Use dataset: ${dataset_file}"
+    dataset_name=mm_custom_gen_${MODEL}
+    gen_dataset_mm_custom_config_file "${dataset_name}"
+    echo "Use dataset: ${dataset_name}"
     gen_model_config_file
-    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_file} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 elif [ "$DATASET_TYPE" == "gsm8k-gen" ]; then
-    dataset_file=gsm8k_gen_${MODEL}
-    gen_dataset_gsm8k_config_file "${dataset_file}"
-    echo "Use dataset: ${dataset_file}"
+    dataset_name=gsm8k_gen_${MODEL}
+    gen_dataset_gsm8k_config_file "${dataset_name}"
+    echo "Use dataset: ${dataset_name}"
     gen_model_config_file
-    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_file} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 elif [ "$DATASET_TYPE" == "gsm8k" ]; then
     if [ ! -f "$DATASET_PATH" ]; then
