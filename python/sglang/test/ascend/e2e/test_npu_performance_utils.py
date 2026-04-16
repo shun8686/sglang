@@ -724,7 +724,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
             metrics = run_aisbench(
                 host=self.host,
                 port=str(self.port),
-                model_path=self.model,
+                model_path=self.model_config.get("model_path"),
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
                 input_len=self.input_len,
@@ -853,7 +853,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
             metrics = run_aisbench(
                 host=self.host,
                 port=str(self.port),
-                model_path=self.model,
+                model_path=self.model_config.get("model_path"),
                 dataset_type=self.aisbench_dataset_type,
                 dataset_path=self.aisbench_dataset_path,
                 input_len=self.input_len,
