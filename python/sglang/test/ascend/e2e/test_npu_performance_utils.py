@@ -29,7 +29,8 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-BENCHMARK_TOOL_DEFAULT = "aisbench"
+AISBENCHMARK_TOOL = "aisbench"
+BENCHMARK_TOOL_DEFAULT = AISBENCHMARK_TOOL
 
 PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
 if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
