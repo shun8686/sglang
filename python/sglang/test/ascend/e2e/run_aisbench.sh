@@ -90,6 +90,9 @@ models = [
     )
 ]
 EOF
+  echo "============== ${model_config_file} - Begin =============="
+  echo "$(cat ${model_config_file})"
+  echo "============== ${model_config_file} - End ================"
 }
 
 function gen_dataset_mm_custom_config_file() {
@@ -146,6 +149,9 @@ mm_custom_datasets = [
     )
 ]
 EOF
+  echo "============== ${dataset_file} - Begin =============="
+  echo "$(cat ${dataset_file})"
+  echo "============== ${dataset_file} - End ================"
 }
 
 function gen_dataset_gsm8k_config_file() {
@@ -203,6 +209,10 @@ gsm8k_datasets = [
         eval_cfg=gsm8k_eval_cfg)
 ]
 EOF
+
+  echo "============== ${dataset_file} - Begin =============="
+  echo "$(cat ${dataset_file})"
+  echo "============== ${dataset_file} - End ================"
 }
 
 
