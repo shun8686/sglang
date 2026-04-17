@@ -83,7 +83,7 @@ class TestStreamInterval(CustomTestCase):
         kill_process_tree(self.process.pid)
 
         # Start server with interval 4
-        self.process = self._start_server(interval=5)
+        self.process = self._start_server(interval=4)
         chunks4 = self._run_stream_request()
         kill_process_tree(self.process.pid)
 

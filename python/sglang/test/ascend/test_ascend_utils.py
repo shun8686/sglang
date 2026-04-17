@@ -32,6 +32,7 @@ MODEL_WEIGHTS_DIR = "/root/.cache/modelscope/hub/models/"
 HF_MODEL_WEIGHTS_DIR = "/root/.cache/huggingface/hub/"
 IMAGES_DIR = "/root/.cache/modelscope/hub/datasets/images/"
 
+
 # LLM model weights path
 AFM_4_5B_BASE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/AFM-4.5B-Base")
 BAICHUAN2_13B_CHAT_WEIGHTS_PATH = os.path.join(

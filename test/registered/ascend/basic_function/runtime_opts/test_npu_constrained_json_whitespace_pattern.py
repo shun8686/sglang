@@ -214,7 +214,7 @@ class ServerWithGrammarBackend(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
 
-class TestJSONModeLOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
+class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
     backend = "outlines"
 
 
