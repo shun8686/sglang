@@ -306,6 +306,7 @@ SKYWORK_REWARD_LLAMA_3_1_8B_V0_2_WEIGHTS_PATH = os.path.join(
 )
 
 # Images path
+IMAGES_EXAMPLE_PATH = os.path.join(IMAGES_DIR, "example_image.png")
 IMAGES_023_PATH = os.path.join(IMAGES_DIR, "023.jpg")
 IMAGES_MAN_PATH = os.path.join(IMAGES_DIR, "man.png")
 IMAGES_LOGO_PATH = os.path.join(IMAGES_DIR, "logo.png")
