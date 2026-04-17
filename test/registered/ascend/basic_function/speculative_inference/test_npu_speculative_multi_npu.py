@@ -114,25 +114,17 @@ class TestNpuSpeculativeDraftParams(CustomTestCase):
         info = info_resp.json()
 
         print("=== /server_info response ===")
-        print(json.dumps(info, indent=2, default=str))
+        print(json.dumps(info, indent=2, default=str)) 
         print("=== end ===")
 
         server_args = info.get("server_args", {})
-        # temporary measure, need debug in furture
-        load_format = server_args.get("speculative_draft_load_format")
-        if load_format is None:
-            self.skipTest("Server does not expose speculative_draft_load_format in server_args yet.")
         self.assertEqual(
-            load_format,
+            server_args.get("speculative_draft_load_format"),
             "dummy",
             "speculative_draft_load_format should be 'dummy'",
         )
-
-        revision = server_args.get("speculative_draft_model_revision")
-        if revision is None:
-            self.skipTest("Server does not expose speculative_draft_model_revision in server_args yet.")
         self.assertEqual(
-            revision,
+            server_args.get("speculative_draft_model_revision"),
             "main",
             "speculative_draft_model_revision should be 'main'",
         )
