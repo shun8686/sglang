@@ -2,7 +2,6 @@ import os
 import unittest
 from types import SimpleNamespace
 
-
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     FR_SPEC_TOKEN_MAP_PATH,
@@ -21,8 +20,6 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=300, suite="nightly-8-npu-a3", nightly=True)
-
-
 
 
 class TestNpuSpeculativeTokenMap(CustomTestCase):
