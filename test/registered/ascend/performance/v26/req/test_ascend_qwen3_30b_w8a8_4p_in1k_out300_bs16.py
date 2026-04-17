@@ -47,7 +47,7 @@ QWEN3_30B_OTHER_ARGS = [
     "EAGLE3",
     "--speculative-draft-model-path",
     # QWEN3_A3B_EAGLE_MODEL_PATH,
-    "/home/weights/Qwen/Qwen3-a3B_eagle3",
+    "/home/weights/Qwen/Qwen3-a3B-eagle3",
     "--speculative-num-steps",
     5,
     "--speculative-eagle-topk",
