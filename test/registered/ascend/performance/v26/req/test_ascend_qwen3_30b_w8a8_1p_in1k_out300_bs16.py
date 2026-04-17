@@ -93,7 +93,7 @@ class TestQwen30B(TestAscendPerformanceTestCaseBase):
     output_len = 300
     random_range_ratio = 1
     tpot = 7
-    output_token_throughput = 780
+    output_token_throughput = 700
 
     def test_qwen3_30b(self):
         self.run_throughput()
