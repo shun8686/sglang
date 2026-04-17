@@ -9,7 +9,7 @@ from sglang.test.ascend.test_ascend_utils import (
     QWEN3_8B_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
-from sglang.test.few_shot_gsm8k import run_eval as run_eval_few_shot_gsm8k
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
@@ -64,6 +64,8 @@ class TestNpuEagle3(CustomTestCase):
         cls.extra_envs = {
             "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
             "SGLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_SPEC_NAN_DETECTION": "1",
+            "SGLANG_SPEC_OOB_DETECTION": "1",
         }
         os.environ.update(cls.extra_envs)
 
@@ -72,26 +74,26 @@ class TestNpuEagle3(CustomTestCase):
             self.model,
             self.base_url,
             timeout=1500,
-            other_args=[
-                *self.common_args,
-            ],
+            other_args=self.common_args,
         )
 
         try:
             args = SimpleNamespace(
-                num_shots=5,
-                data_path=None,
-                num_questions=1319,
+                base_url=self.base_url,
+                eval_name="gsm8k",
+                api="completion",
+                num_examples=1319,
+                num_threads=128,
                 max_new_tokens=512,
-                parallel=128,
-                host=f"http://{self.url.hostname}",
-                port=int(self.url.port),
+                num_shots=5,
+                temperature=0.0,
             )
 
-            metrics = run_eval_few_shot_gsm8k(args)
+            metrics = run_eval(args)
             self.assertGreaterEqual(
-                metrics["accuracy"],
+                metrics["score"],
                 self.accuracy,
+                f"GSM8K score {metrics['score']} below threshold {self.accuracy}",
             )
         finally:
             kill_process_tree(process.pid)
