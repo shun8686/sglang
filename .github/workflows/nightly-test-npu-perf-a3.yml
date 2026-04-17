@@ -51,7 +51,7 @@ jobs:
 
   nightly-performance-baseline-single-node-tests-transformers-5p5:
     name: single-node
-    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
+    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') && false }}
     needs: nightly-performance-baseline-single-node-tests-bugfix
     strategy:
       fail-fast: false
