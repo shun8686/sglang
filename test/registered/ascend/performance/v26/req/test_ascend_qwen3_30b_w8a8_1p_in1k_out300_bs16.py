@@ -73,8 +73,8 @@ QWEN3_30B_OTHER_ARGS = [
     8,
     "--dtype",
     "bfloat16",
-    "--base-gpu-id",
-    14
+    # "--base-gpu-id",
+    # 14,
 ]
 
 
