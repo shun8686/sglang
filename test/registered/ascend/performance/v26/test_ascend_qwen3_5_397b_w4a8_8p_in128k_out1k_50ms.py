@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     QWEN3_5_397B_W4A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -86,6 +88,8 @@ QWEN3_5_397B_OTHER_ARGS = [
 
 
 class TestQwen397B(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_5_397B_W4A8_MODEL_PATH
     other_args = QWEN3_5_397B_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
@@ -96,7 +100,6 @@ class TestQwen397B(TestAscendPerformanceTestCaseBase):
     output_len = 1024
     random_range_ratio = 1
     tpot = 47.17
-    # T: 143@50ms.   800I: 1.1*T
     output_token_throughput = 54.11
 
     def test_qwen3_5_397b(self):

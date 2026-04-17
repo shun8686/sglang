@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH,
     QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
@@ -88,6 +90,8 @@ QWEN3_30B_A3B_OTHER_ARGS = [
 
 
 class TestQwen30B(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH
     # model = "/home/weights/Qwen/Qwen3-30B-A3B-W8A8"
     other_args = QWEN3_30B_A3B_OTHER_ARGS

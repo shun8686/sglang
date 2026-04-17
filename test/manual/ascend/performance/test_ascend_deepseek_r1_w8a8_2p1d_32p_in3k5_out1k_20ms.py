@@ -2,6 +2,8 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     DEEPSEEK_R1_W8A8_MODEL_PATH,
     ROUND_ROBIN,
     TestAscendPerfMultiNodePdSepTestCaseBase,
@@ -136,6 +138,8 @@ MODEL_CONFIG = {
 
 
 class TestDeepSeekR1W8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model_config = MODEL_CONFIG
     dataset_name = "random"
     request_rate = 16
@@ -145,7 +149,6 @@ class TestDeepSeekR1W8A8(TestAscendPerfMultiNodePdSepTestCaseBase):
     output_len = 1024
     random_range_ratio = 1
     tpot = 19.0
-    # T: 216@20ms   800I A3: None     Dev-800I: 1163/32@19.52ms
     output_token_throughput = 1584
 
     def test_throughput(self):

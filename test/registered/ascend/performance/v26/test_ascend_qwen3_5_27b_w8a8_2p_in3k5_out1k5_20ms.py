@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     QWEN3_5_27B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -44,7 +46,8 @@ OTHER_ARGS = [
     "--max-prefill-tokens",
     186000,
     "--enable-prefill-delayer",
-    "--prefill-delayer-max-delay-passes", "200",
+    "--prefill-delayer-max-delay-passes",
+    "200",
     "--disable-radix-cache",
     "--mem-fraction-static",
     0.94,
@@ -87,6 +90,8 @@ OTHER_ARGS = [
 
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_5_27B_W8A8_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
