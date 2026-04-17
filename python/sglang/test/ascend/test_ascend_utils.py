@@ -303,6 +303,7 @@ DEFAULT_WEIGHTS_FOR_TEST = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_FOR_TEST
 # Images path
 IMAGES_EXAMPLE_PATH = os.path.join(IMAGES_DIR, "example_image.png")
 
+
 def run_command(cmd, shell=True):
     """Execute system command and return stdout
 
