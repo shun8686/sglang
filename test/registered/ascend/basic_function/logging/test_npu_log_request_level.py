@@ -10,8 +10,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPULogRequestLevel0(TestNPULoggingBase):
-    """Test case class for verifying that the logs include request logs with the corresponding verbosity level when
-    --log-requests-level is set.
+    """Testcase: Verify that the logs include request logs with the corresponding verbosity level when --log-requests-level is set.
 
     [Test Category] Parameter
     [Test Target] --log-requests-level

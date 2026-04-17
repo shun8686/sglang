@@ -9,7 +9,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPUMetricsTokenizerLabel(TestNPULoggingBase):
-    """Test case for verifying the functionality of tokenizer-metrics custom label related parameters
+    """Testcase: Verify the functionality of tokenizer-metrics custom label related parameters
 
     [Description]
         Parameters include: --tokenizer-metrics-custom-labels-header; --tokenizer-metrics-allowed-custom-labels

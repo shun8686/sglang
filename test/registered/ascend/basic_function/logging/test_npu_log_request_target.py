@@ -11,7 +11,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPULogRequestTarget(TestNPULoggingBase):
-    """Test case class for verifying that logs are stored in the target path by setting --log-requests-target
+    """Testcase: Verify that logs are stored in the target path by setting --log-requests-target
 
     [Test Category] Parameter
     [Test Target] --log-requests-target;

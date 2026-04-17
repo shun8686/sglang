@@ -9,7 +9,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPULogExcludePrefixes(TestNPULoggingBase):
-    """Test case class for verifying the --uvicorn-access-log-exclude-prefixes parameter.
+    """Testcase: Verify the functionality of the --uvicorn-access-log-exclude-prefixes parameter.
 
     Description:
         Verifies that when the --uvicorn-access-log-exclude-prefixes parameter is configured with specified URL prefixes

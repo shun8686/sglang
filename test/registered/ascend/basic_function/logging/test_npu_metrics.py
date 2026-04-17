@@ -9,7 +9,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPUMetricsDefaultBucketBoundary(TestNPULoggingBase):
-    """Test case for verifying the functionality of the metrics-related parameter group.
+    """Testcase: Verify the functionality of the metrics-related parameter group.
 
     [Description]
         The metrics-related parameter group includes: --enable-metrics; --collect-tokens-histogram;

@@ -10,7 +10,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPUGCWarningThreshold(TestNPULoggingBase):
-    """Test case for verifying the functionality of the --gc-warning-threshold-secs parameter
+    """Testcase: Verify the functionality of the --gc-warning-threshold-secs parameter
 
     [Description]
         Verifies the alert threshold setting function of this parameter: this parameter configures the maximum allowed

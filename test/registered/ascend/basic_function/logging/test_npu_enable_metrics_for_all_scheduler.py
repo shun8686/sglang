@@ -9,7 +9,7 @@ register_npu_ci(est_time=100, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestNPUEnableMetricsForAllScheduler(TestNPULoggingBase):
-    """Test case for verifying the functionality of the --enable-metrics-for-all-scheduler parameter
+    """Testcase: Verify that the functionality of the --enable-metrics-for-all-scheduler parameter
 
     [Description]
         When the --enable-metrics-for-all-scheduler parameter is configured, all TP rank instances will independently

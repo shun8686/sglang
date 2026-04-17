@@ -9,10 +9,10 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestNPULogRequestsFormatText(TestNPULoggingBase):
-    """Testcase: Verify the functionality of --enable-request-time-stats-logging to generate Req Time Stats logs on Ascend backend with Llama-3.2-1B-Instruct model.
+    """Testcase: Verify the functionality of --log-requests-format to correctly generate formatted request logs.
 
     [Test Category] Parameter
-    [Test Target] --enable-request-time-stats-logging
+    [Test Target] --log-requests-format
     """
 
     log_requests_format = "text"

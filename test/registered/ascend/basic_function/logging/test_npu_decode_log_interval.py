@@ -9,7 +9,7 @@ register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDecodeLogInterval(TestNPULoggingBase):
-    """Testcase: Test configuration --decode-log-interval is set to 10, generating 52 decode batches.
+    """Testcase: Verify that configuration --decode-log-interval can correctly record decode information in batches.
 
     [Test Category] Parameter
     [Test Target] --decode-log-interval
