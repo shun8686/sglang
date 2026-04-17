@@ -348,9 +348,9 @@ def run_bench_serving(
         # Read output line by line
         with open(result_file, "a", encoding="utf-8") as f:
             for line in process.stdout:
+                print(line)
                 f.write(line)
                 stripped_line = line.strip()
-                logger.info(stripped_line)
 
                 # Extract metrics
                 if "Mean TTFT" in stripped_line:
@@ -426,9 +426,8 @@ def run_aisbench(
     output_lines = []
     try:
         for line in iter(process.stdout.readline, ""):
-            line = line.strip()
-            logger.info(line)
-            output_lines.append(line)
+            print(line)
+            output_lines.append(line.strip())
 
         process.wait()
 

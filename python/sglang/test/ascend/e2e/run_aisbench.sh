@@ -82,7 +82,7 @@ models = [
         host_ip="$IP",
         host_port=$PORT,
         url="",
-        max_out_len=${OUTPUT_LEN},
+        max_out_len=$OUTPUT_LEN,
         batch_size=$BATCH_SIZE,
         trust_remote_code=True,
         generation_kwargs=dict(temperature=0,ignore_eos=True),
