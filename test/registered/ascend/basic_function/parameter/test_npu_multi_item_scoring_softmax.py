@@ -192,6 +192,34 @@ class TestMultiItemScoringBasic(CustomTestCase):
         )
         logger.info("Softmax=False vs Softmax=True distinction verified.")
 
+    def test_item_first_flag(self):
+        """item_first is ignored when --multi-item-scoring-delimiter is active.
+
+        Verifies that item_first=True produces identical scores to item_first=False,
+        confirming the parameter has no effect in multi-item scoring mode.
+        """
+        common_kwargs = dict(
+            base_url=self.base_url,
+            query=_QUERY,
+            items=_ITEMS,
+            label_token_ids=_LABEL_TOKEN_IDS,
+        )
+
+        resp_false = send_score_request(**common_kwargs, item_first=False)
+        self.assertEqual(resp_false.status_code, 200)
+        scores_false = resp_false.json()["scores"]
+
+        resp_true = send_score_request(**common_kwargs, item_first=True)
+        self.assertEqual(resp_true.status_code, 200)
+        scores_true = resp_true.json()["scores"]
+
+        self.assertEqual(
+            scores_false,
+            scores_true,
+            "item_first should be ignored in multi-item scoring mode: scores must be identical.",
+        )
+        logger.info("item_first=True verified: scores identical to item_first=False.")
+
 
 if __name__ == "__main__":
     unittest.main()
