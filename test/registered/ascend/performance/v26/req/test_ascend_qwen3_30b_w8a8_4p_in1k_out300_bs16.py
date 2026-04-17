@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
-    QWEN3_A3B_EAGLE_MODEL_PATH,
+    # QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    # QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -46,7 +46,8 @@ QWEN3_30B_OTHER_ARGS = [
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
-    QWEN3_A3B_EAGLE_MODEL_PATH,
+    # QWEN3_A3B_EAGLE_MODEL_PATH,
+    "/home/weights/Qwen/Qwen3-a3B_eagle3",
     "--speculative-num-steps",
     5,
     "--speculative-eagle-topk",
@@ -68,12 +69,15 @@ QWEN3_30B_OTHER_ARGS = [
     4,
     "--dtype",
     "bfloat16",
+    "--base-gpu-id",
+    8,
 ]
 
 
 class TestQwen30B(TestAscendPerformanceTestCaseBase):
     max_attempts = 5
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = "/home/weights/Qwen/Qwen3-30B-A3B-W8A8"
     other_args = QWEN3_30B_OTHER_ARGS
     envs = QWEN3_30B_ENVS
     dataset_name = "random"
