@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_5_27B_W8A8_MODEL_PATH,
+    # QWEN3_5_27B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -73,11 +73,14 @@ OTHER_ARGS = [
     1,
     "--speculative-num-draft-tokens",
     4,
+    "--base-gpu-id",
+    14,
 ]
 
 
 class TestQwen3527B(TestAscendPerformanceTestCaseBase):
-    model = QWEN3_5_27B_W8A8_MODEL_PATH
+    # model = QWEN3_5_27B_W8A8_MODEL_PATH
+    model = "/home/weights/Qwen3.5-27B-W8A8"
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
