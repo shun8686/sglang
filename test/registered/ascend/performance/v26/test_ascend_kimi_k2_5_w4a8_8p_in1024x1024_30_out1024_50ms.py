@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
+    BENCHMARK_TOOL_DEFAULT,
     KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -74,12 +76,17 @@ KIMI_K2_5_OTHER_ARGS = [
 
 
 class TestKimiK25W4A8(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
+    aisbench_dataset_path = (
+        "/root/.cache/modelscope/hub/datasets/sglang_test/1024x1024_30.jsonl"
+    )
     model = KIMI_K2_5_W4A8_MODEL_PATH
     other_args = KIMI_K2_5_OTHER_ARGS
     envs = KIMI_K2_5_ENVS
     backend = "sglang-oai-chat"
     dataset_name = "image"
-    image_resolution = "1024x1024"
+    image_resolution = "1920x1080"
     image_count = 1
     max_concurrency = 16
     num_prompts = 16

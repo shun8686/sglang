@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     KIMI_K2_5_EAGLE3_MODEL_PATH,
     KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
@@ -89,6 +91,8 @@ KIMI_K2_5_OTHER_ARGS = [
 
 
 class TestKimiK25W4A8(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = KIMI_K2_5_W4A8_MODEL_PATH
     other_args = KIMI_K2_5_OTHER_ARGS
     envs = KIMI_K2_5_ENVS

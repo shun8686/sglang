@@ -31,6 +31,9 @@ logger = logging.getLogger(__name__)
 
 AISBENCHMARK_TOOL = "aisbench"
 BENCHMARK_TOOL_DEFAULT = AISBENCHMARK_TOOL
+AISBENCHMARK_DATASET_GSM8K_GEN = "gsm8k-gen"
+AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
+AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K_GEN
 
 PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
 if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(

@@ -2,6 +2,8 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     QWEN3_480B_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdMixTestCaseBase,
 )
@@ -61,6 +63,8 @@ MODEL_CONFIG = {
 
 
 class TestQwen480B(TestAscendPerfMultiNodePdMixTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 288
@@ -69,7 +73,6 @@ class TestQwen480B(TestAscendPerfMultiNodePdMixTestCaseBase):
     output_len = 1500
     random_range_ratio = 1
     tpot = 48.9
-    # T: 143@50ms.   800I: xxxxx.     dev：4637@50.34ms
     output_token_throughput = 4880
 
     def test_qwen3_480b(self):

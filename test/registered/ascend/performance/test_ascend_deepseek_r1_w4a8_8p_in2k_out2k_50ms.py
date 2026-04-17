@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -80,6 +82,8 @@ MODEL_OTHER_ARGS = [
 
 
 class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS

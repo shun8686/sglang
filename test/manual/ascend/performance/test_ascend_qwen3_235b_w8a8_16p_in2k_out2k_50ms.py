@@ -2,6 +2,8 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
     QWEN3_235B_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdMixTestCaseBase,
@@ -77,6 +79,8 @@ MODEL_CONFIG = {
 
 
 class TestQwen235B(TestAscendPerfMultiNodePdMixTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 768
@@ -85,7 +89,6 @@ class TestQwen235B(TestAscendPerfMultiNodePdMixTestCaseBase):
     output_len = 2048
     random_range_ratio = 1
     tpot = 49.6
-    # T: 205@50ms.   800I: 1.8*T
     output_token_throughput = 8781
 
     def test_qwen3_235b(self):

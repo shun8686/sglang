@@ -2,6 +2,7 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_TOOL,
     QWEN3_480B_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
@@ -63,8 +64,6 @@ MODEL_CONFIG = {
         "ascend_fuseep",
         "--ep-dispatch-algorithm",
         "static",
-        "--init-expert-location",
-        "/root/.cache/modelscope/hub/models/hot_map/480_3.5k_prefill.pt",
         "--dp-size",
         "2",
         "--enable-dp-attention",
@@ -98,8 +97,6 @@ MODEL_CONFIG = {
         "--enable-dp-lm-head",
         "--ep-dispatch-algorithm",
         "static",
-        "--init-expert-location",
-        "/root/.cache/modelscope/hub/models/hot_map/480_3.5k_decode.pt",
         "--cuda-graph-bs",
         "48",
         "64",
@@ -139,10 +136,31 @@ class TestQwen480bW8a8(TestAscendPerfMultiNodePdSepTestCaseBase):
     output_len = 1000
     random_range_ratio = 1
     tpot = 50
-    # T:143@50ms. 800I: None     Dev-800I: 6390/24@48.27ms
     output_token_throughput = 11351
 
     def test_throughput(self):
+        hotmap_file_prefill = (
+            "480_2k_prefill.pt"
+            if self.benchmark_tool == AISBENCHMARK_TOOL
+            else "480_2k_prefill_ais.pt"
+        )
+        self.model_config["prefill_args"].extend(
+            [
+                "--init-expert-location",
+                f"/root/.cache/modelscope/hub/models/hot_map/{hotmap_file_prefill}",
+            ]
+        )
+        hotmap_file_decode = (
+            "480_2k_decode.pt"
+            if self.benchmark_tool == AISBENCHMARK_TOOL
+            else "480_2k_decode_ais.pt"
+        )
+        self.model_config["decode_args"].extend(
+            [
+                "--init-expert-location",
+                f"/root/.cache/modelscope/hub/models/hot_map/{hotmap_file_decode}",
+            ]
+        )
         self.run_throughput()
 
 

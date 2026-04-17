@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     GLM_4_7_FLASH_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -47,6 +49,8 @@ GLM_4_7_FLASH_OTHER_ARGS = [
 
 
 class TestGlm47Flash(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = GLM_4_7_FLASH_MODEL_PATH
     other_args = GLM_4_7_FLASH_OTHER_ARGS
     envs = GLM_4_7_FLASH_ENVS

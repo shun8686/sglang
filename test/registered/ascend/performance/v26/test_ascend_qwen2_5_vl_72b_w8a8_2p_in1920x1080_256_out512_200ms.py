@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
+    BENCHMARK_TOOL_DEFAULT,
     QWEN2_5_VL_72B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -57,6 +59,11 @@ QWEN2_5_VL_72B_OTHER_ARGS = [
 
 
 class TestQwen25Vl72B(TestAscendPerformanceTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
+    aisbench_dataset_path = (
+        "/root/.cache/modelscope/hub/datasets/sglang_test/1920x1080_256.jsonl"
+    )
     model = QWEN2_5_VL_72B_MODEL_PATH
     other_args = QWEN2_5_VL_72B_OTHER_ARGS
     envs = QWEN2_5_VL_72B_ENVS
