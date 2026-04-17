@@ -1,8 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    # QWEN3_30B_A3B_W8A8_MODEL_PATH,
-    # QWEN3_A3B_EAGLE_MODEL_PATH,
+    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    QWEN3_A3B_EAGLE_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -46,14 +46,13 @@ QWEN3_30B_OTHER_ARGS = [
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
-    # QWEN3_A3B_EAGLE_MODEL_PATH,
-    "/home/weights/Qwen/Qwen3-a3B-eagle3",
+    QWEN3_A3B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
-    5,
+    6,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    6,
+    7,
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
@@ -61,7 +60,7 @@ QWEN3_30B_OTHER_ARGS = [
     "--dp-size",
     8,
     "--mem-fraction-static",
-    0.7,
+    0.6,
     "--cuda-graph-bs",
     1,
     2,
@@ -69,15 +68,12 @@ QWEN3_30B_OTHER_ARGS = [
     4,
     "--dtype",
     "bfloat16",
-    "--base-gpu-id",
-    8,
 ]
 
 
 class TestQwen30B(TestAscendPerformanceTestCaseBase):
     max_attempts = 5
-    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
-    model = "/home/weights/Qwen/Qwen3-30B-A3B-W8A8"
+    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     other_args = QWEN3_30B_OTHER_ARGS
     envs = QWEN3_30B_ENVS
     dataset_name = "random"
