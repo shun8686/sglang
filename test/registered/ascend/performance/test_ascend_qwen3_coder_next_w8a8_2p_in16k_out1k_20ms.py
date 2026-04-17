@@ -2,7 +2,7 @@ import logging
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    QWEN3_NEXT_80B_A3B_MODEL_PATH,
+    QWEN3_Coder_NEXT_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -109,7 +109,7 @@ OTHER_ARGS = [
     "--deepep-mode",
     "auto",
     "--speculative-draft-model-path",
-    QWEN3_NEXT_80B_A3B_MODEL_PATH,
+    QWEN3_Coder_NEXT_W8A8_MODEL_PATH,
     "--quantization",
     "modelslim",
 ]

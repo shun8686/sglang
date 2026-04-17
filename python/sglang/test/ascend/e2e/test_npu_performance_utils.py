@@ -97,6 +97,9 @@ QWEN3_NEXT_80B_A3B_MODEL_PATH = (
 QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/vllm-ascend/Qwen3-Next-80B-A3B-Instruct-W8A8"
 )
+QWEN3_Coder_NEXT_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Coder-Next-W8A8"
+)
 GLM_4_6_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/GLM-4.6-w8a8_WITH_MTP"
 
 QWEN3_VL_8B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-VL-8B-Instruct"
