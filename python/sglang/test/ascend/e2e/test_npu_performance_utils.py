@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.gen_gsm8k_fixed_len import (
     generate_fixed_len_dataset,
+    generate_mm_dataset,
     save_jsonl,
 )
 from sglang.test.ascend.e2e.generate_datasets import generate_dataset
@@ -408,6 +409,7 @@ def run_aisbench(
     output_len,
     max_concurrency,
     num_prompts,
+    image_resolution=None,
 ):
 
     if dataset_type == AISBENCHMARK_DATASET_GSM8K and not dataset_path:
@@ -438,6 +440,22 @@ def run_aisbench(
             tokenizer_path=model_path,
             target_tokens=input_len,
             num_prompts=num_prompts,
+        )
+        save_jsonl(data, dataset_file)
+        dataset_path = dataset_file
+        logger.info(f"Dataset generated: {dataset_file}")
+
+    if dataset_type == AISBENCHMARK_DATASET_MM_CUSTOM_GEN and not dataset_path:
+        dataset_file = f"/tmp/datasets/mm.jsonl"
+        image_dir = f"/tmp/datasets/images"
+        data = generate_mm_dataset(
+            train_path=GSM8K_DATASET_TRAIN_FILE,
+            test_path=GSM8K_DATASET_TEST_FILE,
+            tokenizer_path=model_path,
+            target_tokens=input_len,
+            num_prompts=num_prompts,
+            image_dir=image_dir,
+            size=image_resolution,
         )
         save_jsonl(data, dataset_file)
         dataset_path = dataset_file

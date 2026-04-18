@@ -1,6 +1,13 @@
 import json
 import os
+import random
+import string
+from test.manual.ascend.lts.test_ascend_lts_qwen3_coder_next import logger
 
+import Image
+import np
+import numpy as np
+from PIL import Image
 from transformers import AutoTokenizer
 
 
@@ -55,7 +62,8 @@ def pad_to_target_tokens(
 
     gap = remaining_tokens - few_shot_token_count
     if gap > 0:
-        padding_text = " ".join(["A"] * gap)
+        padding_tokens = ["A"] * gap
+        padding_text = tokenizer.decode(tokenizer.convert_tokens_to_ids(padding_tokens))
         few_shot_text += padding_text
 
     return few_shot_text + test_prompt
@@ -107,6 +115,70 @@ def generate_fixed_len_dataset(
         f"Token count stats: min={min(token_counts)}, max={max(token_counts)}, avg={sum(token_counts)/len(token_counts):.1f}"
     )
 
+    return output_data
+
+
+def generate_random_images(mm_dataset_data, size):
+    total_image_num = len(mm_dataset_data)
+    print(f"begin to generate images, total {total_image_num}")
+
+    file_count = 0
+    for item in mm_dataset_data:
+        image_paths = item.get("path")
+
+        for image_path in image_paths:
+            if not image_path:
+                logger.error("The image path is none.")
+                continue
+
+            dir_name = os.path.dirname(image_path)
+            if dir_name and not os.path.exists(dir_name):
+                os.makedirs(dir_name, exist_ok=True)
+
+            random_array = np.random.randint(
+                0, 256, (size[1], size[0], 3), dtype=np.uint8
+            )
+
+            img = Image.fromarray(random_array)
+            img.save(image_path, quality=95)
+            if os.path.isfile(image_path):
+                file_count += 1
+
+    print(f"Finish images generation. Image num: {file_count}")
+
+
+def generate_mm_dataset(
+    train_path,
+    test_path,
+    tokenizer_path,
+    target_tokens=3500,
+    num_prompts=1024,
+    trust_remote_code=False,
+    test_template="Question: {question}\nLet's think step by step\nAnswer:\n",
+    image_dir="/tmp/datasets/image",
+    size=None,
+):
+    output_data = []
+    text_data = generate_fixed_len_dataset(
+        train_path,
+        test_path,
+        tokenizer_path,
+        target_tokens,
+        num_prompts,
+        trust_remote_code,
+        test_template,
+    )
+
+    for item in text_data:
+        random_string = "".join(
+            random.choices(string.ascii_letters + string.digits, k=10)
+        )
+        item["type"] = "image"
+        item["path"] = [f"{image_dir}/{random_string}.jpg"]
+        output_data.append(item)
+
+    size = tuple(map(int, size.split("x")))
+    generate_random_images(output_data, size)
     return output_data
 
 
