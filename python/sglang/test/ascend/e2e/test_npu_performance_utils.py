@@ -29,17 +29,18 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-AISBENCHMARK_TOOL = "aisbench"
-BENCHMARK_TOOL_DEFAULT = AISBENCHMARK_TOOL
+AISBENCHMARK = "aisbench"
+BENCHSERVING = "bench-serving"
+BENCHMARK_TOOL_DEFAULT = BENCHSERVING
 AISBENCHMARK_DATASET_GSM8K_GEN = "gsm8k-gen"
 AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
 AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K_GEN
 
-
-python_test_tool_venv = "test_env_transformers_tool/bin/python"
-PYTHON_FOR_TEST_TOOL = (
-    python_test_tool_venv if not os.path.exists(python_test_tool_venv) else "python3"
-)
+PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
+if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
+    PYTHON_FOR_TEST_TOOL, os.X_OK
+):
+    PYTHON_FOR_TEST_TOOL = "python3"
 logger.info(f"PYTHON_FOR_TEST_TOOL: {PYTHON_FOR_TEST_TOOL}")
 
 DEEPSEEK_R1_W8A8_MODEL_PATH = (
@@ -348,7 +349,8 @@ def run_bench_serving(
         # Read output line by line
         with open(result_file, "a", encoding="utf-8") as f:
             for line in process.stdout:
-                print(line)
+                if line.strip():
+                    print(line, end="")
                 f.write(line)
                 stripped_line = line.strip()
 
@@ -426,7 +428,8 @@ def run_aisbench(
     output_lines = []
     try:
         for line in iter(process.stdout.readline, ""):
-            print(line)
+            if line.strip():
+                print(line, end="")
             output_lines.append(line.strip())
 
         process.wait()
@@ -448,7 +451,7 @@ def run_aisbench(
             logger.info(f"Extracted mean_tpot: {metrics['mean_tpot']} ms")
         else:
             logger.warning("Could not extract mean_tpot from output")
-            logger.info(
+            logger.error(
                 f"Simplified output snippet around TPOT: {simplified_output[simplified_output.find('TPOT')-20:simplified_output.find('TPOT')+50] if 'TPOT' in simplified_output else 'TPOT not found'}"
             )
 
@@ -478,7 +481,7 @@ def run_aisbench(
                 )
         else:
             logger.warning("Could not extract total_tps from output")
-            logger.info(
+            logger.warning(
                 f"Simplified output snippet around Output Token Throughput: {simplified_output[simplified_output.find('Output')-20:simplified_output.find('Output')+100] if 'Output' in simplified_output else 'Output not found'}"
             )
 
@@ -488,8 +491,81 @@ def run_aisbench(
             logger.info(f"Extracted mean_ttft: {metrics['mean_ttft']} ms")
         else:
             logger.warning("Could not extract mean_ttft from output")
-            logger.info(
+            logger.warning(
                 f"Simplified output snippet around TTFT: {simplified_output[simplified_output.find('TTFT')-20:simplified_output.find('TTFT')+50] if 'TTFT' in simplified_output else 'TTFT not found'}"
+            )
+
+        e2el_match = re.search(r"E2EL\s+total\s+([\d.]+)\s+ms", simplified_output)
+        if e2el_match:
+            metrics["mean_e2e_latency"] = e2el_match.group(1)
+            logger.info(f"Extracted mean_e2e_latency: {metrics['mean_e2e_latency']} ms")
+        else:
+            logger.warning("Could not extract mean_e2e_latency from output")
+            logger.warning(
+                f"Simplified output snippet around E2EL: {simplified_output[simplified_output.find('E2EL')-20:simplified_output.find('E2EL')+50] if 'E2EL' in simplified_output else 'E2EL not found'}"
+            )
+
+        concurrency_match = re.search(
+            r"Concurrency\s+total\s+([\d.]+)", simplified_output
+        )
+        if concurrency_match:
+            metrics["concurrency"] = concurrency_match.group(1)
+            logger.info(f"Extracted concurrency: {metrics['concurrency']}")
+        else:
+            logger.warning("Could not extract concurrency from output")
+            logger.warning(
+                f"Simplified output snippet around Concurrency: {simplified_output[simplified_output.find('Concurrency')-20:simplified_output.find('Concurrency')+50] if 'Concurrency' in simplified_output else 'Concurrency not found'}"
+            )
+
+        max_concurrency_match = re.search(
+            r"Max\s+Concurrency\s+total\s+([\d.]+)", simplified_output
+        )
+        if max_concurrency_match:
+            metrics["max_concurrency"] = max_concurrency_match.group(1)
+            logger.info(f"Extracted max_concurrency: {metrics['max_concurrency']}")
+        else:
+            logger.warning("Could not extract max_concurrency from output")
+            logger.warning(
+                f"Simplified output snippet around Max Concurrency: {simplified_output[simplified_output.find('Max Concurrency')-20:simplified_output.find('Max Concurrency')+50] if 'Max Concurrency' in simplified_output else 'Max Concurrency not found'}"
+            )
+
+        req_throughput_match = re.search(
+            r"Request\s+Throughput\s+total\s+([\d.]+)\s+req\s*/?\s*s",
+            simplified_output,
+        )
+        if req_throughput_match:
+            metrics["request_throughput"] = req_throughput_match.group(1)
+            logger.info(
+                f"Extracted request_throughput: {metrics['request_throughput']} req/s"
+            )
+        else:
+            logger.warning("Could not extract request_throughput from output")
+            logger.warning(
+                f"Simplified output snippet around Request Throughput: {simplified_output[simplified_output.find('Request')-20:simplified_output.find('Request')+50] if 'Request' in simplified_output else 'Request not found'}"
+            )
+
+        total_requests_match = re.search(
+            r"Total\s+Requests\s+total\s+(\d+)", simplified_output
+        )
+        if total_requests_match:
+            metrics["total_requests"] = total_requests_match.group(1)
+            logger.info(f"Extracted total_requests: {metrics['total_requests']}")
+        else:
+            logger.warning("Could not extract total_requests from output")
+            logger.warning(
+                f"Simplified output snippet around Total Requests: {simplified_output[simplified_output.find('Total Requests')-20:simplified_output.find('Total Requests')+50] if 'Total Requests' in simplified_output else 'Total Requests not found'}"
+            )
+
+        failed_requests_match = re.search(
+            r"Failed\s+Requests\s+total\s+(\d+)", simplified_output
+        )
+        if failed_requests_match:
+            metrics["failed_requests"] = failed_requests_match.group(1)
+            logger.info(f"Extracted failed_requests: {metrics['failed_requests']}")
+        else:
+            logger.warning("Could not extract failed_requests from output")
+            logger.warning(
+                f"Simplified output snippet around Failed Requests: {simplified_output[simplified_output.find('Failed Requests')-20:simplified_output.find('Failed Requests')+50] if 'Failed Requests' in simplified_output else 'Failed Requests not found'}"
             )
 
         logger.info(f"All extracted metrics: {metrics}")

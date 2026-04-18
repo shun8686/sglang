@@ -81,7 +81,6 @@ class TestQwen32B(TestAscendPerformanceTestCaseBase):
     output_len = 4000
     random_range_ratio = 1
     tpot = 6
-    # 800I A3：79.64
     output_token_throughput = 171
 
     def test_qwen3_32b(self):
