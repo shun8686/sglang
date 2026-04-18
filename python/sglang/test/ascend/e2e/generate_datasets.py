@@ -8,8 +8,6 @@ from PIL import Image
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import KIMI_K2_5_W4A8_MODEL_PATH
-
 
 def generate_dataset(
     model_path, source_dataset_path, batch_size, input_len, output_file
@@ -113,7 +111,7 @@ if __name__ == "__main__":
     input_len = 30
 
     generate_dataset(
-        model_path=KIMI_K2_5_W4A8_MODEL_PATH,
+        model_path="/models/xxx/",
         source_dataset_path="/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl",
         batch_size=batch_size,
         input_len=input_len,
