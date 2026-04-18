@@ -3,7 +3,6 @@ import os
 import random
 import string
 
-import Image
 import np
 import numpy as np
 from PIL import Image
