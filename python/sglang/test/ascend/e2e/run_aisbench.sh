@@ -61,6 +61,18 @@ TMP_CFG=vllm_api_${MODEL}
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
 mkdir -p ${DATASETS_CONFIG_PATH}
 
+GSM8K_TRAIN_FILE="/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl"
+if [ ! -f "${GSM8K_TRAIN_FILE}" ];then
+  ${PIP_FOR_AISBENCH} install modelscope -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PYTHON_ENV_FOR_AISBENCH} -c "
+  from modelscope import MsDataset
+  ds = MsDataset.load('AI-ModelScope/gsm8k', split='train')
+  ds.to_json('/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl')
+  "
+fi
+du -sh /root/.cache/modelscope/hub/datasets/grade_school_math/*
+cp ${GSM8K_TRAIN_FILE} ${DATASETS_CONFIG_PATH}
+
 function gen_model_config_file() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"

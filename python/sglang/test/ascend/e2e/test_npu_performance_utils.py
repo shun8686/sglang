@@ -404,7 +404,7 @@ def run_aisbench(
 ):
 
     if dataset_type == AISBENCHMARK_DATASET_GSM8K and not dataset_path:
-        dataset_file = f"/tmp/ais_configs/datasets/test.jsonl"
+        dataset_file = f"/tmp/datasets/test.jsonl"
         logger.info(
             f"Generating gsm8k dataset: {dataset_file}, "
             f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
