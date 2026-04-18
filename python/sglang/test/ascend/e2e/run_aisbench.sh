@@ -33,8 +33,8 @@ echo "===== Install aisbench in virtual env - End ====="
 # Check if the correct number of arguments are provided
 if [ $# -ne 11 ]; then
     echo -e "\033[31mUsage:\033[0m"
-    echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET_TYPE> <DATASET_PATH> <MAX_OUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
-    echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k_gen /path/to/gsm8k 1024 32 128 ./result"
+    echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET_TYPE> <DATASET_PATH> <INPUT_LEN> <OUTPUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
+    echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k /path/to/gsm8k 3500 1024 32 128 ./result"
     exit 1
 fi
 
@@ -273,7 +273,11 @@ elif [ "$DATASET_TYPE" == "gsm8k" ]; then
         exit 1
     fi
     dataset_dir=$(dirname "$DATASET_PATH")
-    cp ${GSM8K_TRAIN_FILE} ${dataset_dir}
+    if [ -f "${GSM8K_TRAIN_FILE}" ]; then
+        cp ${GSM8K_TRAIN_FILE} ${dataset_dir}
+    else
+        echo "Warning: GSM8K train file not found at ${GSM8K_TRAIN_FILE}"
+    fi
     dataset_name=gsm8k_custom_${MODEL}
     gen_dataset_gsm8k_custom_config_file "${dataset_name}" "${dataset_dir}"
     echo "Use dataset: ${dataset_name}, dataset_file: ${dataset_file}"
