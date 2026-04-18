@@ -61,6 +61,16 @@ TMP_CFG=vllm_api_${MODEL}
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
 mkdir -p ${DATASETS_CONFIG_PATH}
 
+GSM8K_TRAIN_FILE="/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl"
+if [ ! -f "${GSM8K_TRAIN_FILE}" ];then
+  ${PIP_FOR_AISBENCH} install modelscope -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PYTHON_ENV_FOR_AISBENCH}/bin/python -c "
+from modelscope import MsDataset
+ds = MsDataset.load('AI-ModelScope/gsm8k', split='train')
+ds.to_json('/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl')
+"
+fi
+
 function gen_model_config_file() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"
@@ -156,14 +166,15 @@ EOF
 
 function gen_dataset_gsm8k_gen_config_file() {
   dataset_config_name=$1
+  dataset_file=$2
   dataset_config_file=${DATASETS_CONFIG_PATH}/${dataset_config_name}.py
   echo "Writing gsm8k config info into file: ${dataset_config_file}"
   cat > "${dataset_config_file}" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template import PromptTemplate
 from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
 from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
-from ais_bench.benchmark.openicl.icl_evaluator import AccEvaluator
-from ais_bench.benchmark.datasets import GSM8KDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator, SyntheticDataset
+from ais_bench.benchmark.datasets import CustomDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator
+
 gsm8k_reader_cfg = dict(input_columns=['question'], output_column='answer')
 
 gsm8k_infer_cfg = dict(
@@ -178,36 +189,16 @@ gsm8k_eval_cfg = dict(evaluator=dict(type=Gsm8kEvaluator),
                       pred_postprocessor=dict(type=gsm8k_postprocess),
                       dataset_postprocessor=dict(type=gsm8k_dataset_postprocess))
 
-synthetic_config = {
-    "Type": "string",
-    "RequestCount": ${NUM_PROMPTS},
-    "StringConfig": {
-        "Input": {
-            "Method": "uniform",
-            "Params": {
-                "MinValue": ${INPUT_LEN},
-                "MaxValue": ${INPUT_LEN}
-            }
-        },
-        "Output": {
-            "Method": "uniform",
-            "Params": {
-                "MinValue": 100,
-                "MaxValue": 200
-            }
-        }
-    }
-}
-
 gsm8k_datasets = [
     dict(
         abbr='gsm8k',
-        type=SyntheticDataset,
-        config=synthetic_config,
+        type=CustomDataset,
+        path="${dataset_file}",
         reader_cfg=gsm8k_reader_cfg,
         infer_cfg=gsm8k_infer_cfg,
         eval_cfg=gsm8k_eval_cfg)
 ]
+
 EOF
 
   echo "============== ${dataset_config_file} - Begin =============="
@@ -268,8 +259,9 @@ if [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
     CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 elif [ "$DATASET_TYPE" == "gsm8k-gen" ]; then
+    dataset_file=$DATASET_PATH
     dataset_name=gsm8k_gen_${MODEL}
-    gen_dataset_gsm8k_gen_config_file "${dataset_name}"
+    gen_dataset_gsm8k_gen_config_file "${dataset_name}" "${dataset_file}"
     echo "Use dataset: ${dataset_name}"
     gen_model_config_file
     CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
@@ -281,6 +273,7 @@ elif [ "$DATASET_TYPE" == "gsm8k" ]; then
         exit 1
     fi
     dataset_dir=$(dirname "$DATASET_PATH")
+    cp ${GSM8K_TRAIN_FILE} ${dataset_dir}
     dataset_name=gsm8k_custom_${MODEL}
     gen_dataset_gsm8k_custom_config_file "${dataset_name}" "${dataset_dir}"
     echo "Use dataset: ${dataset_name}, dataset_file: ${dataset_file}"
