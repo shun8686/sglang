@@ -8,6 +8,7 @@ from functools import wraps
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.generate_datasets import generate_dataset
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     SERVICE_PORT,
     check_role,
@@ -32,6 +33,7 @@ logger = logging.getLogger(__name__)
 AISBENCHMARK = "aisbench"
 BENCHSERVING = "bench-serving"
 BENCHMARK_TOOL_DEFAULT = BENCHSERVING
+AISBENCHMARK_DATASET_GSM8K = "gsm8k"
 AISBENCHMARK_DATASET_GSM8K_GEN = "gsm8k-gen"
 AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
 AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K_GEN
@@ -396,6 +398,22 @@ def run_aisbench(
     max_concurrency,
     num_prompts,
 ):
+
+    if dataset_type == AISBENCHMARK_DATASET_GSM8K and not dataset_path:
+        dataset_file = f"/tmp/gsm8k_in{input_len}_bs{num_prompts}.jsonl"
+        logger.info(
+            f"Generating gsm8k dataset: {dataset_file}, "
+            f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
+        )
+        generate_dataset(
+            model_path=model_path,
+            source_dataset_path="/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl",
+            batch_size=num_prompts,
+            input_len=input_len,
+            output_file=dataset_file,
+        )
+        dataset_path = dataset_file
+        logger.info(f"Dataset generated at: {dataset_path}")
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
     result_path = "./aisbench_result" if not metrics_path else metrics_path
