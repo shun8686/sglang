@@ -166,14 +166,15 @@ EOF
 
 function gen_dataset_gsm8k_gen_config_file() {
   dataset_config_name=$1
+  dataset_file=$2
   dataset_config_file=${DATASETS_CONFIG_PATH}/${dataset_config_name}.py
   echo "Writing gsm8k config info into file: ${dataset_config_file}"
   cat > "${dataset_config_file}" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template import PromptTemplate
 from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
 from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
-from ais_bench.benchmark.openicl.icl_evaluator import AccEvaluator
-from ais_bench.benchmark.datasets import GSM8KDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator, SyntheticDataset
+from ais_bench.benchmark.datasets import CustomDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator
+
 gsm8k_reader_cfg = dict(input_columns=['question'], output_column='answer')
 
 gsm8k_infer_cfg = dict(
@@ -188,36 +189,16 @@ gsm8k_eval_cfg = dict(evaluator=dict(type=Gsm8kEvaluator),
                       pred_postprocessor=dict(type=gsm8k_postprocess),
                       dataset_postprocessor=dict(type=gsm8k_dataset_postprocess))
 
-synthetic_config = {
-    "Type": "string",
-    "RequestCount": ${NUM_PROMPTS},
-    "StringConfig": {
-        "Input": {
-            "Method": "uniform",
-            "Params": {
-                "MinValue": ${INPUT_LEN},
-                "MaxValue": ${INPUT_LEN}
-            }
-        },
-        "Output": {
-            "Method": "uniform",
-            "Params": {
-                "MinValue": 100,
-                "MaxValue": 200
-            }
-        }
-    }
-}
-
 gsm8k_datasets = [
     dict(
         abbr='gsm8k',
-        type=SyntheticDataset,
-        config=synthetic_config,
+        type=CustomDataset,
+        path="${dataset_file}",
         reader_cfg=gsm8k_reader_cfg,
         infer_cfg=gsm8k_infer_cfg,
         eval_cfg=gsm8k_eval_cfg)
 ]
+
 EOF
 
   echo "============== ${dataset_config_file} - Begin =============="
@@ -278,8 +259,9 @@ if [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
     CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 elif [ "$DATASET_TYPE" == "gsm8k-gen" ]; then
+    dataset_file=$DATASET_PATH
     dataset_name=gsm8k_gen_${MODEL}
-    gen_dataset_gsm8k_gen_config_file "${dataset_name}"
+    gen_dataset_gsm8k_gen_config_file "${dataset_name}" "${dataset_file}"
     echo "Use dataset: ${dataset_name}"
     gen_model_config_file
     CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
