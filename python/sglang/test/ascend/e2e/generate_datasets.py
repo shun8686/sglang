@@ -8,8 +8,6 @@ from PIL import Image
 from tqdm import tqdm
 from transformers import AutoTokenizer
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import KIMI_K2_5_W4A8_MODEL_PATH
-
 
 def generate_dataset(
     model_path, source_dataset_path, batch_size, input_len, output_file
@@ -24,14 +22,16 @@ def generate_dataset(
     dataset_new = []
     for sentence in dataset:
         words = tokenizer.tokenize(sentence)
-        print(len(words))
         len_num = len(words) // input_len
         if len_num == 0:
             multiplier = (input_len // len(words)) + 1
             repeated_len = words * multiplier
             words = repeated_len[:input_len]
             decoded_text = tokenizer.convert_tokens_to_string(words)
-            print(len(words))
+            if len(words) != input_len:
+                print(
+                    f"Generate DataSet Error: the length of new input is {len(words)}, not {input_len}"
+                )
             dataset_new.append(decoded_text)
 
     batch_num = len(dataset_new) // batch_size
@@ -44,7 +44,10 @@ def generate_dataset(
 
     random.shuffle(dataset_new)
 
-    print(len(dataset_new))
+    if len(dataset_new) != batch_size:
+        print(
+            f"Generate DataSet Error: the size of new dataset is {len(dataset_new)}, not {batch_size}"
+        )
 
     with open(output_file, "w", encoding="utf-8") as f:
         for i in range(len(dataset_new)):
@@ -113,7 +116,7 @@ if __name__ == "__main__":
     input_len = 30
 
     generate_dataset(
-        model_path=KIMI_K2_5_W4A8_MODEL_PATH,
+        model_path="/models/xxx/",
         source_dataset_path="/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl",
         batch_size=batch_size,
         input_len=input_len,
