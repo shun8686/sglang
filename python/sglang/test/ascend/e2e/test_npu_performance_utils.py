@@ -35,8 +35,11 @@ AISBENCHMARK_DATASET_GSM8K_GEN = "gsm8k-gen"
 AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
 AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K_GEN
 
+
 python_test_tool_venv = "test_env_transformers_tool/bin/python"
-PYTHON_FOR_TEST_TOOL = python_test_tool_venv if not os.path.exists(python_test_tool_venv) else "python3"
+PYTHON_FOR_TEST_TOOL = (
+    python_test_tool_venv if not os.path.exists(python_test_tool_venv) else "python3"
+)
 logger.info(f"PYTHON_FOR_TEST_TOOL: {PYTHON_FOR_TEST_TOOL}")
 
 DEEPSEEK_R1_W8A8_MODEL_PATH = (

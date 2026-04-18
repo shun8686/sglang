@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
