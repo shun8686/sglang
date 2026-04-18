@@ -37,14 +37,15 @@ def generate_dataset(
     batch_num = len(dataset_new) // batch_size
     if batch_num == 0:
         multiplier = (batch_size // len(dataset_new)) + 1
-        reppeated_batch = dataset_new * multiplier
-        dataset_new = reppeated_batch[:batch_size]
+        repeated_batch = dataset_new * multiplier
+        dataset_new = repeated_batch[:batch_size]
     else:
         dataset_new = dataset_new[:batch_size]
 
+    random.shuffle(dataset_new)
+
     print(len(dataset_new))
 
-    json_str = json.dumps(dataset_new, ensure_ascii=False, indent=4)
     with open(output_file, "w", encoding="utf-8") as f:
         for i in range(len(dataset_new)):
             f.write(
