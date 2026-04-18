@@ -2,8 +2,8 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK,
     AISBENCHMARK_DATASET_DEFAULT,
-    AISBENCHMARK_TOOL,
     BENCHMARK_TOOL_DEFAULT,
     QWEN3_480B_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
@@ -146,7 +146,7 @@ class TestQwen480bW8a8(TestAscendPerfMultiNodePdSepTestCaseBase):
     def test_throughput(self):
         hotmap_file_prefill = (
             "480_3.5k_prefill.pt"
-            if self.benchmark_tool == AISBENCHMARK_TOOL
+            if self.benchmark_tool == AISBENCHMARK
             else "480_3.5k_prefill_ais.pt"
         )
         self.model_config["prefill_args"].extend(
@@ -157,7 +157,7 @@ class TestQwen480bW8a8(TestAscendPerfMultiNodePdSepTestCaseBase):
         )
         hotmap_file_decode = (
             "480_3.5k_decode.pt"
-            if self.benchmark_tool == AISBENCHMARK_TOOL
+            if self.benchmark_tool == AISBENCHMARK
             else "480_3.5k_decode_ais.pt"
         )
         self.model_config["decode_args"].extend(
