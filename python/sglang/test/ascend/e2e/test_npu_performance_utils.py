@@ -700,7 +700,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k-gen"  # gsm8k-gen | mm-custom-gen
+    aisbench_dataset_type = "gsm8k-gen"  # gsm8k | gsm8k-gen | mm-custom-gen
     aisbench_dataset_path = None  # auto generate dataset if none
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
