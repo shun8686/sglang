@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 
 AISBENCHMARK = "aisbench"
 BENCHSERVING = "bench-serving"
-BENCHMARK_TOOL_DEFAULT = AISBENCHMARK
+BENCHMARK_TOOL_DEFAULT = BENCHSERVING
 AISBENCHMARK_DATASET_GSM8K = "gsm8k"
 AISBENCHMARK_DATASET_GSM8K_GEN = "gsm8k-gen"
 AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
@@ -700,7 +700,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k-gen"  # gsm8k-gen | mm-custom-gen
+    aisbench_dataset_type = "gsm8k-gen"  # gsm8k | gsm8k-gen | mm-custom-gen
     aisbench_dataset_path = None  # auto generate dataset if none
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
