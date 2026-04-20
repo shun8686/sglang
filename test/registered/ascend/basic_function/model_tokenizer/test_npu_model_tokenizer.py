@@ -185,24 +185,22 @@ class TestNpuModelTokenizer(CustomTestCase):
     def test_model_tokenizer_context_length(self):
         # Will tokenize to more than context length
         long_text = "hello " * 1200
-        try:
-            response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": long_text,
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 64,
-                    },
+
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": long_text,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 64,
                 },
-            )
-            self.assertEqual(response.status_code, 400)
-            self.assertIn(
-                "The input (1202 tokens) is longer than the model's context length (1000 tokens)",
-                response.text,
-            )
-        except Exception as e:
-            logging.warning(f"Error testing: {e}")
+            },
+        )
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "The input (1202 tokens) is longer than the model's context length (1000 tokens)",
+            response.text,
+        )
 
 
 class TestNpuSkipTokenizerInit(CustomTestCase):
@@ -244,25 +242,23 @@ class TestNpuSkipTokenizerInit(CustomTestCase):
     def test_model_tokenizer_error_request(self):
         # The request failed to send using text.
         prompt = "Explain the concept of machine learning in detail."
-        try:
-            response = requests.post(
-                f"{DEFAULT_URL_FOR_TEST}/generate",
-                json={
-                    "text": prompt,
-                    "sampling_params": {
-                        "temperature": 0,
-                        "max_new_tokens": 100,
-                    },
+
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": prompt,
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 100,
                 },
-            )
-            # The `--skip-tokenizer-init` parameter is configured to prevent text input from being accepted.
-            self.assertEqual(response.status_code, 400)
-            self.assertIn(
-                "The engine initialized with ship_tokenizer_init=True cannot accept text prompts",
-                response.text,
-            )
-        except Exception as e:
-            logging.warning(f"Error testing: {e}")
+            },
+        )
+        # The `--skip-tokenizer-init` parameter is configured to prevent text input from being accepted.
+        self.assertEqual(response.status_code, 400)
+        self.assertIn(
+            "The engine initialized with skip_tokenizer_init=True cannot accept text prompts",
+            response.text,
+        )
 
     def test_model_skip_tokenizer_request(self):
         # Request sent successfully using input_ids
