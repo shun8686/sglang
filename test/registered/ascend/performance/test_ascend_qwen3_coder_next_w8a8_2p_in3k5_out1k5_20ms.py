@@ -4,7 +4,8 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    QWEN3_Coder_NEXT_W8A8_MODEL_PATH,
+    QWEN3_CODER_NEXT_W8A8_MODEL_PATH,
+    QWEN3_NEXT_80B_A3B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -16,7 +17,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3-Coder-Next_W8A8"
 
 register_npu_ci(
     est_time=1800,
@@ -111,7 +111,7 @@ OTHER_ARGS = [
     "--deepep-mode",
     "auto",
     "--speculative-draft-model-path",
-    QWEN3_Coder_NEXT_W8A8_MODEL_PATH,
+    QWEN3_NEXT_80B_A3B_MODEL_PATH,
     "--quantization",
     "modelslim",
 ]
@@ -120,7 +120,7 @@ OTHER_ARGS = [
 class TestQwen3CoderNext(TestAscendPerformanceTestCaseBase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    model = MODEL_PATH
+    model = QWEN3_CODER_NEXT_W8A8_MODEL_PATH
     other_args = OTHER_ARGS
     envs = ENVS
     dataset_name = "random"
