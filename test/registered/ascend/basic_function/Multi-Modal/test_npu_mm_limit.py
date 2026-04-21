@@ -65,7 +65,7 @@ class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
        each containing multiple multimodal input data.
 
     [Test Category] Parameter
-    [Test Target] --mm-max-concurrent-calls; --mm-per-request-timeout; --enable-broadcast-mm-inputs-process; --limit-mm-data-per-request
+    [Test Target] --enable-broadcast-mm-inputs-process; --limit-mm-data-per-request
     """
 
     model = QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
