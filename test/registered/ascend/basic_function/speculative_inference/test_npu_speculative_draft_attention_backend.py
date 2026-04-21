@@ -27,13 +27,12 @@ class TestAscendSpeculativeDraftAttentionAndMoeRunner(CustomTestCase):
     [Test Target] --speculative-draft-attention-backend; --speculative-moe-runner-backend
     """
 
-    os.environ["HCCL_BUFFSIZE"] = "2048"
-    os.environ["SGLANG_ENABLE_OVERLAP_PLAN_SITEAM"] = "1"
-    os.environ["SGLANG_ENABLE_SPEC_V2"] = "1"
-    env = os.environ.copy()
-
     @classmethod
     def setUpClass(cls):
+        os.environ["HCCL_BUFFSIZE"] = "2048"
+        os.environ["SGLANG_ENABLE_OVERLAP_PLAN_STREAM"] = "1"
+        os.environ["SGLANG_ENABLE_SPEC_V2"] = "1"
+        cls.env = os.environ.copy()
         cls.models = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
