@@ -33,8 +33,8 @@ echo "===== Install aisbench in virtual env - End ====="
 # Check if the correct number of arguments are provided
 if [ $# -ne 11 ]; then
     echo -e "\033[31mUsage:\033[0m"
-    echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET_TYPE> <DATASET_PATH> <MAX_OUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
-    echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k_gen /path/to/gsm8k 1024 32 128 ./result"
+    echo "  $0 <IP> <PORT> <MODEL_NAME> <MODEL_PATH> <DATASET_TYPE> <DATASET_PATH> <INPUT_LEN> <OUTPUT_LEN> <BATCH_SIZE> <NUM_PROMPTS> <OUTPUT_PATH>"
+    echo "  Example: $0 127.0.0.1 54321 Qwen2-7B-Instruct /models/qwen gsm8k /path/to/gsm8k 3500 1024 32 128 ./result"
     exit 1
 fi
 
@@ -61,6 +61,16 @@ TMP_CFG=vllm_api_${MODEL}
 DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
 mkdir -p ${DATASETS_CONFIG_PATH}
 
+GSM8K_TRAIN_FILE="/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl"
+if [ ! -f "${GSM8K_TRAIN_FILE}" ];then
+  ${PIP_FOR_AISBENCH} install modelscope -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  ${PYTHON_ENV_FOR_AISBENCH}/bin/python -c "
+from modelscope import MsDataset
+ds = MsDataset.load('AI-ModelScope/gsm8k', split='train')
+ds.to_json('/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl')
+"
+fi
+
 function gen_model_config_file() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"
@@ -82,7 +92,7 @@ models = [
         host_ip="$IP",
         host_port=$PORT,
         url="",
-        max_out_len=${OUTPUT_LEN},
+        max_out_len=$OUTPUT_LEN,
         batch_size=$BATCH_SIZE,
         trust_remote_code=True,
         generation_kwargs=dict(temperature=0,ignore_eos=True),
@@ -154,16 +164,17 @@ EOF
   echo "============== ${dataset_file} - End ================"
 }
 
-function gen_dataset_gsm8k_config_file() {
-  dataset_name=$1
-  dataset_file=${DATASETS_CONFIG_PATH}/${dataset_name}.py
-  echo "Writing gsm8k config info into file: ${dataset_file}"
-  cat > "${dataset_file}" << EOF
+function gen_dataset_gsm8k_gen_config_file() {
+  dataset_config_name=$1
+  dataset_file=$2
+  dataset_config_file=${DATASETS_CONFIG_PATH}/${dataset_config_name}.py
+  echo "Writing gsm8k config info into file: ${dataset_config_file}"
+  cat > "${dataset_config_file}" << EOF
 from ais_bench.benchmark.openicl.icl_prompt_template import PromptTemplate
 from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
 from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
-from ais_bench.benchmark.openicl.icl_evaluator import AccEvaluator
-from ais_bench.benchmark.datasets import GSM8KDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator, SyntheticDataset
+from ais_bench.benchmark.datasets import CustomDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator
+
 gsm8k_reader_cfg = dict(input_columns=['question'], output_column='answer')
 
 gsm8k_infer_cfg = dict(
@@ -178,43 +189,63 @@ gsm8k_eval_cfg = dict(evaluator=dict(type=Gsm8kEvaluator),
                       pred_postprocessor=dict(type=gsm8k_postprocess),
                       dataset_postprocessor=dict(type=gsm8k_dataset_postprocess))
 
-synthetic_config = {
-    "Type": "string",
-    "RequestCount": ${NUM_PROMPTS},
-    "StringConfig": {
-        "Input": {
-            "Method": "uniform",
-            "Params": {
-                "MinValue": ${INPUT_LEN},
-                "MaxValue": ${INPUT_LEN}
-            }
-        },
-        "Output": {
-            "Method": "uniform",
-            "Params": {
-                "MinValue": 100,
-                "MaxValue": 200
-            }
-        }
-    }
+gsm8k_datasets = [
+    dict(
+        abbr='gsm8k',
+        type=CustomDataset,
+        path="${dataset_file}",
+        reader_cfg=gsm8k_reader_cfg,
+        infer_cfg=gsm8k_infer_cfg,
+        eval_cfg=gsm8k_eval_cfg)
+]
+
+EOF
+
+  echo "============== ${dataset_config_file} - Begin =============="
+  echo "$(cat ${dataset_config_file})"
+  echo "============== ${dataset_config_file} - End ================"
 }
+
+function gen_dataset_gsm8k_custom_config_file() {
+  dataset_config_name=$1
+  dataset_dir=$2
+  dataset_config_file=${DATASETS_CONFIG_PATH}/${dataset_config_name}.py
+  echo "Writing gsm8k config info into file: ${dataset_config_file}"
+  cat > "${dataset_config_file}" << EOF
+from ais_bench.benchmark.openicl.icl_prompt_template import PromptTemplate
+from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
+from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
+from ais_bench.benchmark.openicl.icl_evaluator import AccEvaluator
+from ais_bench.benchmark.datasets import GSM8KDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator
+gsm8k_reader_cfg = dict(input_columns=['question'], output_column='answer')
+
+gsm8k_infer_cfg = dict(
+    prompt_template=dict(
+        type=PromptTemplate,
+        template="{question}"),
+    retriever=dict(type=ZeroRetriever),
+    inferencer=dict(type=GenInferencer))
+
+gsm8k_eval_cfg = dict(evaluator=dict(type=Gsm8kEvaluator),
+                      pred_role='BOT',
+                      pred_postprocessor=dict(type=gsm8k_postprocess),
+                      dataset_postprocessor=dict(type=gsm8k_dataset_postprocess))
 
 gsm8k_datasets = [
     dict(
         abbr='gsm8k',
-        type=SyntheticDataset,
-        config=synthetic_config,
+        type=GSM8KDataset,
+        path="${dataset_dir}",
         reader_cfg=gsm8k_reader_cfg,
         infer_cfg=gsm8k_infer_cfg,
         eval_cfg=gsm8k_eval_cfg)
 ]
 EOF
 
-  echo "============== ${dataset_file} - Begin =============="
-  echo "$(cat ${dataset_file})"
-  echo "============== ${dataset_file} - End ================"
+  echo "============== ${dataset_config_file} - Begin =============="
+  echo "$(cat ${dataset_config_file})"
+  echo "============== ${dataset_config_file} - End ================"
 }
-
 
 if [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
     if [ ! -f "$DATASET_PATH" ]; then
@@ -225,24 +256,33 @@ if [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
     gen_dataset_mm_custom_config_file "${dataset_name}"
     echo "Use dataset: ${dataset_name}"
     gen_model_config_file
-    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH --num-warmups 0 "
+    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 elif [ "$DATASET_TYPE" == "gsm8k-gen" ]; then
+    dataset_file=$DATASET_PATH
     dataset_name=gsm8k_gen_${MODEL}
-    gen_dataset_gsm8k_config_file "${dataset_name}"
+    gen_dataset_gsm8k_gen_config_file "${dataset_name}" "${dataset_file}"
     echo "Use dataset: ${dataset_name}"
     gen_model_config_file
-    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH --num-warmups 0 "
+    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 elif [ "$DATASET_TYPE" == "gsm8k" ]; then
-    if [ ! -f "$DATASET_PATH" ]; then
+    dataset_file=$DATASET_PATH
+    if [ ! -f "${dataset_file}" ]; then
         echo "The gsm8k dataset file does not exist: ${DATASET_PATH}."
         exit 1
     fi
-    # import jsonl file from testcase
-    dataset_file=$DATASET_PATH
-    echo "Use dataset: ${dataset_file}"
-    CMD="${CMD} --models vllm_api_stream_chat --custom-dataset-path $dataset_file --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH --num-warmups 0 "
+    dataset_dir=$(dirname "$DATASET_PATH")
+    if [ -f "${GSM8K_TRAIN_FILE}" ]; then
+        cp ${GSM8K_TRAIN_FILE} ${dataset_dir}
+    else
+        echo "Warning: GSM8K train file not found at ${GSM8K_TRAIN_FILE}"
+    fi
+    dataset_name=gsm8k_custom_${MODEL}
+    gen_dataset_gsm8k_custom_config_file "${dataset_name}" "${dataset_dir}"
+    echo "Use dataset: ${dataset_name}, dataset_file: ${dataset_file}"
+    gen_model_config_file
+    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${dataset_name} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
 
 else
     echo "The dataset type $DATASET_TYPE is not supported."

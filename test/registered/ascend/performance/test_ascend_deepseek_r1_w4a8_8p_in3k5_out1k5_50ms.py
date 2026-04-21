@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
+    AISBENCHMARK_DATASET_GSM8K_GEN,
     BENCHMARK_TOOL_DEFAULT,
     DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
@@ -84,7 +84,8 @@ MODEL_OTHER_ARGS = [
 
 class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_GSM8K_GEN
+    # aisbench_dataset_path = "/data/c30044170/dataset/GSM8K-in3584-bs7168.jsonl"
     model = DEEPSEEK_R1_W4A8_PER_CHANNEL_MODEL_PATH
     other_args = MODEL_OTHER_ARGS
     envs = MODEL_ENVS
@@ -95,7 +96,6 @@ class TestAscendDeepSeekR1W4A8(TestAscendPerformanceTestCaseBase):
     output_len = 1500
     random_range_ratio = 1
     tpot = 50.36
-    # T: 146@50ms. 800I A3：1.1*T
     output_token_throughput = 3547
 
     def test_throughput(self):

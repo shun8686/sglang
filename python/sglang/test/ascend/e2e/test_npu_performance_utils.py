@@ -8,6 +8,12 @@ from functools import wraps
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.gen_gsm8k_fixed_len import (
+    generate_dataset_from_gsm8k,
+    generate_fixed_len_dataset,
+    generate_mm_dataset,
+    save_jsonl,
+)
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     SERVICE_PORT,
     check_role,
@@ -29,11 +35,20 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-AISBENCHMARK_TOOL = "aisbench"
-BENCHMARK_TOOL_DEFAULT = AISBENCHMARK_TOOL
+AISBENCHMARK = "aisbench"
+BENCHSERVING = "bench-serving"
+BENCHMARK_TOOL_DEFAULT = BENCHSERVING
+AISBENCHMARK_DATASET_GSM8K = "gsm8k"
 AISBENCHMARK_DATASET_GSM8K_GEN = "gsm8k-gen"
 AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
-AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K_GEN
+AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K
+
+GSM8K_DATASET_TEST_FILE = (
+    "/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl"
+)
+GSM8K_DATASET_TRAIN_FILE = (
+    "/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl"
+)
 
 PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
 if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
@@ -348,9 +363,10 @@ def run_bench_serving(
         # Read output line by line
         with open(result_file, "a", encoding="utf-8") as f:
             for line in process.stdout:
+                if line.strip():
+                    print(line, end="")
                 f.write(line)
                 stripped_line = line.strip()
-                logger.info(stripped_line)
 
                 # Extract metrics
                 if "Mean TTFT" in stripped_line:
@@ -393,7 +409,60 @@ def run_aisbench(
     output_len,
     max_concurrency,
     num_prompts,
+    image_resolution=None,
 ):
+
+    if dataset_type == AISBENCHMARK_DATASET_GSM8K and not dataset_path:
+        dataset_file = f"/tmp/datasets/test.jsonl"
+        if not os.path.exists(dataset_file):
+            logger.info(
+                f"Generating gsm8k dataset: {dataset_file}, "
+                f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
+            )
+            generate_dataset_from_gsm8k(
+                model_path=model_path,
+                source_dataset_path=GSM8K_DATASET_TEST_FILE,
+                batch_size=num_prompts,
+                input_len=input_len,
+                output_file=dataset_file,
+            )
+        dataset_path = dataset_file
+        logger.info(f"Dataset generated: {dataset_path}")
+
+    if dataset_type == AISBENCHMARK_DATASET_GSM8K_GEN:
+        dataset_file = f"/tmp/datasets/test.jsonl"
+        if not os.path.exists(dataset_file):
+            logger.info(
+                f"Generating gsm8k dataset: {dataset_file}, "
+                f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
+            )
+            data = generate_fixed_len_dataset(
+                train_path=GSM8K_DATASET_TRAIN_FILE,
+                test_path=GSM8K_DATASET_TEST_FILE,
+                tokenizer_path=model_path,
+                target_tokens=input_len,
+                num_prompts=num_prompts,
+            )
+            save_jsonl(data, dataset_file)
+        dataset_path = dataset_file
+        logger.info(f"Dataset generated: {dataset_file}")
+
+    if dataset_type == AISBENCHMARK_DATASET_MM_CUSTOM_GEN and not dataset_path:
+        dataset_file = f"/tmp/datasets/mm.jsonl"
+        if not os.path.exists(dataset_file):
+            image_dir = f"/tmp/datasets/images"
+            data = generate_mm_dataset(
+                train_path=GSM8K_DATASET_TRAIN_FILE,
+                test_path=GSM8K_DATASET_TEST_FILE,
+                tokenizer_path=model_path,
+                target_tokens=input_len,
+                num_prompts=num_prompts,
+                image_dir=image_dir,
+                size=image_resolution,
+            )
+            save_jsonl(data, dataset_file)
+        dataset_path = dataset_file
+        logger.info(f"Dataset generated: {dataset_file}")
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
     result_path = "./aisbench_result" if not metrics_path else metrics_path
@@ -426,9 +495,9 @@ def run_aisbench(
     output_lines = []
     try:
         for line in iter(process.stdout.readline, ""):
-            line = line.strip()
-            logger.info(line)
-            output_lines.append(line)
+            if line.strip():
+                print(line, end="")
+            output_lines.append(line.strip())
 
         process.wait()
 
@@ -449,7 +518,7 @@ def run_aisbench(
             logger.info(f"Extracted mean_tpot: {metrics['mean_tpot']} ms")
         else:
             logger.warning("Could not extract mean_tpot from output")
-            logger.info(
+            logger.error(
                 f"Simplified output snippet around TPOT: {simplified_output[simplified_output.find('TPOT')-20:simplified_output.find('TPOT')+50] if 'TPOT' in simplified_output else 'TPOT not found'}"
             )
 
@@ -479,7 +548,7 @@ def run_aisbench(
                 )
         else:
             logger.warning("Could not extract total_tps from output")
-            logger.info(
+            logger.warning(
                 f"Simplified output snippet around Output Token Throughput: {simplified_output[simplified_output.find('Output')-20:simplified_output.find('Output')+100] if 'Output' in simplified_output else 'Output not found'}"
             )
 
@@ -489,8 +558,81 @@ def run_aisbench(
             logger.info(f"Extracted mean_ttft: {metrics['mean_ttft']} ms")
         else:
             logger.warning("Could not extract mean_ttft from output")
-            logger.info(
+            logger.warning(
                 f"Simplified output snippet around TTFT: {simplified_output[simplified_output.find('TTFT')-20:simplified_output.find('TTFT')+50] if 'TTFT' in simplified_output else 'TTFT not found'}"
+            )
+
+        e2el_match = re.search(r"E2EL\s+total\s+([\d.]+)\s+ms", simplified_output)
+        if e2el_match:
+            metrics["mean_e2e_latency"] = e2el_match.group(1)
+            logger.info(f"Extracted mean_e2e_latency: {metrics['mean_e2e_latency']} ms")
+        else:
+            logger.warning("Could not extract mean_e2e_latency from output")
+            logger.warning(
+                f"Simplified output snippet around E2EL: {simplified_output[simplified_output.find('E2EL')-20:simplified_output.find('E2EL')+50] if 'E2EL' in simplified_output else 'E2EL not found'}"
+            )
+
+        concurrency_match = re.search(
+            r"Concurrency\s+total\s+([\d.]+)", simplified_output
+        )
+        if concurrency_match:
+            metrics["concurrency"] = concurrency_match.group(1)
+            logger.info(f"Extracted concurrency: {metrics['concurrency']}")
+        else:
+            logger.warning("Could not extract concurrency from output")
+            logger.warning(
+                f"Simplified output snippet around Concurrency: {simplified_output[simplified_output.find('Concurrency')-20:simplified_output.find('Concurrency')+50] if 'Concurrency' in simplified_output else 'Concurrency not found'}"
+            )
+
+        max_concurrency_match = re.search(
+            r"Max\s+Concurrency\s+total\s+([\d.]+)", simplified_output
+        )
+        if max_concurrency_match:
+            metrics["max_concurrency"] = max_concurrency_match.group(1)
+            logger.info(f"Extracted max_concurrency: {metrics['max_concurrency']}")
+        else:
+            logger.warning("Could not extract max_concurrency from output")
+            logger.warning(
+                f"Simplified output snippet around Max Concurrency: {simplified_output[simplified_output.find('Max Concurrency')-20:simplified_output.find('Max Concurrency')+50] if 'Max Concurrency' in simplified_output else 'Max Concurrency not found'}"
+            )
+
+        req_throughput_match = re.search(
+            r"Request\s+Throughput\s+total\s+([\d.]+)\s+req\s*/?\s*s",
+            simplified_output,
+        )
+        if req_throughput_match:
+            metrics["request_throughput"] = req_throughput_match.group(1)
+            logger.info(
+                f"Extracted request_throughput: {metrics['request_throughput']} req/s"
+            )
+        else:
+            logger.warning("Could not extract request_throughput from output")
+            logger.warning(
+                f"Simplified output snippet around Request Throughput: {simplified_output[simplified_output.find('Request')-20:simplified_output.find('Request')+50] if 'Request' in simplified_output else 'Request not found'}"
+            )
+
+        total_requests_match = re.search(
+            r"Total\s+Requests\s+total\s+(\d+)", simplified_output
+        )
+        if total_requests_match:
+            metrics["total_requests"] = total_requests_match.group(1)
+            logger.info(f"Extracted total_requests: {metrics['total_requests']}")
+        else:
+            logger.warning("Could not extract total_requests from output")
+            logger.warning(
+                f"Simplified output snippet around Total Requests: {simplified_output[simplified_output.find('Total Requests')-20:simplified_output.find('Total Requests')+50] if 'Total Requests' in simplified_output else 'Total Requests not found'}"
+            )
+
+        failed_requests_match = re.search(
+            r"Failed\s+Requests\s+total\s+(\d+)", simplified_output
+        )
+        if failed_requests_match:
+            metrics["failed_requests"] = failed_requests_match.group(1)
+            logger.info(f"Extracted failed_requests: {metrics['failed_requests']}")
+        else:
+            logger.warning("Could not extract failed_requests from output")
+            logger.warning(
+                f"Simplified output snippet around Failed Requests: {simplified_output[simplified_output.find('Failed Requests')-20:simplified_output.find('Failed Requests')+50] if 'Failed Requests' in simplified_output else 'Failed Requests not found'}"
             )
 
         logger.info(f"All extracted metrics: {metrics}")
@@ -554,14 +696,12 @@ def assert_metrics(self, metrics):
 
 class TestAscendPerformanceTestCaseBase(CustomTestCase):
     model = None
-    benchmark_tool = "bench-serving"
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k"  # gsm8k or mm-custom-gen
-    aisbench_dataset_path = (
-        None  # keep none for gsm8k; set a json config file for mm_custom_gen
-    )
+    aisbench_dataset_type = "gsm8k-gen"  # gsm8k | gsm8k-gen | mm-custom-gen
+    aisbench_dataset_path = None  # auto generate dataset if none
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -615,7 +755,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
-        if self.benchmark_tool == "aisbench":
+        if self.benchmark_tool == AISBENCHMARK:
             metrics = run_aisbench(
                 host=host,
                 port=port,
@@ -626,6 +766,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
+                image_resolution=self.image_resolution,
             )
             assert_metrics(self, metrics)
 
@@ -655,14 +796,12 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
 
 class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
-    benchmark_tool = "bench-serving"
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k"  # gsm8k or mm-custom-gen
-    aisbench_dataset_path = (
-        None  # keep none for gsm8k; set a json config file for mm_custom_gen
-    )
+    aisbench_dataset_type = "gsm8k-gen"  # gsm8k-gen | mm-custom-gen
+    aisbench_dataset_path = None  # auto generate dataset if none
     max_attempts = 2
     request_rate = None
     max_concurrency = None
@@ -727,7 +866,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     @retry()
     @check_role(allowed_roles=["master", "worker"])
     def run_throughput(self):
-        if self.benchmark_tool == "aisbench":
+        if self.benchmark_tool == AISBENCHMARK:
             metrics = run_aisbench(
                 host=self.host,
                 port=str(self.port),
@@ -738,6 +877,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
+                image_resolution=self.image_resolution,
             )
             assert_metrics(self, metrics)
 
@@ -767,14 +907,12 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
 
 class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
-    benchmark_tool = "bench-serving"
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "random"
     dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
-    aisbench_dataset_type = "gsm8k"  # gsm8k or mm-custom-gen
-    aisbench_dataset_path = (
-        None  # keep none for gsm8k; set a json config file for mm_custom_gen
-    )
+    aisbench_dataset_type = "gsm8k-gen"  # gsm8k-gen | mm-custom-gen
+    aisbench_dataset_path = None  # auto generate dataset if none
     max_attempts = 2
     request_rate = None
     max_concurrency = None
@@ -856,7 +994,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     @retry()
     @check_role(allowed_roles=["router"])
     def run_throughput(self):
-        if self.benchmark_tool == "aisbench":
+        if self.benchmark_tool == AISBENCHMARK:
             metrics = run_aisbench(
                 host=self.host,
                 port=str(self.port),
@@ -867,6 +1005,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
+                image_resolution=self.image_resolution,
             )
             assert_metrics(self, metrics)
 

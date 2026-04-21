@@ -1,8 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
-    BENCHMARK_TOOL_DEFAULT,
+    BENCHSERVING,
     QWEN3_14B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -60,8 +59,7 @@ QWEN3_14B_OTHER_ARGS = [
 
 
 class TestQwen14B(TestAscendPerformanceTestCaseBase):
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
+    benchmark_tool = BENCHSERVING
     model = QWEN3_14B_MODEL_PATH
     other_args = QWEN3_14B_OTHER_ARGS
     envs = QWEN3_14B_ENVS
