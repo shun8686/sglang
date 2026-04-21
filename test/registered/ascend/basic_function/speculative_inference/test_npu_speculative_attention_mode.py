@@ -85,7 +85,6 @@ class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
             "4",
             "--mem-fraction-static",
             "0.7",
-            "--disable-cuda-graph",
             "--dtype",
             "bfloat16",
         ]
