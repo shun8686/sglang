@@ -35,8 +35,7 @@ class TestAscendSpeculativeDraftAttentionAndMoeRunner(CustomTestCase):
         cls.env = os.environ.copy()
         cls.models = MODEL_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(cls.base_url)
 
         cls.common_args = [
             "--trust-remote-code",
