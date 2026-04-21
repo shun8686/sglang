@@ -27,23 +27,11 @@ IMAGE_MAN_IRONING_URL = IMAGES_MAN_PATH
 IMAGE_SGL_LOGO_URL = IMAGES_LOGO_PATH
 
 
-def popen_launch_server_wrapper(base_url, model, other_args):
-    process = popen_launch_server(
-        model,
-        base_url,
-        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-        other_args=other_args,
-    )
-    return process
-
-
 def _send_parallel_request_task1(base_url, image_url):
-    import requests
-
     requests.packages.urllib3.disable_warnings()
     import ssl
-
     ssl._create_default_https_context = ssl._create_unverified_context
+
     messages = [
         {
             "role": "user",
@@ -57,6 +45,7 @@ def _send_parallel_request_task1(base_url, image_url):
         f"{base_url}/chat/completions",
         json={"messages": messages, "temperature": 0, "max_completion_tokens": 512},
     )
+
     assert resp.status_code == 200
 
 
@@ -65,7 +54,7 @@ class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
        each containing multiple multimodal input data.
 
     [Test Category] Parameter
-    [Test Target] --enable-broadcast-mm-inputs-process; --limit-mm-data-per-request
+    [Test Target] --mm-max-concurrent-calls; --mm-per-request-timeout; --enable-broadcast-mm-inputs-process; --limit-mm-data-per-request
     """
 
     model = QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
@@ -93,8 +82,11 @@ class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
             "--limit-mm-data-per-request",
             limit_mm,
         ]
-        cls.process = popen_launch_server_wrapper(
-            DEFAULT_URL_FOR_TEST, MODEL, other_args
+        cls.process = popen_launch_server(
+            MODEL,
+            DEFAULT_URL_FOR_TEST,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args
         )
 
     @classmethod
@@ -126,7 +118,7 @@ class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
                 "max_completion_tokens": 1024,
             },
         )
-        assert response.status_code == 200
+        self.assertEqual(response.status_code, 200)
 
     def _run_multi_turn_request1(self):
         # Enter two images
@@ -157,7 +149,8 @@ class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
                 "max_completion_tokens": 1024,
             },
         )
-        assert response2.status_code == 400
+
+        self.assertEqual(response2.status_code, 400)
 
     def _run_parallel_two_requests(self):
         url = self.base_url + "/v1"
