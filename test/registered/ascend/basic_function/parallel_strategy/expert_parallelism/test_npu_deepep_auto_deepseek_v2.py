@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+# from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.run_eval import run_eval
@@ -20,7 +20,8 @@ register_npu_ci(est_time=400, suite="full-8-npu-a3", nightly=True)
 class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+        # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+        cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -44,6 +45,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 1024,
                 "--mem-fraction-static",
                 0.7,
+                "--base-gpu-id",
+                8,
             ],
             env={
                 "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
@@ -66,6 +69,8 @@ class TestDeepEpDeepseek(CustomTestCase):
             eval_name="mmlu",
             num_examples=128,
             num_threads=32,
+            num_shots=5,
+            api="completion",
         )
         print("Starting mmlu test...")
         metrics = run_eval(args)

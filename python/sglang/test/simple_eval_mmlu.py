@@ -85,23 +85,44 @@ subject2category = {
 
 
 class MMLUEval(Eval):
-    def __init__(self, filename: str, num_examples: Optional[int], num_threads: int):
+    def __init__(self, filename: str, num_examples: Optional[int], num_threads: int, num_shots: int = 0):
         if "://" in filename:
             df = pandas.read_csv(filename, storage_options={"timeout": 30})
         else:
             df = pandas.read_csv(filename)
         examples = [row.to_dict() for _, row in df.iterrows()]
+        # The evaluation data should not include the few-shot examples to prevent data leakage.
+        if num_shots > 0:
+            self.few_shot_examples = examples[:num_shots]
+            test_examples = examples[num_shots:]
+        else:
+            self.few_shot_examples = []
+            test_examples = examples
         if num_examples:
-            examples = random.Random(0).sample(examples, num_examples)
-        self.examples = examples
+            test_examples = random.Random(0).sample(test_examples, num_examples)
+        self.examples = test_examples
         self.num_threads = num_threads
 
+    def build_few_shot_prompt(self):
+        if self.num_shots == 0 or not self.few_shot_examples:
+            return ""
+
+        prompt_parts = []
+        for ex in self.few_shot_examples:
+            q = format_multichoice_question(ex)
+            a = ex["Answer"]
+            prompt_parts.append(f"{q}\nAnswer: {a}")
+
+        return "\n\n".join(prompt_parts) + "\n\n"
+
     def __call__(self, sampler: SamplerBase) -> EvalResult:
+        few_shot_prompt = self.build_few_shot_prompt()
+
         def fn(row: dict):
+            test_question = format_multichoice_question(row)
+            final_prompt = few_shot_prompt + test_question
             prompt_messages = [
-                sampler._pack_message(
-                    content=format_multichoice_question(row), role="user"
-                )
+                sampler._pack_message(content=final_prompt, role="user")
             ]
             response_text = sampler(prompt_messages)
             response_text = response_text or ""
