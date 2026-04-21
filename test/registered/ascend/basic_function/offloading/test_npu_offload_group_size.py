@@ -17,7 +17,7 @@ register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
 
 
 class TestOffloadGroupSize(CustomTestCase):
-    """Testcase: Test the --offload-group-size parameter and --offload-mode=cpu, the parameter
+    """Testcase: Test the --offload-group-size parameter and --offload-mode = cpu, the parameter
     takes effect and the inference request succeeds.
 
     [Test Category] Parameter
@@ -79,7 +79,7 @@ class TestOffloadGroupSize(CustomTestCase):
 
 
 class TestOffloadMeta(TestOffloadGroupSize):
-    """Testcase: Test the --offload-mode=meta parameter, the parameter
+    """Testcase: Test the --offload-mode = meta parameter, the parameter
     takes effect and the inference request succeeds.
 
     [Test Category] Parameter
@@ -121,7 +121,7 @@ class TestOffloadShardedGpu(TestOffloadGroupSize):
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--dp",
+        "--dp",#When --offload-mode = sharded_gpu, must set --dp parameter and --tp = 1.
         "2",
         "--offload-group-size",
         "4",
