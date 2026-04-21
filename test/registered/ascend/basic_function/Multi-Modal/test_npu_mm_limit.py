@@ -30,6 +30,7 @@ IMAGE_SGL_LOGO_URL = IMAGES_LOGO_PATH
 def _send_parallel_request_task1(base_url, image_url):
     requests.packages.urllib3.disable_warnings()
     import ssl
+
     ssl._create_default_https_context = ssl._create_unverified_context
 
     messages = [
@@ -86,7 +87,7 @@ class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
             MODEL,
             DEFAULT_URL_FOR_TEST,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=other_args
+            other_args=other_args,
         )
 
     @classmethod
