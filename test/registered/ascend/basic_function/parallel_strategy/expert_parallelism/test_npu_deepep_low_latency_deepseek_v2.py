@@ -30,6 +30,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--trust-remote-code",
                 "--attention-backend",
                 "ascend",
+                "--quantization",
+                "modelslim",
                 "--tp-size",
                 "8",
                 "--moe-a2a-backend",
