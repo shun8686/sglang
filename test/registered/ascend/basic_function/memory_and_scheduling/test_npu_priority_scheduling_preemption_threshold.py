@@ -22,7 +22,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestPrioritySchedulingPreemptionThreshold(CustomTestCase):
-    """Testcase: Verify the priority scheduling preemption threshold mechanism and execution order by controlling the priority and sequence of sending requests..
+    """Testcase: Verify the priority scheduling preemption threshold mechanism and execution order by controlling the priority and sequence of sending requests.
 
     [Test Category] Parameter
     [Test Target] --priority-scheduling-preemption-threshold;--enable-priority-scheduling;--max-running-requests;--max-queued-requests
