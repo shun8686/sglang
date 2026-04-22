@@ -35,7 +35,7 @@ class DeterministicLogitProcessor(CustomLogitProcessor):
         return logits
 
 
-class TestEnableReturnRoutedExperts(CustomTestCase):
+class TestEnableCustomLogitProcessor(CustomTestCase):
     """
     Testcase：When the service startup configuration --enable-custom-logit-processor is enabled and requests include
     "custom_logit_processor" and "custom_params," custom functions can control the generated text content.
