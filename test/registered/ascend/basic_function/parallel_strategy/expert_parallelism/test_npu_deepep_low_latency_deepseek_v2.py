@@ -3,7 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+# from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 from sglang.test.run_eval import run_eval
@@ -20,7 +20,8 @@ register_npu_ci(est_time=400, suite="full-8-npu-a3", nightly=True)
 class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+        # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
+        cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -38,6 +39,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "deepep",
                 "--deepep-mode",
                 "low_latency",
+                "--max-running-requests",
+                128,
                 "--disable-cuda-graph",
                 "--dp-size",
                 8,
@@ -45,13 +48,20 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--chunked-prefill-size",
                 1024,
                 "--mem-fraction-static",
-                0.7,
+                0.68,
+                "--base-gpu-id",
+                8,
             ],
             env={
-                "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                "SGLANG_SET_CPU_AFFINITY": "1",
+                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+                "STREAMS_PER_DEVICE": "32",
                 "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
-                "HCCL_BUFFSIZE": "2048",
-                "MOE_ENABLE_TOPK_NEG_ONE": "1",
+                "HCCL_BUFFSIZE": "4096",
+                # "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
+                # "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+                # "HCCL_BUFFSIZE": "2048",
+                # "MOE_ENABLE_TOPK_NEG_ONE": "1",
                 **os.environ,
             },
         )
@@ -68,6 +78,8 @@ class TestDeepEpDeepseek(CustomTestCase):
             eval_name="mmlu",
             num_examples=128,
             num_threads=32,
+            num_shots=5,
+            api="completion"
         )
         print("Starting mmlu test...")
         metrics = run_eval(args)
