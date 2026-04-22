@@ -150,7 +150,7 @@ def _verify_genereate_responses(
 
         assert (
             got_status == expected_status
-        ), f"expected_status:{expected_status}，actually:{got_status}"
+        ), f"expected_status:{expected_status}, actually:{got_status}"
 
         if got_status != 200:
             assert (
@@ -158,7 +158,7 @@ def _verify_genereate_responses(
             ), f"expected object 'error', actually: {got_json.get('object')}"
             assert (
                 got_json.get("message") == expected_err_msg
-            ), f"expected_err_msg:{expected_err_msg}，actually: {got_json.get('message')}"
+            ), f"expected_err_msg:{expected_err_msg}, actually: {got_json.get('message')}"
         else:
             assert "object" not in got_json
             assert "message" not in got_json
@@ -185,12 +185,12 @@ def _verify_max_running_requests_and_max_queued_request_validation(
             if rr_match:
                 assert (
                     int(rr_match.group(1)) <= max_running_requests
-                ), f"running：{rr_match.group(1)} > {max_running_requests}"
+                ), f"running: {rr_match.group(1)} > {max_running_requests}"
             qr_match = qr_pattern.search(line)
             if qr_match:
                 assert (
                     int(qr_match.group(1)) <= max_queued_requests
-                ), f"queue：{qr_match.group(1)} > {max_queued_requests}"
+                ), f"queue: {qr_match.group(1)} > {max_queued_requests}"
 
 
 if __name__ == "__main__":

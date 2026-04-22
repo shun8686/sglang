@@ -101,9 +101,9 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
         )
 
         for choice in response.choices:
-            assert hasattr(choice, "hidden_states") == return_hidden_states
+            self.assertEqual(hasattr(choice, "hidden_states"), return_hidden_states)
             if return_hidden_states:
-                assert choice.hidden_states is not None, "hidden_states was None"
+                self.assertIsNotNone(choice.hidden_states, "hidden_states was None")
 
     def run_completion_stream(
         self,
@@ -169,7 +169,7 @@ class BaseTestOpenAIServerWithHiddenStates(ABC):
         )
 
         for choice in response.choices:
-            assert hasattr(choice, "hidden_states") == return_hidden_states
+            self.assertEqual(hasattr(choice, "hidden_states"), return_hidden_states)
             if return_hidden_states:
                 assert choice.hidden_states is not None, "hidden_states was None"
 

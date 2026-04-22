@@ -29,9 +29,9 @@ class TestPhi4MultimodalLatencyCompare(TestVLMModels):
 
     def _run_and_measure_time(self, extra_args):
         self.other_args = self.base_args + extra_args
-        start = time.time()
+        start = time.perf_counter()
         metrics = self._run_vlm_mmmu_test()
-        duration = time.time() - start
+        duration = time.perf_counter() - start
         print(f"Duration: {duration:.2f}s | metrics: {metrics}")
         return duration
 
