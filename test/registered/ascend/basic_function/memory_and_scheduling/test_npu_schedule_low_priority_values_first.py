@@ -21,7 +21,7 @@ register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestLowPriorityFirstScheduling(CustomTestCase):
-    """Testcase: Verify the low-priority-first scheduling mechanism and its abortion logic by sending requests with different priorities and observing whether the behavior meets expectations, .
+    """Testcase: Verify the low-priority-first scheduling mechanism and its abortion logic by sending requests with different priorities and observing whether the behavior meets expectations.
 
     [Test Category] Parameter
     [Test Target] --enable-priority-scheduling;--schedule-low-priority-values-first;--max-running-requests;--max-queued-requests
