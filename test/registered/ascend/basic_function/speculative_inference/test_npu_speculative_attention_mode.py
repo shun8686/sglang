@@ -134,7 +134,7 @@ class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
             "--speculative-num-draft-tokens",
             "5",
             "--speculative-attention-mode",
-            "prefill",
+            "decode",
             "--tp-size",
             "4",
             "--mem-fraction-static",
