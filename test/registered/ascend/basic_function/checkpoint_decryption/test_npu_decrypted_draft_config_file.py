@@ -4,8 +4,8 @@ from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_8B_EAGLE3_DECRYPTED_WEIGHTS_PATH,
     QWEN3_8B_DECRYPTED_WEIGHTS_PATH,
+    QWEN3_8B_EAGLE3_DECRYPTED_WEIGHTS_PATH,
     run_command,
 )
 from sglang.test.ci.ci_register import register_npu_ci
