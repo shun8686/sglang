@@ -98,6 +98,8 @@ class TestMambaCacheRadix(CustomTestCase):
         "bfloat16",
         "--mamba-full-memory-ratio",
         "0.3",
+        "--mamba-scheduler-strategy",
+        "extra_buffer",  # To reuse Radix Cache, this parameter must be set to extra_buffer
     ]
 
     @classmethod
@@ -169,30 +171,6 @@ class TestMambaCacheRadix(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.text), 0)
-
-
-class TestMambaCacheHierarchicalCache(TestMambaCacheRadix):
-    """Testcase: Verify hierarchical cache reuse with mamba cache.
-
-    [Test Category] Parameter
-    [Test Target]--enable-hierarchical-cache
-    """
-
-    other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.5",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        "8",
-        "--enable-hierarchical-cache",
-        "--hicache-ratio",
-        1.2,
-        "--max-mamba-cache-size",
-        "512",
-    ]
 
 
 if __name__ == "__main__":

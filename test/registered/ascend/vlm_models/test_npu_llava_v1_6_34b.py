@@ -34,8 +34,6 @@ class TestLlava(TestVLMModels):
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--mm-per-request-timeout",
-        60,
         "--enable-multimodal",
         "--tokenizer-path",
         LLAVA_V1_6_34B_TOKENIZER_PATH,

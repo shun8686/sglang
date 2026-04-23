@@ -4,7 +4,11 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import (
+    IMAGES_LOGO_PATH,
+    IMAGES_MAN_PATH,
+    QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH,
+)
 from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -19,8 +23,8 @@ register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 MODEL = QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH
 
 # image
-IMAGE_MAN_IRONING_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/man_ironing_on_back_of_suv.png"
-IMAGE_SGL_LOGO_URL = "https://raw.githubusercontent.com/sgl-project/sgl-test-files/refs/heads/main/images/sgl_logo.png"
+IMAGE_MAN_IRONING_URL = IMAGES_MAN_PATH
+IMAGE_SGL_LOGO_URL = IMAGES_LOGO_PATH
 
 
 def popen_launch_server_wrapper(base_url, model, other_args):
@@ -56,7 +60,7 @@ def _send_parallel_request_task1(base_url, image_url):
     assert resp.status_code == 200
 
 
-class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
+class TestLimitMMDatePerRequest(TestVLMModels, CustomTestCase):
     """Testcase: Configuring Multi-Modal to send different multimodal inference requests,
        each containing multiple multimodal input data.
 
@@ -71,7 +75,6 @@ class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
     def setUpClass(cls):
         mp.set_start_method("spawn", force=True)
         cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.base_url += "/v1"
         cls.api_key = "sk-123456"
 
         limit_mm = '{"image":1, "video":1}'
@@ -79,10 +82,6 @@ class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
             "--mem-fraction-static",
             "0.5",
             "--enable-multimodal",
-            "--mm-max-concurrent-calls",
-            "1",
-            "--mm-per-request-timeout",
-            "1",
             "--enable-broadcast-mm-inputs-process",
             "--attention-backend",
             "ascend",
@@ -120,7 +119,7 @@ class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
             },
         ]
         response = requests.post(
-            self.base_url + "/chat/completions",
+            self.base_url + "/v1/chat/completions",
             json={
                 "messages": messages,
                 "temperature": 0,
@@ -151,7 +150,7 @@ class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
             },
         ]
         response2 = requests.post(
-            self.base_url + "/chat/completions",
+            self.base_url + "/v1/chat/completions",
             json={
                 "messages": messages2,
                 "temperature": 0,
@@ -161,14 +160,14 @@ class TestLimitMMDatePerRequest(CustomTestCase, TestVLMModels):
         assert response2.status_code == 400
 
     def _run_parallel_two_requests(self):
-
+        url = self.base_url + "/v1"
         p1 = mp.Process(
             target=_send_parallel_request_task1,
-            args=(self.base_url, IMAGE_MAN_IRONING_URL),
+            args=(url, IMAGE_MAN_IRONING_URL),
         )
         p2 = mp.Process(
             target=_send_parallel_request_task1,
-            args=(self.base_url, IMAGE_MAN_IRONING_URL),
+            args=(url, IMAGE_MAN_IRONING_URL),
         )
 
         p1.start()

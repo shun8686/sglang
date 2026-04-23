@@ -29,8 +29,6 @@ class TestLlavaOneVision(TestVLMModels):
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--mm-per-request-timeout",
-        60,
         "--enable-multimodal",
         "--disable-fast-image-processor",
     ]
