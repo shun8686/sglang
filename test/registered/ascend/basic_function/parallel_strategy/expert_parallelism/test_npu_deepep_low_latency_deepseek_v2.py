@@ -74,15 +74,15 @@ class TestDeepEpDeepseek(CustomTestCase):
 
     def test_mmlu(self):
         # expect_score = 0.58
-        expect_score = 0.1
-        sleep(1200)
+        expect_score = 0.5
+        # sleep(1200)
 
         print("=" * 20 + " 5 num shot START" + "=" * 20)
         args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
             eval_name="mmlu",
-            num_examples=128,
+            num_examples=3000,
             num_threads=32,
             num_shots=5,
             api="completion",
