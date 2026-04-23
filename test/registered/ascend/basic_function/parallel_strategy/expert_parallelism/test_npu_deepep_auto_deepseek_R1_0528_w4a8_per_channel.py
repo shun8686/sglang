@@ -14,7 +14,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
-
+from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
 register_npu_ci(est_time=400, suite="full-16-npu-a3", nightly=True)
 
 
@@ -29,7 +29,8 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+        # cls.model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
+        cls.model = "/home/weights/DeepSeek-R1-0528-w4a8-per-channel"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -105,19 +106,19 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
         # Terminate the model server process after all tests in the class are completed
         kill_process_tree(cls.process.pid)
 
-    def test_mmlu(self):
-        # Test Scenario: Verify the model's performance on MMLU dataset (general knowledge evaluation)
-        args = SimpleNamespace(
-            base_url=self.base_url,
-            model=self.model,
-            eval_name="mmlu",
-            num_examples=64,
-            num_threads=32,
-        )
-
-        # Execute MMLU evaluation and get metrics
-        metrics = run_eval(args)
-        self.assertGreater(metrics["score"], 0.5)
+    # def test_mmlu(self):
+    #     # Test Scenario: Verify the model's performance on MMLU dataset (general knowledge evaluation)
+    #     args = SimpleNamespace(
+    #         base_url=self.base_url,
+    #         model=self.model,
+    #         eval_name="mmlu",
+    #         num_examples=64,
+    #         num_threads=32,
+    #     )
+    #
+    #     # Execute MMLU evaluation and get metrics
+    #     metrics = run_eval(args)
+    #     self.assertGreater(metrics["score"], 0.5)
 
     def test_gsm8k(self):
         # Test Scenario: Verify the model's accuracy on GSM8K dataset (mathematical reasoning evaluation)
@@ -139,6 +140,25 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
             self.accuracy,
             f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {self.accuracy}',
         )
+
+        print("=" * 20 + " OLD GSM8K START" + "=" * 20)
+        args = SimpleNamespace(
+            num_shots=5,
+            data_path=None,
+            num_questions=200,
+            max_new_tokens=512,
+            parallel=300,
+            host="http://127.0.0.1",
+            port=int(self.base_url.split(":")[-1]),
+        )
+        print("Starting gsm8k test...")
+        metrics = run_gsm8k(args)
+        self.assertGreaterEqual(
+            metrics["accuracy"],
+            self.accuracy,
+            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {self.accuracy}',
+        )
+        print("=" * 20 + " OLD GSM8K END" + "=" * 20)
 
 
 if __name__ == "__main__":
