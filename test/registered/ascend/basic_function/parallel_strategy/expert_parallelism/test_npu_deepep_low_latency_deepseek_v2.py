@@ -51,7 +51,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 "--mem-fraction-static",
                 0.68,
                 "--base-gpu-id",
-                8,
+                6,
                 "--log-requests",
             ],
             env={
