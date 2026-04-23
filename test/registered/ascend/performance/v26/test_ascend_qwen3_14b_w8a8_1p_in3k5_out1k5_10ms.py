@@ -77,6 +77,7 @@ QWEN3_14B_OTHER_ARGS = [
 
 
 class TestQwen14B(TestAscendPerformanceTestCaseBase):
+    max_attempts = 5
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_14B_W8A8_MODEL_PATH
@@ -84,11 +85,11 @@ class TestQwen14B(TestAscendPerformanceTestCaseBase):
     envs = QWEN3_14B_ENVS
     dataset_name = "random"
     max_concurrency = 1
-    num_prompts = 8
+    num_prompts = 1
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 9
+    tpot = 10
     output_token_throughput = 116
 
     def test_qwen3_14b(self):

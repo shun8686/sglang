@@ -64,7 +64,7 @@ MODEL=""
 MODEL_PATH=""
 DATASET_TYPE=""
 DATASET_NAME=""
-DATASET_PATH="/tmp/datasets/test.jsonl"
+DATASET_PATH=""
 INPUT_LEN="2048"
 OUTPUT_LEN="8192"
 BATCH_SIZE=""
@@ -144,12 +144,12 @@ install_aisbench
 
 CMD="ais_bench "
 
-AISBENCH_CINFG_PATH=/tmp/ais_configs
+AISBENCH_CUSTOM_CONFIG_PATH=/tmp/ais_configs
 
-MODEL_CONFIG_PATH=${AISBENCH_CINFG_PATH}/models
+MODEL_CONFIG_PATH=${AISBENCH_CUSTOM_CONFIG_PATH}/models
 mkdir -p ${MODEL_CONFIG_PATH}
 TMP_CFG=vllm_api_${MODEL}
-DATASETS_CONFIG_PATH=${AISBENCH_CINFG_PATH}/datasets
+DATASETS_CONFIG_PATH=${AISBENCH_CUSTOM_CONFIG_PATH}/datasets
 mkdir -p ${DATASETS_CONFIG_PATH}
 
 GSM8K_TRAIN_FILE="/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl"
@@ -354,14 +354,14 @@ if [ "$MODE" == "perf" ];then
         gen_dataset_mm_custom_config_file
         echo "Use dataset: ${DATASET_NAME}"
         gen_model_config_file
-        CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+        CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     elif [ "$DATASET_TYPE" == "custom-gen" ]; then
         dataset_file=$DATASET_PATH
         DATASET_NAME=gsm8k_gen_${MODEL}
         gen_dataset_custom_config_file "${dataset_file}"
         echo "Use dataset: ${DATASET_NAME}"
         gen_model_config_file
-        CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+        CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     elif [ "$DATASET_TYPE" == "gsm8k" ]; then
         dataset_file=$DATASET_PATH
         if [ ! -f "${dataset_file}" ]; then
@@ -378,7 +378,7 @@ if [ "$MODE" == "perf" ];then
         gen_dataset_gsm8k_config_file "${dataset_dir}"
         echo "Use dataset: ${DATASET_NAME}, dataset_file: ${dataset_file}"
         gen_model_config_file
-        CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+        CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     else
         echo "The dataset type $DATASET_TYPE is not supported."
         exit 1
@@ -392,7 +392,7 @@ elif [ "$MODE" == "accuracy" ]; then
         exit 1
     fi
     gen_model_config_file
-    CMD="${CMD} --config-dir ${AISBENCH_CINFG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --work-dir $OUTPUT_PATH "
+    CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --work-dir $OUTPUT_PATH "
     echo "IP: $IP | Port: $PORT | Model: $MODEL | Model Path: $MODEL_PATH"
     echo "max_out_len: ${OUTPUT_LEN} | batch_size: ${BATCH_SIZE} | datasets: ${DATASET_NAME}"
 
