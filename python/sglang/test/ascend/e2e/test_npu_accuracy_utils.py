@@ -274,6 +274,8 @@ def run_aisbench(
     port,
     model_path,
     dataset_name,
+    output_len,
+    max_concurrency,
 ):
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
@@ -288,7 +290,9 @@ def run_aisbench(
     cmd += f"--model-path {model_path} "
     cmd += f"--dataset-name {dataset_name} "
     cmd += f"--output-path {result_path}"
-
+    cmd += f"--output-len {output_len}"
+    cmd += f"--batch-size {max_concurrency}"
+    
     logger.info(f"Command: {cmd}")
 
     process = subprocess.Popen(
@@ -374,6 +378,8 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
     envs = None
     max_attempts = 2
     accuracy = 0.1
+    output_len = 512
+    max_concurrency = 1
 
     @classmethod
     def setUpClass(cls):
@@ -415,6 +421,8 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
                 port=port,
                 model_path=self.model,
                 dataset_name=self.dataset_name,
+                output_len=self.output_len,
+                max_concurrency=self.max_concurrency,
             )
             assert_metrics(self, metrics)
 
@@ -428,6 +436,8 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
     envs = None
     max_attempts = 2
     accuracy = 0.1
+    output_len = 512
+    max_concurrency = 1
 
     @classmethod
     def setUpClass(cls):
@@ -487,6 +497,8 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
                 port=port,
                 model_path=self.model,
                 dataset_name=self.dataset_name,
+                output_len=self.output_len,
+                max_concurrency=self.max_concurrency,
             )
             assert_metrics(self, metrics)
 
@@ -500,6 +512,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     envs = None
     max_attempts = 2
     accuracy = 0.1
+    output_len = 512
+    max_concurrency = 1
 
     @classmethod
     def setUpClass(cls):
@@ -575,6 +589,8 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 port=port,
                 model_path=self.model,
                 dataset_name=self.dataset_name,
+                output_len=self.output_len,
+                max_concurrency=self.max_concurrency,
             )
             assert_metrics(self, metrics)
     
