@@ -46,8 +46,6 @@ class TestDeepEpDeepseek(CustomTestCase):
                 1024,
                 "--mem-fraction-static",
                 0.7,
-                "--base-gpu-id",
-                8,
             ],
             env={
                 "SGLANG_SET_CPU_AFFINITY": "1",
