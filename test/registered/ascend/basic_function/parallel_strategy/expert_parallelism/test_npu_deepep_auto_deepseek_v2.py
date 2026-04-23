@@ -115,6 +115,7 @@ class TestDeepEpDeepseek(CustomTestCase):
             parallel=128,
             host="http://127.0.0.1",
             port=int(self.base_url.split(":")[-1]),
+            api="completion"
         )
         print("Starting gsm8k test...")
         metrics = run_gsm8k(args)
@@ -135,6 +136,7 @@ class TestDeepEpDeepseek(CustomTestCase):
             num_threads=128,
             num_shots=5,
             max_new_tokens=512,
+            api="completion"
         )
         print("Starting gsm8k test...")
         metrics = run_eval(args)
