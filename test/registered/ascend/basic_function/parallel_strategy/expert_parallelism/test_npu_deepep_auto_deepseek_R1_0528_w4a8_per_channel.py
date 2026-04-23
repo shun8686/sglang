@@ -3,9 +3,9 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
-)
+# from sglang.test.ascend.test_ascend_utils import (
+#     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
+# )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
