@@ -273,8 +273,7 @@ def run_aisbench(
     host,
     port,
     model_path,
-    dataset_type,
-    accuracy,
+    dataset_name,
 ):
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
@@ -282,12 +281,13 @@ def run_aisbench(
     logger.info(f"The metrics result file: {result_path}")
 
     cmd = f"/bin/bash /root/sglang/python/sglang/test/ascend/e2e/run_aisbench_accuracy.sh "
-    cmd += f"{host} "
-    cmd += f"{str(port)} "
-    cmd += f"{os.path.basename(model_path)} "
-    cmd += f"{model_path} "
-    cmd += f"{dataset_type} "
-    cmd += f"{result_path}"
+    cmd += f"--mode accuracy "
+    cmd += f"--ip {host} "
+    cmd += f"--port {str(port)} "
+    cmd += f"--model {os.path.basename(model_path)} "
+    cmd += f"--model-path {model_path} "
+    cmd += f"--dataset-name {dataset_name} "
+    cmd += f"--output-path {result_path}"
 
     logger.info(f"Command: {cmd}")
 
@@ -318,13 +318,17 @@ def run_aisbench(
         metrics = {}
         full_output = "\n".join(output_lines)
 
-        simplified_output = re.sub(r"[^\w\s.]", " ", full_output)
+        matches = re.findall(r"accuracy\s+[a-zA-Z]+\s+([\d.]+)", full_output)
 
-
-
-        logger.info(f"All extracted metrics: {metrics}")
+        if matches:
+            final_accuracy = float(matches[-1])
+            metrics["accuracy"] = final_accuracy
+            logger.info(f"The Final Accuracy: {final_accuracy}")
+        else:
+            logger.info(f"Can Not Find The Accuracy")
 
         return metrics
+
 
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, terminating process...")
@@ -353,29 +357,229 @@ def assert_metrics(self, metrics):
     if not metrics:
         raise Exception("No metrics obtained from benchmark")
 
-    if self.accuracy:
-        if self.tpot < TPOT_THRESHOLD:
-            self.assertLessEqual(
-                float(metrics["mean_tpot"]),
-                self.tpot + TPOT_TOLERANCE_LOW,
-            )
-        else:
-            self.assertLessEqual(
-                float(metrics["mean_tpot"]),
-                self.tpot * TPOT_TOLERANCE_HIGH,
-            )
-    if self.output_token_throughput:
+    if self.accuracy is not None:
         self.assertGreaterEqual(
-            float(metrics["total_tps"]),
-            self.output_token_throughput * OUTPUT_TOKEN_THROUGHPUT_TOLERANCE,
+            float(metrics["accuracy"]),
+            self.accuracy,
+            f"Accuracy check failed. Expected >= {self.accuracy}, Got: {metrics['accuracy']}"
         )
-    if self.ttft:
-        self.assertLessEqual(
-            float(metrics["mean_ttft"]),
-            self.ttft * TTFT_TOLERANCE,
+
+class TestAscendAccuracyTestCaseBase(CustomTestCase):
+    model = None
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    backend = "sglang"
+    dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
+    other_args = None
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+    envs = None
+    max_attempts = 2
+    accuracy = 0.1
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        env = os.environ.copy()
+        for key, value in env.items():
+            logger.info(f"ENV_VAR_SYS {key}:{value}")
+        if cls.envs:
+            for key, value in cls.envs.items():
+                logger.info(f"ENV_VAR_CASE {key}:{value}")
+                env[key] = value
+
+        other_args = list(cls.other_args)
+
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=cls.timeout,
+            other_args=other_args,
+            env=env,
         )
-    if self.mean_e2e_latency:
-        self.assertLessEqual(
-            float(metrics["mean_e2e_latency"]),
-            self.mean_e2e_latency * E2E_TOLERANCE,
+
+    @classmethod
+    def tearDownClass(cls):
+        if hasattr(cls, "process") and cls.process:
+            try:
+                kill_process_tree(cls.process.pid)
+            except Exception as e:
+                logger.error(f"Error during tearDown: {e}")
+
+    @retry()
+    def run_throughput(self):
+        parsed_url = urlparse(self.base_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+        if self.benchmark_tool == AISBENCHMARK:
+            metrics = run_aisbench(
+                host=host,
+                port=port,
+                model_path=self.model,
+                dataset_name=self.dataset_name,
+            )
+            assert_metrics(self, metrics)
+
+class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
+    model = None
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    backend = "sglang"
+    dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
+    other_args = None
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+    envs = None
+    max_attempts = 2
+    accuracy = 0.1
+
+    @classmethod
+    def setUpClass(cls):
+        cls.local_ip = "127.0.0.1"
+        cls.host = os.getenv("POD_IP")
+        cls.port = SERVICE_PORT
+        cls.base_url = f"http://{cls.host}:{cls.port}"
+        cls.hostname = os.getenv("HOSTNAME")
+        cls.role = "master" if cls.hostname.endswith("sglang-node-0") else "worker"
+        logger.info(f"Init {cls.host} {cls.role=}!")
+
+        cls.start_pd_mix_master_node()
+        cls.start_pd_mix_worker_node()
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    @classmethod
+    @check_role(allowed_roles=["master"])
+    def start_pd_mix_master_node(cls):
+        sglang_thread = threading.Thread(
+            target=launch_pd_mix_node, args=(cls.model_config,)
         )
+        sglang_thread.start()
+
+        wait_server_ready(f"{cls.base_url}/health")
+
+        logger.info(
+            f"Wait {SERVER_INITIALIZATION_DELAY}s, starting run benchmark ......"
+        )
+        time.sleep(SERVER_INITIALIZATION_DELAY)
+
+    @classmethod
+    @check_role(allowed_roles=["worker"])
+    def start_pd_mix_worker_node(cls):
+        sglang_thread = threading.Thread(
+            target=launch_pd_mix_node, args=(cls.model_config,)
+        )
+        sglang_thread.start()
+
+        logger.info(
+            f"{cls.role} node started, keeping test alive for {MAX_SERVER_KEEP_ALIVE_TIME} seconds"
+        )
+        time.sleep(MAX_SERVER_KEEP_ALIVE_TIME)
+
+    @retry()
+    @check_role(allowed_roles=["master", "worker"])
+
+    def run_throughput(self):
+        parsed_url = urlparse(self.base_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+        if self.benchmark_tool == AISBENCHMARK:
+            metrics = run_aisbench(
+                host=host,
+                port=port,
+                model_path=self.model,
+                dataset_name=self.dataset_name,
+            )
+            assert_metrics(self, metrics)
+
+class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
+    model = None
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    backend = "sglang"
+    dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
+    other_args = None
+    timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
+    envs = None
+    max_attempts = 2
+    accuracy = 0.1
+
+    @classmethod
+    def setUpClass(cls):
+        cls.process = None
+        cls.local_ip = "127.0.0.1"
+        cls.host = os.getenv("POD_IP")
+        cls.port = SERVICE_PORT
+        cls.base_url = f"http://{cls.host}:{cls.port}"
+        cls.hostname = os.getenv("HOSTNAME")
+        cls.role = (
+            "router"
+            if "router" in cls.hostname
+            else "prefill" if "prefill" in cls.hostname else "decode"
+        )
+        logger.info(f"Init {cls.host} {cls.role=}!")
+
+        cls.start_pd_server()
+        cls.start_router_server()
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.process:
+            try:
+                kill_process_tree(cls.process.pid)
+            except Exception as e:
+                logger.error(f"Error during tearDown: {e}")
+
+    @classmethod
+    @check_role(allowed_roles=["router"])
+    def start_router_server(cls):
+        logger.info(f"Starting router in thread...")
+        sglang_thread = threading.Thread(target=launch_router, args=(cls.model_config,))
+        sglang_thread.daemon = True
+        sglang_thread.start()
+
+        health_check_url = f"{cls.base_url}/health"
+        logger.info(f"Waiting for router to be ready at {health_check_url}")
+        wait_server_ready(health_check_url)
+
+        logger.info(
+            f"Waiting {SERVER_INITIALIZATION_DELAY} seconds for the server to fully initialize..."
+        )
+        time.sleep(SERVER_INITIALIZATION_DELAY)
+
+    @classmethod
+    @check_role(allowed_roles=["prefill", "decode"])
+    def start_pd_server(cls):
+        logger.info(f"Starting pd separation node...")
+        cls.process = launch_pd_separation_node(cls.model_config)
+        logger.info(f"Pd separation node started with PID: {cls.process.pid}")
+
+        # Loop to check if the process is still running
+        while True:
+            if cls.process.poll() is None:
+                # Process is still running
+                time.sleep(30)
+            else:
+                # Process has exited
+                exit_code = cls.process.poll()
+                raise Exception(
+                    f"Sglang process exited on node {cls.host} {cls.hostname} with exit code: {exit_code}"
+                )
+
+    @retry()
+    @check_role(allowed_roles=["router"])
+    def run_throughput(self):
+        parsed_url = urlparse(self.base_url)
+        host = parsed_url.hostname
+        port = parsed_url.port
+        if self.benchmark_tool == AISBENCHMARK:
+            metrics = run_aisbench(
+                host=host,
+                port=port,
+                model_path=self.model,
+                dataset_name=self.dataset_name,
+            )
+            assert_metrics(self, metrics)
+    
+
+
+
+
+
