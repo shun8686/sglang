@@ -82,6 +82,9 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
                 "3",
                 "--dtype",
                 "bfloat16",
+                "--log-requests",
+                "--log-requests-level",
+                3,
             ],
             env={
                 "SGLANG_SET_CPU_AFFINITY": "1",
