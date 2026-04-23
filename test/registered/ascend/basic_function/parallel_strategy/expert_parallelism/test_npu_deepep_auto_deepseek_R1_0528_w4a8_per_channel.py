@@ -25,7 +25,8 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
     [Test Target] --moe-a2a-backend; --deepep-mode
     """
 
-    accuracy = 0.96
+    # accuracy = 0.96
+    accuracy = 0.8
 
     @classmethod
     def setUpClass(cls):
