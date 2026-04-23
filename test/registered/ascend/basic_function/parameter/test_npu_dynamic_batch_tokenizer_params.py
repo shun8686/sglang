@@ -220,7 +220,7 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
             api="completion",
             num_examples=200,
             num_threads=128,
-            max_new_tokens=512,
+            max_tokens=512,
         )
         metrics = run_eval(args)
         accuracy = 0.86
@@ -278,7 +278,7 @@ class TestBatchSize1Timeout0p005(CustomTestCase):
             api="completion",
             num_examples=200,
             num_threads=128,
-            max_new_tokens=512,
+            max_tokens=512,
         )
         metrics = run_eval(args)
         accuracy = 0.86

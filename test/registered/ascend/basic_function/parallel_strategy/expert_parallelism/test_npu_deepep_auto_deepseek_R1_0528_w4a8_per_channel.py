@@ -129,7 +129,7 @@ class TestDeepEpAutoDeepseekR1(CustomTestCase):
             num_examples=200,
             num_threads=300,
             num_shots=5,
-            max_new_tokens=512,
+            max_tokens=512,
         )
         # Execute GSM8K evaluation and get metrics
         metrics = run_eval(args)
