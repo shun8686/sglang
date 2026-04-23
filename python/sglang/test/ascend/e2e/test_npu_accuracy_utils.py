@@ -289,8 +289,8 @@ def run_aisbench(
     cmd += f"--model {os.path.basename(model_path)} "
     cmd += f"--model-path {model_path} "
     cmd += f"--dataset-name {dataset_name} "
-    cmd += f"--output-path {result_path}"
-    cmd += f"--output-len {output_len}"
+    cmd += f"--output-path {result_path} "
+    cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency}"
     
     logger.info(f"Command: {cmd}")
