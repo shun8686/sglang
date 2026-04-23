@@ -20,7 +20,7 @@ class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
-        cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
+        cls.model = "/home/weights/DeepSeek-V2-Lite-w8a8"
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
@@ -46,6 +46,8 @@ class TestDeepEpDeepseek(CustomTestCase):
                 1024,
                 "--mem-fraction-static",
                 0.7,
+                "--base-gpu-id",
+                8,
             ],
             env={
                 "SGLANG_SET_CPU_AFFINITY": "1",

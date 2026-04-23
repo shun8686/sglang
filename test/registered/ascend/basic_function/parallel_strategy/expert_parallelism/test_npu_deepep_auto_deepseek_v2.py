@@ -20,8 +20,9 @@ class TestDeepEpDeepseek(CustomTestCase):
     @classmethod
     def setUpClass(cls):
         # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
-        cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
-        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.model = "/home/weights/DeepSeek-V2-Lite-w8a8"
+        cls.base_url = "http://127.0.0.1:8888"
+        # cls.base_url = DEFAULT_URL_FOR_TEST
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,
