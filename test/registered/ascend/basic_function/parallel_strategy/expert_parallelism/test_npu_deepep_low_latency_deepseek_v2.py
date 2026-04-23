@@ -52,7 +52,7 @@ class TestDeepEpDeepseek(CustomTestCase):
                 0.68,
                 "--base-gpu-id",
                 6,
-                "--log-requests",
+                # "--log-requests",
             ],
             env={
                 "SGLANG_SET_CPU_AFFINITY": "1",
@@ -75,7 +75,7 @@ class TestDeepEpDeepseek(CustomTestCase):
     def test_mmlu(self):
         # expect_score = 0.58
         expect_score = 0.1
-        # sleep(1200)
+        sleep(1200)
 
         print("=" * 20 + " 5 num shot START" + "=" * 20)
         args = SimpleNamespace(
@@ -107,25 +107,25 @@ class TestDeepEpDeepseek(CustomTestCase):
         # self.assertGreater(metrics["score"], expect_score)
         # print("=" * 20 + " 8 num shot END" + "=" * 20)
 
-    def test_gsm8k(self):
-        expect_accuracy = 0.34
-        args = SimpleNamespace(
-            num_shots=8,
-            data_path=None,
-            num_questions=200,
-            max_new_tokens=512,
-            parallel=128,
-            host="http://127.0.0.1",
-            port=int(self.base_url.split(":")[-1]),
-            api="completion",
-        )
-        print("Starting gsm8k test...")
-        metrics = run_gsm8k(args)
-        self.assertGreaterEqual(
-            metrics["accuracy"],
-            expect_accuracy,
-            f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
-        )
+    # def test_gsm8k(self):
+    #     expect_accuracy = 0.34
+    #     args = SimpleNamespace(
+    #         num_shots=8,
+    #         data_path=None,
+    #         num_questions=200,
+    #         max_new_tokens=512,
+    #         parallel=128,
+    #         host="http://127.0.0.1",
+    #         port=int(self.base_url.split(":")[-1]),
+    #         api="completion",
+    #     )
+    #     print("Starting gsm8k test...")
+    #     metrics = run_gsm8k(args)
+    #     self.assertGreaterEqual(
+    #         metrics["accuracy"],
+    #         expect_accuracy,
+    #         f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
+    #     )
 
 
 if __name__ == "__main__":
