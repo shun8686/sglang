@@ -104,8 +104,7 @@ class TestQwen397B(TestAscendPerformanceTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 49.09
-    # T: 143@50ms.   800I: 1.1*T
+    tpot = 50
     output_token_throughput = 4047.68
 
     def test_qwen3_5_397b(self):

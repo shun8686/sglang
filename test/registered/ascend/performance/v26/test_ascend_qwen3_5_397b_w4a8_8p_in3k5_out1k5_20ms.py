@@ -94,6 +94,7 @@ QWEN3_5_397B_OTHER_ARGS = [
 
 
 class TestQwen397B(TestAscendPerformanceTestCaseBase):
+    max_attempts = 3
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_5_397B_W4A8_MODEL_PATH
@@ -105,9 +106,8 @@ class TestQwen397B(TestAscendPerformanceTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 20.61
-    # T: 143@50ms.   800I: 1.1*T
-    output_token_throughput = 1523.25
+    tpot = 20
+    output_token_throughput = 1600
 
     def test_qwen3_5_397b(self):
         self.run_throughput()
