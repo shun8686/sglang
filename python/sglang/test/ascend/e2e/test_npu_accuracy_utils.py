@@ -280,7 +280,7 @@ def run_aisbench(
     result_path = "./aisbench_result" if not metrics_path else metrics_path
     logger.info(f"The metrics result file: {result_path}")
 
-    cmd = f"/bin/bash /root/sglang/python/sglang/test/ascend/e2e/run_aisbench_accuracy.sh "
+    cmd = f"/bin/bash /root/sglang/python/sglang/test/ascend/e2e/run_aisbench.sh "
     cmd += f"--mode accuracy "
     cmd += f"--ip {host} "
     cmd += f"--port {str(port)} "
