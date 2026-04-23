@@ -92,6 +92,7 @@ class MMLUEval(Eval):
             df = pandas.read_csv(filename)
         examples = [row.to_dict() for _, row in df.iterrows()]
         # The evaluation data should not include the few-shot examples to prevent data leakage.
+        self.num_shots = num_shots
         if num_shots > 0:
             self.few_shot_examples = examples[:num_shots]
             test_examples = examples[num_shots:]
