@@ -1,14 +1,13 @@
 import logging
+import os
+import shutil
 import unittest
 from types import SimpleNamespace
 
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-    run_command,
-)
+from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval
 from sglang.test.test_utils import (
@@ -160,14 +159,15 @@ class TestHiCache(CustomTestCase):
                 port=int(self.base_url.split(":")[-1]),
             )
             run_eval(args)
-            hicache_file = run_command(f"ls /tmp/hicache")
-            self.assertNotEqual(hicache_file, None)
-            hicache_file_size = run_command(f"du -s /tmp/hicache | cut -f1")
-            self.assertGreater(int(hicache_file_size), 0)
+            self.assertTrue(os.path.exists("/tmp/hicache") and os.listdir("/tmp/hicache"))
+            hicache_file_size = sum(
+                os.path.getsize(os.path.join("/tmp/hicache", f)) for f in os.listdir("/tmp/hicache") if
+                os.path.isfile(os.path.join("/tmp/hicache", f)))
+            self.assertGreater(hicache_file_size, 0)
         finally:
             kill_process_tree(self.process.pid)
             self.process = None
-            run_command(f"rm -rf /tmp/hicache")
+            shutil.rmtree("/tmp/hicache", ignore_errors=True)
 
     def test_003_combined_params(self):
         """Test Hicache with combined parameters, hicache with long sequence"""

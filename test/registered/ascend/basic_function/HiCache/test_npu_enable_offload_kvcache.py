@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import tempfile
 import time
 import unittest
@@ -90,6 +91,12 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
             other_args=prefill_args,
             env=env,
         )
+
+    @classmethod
+    def tearDownClass(cls):
+        # Test class cleanup: call parent class cleanup to terminate all processes
+        shutil.rmtree(cls.temp_dir, ignore_errors=True)
+        super().tearDownClass()
 
     @classmethod
     def start_decode(cls):

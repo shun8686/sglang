@@ -1,5 +1,6 @@
 import os
 import random
+import shutil
 import tempfile
 import time
 import unittest
@@ -174,7 +175,6 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
 
         # First request - should miss cache
         self.send_request(repeated_prompt, max_tokens=100)
-        # Flush cache
         # Second request - should hit cache (faster)
         response2 = self.send_request(repeated_prompt, max_tokens=100)
         # Assert cached tokens cnt
@@ -196,6 +196,7 @@ class TestDisaggregationPrefillWithHiCache(DisaggregationHiCacheBase):
     @classmethod
     def tearDownClass(cls):
         # Test class cleanup: call parent class cleanup to terminate all processes
+        shutil.rmtree(cls.temp_dir, ignore_errors=True)
         super().tearDownClass()
 
 
