@@ -360,8 +360,7 @@ def generate_random_dataset(
         os.makedirs(output_dir, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
-        for item in input_requests:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        json.dump(input_requests, f, ensure_ascii=False, indent=2)
 
 
 def main():
