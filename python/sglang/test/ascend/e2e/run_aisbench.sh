@@ -2,36 +2,6 @@
 
 set -e
 
-install_aisbench() {
-    echo "===== Install aisbench in virtual env - Begin ====="
-    PYTHON_ENV_FOR_AISBENCH=test_env_aisbench
-    PIP_FOR_AISBENCH=${PYTHON_ENV_FOR_AISBENCH}/bin/pip
-    python -m venv ${PYTHON_ENV_FOR_AISBENCH}
-    AISBENCH_SOURCE_PATH=/root/.cache/.cache/benchmark
-    AISBENCH_PKG_PATH=/root/.cache/.cache/aisbench-packages
-    if [ ! -d "${AISBENCH_SOURCE_PATH}" ]; then
-    echo "The aisbench source does not exist: ${AISBENCH_SOURCE_PATH}."
-    echo "git clone https://github.com/AISBench/benchmark.git"
-    git clone https://github.com/AISBench/benchmark.git
-    AISBENCH_SOURCE_PATH="./benchmark/"
-    fi
-    if [ ! -d "${AISBENCH_PKG_PATH}" ]; then
-    echo "The dependent aisbench package does not exist: ${AISBENCH_PKG_PATH}."
-    echo "Install aisbench online."
-    ${PIP_FOR_AISBENCH} install -U pip -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    ${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-    else
-    echo "Install aisbench locally."
-    ${PIP_FOR_AISBENCH} install -U pip --no-index --find-links=${AISBENCH_PKG_PATH}
-    ${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 --no-index --find-links=${AISBENCH_PKG_PATH}
-    ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt --no-index --find-links=${AISBENCH_PKG_PATH}
-    ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt --no-index --find-links=${AISBENCH_PKG_PATH}
-    fi
-    echo "===== Install aisbench in virtual env - End ====="
-}
-
 show_usage() {
     echo -e "\033[31mUsage:\033[0m"
     echo "  $0 [OPTIONS]"
@@ -42,8 +12,8 @@ show_usage() {
     echo "  --port           Server port (required)"
     echo "  --model          Model name (required)"
     echo "  --model-path     Model path (required)"
-    echo "  --dataset-type   Dataset type: gsm8k | mm-custom-gen (required if mode=perf)"
-    echo "  --dataset-name   Dataset name (default: auto-generated)"
+    echo "  --dataset-type   Dataset type: gsm8k | sharegpt | mm-custom-gen (required)"
+    echo "  --dataset-name   Dataset name (default: auto-generated if mode=perf; required if mode=accuracy)"
     echo "  --dataset-path   Dataset path (automatic if not provided)"
     echo "  --input-len      Input token length (required if mode=perf)"
     echo "  --output-len     Output token length (required)"
@@ -139,6 +109,43 @@ if [ -z "$MODE" ] || [ -z "$IP" ] || [ -z "$PORT" ] || [ -z "$MODEL" ] || [ -z "
     echo "Error: Missing required parameters."
     show_usage
 fi
+
+install_aisbench() {
+    echo "===== Install aisbench in virtual env - Begin ====="
+    PYTHON_ENV_FOR_AISBENCH=test_env_aisbench
+    PIP_FOR_AISBENCH=${PYTHON_ENV_FOR_AISBENCH}/bin/pip
+    python -m venv ${PYTHON_ENV_FOR_AISBENCH}
+    AISBENCH_SOURCE_PATH=/root/.cache/.cache/benchmark
+    AISBENCH_PKG_PATH=/root/.cache/.cache/aisbench-packages
+    if [ ! -d "${AISBENCH_SOURCE_PATH}" ]; then
+        echo "The aisbench source does not exist: ${AISBENCH_SOURCE_PATH}."
+        echo "git clone https://github.com/AISBench/benchmark.git"
+        git clone https://github.com/AISBench/benchmark.git
+        AISBENCH_SOURCE_PATH="./benchmark/"
+    fi
+    pip_mirror_source="https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple"
+    if [ ! -d "${AISBENCH_PKG_PATH}" ]; then
+        echo "The dependent aisbench package does not exist: ${AISBENCH_PKG_PATH}."
+        echo "Install aisbench online."
+        ${PIP_FOR_AISBENCH} install -U pip -i ${pip_mirror_source}
+        ${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 -i ${pip_mirror_source}
+        ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt -i ${pip_mirror_source}
+        ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt -i ${pip_mirror_source}
+        if [ "${DATASET_TYPE}" == "bfcl" ];then
+            ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/datasets/bfcl_dependencies.txt -i ${pip_mirror_source}
+        fi
+    else
+        echo "Install aisbench locally."
+        ${PIP_FOR_AISBENCH} install -U pip --no-index --find-links=${AISBENCH_PKG_PATH}
+        ${PIP_FOR_AISBENCH} install -e ${AISBENCH_SOURCE_PATH} --use-pep517 --no-index --find-links=${AISBENCH_PKG_PATH}
+        ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/api.txt --no-index --find-links=${AISBENCH_PKG_PATH}
+        ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/extra.txt --no-index --find-links=${AISBENCH_PKG_PATH}
+        if [ "${DATASET_TYPE}" == "bfcl" ];then
+            ${PIP_FOR_AISBENCH} install -r ${AISBENCH_SOURCE_PATH}/requirements/datasets/bfcl_dependencies.txt --no-index --find-links=${AISBENCH_PKG_PATH}
+        fi
+    fi
+    echo "===== Install aisbench in virtual env - End ====="
+}
 
 install_aisbench
 
@@ -263,47 +270,6 @@ EOF
   echo "============== ${dataset_file} - End ================"
 }
 
-function gen_dataset_custom_config_file() {
-  dataset_file=$1
-  dataset_config_file=${DATASETS_CONFIG_PATH}/${DATASET_NAME}.py
-  echo "Writing gsm8k config info into file: ${dataset_config_file}"
-  cat > "${dataset_config_file}" << EOF
-from ais_bench.benchmark.openicl.icl_prompt_template import PromptTemplate
-from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
-from ais_bench.benchmark.openicl.icl_inferencer import GenInferencer
-from ais_bench.benchmark.datasets import CustomDataset, gsm8k_postprocess, gsm8k_dataset_postprocess, Gsm8kEvaluator
-
-gsm8k_reader_cfg = dict(input_columns=['question'], output_column='answer')
-
-gsm8k_infer_cfg = dict(
-    prompt_template=dict(
-        type=PromptTemplate,
-        template="{question}"),
-    retriever=dict(type=ZeroRetriever),
-    inferencer=dict(type=GenInferencer))
-
-gsm8k_eval_cfg = dict(evaluator=dict(type=Gsm8kEvaluator),
-                      pred_role='BOT',
-                      pred_postprocessor=dict(type=gsm8k_postprocess),
-                      dataset_postprocessor=dict(type=gsm8k_dataset_postprocess))
-
-gsm8k_datasets = [
-    dict(
-        abbr='gsm8k',
-        type=CustomDataset,
-        path="${dataset_file}",
-        reader_cfg=gsm8k_reader_cfg,
-        infer_cfg=gsm8k_infer_cfg,
-        eval_cfg=gsm8k_eval_cfg)
-]
-
-EOF
-
-  echo "============== ${dataset_config_file} - Begin =============="
-  echo "$(cat ${dataset_config_file})"
-  echo "============== ${dataset_config_file} - End ================"
-}
-
 function gen_dataset_gsm8k_config_file() {
   dataset_dir=$1
   dataset_config_file=${DATASETS_CONFIG_PATH}/${DATASET_NAME}.py
@@ -344,8 +310,71 @@ EOF
   echo "============== ${dataset_config_file} - End ================"
 }
 
+function gen_dataset_sharegpt_config_file() {
+  dataset_file=$1
+  dataset_config_file=${DATASETS_CONFIG_PATH}/${DATASET_NAME}.py
+  echo "Writing sharegpt config info into file: ${dataset_config_file}"
+  cat > "${dataset_config_file}" << EOF
+from ais_bench.benchmark.openicl.icl_prompt_template import MultiTurnPromptTemplate
+from ais_bench.benchmark.openicl.icl_retriever import ZeroRetriever
+from ais_bench.benchmark.openicl.icl_inferencer import MultiTurnGenInferencer
+from ais_bench.benchmark.datasets import ShareGPTDataset, ShareGPTEvaluator, math_postprocess_v2
+
+
+sharegpt_reader_cfg = dict(
+    input_columns=["question", "answer"],
+    output_column="answer"
+)
+
+
+sharegpt_infer_cfg = dict(
+    prompt_template=dict(
+        type=MultiTurnPromptTemplate,
+        template=dict(
+            round=[
+                dict(role="HUMAN", prompt="{question}"),
+                dict(role="BOT", prompt="{answer}"),
+            ]
+        )
+    ),
+    retriever=dict(type=ZeroRetriever),
+    inferencer=dict(type=MultiTurnGenInferencer, infer_mode="every") # Default using "every" mode, Supports: "last", "every", "every_with_gt"
+)
+
+sharegpt_eval_cfg = dict(
+    evaluator=dict(type=ShareGPTEvaluator)
+)
+
+sharegpt_datasets = [
+    dict(
+        abbr='sharegpt',
+        type=ShareGPTDataset,
+        disable_shuffle=True,
+        path="${dataset_file}",
+        reader_cfg=sharegpt_reader_cfg,
+        infer_cfg=sharegpt_infer_cfg,
+        eval_cfg=sharegpt_eval_cfg
+    )
+]
+EOF
+  echo "============== ${dataset_config_file} - Begin =============="
+  echo "$(cat ${dataset_config_file})"
+  echo "============== ${dataset_config_file} - End ================"
+}
+
 if [ "$MODE" == "perf" ];then
-    if [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
+    if [ "$DATASET_TYPE" == "sharegpt" ]; then
+        dataset_file=$DATASET_PATH
+        if [ ! -f "${dataset_file}" ]; then
+            echo "The sharegpt dataset file does not exist: ${DATASET_PATH}."
+            exit 1
+        fi
+        DATASET_NAME=sharegpt_custom_${MODEL}
+        gen_dataset_sharegpt_config_file "${dataset_file}"
+        echo "Use dataset: ${DATASET_NAME}"
+        gen_model_config_file
+        CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+    elif [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
         if [ ! -f "$DATASET_PATH" ]; then
             echo "The mm-custom-gen dataset file does not exist: ${DATASET_PATH}."
             exit 1
