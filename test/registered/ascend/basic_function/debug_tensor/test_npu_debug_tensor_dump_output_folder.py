@@ -1,4 +1,6 @@
 import glob
+import shutil
+import tempfile
 import unittest
 from abc import ABC
 
@@ -6,7 +8,7 @@ import requests
 import torch
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH, run_command
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -20,9 +22,12 @@ register_npu_ci(est_time=400, suite="nightly-8-npu-a3", nightly=True)
 TP_SIZE = 4
 PP_SIZE = 1
 TP_DIR_NUM = TP_SIZE * PP_SIZE
-FILE_PATTERN_PP0 = "./TP0_PP0_Rank0_pid*"
-FILE_PATTERN_PP1 = "./TP0_PP1_Rank4_pid*"
+FILE_PATTERN_PP0 = f"/TP0_PP0_Rank0_pid*"
+FILE_PATTERN_TP1 = f"/TP1_PP0_Rank1_pid*"
+FILE_PATTERN_TP2 = f"/TP2_PP0_Rank2_pid*"
+FILE_PATTERN_TP3 = f"/TP3_PP0_Rank3_pid*"
 PT_FILE_NAME = "Pass00000.pt"
+NUM_HIDDEN_LAYERS = 64
 
 
 class TestDebugTensorDumpOutputFolderBase(ABC):
@@ -32,7 +37,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     [Test Category] Parameter
     [Test Target] --debug-tensor-dump-output-folder; --debug-tensor-dump-layers
     """
-
+    dump_folder = tempfile.mkdtemp(prefix="tensor_folder")
     model = QWEN3_32B_WEIGHTS_PATH
     base_args = [
         "--trust-remote-code",
@@ -44,7 +49,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
         "--tp-size",
         TP_SIZE,
         "--debug-tensor-dump-output-folder",
-        "./",
+        dump_folder,
         "--skip-server-warmup",
     ]
     other_args = []
@@ -72,9 +77,9 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     def _cleanup_directories(cls):
         """Remove test directories with retry mechanism."""
         for _ in range(3):
-            run_command("rm -rf ./TP*_PP*")
-            result = run_command("ls -d ./TP*_PP* 2>/dev/null || echo ''")
-            if not result.strip():
+            shutil.rmtree(cls.dump_folder, ignore_errors=True)
+            result = glob.glob(f"{cls.dump_folder}")
+            if not result:
                 break
 
     def sending_request(self):
@@ -90,7 +95,8 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
                 },
             },
         )
-        res = run_command("ls -d TP*_PP*_Rank*_pid* | wc -l")
+
+        res = glob.glob(f"{self.dump_folder}/TP*_PP*_Rank*_pid*")
         return response, res
 
     def get_layers_from_tensor_file(self, file_pattern, file_name=PT_FILE_NAME):
@@ -122,15 +128,21 @@ class TestDebugTensorDumpOutputFolder(
     """
 
     def test_debug_tensor_dump_output_folder(self):
-        """Test that tensor dumps are generated for all 64 layers across two pipeline stages."""
+        """Test that tensor dumps are generated for all layers across two pipeline stages."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(res), TP_DIR_NUM)
+        self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
+        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
+        model_layers_list1 = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_TP1}")
+        model_layers_list2 = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_TP2}")
+        model_layers_list3 = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_TP3}")
         # Keep it consistent with num_hidden_layers in the model's config.json file.
-        self.assertEqual(len(model_layers_list), 64)
-        self.assertEqual(model_layers_list, list(range(64)))
+        self.assertEqual(len(model_layers_list), NUM_HIDDEN_LAYERS)
+        self.assertEqual(len(model_layers_list1), NUM_HIDDEN_LAYERS)
+        self.assertEqual(len(model_layers_list2), NUM_HIDDEN_LAYERS)
+        self.assertEqual(len(model_layers_list3), NUM_HIDDEN_LAYERS)
+        self.assertEqual(model_layers_list, list(range(NUM_HIDDEN_LAYERS)))
 
 
 class TestDumpLayersSingle(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
@@ -147,9 +159,9 @@ class TestDumpLayersSingle(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
         """Test that tensor dumps are generated only for layer 1."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(res), TP_DIR_NUM)
+        self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
+        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
         self.assertEqual(len(model_layers_list), 1)
         self.assertEqual(model_layers_list[0], 1)
 
@@ -170,9 +182,9 @@ class TestDumpLayersMultiple(TestDebugTensorDumpOutputFolderBase, CustomTestCase
         """Test that tensor dumps are generated for layers 2, 3, and 4."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(res), TP_DIR_NUM)
+        self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
+        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
         self.assertEqual(len(model_layers_list), 3)
         self.assertEqual(model_layers_list[0], 2)
         self.assertEqual(model_layers_list[1], 3)
@@ -197,9 +209,9 @@ class TestDumpLayersNonConsecutiveLayers(
         """Test that tensor dumps are generated for layers 0, 5, and 10."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(res), TP_DIR_NUM)
+        self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
+        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
         self.assertEqual(len(model_layers_list), 3)
         self.assertEqual(model_layers_list[0], 0)
         self.assertEqual(model_layers_list[1], 5)
@@ -220,9 +232,9 @@ class TestDumpLayersOutOFRange(TestDebugTensorDumpOutputFolderBase, CustomTestCa
         """Test that no tensor dumps are generated when specifying layer 500 (out of range)."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(res), TP_DIR_NUM)
+        self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(FILE_PATTERN_PP0)
+        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
         self.assertEqual(len(model_layers_list), 0)
 
 
@@ -251,7 +263,7 @@ class TestDebugTensorNoDumpOutputFolder(
         """Test that no tensor dump directories are created when output folder is not specified."""
         response, res = self.sending_request()
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(int(res), 0)
+        self.assertEqual(len(res), 0)
 
 
 if __name__ == "__main__":

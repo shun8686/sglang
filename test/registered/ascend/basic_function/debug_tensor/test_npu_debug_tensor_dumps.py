@@ -1,3 +1,4 @@
+import glob
 import os
 import re
 import shutil
@@ -8,10 +9,7 @@ import requests
 import torch
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_32B_WEIGHTS_PATH,
-    run_command,
-)
+from sglang.test.ascend.test_ascend_utils import QWEN3_32B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -91,8 +89,8 @@ class TestNpuDebugTensorDumps(CustomTestCase):
             self.assertEqual(response.status_code, 200)
 
         # Verify that the debug-tensor-dump-output-folder configuration is effective and that the tensor folder exists.
-        res = run_command(f"ls -d {self.dump_folder}/TP*_PP*_Rank*_pid* | wc -l")
-        self.assertEqual(int(res), self.TP_DIR_NUM)
+        res = glob.glob(f"{self.dump_folder}/TP*_PP*_Rank*_pid*")
+        self.assertEqual(len(res), self.TP_DIR_NUM)
 
         # Verify the directory structure of tensor_dump
         subdirs = [
