@@ -290,7 +290,7 @@ def run_aisbench(
     cmd += f"--model {os.path.basename(model_path)} "
     cmd += f"--model-path {model_path} "
     cmd += f"--dataset-name {dataset_name} "
-    cmd += f"--dataset-type {dataset_type } "
+    cmd += f"--dataset-type {dataset_type} "
     cmd += f"--output-path {result_path} "
     cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency}"
@@ -508,7 +508,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
             )
             assert_metrics(self, metrics)
 
-class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
+class TestAscendAccuracyMultiNodePdSepTestCaseBase(CustomTestCase):
     model = None
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
