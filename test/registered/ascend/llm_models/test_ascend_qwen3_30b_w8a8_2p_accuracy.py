@@ -3,7 +3,7 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
+    # QWEN3_30B_A3B_W8A8_MODEL_PATH,
     TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -60,12 +60,15 @@ QWEN3_30B_OTHER_ARGS = [
     72,
     "--dtype",
     "bfloat16",
+    "--base-gpu-id",
+    12,
 ]
 
 
 class TestQwen30B(TestAscendAccuracyTestCaseBase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = "/home/weights/Qwen/Qwen3-30B-A3B-W8A8"
     other_args = QWEN3_30B_OTHER_ARGS
     envs = QWEN3_30B_ENVS
     accuracy = 0.1
