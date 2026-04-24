@@ -45,9 +45,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check pod and npu info
+      - name: Check npu info
         run: |
-          ifconfig
           npu-smi info
 
       - name: Run test
