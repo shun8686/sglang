@@ -124,6 +124,10 @@ class TestNPULoggingBase(CustomTestCase):
         self.assertEqual(response.status_code, 200, "Failed to call generate API")
         self.assertIn("Paris", response.text, "Inference out error.")
 
+    def inference(self, max_tokens=32, times=1):
+        for _ in range(times):
+            self.inference_once(max_tokens)
+
     def wait_for_log_content(self, timeout=30):
         """Wait for and return the content of the specified log file, with timeout handling.
 

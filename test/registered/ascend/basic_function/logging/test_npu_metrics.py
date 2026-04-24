@@ -2,6 +2,7 @@ import unittest
 
 import requests
 
+from sglang.srt.observability.utils import two_sides_exponential_buckets
 from sglang.test.ascend.test_npu_logging import TestNPULoggingBase
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -280,17 +281,7 @@ class TestNPUMetricsTSEBucketBoundary(TestNPULoggingBase):
         # Format: [base_value, exponential_factor, number_of_steps]
         cls.my_tse_set = ["1000", "2", "8"]
         # Precomputed custom bucket boundaries using the TSE strategy
-        cls.my_tse_bucket = [
-            "984.0",
-            "992.0",
-            "996.0",
-            "998.0",
-            "1000.0",
-            "1002.0",
-            "1004.0",
-            "1008.0",
-            "1016.0",
-        ]
+        cls.my_tse_bucket = two_sides_exponential_buckets(100, 2, 8)
 
     def test_bucket_boundary(self):
         TestNPUMetricsDefaultBucketBoundary._verify_metrics_and_bucket_boundary(

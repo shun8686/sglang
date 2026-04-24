@@ -33,6 +33,7 @@ class TestNPUEnableMetricsForAllScheduler(TestNPULoggingBase):
         cls.launch_server()
 
     def test_enable_metrics_for_all_scheduler(self):
+        self.inference(times=2)
         response = requests.get(f"{self.base_url}/metrics", timeout=10)
         message_0 = (
             f'sglang:num_decode_transfer_queue_reqs{{engine_type="unified",model_name="{self.model}"'
