@@ -345,10 +345,11 @@ def generate_random_dataset(
         input_content = tokenizer.decode(input_ids)
         input_requests.append(
             {
-                "question": input_content,
-                "answer": "none",
-                "prompt_len": input_lens[i],
-                "output_len": output_lens[i],
+                "id": str(i),
+                "conversations": [
+                    {"from": "human", "value": input_content},
+                    {"from": "gpt", "value": "none"},
+                ],
             }
         )
 
