@@ -169,7 +169,7 @@ ds.to_json('/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl')
 "
 fi
 
-function gen_model_config_file() {
+function gen_model_config_file_vllm_api_stream_chat() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"
   if [ "$MODE" == "perf" ]; then
@@ -202,6 +202,49 @@ models = [
         max_out_len=$OUTPUT_LEN,
         batch_size=$BATCH_SIZE,
         trust_remote_code=True,
+        generation_kwargs=${generation_kwargs},
+        pred_postprocessor=dict(type=extract_non_reasoning_content),
+    )
+]
+EOF
+  echo "============== ${model_config_file} - Begin =============="
+  echo "$(cat ${model_config_file})"
+  echo "============== ${model_config_file} - End ================"
+}
+
+function gen_model_config_file_vllm_api_function_call_chat() {
+  model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
+  echo "Writing model config info into file: ${model_config_file}"
+  if [ "$MODE" == "perf" ]; then
+    generation_kwargs="dict(temperature=0,ignore_eos=True)"
+  elif [ "$MODE" == "accuracy" ]; then
+    generation_kwargs="dict(temperature=0.01,seed=1234)"
+  else
+    echo "Error: Unknown mode: $MODE."
+    show_usage
+  fi
+
+  cat > "${model_config_file}" << EOF
+from ais_bench.benchmark.models import VLLMCustomAPIChat
+from ais_bench.benchmark.utils.postprocess.model_postprocessors import extract_non_reasoning_content
+
+models = [
+    dict(
+        attr="service",
+        type=VLLMCustomAPIChat,
+        abbr="vllm-api-function-call-chat",
+        path="$MODEL_PATH",
+        model="$MODEL",
+        request_rate=0,
+        retry=2,
+        api_key="",
+        host_ip="$IP",
+        host_port=$PORT,
+        url="",
+        max_out_len=$OUTPUT_LEN,
+        returns_tool_calls=True,
+        batch_size=$BATCH_SIZE,
+        trust_remote_code=False,
         generation_kwargs=${generation_kwargs},
         pred_postprocessor=dict(type=extract_non_reasoning_content),
     )
@@ -372,7 +415,7 @@ if [ "$MODE" == "perf" ];then
         DATASET_NAME=sharegpt_custom_${MODEL}
         gen_dataset_sharegpt_config_file "${dataset_file}"
         echo "Use dataset: ${DATASET_NAME}"
-        gen_model_config_file
+        gen_model_config_file_vllm_api_stream_chat
         CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     elif [ "$DATASET_TYPE" == "mm-custom-gen" ]; then
         if [ ! -f "$DATASET_PATH" ]; then
@@ -382,14 +425,14 @@ if [ "$MODE" == "perf" ];then
         DATASET_NAME=mm_custom_gen_${MODEL}
         gen_dataset_mm_custom_config_file
         echo "Use dataset: ${DATASET_NAME}"
-        gen_model_config_file
+        gen_model_config_file_vllm_api_stream_chat
         CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     elif [ "$DATASET_TYPE" == "custom-gen" ]; then
         dataset_file=$DATASET_PATH
         DATASET_NAME=gsm8k_gen_${MODEL}
         gen_dataset_custom_config_file "${dataset_file}"
         echo "Use dataset: ${DATASET_NAME}"
-        gen_model_config_file
+        gen_model_config_file_vllm_api_stream_chat
         CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     elif [ "$DATASET_TYPE" == "gsm8k" ]; then
         dataset_file=$DATASET_PATH
@@ -406,7 +449,7 @@ if [ "$MODE" == "perf" ];then
         DATASET_NAME=gsm8k_custom_${MODEL}
         gen_dataset_gsm8k_config_file "${dataset_dir}"
         echo "Use dataset: ${DATASET_NAME}, dataset_file: ${dataset_file}"
-        gen_model_config_file
+        gen_model_config_file_vllm_api_stream_chat
         CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     else
         echo "The dataset type $DATASET_TYPE is not supported."
@@ -420,7 +463,11 @@ elif [ "$MODE" == "accuracy" ]; then
         echo "The dataset name is not provided: ${DATASET_NAME}."
         exit 1
     fi
-    gen_model_config_file
+    if [ "$DATASET_TYPE" == "bfcl" ]; then
+        gen_model_config_file_vllm_api_function_call_chat
+    else
+        gen_model_config_file_vllm_api_stream_chat
+    fi
     CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --work-dir $OUTPUT_PATH "
     echo "IP: $IP | Port: $PORT | Model: $MODEL | Model Path: $MODEL_PATH"
     echo "max_out_len: ${OUTPUT_LEN} | batch_size: ${BATCH_SIZE} | datasets: ${DATASET_NAME}"
