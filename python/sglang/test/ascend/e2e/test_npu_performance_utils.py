@@ -10,8 +10,8 @@ from urllib.parse import urlparse
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.gen_gsm8k_fixed_len import (
     generate_dataset_from_gsm8k,
-    generate_fixed_len_dataset,
     generate_mm_dataset,
+    generate_random_dataset,
     save_jsonl,
 )
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
@@ -39,10 +39,11 @@ AISBENCHMARK = "aisbench"
 BENCHSERVING = "bench-serving"
 BENCHMARK_TOOL_DEFAULT = AISBENCHMARK
 AISBENCHMARK_DATASET_GSM8K = "gsm8k"
-AISBENCHMARK_DATASET_CUSTOM_GEN = "custom-gen"
+AISBENCHMARK_DATASET_SHAREGPT = "sharegpt"
 AISBENCHMARK_DATASET_MM_CUSTOM_GEN = "mm-custom-gen"
-AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_GSM8K
+AISBENCHMARK_DATASET_DEFAULT = AISBENCHMARK_DATASET_SHAREGPT
 
+SHAREGPT_DATASET_TEST_FILE = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
 GSM8K_DATASET_TEST_FILE = (
     "/root/.cache/modelscope/hub/datasets/grade_school_math/test.jsonl"
 )
@@ -410,9 +411,29 @@ def run_aisbench(
     max_concurrency,
     num_prompts,
     image_resolution=None,
+    random_range_ratio=1,
 ):
 
-    if dataset_type == AISBENCHMARK_DATASET_GSM8K and not dataset_path:
+    if dataset_type == "random":
+        dataset_file = f"/tmp/datasets/test.jsonl"
+        if not os.path.exists(dataset_file):
+            logger.info(
+                f"Generating random dataset from ShareGPT: {dataset_file}, "
+                f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
+            )
+            generate_random_dataset(
+                model_path=model_path,
+                source_dataset_path=SHAREGPT_DATASET_TEST_FILE,
+                batch_size=num_prompts,
+                input_len=input_len,
+                output_file=dataset_file,
+                output_len=output_len,
+                random_range_ratio=random_range_ratio,
+            )
+        dataset_path = dataset_file
+        logger.info(f"Dataset generated: {dataset_path}")
+
+    elif dataset_type == AISBENCHMARK_DATASET_GSM8K and not dataset_path:
         dataset_file = f"/tmp/datasets/test.jsonl"
         if not os.path.exists(dataset_file):
             logger.info(
@@ -429,25 +450,7 @@ def run_aisbench(
         dataset_path = dataset_file
         logger.info(f"Dataset generated: {dataset_path}")
 
-    if dataset_type == AISBENCHMARK_DATASET_CUSTOM_GEN:
-        dataset_file = f"/tmp/datasets/test.jsonl"
-        if not os.path.exists(dataset_file):
-            logger.info(
-                f"Generating gsm8k dataset: {dataset_file}, "
-                f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
-            )
-            data = generate_fixed_len_dataset(
-                train_path=GSM8K_DATASET_TRAIN_FILE,
-                test_path=GSM8K_DATASET_TEST_FILE,
-                tokenizer_path=model_path,
-                target_tokens=input_len,
-                num_prompts=num_prompts,
-            )
-            save_jsonl(data, dataset_file)
-        dataset_path = dataset_file
-        logger.info(f"Dataset generated: {dataset_file}")
-
-    if dataset_type == AISBENCHMARK_DATASET_MM_CUSTOM_GEN and not dataset_path:
+    elif dataset_type == AISBENCHMARK_DATASET_MM_CUSTOM_GEN and not dataset_path:
         dataset_file = f"/tmp/datasets/mm.jsonl"
         if not os.path.exists(dataset_file):
             image_dir = f"/tmp/datasets/images"
@@ -463,6 +466,9 @@ def run_aisbench(
             save_jsonl(data, dataset_file)
         dataset_path = dataset_file
         logger.info(f"Dataset generated: {dataset_file}")
+
+    else:
+        logger.info(f"Use exist dataset: {dataset_path}")
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
     result_path = "./aisbench_result" if not metrics_path else metrics_path
@@ -700,7 +706,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    dataset_path = SHAREGPT_DATASET_TEST_FILE
     aisbench_dataset_type = "gsm8k"  # gsm8k | mm-custom-gen
     aisbench_dataset_path = None  # auto generate dataset if none
     other_args = None
@@ -712,7 +718,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     num_prompts = None
     input_len = None
     output_len = None
-    random_range_ratio = None
+    random_range_ratio = 1
     image_resolution = None
     image_count = None
     warmup_requests = None
@@ -768,6 +774,7 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
                 image_resolution=self.image_resolution,
+                random_range_ratio=self.random_range_ratio,
             )
             assert_metrics(self, metrics)
 
@@ -800,7 +807,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    dataset_path = SHAREGPT_DATASET_TEST_FILE
     aisbench_dataset_type = "gsm8k"  # gsm8k | mm-custom-gen
     aisbench_dataset_path = None  # auto generate dataset if none
     max_attempts = 2
@@ -809,7 +816,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     num_prompts = None
     input_len = None
     output_len = None
-    random_range_ratio = None
+    random_range_ratio = 1
     image_resolution = None
     image_count = None
     warmup_requests = None
@@ -879,6 +886,7 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
                 image_resolution=self.image_resolution,
+                random_range_ratio=self.random_range_ratio,
             )
             assert_metrics(self, metrics)
 
@@ -911,7 +919,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "random"
-    dataset_path = "/tmp/ShareGPT_V3_unfiltered_cleaned_split.json"
+    dataset_path = SHAREGPT_DATASET_TEST_FILE
     aisbench_dataset_type = "gsm8k"  # gsm8k | mm-custom-gen
     aisbench_dataset_path = None  # auto generate dataset if none
     max_attempts = 2
@@ -1007,6 +1015,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
                 image_resolution=self.image_resolution,
+                random_range_ratio=self.random_range_ratio,
             )
             assert_metrics(self, metrics)
 

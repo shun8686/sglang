@@ -254,6 +254,116 @@ def generate_dataset_from_gsm8k(
             f.write("\n")
 
 
+def generate_random_dataset(
+    model_path,
+    source_dataset_path,
+    batch_size,
+    input_len,
+    output_file,
+    output_len=1024,
+    range_ratio=1,
+):
+    SHAREGPT_REPO_ID = "anon8231489123/ShareGPT_Vicuna_unfiltered"
+    SHAREGPT_FILENAME = "ShareGPT_V3_unfiltered_cleaned_split.json"
+
+    def _is_file_valid_json(path):
+        if not os.path.isfile(path):
+            return False
+        try:
+            with open(path, encoding="utf-8") as f:
+                json.load(f)
+            return True
+        except json.JSONDecodeError:
+            return False
+
+    def _download_and_cache_hf_file(repo_id, filename, repo_type="dataset"):
+        from huggingface_hub import hf_hub_download
+
+        return hf_hub_download(repo_id=repo_id, filename=filename, repo_type=repo_type)
+
+    tokenizer = AutoTokenizer.from_pretrained(model_path)
+
+    input_lens = np.random.randint(
+        max(int(input_len * range_ratio), 1),
+        input_len + 1,
+        size=batch_size,
+    ).tolist()
+    output_lens = np.random.randint(
+        max(int(output_len * range_ratio), 1),
+        output_len + 1,
+        size=batch_size,
+    ).tolist()
+
+    num_special_tokens = int(tokenizer.num_special_tokens_to_add())
+    for i in range(batch_size):
+        input_lens[i] = max(1, input_lens[i] - num_special_tokens)
+
+    if not _is_file_valid_json(source_dataset_path):
+        print(
+            f"source_dataset_path '{source_dataset_path}' is not a valid file, downloading from HuggingFace..."
+        )
+        source_dataset_path = _download_and_cache_hf_file(
+            repo_id=SHAREGPT_REPO_ID,
+            filename=SHAREGPT_FILENAME,
+        )
+
+    with open(source_dataset_path, "r", encoding="utf-8") as f:
+        dataset = json.load(f)
+
+    dataset = [
+        data
+        for data in dataset
+        if len(data.get("conversations", data.get("conversation", []))) >= 2
+    ]
+    dataset = [
+        (
+            data.get("conversations", data.get("conversation", []))[0]["value"],
+            data.get("conversations", data.get("conversation", []))[1]["value"],
+        )
+        for data in dataset
+    ]
+    random.shuffle(dataset)
+
+    input_requests = []
+    for data in dataset:
+        i = len(input_requests)
+        if i == batch_size:
+            break
+
+        prompt = data[0]
+        prompt_token_ids = tokenizer.encode(prompt)
+        prompt_len = len(prompt_token_ids)
+
+        if prompt_len == 0:
+            continue
+
+        if prompt_len > input_lens[i]:
+            input_ids = prompt_token_ids[: input_lens[i]]
+        else:
+            ratio = (input_lens[i] + prompt_len - 1) // prompt_len
+            input_ids = (prompt_token_ids * ratio)[: input_lens[i]]
+        input_content = tokenizer.decode(input_ids)
+        input_requests.append(
+            {
+                "question": input_content,
+                "answer": "none",
+                "prompt_len": input_lens[i],
+                "output_len": output_lens[i],
+            }
+        )
+
+    print(f"#Input tokens: {np.sum(input_lens[:len(input_requests)])}")
+    print(f"#Output tokens: {np.sum(output_lens[:len(input_requests)])}")
+
+    output_dir = os.path.dirname(output_file)
+    if output_dir:
+        os.makedirs(output_dir, exist_ok=True)
+
+    with open(output_file, "w", encoding="utf-8") as f:
+        for item in input_requests:
+            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+
+
 def main():
     import argparse
 
