@@ -159,10 +159,14 @@ class TestHiCache(CustomTestCase):
                 port=int(self.base_url.split(":")[-1]),
             )
             run_eval(args)
-            self.assertTrue(os.path.exists("/tmp/hicache") and os.listdir("/tmp/hicache"))
+            self.assertTrue(
+                os.path.exists("/tmp/hicache") and os.listdir("/tmp/hicache")
+            )
             hicache_file_size = sum(
-                os.path.getsize(os.path.join("/tmp/hicache", f)) for f in os.listdir("/tmp/hicache") if
-                os.path.isfile(os.path.join("/tmp/hicache", f)))
+                os.path.getsize(os.path.join("/tmp/hicache", f))
+                for f in os.listdir("/tmp/hicache")
+                if os.path.isfile(os.path.join("/tmp/hicache", f))
+            )
             self.assertGreater(hicache_file_size, 0)
         finally:
             kill_process_tree(self.process.pid)
