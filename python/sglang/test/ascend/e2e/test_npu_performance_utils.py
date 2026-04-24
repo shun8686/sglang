@@ -414,7 +414,7 @@ def run_aisbench(
     random_range_ratio=1,
 ):
 
-    if dataset_type == "random":
+    if dataset_type == "sharegpt":
         dataset_file = f"/tmp/datasets/test.jsonl"
         if not os.path.exists(dataset_file):
             logger.info(
@@ -428,7 +428,7 @@ def run_aisbench(
                 input_len=input_len,
                 output_file=dataset_file,
                 output_len=output_len,
-                random_range_ratio=random_range_ratio,
+                range_ratio=random_range_ratio,
             )
         dataset_path = dataset_file
         logger.info(f"Dataset generated: {dataset_path}")
