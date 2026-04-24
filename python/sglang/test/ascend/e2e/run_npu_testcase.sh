@@ -40,27 +40,29 @@ if [ -n "${TRANSFORMERS_VERSION_FOR_SGLANG}" ];then
   echo "===== Install transformers for sglang in virtual env - End ====="
 fi
 
-echo "===== Install transformers in virtual env for test tools - Begin ====="
-TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
-PYTHON_ENV_FOR_TEST_TOOL=test_env_transformers_tool
-PIP_FOR_TEST_TOOL=${PYTHON_ENV_FOR_TEST_TOOL}/bin/pip
-python -m venv ${PYTHON_ENV_FOR_TEST_TOOL} --system-site-packages
-TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
-if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
-  echo "The dependent transformers package does not exist: ${TRANSFORMERS_PKG_PATH_SOURCE}."
-  echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} online."
-  ${PIP_FOR_TEST_TOOL} install transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
-else
-  echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} locally."
-  TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
-  mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
-  cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
-  ${PIP_FOR_TEST_TOOL} install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+if [ -n "${TRANSFORMERS_VERSION_FOR_TEST_TOOL}" ]; then
+  # Example: TRANSFORMERS_VERSION_FOR_TEST_TOOL=4.57.6
+  echo "===== Install transformers in virtual env for test tools - Begin ====="
+  PYTHON_ENV_FOR_TEST_TOOL=python_venv_for_test_tool
+  PIP_FOR_TEST_TOOL=${PYTHON_ENV_FOR_TEST_TOOL}/bin/pip
+  python -m venv ${PYTHON_ENV_FOR_TEST_TOOL} --system-site-packages
+  TRANSFORMERS_PKG_PATH_SOURCE=/root/.cache/.cache/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+  if [ ! -d "${TRANSFORMERS_PKG_PATH_SOURCE}" ]; then
+    echo "The dependent transformers package does not exist: ${TRANSFORMERS_PKG_PATH_SOURCE}."
+    echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} online."
+    ${PIP_FOR_TEST_TOOL} install transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL} -i https://mirrors.tuna.tsinghua.edu.cn/pypi/web/simple
+  else
+    echo "Install transformers ${TRANSFORMERS_VERSION_FOR_TEST_TOOL} locally."
+    TRANSFORMERS_PKG_PATH_TARGET=/tmp/transformers/${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+    mkdir -p ${TRANSFORMERS_PKG_PATH_TARGET}
+    cp ${TRANSFORMERS_PKG_PATH_SOURCE}/* ${TRANSFORMERS_PKG_PATH_TARGET}/
+    ${PIP_FOR_TEST_TOOL} install --no-index --find-links=${TRANSFORMERS_PKG_PATH_TARGET} transformers==${TRANSFORMERS_VERSION_FOR_TEST_TOOL}
+  fi
+  echo "===== Install transformers in virtual env for test tools - End ====="
+  echo "Transformers version for test tools: $(${PIP_FOR_TEST_TOOL} show transformers | grep Version | cut -d: -f2)"
 fi
-echo "===== Install transformers in virtual env for test tools - End ====="
 
 echo "Transformers version for sglang: $(${PIP_FOR_SGLANG} show transformers | grep Version | cut -d: -f2)"
-echo "Transformers version for test tools: $(${PIP_FOR_TEST_TOOL} show transformers | grep Version | cut -d: -f2)"
 
 # copy or download required file
 cp /root/.cache/huggingface/hub/datasets--anon8231489123--ShareGPT_Vicuna_unfiltered/snapshots/192ab2185289094fc556ec8ce5ce1e8e587154ca/ShareGPT_V3_unfiltered_cleaned_split.json /tmp

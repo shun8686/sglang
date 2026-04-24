@@ -51,7 +51,7 @@ GSM8K_DATASET_TRAIN_FILE = (
     "/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl"
 )
 
-PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
+PYTHON_FOR_TEST_TOOL = "python_venv_for_test_tool/bin/python"
 if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
     PYTHON_FOR_TEST_TOOL, os.X_OK
 ):

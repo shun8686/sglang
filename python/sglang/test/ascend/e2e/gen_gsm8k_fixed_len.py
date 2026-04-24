@@ -345,10 +345,11 @@ def generate_random_dataset(
         input_content = tokenizer.decode(input_ids)
         input_requests.append(
             {
-                "question": input_content,
-                "answer": "none",
-                "prompt_len": input_lens[i],
-                "output_len": output_lens[i],
+                "id": str(i),
+                "conversations": [
+                    {"from": "human", "value": input_content},
+                    {"from": "gpt", "value": "none"},
+                ],
             }
         )
 
@@ -360,8 +361,7 @@ def generate_random_dataset(
         os.makedirs(output_dir, exist_ok=True)
 
     with open(output_file, "w", encoding="utf-8") as f:
-        for item in input_requests:
-            f.write(json.dumps(item, ensure_ascii=False) + "\n")
+        json.dump(input_requests, f, ensure_ascii=False, indent=2)
 
 
 def main():
