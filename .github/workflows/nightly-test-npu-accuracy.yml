@@ -39,7 +39,7 @@ jobs:
           sglang_source_path=$(pwd)
           echo "Source code path: ${sglang_source_path}"
           ln -sf ${sglang_source_path} /root/sglang
-          
+
           # copy required file from our daily cache
           cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
           # copy download through proxy
@@ -48,11 +48,11 @@ jobs:
           # Set environment of cann
           source /usr/local/Ascend/cann/set_env.sh || true
           source /usr/local/Ascend/nnal/atb/set_env.sh || true
-          
+
           sglang_pkg_path=$(pip show sglang | grep Location | awk '{print $2}')
           ascend_test_util_path=${sglang_pkg_path}/sglang/test/ascend
           mkdir -p ${ascend_test_util_path}
           mv ${ascend_test_util_path} ${ascend_test_util_path}_bak
           cp -r ${sglang_source_path}/python/sglang/test/ascend ${ascend_test_util_path}
-          
-          python3 test/registered/ascend/llm_models/test_ascend_qwen3_235b_w8a8_8p_in2k_out2k_accuracy.py
+
+          python3 test/registered/ascend/llm_models/test_ascend_qwen3_30b_w8a8_2p_accuracy.py
