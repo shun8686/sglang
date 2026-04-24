@@ -101,7 +101,7 @@ QWEN3_235B_OTHER_ARGS = [
 ]
 
 
-class TestQwen235B(TestAscendPerformanceTestCaseBase):
+class TestQwen235B(TestAscendAccuracyTestCaseBase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = QWEN3_235B_W8A8_MODEL_PATH
     other_args = QWEN3_235B_OTHER_ARGS
