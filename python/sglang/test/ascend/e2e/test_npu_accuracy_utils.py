@@ -274,6 +274,7 @@ def run_aisbench(
     port,
     model_path,
     dataset_name,
+    dataset_type,
     output_len,
     max_concurrency,
 ):
@@ -289,6 +290,7 @@ def run_aisbench(
     cmd += f"--model {os.path.basename(model_path)} "
     cmd += f"--model-path {model_path} "
     cmd += f"--dataset-name {dataset_name} "
+    cmd += f"--dataset-type {dataset_type } "
     cmd += f"--output-path {result_path} "
     cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency}"
@@ -373,6 +375,7 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
+    dataset_type = "gsm8k"
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -411,7 +414,7 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
                 logger.error(f"Error during tearDown: {e}")
 
     @retry()
-    def run_throughput(self):
+    def run_accuracy(self):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
@@ -421,6 +424,7 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
                 port=port,
                 model_path=self.model,
                 dataset_name=self.dataset_name,
+                dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
             )
@@ -431,6 +435,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
+    dataset_type = "gsm8k"
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -487,7 +492,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
     @retry()
     @check_role(allowed_roles=["master", "worker"])
 
-    def run_throughput(self):
+    def run_accuracy(self):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
@@ -497,6 +502,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
                 port=port,
                 model_path=self.model,
                 dataset_name=self.dataset_name,
+                dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
             )
@@ -507,6 +513,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
+    dataset_type = "gsm8k"
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
     envs = None
@@ -579,7 +586,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
 
     @retry()
     @check_role(allowed_roles=["router"])
-    def run_throughput(self):
+    def run_accuracy(self):
         parsed_url = urlparse(self.base_url)
         host = parsed_url.hostname
         port = parsed_url.port
@@ -589,6 +596,7 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 port=port,
                 model_path=self.model,
                 dataset_name=self.dataset_name,
+                dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
             )
