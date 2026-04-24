@@ -69,7 +69,7 @@ class TestQwen30B(TestAscendAccuracyTestCaseBase):
     other_args = QWEN3_30B_OTHER_ARGS
     envs = QWEN3_32B_ENVS
     accuracy = 0.1
-    dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_promp"
+    dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
     def test_qwen3_30b(self):
         self.run_accuracy()
 
