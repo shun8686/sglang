@@ -79,7 +79,7 @@ def run_aisbench(
     cmd += f"--dataset-type {dataset_type} "
     cmd += f"--output-path {result_path} "
     cmd += f"--output-len {output_len} "
-    cmd += f"--batch-size {max_concurrency}"
+    cmd += f"--batch-size {max_concurrency} "
     cmd += f"--num-prompts {num_prompts}"
     
     logger.info(f"Command: {cmd}")
