@@ -8,8 +8,8 @@ from functools import wraps
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.e2e.gen_gsm8k_fixed_len import (
-    generate_dataset_from_gsm8k,
+from sglang.test.ascend.e2e.gen_dataset_fixed_len import (
+    generate_gsm8k_dataset,
     generate_mm_dataset,
     generate_random_dataset,
     save_jsonl,
@@ -440,7 +440,7 @@ def run_aisbench(
                 f"Generating gsm8k dataset: {dataset_file}, "
                 f"model_path={model_path}, batch_size={num_prompts}, input_len={input_len}"
             )
-            generate_dataset_from_gsm8k(
+            generate_gsm8k_dataset(
                 model_path=model_path,
                 source_dataset_path=GSM8K_DATASET_TEST_FILE,
                 batch_size=num_prompts,

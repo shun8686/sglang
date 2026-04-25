@@ -9,6 +9,7 @@ from transformers import AutoTokenizer
 
 
 def load_jsonl(path):
+    """Load data from a JSONL file, one JSON object per line."""
     data = []
     with open(path, "r", encoding="utf-8") as f:
         for line in f:
@@ -19,6 +20,7 @@ def load_jsonl(path):
 
 
 def save_jsonl(data, file_path):
+    """Save a list of dicts to a JSONL file, one JSON object per line."""
     file_dir = os.path.dirname(file_path)
     if file_dir:
         os.makedirs(file_dir, exist_ok=True)
@@ -28,6 +30,7 @@ def save_jsonl(data, file_path):
 
 
 def format_qa(item):
+    """Format a GSM8K data entry into QA text for the few-shot pool."""
     question = item["question"]
     answer = item["answer"]
     return f"Question: {question}\nLet's think step by step\nAnswer:\n{answer}\n\n"
@@ -40,6 +43,20 @@ def pad_to_target_tokens(
     target_tokens,
     test_template="Question: {question}\nLet's think step by step\nAnswer:\n",
 ):
+    """Pad a question text to the target token length.
+
+    Tokenizes the question using the test_template, calculates the remaining tokens
+    needed, and prepends randomly sampled few-shot token ids from the pool to reach
+    target_tokens. If the few-shot pool is insufficient, repeats the first sample
+    to fill the remaining gap.
+
+    Args:
+        question: The test question text.
+        few_shot_pool_token_ids: List of token id lists from the few-shot training pool.
+        tokenizer: The tokenizer instance.
+        target_tokens: Target input token length.
+        test_template: Question template string, defaults to GSM8K format.
+    """
     test_prompt = test_template.format(question=question)
     test_token_ids = tokenizer.encode(test_prompt, add_special_tokens=False)
 
@@ -75,7 +92,7 @@ def pad_to_target_tokens(
     return tokenizer.decode(full_ids[:target_tokens], skip_special_tokens=True)
 
 
-def generate_fixed_len_dataset(
+def generate_custom_dataset(
     train_path,
     test_path,
     tokenizer_path,
@@ -84,6 +101,24 @@ def generate_fixed_len_dataset(
     trust_remote_code=False,
     test_template="Question: {question}\nLet's think step by step\nAnswer:\n",
 ):
+    """Generate a custom dataset with a fixed input token length.
+
+    Builds a few-shot pool from the training set and pads test questions to the
+    specified token length. If the test set has fewer samples than num_prompts,
+    it cycles and repeats to fill the required count.
+
+    Args:
+        train_path: Path to the GSM8K training JSONL file.
+        test_path: Path to the GSM8K test JSONL file.
+        tokenizer_path: Path to the tokenizer.
+        target_tokens: Target input token length.
+        num_prompts: Number of prompts to generate; 0 means use all test samples.
+        trust_remote_code: Whether to trust remote code when loading the tokenizer.
+        test_template: Question template string.
+
+    Returns:
+        list[dict]: Each item contains fields defined in test_template.
+    """
     tokenizer = AutoTokenizer.from_pretrained(
         tokenizer_path, trust_remote_code=trust_remote_code
     )
@@ -136,6 +171,16 @@ def generate_fixed_len_dataset(
 
 
 def generate_random_images(mm_dataset_data, size):
+    """Generate random image files for a multimodal dataset.
+
+    Creates random RGB images at the specified resolution for each image path
+    listed in the dataset entries.
+
+    Args:
+        mm_dataset_data: List of multimodal data entries, each with a "path" field
+            containing a list of image file paths.
+        size: Image size tuple (width, height), e.g. (1080, 1920).
+    """
     total_image_num = len(mm_dataset_data)
     print(f"begin to generate images, total {total_image_num}")
 
@@ -175,8 +220,28 @@ def generate_mm_dataset(
     image_dir="/tmp/datasets/image",
     size=None,
 ):
+    """Generate a multimodal (text + image) dataset.
+
+    First generates fixed-length text data via generate_fixed_len_dataset, then
+    attaches random image paths and type labels to each entry, and generates
+    the corresponding random image files.
+
+    Args:
+        train_path: Path to the GSM8K training JSONL file.
+        test_path: Path to the GSM8K test JSONL file.
+        tokenizer_path: Path to the tokenizer.
+        target_tokens: Target input token length.
+        num_prompts: Number of prompts to generate.
+        trust_remote_code: Whether to trust remote code when loading the tokenizer.
+        test_template: Question template string.
+        image_dir: Directory to save generated image files.
+        size: Image size string in "widthxheight" format, e.g. "1080x1920".
+
+    Returns:
+        list[dict]: Each item contains "question", "answer", "type", and "path" fields.
+    """
     output_data = []
-    text_data = generate_fixed_len_dataset(
+    text_data = generate_custom_dataset(
         train_path,
         test_path,
         tokenizer_path,
@@ -199,9 +264,22 @@ def generate_mm_dataset(
     return output_data
 
 
-def generate_dataset_from_gsm8k(
+def generate_gsm8k_dataset(
     model_path, source_dataset_path, batch_size, input_len, output_file
 ):
+    """Generate a dataset with a fixed input token length from GSM8K (JSONL format).
+
+    Reads GSM8K source data, repeats or truncates each question's tokens to input_len,
+    then trims or replicates the dataset to batch_size entries, shuffles, and writes
+    to the output file.
+
+    Args:
+        model_path: Model path used to load the tokenizer.
+        source_dataset_path: Path to the GSM8K source JSONL file.
+        batch_size: Number of samples to generate.
+        input_len: Target input token length.
+        output_file: Output JSONL file path.
+    """
     tokenizer = AutoTokenizer.from_pretrained(model_path)
     dataset = []
     with open(source_dataset_path, "r", encoding="utf-8") as f:
@@ -263,10 +341,31 @@ def generate_random_dataset(
     output_len=1024,
     range_ratio=1,
 ):
+    """Generate a random dataset with logic matching bench_serving's --dataset-name random.
+
+    Samples real conversation text from the ShareGPT dataset as prompts, adjusting
+    to the target token length via truncation or repetition. Input/output lengths
+    are randomly sampled from [target*range_ratio, target]. Output format is a
+    JSON array compatible with ais_bench's ShareGPTDataset.
+
+    If source_dataset_path is not a valid JSON file, automatically downloads the
+    ShareGPT dataset from HuggingFace (anon8231489123/ShareGPT_Vicuna_unfiltered).
+
+    Args:
+        model_path: Model path used to load the tokenizer.
+        source_dataset_path: Path to the ShareGPT JSON file; auto-downloaded if invalid.
+        batch_size: Number of samples to generate.
+        input_len: Target input token length.
+        output_file: Output JSON file path.
+        output_len: Target output token length, default 1024.
+        range_ratio: Random range ratio for input/output lengths. Actual lengths are
+            uniformly sampled from [target*range_ratio, target]. Default 1 (fixed length).
+    """
     SHAREGPT_REPO_ID = "anon8231489123/ShareGPT_Vicuna_unfiltered"
     SHAREGPT_FILENAME = "ShareGPT_V3_unfiltered_cleaned_split.json"
 
     def _is_file_valid_json(path):
+        """Check if the path points to a valid JSON file (exists and parseable)."""
         if not os.path.isfile(path):
             return False
         try:
@@ -277,12 +376,14 @@ def generate_random_dataset(
             return False
 
     def _download_and_cache_hf_file(repo_id, filename, repo_type="dataset"):
+        """Download and cache a file from HuggingFace Hub."""
         from huggingface_hub import hf_hub_download
 
         return hf_hub_download(repo_id=repo_id, filename=filename, repo_type=repo_type)
 
     tokenizer = AutoTokenizer.from_pretrained(model_path)
 
+    # Randomly sample input/output lengths per request in [target*range_ratio, target]
     input_lens = np.random.randint(
         max(int(input_len * range_ratio), 1),
         input_len + 1,
@@ -294,10 +395,12 @@ def generate_random_dataset(
         size=batch_size,
     ).tolist()
 
+    # Subtract special tokens to ensure the actual encoded length does not exceed target
     num_special_tokens = int(tokenizer.num_special_tokens_to_add())
     for i in range(batch_size):
         input_lens[i] = max(1, input_lens[i] - num_special_tokens)
 
+    # Auto-download ShareGPT dataset from HuggingFace if local file is invalid
     if not _is_file_valid_json(source_dataset_path):
         print(
             f"source_dataset_path '{source_dataset_path}' is not a valid file, downloading from HuggingFace..."
@@ -307,6 +410,7 @@ def generate_random_dataset(
             filename=SHAREGPT_FILENAME,
         )
 
+    # Load ShareGPT dataset, filter for >=2 turns, take the first turn (human) as prompt
     with open(source_dataset_path, "r", encoding="utf-8") as f:
         dataset = json.load(f)
 
@@ -324,6 +428,7 @@ def generate_random_dataset(
     ]
     random.shuffle(dataset)
 
+    # Sample prompts, truncating or repeating tokens to reach target input length
     input_requests = []
     for data in dataset:
         i = len(input_requests)
@@ -343,6 +448,7 @@ def generate_random_dataset(
             ratio = (input_lens[i] + prompt_len - 1) // prompt_len
             input_ids = (prompt_token_ids * ratio)[: input_lens[i]]
         input_content = tokenizer.decode(input_ids)
+        # Output format compatible with ais_bench ShareGPTDataset
         input_requests.append(
             {
                 "id": str(i),
@@ -360,6 +466,7 @@ def generate_random_dataset(
     if output_dir:
         os.makedirs(output_dir, exist_ok=True)
 
+    # Output as JSON array format, compatible with ais_bench's json.load()
     with open(output_file, "w", encoding="utf-8") as f:
         json.dump(input_requests, f, ensure_ascii=False, indent=2)
 
@@ -398,7 +505,7 @@ def main():
     )
     args = parser.parse_args()
 
-    output_data = generate_fixed_len_dataset(
+    output_data = generate_custom_dataset(
         train_path=args.train_path,
         test_path=args.test_path,
         tokenizer_path=args.tokenizer_path,
