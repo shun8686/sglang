@@ -80,10 +80,10 @@ class BaseSamplingTest(CustomTestCase):
         try:
             test_file.write_text("test")
             test_file.unlink()
-            logger.info(f"✅ Current directory is writable: {metrics_dir}")
+            logger.info(f"Current directory is writable: {metrics_dir}")
         except PermissionError:
             raise RuntimeError(
-                f"❌ No write permission for current directory: {metrics_dir}"
+                f"No write permission for current directory: {metrics_dir}"
             )
 
         # Launch server
@@ -95,7 +95,7 @@ class BaseSamplingTest(CustomTestCase):
             f"SGLang built-in default parameters: {COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']}"
         )
         logger.info(
-            f"📂 Initial files in current directory: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
+            f"Initial files in current directory: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
         )
 
     @classmethod
@@ -106,7 +106,7 @@ class BaseSamplingTest(CustomTestCase):
             logger.info(f"\n=== {cls.__name__} server has been shut down ===")
             metrics_dir = Path(COMMON_CONFIG["metrics_dir"])
             logger.info(
-                f"📂 Files in current directory after test completion: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
+                f"Files in current directory after test completion: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
             )
 
     def setUp(self):
@@ -114,7 +114,7 @@ class BaseSamplingTest(CustomTestCase):
         metrics_dir = Path(COMMON_CONFIG["metrics_dir"])
         time.sleep(0.5)
         logger.info(
-            f"\n📂 Files in directory before test method execution: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
+            f"\nFiles in directory before test method execution: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
         )
 
     @classmethod
@@ -150,16 +150,16 @@ class BaseSamplingTest(CustomTestCase):
         metrics_dir = Path(COMMON_CONFIG["metrics_dir"])
         # Match actual metrics file naming: sglang-request-metrics-*
         metrics_files = list(metrics_dir.glob("sglang-request-metrics-*.log"))
-        logger.info(f"\n🔍 Matched metrics files: {[f.name for f in metrics_files]}")
+        logger.info(f"\nMatched metrics files: {[f.name for f in metrics_files]}")
 
         if not metrics_files:
             self.fail(
-                f"❌ No sglang-request-metrics-*.log files found! Current directory files: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
+                f"No sglang-request-metrics-*.log files found! Current directory files: {[f.name for f in metrics_dir.glob('*') if f.is_file()]}"
             )
 
         # Get latest metrics file
         latest_file = max(metrics_files, key=lambda f: f.stat().st_mtime)
-        logger.info(f"🔍 Reading latest metrics file: {latest_file.name}")
+        logger.info(f"Reading latest metrics file: {latest_file.name}")
 
         # Read and clean log content (fix line break/space issues)
         with open(latest_file, "r", encoding="utf-8") as f:
@@ -172,7 +172,7 @@ class BaseSamplingTest(CustomTestCase):
             last_log = log_lines[-1] if log_lines else ""
             # Clean line breaks and extra spaces
             clean_content = last_log.replace("\n", "").replace("  ", " ").strip()
-            logger.info(f"\n📝 Cleaned latest log content:\n{clean_content[:800]}...")
+            logger.info(f"\nCleaned latest log content:\n{clean_content[:800]}...")
 
         # Parse JSON (core adaptation: sampling_params nested in request_parameters)
         try:
@@ -182,10 +182,10 @@ class BaseSamplingTest(CustomTestCase):
             req_params = json.loads(log_data["request_parameters"])
             # Extract sampling_params
             sampling_params = req_params.get("sampling_params", {})
-            logger.info(f"🔍 Parsed sampling_params: {sampling_params}")
+            logger.info(f"Parsed sampling_params: {sampling_params}")
         except json.JSONDecodeError as e:
             self.fail(
-                f"❌ JSON parsing failed: {e}, Original content: {clean_content[:500]}"
+                f"JSON parsing failed: {e}, Original content: {clean_content[:500]}"
             )
 
         # Extract core sampling parameters (fill missing parameters with default values)
@@ -194,7 +194,7 @@ class BaseSamplingTest(CustomTestCase):
             core_params[key] = sampling_params.get(
                 key, COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"][key]
             )
-        logger.info(f"🔍 Final extracted core sampling parameters: {core_params}")
+        logger.info(f"Final extracted core sampling parameters: {core_params}")
         return core_params
 
 
@@ -250,7 +250,7 @@ class TestSamplingDefaultsModel(BaseSamplingTest):
             f"repetition_penalty mismatch: expected={COMMON_CONFIG['MODEL_GEN_DEFAULTS']['repetition_penalty']}, "
             f"actual={sampling_params['repetition_penalty']}",
         )
-        logger.info("✅ Model mode default parameters assertion passed!")
+        logger.info("Model mode default parameters assertion passed!")
 
     def test_custom_params(self):
         """Model mode - Manually customized parameters"""
@@ -273,7 +273,7 @@ class TestSamplingDefaultsModel(BaseSamplingTest):
                 expected_value,
                 f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}",
             )
-        logger.info("✅ Model mode manual parameters assertion passed!")
+        logger.info("Model mode manual parameters assertion passed!")
 
 
 class TestSamplingDefaultsOpenAI(BaseSamplingTest):
@@ -327,7 +327,7 @@ class TestSamplingDefaultsOpenAI(BaseSamplingTest):
             COMMON_CONFIG["SGLANG_BUILTIN_DEFAULTS"]["repetition_penalty"],
             f"repetition_penalty mismatch: expected={COMMON_CONFIG['SGLANG_BUILTIN_DEFAULTS']['repetition_penalty']}, actual={sampling_params['repetition_penalty']}",
         )
-        logger.info("✅ openai mode default parameters assertion passed!")
+        logger.info("openai mode default parameters assertion passed!")
 
     def test_custom_params(self):
         """openai mode - Manually customized parameters"""
@@ -350,7 +350,7 @@ class TestSamplingDefaultsOpenAI(BaseSamplingTest):
                 expected_value,
                 f"Manual parameter {key} not effective: expected={expected_value}, actual={sampling_params[key]}",
             )
-        logger.info("✅ openai mode manual parameters assertion passed!")
+        logger.info("openai mode manual parameters assertion passed!")
 
 
 if __name__ == "__main__":

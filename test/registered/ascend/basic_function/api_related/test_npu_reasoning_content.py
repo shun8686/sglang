@@ -71,9 +71,9 @@ class TestReasoningContentAPI(CustomTestCase):
             elif chunk.choices[0].delta.reasoning_content:
                 reasoning_content += chunk.choices[0].delta.reasoning_content
         # the reasoning_content of chunk should not have a value when separate reasoning is false
-        assert len(reasoning_content) == 0
+        self.assertEqual(len(reasoning_content), 0)
         # the content of chunk should have a value when streaming is true
-        assert len(content) > 0
+        self.assertGreater(len(content), 0)
 
     def test_streaming_separate_reasoning_true(self):
         client = openai.Client(api_key=self.api_key, base_url=self.base_url)

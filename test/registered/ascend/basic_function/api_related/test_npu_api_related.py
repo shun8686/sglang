@@ -15,6 +15,7 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+BEARER_HEADERS = "Bearer sk-123456"
 
 
 class TestNpuApiRelated(CustomTestCase):
@@ -78,6 +79,8 @@ class TestNpuApiRelated(CustomTestCase):
     @classmethod
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
+        cls.out_log_file.close()
+        cls.err_log_file.close()
         os.remove("./cache_out_log.txt")
         os.remove("./cache_err_log.txt")
 
@@ -85,7 +88,7 @@ class TestNpuApiRelated(CustomTestCase):
         # Verify the weight version identifier and the served-model-name covered model name.
         response = requests.get(
             f"{self.base_url}/v1/models",
-            headers={"Authorization": "Bearer sk-123456"},
+            headers={"Authorization": BEARER_HEADERS},
         )
         result = response.json()
 
@@ -94,7 +97,7 @@ class TestNpuApiRelated(CustomTestCase):
 
         response1 = requests.get(
             f"{self.base_url}/model_info",
-            headers={"Authorization": "Bearer sk-123456"},
+            headers={"Authorization": BEARER_HEADERS},
         )
         self.assertEqual(response1.json()["weight_version"], self.weight_version)
 
@@ -102,8 +105,6 @@ class TestNpuApiRelated(CustomTestCase):
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
         self.assertIn("Using specified chat template: 'tool_use'", content)
-        self.out_log_file.close()
-        self.err_log_file.close()
 
     def test_chat_template_request(self):
         """Send inference request"""
@@ -154,7 +155,7 @@ class TestNpuApiRelated(CustomTestCase):
         for i in range(2):
             response = requests.post(
                 f"{self.base_url}/v1/completions",
-                headers={"Authorization": "Bearer sk-123456"},
+                headers={"Authorization": BEARER_HEADERS},
                 json={
                     "prompt": "just return me a string with of 5000 characters, " * 24,
                     "max_tokens": 260,

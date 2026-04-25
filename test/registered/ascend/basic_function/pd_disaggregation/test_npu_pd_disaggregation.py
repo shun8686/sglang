@@ -155,7 +155,8 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
 
         # Flush device cache to force remote storage access
         time.sleep(2)
-        requests.post(self.prefill_url + "/flush_cache")
+        response = requests.post(self.prefill_url + "/flush_cache")
+        self.assertEqual(response.status_code, 200)
 
 
 class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):

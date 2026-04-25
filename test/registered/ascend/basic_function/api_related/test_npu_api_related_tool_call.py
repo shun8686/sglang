@@ -19,6 +19,16 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+SYSTEM_MESSAGE = (
+    "You are a helpful assistant with tool calling capabilities. "
+    "Only reply with a tool call if the function exists in the library provided by the user. "
+    "If it doesn't exist, just reply directly in natural language. "
+    "When you receive a tool call response, use the output to format an answer to the original user question. "
+    "You have access to the following functions. "
+    "To call a function, please respond with JSON for a function call. "
+    'Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}. '
+    "Do not use variables.\n\n"
+)
 
 
 class TestApiRelatedToolCallParserLlama(CustomTestCase):
@@ -28,17 +38,6 @@ class TestApiRelatedToolCallParserLlama(CustomTestCase):
     [Test Target] Api related on NPU
     --sampling-defaults; --chat-template; --tool-call-parser
     """
-
-    SYSTEM_MESSAGE = (
-        "You are a helpful assistant with tool calling capabilities. "
-        "Only reply with a tool call if the function exists in the library provided by the user. "
-        "If it doesn't exist, just reply directly in natural language. "
-        "When you receive a tool call response, use the output to format an answer to the original user question. "
-        "You have access to the following functions. "
-        "To call a function, please respond with JSON for a function call. "
-        'Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}. '
-        "Do not use variables.\n\n"
-    )
 
     @classmethod
     def setUpClass(cls):
@@ -106,7 +105,7 @@ class TestApiRelatedToolCallParserLlama(CustomTestCase):
         ]
 
         messages = [
-            {"role": "system", "content": self.SYSTEM_MESSAGE},
+            {"role": "system", "content": SYSTEM_MESSAGE},
             {"role": "user", "content": "Compute (3+5)"},
         ]
         response = client.chat.completions.create(
@@ -120,12 +119,11 @@ class TestApiRelatedToolCallParserLlama(CustomTestCase):
         )
 
         tool_calls = response.choices[0].message.tool_calls
-        assert (
-            isinstance(tool_calls, list) and len(tool_calls) > 0
-        ), "tool_calls should be a non-empty list"
+        self.assertIsInstance(tool_calls, list)
+        self.assertGreater(len(tool_calls), 0, "tool_calls should be a non-empty list")
 
         function_name = tool_calls[0].function.name
-        assert function_name == "add", "Function name should be 'add'"
+        self.assertEqual(function_name, "add", "Function name should be 'add'")
 
 
 class TestApiRelatedToolCallParserPythonic(CustomTestCase):
@@ -241,17 +239,6 @@ class TestApiRelatedToolCallParserQwen(CustomTestCase):
     --tool-call-parser
     """
 
-    SYSTEM_MESSAGE = (
-        "You are a helpful assistant with tool calling capabilities. "
-        "Only reply with a tool call if the function exists in the library provided by the user. "
-        "If it doesn't exist, just reply directly in natural language. "
-        "When you receive a tool call response, use the output to format an answer to the original user question. "
-        "You have access to the following functions. "
-        "To call a function, please respond with JSON for a function call. "
-        'Respond in the format {"name": function name, "parameters": dictionary of argument name and its value}. '
-        "Do not use variables.\n\n"
-    )
-
     tool_call_parser = "qwen"
 
     @classmethod
@@ -319,7 +306,7 @@ class TestApiRelatedToolCallParserQwen(CustomTestCase):
         ]
 
         messages = [
-            {"role": "system", "content": self.SYSTEM_MESSAGE},
+            {"role": "system", "content": SYSTEM_MESSAGE},
             {
                 "role": "user",
                 "content": "Tell me the temperature in Xi'an, please use celsius",
