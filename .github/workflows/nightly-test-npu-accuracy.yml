@@ -37,7 +37,7 @@ jobs:
 
   nightly-accuracy-baseline-multi-node-tests:
     name: multi-node-pd-separation
-    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') && false }}
+    if: ${{ !cancelled() && (github.repository == 'sgl-project/sglang' || github.event_name == 'pull_request') }}
     needs: nightly-accuracy-baseline-single-node-tests
     strategy:
       fail-fast: false
