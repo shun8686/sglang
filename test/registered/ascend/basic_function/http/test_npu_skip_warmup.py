@@ -70,15 +70,9 @@ class TestSkipServerWarmup(CustomTestCase):
         # Verify that inference is correct when warming up is skipped
         self.assertEqual(response.status_code, 200)
         self.assertIn("Paris", response.text)
-        start_time = time.time()
-        timeout = 30
-        content = ""
-        while time.time() - start_time < timeout:
-            with open(self.out_log_file.name, "r", encoding="utf-8") as f:
-                content = f.read()
-            if content:
-                break
-            time.sleep(0.5)
+        with open(self.out_log_file.name, "r", encoding="utf-8") as f:
+            content = f.read()
+
 
         self.assertTrue(
             len(content) > 0, "Log file remained empty after server startup"
