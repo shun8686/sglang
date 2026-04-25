@@ -72,6 +72,11 @@ OTHER_ARGS = [
 
 
 class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
+    """Testcase: Verify the accuracy of DeepSeek-R1 model on MMLU and GSM8K tasks with --deepep-mode low_latency on Ascend backend.
+
+    [Test Category] Parameter
+    [Test Target] --moe-a2a-backend; --deepep-mode
+    """
     model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
     envs = ENVS
     other_args = OTHER_ARGS
