@@ -61,7 +61,7 @@ class TestAscendMoeDenseTPSize(CustomTestCase):
 
     def test_gsm8k(self):
         args = SimpleNamespace(
-            max_new_tokens=512,
+            max_tokens=512,
             base_url=DEFAULT_URL_FOR_TEST,
             model=self.model,
             eval_name="gsm8k",

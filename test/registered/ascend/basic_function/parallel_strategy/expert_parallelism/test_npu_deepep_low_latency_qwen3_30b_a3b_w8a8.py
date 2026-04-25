@@ -81,7 +81,7 @@ class TestDeepepLowlatencyQwen3(CustomTestCase):
             num_examples=200,
             num_threads=64,
             num_shots=5,
-            max_new_tokens=512,
+            max_tokens=512,
         )
         metrics = run_eval(args)
         self.assertGreaterEqual(
