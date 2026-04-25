@@ -274,7 +274,3 @@ sgl-kernel/csrc/**/*_musa/
 *.glb
 *.ply
 *.npz
-pyrightconfig.json
-.gitignore
-setup.py
-test/__init__.py
