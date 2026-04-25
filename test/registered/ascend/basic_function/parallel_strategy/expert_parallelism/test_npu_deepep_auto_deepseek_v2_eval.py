@@ -62,8 +62,8 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     # base_url = DEFAULT_URL_FOR_TEST
     # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     model = "/home/weights/DeepSeek-V2-Lite-W8A8"
-    other_args = ENVS
-    envs = OTHER_ARGS
+    envs = ENVS
+    other_args = OTHER_ARGS
     accuracy = 0.1
     dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
     def test_accuracy(self):
