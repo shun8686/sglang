@@ -37,9 +37,10 @@ jobs:
           - name: test_ascend_qwen3_coder_next_w8a8_2p_in16k_out1k_20ms
             test_case: test/registered/ascend/performance/test_ascend_qwen3_coder_next_w8a8_2p_in16k_out1k_20ms.py
             runner: linux-aarch64-a3-4
-    uses: ./.github/workflows/nightly-test-npu-perf-single-node.yml
+    uses: ./.github/workflows/nightly-test-npu-e2e-single-node.yml
     with:
       runner: ${{ matrix.test_config.runner }}
+      test_type: 'perf'
       test_config_name: ${{ matrix.test_config.name }}
       test_case: ${{ matrix.test_config.test_case }}
       image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B111'
@@ -61,9 +62,10 @@ jobs:
           - name: test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms
             test_case: test/registered/ascend/performance/v26/test_ascend_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms.py
             runner: linux-aarch64-a3-16
-    uses: ./.github/workflows/nightly-test-npu-perf-single-node.yml
+    uses: ./.github/workflows/nightly-test-npu-e2e-single-node.yml
     with:
       runner: ${{ matrix.test_config.runner }}
+      test_type: 'perf'
       test_config_name: ${{ matrix.test_config.name }}
       test_case: ${{ matrix.test_config.test_case }}
       image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B111'
@@ -223,9 +225,10 @@ jobs:
           - name: test_ascend_qwen3_32b_w8a8_2p_in6k_out1k5_bs16
             test_case: test/registered/ascend/performance/v26/req/test_ascend_qwen3_32b_w8a8_2p_in6k_out1k5_bs16.py
             runner: linux-aarch64-a3-4
-    uses: ./.github/workflows/nightly-test-npu-perf-single-node.yml
+    uses: ./.github/workflows/nightly-test-npu-e2e-single-node.yml
     with:
       runner: ${{ matrix.test_config.runner }}
+      test_type: 'perf'
       test_config_name: ${{ matrix.test_config.name }}
       test_case: ${{ matrix.test_config.test_case }}
       image: 'swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann8.5.0-a3-B111'
@@ -247,9 +250,10 @@ jobs:
           - name: test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms
             node_size: 2
             test_case: test/manual/ascend/performance/test_ascend_qwen3_480b_w8a8_16p_in3k5_out1k5_50ms.py
-    uses: ./.github/workflows/nightly-test-npu-perf-multi-node.yml
+    uses: ./.github/workflows/nightly-test-npu-e2e-multi-node.yml
     with:
       runner: linux-aarch64-a3-0
+      test_type: 'perf'
       test_config_name: ${{ matrix.test_config.name }}
       node_size: ${{ matrix.test_config.node_size }}
       test_case: ${{ matrix.test_config.test_case }}
@@ -327,9 +331,10 @@ jobs:
             decode_size: 2
             router_size: 1
             test_case: test/manual/ascend/performance/v26/test_ascend_deepseek_v3_2_w8a8_1p1d_32p_in128k_out1k_bs16.py
-    uses: ./.github/workflows/nightly-test-npu-perf-multi-node.yml
+    uses: ./.github/workflows/nightly-test-npu-e2e-multi-node.yml
     with:
       runner: linux-aarch64-a3-0
+      test_type: 'perf'
       test_config_name: ${{ matrix.test_config.name }}
       prefill_size: ${{ matrix.test_config.prefill_size }}
       decode_size: ${{ matrix.test_config.decode_size }}
@@ -359,9 +364,10 @@ jobs:
             decode_size: 2
             router_size: 1
             test_case: test/manual/ascend/performance/test_ascend_qwen3_480b_w8a8_1p1d_24p_in3k5_out1k5_50ms.py
-    uses: ./.github/workflows/nightly-test-npu-perf-multi-node.yml
+    uses: ./.github/workflows/nightly-test-npu-e2e-multi-node.yml
     with:
       runner: linux-aarch64-a3-0
+      test_type: 'perf'
       test_config_name: ${{ matrix.test_config.name }}
       prefill_size: ${{ matrix.test_config.prefill_size }}
       decode_size: ${{ matrix.test_config.decode_size }}

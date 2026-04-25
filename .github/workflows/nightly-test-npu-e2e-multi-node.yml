@@ -7,6 +7,11 @@ on:
         required: false
         type: string
         default: linux-aarch64-a3-0
+      test_type:
+        required: false
+        type: string
+        default: perf
+        description: perf or accuracy
       test_config_name:
         required: true
         type: string
@@ -69,7 +74,7 @@ jobs:
         KUBECONFIG: /root/.cache/.cache/kb.yaml
         KUBECTL: /root/.cache/.cache/kubectl
         NAMESPACE: sgl-project
-        KUBE_JOB_NAME: ascend-sglang-perf-test
+        KUBE_JOB_NAME: ascend-sglang-${{ inputs.test_type }}-test
         SGLANG_IS_IN_CI: true
         ASCEND_E2E_TEST_CONFIG_PATH: python/sglang/test/ascend/e2e
         SGLANG_USE_MODELSCOPE: true
@@ -129,7 +134,7 @@ jobs:
 
           # prepare for output data
           current_date=$(date +%Y%m%d)
-          test_data_output_path=/root/.cache/tests/output/perf/${current_date}
+          test_data_output_path=/root/.cache/tests/output/${{ inputs.test_type }}/${current_date}
           mkdir -p ${test_data_output_path}
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
