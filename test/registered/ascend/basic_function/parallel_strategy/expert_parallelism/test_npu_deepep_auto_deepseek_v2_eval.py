@@ -54,8 +54,12 @@ OTHER_ARGS = [
 ]
 
 class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = "http:127.0.0.1:8888"
+
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    base_url = DEFAULT_URL_FOR_TEST
+    # base_url = DEFAULT_URL_FOR_TEST
     # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     model = "/home/weights/DeepSeek-V2-Lite-W8A8"
     other_args = ENVS
