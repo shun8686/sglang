@@ -77,7 +77,7 @@ class TestSkipServerWarmup(CustomTestCase):
         self.assertTrue(
             len(content) > 0, "Log file remained empty after server startup"
         )
-        self.assertNotIn("GET /model_info HTTP/1.1", content)
+        self.assertNotIn("Running warmup", content)
 
 
 if __name__ == "__main__":
