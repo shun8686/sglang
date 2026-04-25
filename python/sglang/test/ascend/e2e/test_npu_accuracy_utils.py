@@ -7,6 +7,12 @@ import time
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.gen_gsm8k_fixed_len import (
+    generate_dataset_from_gsm8k,
+    generate_fixed_len_dataset,
+    generate_mm_dataset,
+    save_jsonl,
+)
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     SERVICE_PORT,
     check_role,
@@ -29,6 +35,14 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 AISBENCHMARK = "aisbench"
+BENCHMARK_TOOL_DEFAULT = AISBENCHMARK
+
+PYTHON_FOR_TEST_TOOL = "test_env_transformers_tool/bin/python"
+if not os.path.exists(PYTHON_FOR_TEST_TOOL) or not os.access(
+    PYTHON_FOR_TEST_TOOL, os.X_OK
+):
+    PYTHON_FOR_TEST_TOOL = "python3"
+logger.info(f"PYTHON_FOR_TEST_TOOL: {PYTHON_FOR_TEST_TOOL}")
 
 DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH = 3600
 MAX_SERVER_KEEP_ALIVE_TIME = 3600
@@ -46,7 +60,6 @@ else:
     )
 DEFAULT_URL_FOR_TEST = f"http://127.0.0.1:{DEFAULT_SERVER_PORT_FOR_TEST + 66}"
 
-
 def run_aisbench(
     host,
     port,
@@ -55,6 +68,7 @@ def run_aisbench(
     dataset_type,
     output_len,
     max_concurrency,
+    num_prompts,
 ):
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
@@ -72,7 +86,8 @@ def run_aisbench(
     cmd += f"--output-path {result_path} "
     cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency}"
-
+    cmd += f"--num-prompts {num_prompts}"
+    
     logger.info(f"Command: {cmd}")
 
     process = subprocess.Popen(
@@ -113,6 +128,7 @@ def run_aisbench(
 
         return metrics
 
+
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, terminating process...")
         process.terminate()
@@ -144,13 +160,12 @@ def assert_metrics(self, metrics):
         self.assertGreaterEqual(
             float(metrics["accuracy"]),
             self.accuracy,
-            f"Accuracy check failed. Expected >= {self.accuracy}, Got: {metrics['accuracy']}",
+            f"Accuracy check failed. Expected >= {self.accuracy}, Got: {metrics['accuracy']}"
         )
-
 
 class TestAscendAccuracyTestCaseBase(CustomTestCase):
     model = None
-    benchmark_tool = AISBENCHMARK
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
     dataset_type = "gsm8k"
@@ -161,6 +176,7 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
     accuracy = 0.1
     output_len = 512
     max_concurrency = 1
+    num_prompts = 100000
 
     @classmethod
     def setUpClass(cls):
@@ -204,13 +220,13 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
                 dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
+                num_prompts = self.num_prompts,
             )
             assert_metrics(self, metrics)
 
-
 class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
-    model = None
-    benchmark_tool = AISBENCHMARK
+    model_config = None
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
     dataset_type = "gsm8k"
@@ -274,9 +290,9 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
         port = parsed_url.port
         if self.benchmark_tool == AISBENCHMARK:
             metrics = run_aisbench(
-                host=host,
-                port=port,
-                model_path=self.model,
+                host=self.host,
+                port=self.port,
+                model_path=self.model_config.get("model_path"),
                 dataset_name=self.dataset_name,
                 dataset_type=self.dataset_type,
                 output_len=self.output_len,
@@ -284,20 +300,19 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
             )
             assert_metrics(self, metrics)
 
-
 class TestAscendAccuracyMultiNodePdSepTestCaseBase(CustomTestCase):
-    model = None
-    benchmark_tool = AISBENCHMARK
+    model_config = None
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     backend = "sglang"
     dataset_name = "gsm8k_gen_4_shot_cot_str"  # gsm8k
     dataset_type = "gsm8k"
     other_args = None
     timeout = DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH
-    envs = None
     max_attempts = 2
     accuracy = 0.1
     output_len = 512
     max_concurrency = 1
+    num_prompts = 100000
 
     @classmethod
     def setUpClass(cls):
@@ -370,10 +385,11 @@ class TestAscendAccuracyMultiNodePdSepTestCaseBase(CustomTestCase):
             metrics = run_aisbench(
                 host=host,
                 port=port,
-                model_path=self.model,
+                model_path=self.model_config.get("model_path"),
                 dataset_name=self.dataset_name,
                 dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
             )
             assert_metrics(self, metrics)
