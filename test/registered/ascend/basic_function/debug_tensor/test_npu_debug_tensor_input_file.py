@@ -40,7 +40,7 @@ class TestDebugTensorInputFile(CustomTestCase):
             "--disable-cuda-graph",
         ]
         with open(
-                "./tensor_input_out_log.txt", "w+", encoding="utf-8"
+            "./tensor_input_out_log.txt", "w+", encoding="utf-8"
         ) as out_log_file, open(
             "./tensor_input_err_log.txt", "w+", encoding="utf-8"
         ) as err_log_file:
