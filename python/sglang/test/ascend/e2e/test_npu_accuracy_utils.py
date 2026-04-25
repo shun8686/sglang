@@ -7,12 +7,6 @@ import time
 from urllib.parse import urlparse
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.e2e.gen_gsm8k_fixed_len import (
-    generate_dataset_from_gsm8k,
-    generate_fixed_len_dataset,
-    generate_mm_dataset,
-    save_jsonl,
-)
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     SERVICE_PORT,
     check_role,
