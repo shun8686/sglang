@@ -7,6 +7,11 @@ on:
         required: true
         type: string
         default: linux-aarch64-a3-16
+      test_type:
+        required: false
+        type: string
+        default: perf
+        description: perf or accuracy
       test_config_name:
         required: true
         type: string
@@ -32,7 +37,7 @@ on:
         description: "The transformers version number for running sglang. Use default version in image if keep empty."
 
 concurrency:
-  group: ascend-nightly-performance-singlenode-${{ github.workflow_ref }}-${{ github.ref }}-${{ inputs.test_config_name }}
+  group: ascend-nightly-e2e-singlenode-${{ github.workflow_ref }}-${{ github.ref }}-${{ inputs.test_config_name }}
   cancel-in-progress: true
 
 jobs:
@@ -69,7 +74,7 @@ jobs:
 
           # prepare for output data
           current_date=$(date +%Y%m%d)
-          test_data_output_path=/root/.cache/tests/output/perf/${current_date}
+          test_data_output_path=/root/.cache/tests/output/${{ inputs.test_type }}/${current_date}
           mkdir -p ${test_data_output_path}
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
