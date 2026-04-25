@@ -57,6 +57,7 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     @classmethod
     def setUpClass(cls):
         cls.base_url = "http:127.0.0.1:8888"
+        cls.dataset_type = "mmlu"
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     # base_url = DEFAULT_URL_FOR_TEST
@@ -65,7 +66,8 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     envs = ENVS
     other_args = OTHER_ARGS
     accuracy = 0.1
-    dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
+    # dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
+    dataset_name = "mmlu_gen_5_shot_str"
     def test_accuracy(self):
         self.run_accuracy()
 
