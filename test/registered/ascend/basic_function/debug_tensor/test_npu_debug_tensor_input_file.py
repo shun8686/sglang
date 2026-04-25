@@ -39,8 +39,11 @@ class TestDebugTensorInputFile(CustomTestCase):
             "ascend",
             "--disable-cuda-graph",
         ]
-        with open("./tensor_input_out_log.txt", "w+", encoding="utf-8") as out_log_file, \
-                open("./tensor_input_err_log.txt", "w+", encoding="utf-8") as err_log_file:
+        with open(
+                "./tensor_input_out_log.txt", "w+", encoding="utf-8"
+        ) as out_log_file, open(
+            "./tensor_input_err_log.txt", "w+", encoding="utf-8"
+        ) as err_log_file:
             with self.assertRaises(Exception) as cm:
                 popen_launch_server(
                     LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,

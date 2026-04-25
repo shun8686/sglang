@@ -37,6 +37,7 @@ class TestDebugTensorDumpOutputFolderBase(ABC):
     [Test Category] Parameter
     [Test Target] --debug-tensor-dump-output-folder; --debug-tensor-dump-layers
     """
+
     dump_folder = tempfile.mkdtemp(prefix="tensor_folder")
     model = QWEN3_32B_WEIGHTS_PATH
     base_args = [
@@ -133,10 +134,18 @@ class TestDebugTensorDumpOutputFolder(
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
-        model_layers_list1 = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_TP1}")
-        model_layers_list2 = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_TP2}")
-        model_layers_list3 = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_TP3}")
+        model_layers_list = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_PP0}"
+        )
+        model_layers_list1 = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_TP1}"
+        )
+        model_layers_list2 = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_TP2}"
+        )
+        model_layers_list3 = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_TP3}"
+        )
         # Keep it consistent with num_hidden_layers in the model's config.json file.
         self.assertEqual(len(model_layers_list), NUM_HIDDEN_LAYERS)
         self.assertEqual(len(model_layers_list1), NUM_HIDDEN_LAYERS)
@@ -161,7 +170,9 @@ class TestDumpLayersSingle(TestDebugTensorDumpOutputFolderBase, CustomTestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
+        model_layers_list = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_PP0}"
+        )
         self.assertEqual(len(model_layers_list), 1)
         self.assertEqual(model_layers_list[0], 1)
 
@@ -184,7 +195,9 @@ class TestDumpLayersMultiple(TestDebugTensorDumpOutputFolderBase, CustomTestCase
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
+        model_layers_list = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_PP0}"
+        )
         self.assertEqual(len(model_layers_list), 3)
         self.assertEqual(model_layers_list[0], 2)
         self.assertEqual(model_layers_list[1], 3)
@@ -211,7 +224,9 @@ class TestDumpLayersNonConsecutiveLayers(
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
+        model_layers_list = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_PP0}"
+        )
         self.assertEqual(len(model_layers_list), 3)
         self.assertEqual(model_layers_list[0], 0)
         self.assertEqual(model_layers_list[1], 5)
@@ -234,7 +249,9 @@ class TestDumpLayersOutOFRange(TestDebugTensorDumpOutputFolderBase, CustomTestCa
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(res), TP_DIR_NUM)
 
-        model_layers_list = self.get_layers_from_tensor_file(f"{self.dump_folder}{FILE_PATTERN_PP0}")
+        model_layers_list = self.get_layers_from_tensor_file(
+            f"{self.dump_folder}{FILE_PATTERN_PP0}"
+        )
         self.assertEqual(len(model_layers_list), 0)
 
 
