@@ -54,6 +54,7 @@ else:
     )
 DEFAULT_URL_FOR_TEST = f"http://127.0.0.1:{DEFAULT_SERVER_PORT_FOR_TEST + 66}"
 
+
 def run_aisbench(
     host,
     port,
@@ -81,6 +82,7 @@ def run_aisbench(
     cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency} "
     cmd += f"--num-prompts {num_prompts}"
+
     
     logger.info(f"Command: {cmd}")
 
@@ -122,7 +124,6 @@ def run_aisbench(
 
         return metrics
 
-
     except KeyboardInterrupt:
         logger.info("Keyboard interrupt received, terminating process...")
         process.terminate()
@@ -154,8 +155,9 @@ def assert_metrics(self, metrics):
         self.assertGreaterEqual(
             float(metrics["accuracy"]),
             self.accuracy,
-            f"Accuracy check failed. Expected >= {self.accuracy}, Got: {metrics['accuracy']}"
+            f"Accuracy check failed. Expected >= {self.accuracy}, Got: {metrics['accuracy']}",
         )
+
 
 class TestAscendAccuracyTestCaseBase(CustomTestCase):
     model = None
@@ -214,9 +216,10 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
                 dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
-                num_prompts = self.num_prompts,
+                num_prompts=self.num_prompts,
             )
             assert_metrics(self, metrics)
+
 
 class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
     model_config = None
