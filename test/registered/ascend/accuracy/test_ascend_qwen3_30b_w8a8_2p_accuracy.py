@@ -2,9 +2,9 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     AISBENCHMARK,
-    QWEN3_30B_A3B_W8A8_MODEL_PATH,
     TestAscendAccuracyTestCaseBase,
 )
+from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
@@ -63,7 +63,7 @@ QWEN3_30B_OTHER_ARGS = [
 
 
 class TestQwen30B(TestAscendAccuracyTestCaseBase):
-    model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = QWEN3_30B_A3B_W8A8_WEIGHTS_PATH
     other_args = QWEN3_30B_OTHER_ARGS
     envs = QWEN3_30B_ENVS
     # Test gsm8k accuracy by aisbench
