@@ -3,6 +3,7 @@ import unittest
 from types import SimpleNamespace
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import TestAscendAccuracyTestCaseBase, BENCHMARK_TOOL_DEFAULT
 # from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.few_shot_gsm8k import run_eval as run_gsm8k
@@ -17,136 +18,52 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=400, suite="full-8-npu-a3", nightly=True)
 
 
-class TestDeepEpDeepseek(CustomTestCase):
-    @classmethod
-    def setUpClass(cls):
-        # cls.model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
-        cls.model = "/home/weights/DeepSeek-V2-Lite-W8A8"
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--trust-remote-code",
-                "--attention-backend",
-                "ascend",
-                "--quantization",
-                "modelslim",
-                "--tp-size",
-                "8",
-                "--moe-a2a-backend",
-                "deepep",
-                "--deepep-mode",
-                "auto",
-                "--max-running-requests",
-                128,
-                "--disable-cuda-graph",
-                "--dp-size",
-                8,
-                "--enable-dp-attention",
-                "--chunked-prefill-size",
-                1024,
-                "--mem-fraction-static",
-                0.68,
-                "--base-gpu-id",
-                8,
-                "--log-requests",
-            ],
-            env={
-                "SGLANG_SET_CPU_AFFINITY": "1",
-                "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
-                "STREAMS_PER_DEVICE": "32",
-                # "SGLANG_ENABLE_JIT_DEEPGEMM": "0",
-                "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
-                "HCCL_BUFFSIZE": "4096",
-                # "MOE_ENABLE_TOPK_NEG_ONE": "1",
-                **os.environ,
-            },
-        )
+ENVS = {
+    "SGLANG_SET_CPU_AFFINITY": "1",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "STREAMS_PER_DEVICE": "32",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "512",
+    "HCCL_BUFFSIZE": "4096",
+}
 
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+OTHER_ARGS = [
+    "--trust-remote-code",
+    "--attention-backend",
+    "ascend",
+    "--quantization",
+    "modelslim",
+    "--tp-size",
+    "8",
+    "--moe-a2a-backend",
+    "deepep",
+    "--deepep-mode",
+    "auto",
+    "--max-running-requests",
+    128,
+    "--disable-cuda-graph",
+    "--dp-size",
+    8,
+    "--enable-dp-attention",
+    "--chunked-prefill-size",
+    1024,
+    "--mem-fraction-static",
+    0.68,
+    "--base-gpu-id",
+    8,
+    "--log-requests",
+]
 
-    # def test_mmlu(self):
-    #     expect_score = 0.58
-    #     args = SimpleNamespace(
-    #         base_url=self.base_url,
-    #         model=self.model,
-    #         eval_name="mmlu",
-    #         num_examples=128,
-    #         num_threads=32,
-    #         num_shots=5,
-    #         api="completion",
-    #     )
-    #     print("Starting mmlu test...")
-    #     metrics = run_eval(args)
-    #     self.assertGreater(metrics["score"], expect_score)
+class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
+    model = "/home/weights/DeepSeek-V2-Lite-W8A8"
+    other_args = ENVS
+    envs = OTHER_ARGS
+    accuracy = 0.1
+    dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
+    def test_accuracy(self):
+        self.run_accuracy()
 
-    # def test_gsm8k(self):
-    #     expect_accuracy = 0.34
-    #     args = SimpleNamespace(
-    #         num_shots=8,
-    #         data_path=None,
-    #         num_questions=200,
-    #         max_new_tokens=512,
-    #         parallel=128,
-    #         host="http://127.0.0.1",
-    #         port=int(self.base_url.split(":")[-1]),
-    #     )
-    #     print("Starting gsm8k test...")
-    #     metrics = run_gsm8k(args)
-    #     self.assertGreaterEqual(
-    #         metrics["accuracy"],
-    #         expect_accuracy,
-    #         f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
-    #     )
-
-    def test_gsm8k(self):
-        expect_accuracy = 0.1
-
-        # print("=" * 20 + " OLD GSM8K START" + "=" * 20)
-        # args = SimpleNamespace(
-        #     num_shots=5,
-        #     data_path=None,
-        #     num_questions=200,
-        #     max_new_tokens=512,
-        #     parallel=128,
-        #     host="http://127.0.0.1",
-        #     port=int(self.base_url.split(":")[-1]),
-        #     api="completion"
-        # )
-        # print("Starting gsm8k test...")
-        # metrics = run_gsm8k(args)
-        # self.assertGreaterEqual(
-        #     metrics["accuracy"],
-        #     expect_accuracy,
-        #     f'Accuracy of {self.model} is {str(metrics["accuracy"])}, is lower than {expect_accuracy}',
-        # )
-        # print("=" * 20 + " OLD GSM8K END" + "=" * 20)
-        #
-        # print("=" * 20 + "NEW GSM8K START" + "=" * 20)
-        # args = SimpleNamespace(
-        #     base_url=self.base_url,
-        #     model=self.model,
-        #     eval_name="gsm8k",
-        #     data_path=None,
-        #     num_examples=200,
-        #     num_threads=128,
-        #     num_shots=5,
-        #     max_new_tokens=512,
-        #     api="completion"
-        # )
-        # print("Starting gsm8k test...")
-        # metrics = run_eval(args)
-        # # Assertion: The GSM8K accuracy is not lower than the preset threshold (0.96)
-        # self.assertGreaterEqual(
-        #     metrics["score"],
-        #     expect_accuracy,
-        #     f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {expect_accuracy}',
-        # )
-        # print("=" * 20 + "NEW GSM8K END" + "=" * 20)
 
 
 
