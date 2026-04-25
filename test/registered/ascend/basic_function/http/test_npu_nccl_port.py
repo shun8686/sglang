@@ -64,8 +64,8 @@ class TestNcclPort(CustomTestCase):
         )
 
         self.assertEqual(response.status_code, 200)
-        result = run_command("netstat -tulnp | grep :9111")
-        self.assertIn(":9111", result)
+        result = run_command("ss -tuln | grep -w 9111")
+        self.assertIn("9111", result)
         self.assertIn("LISTEN", result)
 
 
