@@ -7,6 +7,7 @@ from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import DEFAULT_URL_FOR_TEST
 
 register_npu_ci(
     est_time=1800,
@@ -68,7 +69,8 @@ QWEN3_30B_OTHER_ARGS = [
 class TestQwen30B(TestAscendAccuracyTestCaseBase):
     @classmethod
     def setUpClass(cls):
-        pass
+        cls.base_url = DEFAULT_URL_FOR_TEST
+
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
     model = "/home/weights/Qwen/Qwen3-30B-A3B-W8A8"
