@@ -61,12 +61,16 @@ jobs:
           echo "Source code path: ${sglang_source_path}"
           ln -sf ${sglang_source_path} /root/sglang
 
+          test_case=${{ inputs.test_case }}
+          if [ ! -f "${sglang_source_path}/${test_case}" ]; then
+            echo "The testcase does not exit: ${sglang_source_path}/${test_case}"
+            exit 1
+          fi
+
           # prepare for output data
           current_date=$(date +%Y%m%d)
           test_data_output_path=/root/.cache/tests/output/perf/${current_date}
           mkdir -p ${test_data_output_path}
-
-          test_case=${{ inputs.test_case }}
           tc_name=${test_case##*/}
           tc_name=${tc_name%.*}
           export METRICS_DATA_FILE=${test_data_output_path}/${tc_name}
