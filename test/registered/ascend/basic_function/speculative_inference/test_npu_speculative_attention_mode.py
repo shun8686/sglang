@@ -1,4 +1,6 @@
+import logging
 import os
+import socket
 import unittest
 from types import SimpleNamespace
 from urllib.parse import urlparse
@@ -22,6 +24,9 @@ register_npu_ci(
     nightly=True,
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
     """Testcase: Verify that in the PD disaggregation + MTP scenario, the model inference accuracy remains
@@ -39,7 +44,10 @@ class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
         cls.accuracy = 0.86
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        os.environ["ASCEND_MF_STORE_URL"] = "tcp://127.0.0.1:24666"
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.bind(('', 0))
+            cls.store_port = s.getsockname()[1]
+        os.environ["ASCEND_MF_STORE_URL"] = f"tcp://127.0.0.1:{cls.store_port}"
 
         # Non blocking start servers
         cls.start_prefill()
@@ -156,7 +164,7 @@ class TestAscendSpeculativeAttentionMode(TestDisaggregationBase):
         )
 
     def test_gsm8k(self):
-        print(f"##=== Testing accuracy: {self.model} ===##")
+        logger.info(f"##=== Testing accuracy: {self.model} ===##")
         args = SimpleNamespace(
             base_url=self.base_url,
             eval_name="gsm8k",
