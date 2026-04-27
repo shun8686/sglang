@@ -83,7 +83,6 @@ def run_aisbench(
     cmd += f"--batch-size {max_concurrency} "
     cmd += f"--num-prompts {num_prompts}"
 
-    
     logger.info(f"Command: {cmd}")
 
     process = subprocess.Popen(
@@ -296,6 +295,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
                 max_concurrency=self.max_concurrency,
             )
             assert_metrics(self, metrics)
+
 
 class TestAscendAccuracyMultiNodePdSepTestCaseBase(CustomTestCase):
     model_config = None
