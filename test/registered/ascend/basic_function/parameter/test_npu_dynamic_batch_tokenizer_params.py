@@ -120,9 +120,9 @@ class TestBatchSize64Timeout0p001(CustomTestCase):
                 )
                 with lock:
                     results.append((resp.status_code, resp.text, keyword))
-            except Exception:
+            except Exception as e:
                 with lock:
-                    results.append((-1, "", keyword))
+                    results.append((-1, str(e), keyword))
 
         threads = [threading.Thread(target=send, args=(item,)) for item in all_prompts]
         for t in threads:
