@@ -84,7 +84,8 @@ class TestAscendSpeculativeDraftAttentionAndMoeRunner(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
+        if cls.process is not None:
+            kill_process_tree(cls.process.pid)
 
     def test_a_gsm8k(self):
         args = SimpleNamespace(
