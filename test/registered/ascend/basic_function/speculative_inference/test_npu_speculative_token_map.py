@@ -21,6 +21,9 @@ from sglang.test.test_utils import (
 
 register_npu_ci(est_time=300, suite="nightly-8-npu-a3", nightly=True)
 
+# Intentionally invalid path to verify EAGLE3 ignores token map and does not crash
+INVALID_TOKEN_MAP_PATH = "/nonexistent/token_map.pt"
+
 
 class TestNpuSpeculativeTokenMap(CustomTestCase):
     """Test --speculative-token-map with EAGLE3 (ignored) and EAGLE (enabled).
@@ -52,7 +55,7 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
             "--speculative-attention-mode",
             "decode",
             "--speculative-token-map",
-            "/nonexistent/token_map.pt",  # ignored
+            INVALID_TOKEN_MAP_PATH,  # EAGLE3 should ignore this and proceed normally
             "--tp-size",
             "8",
             "--mem-fraction-static",
@@ -89,7 +92,8 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
             metrics = run_eval(eval_args)
             self.assertGreaterEqual(metrics["score"], 0.86)
         finally:
-            kill_process_tree(process.pid)
+            if process is not None:
+                kill_process_tree(process.pid)
 
     def test_eagle_with_valid_token_map_gsm8k(self):
         """EAGLE (EAGLE-2) with valid token map; GSM8K accuracy should meet threshold."""
