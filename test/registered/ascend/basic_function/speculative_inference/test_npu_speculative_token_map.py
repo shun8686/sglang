@@ -153,7 +153,8 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
                 metrics["score"], 0.79
             )  # adjust threshold as needed
         finally:
-            kill_process_tree(process.pid)
+            if process is not None:
+                kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":
