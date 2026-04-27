@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 from types import SimpleNamespace
@@ -14,6 +15,9 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
@@ -95,7 +99,7 @@ class TestAscendSpeculativeDraftAttentionAndMoeRunner(CustomTestCase):
 
         metrics = run_eval(args)
         score = metrics["score"]
-        print(f"GSM8K score for {MODEL_PATH}: {score:.4f}")
+        logger.info(f"GSM8K score for {MODEL_PATH}: {score:.4f}")
         self.assertIsNotNone(score, "GSM8K evaluation returned no score")
         self.assertIsInstance(score, float, "Score should be a float")
         self.assertGreaterEqual(score, 0.9, f"GSM8K score {score} below threshold 0.9")
