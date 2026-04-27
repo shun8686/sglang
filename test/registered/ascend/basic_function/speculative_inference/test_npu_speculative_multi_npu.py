@@ -102,7 +102,8 @@ class TestNpuSpeculativeDraftParams(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls) -> None:
-        kill_process_tree(cls.process.pid)
+        if cls.process is not None:
+            kill_process_tree(cls.process.pid)
 
     def test_draft_params_via_server_info(self):
         """Verify draft load format and revision are set correctly via /server_info."""
