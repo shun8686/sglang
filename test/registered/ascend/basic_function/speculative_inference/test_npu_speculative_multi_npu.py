@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 
@@ -15,6 +16,9 @@ from sglang.test.test_utils import (
     CustomTestCase,
     popen_launch_server,
 )
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 register_npu_ci(est_time=400, suite="nightly-4-npu-a3", nightly=True)
 
@@ -151,8 +155,8 @@ class TestNpuSpeculativeDraftParams(CustomTestCase):
             f"Expected 'Paris' in response, but got: {content[:200]}",
         )
 
-        print(f"Q: {prompt}")
-        print(f"A: {content}")
+        logger.info(f"Q: {prompt}")
+        logger.info(f"A: {content}")
 
 
 if __name__ == "__main__":
