@@ -144,9 +144,7 @@ class TestModelOverrideArgs(CustomTestCase):
             result1 = self._test_basic_inference()
             self.assertIn("text", result1)
             self.assertGreater(len(result1["text"]), 0)
-            logging.info(
-                f"Inference with multiple sampling: {result1['text'][:50]}..."
-            )
+            logging.info(f"Inference with multiple sampling: {result1['text'][:50]}...")
 
             # If `max_position_embeddings` is set to 50, an error will occur if the input length exceeds 50.
             response2 = requests.post(
