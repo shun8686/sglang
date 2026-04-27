@@ -1,12 +1,12 @@
 name: Full Test (NPU)
 
 on:
-  # pull_request:
-  #   branches:
-  #     - main
-  #     - testcases
-  #   paths:
-  #     - ".github/workflows/full-test-npu.yml"
+  pull_request:
+    branches:
+     - main
+     - testcases
+    paths:
+     - ".github/workflows/full-test-npu.yml"
   workflow_dispatch:
     inputs:
       ref:
@@ -38,7 +38,7 @@ on:
           - func
           - perf
           - accuracy
-        default: 'all'
+        default: 'accuracy'
 
 concurrency:
   group: full-test-npu-${{ inputs.ref || github.ref }}-${{ inputs.test_scope }}
@@ -401,9 +401,6 @@ jobs:
           cd test
           python3 run_suite.py --hw npu --suite full-16-npu-a3 --nightly --continue-on-error --timeout-per-file 3600
 
-  # ==============================================
-  # 二、精度测试 accuracy（清空用例）
-  # ==============================================
   nightly-accuracy-baseline-single-node-tests:
     name: single-node
     needs: [set-image-config]
@@ -446,11 +443,6 @@ jobs:
       prefill_decode_deployment: 'separation'
       transformers_version: ''
 
-  # ==============================================
-  # 三、性能测试 perf
-  # 保留：single-node 主性能 + 通用 PD分离多节点
-  # 删掉：废弃bugfix/req、mix、deepseek/qwen拆分job
-  # ==============================================
   nightly-performance-baseline-single-node-tests:
     name: single-node-perf
     needs: [set-image-config]
