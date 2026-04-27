@@ -1,3 +1,4 @@
+import logging
 import os
 import unittest
 from types import SimpleNamespace
@@ -15,6 +16,9 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 register_npu_ci(est_time=400, suite="nightly-16-npu-a3", nightly=True)
 
 
@@ -26,11 +30,13 @@ class TestAscendSpeculativeMoeA2ABackend(CustomTestCase):
         cls.base_url = DEFAULT_URL_FOR_TEST
         cls.accuracy = 0.95
         cls.url = urlparse(DEFAULT_URL_FOR_TEST)
-        os.environ["HCCL_BUFFSIZE"] = "2048"
-        os.environ["SGLANG_ENABLE_OVERLAP_PLAN_STREAM"] = "1"
-        os.environ["SGLANG_ENABLE_SPEC_V2"] = "1"
-        os.environ["SGLANG_NPU_FUSED_MOE_MODE"] = "1"
         cls.env = os.environ.copy()
+        cls.env.update({
+            "HCCL_BUFFSIZE": "2048",
+            "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+            "SGLANG_ENABLE_SPEC_V2": "1",
+            "SGLANG_NPU_FUSED_MOE_MODE": "1",
+        })
         cls.common_args = [
             "--trust-remote-code",
             "--attention-backend",
@@ -62,7 +68,7 @@ class TestAscendSpeculativeMoeA2ABackend(CustomTestCase):
         ]
 
     def test_a_gsm8k(self):
-        print(f"##=== Testing accuracy: {self.model} ===##")
+        logger.info(f"##=== Testing accuracy: {self.model} ===##")
         process = popen_launch_server(
             self.model,
             self.base_url,
@@ -90,7 +96,8 @@ class TestAscendSpeculativeMoeA2ABackend(CustomTestCase):
                 f"GSM8K score {metrics['score']} below threshold {self.accuracy}",
             )
         finally:
-            kill_process_tree(process.pid)
+            if process is not None:
+                kill_process_tree(process.pid)
 
 
 if __name__ == "__main__":
