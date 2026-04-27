@@ -1,4 +1,4 @@
-name: Merged NPU Full Test (Func/Perf/Accuracy)
+name: Full Test (NPU)
 
 on:
   # pull_request:
@@ -6,7 +6,7 @@ on:
   #     - main
   #     - testcases
   #   paths:
-  #     - ".github/workflows/merged-npu-full-test.yml"
+  #     - ".github/workflows/full-test-npu.yml"
   workflow_dispatch:
     inputs:
       ref:
@@ -41,8 +41,8 @@ on:
         default: 'all'
 
 concurrency:
-  group: merged-npu-test-${{ inputs.ref || github.ref }}-${{ inputs.test_scope }}
-  cancel-in-progress: true
+  group: full-test-npu-${{ inputs.ref || github.ref }}-${{ inputs.test_scope }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
 jobs:
   set-image-config:
@@ -81,9 +81,6 @@ jobs:
             echo "skip_install_flag=${{ inputs.skip_install_flag }}" >> $GITHUB_OUTPUT
           fi
 
-  # ==============================================
-  # 一、功能测试 func
-  # ==============================================
   nighly-test-npu:
     needs: [set-image-config]
     name: nightly-test-npu
@@ -114,11 +111,13 @@ jobs:
           UV_INDEX_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
           GITHUB_PROXY_URL: "https://gh-proxy.test.osinfra.cn/"
         run: |
+          # speed up by using infra cache services
           CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
           sed -Ei "s@(ports|archive).ubuntu.com@${CACHING_URL}:8081@g" /etc/apt/sources.list
           pip config set global.index-url http://${CACHING_URL}/pypi/simple
           pip config set global.trusted-host "${CACHING_URL}"
           sglang_source_path=$(pwd)
+          echo "Source code path: ${sglang_source_path}"
           if [ ${{ needs.set-image-config.outputs.skip_install_flag }} != "true" ];then
             bash scripts/ci/npu/npu_ci_install_dependency.sh a3
           else
@@ -128,6 +127,8 @@ jobs:
             mv ${ascend_test_util_path} ${ascend_test_util_path}_bak
             cp -r ${sglang_source_path}/python/sglang/test/ascend ${ascend_test_util_path}
           fi
+
+          # copy required file from our daily cache
           cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
           cp ~/.cache/modelscope/hub/datasets/tmp/test.jsonl /tmp
       - name: Print Log Information
@@ -172,6 +173,7 @@ jobs:
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
           PYPI_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
+          UV_INDEX_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
           GITHUB_PROXY_URL: "https://gh-proxy.test.osinfra.cn/"
         run: |
           CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
@@ -232,6 +234,7 @@ jobs:
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
           PYPI_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
+          UV_INDEX_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
           GITHUB_PROXY_URL: "https://gh-proxy.test.osinfra.cn/"
         run: |
           CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
@@ -352,6 +355,7 @@ jobs:
         env:
           TORCH_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/whl/cpu"
           PYPI_CACHE_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
+          UV_INDEX_URL: "http://cache-service.nginx-pypi-cache.svc.cluster.local/pypi/simple"
           GITHUB_PROXY_URL: "https://gh-proxy.test.osinfra.cn/"
         run: |
           CACHING_URL="cache-service.nginx-pypi-cache.svc.cluster.local"
@@ -518,4 +522,4 @@ jobs:
             echo "❌ Some jobs failed or cancelled"
             exit 1
           fi
-          echo "✅ All selected scope jobs passed"
+          echo " All selected scope jobs passed"
