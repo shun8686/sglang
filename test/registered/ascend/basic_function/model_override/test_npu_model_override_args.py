@@ -1,6 +1,7 @@
 import logging
 import unittest
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 import requests
 
@@ -26,10 +27,11 @@ class TestModelOverrideArgs(CustomTestCase):
     """
 
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
-    base_url = DEFAULT_URL_FOR_TEST
 
     @classmethod
     def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        cls.url = urlparse(cls.base_url)
         cls.process = None
 
     @classmethod
@@ -81,7 +83,7 @@ class TestModelOverrideArgs(CustomTestCase):
 
     def test_001_batch_processing_requests(self):
         """Test multiple configuration parameters simultaneously overriding, batch processing requests."""
-        logging.warning("\n=== Test 001: Override multiple parameters ===")
+        logging.info("\n=== Test 001: Override multiple parameters ===")
         self.process = self._launch_server_with_overrides(
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7,  "max_new_tokens": 127, "min_p": 1}',
@@ -100,7 +102,7 @@ class TestModelOverrideArgs(CustomTestCase):
             # Test request parameters take precedence, in the request parameters, max_new_tokens is set to 32.
             self.assertIn("length", result1["meta_info"]["finish_reason"])
             self.assertEqual(result1["meta_info"]["completion_tokens"], 32)
-            logging.warning(
+            logging.info(
                 f"Inference with multiple overrides: {result1['text'][:50]}..."
             )
 
@@ -110,11 +112,11 @@ class TestModelOverrideArgs(CustomTestCase):
                 num_questions=200,
                 max_new_tokens=512,
                 parallel=128,
-                host="http://127.0.0.1",
+                host=f"http://{self.url.hostname}",
                 port=int(self.base_url.split(":")[-1]),
             )
             run_eval(args)
-            logging.warning(f"Batch processing requests successful.")
+            logging.info(f"Batch processing requests successful.")
 
         finally:
             kill_process_tree(self.process.pid)
@@ -122,7 +124,7 @@ class TestModelOverrideArgs(CustomTestCase):
 
     def test_002_multiple_sampling_parameters(self):
         """Test configuration with multiple sampling parameters."""
-        logging.warning("\n=== Test 002: multiple sampling parameters ===")
+        logging.info("\n=== Test 002: multiple sampling parameters ===")
         self.process = self._launch_server_with_overrides(
             model_override_args='{"num_hidden_layers": 3, "max_position_embeddings": 50, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "top_p": 0.9, "top_k": 40, "max_new_tokens": 256, "min_new_tokens": 1, "logit_bias": {"123": 100}}',
@@ -142,7 +144,7 @@ class TestModelOverrideArgs(CustomTestCase):
             result1 = self._test_basic_inference()
             self.assertIn("text", result1)
             self.assertGreater(len(result1["text"]), 0)
-            logging.warning(
+            logging.info(
                 f"Inference with multiple sampling: {result1['text'][:50]}..."
             )
 
@@ -174,7 +176,7 @@ class TestModelOverrideArgs(CustomTestCase):
 
     def test_003_long_sequence_request(self):
         """Test configuration with multiple sampling penalty parameters, long sequence request."""
-        logging.warning("\n=== Test 003: multiple sampling penalty parameters ===")
+        logging.info("\n=== Test 003: multiple sampling penalty parameters ===")
         self.process = self._launch_server_with_overrides(
             model_override_args='{"num_hidden_layers": 3, "num_key_value_heads": 4}',
             preferred_sampling_params='{"temperature": 0.7, "max_new_tokens": 64, "frequency_penalty": 0.5, "presence_penalty": 0.3, "repetition_penalty": 1.2}',

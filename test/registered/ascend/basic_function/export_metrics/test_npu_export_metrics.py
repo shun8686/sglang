@@ -7,6 +7,7 @@ import time
 import unittest
 from pathlib import Path
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 import requests
 
@@ -183,13 +184,13 @@ class TestMetricsExporter(CustomTestCase):
         logging.warning(
             "****test4: Test different sampling parameters and request export"
         )
-        sampling_cinfigs = [
+        sampling_configs = [
             {"temperature": 0, "max_new_tokens": 32},
             {"temperature": 0.5, "max_new_tokens": 64},
             {"temperature": 1.0, "top_p": 0.9, "max_new_tokens": 127},
         ]
 
-        for config in sampling_cinfigs:
+        for config in sampling_configs:
             response = requests.post(
                 f"{self.base_url}/generate",
                 json={
@@ -206,7 +207,7 @@ class TestMetricsExporter(CustomTestCase):
         for i, record in enumerate(metrics_records):
             request_parameters = json.loads(record["request_parameters"])
             recorded_sampling = request_parameters.get("sampling_params", {})
-            for key, param_value in sampling_cinfigs[i].items():
+            for key, param_value in sampling_configs[i].items():
                 self.assertIn(key, recorded_sampling)
                 self.assertEqual(recorded_sampling[key], param_value)
 
@@ -250,10 +251,6 @@ class TestMetricsExporter(CustomTestCase):
 
             request_parameters = json.loads(record["request_parameters"])
             self.assertIn("stream", request_parameters)
-        metrics_files = self._get_metrics_files()
-        metrics_records = self._read_metrics_records(metrics_files)
-        for record in metrics_records:
-            self.assertIn("request_parameters", record)
         metrics_path = Path(self.metrics_dir)
         if metrics_path.exists():
             for log_file in metrics_path.glob("sglang-request-metrics-*.log"):
@@ -262,13 +259,14 @@ class TestMetricsExporter(CustomTestCase):
 
     def test_gsm8k(self):
         logging.warning("****test6: Test Batch processing requests")
+        url = urlparse(self.base_url)
         args = SimpleNamespace(
             num_shots=5,
             data_path=None,
             num_questions=200,
             max_new_tokens=512,
             parallel=128,
-            host="http://127.0.0.1",
+            host=f"http://{url.hostname}",
             port=int(self.base_url.split(":")[-1]),
         )
         run_eval(args)
