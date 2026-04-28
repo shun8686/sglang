@@ -165,8 +165,8 @@ GLM_5_1_PD_SEP_MODEL_CONFIG = {
 }
 
 
-class TestNPUGLM5_1_W4A8_1P1D_64P_In3k5_Out1k5_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
-    """Test NPU performance for GLM-5.1-w4a8 1p1d_64p PD separation in3k5 out1k5"""
+class TestNPUGLM5_1_W4A8_1P1D_32P_In3k5_Out1k5_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+    """Test NPU performance for GLM-5.1-w4a8 1p1d_32p PD separation in3k5 out1k5"""
 
     model_config = GLM_5_1_PD_SEP_MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
@@ -180,8 +180,8 @@ class TestNPUGLM5_1_W4A8_1P1D_64P_In3k5_Out1k5_50ms(TestAscendPerfMultiNodePdSep
     tpot = 50
     output_token_throughput = 3000
 
-    def test_npu_glm5_1_w4a8_1p1d_64p_in3k5_out1k5_50ms(self):
-        """Run NPU performance test for GLM-5.1-w4a8 1p1d_64p"""
+    def test_npu_glm5_1_w4a8_1p1d_32p_in3k5_out1k5_50ms(self):
+        """Run NPU performance test for GLM-5.1-w4a8 1p1d_32p"""
         self.run_throughput()
 
 

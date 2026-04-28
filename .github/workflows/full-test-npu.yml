@@ -467,26 +467,74 @@ jobs:
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency_50ms.py
             test_type: 'perf'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency_gpqa
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency_gpqa.py
+            test_type: 'accuracy'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency_aime2025
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency_aime2025.py
+            test_type: 'accuracy'
           - name: test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput_50ms
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput_50ms.py
             test_type: 'perf'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput_gpqa
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput_gpqa.py
+            test_type: 'accuracy'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput_aime2025
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput_aime2025.py
+            test_type: 'accuracy'
           - name: test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput_50ms
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput_50ms.py
             test_type: 'perf'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput_gpqa
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput_gpqa.py
+            test_type: 'accuracy'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput_aime2025
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput_aime2025.py
+            test_type: 'accuracy'
           - name: test_npu_minimax_m2_5_w8a8_8p_in64k_out1k_prefix_50ms
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_8p_in64k_out1k_prefix_50ms.py
             test_type: 'perf'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in64k_out1k_prefix_gpqa
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in64k_out1k_prefix_gpqa.py
+            test_type: 'accuracy'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in64k_out1k_prefix_aime2025
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in64k_out1k_prefix_aime2025.py
+            test_type: 'accuracy'
           - name: test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix_50ms
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix_50ms.py
             test_type: 'perf'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix_gpqa
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix_gpqa.py
+            test_type: 'accuracy'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix_aime2025
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix_aime2025.py
+            test_type: 'accuracy'
           - name: test_npu_minimax_m2_5_w8a8_8p_in32k_out0k5_prefix_50ms
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_8p_in32k_out0k5_prefix_50ms.py
             test_type: 'perf'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in32k_out0k5_prefix_gpqa
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in32k_out0k5_prefix_gpqa.py
+            test_type: 'accuracy'
+          - name: test_npu_minimax_m2_5_w8a8_8p_in32k_out0k5_prefix_aime2025
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_8p_in32k_out0k5_prefix_aime2025.py
+            test_type: 'accuracy'
     uses: ./.github/workflows/nightly-test-npu-e2e-single-node.yml
     with:
       runner: ${{ matrix.test_config.runner }}
@@ -600,13 +648,27 @@ jobs:
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_2p1d_64p_in3k5_out1k5_50ms.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
-          # MiniMax-M2.5-w8a8 PD separation (P: tp=16 + D: tp=32,nnodes=2, total 48 cards)
-          - name: test_npu_minimax_m2_5_w8a8_1p1d_48p_in64k_out1k_50ms
+          # MiniMax-M2.5-w8a8 PD separation (P: tp=16,nnodes=1=16卡 + D: tp=32,nnodes=2=32卡, total 48卡=24p)
+          - name: test_npu_minimax_m2_5_w8a8_1p1d_24p_in64k_out1k_50ms
             prefill_size: 1
             decode_size: 2
             router_size: 1
-            test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_1p1d_48p_in64k_out1k_50ms.py
+            test_case: test/registered/ascend/performance/test_npu_minimax_m2_5_w8a8_1p1d_24p_in64k_out1k_50ms.py
             test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_minimax_m2_5_w8a8_1p1d_24p_gpqa
+            prefill_size: 1
+            decode_size: 2
+            router_size: 1
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_1p1d_24p_gpqa.py
+            test_type: 'accuracy'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_minimax_m2_5_w8a8_1p1d_24p_aime2025
+            prefill_size: 1
+            decode_size: 2
+            router_size: 1
+            test_case: test/registered/ascend/accuracy/test_npu_minimax_m2_5_w8a8_1p1d_24p_aime2025.py
+            test_type: 'accuracy'
             prefill_decode_deployment: 'separation'
     uses: ./.github/workflows/nightly-test-npu-e2e-multi-node.yml
     with:
