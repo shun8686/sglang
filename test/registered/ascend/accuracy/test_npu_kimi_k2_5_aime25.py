@@ -29,8 +29,6 @@ KIMI_K2_5_ENVS = {
 
 KIMI_K2_5_OTHER_ARGS = [
     "--skip-server-warmup",
-    "--model-path",
-    KIMI_K2_5_W4A8_MODEL_PATH,
     "--quantization",
     "modelslim",
     "--dtype",

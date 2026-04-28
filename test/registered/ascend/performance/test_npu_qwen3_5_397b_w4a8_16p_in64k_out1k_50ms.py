@@ -32,8 +32,6 @@ QWEN3_5_397B_ENVS = {
 }
 
 QWEN3_5_397B_64K_OTHER_ARGS = [
-    "--model-path",
-    QWEN3_5_397B_W4A8_MODEL_PATH,
     "--attention-backend",
     "ascend",
     "--device",
