@@ -52,7 +52,7 @@ jobs:
       job_filter: ${{ steps.set-vars.outputs.job_filter }}
       image_a3: ${{ steps.set-vars.outputs.image_a3 }}
       skip_install_flag: ${{ steps.set-vars.outputs.skip_install_flag }}
-      test_scope: ${{ inputs.test_scope || 'accuracy' }}
+      test_scope: ${{ inputs.test_scope || 'perf' }}
     steps:
       - name: Set image config
         id: set-vars
