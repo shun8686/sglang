@@ -169,6 +169,48 @@ ds.to_json('/root/.cache/modelscope/hub/datasets/grade_school_math/train.jsonl')
 "
 fi
 
+function gen_model_config_file_vllm_api_chat() {
+  model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
+  echo "Writing model config info into file: ${model_config_file}"
+  if [ "$MODE" == "perf" ]; then
+    generation_kwargs="dict(temperature=0,ignore_eos=True)"
+  elif [ "$MODE" == "accuracy" ]; then
+    generation_kwargs="dict(temperature=0,seed=1234)"
+  else
+    echo "Error: Unknown mode: $MODE."
+    show_usage
+  fi
+
+  cat > "${model_config_file}" << EOF
+from ais_bench.benchmark.models import VLLMCustomAPIChat
+models = [
+    dict(
+        attr="service",
+        type=VLLMCustomAPIChat,
+        abbr='vllm-api-stream-chat',
+        path="$MODEL_PATH",
+        model="$MODEL",
+        stream=True,
+        request_rate=0,
+        use_timestamp=False,
+        retry=2,
+        api_key="",
+        host_ip="$IP",
+        host_port=$PORT,
+        url="",
+        max_out_len=$OUTPUT_LEN,
+        batch_size=$BATCH_SIZE,
+        trust_remote_code=True,
+        generation_kwargs=${generation_kwargs},
+        pred_postprocessor=dict(type="mmlu"),
+    )
+]
+EOF
+  echo "============== ${model_config_file} - Begin =============="
+  echo "$(cat ${model_config_file})"
+  echo "============== ${model_config_file} - End ================"
+}
+
 function gen_model_config_file_vllm_api_stream_chat() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"
