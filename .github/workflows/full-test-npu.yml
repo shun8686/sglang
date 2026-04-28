@@ -52,7 +52,7 @@ jobs:
       job_filter: ${{ steps.set-vars.outputs.job_filter }}
       image_a3: ${{ steps.set-vars.outputs.image_a3 }}
       skip_install_flag: ${{ steps.set-vars.outputs.skip_install_flag }}
-      test_scope: ${{ inputs.test_scope }}
+      test_scope: ${{ inputs.test_scope || 'accuracy' }}
     steps:
       - name: Set image config
         id: set-vars
@@ -81,7 +81,7 @@ jobs:
             echo "skip_install_flag=${{ inputs.skip_install_flag }}" >> $GITHUB_OUTPUT
           fi
 
-  nighly-test-npu:
+  nightly-test-npu:
     needs: [set-image-config]
     name: nightly-test-npu
     if: ${{ !cancelled() && (needs.set-image-config.outputs.test_scope == 'all' || needs.set-image-config.outputs.test_scope == 'func') }}
