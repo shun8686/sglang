@@ -81,9 +81,9 @@ jobs:
             echo "skip_install_flag=${{ inputs.skip_install_flag }}" >> $GITHUB_OUTPUT
           fi
 
-  nightly-test-npu:
+  nighly-test-npu:
     needs: [set-image-config]
-    name: nighly-test-npu
+    name: nightly-test-npu
     if: ${{ !cancelled() && (needs.set-image-config.outputs.test_scope == 'all' || needs.set-image-config.outputs.test_scope == 'func') }}
     uses: ./.github/workflows/nightly-test-npu.yml
     with:
