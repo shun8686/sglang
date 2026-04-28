@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
@@ -18,7 +19,12 @@ register_npu_ci(
 
 PREFILL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "SGLANG_EXTERNAL_MODEL_PACKAGE": "custom_eagle3",
     "STREAMS_PER_DEVICE": "32",
+    "ENABLE_PROFILING": "1",
+    "PROFILING_BS": "30",
+    "PROFILING_step": "8",
     "ASCEND_USE_FIA": "1",
     "HCCL_BUFFSIZE": "2500",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
@@ -26,16 +32,22 @@ PREFILL_ENVS = {
     "DEEPEP_NORMAL_LONG_SEQ_ROUND": "64",
     "DEEPEP_NORMAL_LONG_SEQ_PER_ROUND_TOKENS": "2048",
     "DEEPEP_NORMAL_COMBINE_ENABLE_LONG_SEQ": "1",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
 }
 
 DECODE_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "SGLANG_EXTERNAL_MODEL_PACKAGE": "custom_eagle3",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_BUFFSIZE": "1600",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "640",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_NPU_FUSED_MOE_MODE": "2",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
 }
 
 PREFILL_ARGS = [
@@ -89,8 +101,6 @@ PREFILL_ARGS = [
     "--speculative-draft-model-quantization",
     "unquant",
     "--disable-radix-cache",
-    "--external-model-package",
-    "custom_eagle3",
 ]
 
 DECODE_ARGS = [
@@ -104,6 +114,8 @@ DECODE_ARGS = [
     8,
     16,
     24,
+    "--mem-fraction-static",
+    0.6,
     "--attention-backend",
     "ascend",
     "--device",
@@ -144,8 +156,6 @@ DECODE_ARGS = [
     "--speculative-draft-model-quantization",
     "unquant",
     "--disable-radix-cache",
-    "--external-model-package",
-    "custom_eagle3",
 ]
 
 MODEL_CONFIG = {
@@ -166,10 +176,10 @@ class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(TestAscendPerfMultiNodeP
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 512
-    input_len = 64000
-    output_len = 1000
+    max_concurrency = 190
+    num_prompts = 760
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 1
     tpot = 50
     output_token_throughput = 3000

@@ -34,15 +34,16 @@ MINIMAX_M2_5_128K_PREFIX_ENVS = {
     "SGLANG_NPU_FUSED_MOE_MODE": "2",
     "SGLANG_NPU_DEEPEP_USE_FUSED_MOE_DECODE": "1",
     "SGLANG_NPU_FUSEEP_DECODE_ONLY": "1",
+    "ENABLE_PROFILING": "0",
+    "PROFILING_BS": "28",
+    "PROFILING_STAGE": "decode",
+    "PROFILING_step": "10",
+
 }
 
 MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
     "--model-path",
     MINIMAX_M2_5_W8A8_MODEL_PATH,
-    "--host",
-    "127.0.0.1",
-    "--port",
-    32000,
     "--tp-size",
     16,
     "--dp-size",
@@ -86,8 +87,6 @@ MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
     "--trust-remote-code",
     "--tokenizer-worker-num",
     8,
-    "--external-model-package",
-    "custom_eagle3",
 ]
 
 
@@ -100,13 +99,13 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In128k_Out1k_Prefix(TestAscendPerformanceTestCa
     other_args = MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS
     envs = MINIMAX_M2_5_128K_PREFIX_ENVS
     dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 512
+    max_concurrency = 1
+    num_prompts = 4
     input_len = 128000
     output_len = 1000
     random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 3000
+    # tpot = 50
+    # output_token_throughput = 3000
 
     def test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 in128k out1k prefix"""

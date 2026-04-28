@@ -33,10 +33,6 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS = {
 MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
     "--model-path",
     MINIMAX_M2_5_W8A8_MODEL_PATH,
-    "--host",
-    "127.0.0.1",
-    "--port",
-    32000,
     "--tp-size",
     16,
     "--enable-dp-attention",
@@ -86,8 +82,6 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
     "unquant",
     "--dtype",
     "bfloat16",
-    "--external-model-package",
-    "custom_eagle3",
 ]
 
 
@@ -100,8 +94,8 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(TestAscendPerforman
     other_args = MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS
     envs = MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS
     dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 512
+    max_concurrency = 217
+    num_prompts = 868
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1

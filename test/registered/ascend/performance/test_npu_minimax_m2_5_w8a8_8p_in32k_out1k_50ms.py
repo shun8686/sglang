@@ -1,18 +1,18 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
-    BENCHMARK_TOOL_DEFAULT,
-    TestAscendAccuracyTestCaseBase,
-)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     MINIMAX_M2_5_W8A8_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
+    est_time=1800,
     suite="nightly-16-npu-a3",
     nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 MINIMAX_M2_5_32K_ENVS = {
@@ -33,10 +33,6 @@ MINIMAX_M2_5_32K_ENVS = {
 MINIMAX_M2_5_32K_OTHER_ARGS = [
     "--model-path",
     MINIMAX_M2_5_W8A8_MODEL_PATH,
-    "--host",
-    "127.0.0.1",
-    "--port",
-    32000,
     "--tp-size",
     16,
     "--enable-dp-attention",
@@ -69,22 +65,26 @@ MINIMAX_M2_5_32K_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_AIME2025(TestAscendAccuracyTestCaseBase):
-    """Test NPU accuracy for MiniMax-M2.5-w8a8 8p single node high throughput in32k on AIME 2025"""
+class TestNPUMiniMaxM2_5_W8A8_8P_In32k_Out1k_HighThroughput(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for MiniMax-M2.5-w8a8 8p single node high throughput in32k out1k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = MINIMAX_M2_5_W8A8_MODEL_PATH
     other_args = MINIMAX_M2_5_32K_OTHER_ARGS
     envs = MINIMAX_M2_5_32K_ENVS
-    accuracy = 0.8
-    dataset_type = "aime2025"
-    dataset_name = "aime2025_gen"
-    batch_size = 64
-    max_out_len = 8192
+    dataset_name = "random"
+    max_concurrency = 65
+    num_prompts = 260
+    input_len = 32000
+    output_len = 1000
+    random_range_ratio = 1
+    tpot = 50
+    output_token_throughput = 3000
 
-    def test_npu_minimax_m2_5_w8a8_8p_aime2025(self):
-        """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput in32k on AIME 2025"""
-        self.run_accuracy()
+    def test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput(self):
+        """Run NPU performance test for MiniMax-M2.5-w8a8 in32k out1k"""
+        self.run_throughput()
 
 
 if __name__ == "__main__":

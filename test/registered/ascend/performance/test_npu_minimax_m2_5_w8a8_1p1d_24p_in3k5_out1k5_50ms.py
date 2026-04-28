@@ -1,12 +1,12 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
-    BENCHMARK_TOOL_DEFAULT,
-    TestAscendAccuracyMultiNodePdSepTestCaseBase,
-)
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
+    BENCHMARK_TOOL_DEFAULT,
     MINIMAX_M2_5_W8A8_MODEL_PATH,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
+    TestAscendPerfMultiNodePdSepTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -14,6 +14,7 @@ register_npu_ci(
     est_time=1800,
     suite="nightly-pd-sep-3-node",
     nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 PREFILL_ENVS = {
@@ -168,20 +169,24 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_GPQA(TestAscendAccuracyMultiNodePdSepTestCaseBase):
-    """Test NPU accuracy for MiniMax-M2.5-w8a8 1p1d_24p on GPQA"""
+class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+    """Test NPU performance for MiniMax-M2.5-w8a8 1p1d_24p PD separation in64k out1k"""
 
     model_config = MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    accuracy = 0.8
-    dataset_type = "gpqa"
-    dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    max_concurrency = 128
-    output_len = 1024
+    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
+    dataset_name = "random"
+    max_concurrency = 890
+    num_prompts = 3560
+    input_len = 3500
+    output_len = 1500
+    random_range_ratio = 1
+    tpot = 50
+    output_token_throughput = 3000
 
-    def test_npu_minimax_m2_5_w8a8_1p1d_24p_gpqa(self):
-        """Run NPU accuracy test for MiniMax-M2.5-w8a8 1p1d_24p on GPQA"""
-        self.run_accuracy()
+    def test_npu_minimax_m2_5_w8a8_1p1d_24p_in64k_out1k_50ms(self):
+        """Run NPU performance test for MiniMax-M2.5-w8a8 1p1d_24p"""
+        self.run_throughput()
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
+    est_time=1800,
     suite="nightly-16-npu-a3",
     nightly=True,
 )
@@ -33,10 +33,6 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS = {
 MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
     "--model-path",
     MINIMAX_M2_5_W8A8_MODEL_PATH,
-    "--host",
-    "127.0.0.1",
-    "--port",
-    32000,
     "--tp-size",
     16,
     "--enable-dp-attention",
@@ -86,26 +82,24 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
     "unquant",
     "--dtype",
     "bfloat16",
-    "--external-model-package",
-    "custom_eagle3",
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_AIME2025(TestAscendAccuracyTestCaseBase):
-    """Test NPU accuracy for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
+class TestNPUMiniMaxM2_5_W8A8_8P_GPQA(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for MiniMax-M2.5-w8a8 8p single node high throughput on GPQA"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = MINIMAX_M2_5_W8A8_MODEL_PATH
     other_args = MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS
     envs = MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS
     accuracy = 0.8
-    dataset_type = "aime2025"
-    dataset_name = "aime2025_gen"
-    batch_size = 64
-    max_out_len = 8192
+    dataset_type = "gpqa"
+    dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
+    batch_size = 128
+    max_out_len = 1024
 
-    def test_npu_minimax_m2_5_w8a8_8p_aime2025(self):
-        """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
+    def test_npu_minimax_m2_5_w8a8_8p_gpqa(self):
+        """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput on GPQA"""
         self.run_accuracy()
 
 
