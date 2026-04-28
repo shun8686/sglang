@@ -29,10 +29,6 @@ QWEN3_5_27B_128K_HIGH_ENVS = {
 QWEN3_5_27B_128K_HIGH_OTHER_ARGS = [
     "--model-path",
     QWEN3_5_27B_W8A8_HOME_MODEL_PATH,
-    "--host",
-    "127.0.0.1",
-    "--port",
-    30000,
     "--tp-size",
     4,
     "--nnodes",
