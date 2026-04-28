@@ -83,7 +83,7 @@ jobs:
 
   nightly-test-npu:
     needs: [set-image-config]
-    name: nightly-test-npu
+    name: nighly-test-npu
     if: ${{ !cancelled() && (needs.set-image-config.outputs.test_scope == 'all' || needs.set-image-config.outputs.test_scope == 'func') }}
     uses: ./.github/workflows/nightly-test-npu.yml
     with:
