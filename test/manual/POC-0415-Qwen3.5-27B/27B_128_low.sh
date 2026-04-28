@@ -42,7 +42,7 @@ python3 -m sglang.launch_server \
         --attention-backend ascend \
         --device npu \
         --tp-size 2 --nnodes 1 --node-rank 0 \
-        --chunked-prefill-size -1 --max-prefill-tokens 130000 \
+        --chunked-prefill-size -1 --max-prefill-tokens 140000 \
         --disable-radix-cache \
         --trust-remote-code \
         --host 127.0.0.1 --max-running-requests 32 --max-mamba-cache-size 18 \
