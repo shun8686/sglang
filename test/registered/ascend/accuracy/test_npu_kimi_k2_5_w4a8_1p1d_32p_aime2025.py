@@ -8,16 +8,15 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import KIMI_K2_5_W4A8_MOD
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-pd-sep-4-node",
+    est_time=3600,
+    suite="nightly-pd-sep-2-node",
     nightly=True,
 )
 
 PREFILL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
-    "HCCL_BUFFSIZE": "1600",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "100",
+    "HCCL_BUFFSIZE": "1800",
 }
 
 DECODE_ENVS = {
@@ -25,10 +24,9 @@ DECODE_ENVS = {
     "STREAMS_PER_DEVICE": "32",
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
-    "HCCL_BUFFSIZE": "2400",
+    "HCCL_BUFFSIZE": "800",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "60",
 }
 
 PREFILL_ARGS = [
@@ -41,11 +39,11 @@ PREFILL_ARGS = [
     "--node-rank",
     0,
     "--mem-fraction-static",
-    0.76,
+    0.75,
+    "--max-running-requests",
+    16,
     "--chunked-prefill-size",
-    16384,
-    "--context-length",
-    133120,
+    32768,
     "--quantization",
     "modelslim",
     "--disaggregation-transfer-backend",
@@ -74,18 +72,13 @@ DECODE_ARGS = [
     "--disaggregation-mode",
     "decode",
     "--tp-size",
-    32,
+    16,
     "--nnodes",
-    2,
+    1,
     "--mem-fraction-static",
-    0.67,
+    0.76,
     "--max-running-requests",
-    32,
-    "--chunked-prefill-size",
-    65536,
-    "--context-length",
-    133120,
-    "--disable-radix-cache",
+    16,
     "--quantization",
     "modelslim",
     "--disaggregation-transfer-backend",
@@ -104,10 +97,11 @@ DECODE_ARGS = [
     "--deepep-mode",
     "auto",
     "--dp-size",
-    32,
+    4,
     "--enable-dp-attention",
     "--cuda-graph-bs",
-    1,
+    4,
+    8,
     "--dtype",
     "bfloat16",
     "--speculative-draft-model-quantization",
@@ -128,24 +122,24 @@ MODEL_CONFIG = {
     "decode_args": DECODE_ARGS,
     "prefill_envs": PREFILL_ENVS,
     "decode_envs": DECODE_ENVS,
-    "router_args": ["--policy", "cache_aware"],
+    "router_args": ["--policy", "round_robin"],
     "router_envs": {},
 }
 
 
-class TestNPUKimiK2_5_W4A8_2P1D_32P_GPQA(TestAscendAccuracyMultiNodePdSepTestCaseBase):
-    """Test NPU accuracy for Kimi-K2.5-w4a8 2p1d_32p on GPQA"""
+class TestNPUKimiK2_5_W4A8_1P1D_32P_AIME2025(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+    """Test NPU accuracy for Kimi-K2.5-w4a8 1p1d_32p on AIME 2025"""
 
     model_config = MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     accuracy = 0.8
-    dataset_type = "gpqa"
-    dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    max_concurrency = 128
-    output_len = 1024
+    dataset_type = "aime2025"
+    dataset_name = "aime2025_gen"
+    max_concurrency = 64
+    output_len = 8192
 
-    def test_npu_kimi_k2_5_w4a8_2p1d_32p_gpqa(self):
-        """Run NPU accuracy test for Kimi-K2.5-w4a8 2p1d_32p on GPQA"""
+    def test_npu_kimi_k2_5_w4a8_1p1d_32p_aime2025(self):
+        """Run NPU accuracy test for Kimi-K2.5-w4a8 1p1d_32p on AIME 2025"""
         self.run_accuracy()
 
 

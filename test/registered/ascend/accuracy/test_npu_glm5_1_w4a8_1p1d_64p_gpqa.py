@@ -163,8 +163,8 @@ GLM_5_1_PD_SEP_MODEL_CONFIG = {
 }
 
 
-class TestNPUGLM5_1_W4A8_PD_SEP_GPQA(TestAscendAccuracyMultiNodePdSepTestCaseBase):
-    """Test NPU accuracy for GLM-5.1-w4a8 PD separation 4 nodes on GPQA"""
+class TestNPUGLM5_1_W4A8_1P1D_64P_GPQA(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+    """Test NPU accuracy for GLM-5.1-w4a8 1p1d_64p on GPQA"""
 
     model_config = GLM_5_1_PD_SEP_MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
@@ -174,8 +174,8 @@ class TestNPUGLM5_1_W4A8_PD_SEP_GPQA(TestAscendAccuracyMultiNodePdSepTestCaseBas
     max_concurrency = 128
     output_len = 1024
 
-    def test_npu_glm5_1_w4a8_pd_sep_gpqa(self):
-        """Run NPU accuracy test for GLM-5.1-w4a8 PD separation on GPQA"""
+    def test_npu_glm5_1_w4a8_1p1d_64p_gpqa(self):
+        """Run NPU accuracy test for GLM-5.1-w4a8 1p1d_64p on GPQA"""
         self.run_accuracy()
 
 

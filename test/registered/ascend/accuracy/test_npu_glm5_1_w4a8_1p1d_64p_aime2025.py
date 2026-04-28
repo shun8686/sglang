@@ -1,18 +1,16 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     BENCHMARK_TOOL_DEFAULT,
-    GLM_5_1_W4A8_MODEL_PATH,
-    TestAscendPerfMultiNodePdSepTestCaseBase,
+    TestAscendAccuracyMultiNodePdSepTestCaseBase,
 )
+from sglang.test.ascend.e2e.test_npu_performance_utils import GLM_5_1_W4A8_MODEL_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
+    est_time=3600,
     suite="nightly-pd-sep-4-node",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 GLM_5_1_PD_SEP_PREFILL_ENVS = {
@@ -165,24 +163,20 @@ GLM_5_1_PD_SEP_MODEL_CONFIG = {
 }
 
 
-class TestNPUGLM5_1_W4A8_PD_SEP_In3k5_Out1k5(TestAscendPerfMultiNodePdSepTestCaseBase):
-    """Test NPU performance for GLM-5.1-w4a8 PD separation 4 nodes in3k5 out1k5"""
+class TestNPUGLM5_1_W4A8_1P1D_64P_AIME2025(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+    """Test NPU accuracy for GLM-5.1-w4a8 1p1d_64p on AIME 2025"""
 
     model_config = GLM_5_1_PD_SEP_MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 512
-    input_len = 3500
-    output_len = 1500
-    random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 3000
+    accuracy = 0.8
+    dataset_type = "aime2025"
+    dataset_name = "aime2025_gen"
+    max_concurrency = 64
+    output_len = 8192
 
-    def test_npu_glm5_1_w4a8_pd_sep_in3k5_out1k5(self):
-        """Run NPU performance test for GLM-5.1-w4a8 PD separation"""
-        self.run_throughput()
+    def test_npu_glm5_1_w4a8_1p1d_64p_aime2025(self):
+        """Run NPU accuracy test for GLM-5.1-w4a8 1p1d_64p on AIME 2025"""
+        self.run_accuracy()
 
 
 if __name__ == "__main__":

@@ -4,53 +4,55 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
     GLM_5_1_W4A8_MODEL_PATH,
-    TestAscendPerfMultiNodePdMixTestCaseBase,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-32-npu-a3",
+    suite="nightly-16-npu-a3",
     nightly=True,
     disabled="Currently it is executed by the npu performance workflow.",
 )
 
-GLM_5_1_TWO_NODE_ENVS = {
+GLM_5_1_SINGLE_NODE_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
-    "HCCL_BUFFSIZE": "2500",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
+    "HCCL_BUFFSIZE": "2000",
 }
 
-GLM_5_1_TWO_NODE_OTHER_ARGS = [
+GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--device",
     "npu",
     "--tp-size",
-    32,
+    16,
     "--nnodes",
-    2,
+    1,
+    "--node-rank",
+    0,
     "--dp-size",
     16,
     "--enable-dp-attention",
     "--chunked-prefill-size",
-    131072,
+    -1,
     "--max-prefill-tokens",
     280000,
     "--trust-remote-code",
     "--host",
     "127.0.0.1",
     "--mem-fraction-static",
-    0.65,
+    0.8,
     "--port",
     8001,
     "--served-model-name",
     "glm-5",
     "--cuda-graph-max-bs",
-    8,
+    16,
     "--max-running-requests",
     128,
     "--quantization",
@@ -73,19 +75,15 @@ GLM_5_1_TWO_NODE_OTHER_ARGS = [
     4,
 ]
 
-GLM_5_1_TWO_NODE_MODEL_CONFIG = {
-    "model_path": GLM_5_1_W4A8_MODEL_PATH,
-    "other_args": GLM_5_1_TWO_NODE_OTHER_ARGS,
-    "node_envs": GLM_5_1_TWO_NODE_ENVS,
-}
 
+class TestNPUGLM5_1_W4A8_16P_In3k5_Out1k5(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for GLM-5.1-w4a8 16p single node in3k5 out1k5"""
 
-class TestNPUGLM5_1_W4A8_32P_In3k5_Out1k5(TestAscendPerfMultiNodePdMixTestCaseBase):
-    """Test NPU performance for GLM-5.1-w4a8 32p two nodes in3k5 out1k5"""
-
-    model_config = GLM_5_1_TWO_NODE_MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
+    model = GLM_5_1_W4A8_MODEL_PATH
+    other_args = GLM_5_1_SINGLE_NODE_OTHER_ARGS
+    envs = GLM_5_1_SINGLE_NODE_ENVS
     dataset_name = "random"
     max_concurrency = 128
     num_prompts = 512
@@ -95,8 +93,8 @@ class TestNPUGLM5_1_W4A8_32P_In3k5_Out1k5(TestAscendPerfMultiNodePdMixTestCaseBa
     tpot = 50
     output_token_throughput = 3000
 
-    def test_npu_glm5_1_w4a8_32p_in3k5_out1k5(self):
-        """Run NPU performance test for GLM-5.1-w4a8 two nodes"""
+    def test_npu_glm5_1_w4a8_16p_in3k5_out1k5(self):
+        """Run NPU performance test for GLM-5.1-w4a8 single node"""
         self.run_throughput()
 
 
