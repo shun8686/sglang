@@ -51,7 +51,7 @@ jobs:
       job_filter: ${{ steps.set-vars.outputs.job_filter }}
       image_a3: ${{ steps.set-vars.outputs.image_a3 }}
       skip_install_flag: ${{ steps.set-vars.outputs.skip_install_flag }}
-      test_scope: ${{ inputs.test_scope }}
+      test_scope: ${{ steps.set-vars.outputs.test_scope }}
     steps:
       # When triggered by PR, no inputs parameters are used. The latest community code is tested by default.
       - name: Set image config
