@@ -38,7 +38,7 @@ on:
           - func
           - perf
           - accuracy
-        default: 'accuracy'
+        default: 'perf'
 
 concurrency:
   group: full-test-npu-${{ inputs.ref || github.ref }}-${{ inputs.test_scope }}
