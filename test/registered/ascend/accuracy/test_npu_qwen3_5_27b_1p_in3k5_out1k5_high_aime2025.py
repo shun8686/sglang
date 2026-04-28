@@ -78,8 +78,6 @@ QWEN3_5_27B_3K5_1K5_HIGH_OTHER_ARGS = [
     1,
     "--speculative-num-draft-tokens",
     4,
-    "--base-gpu-id",
-    8,
 ]
 
 
