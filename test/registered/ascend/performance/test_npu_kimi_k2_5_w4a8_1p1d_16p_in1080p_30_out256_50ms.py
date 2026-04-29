@@ -1,11 +1,10 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK,
     AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
     BENCHMARK_TOOL_DEFAULT,
-    KIMI_K2_5_W4A8_MODEL_PATH,
     KIMI_K2_5_EAGLE3_MODEL_PATH,
+    KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
