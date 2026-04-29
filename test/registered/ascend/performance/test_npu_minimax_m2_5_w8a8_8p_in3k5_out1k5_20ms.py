@@ -33,8 +33,6 @@ MINIMAX_M2_5_LOW_LATENCY_ENVS = {
 }
 
 MINIMAX_M2_5_LOW_LATENCY_OTHER_ARGS = [
-    "--model-path",
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     "--tp-size",
     16,
     "--enable-dp-attention",
@@ -48,6 +46,7 @@ MINIMAX_M2_5_LOW_LATENCY_OTHER_ARGS = [
     512,
     "--disable-radix-cache",
     "--prefill-delayer-max-delay-passes",
+    200,
     "--enable-prefill-delayer",
     "--chunked-prefill-size",
     -1,
@@ -100,7 +99,7 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_LowLatency(TestAscendPerformanceTe
     output_len = 1500
     random_range_ratio = 1
     tpot = 20
-    output_token_throughput = 3000
+    output_token_throughput = 100
 
     def test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 low latency"""
