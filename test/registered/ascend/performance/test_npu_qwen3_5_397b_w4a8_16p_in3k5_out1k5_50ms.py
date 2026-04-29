@@ -81,6 +81,7 @@ QWEN3_5_397B_3K5_OTHER_ARGS = [
     "bfloat16",
     "--dp-size",
     8,
+
     "--enable-dp-attention",
     "--enable-dp-lm-head",
     "--speculative-algorithm",
