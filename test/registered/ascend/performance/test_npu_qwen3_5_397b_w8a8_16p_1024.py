@@ -1,11 +1,10 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    TestAscendAccuracyTestCaseBase,
-)
-from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_5_397B_W4A8_MODEL_PATH,
+    QWEN3_5_397B_W8A8_MODEL_PATH,
+    TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -13,6 +12,7 @@ register_npu_ci(
     est_time=1800,
     suite="nightly-16-npu-a3",
     nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 QWEN3_5_397B_ENVS = {
@@ -31,8 +31,7 @@ QWEN3_5_397B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-QWEN3_5_397B_OTHER_ARGS = [
-    "--skip-server-warmup",
+QWEN3_5_397B_3K5_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--device",
@@ -42,11 +41,11 @@ QWEN3_5_397B_OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    17500,
+    16384,
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    448,
+    96,
     "--mem-fraction-static",
     0.8,
     "--max-total-tokens",
@@ -62,11 +61,6 @@ QWEN3_5_397B_OTHER_ARGS = [
     24,
     28,
     32,
-    36,
-    48,
-    52,
-    54,
-    56,
     "--quantization",
     "modelslim",
     "--enable-multimodal",
@@ -81,7 +75,7 @@ QWEN3_5_397B_OTHER_ARGS = [
     "--mamba-ssm-dtype",
     "bfloat16",
     "--dp-size",
-    8,
+    4,
     "--enable-dp-attention",
     "--enable-dp-lm-head",
     "--speculative-algorithm",
@@ -97,22 +91,28 @@ QWEN3_5_397B_OTHER_ARGS = [
 ]
 
 
-class TestNPUQwen3_5_397B_GPQA(TestAscendAccuracyTestCaseBase):
-    """Test NPU accuracy for Qwen3.5-397B-w4a8 on GPQA"""
+class TestNPUQwen3_5_397B_1024(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for Qwen3.5-397B-w4a8 16p 1080p"""
 
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    model = QWEN3_5_397B_W4A8_MODEL_PATH
-    other_args = QWEN3_5_397B_OTHER_ARGS
+    benchmark_tool = AISBENCHMARK
+    aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
+    model = QWEN3_5_397B_W8A8_MODEL_PATH
+    other_args = QWEN3_5_397B_3K5_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
-    accuracy = 0.8
-    dataset_type = "gpqa"
-    dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    batch_size = 128
-    max_out_len = 1024
+    dataset_name = "image"
+    image_resolution = "1024x1024"
+    image_count = 1
+    max_concurrency = 16
+    num_prompts = 16
+    input_len = 30
+    output_len = 1024
+    random_range_ratio = 1
+    tpot = 50
+    output_token_throughput = 100
 
-    def test_npu_qwen3_5_397b_gpqa(self):
-        """Run NPU accuracy test for Qwen3.5-397B on GPQA"""
-        self.run_accuracy()
+    def test_npu_qwen3_5_397b_1024(self):
+        """Run NPU performance test for Qwen3.5-397B 1024"""
+        self.run_throughput()
 
 
 if __name__ == "__main__":

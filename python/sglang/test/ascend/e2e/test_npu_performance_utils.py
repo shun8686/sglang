@@ -141,8 +141,8 @@ GLM_5_1_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/GLM-5.1-w
 MINIMAX_M2_5_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-w8a8-QuaRot"
 MINIMAX_M2_5_EAGLE3_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-eagle3"
 
-QWEN3_5_397B_W4A8_MODEL_PATH = (
-    "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-397B-A17B-w4a8-mtp"
+QWEN3_5_397B_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-397B-A17B-w8a8-mtp"
 )
 
 ROUND_ROBIN = "round_robin"
