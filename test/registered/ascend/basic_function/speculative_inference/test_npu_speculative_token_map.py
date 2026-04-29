@@ -82,7 +82,7 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
                 api="completion",
                 num_examples=1319,
                 num_threads=128,
-                max_new_tokens=512,
+                max_tokens=512,
                 num_shots=5,
                 temperature=0.0,
             )
@@ -140,7 +140,7 @@ class TestNpuSpeculativeTokenMap(CustomTestCase):
                 api="completion",
                 num_examples=1319,
                 num_threads=128,
-                max_new_tokens=512,
+                max_tokens=512,
                 num_shots=5,
                 temperature=0.0,
             )
