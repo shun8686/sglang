@@ -64,6 +64,8 @@ def run_aisbench(
     output_len,
     max_concurrency,
     num_prompts,
+    request_rate,
+    generation_kwargs=None,
 ):
 
     metrics_path = os.getenv("METRICS_DATA_FILE")
@@ -82,6 +84,11 @@ def run_aisbench(
     cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency} "
     cmd += f"--num-prompts {num_prompts}"
+
+    if generation_kwargs:
+        cmd += f" --generation-kwargs '{generation_kwargs}'"
+    if request_rate:
+        cmd += f" --request_rate '{request_rate}'"
 
     logger.info(f"Command: {cmd}")
 
@@ -172,6 +179,8 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
     output_len = 512
     max_concurrency = 1
     num_prompts = 100000
+    generation_kwargs = None
+    request_rate = None
 
     @classmethod
     def setUpClass(cls):
@@ -216,6 +225,8 @@ class TestAscendAccuracyTestCaseBase(CustomTestCase):
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
+                request_rate=self.request_rate,
+                generation_kwargs=self.generation_kwargs,
             )
             assert_metrics(self, metrics)
 
@@ -234,6 +245,8 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
     output_len = 512
     max_concurrency = 1
     num_prompts = 100000
+    generation_kwargs = None
+    request_rate = None
 
     @classmethod
     def setUpClass(cls):
@@ -295,6 +308,8 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
+                request_rate=self.request_rate,
+                generation_kwargs=self.generation_kwargs,
             )
             assert_metrics(self, metrics)
 
@@ -312,6 +327,8 @@ class TestAscendAccuracyMultiNodePdSepTestCaseBase(CustomTestCase):
     output_len = 512
     max_concurrency = 1
     num_prompts = 100000
+    generation_kwargs = None
+    request_rate = None
 
     @classmethod
     def setUpClass(cls):
@@ -390,5 +407,7 @@ class TestAscendAccuracyMultiNodePdSepTestCaseBase(CustomTestCase):
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
                 num_prompts=self.num_prompts,
+                request_rate=self.request_rate,
+                generation_kwargs=self.generation_kwargs,
             )
             assert_metrics(self, metrics)

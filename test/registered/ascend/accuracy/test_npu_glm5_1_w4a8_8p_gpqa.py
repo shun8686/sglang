@@ -33,7 +33,7 @@ GLM_5_1_TWO_NODE_OTHER_ARGS = [
     "--tp-size",
     16,
     "--nnodes",
-    2,
+    1,
     "--dp-size",
     2,
     "--enable-dp-attention",
