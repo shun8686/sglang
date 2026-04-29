@@ -7,19 +7,25 @@ show_usage() {
     echo "  $0 [OPTIONS]"
     echo ""
     echo "Options:"
-    echo "  --mode           Benchmark mode: perf | accuracy (required)"
-    echo "  --ip             Server IP address (required)"
-    echo "  --port           Server port (required)"
-    echo "  --model          Model name (required)"
-    echo "  --model-path     Model path (required)"
-    echo "  --dataset-type   Dataset type: gsm8k | sharegpt | mm-custom-gen (required)"
-    echo "  --dataset-name   Dataset name (default: auto-generated if mode=perf; required if mode=accuracy)"
-    echo "  --dataset-path   Dataset path (automatic if not provided)"
-    echo "  --input-len      Input token length (required if mode=perf)"
-    echo "  --output-len     Output token length (required)"
-    echo "  --batch-size     Batch size (required)"
-    echo "  --num-prompts    Number of prompts (default: 128)"
-    echo "  --output-path    Output path (default: ./result)"
+    echo "  --mode              Benchmark mode: perf | accuracy (required)"
+    echo "  --ip                Server IP address (required)"
+    echo "  --port              Server port (required)"
+    echo "  --model             Model name (required)"
+    echo "  --model-path        Model path (required)"
+    echo "  --dataset-type      Dataset type: gsm8k | sharegpt | mm-custom-gen (required)"
+    echo "  --dataset-name      Dataset name (default: auto-generated if mode=perf; required if mode=accuracy)"
+    echo "  --dataset-path      Dataset path (automatic if not provided)"
+    echo "  --input-len         Input token length (required if mode=perf)"
+    echo "  --output-len        Output token length (required)"
+    echo "  --batch-size        Batch size (required)"
+    echo "  --num-prompts       Number of prompts (default: 128)"
+    echo "  --output-path       Output path (default: ./result)"
+    echo "  --prefix-hit-rate   Prefix cache hit rate (if >0, run prefix cache test; default: 0)"
+    echo "  --request_rate      Request rate for prefix cache test (default: 0)"
+    echo "  --repeat_rate       Repeat rate for prefix cache test (default: 0)"
+    echo "  --dp                Data parallelism for prefix cache test (default: 2)"
+    echo "  --generation-kwargs Custom generation kwargs dict string (overrides defaults based on mode)"
+    echo "                      Example: 'dict(temperature=0.5, top_k=10, top_p=0.95, seed=None, repetition_penalty=1.03)'"
     echo ""
     echo "Example:"
     echo "  $0 --mode perf --ip 127.0.0.1 --port 54321 --model Qwen2-7B-Instruct \\"
@@ -40,6 +46,13 @@ OUTPUT_LEN="8192"
 BATCH_SIZE=""
 NUM_PROMPTS="128"
 OUTPUT_PATH="./result"
+INTERNAL_TEMPLATE_DIR="/root/.cache/.cache/aisbench_auto_tools_prefix-master"
+
+REQUEST_RATE="0"
+REPEAT_RATE="0"
+DP="1"
+
+GENERATION_KWARGS=""
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -91,8 +104,28 @@ while [[ $# -gt 0 ]]; do
             NUM_PROMPTS="$2"
             shift 2
             ;;
+        --prefix-hit-rate)
+            PREFIX_HIT_RATE="$2"
+            shift 2
+            ;;
+        --request_rate)
+            REQUEST_RATE="$2"
+            shift 2
+            ;;
+        --repeat_rate)
+            REPEAT_RATE="$2"
+            shift 2
+            ;;
+        --generation-kwargs)
+            GENERATION_KWARGS="$2"
+            shift 2
+            ;;
         --output-path)
             OUTPUT_PATH="$2"
+            shift 2
+            ;;
+        --dp)
+            DP="$2"
             shift 2
             ;;
         -h|--help)
@@ -109,6 +142,22 @@ if [ -z "$MODE" ] || [ -z "$IP" ] || [ -z "$PORT" ] || [ -z "$MODEL" ] || [ -z "
     echo "Error: Missing required parameters."
     show_usage
 fi
+
+get_generation_kwargs() {
+    if [ -n "$GENERATION_KWARGS" ]; then
+        echo "$GENERATION_KWARGS"
+        return
+    fi
+
+    if [ "$MODE" == "perf" ]; then
+        echo "dict(temperature=0,ignore_eos=True)"
+    elif [ "$MODE" == "accuracy" ]; then
+        echo "dict(temperature=0.01,seed=1234)"
+    else
+        echo "Error: Unknown mode: $MODE."
+        show_usage
+    fi
+}
 
 install_aisbench() {
     echo "===== Install aisbench in virtual env - Begin ====="
@@ -172,14 +221,8 @@ fi
 function gen_model_config_file_vllm_api_stream_chat() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"
-  if [ "$MODE" == "perf" ]; then
-    generation_kwargs="dict(temperature=0,ignore_eos=True)"
-  elif [ "$MODE" == "accuracy" ]; then
-    generation_kwargs="dict(temperature=0,seed=1234)"
-  else
-    echo "Error: Unknown mode: $MODE."
-    show_usage
-  fi
+
+  final_generation_kwargs=$(get_generation_kwargs)
 
   cat > "${model_config_file}" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChatStream
@@ -192,7 +235,7 @@ models = [
         path="$MODEL_PATH",
         model="$MODEL",
         stream=True,
-        request_rate=0,
+        request_rate="$REQUEST_RATE",
         use_timestamp=False,
         retry=2,
         api_key="",
@@ -202,7 +245,7 @@ models = [
         max_out_len=${OUTPUT_LEN},
         batch_size=$BATCH_SIZE,
         trust_remote_code=True,
-        generation_kwargs=${generation_kwargs},
+        generation_kwargs=${final_generation_kwargs},
         pred_postprocessor=dict(type=extract_non_reasoning_content),
     )
 ]
@@ -215,14 +258,8 @@ EOF
 function gen_model_config_file_vllm_api_function_call_chat() {
   model_config_file=${MODEL_CONFIG_PATH}/${TMP_CFG}.py
   echo "Writing model config info into file: ${model_config_file}"
-  if [ "$MODE" == "perf" ]; then
-    generation_kwargs="dict(temperature=0,ignore_eos=True)"
-  elif [ "$MODE" == "accuracy" ]; then
-    generation_kwargs="dict(temperature=0.01,seed=1234)"
-  else
-    echo "Error: Unknown mode: $MODE."
-    show_usage
-  fi
+
+  final_generation_kwargs=$(get_generation_kwargs)
 
   cat > "${model_config_file}" << EOF
 from ais_bench.benchmark.models import VLLMCustomAPIChat
@@ -235,7 +272,7 @@ models = [
         abbr="vllm-api-function-call-chat",
         path="$MODEL_PATH",
         model="$MODEL",
-        request_rate=0,
+        request_rate="$REQUEST_RATE",
         retry=2,
         api_key="",
         host_ip="$IP",
@@ -245,7 +282,7 @@ models = [
         returns_tool_calls=True,
         batch_size=$BATCH_SIZE,
         trust_remote_code=False,
-        generation_kwargs=${generation_kwargs},
+        generation_kwargs=${final_generation_kwargs},
         pred_postprocessor=dict(type=extract_non_reasoning_content),
     )
 ]
@@ -435,6 +472,20 @@ if [ "$MODE" == "perf" ];then
         gen_model_config_file_vllm_api_stream_chat
         CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
     elif [ "$DATASET_TYPE" == "gsm8k" ]; then
+        SOURCE_AUTO_TOOLS_DIR="/root/.cache/.cache/aisbench_auto_tools_prefix-master"
+        DEST_COPY_DIR="/tmp/copy_aisbench_$(date +%Y%m%d_%H%M%S)"
+
+        echo "===== [Step 1/4] Copying entire toolkit directory ====="
+        if [ ! -d "${SOURCE_AUTO_TOOLS_DIR}" ]; then
+            echo "Error: Source directory not found: ${SOURCE_AUTO_TOOLS_DIR}"
+            exit 1
+        fi
+        cp -rf "${SOURCE_AUTO_TOOLS_DIR}" "${DEST_COPY_DIR}"
+        echo "Successfully copied to: ${DEST_COPY_DIR}"
+
+        INTERNAL_TEMPLATE_DIR="${DEST_COPY_DIR}"
+        INTERNAL_TEMPLATE_CONFIG_PATH="${DEST_COPY_DIR}"
+
         dataset_file=$DATASET_PATH
         if [ ! -f "${dataset_file}" ]; then
             echo "The gsm8k dataset file does not exist: ${DATASET_PATH}."
@@ -446,17 +497,50 @@ if [ "$MODE" == "perf" ];then
         else
             echo "Warning: GSM8K train file not found at ${GSM8K_TRAIN_FILE}"
         fi
+        
         DATASET_NAME=gsm8k_custom_${MODEL}
         gen_dataset_gsm8k_config_file "${dataset_dir}"
-        echo "Use dataset: ${DATASET_NAME}, dataset_file: ${dataset_file}"
         gen_model_config_file_vllm_api_stream_chat
-        CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+
+        if (( $(echo "$REPEAT_RATE > 0" | bc -l) )); then
+            TARGET_CONFIG_FILE="${DEST_COPY_DIR}/config"
+            
+            echo "===== [Step 2/4] Prefix Mode Detected: Updating temporary config file ====="
+            if [ -f "$TARGET_CONFIG_FILE" ]; then
+                [ -n "$MODEL" ] && sed -i "s/^[[:space:]]*MODEL_NAME[[:space:]]*=.*/MODEL_NAME=\"$MODEL\"/" "$TARGET_CONFIG_FILE"
+                [ -n "$MODEL_PATH" ] && sed -i "s|^[[:space:]]*MODEL_PATH[[:space:]]*=.*|MODEL_PATH=\"$MODEL_PATH\"|" "$TARGET_CONFIG_FILE"
+                [ -n "$IP" ] && sed -i "s/^[[:space:]]*HOST_IP[[:space:]]*=.*/HOST_IP=\"$IP\"/" "$TARGET_CONFIG_FILE"
+                [ -n "$PORT" ] && sed -i "s/^[[:space:]]*HOST_PORT[[:space:]]*=.*/HOST_PORT=\"$PORT\"/" "$TARGET_CONFIG_FILE"
+                
+                echo "Config updated successfully in: $TARGET_CONFIG_FILE"
+            else
+                echo "Error: Config file not found in temp dir: $TARGET_CONFIG_FILE"
+                exit 1
+            fi
+
+            echo "===== [Mode] Prefix Cache Test (Hit Rate: $REPEAT_RATE) ====="
+            echo "Use dataset: ${DATASET_NAME}, dataset_file: ${dataset_file}"
+            echo "Input tokens: ${INPUT_LEN} | Output tokens: ${OUTPUT_LEN} | Batch size: ${BATCH_SIZE} | Prompts num: ${NUM_PROMPTS}"
+            echo "Executing from temp dir: ${INTERNAL_TEMPLATE_DIR}"
+            
+            PREFIX_TEST_CMD="python3 ${INTERNAL_TEMPLATE_DIR}/aisbench_test.py --input_len ${INPUT_LEN} --output_len ${OUTPUT_LEN} --data_num ${NUM_PROMPTS} --concurrency ${BATCH_SIZE} --request_rate ${REQUEST_RATE} --dataset_type prefix_cache --repeat_rate ${REPEAT_RATE} --prefix_test --dp ${DP}"
+            echo "Executing: ${PREFIX_TEST_CMD}"
+    
+            source ${PYTHON_ENV_FOR_AISBENCH}/bin/activate
+            eval "${PREFIX_TEST_CMD}"
+            exit 0
+        else
+            echo "===== [Mode] Standard AISBench Performance Test ====="
+            echo "Use dataset: ${DATASET_NAME}, dataset_file: ${dataset_file}"
+            echo "IP: $IP | Port: $PORT | Model: $MODEL | Model Path: $MODEL_PATH"
+            echo "Input tokens: ${INPUT_LEN} | Output tokens: ${OUTPUT_LEN} | Batch size: ${BATCH_SIZE} | Prompts num: ${NUM_PROMPTS}"
+
+            CMD="${CMD} --config-dir ${AISBENCH_CUSTOM_CONFIG_PATH} --models $TMP_CFG --datasets ${DATASET_NAME} --debug --summarizer default_perf --mode perf --num-prompts $NUM_PROMPTS --work-dir $OUTPUT_PATH "
+        fi
     else
         echo "The dataset type $DATASET_TYPE is not supported."
         exit 1
     fi
-    echo "IP: $IP | Port: $PORT | Model: $MODEL | Model Path: $MODEL_PATH"
-    echo "Input tokens: ${INPUT_LEN} | Output tokens: ${OUTPUT_LEN} | Batch size: ${BATCH_SIZE} | Prompts num: ${NUM_PROMPTS}"
 
 elif [ "$MODE" == "accuracy" ]; then
     if [ -z "$DATASET_NAME" ]; then
