@@ -121,7 +121,7 @@ GLM_5_1_PD_SEP_DECODE_ARGS = [
     "--mem-fraction-static",
     0.87,
     "--max-running-requests",
-    128,
+    24,
     "--attention-backend",
     "ascend",
     "--device",
