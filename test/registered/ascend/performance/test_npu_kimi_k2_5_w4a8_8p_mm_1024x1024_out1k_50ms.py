@@ -87,7 +87,9 @@ KIMI_K2_5_MM_1024_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_MM_1024x1024_Out1k_50ms(TestAscendPerformanceTestCaseBase):
+class TestNPUKimiK2_5_W4A8_8P_MM_1024x1024_Out1k_50ms(
+    TestAscendPerformanceTestCaseBase
+):
     """Test NPU performance for Kimi-K2.5-w4a8 8p multimodal 1024x1024 out1k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT

@@ -127,7 +127,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_32P_AIME2025(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+class TestNPUKimiK2_5_W4A8_1P1D_32P_AIME2025(
+    TestAscendAccuracyMultiNodePdSepTestCaseBase
+):
     """Test NPU accuracy for Kimi-K2.5-w4a8 1p1d_32p on AIME 2025"""
 
     model_config = MODEL_CONFIG
