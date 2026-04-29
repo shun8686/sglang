@@ -166,7 +166,7 @@ class TestNPUQwen3_5_397B_W8A8_1P1D_16P_AIME2025(
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     accuracy = 0.8
     dataset_type = "aime2025"
-    dataset_name = "aime2025_gen"
+    dataset_name = "aime2025_gen_0_shot_cot"
     max_concurrency = 64
     output_len = 8192
 
