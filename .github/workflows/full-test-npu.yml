@@ -576,6 +576,14 @@ jobs:
             runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_8p_in196k_out1k.py
             test_type: 'perf'
+          - name: test_npu_glm5_1_w4a8_8p_in32k_out0k5_20ms_90.py
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_8p_in32k_out0k5_20ms_90.py
+            test_type: 'perf'
+          - name: test_npu_glm5_1_w4a8_8p_in64k_out1k_20ms_90.py
+            runner: linux-aarch64-a3-16
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_8p_in64k_out1k_20ms_90.py
+            test_type: 'perf'
           # MiniMax-M2.5-w8a8 single-node tests
           - name: test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_20ms
             runner: linux-aarch64-a3-16
@@ -687,6 +695,34 @@ jobs:
             decode_size: 1
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in196k_out1k.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_glm5_1_w4a8_1p1d_32p_in64k_out1k_20ms_90.py
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in64k_out1k_20ms_90.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_glm5_1_w4a8_1p1d_32p_in128k_out1k_20ms_90.py
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in128k_out1k_20ms_90.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_glm5_1_w4a8_1p1d_32p_in128k_out1k_20ms_90_1.py
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in128k_out1k_20ms_90_1.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_glm5_1_w4a8_1p1d_48p_in64k_out1k_33ms_90.py
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_48p_in64k_out1k_33ms_90.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
           # Kimi 1p1d_16p PD separation (Issue #1: P:tp=8 + D:tp=8 = 16 cards total)
@@ -880,6 +916,12 @@ jobs:
           - name: test_npu_glm5_1_w4a8_16p_in3k5_out1k5_50ms
             node_size: 2
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_16p_in3k5_out1k5_50ms.py
+          - name: test_npu_glm5_1_w4a8_16p_in128k_out1k_50ms_90.py
+            node_size: 2
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_16p_in128k_out1k_50ms_90.py
+          - name: test_npu_glm5_1_w4a8_16p_in128k_out1k_50ms_90_1.py
+            node_size: 2
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_16p_in128k_out1k_50ms_90_1.py
     uses: ./.github/workflows/nightly-test-npu-e2e-multi-node.yml
     with:
       runner: linux-aarch64-a3-0
