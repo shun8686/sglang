@@ -88,7 +88,9 @@ MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_In128k_Out1k_Prefix90(TestAscendPerformanceTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_8P_In128k_Out1k_Prefix90(
+    TestAscendPerformanceTestCaseBase
+):
     """Test NPU performance for MiniMax-M2.5-w8a8 8p single node prefix cache in128k out1k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
