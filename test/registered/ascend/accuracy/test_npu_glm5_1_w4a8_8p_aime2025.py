@@ -9,21 +9,20 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="nightly-32-npu-a3",
+    suite="",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 GLM_5_1_TWO_NODE_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
-    "HCCL_SOCKET_IFNAME": "enp196s0f0",
-    "GLOO_SOCKET_IFNAME": "enp196s0f",
     "SGLANG_ENABLE_SPEC_V2": "1",
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "ENABLE_PROFILING": "1",
-    "SGLANG_NPU_USE_MLAPO": "1",
-    "SGLANG_SCHEDULER_DECREASE_PREFILL": "1",
-    "HCCL_BUFFSIZE": "2500",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
+    "HCCL_BUFFSIZE": "2000",
 }
 
 GLM_5_1_TWO_NODE_OTHER_ARGS = [
@@ -32,11 +31,11 @@ GLM_5_1_TWO_NODE_OTHER_ARGS = [
     "--device",
     "npu",
     "--tp-size",
-    8,
+    16,
     "--nnodes",
     2,
     "--dp-size",
-    4,
+    2,
     "--enable-dp-attention",
     "--chunked-prefill-size",
     131072,

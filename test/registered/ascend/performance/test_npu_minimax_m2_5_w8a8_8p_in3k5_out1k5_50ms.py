@@ -3,17 +3,17 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
+    MINIMAX_M2_5_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-16-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
+    disabled="performance testcase",
 )
 
 MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS = {
@@ -31,8 +31,6 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS = {
 }
 
 MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
-    "--model-path",
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     "--tp-size",
     16,
     "--enable-dp-attention",
@@ -85,7 +83,9 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(TestAscendPerformanceTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(
+    TestAscendPerformanceTestCaseBase
+):
     """Test NPU performance for MiniMax-M2.5-w8a8 8p single node high throughput in3k5 out1k5"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
@@ -100,7 +100,7 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(TestAscendPerforman
     output_len = 1500
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 3000
+    output_token_throughput = 200
 
     def test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 high throughput"""

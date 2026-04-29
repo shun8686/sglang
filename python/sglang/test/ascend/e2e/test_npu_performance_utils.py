@@ -83,7 +83,6 @@ QWEN3_5_27B_MODEL_PATH = "/root/.cache/modelscope/hub/models/Qwen/Qwen3.5-27B"
 QWEN3_5_27B_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-27B-W8A8"
 )
-QWEN3_5_27B_W8A8_HOME_MODEL_PATH = "/home/weights/Qwen3.5-27B-W8A8"
 QWEN3_30B_A3B_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Qwen/Qwen3-30B-A3B-Instruct-2507"
 )
@@ -138,8 +137,12 @@ KIMI_K2_5_EAGLE3_MODEL_PATH = (
 )
 GLM_4_7_FLASH_MODEL_PATH = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.7-Flash"
 GLM_5_1_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/GLM-5.1-w4a8"
-MINIMAX_M2_5_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-w8a8-QuaRot"
-MINIMAX_M2_5_EAGLE3_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-eagle3"
+MINIMAX_M2_5_W8A8_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-w8a8-QuaRot"
+)
+MINIMAX_M2_5_EAGLE3_MODEL_PATH = (
+    "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-eagel-model-0318"
+)
 
 QWEN3_5_397B_W8A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-397B-A17B-w8a8-mtp"

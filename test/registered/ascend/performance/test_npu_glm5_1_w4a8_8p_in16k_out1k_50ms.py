@@ -9,10 +9,10 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-16-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
+    disabled="performance testcase",
 )
 
 GLM_5_1_SINGLE_NODE_ENVS = {
@@ -22,10 +22,8 @@ GLM_5_1_SINGLE_NODE_ENVS = {
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP": "600",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "2000",
-    "ENABLE_PROFILING": "1",
-    "SGLANG_SCHEDULER_DECREASE_PREFILL": "1",
 }
 
 GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
@@ -34,7 +32,7 @@ GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
     "--device",
     "npu",
     "--tp-size",
-    8,
+    16,
     "--nnodes",
     1,
     "--node-rank",

@@ -12,10 +12,10 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-8-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
+    disabled="performance testcase",
 )
 
 KIMI_K2_5_16K_50MS_ENVS = {

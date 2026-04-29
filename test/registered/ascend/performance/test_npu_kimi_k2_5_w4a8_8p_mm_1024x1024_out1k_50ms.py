@@ -1,7 +1,6 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
     AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
     BENCHMARK_TOOL_DEFAULT,
     TestAscendPerformanceTestCaseBase,
@@ -13,10 +12,10 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-8-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
+    disabled="performance testcase",
 )
 
 KIMI_K2_5_MM_1024_ENVS = {
@@ -88,7 +87,9 @@ KIMI_K2_5_MM_1024_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_MM_1024x1024_Out1k_50ms(TestAscendPerformanceTestCaseBase):
+class TestNPUKimiK2_5_W4A8_8P_MM_1024x1024_Out1k_50ms(
+    TestAscendPerformanceTestCaseBase
+):
     """Test NPU performance for Kimi-K2.5-w4a8 8p multimodal 1024x1024 out1k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
