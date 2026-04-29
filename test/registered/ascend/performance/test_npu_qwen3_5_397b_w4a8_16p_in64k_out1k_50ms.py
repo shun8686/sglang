@@ -15,7 +15,6 @@ register_npu_ci(
     disabled="Currently it is executed by the npu performance workflow.",
 )
 
-
 QWEN3_5_397B_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
