@@ -478,11 +478,11 @@ jobs:
             test_type: 'perf'
           # Qwen3.5-27b accuracy tests (1p single-node)
           - name: test_npu_qwen3_5_27b_1p_in3k5_out1k5_high_gpqa
-            runner: linux-aarch64-a3-1
+            runner: linux-aarch64-a3-2
             test_case: test/registered/ascend/accuracy/test_npu_qwen3_5_27b_1p_in3k5_out1k5_high_gpqa.py
             test_type: 'accuracy'
           - name: test_npu_qwen3_5_27b_1p_in3k5_out1k5_high_aime2025
-            runner: linux-aarch64-a3-1
+            runner: linux-aarch64-a3-2
             test_case: test/registered/ascend/accuracy/test_npu_qwen3_5_27b_1p_in3k5_out1k5_high_aime2025.py
             test_type: 'accuracy'
           # Qwen3.5-27b 1p performance tests

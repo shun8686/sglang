@@ -15,16 +15,15 @@ register_npu_ci(
 )
 
 QWEN3_5_27B_16K_1K_HIGH_ENVS = {
-    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
+    "HCCL_OP_EXPANSION_MODE": "AIV",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "HCCL_OP_EXPANSION_MODE": "AIV",
-    "SGLANG_SET_CPU_AFFINITY": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
-    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "0",
+    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "30",
 }
 
 QWEN3_5_27B_16K_1K_HIGH_OTHER_ARGS = [
@@ -43,19 +42,19 @@ QWEN3_5_27B_16K_1K_HIGH_OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    200000,
+    50000,
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    32,
+    28,
     "--max-mamba-cache-size",
-    22,
+    50,
     "--mem-fraction-static",
-    0.5,
+    0.7,
     "--cuda-graph-bs",
     2,
-    4,
     8,
+    12,
     16,
     20,
     24,
@@ -69,8 +68,6 @@ QWEN3_5_27B_16K_1K_HIGH_OTHER_ARGS = [
     "bfloat16",
     "--mamba-ssm-dtype",
     "bfloat16",
-    "--max-total-tokens",
-    850000,
     "--speculative-algorithm",
     "NEXTN",
     "--speculative-num-steps",
@@ -91,8 +88,8 @@ class TestNPUQwen3_5_27B_2P_In16k_Out1k_High(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_5_27B_16K_1K_HIGH_OTHER_ARGS
     envs = QWEN3_5_27B_16K_1K_HIGH_ENVS
     dataset_name = "random"
-    max_concurrency = 14
-    num_prompts = 56
+    max_concurrency = 28
+    num_prompts = 112
     input_len = 16384
     output_len = 1024
     random_range_ratio = 1
