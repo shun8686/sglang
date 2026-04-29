@@ -497,21 +497,21 @@ if [ "$MODE" == "perf" ];then
         else
             echo "Warning: GSM8K train file not found at ${GSM8K_TRAIN_FILE}"
         fi
-        
+
         DATASET_NAME=gsm8k_custom_${MODEL}
         gen_dataset_gsm8k_config_file "${dataset_dir}"
         gen_model_config_file_vllm_api_stream_chat
 
         if (( $(echo "$REPEAT_RATE > 0" | bc -l) )); then
             TARGET_CONFIG_FILE="${DEST_COPY_DIR}/config"
-            
+
             echo "===== [Step 2/4] Prefix Mode Detected: Updating temporary config file ====="
             if [ -f "$TARGET_CONFIG_FILE" ]; then
                 [ -n "$MODEL" ] && sed -i "s/^[[:space:]]*MODEL_NAME[[:space:]]*=.*/MODEL_NAME=\"$MODEL\"/" "$TARGET_CONFIG_FILE"
                 [ -n "$MODEL_PATH" ] && sed -i "s|^[[:space:]]*MODEL_PATH[[:space:]]*=.*|MODEL_PATH=\"$MODEL_PATH\"|" "$TARGET_CONFIG_FILE"
                 [ -n "$IP" ] && sed -i "s/^[[:space:]]*HOST_IP[[:space:]]*=.*/HOST_IP=\"$IP\"/" "$TARGET_CONFIG_FILE"
                 [ -n "$PORT" ] && sed -i "s/^[[:space:]]*HOST_PORT[[:space:]]*=.*/HOST_PORT=\"$PORT\"/" "$TARGET_CONFIG_FILE"
-                
+
                 echo "Config updated successfully in: $TARGET_CONFIG_FILE"
             else
                 echo "Error: Config file not found in temp dir: $TARGET_CONFIG_FILE"
@@ -522,10 +522,10 @@ if [ "$MODE" == "perf" ];then
             echo "Use dataset: ${DATASET_NAME}, dataset_file: ${dataset_file}"
             echo "Input tokens: ${INPUT_LEN} | Output tokens: ${OUTPUT_LEN} | Batch size: ${BATCH_SIZE} | Prompts num: ${NUM_PROMPTS}"
             echo "Executing from temp dir: ${INTERNAL_TEMPLATE_DIR}"
-            
+
             PREFIX_TEST_CMD="python3 ${INTERNAL_TEMPLATE_DIR}/aisbench_test.py --input_len ${INPUT_LEN} --output_len ${OUTPUT_LEN} --data_num ${NUM_PROMPTS} --concurrency ${BATCH_SIZE} --request_rate ${REQUEST_RATE} --dataset_type prefix_cache --repeat_rate ${REPEAT_RATE} --prefix_test --dp ${DP}"
             echo "Executing: ${PREFIX_TEST_CMD}"
-    
+
             source ${PYTHON_ENV_FOR_AISBENCH}/bin/activate
             eval "${PREFIX_TEST_CMD}"
             exit 0
