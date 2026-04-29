@@ -12,13 +12,13 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-8-npu-a3",
     nightly=True,
-    disabled="performance testcase",
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
-KIMI_K2_5_MM_1080P_ENVS = {
+KIMI_K2_5_IN1080P_30_OUT256_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
@@ -29,7 +29,7 @@ KIMI_K2_5_MM_1080P_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-KIMI_K2_5_MM_1080P_OTHER_ARGS = [
+KIMI_K2_5_IN1080P_30_OUT256_OTHER_ARGS = [
     "--skip-server-warmup",
     "--quantization",
     "modelslim",
@@ -43,19 +43,15 @@ KIMI_K2_5_MM_1080P_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--tp-size",
-    8,
-    "--nnodes",
-    1,
+    16,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
     128,
     "--chunked-prefill-size",
-    -1,
-    "--context-length",
-    8192,
+    16384,
     "--max-prefill-tokens",
-    8192,
+    16384,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -72,6 +68,7 @@ KIMI_K2_5_MM_1080P_OTHER_ARGS = [
     4,
     8,
     16,
+    32,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
@@ -87,27 +84,29 @@ KIMI_K2_5_MM_1080P_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_MM_1080p_Out256_50ms(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for Kimi-K2.5-w4a8 8p multimodal 1080P out256"""
+class TestNPUKimiK2_5_W4A8_8P_IN1080P_30_OUT256_50ms(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for Kimi-K2.5-w4a8 8p multimodal in1080p+30 out256"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
     model = KIMI_K2_5_W4A8_MODEL_PATH
-    other_args = KIMI_K2_5_MM_1080P_OTHER_ARGS
-    envs = KIMI_K2_5_MM_1080P_ENVS
-    dataset_name = "random"
-    max_concurrency = 64
-    num_prompts = 256
-    input_len = 1024
+    other_args = KIMI_K2_5_IN1080P_30_OUT256_OTHER_ARGS
+    envs = KIMI_K2_5_IN1080P_30_OUT256_ENVS
+    backend = "sglang-oai-chat"
+    dataset_name = "image"
+    image_resolution = "1920x1080"
+    image_count = 1
+    max_concurrency = 16
+    num_prompts = 16
+    request_rate = 0.9
+    input_len = 30
     output_len = 256
     random_range_ratio = 1
-    image_resolution = 1920
-    image_count = 1
     tpot = 50
-    output_token_throughput = 400
+    output_token_throughput = 600
 
-    def test_npu_kimi_k2_5_w4a8_8p_mm_1080p_out256_50ms(self):
-        """Run NPU performance test for Kimi-K2.5-w4a8 multimodal 1080P"""
+    def test_npu_kimi_k2_5_w4a8_8p_in1080p_30_out256_50ms(self):
+        """Run NPU performance test for Kimi-K2.5-w4a8 multimodal in1080p+30 out256"""
         self.run_throughput()
 
 

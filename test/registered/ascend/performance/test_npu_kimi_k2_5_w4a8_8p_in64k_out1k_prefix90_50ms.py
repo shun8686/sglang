@@ -12,13 +12,13 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-8-npu-a3",
     nightly=True,
-    disabled="performance testcase",
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
-KIMI_K2_5_256K_ENVS = {
+ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
@@ -29,7 +29,7 @@ KIMI_K2_5_256K_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-KIMI_K2_5_256K_OTHER_ARGS = [
+OTHER_ARGS = [
     "--skip-server-warmup",
     "--quantization",
     "modelslim",
@@ -43,19 +43,15 @@ KIMI_K2_5_256K_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--tp-size",
-    8,
-    "--nnodes",
-    1,
+    16,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
-    64,
+    128,
     "--chunked-prefill-size",
-    -1,
-    "--context-length",
-    280000,
+    16384,
     "--max-prefill-tokens",
-    260096,
+    16384,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -67,11 +63,12 @@ KIMI_K2_5_256K_OTHER_ARGS = [
     "auto",
     "--enable-dp-attention",
     "--dp-size",
-    2,
+    4,
     "--cuda-graph-bs",
     4,
     8,
     16,
+    32,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
@@ -87,25 +84,27 @@ KIMI_K2_5_256K_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_In256k_Out1k_50ms(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for Kimi-K2.5-w4a8 8p in256k out1k"""
+class TestNPUKimiK2_5_W4A8_8P_In64k_Out1k_50ms(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for Kimi-K2.5-w4a8 8p in64k out1k 50ms TPOT"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = KIMI_K2_5_W4A8_MODEL_PATH
-    other_args = KIMI_K2_5_256K_OTHER_ARGS
-    envs = KIMI_K2_5_256K_ENVS
+    other_args = OTHER_ARGS
+    envs = ENVS
     dataset_name = "random"
-    max_concurrency = 32
-    num_prompts = 128
-    input_len = 260096
+    max_concurrency = 48
+    num_prompts = 48
+    request_rate = 0.74
+    aisbench_repeat_rate = 0.9
+    input_len = 16384
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 500
+    output_token_throughput = 1000
 
-    def test_npu_kimi_k2_5_w4a8_8p_in256k_out1k_50ms(self):
-        """Run NPU performance test for Kimi-K2.5-w4a8 in256k out1k"""
+    def test_npu_kimi_k2_5_w4a8_8p_in64k_out1k_50ms(self):
+        """Run NPU performance test for Kimi-K2.5-w4a8 in64k out1k 50ms"""
         self.run_throughput()
 
 

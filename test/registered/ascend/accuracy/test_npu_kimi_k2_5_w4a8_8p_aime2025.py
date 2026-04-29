@@ -12,12 +12,11 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="",
+    suite="nightly-16-npu-a3",
     nightly=True,
-    disabled="accuracy testcase",
 )
 
-KIMI_K2_5_ENVS = {
+ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
@@ -28,7 +27,7 @@ KIMI_K2_5_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-KIMI_K2_5_OTHER_ARGS = [
+OTHER_ARGS = [
     "--skip-server-warmup",
     "--quantization",
     "modelslim",
@@ -49,8 +48,6 @@ KIMI_K2_5_OTHER_ARGS = [
     128,
     "--chunked-prefill-size",
     16384,
-    "--context-length",
-    8192,
     "--max-prefill-tokens",
     16384,
     "--enable-multimodal",
@@ -90,8 +87,8 @@ class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = KIMI_K2_5_W4A8_MODEL_PATH
-    other_args = KIMI_K2_5_OTHER_ARGS
-    envs = KIMI_K2_5_ENVS
+    other_args = OTHER_ARGS
+    envs = ENVS
     accuracy = 0.3
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"

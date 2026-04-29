@@ -18,7 +18,7 @@ register_npu_ci(
     disabled="Currently it is executed by the npu performance workflow.",
 )
 
-KIMI_K2_5_16K_20MS_ENVS = {
+ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
@@ -29,7 +29,7 @@ KIMI_K2_5_16K_20MS_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-KIMI_K2_5_16K_20MS_OTHER_ARGS = [
+OTHER_ARGS = [
     "--skip-server-warmup",
     "--quantization",
     "modelslim",
@@ -84,26 +84,27 @@ KIMI_K2_5_16K_20MS_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_In16k_Out1k_20ms(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for Kimi-K2.5-w4a8 8p in16k out1k 20ms TPOT"""
+class TestNPUKimiK2_5_W4A8_8P_In128k_Out1k_50ms(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for Kimi-K2.5-w4a8 8p in128k out1k 50ms TPOT"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = KIMI_K2_5_W4A8_MODEL_PATH
-    other_args = KIMI_K2_5_16K_20MS_OTHER_ARGS
-    envs = KIMI_K2_5_16K_20MS_ENVS
+    other_args = OTHER_ARGS
+    envs = ENVS
     dataset_name = "random"
-    max_concurrency = 16
-    num_prompts = 16
-    request_rate = 0.9
+    max_concurrency = 48
+    num_prompts = 48
+    request_rate = 0.74
+    aisbench_repeat_rate = 0.9
     input_len = 16384
     output_len = 1024
     random_range_ratio = 1
-    tpot = 20
+    tpot = 50
     output_token_throughput = 1000
 
-    def test_npu_kimi_k2_5_w4a8_8p_in16k_out1k_20ms(self):
-        """Run NPU performance test for Kimi-K2.5-w4a8 in16k out1k 20ms"""
+    def test_npu_kimi_k2_5_w4a8_8p_in128k_out1k_50ms(self):
+        """Run NPU performance test for Kimi-K2.5-w4a8 in128k out1k 50ms"""
         self.run_throughput()
 
 

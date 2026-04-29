@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
@@ -11,48 +12,46 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-pd-sep-2-node",
+    suite="nightly-pd-sep-4-node",
     nightly=True,
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
-PREFILL_ENVS = {
+KIMI_K2_5_W4A8_PREFILL_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
-    "HCCL_BUFFSIZE": "1800",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "60",
+    "HCCL_BUFFSIZE": "1600",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "100",
 }
 
-DECODE_ENVS = {
+KIMI_K2_5_W4A8_DECODE_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
-    "HCCL_SOCKET_IFNAME": "lo",
-    "GLOO_SOCKET_IFNAME": "lo",
-    "HCCL_BUFFSIZE": "800",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "60",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+    "HCCL_BUFFSIZE": "2400",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "60",
 }
 
-PREFILL_ARGS = [
+KIMI_K2_5_W4A8_PREFILL_ARGS = [
     "--quantization",
     "modelslim",
     "--dtype",
     "bfloat16",
     "--disaggregation-mode",
     "prefill",
-    "--load-balance-method",
-    "round_robin",
     "--nnodes",
     "1",
     "--node-rank",
     "0",
-    "--trust-remote-code",
     "--attention-backend",
     "ascend",
     "--device",
@@ -60,11 +59,13 @@ PREFILL_ARGS = [
     "--tp-size",
     16,
     "--mem-fraction-static",
-    0.75,
-    "--max-running-requests",
-    "16",
+    0.76,
+    "--max-prefill-tokens",
+    1,
     "--chunked-prefill-size",
-    32768,
+    16384,
+    "--context-length",
+    133120,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -79,7 +80,7 @@ PREFILL_ARGS = [
     "auto",
 ]
 
-DECODE_ARGS = [
+KIMI_K2_5_W4A8_DECODE_ARGS = [
     "--quantization",
     "modelslim",
     "--dtype",
@@ -87,18 +88,24 @@ DECODE_ARGS = [
     "--disaggregation-mode",
     "decode",
     "--nnodes",
-    "1",
+    "2",
     "--trust-remote-code",
     "--attention-backend",
     "ascend",
     "--device",
     "npu",
     "--tp-size",
-    16,
+    32,
     "--mem-fraction-static",
-    0.76,
+    0.67,
     "--max-running-requests",
-    16,
+    32,
+    "--disable-radix-cache",
+    1,
+    "--chunked-prefill-size",
+    65536,
+    "--context-length",
+    133120,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -106,14 +113,13 @@ DECODE_ARGS = [
     "ascend",
     "--enable-dp-attention",
     "--dp-size",
-    4,
+    32,
     "--moe-a2a-backend",
     "deepep",
     "--deepep-mode",
     "auto",
     "--cuda-graph-bs",
-    4,
-    8,
+    1,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
@@ -130,35 +136,36 @@ DECODE_ARGS = [
 
 MODEL_CONFIG = {
     "model_path": KIMI_K2_5_W4A8_MODEL_PATH,
-    "prefill_args": PREFILL_ARGS,
-    "decode_args": DECODE_ARGS,
-    "prefill_envs": PREFILL_ENVS,
-    "decode_envs": DECODE_ENVS,
-    "router_args": ["--policy", "round_robin"],
+    "prefill_args": KIMI_K2_5_W4A8_PREFILL_ARGS,
+    "decode_args": KIMI_K2_5_W4A8_DECODE_ARGS,
+    "prefill_envs": KIMI_K2_5_W4A8_PREFILL_ENVS,
+    "decode_envs": KIMI_K2_5_W4A8_DECODE_ENVS,
+    "router_args": ["--policy", "cache_aware"],
     "router_envs": {},
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_16P_In16k_Out1k_50ms(
+class TestNPUKimiK2_5_W4A8_2P1D_32P_In128k_Out1k_50ms(
     TestAscendPerfMultiNodePdSepTestCaseBase
 ):
-    """Test NPU performance for Kimi-K2.5-w4a8 1P+1D 16p: input_len=16384, output_len=1024, TPOT=50ms"""
+    """Test NPU performance for Kimi-K2.5-w4a8 2p1d_32p PD separation in128k out1k"""
 
     model_config = MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     dataset_name = "random"
-    max_concurrency = 48
-    num_prompts = 48
-    request_rate = 0.74
-    input_len = 16384
-    output_len = 1024
+    max_concurrency = 4
+    num_prompts = 4
+    request_rate = 0.9
+    aisbench_repeat_rate = 0.9
+    input_len = 3500
+    output_len = 1500
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 1000
+    output_token_throughput = 1540
 
-    def test_npu_kimi_k2_5_w4a8_1p1d_16p_in16k_out1k_50ms(self):
-        """Run NPU performance test for 1P+1D 16p with 16k input, 1k output, TPOT=50ms"""
+    def test_npu_kimi_k2_5_w4a8_2p1d_32p_in128k_out1k_50ms(self):
+        """Run NPU performance test for Kimi-K2.5-w4a8 2p1d_32p"""
         self.run_throughput()
 
 

@@ -1,8 +1,9 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK,
     AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
+    BENCHMARK_TOOL_DEFAULT,
     KIMI_K2_5_EAGLE3_MODEL_PATH,
     KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
@@ -10,38 +11,42 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-pd-sep-4-node",
     nightly=True,
-    disabled="performance testcase",
 )
 
-KIMI_K2_5_W4A8_2P1D_PREFILL_ENVS = {
+KIMI_K2_5_W4A8_PREFILL_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
-    "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
-    "HCCL_BUFFSIZE": "1800",
-    "SGLANG_ENABLE_SPEC_V2": "1",
-    "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
+    "HCCL_BUFFSIZE": "1600",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "100",
 }
 
-KIMI_K2_5_W4A8_2P1D_DECODE_ENVS = {
+KIMI_K2_5_W4A8_DECODE_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
-    "HCCL_BUFFSIZE": "1800",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+    "HCCL_BUFFSIZE": "2400",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "60",
 }
 
-KIMI_K2_5_W4A8_2P1D_ROUTER_ENVS = {}
-
-KIMI_K2_5_W4A8_2P1D_PREFILL_ARGS = [
-    "--trust-remote-code",
+KIMI_K2_5_W4A8_PREFILL_ARGS = [
+    "--quantization",
+    "modelslim",
+    "--dtype",
+    "bfloat16",
+    "--disaggregation-mode",
+    "prefill",
     "--nnodes",
     "1",
     "--node-rank",
@@ -50,25 +55,16 @@ KIMI_K2_5_W4A8_2P1D_PREFILL_ARGS = [
     "ascend",
     "--device",
     "npu",
-    "--max-running-requests",
-    160,
-    "--disable-radix-cache",
-    "--model-path",
-    KIMI_K2_5_W4A8_MODEL_PATH,
-    "--quantization",
-    "modelslim",
-    "--dtype",
-    "bfloat16",
-    "--model-loader-extra-config",
-    '{"enable_multithread_load": true}',
     "--tp-size",
     16,
     "--mem-fraction-static",
-    0.765,
+    0.76,
+    "--max-prefill-tokens",
+    1,
     "--chunked-prefill-size",
-    49152,
+    16384,
     "--context-length",
-    8192,
+    133120,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -76,65 +72,39 @@ KIMI_K2_5_W4A8_2P1D_PREFILL_ARGS = [
     "ascend",
     "--enable-dp-attention",
     "--dp-size",
-    16,
+    4,
     "--moe-a2a-backend",
     "deepep",
     "--deepep-mode",
     "auto",
-    "--cuda-graph-bs",
-    1,
-    2,
-    4,
-    6,
-    8,
-    10,
-    "--speculative-algorithm",
-    "EAGLE3",
-    "--speculative-draft-model-path",
-    KIMI_K2_5_EAGLE3_MODEL_PATH,
-    "--speculative-num-steps",
-    2,
-    "--speculative-eagle-topk",
-    1,
-    "--speculative-num-draft-tokens",
-    3,
-    "--speculative-draft-model-quantization",
-    "unquant",
-    "--disaggregation-mode",
-    "prefill",
-    "--disaggregation-transfer-backend",
-    "ascend",
 ]
 
-KIMI_K2_5_W4A8_2P1D_DECODE_ARGS = [
-    "--trust-remote-code",
+KIMI_K2_5_W4A8_DECODE_ARGS = [
+    "--quantization",
+    "modelslim",
+    "--dtype",
+    "bfloat16",
+    "--disaggregation-mode",
+    "decode",
     "--nnodes",
     "2",
-    "--node-rank",
-    "0",
+    "--trust-remote-code",
     "--attention-backend",
     "ascend",
     "--device",
     "npu",
-    "--max-running-requests",
-    160,
-    "--disable-radix-cache",
-    "--model-path",
-    KIMI_K2_5_W4A8_MODEL_PATH,
-    "--quantization",
-    "modelslim",
-    "--dtype",
-    "bfloat16",
-    "--model-loader-extra-config",
-    '{"enable_multithread_load": true}',
     "--tp-size",
     32,
     "--mem-fraction-static",
-    0.765,
+    0.67,
+    "--max-running-requests",
+    32,
+    "--disable-radix-cache",
+    1,
     "--chunked-prefill-size",
-    49152,
+    65536,
     "--context-length",
-    8192,
+    133120,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -149,33 +119,29 @@ KIMI_K2_5_W4A8_2P1D_DECODE_ARGS = [
     "auto",
     "--cuda-graph-bs",
     1,
-    2,
-    4,
-    6,
-    8,
-    10,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
     KIMI_K2_5_EAGLE3_MODEL_PATH,
     "--speculative-num-steps",
-    2,
+    1,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    3,
+    2,
     "--speculative-draft-model-quantization",
     "unquant",
-    "--disaggregation-mode",
-    "decode",
-    "--disaggregation-transfer-backend",
-    "ascend",
 ]
 
-KIMI_K2_5_W4A8_2P1D_ROUTER_ARGS = [
-    "--policy",
-    "cache_aware",
-]
+MODEL_CONFIG = {
+    "model_path": KIMI_K2_5_W4A8_MODEL_PATH,
+    "prefill_args": KIMI_K2_5_W4A8_PREFILL_ARGS,
+    "decode_args": KIMI_K2_5_W4A8_DECODE_ARGS,
+    "prefill_envs": KIMI_K2_5_W4A8_PREFILL_ENVS,
+    "decode_envs": KIMI_K2_5_W4A8_DECODE_ENVS,
+    "router_args": ["--policy", "cache_aware"],
+    "router_envs": {},
+}
 
 
 class TestNPUKimiK2_5_W4A8_2P1D_32P_MM_1080p_Out256_50ms(
@@ -183,27 +149,21 @@ class TestNPUKimiK2_5_W4A8_2P1D_32P_MM_1080p_Out256_50ms(
 ):
     """Test NPU multimodal performance for Kimi-K2.5-w4a8 2P+1D 32p: image_resolution=1920, image_count=1, output_len=256, TPOT=50ms"""
 
-    model_config = {
-        "model_path": KIMI_K2_5_W4A8_MODEL_PATH,
-        "prefill_args": KIMI_K2_5_W4A8_2P1D_PREFILL_ARGS,
-        "decode_args": KIMI_K2_5_W4A8_2P1D_DECODE_ARGS,
-        "prefill_envs": KIMI_K2_5_W4A8_2P1D_PREFILL_ENVS,
-        "decode_envs": KIMI_K2_5_W4A8_2P1D_DECODE_ENVS,
-        "router_envs": KIMI_K2_5_W4A8_2P1D_ROUTER_ENVS,
-        "router_args": KIMI_K2_5_W4A8_2P1D_ROUTER_ARGS,
-    }
-
-    benchmark_tool = AISBENCHMARK
+    model_config = MODEL_CONFIG
+    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
-    dataset_name = "random"
-    max_concurrency = 160
-    num_prompts = 160
-    input_len = None
+    backend = "sglang-oai-chat"
+    dataset_name = "image"
+    image_resolution = "1920x1080"
+    image_count = 1
+    max_concurrency = 16
+    num_prompts = 16
+    request_rate = 0.9
+    input_len = 30
     output_len = 256
     random_range_ratio = 1
-    image_resolution = 1920
-    image_count = 1
     tpot = 50
+    output_token_throughput = 600
 
     def test_npu_kimi_k2_5_w4a8_2p1d_32p_mm_1080p_out256_50ms(self):
         """Run NPU multimodal performance test for 2P+1D 32p with 1080p image, 256 output"""
