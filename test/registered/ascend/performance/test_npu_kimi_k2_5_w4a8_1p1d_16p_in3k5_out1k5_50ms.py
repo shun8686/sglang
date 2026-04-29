@@ -6,14 +6,6 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
-from sglang.test.ci.ci_register import register_npu_ci
-
-register_npu_ci(
-    est_time=1800,
-    suite="nightly-pd-sep-2-node",
-    nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
-)
 
 PREFILL_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",

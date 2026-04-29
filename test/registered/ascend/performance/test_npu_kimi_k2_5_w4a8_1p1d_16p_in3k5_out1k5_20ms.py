@@ -7,13 +7,6 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     KIMI_K2_5_EAGLE3_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
-from sglang.test.ci.ci_register import register_npu_ci
-
-register_npu_ci(
-    est_time=1800,
-    suite="nightly-pd-sep-2-node",
-    nightly=True,
-)
 
 KIMI_K2_5_W4A8_PREFILL_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
@@ -60,10 +53,6 @@ KIMI_K2_5_W4A8_PREFILL_ARGS = [
     "bfloat16",
     "--model-loader-extra-config",
     '{"enable_multithread_load": true}',
-    "--host",
-    "0.0.0.0",
-    "--port",
-    8100,
     "--tp-size",
     16,
     "--base-gpu-id",
@@ -132,10 +121,6 @@ KIMI_K2_5_W4A8_DECODE_ARGS = [
     "bfloat16",
     "--model-loader-extra-config",
     '{"enable_multithread_load": true}',
-    "--host",
-    "0.0.0.0",
-    "--port",
-    8100,
     "--tp-size",
     16,
     "--base-gpu-id",
