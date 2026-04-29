@@ -76,7 +76,9 @@ QWEN3_5_397B_W8A8_1P_HIGH_OTHER_ARGS = [
 ]
 
 
-class TestNPUQwen3_5_397B_W8A8_1P_In3k5_Out1k5_High_AIME2025(TestAscendAccuracyTestCaseBase):
+class TestNPUQwen3_5_397B_W8A8_1P_In3k5_Out1k5_High_AIME2025(
+    TestAscendAccuracyTestCaseBase
+):
     """Test NPU accuracy for Qwen3.5-397B-W8A8 1p in3k5 out1k5 high throughput on AIME2025"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT

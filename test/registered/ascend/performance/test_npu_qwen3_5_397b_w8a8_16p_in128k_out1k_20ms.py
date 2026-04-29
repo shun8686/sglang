@@ -103,7 +103,7 @@ class TestNPUQwen3_5_397B_128K_1k_20ms(TestAscendPerformanceTestCaseBase):
     output_token_throughput = 100
 
     def test_npu_qwen3_5_397b_128K_1k_20ms(self):
-        """Run NPU performance test for Qwen3.5-397B in128k """
+        """Run NPU performance test for Qwen3.5-397B in128k"""
         self.run_throughput()
 
 

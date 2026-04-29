@@ -157,7 +157,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUQwen3_5_397B_W8A8_1P1D_16P_AIME2025(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+class TestNPUQwen3_5_397B_W8A8_1P1D_16P_AIME2025(
+    TestAscendAccuracyMultiNodePdSepTestCaseBase
+):
     """Test NPU accuracy for Qwen3.5-397B-W8A8 1p1d_16p on AIME2025"""
 
     model_config = MODEL_CONFIG
