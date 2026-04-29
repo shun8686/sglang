@@ -20,6 +20,10 @@ QWEN3_5_397B_W4A8_MODEL_PATH = os.path.join(
     "/root/.cache/modelscope/hub/models/", "Qwen/Qwen3.5-397B-w4a8"
 )
 
+GLM5_1_W4A8_MODEL_PATH = os.path.join(
+    "/root/.cache/modelscope/hub/models/", "GLM-5.1-w4a8"
+)
+
 GPQA_DATASET = "gpqa"
 AIME2025_DATASET = "aime2025"
 
