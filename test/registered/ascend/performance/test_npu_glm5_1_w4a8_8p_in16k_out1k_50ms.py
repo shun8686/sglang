@@ -91,7 +91,7 @@ class TestNPUGLM5_1_W4A8_16P_In3k5_Out1k5(TestAscendPerformanceTestCaseBase):
     dataset_name = "random"
     max_concurrency = 5
     num_prompts = 20
-    input_len = 20480
+    input_len = 16384
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
