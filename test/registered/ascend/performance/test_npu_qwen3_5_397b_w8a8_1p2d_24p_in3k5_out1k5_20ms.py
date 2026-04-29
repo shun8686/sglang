@@ -100,7 +100,7 @@ PREFILL_ARGS = [
 ]
 
 DECODE_ARGS = [
-    "--disaggregation-mode"
+    "--disaggregation-mode",
     "decode",
     "--nnodes",
     2,
@@ -186,6 +186,7 @@ class TestNPUQwen3_5_397B_W8A8_1P2D_24P_In3k5_Out1k5_20ms(
     def test_npu_qwen3_5_397b_1p2d_24p_3k5_1k_20ms(self):
         """Run NPU performance test for Qwen3.5-397B-w8a8 1p2d"""
         self.run_throughput()
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -108,7 +108,8 @@ DECODE_ARGS = [
     8,
     "--ep-size",
     16,
-    "--mem-fraction-static", 0.75,
+    "--mem-fraction-static",
+    0.75,
     "--max-running-requests",
     96,
     "--attention-backend",
@@ -185,6 +186,7 @@ class TestNPUQwen3_5_397B_W8A8_1P1D_16P_In16k_Out1k_20ms(
     def test_npu_qwen3_5_397b_1p1d_16p_16k_1k_20ms(self):
         """Run NPU performance test for Qwen3.5-397B-w8a8 1p1d"""
         self.run_throughput()
+
 
 if __name__ == "__main__":
     unittest.main()

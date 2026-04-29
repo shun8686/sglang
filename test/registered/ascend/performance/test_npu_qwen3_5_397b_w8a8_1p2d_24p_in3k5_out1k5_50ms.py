@@ -187,5 +187,6 @@ class TestNPUQwen3_5_397B_W8A8_1P2D_24P_In3k5_Out1k5_50ms(
         """Run NPU performance test for Qwen3.5-397B-w8a8 1p2d"""
         self.run_throughput()
 
+
 if __name__ == "__main__":
     unittest.main()
