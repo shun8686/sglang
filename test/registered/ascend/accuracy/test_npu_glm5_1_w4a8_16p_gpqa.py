@@ -21,10 +21,8 @@ GLM_5_1_SINGLE_NODE_ENVS = {
     "HCCL_SOCKET_IFNAME": "lo",
     "GLOO_SOCKET_IFNAME": "lo",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_DISAGGREGATION_BOOTSTRAP": "600",
+    "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "2000",
-    "ENABLE_PROFILING": "1",
-    "SGLANG_SCHEDULER_DECREASE_PREFILL": "1",
 }
 
 GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
@@ -33,13 +31,13 @@ GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
     "--device",
     "npu",
     "--tp-size",
-    8,
+    32,
     "--nnodes",
     1,
     "--node-rank",
     0,
     "--dp-size",
-    2,
+    4,
     "--enable-dp-attention",
     "--chunked-prefill-size",
     -1,
