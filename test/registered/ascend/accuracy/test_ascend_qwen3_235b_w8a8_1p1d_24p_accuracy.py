@@ -6,8 +6,8 @@ from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     TestAscendAccuracyMultiNodePdSepTestCaseBase,
 )
 from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_235B_A22B_W8A8_WEIGHTS_PATH,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    QWEN3_235B_A22B_W8A8_WEIGHTS_PATH,
 )
 
 MODEL_CONFIG = {

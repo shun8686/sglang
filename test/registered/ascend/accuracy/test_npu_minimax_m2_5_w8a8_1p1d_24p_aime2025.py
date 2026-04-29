@@ -4,6 +4,7 @@ from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     BENCHMARK_TOOL_DEFAULT,
     TestAscendAccuracyMultiNodePdSepTestCaseBase,
 )
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     MINIMAX_M2_5_W8A8_MODEL_PATH,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
@@ -168,7 +169,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_AIME2025(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_AIME2025(
+    TestAscendAccuracyMultiNodePdSepTestCaseBase
+):
     """Test NPU accuracy for MiniMax-M2.5-w8a8 1p1d_24p on AIME 2025"""
 
     model_config = MODEL_CONFIG

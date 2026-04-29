@@ -2,7 +2,7 @@ import unittest
 
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     BENCHMARK_TOOL_DEFAULT,
-    QWEN3_5_27B_W8A8_HOME_MODEL_PATH,
+    QWEN3_5_27B_W8A8_MODEL_PATH,
     TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -28,7 +28,7 @@ QWEN3_5_27B_3K5_1K5_HIGH_ENVS = {
 
 QWEN3_5_27B_3K5_1K5_HIGH_OTHER_ARGS = [
     "--model-path",
-    QWEN3_5_27B_W8A8_HOME_MODEL_PATH,
+    QWEN3_5_27B_W8A8_MODEL_PATH,
     "--tp-size",
     2,
     "--nnodes",
@@ -81,7 +81,7 @@ class TestNPUQwen3_5_27B_1P_In3k5_Out1k5_High_GPQA(TestAscendAccuracyTestCaseBas
     """Test NPU accuracy for Qwen3.5-27B-W8A8 1p in3k5 out1k5 high throughput on GPQA"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    model = QWEN3_5_27B_W8A8_HOME_MODEL_PATH
+    model = QWEN3_5_27B_W8A8_MODEL_PATH
     other_args = QWEN3_5_27B_3K5_1K5_HIGH_OTHER_ARGS
     envs = QWEN3_5_27B_3K5_1K5_HIGH_ENVS
     accuracy = 0.3

@@ -96,3 +96,4 @@ class TestNPUGLM5_1_W4A8_32P_GPQA(TestAscendAccuracyMultiNodePdMixTestCaseBase):
 
 if __name__ == "__main__":
     unittest.main()
+    

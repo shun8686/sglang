@@ -3,8 +3,8 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
+    MINIMAX_M2_5_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -85,7 +85,9 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(TestAscendPerformanceTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(
+    TestAscendPerformanceTestCaseBase
+):
     """Test NPU performance for MiniMax-M2.5-w8a8 8p single node high throughput in3k5 out1k5"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT

@@ -65,7 +65,9 @@ MINIMAX_M2_5_32K_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_In32k_Out1k_HighThroughput(TestAscendPerformanceTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_8P_In32k_Out1k_HighThroughput(
+    TestAscendPerformanceTestCaseBase
+):
     """Test NPU performance for MiniMax-M2.5-w8a8 8p single node high throughput in32k out1k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT

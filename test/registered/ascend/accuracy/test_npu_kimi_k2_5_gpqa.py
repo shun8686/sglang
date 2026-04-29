@@ -104,5 +104,3 @@ class TestNPUKimiK2_5GPQA(TestAscendAccuracyTestCaseBase):
 
 if __name__ == "__main__":
     unittest.main()
-
-

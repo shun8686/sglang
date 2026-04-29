@@ -4,8 +4,8 @@ from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
+    MINIMAX_M2_5_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -169,7 +169,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """Test NPU performance for MiniMax-M2.5-w8a8 1p1d_24p PD separation in64k out1k"""
 
     model_config = MODEL_CONFIG
