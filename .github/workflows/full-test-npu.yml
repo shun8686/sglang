@@ -3,10 +3,10 @@ name: Full Test (NPU)
 on:
 #  pull_request:
 #    branches:
-#     - main
-#     - testcases
+#      - main
+#      - testcases
 #    paths:
-#     - ".github/workflows/full-test-npu.yml"
+#      - ".github/workflows/full-test-npu.yml"
   workflow_dispatch:
     inputs:
       ref:
