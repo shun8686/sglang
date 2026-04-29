@@ -27,11 +27,11 @@ GLM_5_1_PD_SEP_PREFILL_ENVS = {
     "TASK_QUEUE_ENABLE": "2",
     "ENABLE_PROFILING": "0",
     "HCCL_SOCKET_IFNAME": "enp196s0f0",
-    "GLOO_SOCKET_IFNAME": "enp196s0f",
+    "GLOO_SOCKET_IFNAME": "enp196s0f0",
 }
 
 GLM_5_1_PD_SEP_DECODE_ENVS = {
-     "SGLANG_SET_CPU_AFFINITY": "1",
+    "SGLANG_SET_CPU_AFFINITY": "1",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24707",
@@ -43,14 +43,14 @@ GLM_5_1_PD_SEP_DECODE_ENVS = {
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
     "TASK_QUEUE_ENABLE": "0",
     "HCCL_SOCKET_IFNAME": "enp196s0f0",
-    "GLOO_SOCKET_IFNAME": "enp196s0f",
+    "GLOO_SOCKET_IFNAME": "enp196s0f0",
 }
 
 GLM_5_1_PD_SEP_PREFILL_ARGS = [
     "--disaggregation-mode",
     "prefill",
     "--tp-size",
-    8,
+    32,
     "--nnodes",
     2,
     "--mem-fraction-static",
@@ -108,7 +108,7 @@ GLM_5_1_PD_SEP_DECODE_ARGS = [
     "--disaggregation-mode",
     "decode",
     "--tp-size",
-    4,
+    32,
     "--nnodes",
     2,
     "--dp-size",
