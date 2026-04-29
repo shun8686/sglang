@@ -136,7 +136,7 @@ class TestNPUKimiK2_5_W4A8_1P1D_32P_AIME2025(TestAscendAccuracyMultiNodePdSepTes
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
     max_concurrency = 64
-    output_len = 8192
+    output_len = 220000
 
     def test_npu_kimi_k2_5_w4a8_1p1d_32p_aime2025(self):
         """Run NPU accuracy test for Kimi-K2.5-w4a8 1p1d_32p on AIME 2025"""

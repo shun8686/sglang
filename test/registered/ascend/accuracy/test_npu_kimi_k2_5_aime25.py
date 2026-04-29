@@ -42,8 +42,6 @@ KIMI_K2_5_OTHER_ARGS = [
     "ascend",
     "--tp-size",
     16,
-    "--base-gpu-id",
-    0,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
@@ -97,7 +95,7 @@ class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
     batch_size = 64
-    max_out_len = 8192
+    max_out_len = 220000
 
     def test_npu_kimi_k2_5_aime25(self):
         """Run NPU accuracy test for Kimi-K2.5 on AIME 2025"""

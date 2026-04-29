@@ -42,8 +42,6 @@ KIMI_K2_5_OTHER_ARGS = [
     "ascend",
     "--tp-size",
     16,
-    "--base-gpu-id",
-    0,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
@@ -97,7 +95,7 @@ class TestNPUKimiK2_5GPQA(TestAscendAccuracyTestCaseBase):
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
     batch_size = 128
-    max_out_len = 1024
+    max_out_len = 220000
 
     def test_npu_kimi_k2_5_gpqa(self):
         """Run NPU accuracy test for Kimi-K2.5 on GPQA"""

@@ -46,8 +46,6 @@ KIMI_K2_5_16K_50MS_OTHER_ARGS = [
     8,
     "--nnodes",
     1,
-    "--base-gpu-id",
-    0,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",

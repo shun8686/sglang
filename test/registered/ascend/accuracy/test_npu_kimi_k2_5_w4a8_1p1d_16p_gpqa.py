@@ -136,7 +136,7 @@ class TestNPUKimiK2_5_W4A8_1P1D_32P_GPQA(TestAscendAccuracyMultiNodePdSepTestCas
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
     max_concurrency = 128
-    output_len = 1024
+    output_len = 220000
 
     def test_npu_kimi_k2_5_w4a8_1p1d_32p_gpqa(self):
         """Run NPU accuracy test for Kimi-K2.5-w4a8 1p1d_32p on GPQA"""
