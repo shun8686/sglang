@@ -33,7 +33,7 @@ GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
     "--tp-size",
     32,
     "--nnodes",
-    1,
+    2,
     "--node-rank",
     0,
     "--dp-size",
