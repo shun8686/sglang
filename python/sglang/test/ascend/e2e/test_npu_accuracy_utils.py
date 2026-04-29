@@ -236,6 +236,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
     accuracy = 0.1
     output_len = 512
     max_concurrency = 1
+    num_prompts = 100000
 
     @classmethod
     def setUpClass(cls):
@@ -296,6 +297,7 @@ class TestAscendAccuracyMultiNodePdMixTestCaseBase(CustomTestCase):
                 dataset_type=self.dataset_type,
                 output_len=self.output_len,
                 max_concurrency=self.max_concurrency,
+                num_prompts=self.num_prompts,
             )
             assert_metrics(self, metrics)
 
