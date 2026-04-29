@@ -428,31 +428,31 @@ jobs:
             test_type: 'accuracy'
           # Kimi-K2.5 8p single-node performance tests (Issue #1: 8 cards)
           - name: test_npu_kimi_k2_5_w4a8_8p_in256k_out1k_50ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_in256k_out1k_50ms.py
             test_type: 'perf'
           - name: test_npu_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_in3k5_out1k5_20ms.py
             test_type: 'perf'
           - name: test_npu_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms.py
             test_type: 'perf'
           - name: test_npu_kimi_k2_5_w4a8_8p_in16k_out1k_20ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_in16k_out1k_20ms.py
             test_type: 'perf'
           - name: test_npu_kimi_k2_5_w4a8_8p_in16k_out1k_50ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_in16k_out1k_50ms.py
             test_type: 'perf'
           - name: test_npu_kimi_k2_5_w4a8_8p_mm_1080p_out256_50ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_mm_1080p_out256_50ms.py
             test_type: 'perf'
           - name: test_npu_kimi_k2_5_w4a8_8p_mm_1024x1024_out1k_50ms
-            runner: linux-aarch64-a3-8
+            runner: linux-aarch64-a3-16
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_8p_mm_1024x1024_out1k_50ms.py
             test_type: 'perf'
           - name: test_npu_qwen3_5_397b_gpqa
@@ -760,7 +760,6 @@ jobs:
             test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_1p1d_16p_mm_1024x1024_out1k_50ms.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
-          # Kimi 2p1d_32p PD separation (Issue #1: 2P:tp=8 each + D:tp=16 = 32 cards total)
           - name: test_npu_kimi_k2_5_w4a8_2p1d_32p_in3k5_out1k5_20ms
             prefill_size: 2
             decode_size: 2
@@ -812,7 +811,6 @@ jobs:
             test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_2p1d_32p_aime2025.py
             test_type: 'accuracy'
             prefill_decode_deployment: 'separation'
-          # MiniMax-M2.5-w8a8 PD separation (P: tp=16,nnodes=1=16卡 + D: tp=32,nnodes=2=32卡, total 48卡=24p)
           - name: test_npu_minimax_m2_5_w8a8_1p1d_24p_in3k5_out1k5_20ms
             prefill_size: 1
             decode_size: 2

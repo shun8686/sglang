@@ -103,7 +103,7 @@ INTERNLM2_7B_WEIGHTS_PATH = os.path.join(
 KIMI_K2_THINKING_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Kimi/Kimi-K2-Thinking")
 KIMI_K2_5_W4A8_MODEL_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Eco-Tech/Kimi-K2.5-w4a8")
 KIMI_K2_5_EAGLE3_MODEL_PATH = os.path.join(
-    MODEL_WEIGHTS_DIR, "lightseekorg/Kimi-K2.5-eagle3"
+    MODEL_WEIGHTS_DIR, "lightseekorg/kimi-k2.5-eagle3"
 )
 LING_LITE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "inclusionAI/Ling-lite")
 LLAMA_2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-2-7B")
