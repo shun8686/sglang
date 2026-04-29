@@ -7,6 +7,14 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(
+    est_time=3600,
+    suite="",
+    nightly=True,
+    disabled="performance testcase",
+)
 
 KIMI_K2_5_W4A8_PREFILL_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",

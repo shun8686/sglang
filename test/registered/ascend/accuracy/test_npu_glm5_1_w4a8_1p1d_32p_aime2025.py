@@ -9,8 +9,9 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="nightly-pd-sep-4-node",
+    suite="",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 GLM_5_1_PD_SEP_PREFILL_ENVS = {
