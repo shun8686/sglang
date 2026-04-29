@@ -177,7 +177,9 @@ KIMI_K2_5_W4A8_ROUTER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_16P_MM_1080p_Out256_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUKimiK2_5_W4A8_1P1D_16P_MM_1080p_Out256_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """Test NPU multimodal performance for Kimi-K2.5-w4a8 1P+1D 16p: image_resolution=1920, image_count=1, output_len=256, TPOT=50ms"""
 
     model_config = {

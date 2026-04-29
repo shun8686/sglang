@@ -169,7 +169,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """Test NPU performance for MiniMax-M2.5-w8a8 1p1d_24p PD separation in64k out1k"""
 
     model_config = MODEL_CONFIG

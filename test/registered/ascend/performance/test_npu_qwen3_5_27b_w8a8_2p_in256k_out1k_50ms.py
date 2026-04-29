@@ -77,7 +77,7 @@ QWEN3_5_27B_128K_HIGH_OTHER_ARGS = [
 
 
 class TestNPUQwen3_5_27B_2P_In256k(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for Qwen3.5-27B-W8A8 2p in256k """
+    """Test NPU performance for Qwen3.5-27B-W8A8 2p in256k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT

@@ -74,7 +74,9 @@ GLM_5_1_SINGLE_NODE_OTHER_ARGS = [
 ]
 
 
-class TestNPUGLM5_1_W4A8_16P_AIME2025(TestAscendAccuracyMultiNodePdMixTestCaseBase):
+class TestNPUGLM5_1_W4A8_16P_AIME2025(
+    TestAscendAccuracyMultiNodePdMixTestCaseBase
+):
     """Test NPU accuracy for GLM-5.1-w4a8 16p single node on AIME 2025"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
