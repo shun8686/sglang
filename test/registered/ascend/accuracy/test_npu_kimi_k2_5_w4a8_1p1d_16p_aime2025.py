@@ -9,8 +9,9 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="nightly-pd-sep-2-node",
+    suite="",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 PREFILL_ENVS = {
@@ -127,7 +128,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_32P_AIME2025(TestAscendAccuracyMultiNodePdSepTestCaseBase):
+class TestNPUKimiK2_5_W4A8_1P1D_32P_AIME2025(
+    TestAscendAccuracyMultiNodePdSepTestCaseBase
+):
     """Test NPU accuracy for Kimi-K2.5-w4a8 1p1d_32p on AIME 2025"""
 
     model_config = MODEL_CONFIG

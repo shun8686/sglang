@@ -1,13 +1,21 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     BENCHMARK_TOOL_DEFAULT,
     TestAscendAccuracyMultiNodePdSepTestCaseBase,
 )
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_235B_A22B_W8A8_WEIGHTS_PATH,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    QWEN3_235B_A22B_W8A8_WEIGHTS_PATH,
+)
+from sglang.test.ci.ci_register import register_npu_ci
+
+register_npu_ci(
+    est_time=3600,
+    suite="",
+    nightly=True,
+    disabled="accuracy testcase",
 )
 
 MODEL_CONFIG = {

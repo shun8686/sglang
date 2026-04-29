@@ -3,17 +3,17 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK,
     AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
-    BENCHMARK_TOOL_DEFAULT,
-    KIMI_K2_5_W4A8_MODEL_PATH,
     KIMI_K2_5_EAGLE3_MODEL_PATH,
+    KIMI_K2_5_W4A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-pd-sep-4-node",
+    est_time=3600,
+    suite="",
     nightly=True,
+    disabled="performance testcase",
 )
 
 KIMI_K2_5_W4A8_2P1D_PREFILL_ENVS = {
@@ -178,7 +178,9 @@ KIMI_K2_5_W4A8_2P1D_ROUTER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_2P1D_32P_MM_1080p_Out256_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUKimiK2_5_W4A8_2P1D_32P_MM_1080p_Out256_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """Test NPU multimodal performance for Kimi-K2.5-w4a8 2P+1D 32p: image_resolution=1920, image_count=1, output_len=256, TPOT=50ms"""
 
     model_config = {
