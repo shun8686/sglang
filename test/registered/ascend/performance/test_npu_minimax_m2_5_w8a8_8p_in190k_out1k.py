@@ -3,17 +3,17 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
+    MINIMAX_M2_5_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-16-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
+    disabled="performance testcase",
 )
 
 MINIMAX_M2_5_128K_PREFIX_ENVS = {
@@ -38,7 +38,6 @@ MINIMAX_M2_5_128K_PREFIX_ENVS = {
     "PROFILING_BS": "28",
     "PROFILING_STAGE": "decode",
     "PROFILING_step": "10",
-
 }
 
 MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [

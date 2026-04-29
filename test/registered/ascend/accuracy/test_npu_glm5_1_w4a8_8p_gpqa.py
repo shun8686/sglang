@@ -8,9 +8,10 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import GLM_5_1_W4A8_MODEL
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-32-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 GLM_5_1_TWO_NODE_ENVS = {

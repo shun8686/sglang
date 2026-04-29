@@ -10,9 +10,10 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-16-npu-a3",
+    est_time=3600,
+    suite="",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 QWEN3_5_397B_ENVS = {
