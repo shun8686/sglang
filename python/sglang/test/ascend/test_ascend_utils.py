@@ -83,6 +83,7 @@ EXAONE_3_5_7_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(
 )
 GEMMA_3_4B_IT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "google/gemma-3-4b-it")
 GLM_4_9B_CHAT_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "ZhipuAI/glm-4-9b-chat")
+GLM_5_1_W4A8_MODEL_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Eco-Tech/GLM-5.1-w4a8")
 GPT_OSS_120B_BF16_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "eigen-ai-labs/gpt-oss-120b-bf16"
 )
@@ -100,6 +101,10 @@ INTERNLM2_7B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Shanghai_AI_Laboratory/internlm2-7b"
 )
 KIMI_K2_THINKING_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Kimi/Kimi-K2-Thinking")
+KIMI_K2_5_W4A8_MODEL_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Eco-Tech/Kimi-K2.5-w4a8")
+KIMI_K2_5_EAGLE3_MODEL_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "lightseekorg/kimi-k2.5-eagle3"
+)
 LING_LITE_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "inclusionAI/Ling-lite")
 LLAMA_2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "LLM-Research/Llama-2-7B")
 LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH = os.path.join(
@@ -153,6 +158,9 @@ QWEN3_1_7B_GPTQ_INT8_WEIGHTS_PATH = os.path.join(
 QWEN3_235B_A22B_W8A8_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "vllm-ascend/Qwen3-235B-A22B-W8A8"
 )
+QWEN3_235B_A22B_EAGLE_MODEL_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Qwen/Qwen3-235B-A22B-Eagle3"
+)
 QWEN3_30B_A3B_GPTQ_2507_INT4_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Qwen/Qwen3-30B-A3B-GPTQ-Int4"
 )
@@ -196,6 +204,8 @@ STARCODER2_7B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bigcode/starcoder2
 TRINITY_MINI_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "arcee-ai/Trinity-Mini")
 XVERSE_MOE_A36B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "xverse/XVERSE-MoE-A36B")
 MINIMAX_M2_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "cyankiwi/MiniMax-M2-BF16")
+MINIMAX_M2_5_W8A8_MODEL_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Eco-Tech/MiniMax-M2.5-w8a8-QuaRot")
+MINIMAX_M2_5_EAGLE3_MODEL_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Eco-Tech/MiniMax-M2.5-eagle3")
 EAGLE3_LLAMA3_1_INSTRUCT_8B_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "sglang-EAGLE3-LLaMA3.1-Instruct-8B"
 )
@@ -268,6 +278,9 @@ DEEPSEEK_R1_0528_W8A8_WEIGHTS_PATH = os.path.join(
 )
 QWEN3_30B_MODELSLIM_INT4_WEIGHTS_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Eco-Tech/Qwen3-30B-A3B-w4a4-LAOS"
+)
+QWEN3_5_397B_W4A8_MODEL_PATH = os.path.join(
+    MODEL_WEIGHTS_DIR, "Eco-Tech/Qwen3.5-397B-A17B-w4a8-mtp"
 )
 
 # Embedding model weights path
