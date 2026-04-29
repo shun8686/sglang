@@ -139,25 +139,24 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_16P_In16k_Out1k_20ms(TestAscendPerfMultiNodePdSepTestCaseBase):
-    """Test NPU performance for Kimi-K2.5-w4a8 1P+1D 16p: input_len=16384, output_len=1024, TPOT=20ms"""
+class TestNPUKimiK2_5_W4A8_1P1D_16P_In254k_Out1k(TestAscendPerfMultiNodePdSepTestCaseBase):
+    """Test NPU performance for Kimi-K2.5-w4a8 1P+1D 16p: input_len=260096, output_len=1024"""
 
     model_config = MODEL_CONFIG
-
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     dataset_name = "random"
-    max_concurrency = 16
-    num_prompts = 16
-    request_rate = 0.9
-    input_len = 16384
+    max_concurrency = 1
+    num_prompts = 1
+    request_rate = 0.01
+    input_len = 260096
     output_len = 1024
     random_range_ratio = 1
-    tpot = 20
-    output_token_throughput = 1000
+    tpot = 50
+    output_token_throughput = 500
 
-    def test_npu_kimi_k2_5_w4a8_1p1d_16p_in16k_out1k_20ms(self):
-        """Run NPU performance test for 1P+1D 16p with 16k input, 1k output, TPOT=20ms"""
+    def test_npu_kimi_k2_5_w4a8_1p1d_16p_in254k_out1k(self):
+        """Run NPU performance test for 1P+1D 16p with 254k input, 1k output"""
         self.run_throughput()
 
 

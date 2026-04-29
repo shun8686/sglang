@@ -1,9 +1,8 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     BENCHMARK_TOOL_DEFAULT,
-    TestAscendPerformanceTestCaseBase,
+    TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ascend.test_ascend_utils import (
     KIMI_K2_5_EAGLE3_MODEL_PATH,
@@ -13,12 +12,11 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="",
+    suite="nightly-16-npu-a3",
     nightly=True,
-    disabled="performance testcase",
 )
 
-KIMI_K2_5_MM_1024_ENVS = {
+ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
@@ -29,7 +27,7 @@ KIMI_K2_5_MM_1024_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-KIMI_K2_5_MM_1024_OTHER_ARGS = [
+OTHER_ARGS = [
     "--skip-server-warmup",
     "--quantization",
     "modelslim",
@@ -43,19 +41,15 @@ KIMI_K2_5_MM_1024_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--tp-size",
-    8,
-    "--nnodes",
-    1,
+    16,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
     128,
     "--chunked-prefill-size",
-    -1,
-    "--context-length",
-    8192,
+    16384,
     "--max-prefill-tokens",
-    8192,
+    16384,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -72,6 +66,7 @@ KIMI_K2_5_MM_1024_OTHER_ARGS = [
     4,
     8,
     16,
+    32,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
@@ -87,30 +82,22 @@ KIMI_K2_5_MM_1024_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_MM_1024x1024_Out1k_50ms(
-    TestAscendPerformanceTestCaseBase
-):
-    """Test NPU performance for Kimi-K2.5-w4a8 8p multimodal 1024x1024 out1k"""
+class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Kimi-K2.5-w4a8 on AIME 2025"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
     model = KIMI_K2_5_W4A8_MODEL_PATH
-    other_args = KIMI_K2_5_MM_1024_OTHER_ARGS
-    envs = KIMI_K2_5_MM_1024_ENVS
-    dataset_name = "random"
-    max_concurrency = 64
-    num_prompts = 256
-    input_len = 1024
-    output_len = 1024
-    random_range_ratio = 1
-    image_resolution = 1024
-    image_count = 1
-    tpot = 50
-    output_token_throughput = 600
+    other_args = OTHER_ARGS
+    envs = ENVS
+    accuracy = 0.3
+    dataset_type = "aime2025"
+    dataset_name = "aime2025_gen"
+    batch_size = 64
+    max_out_len = 220000
 
-    def test_npu_kimi_k2_5_w4a8_8p_mm_1024x1024_out1k_50ms(self):
-        """Run NPU performance test for Kimi-K2.5-w4a8 multimodal 1024x1024"""
-        self.run_throughput()
+    def test_npu_kimi_k2_5_aime25(self):
+        """Run NPU accuracy test for Kimi-K2.5 on AIME 2025"""
+        self.run_accuracy()
 
 
 if __name__ == "__main__":
