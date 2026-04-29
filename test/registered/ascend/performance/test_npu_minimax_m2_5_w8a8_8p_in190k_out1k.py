@@ -41,8 +41,6 @@ MINIMAX_M2_5_128K_PREFIX_ENVS = {
 }
 
 MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
-    "--model-path",
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     "--tp-size",
     16,
     "--dp-size",

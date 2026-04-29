@@ -32,8 +32,6 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS = {
 }
 
 MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
-    "--model-path",
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     "--tp-size",
     16,
     "--enable-dp-attention",

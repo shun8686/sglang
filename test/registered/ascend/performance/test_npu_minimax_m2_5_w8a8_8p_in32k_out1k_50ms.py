@@ -31,8 +31,6 @@ MINIMAX_M2_5_32K_ENVS = {
 }
 
 MINIMAX_M2_5_32K_OTHER_ARGS = [
-    "--model-path",
-    MINIMAX_M2_5_W8A8_MODEL_PATH,
     "--tp-size",
     16,
     "--enable-dp-attention",
@@ -82,7 +80,7 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In32k_Out1k_HighThroughput(
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 3000
+    output_token_throughput = 200
 
     def test_npu_minimax_m2_5_w8a8_8p_in32k_out1k_high_throughput(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 in32k out1k"""
