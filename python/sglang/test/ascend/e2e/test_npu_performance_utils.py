@@ -137,12 +137,8 @@ KIMI_K2_5_EAGLE3_MODEL_PATH = (
 )
 GLM_4_7_FLASH_MODEL_PATH = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.7-Flash"
 GLM_5_1_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/GLM-5.1-w4a8"
-MINIMAX_M2_5_W8A8_MODEL_PATH = (
-    "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-w8a8-QuaRot"
-)
-MINIMAX_M2_5_EAGLE3_MODEL_PATH = (
-    "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-eagel-model-0318"
-)
+MINIMAX_M2_5_W8A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-w8a8-QuaRot"
+MINIMAX_M2_5_EAGLE3_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-eagle3"
 
 QWEN3_5_397B_W4A8_MODEL_PATH = (
     "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3.5-397B-A17B-w4a8-mtp"
@@ -421,6 +417,11 @@ def run_aisbench(
     num_prompts,
     image_resolution=None,
     random_range_ratio=1,
+    prefix_hit_rate=None,
+    aisbench_request_rate=None,
+    aisbench_repeat_rate=None,
+    dp=None,
+    generation_kwargs=None,
 ):
 
     if dataset_type == "sharegpt":
@@ -496,6 +497,17 @@ def run_aisbench(
     cmd += f"--batch-size {str(max_concurrency)} "
     cmd += f"--num-prompts {str(num_prompts)} "
     cmd += f"--output-path {result_path}"
+
+    if prefix_hit_rate is not None:
+        cmd += f" --prefix-hit-rate {prefix_hit_rate}"
+    if aisbench_request_rate is not None:
+        cmd += f" --request_rate {aisbench_request_rate}"
+    if aisbench_repeat_rate is not None:
+        cmd += f" --repeat_rate {aisbench_repeat_rate}"
+    if dp is not None:
+        cmd += f" --dp {dp}"
+    if generation_kwargs:
+        cmd += f" --generation-kwargs '{generation_kwargs}'"
 
     logger.info(f"Command: {cmd}")
 
@@ -737,6 +749,12 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
     mean_e2e_latency = None
     output_token_throughput = None
 
+    prefix_hit_rate = None
+    aisbench_request_rate = None
+    aisbench_repeat_rate = None
+    dp = None
+    generation_kwargs = None
+
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -784,6 +802,11 @@ class TestAscendPerformanceTestCaseBase(CustomTestCase):
                 num_prompts=self.num_prompts,
                 image_resolution=self.image_resolution,
                 random_range_ratio=self.random_range_ratio,
+                prefix_hit_rate=self.prefix_hit_rate,
+                aisbench_request_rate=self.aisbench_request_rate,
+                aisbench_repeat_rate=self.aisbench_repeat_rate,
+                dp=self.dp,
+                generation_kwargs=self.generation_kwargs,
             )
             assert_metrics(self, metrics)
 
@@ -834,6 +857,12 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
     tpot = None
     mean_e2e_latency = None
     output_token_throughput = None
+
+    prefix_hit_rate = None
+    aisbench_request_rate = None
+    aisbench_repeat_rate = None
+    dp = None
+    generation_kwargs = None
 
     @classmethod
     def setUpClass(cls):
@@ -896,6 +925,11 @@ class TestAscendPerfMultiNodePdMixTestCaseBase(CustomTestCase):
                 num_prompts=self.num_prompts,
                 image_resolution=self.image_resolution,
                 random_range_ratio=self.random_range_ratio,
+                prefix_hit_rate=self.prefix_hit_rate,
+                aisbench_request_rate=self.aisbench_request_rate,
+                aisbench_repeat_rate=self.aisbench_repeat_rate,
+                dp=self.dp,
+                generation_kwargs=self.generation_kwargs,
             )
             assert_metrics(self, metrics)
 
@@ -946,6 +980,12 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
     tpot = None
     mean_e2e_latency = None
     output_token_throughput = None
+
+    prefix_hit_rate = None
+    aisbench_request_rate = None
+    aisbench_repeat_rate = None
+    dp = None
+    generation_kwargs = None
 
     @classmethod
     def setUpClass(cls):
@@ -1025,6 +1065,11 @@ class TestAscendPerfMultiNodePdSepTestCaseBase(CustomTestCase):
                 num_prompts=self.num_prompts,
                 image_resolution=self.image_resolution,
                 random_range_ratio=self.random_range_ratio,
+                prefix_hit_rate=self.prefix_hit_rate,
+                aisbench_request_rate=self.aisbench_request_rate,
+                aisbench_repeat_rate=self.aisbench_repeat_rate,
+                dp=self.dp,
+                generation_kwargs=self.generation_kwargs,
             )
             assert_metrics(self, metrics)
 
