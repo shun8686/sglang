@@ -139,7 +139,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_16P_MM_1024x1024_Out1k_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUKimiK2_5_W4A8_1P1D_16P_MM_1024x1024_Out1k_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """Test NPU multimodal performance for Kimi-K2.5-w4a8 1P+1D 16p: image_resolution=1024, image_count=1, output_len=1024, TPOT=50ms"""
 
     model_config = MODEL_CONFIG

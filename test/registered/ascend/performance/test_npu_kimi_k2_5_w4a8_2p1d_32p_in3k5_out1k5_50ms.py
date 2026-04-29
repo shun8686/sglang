@@ -145,7 +145,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_2P1D_32P_In3k5_Out1k5_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUKimiK2_5_W4A8_2P1D_32P_In3k5_Out1k5_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """Test NPU performance for Kimi-K2.5-w4a8 2p1d_32p PD separation in3k5 out1k5"""
 
     model_config = MODEL_CONFIG

@@ -102,4 +102,3 @@ class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
 
 if __name__ == "__main__":
     unittest.main()
-
