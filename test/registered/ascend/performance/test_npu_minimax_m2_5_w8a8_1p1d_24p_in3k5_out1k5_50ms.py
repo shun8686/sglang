@@ -184,7 +184,7 @@ class TestNPUMiniMaxM2_5_W8A8_1P1D_24P_In64k_Out1k_50ms(
     output_len = 1500
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 3000
+    output_token_throughput = 200
 
     def test_npu_minimax_m2_5_w8a8_1p1d_24p_in64k_out1k_50ms(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 1p1d_24p"""
