@@ -1,6 +1,8 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    AISBENCHMARK,
+    AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
     QWEN3_5_397B_W8A8_MODEL_PATH,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
@@ -61,7 +63,7 @@ PREFILL_ARGS = [
     "--disaggregation-transfer-backend",
     "ascend",
     "--max-running-requests",
-    40,
+    96,
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
@@ -107,7 +109,7 @@ DECODE_ARGS = [
     "--mem-fraction-static",
     0.75,
     "--max-running-requests",
-    192,
+    96,
     "--attention-backend",
     "ascend",
     "--device",
@@ -128,6 +130,7 @@ DECODE_ARGS = [
     4,
     8,
     16,
+    32,
     "--disaggregation-transfer-backend",
     "ascend",
     "--watchdog-timeout",
@@ -164,21 +167,26 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUQwen3_5_397B_W8A8_1P2D_24P_In3k5_Out1k5_20ms(
+class TestNPUQwen3_5_397B_W8A8_1P1D_16P_1080p_256_50ms(
     TestAscendPerfMultiNodePdSepTestCaseBase
 ):
-    """Test NPU performance for Qwen3.5-397B-w8a8 1p2d PD separation ..."""
+    """Test NPU performance for Qwen3.5-397B-w8a8 1p1d PD separation ..."""
 
     model_config = MODEL_CONFIG
 
-    max_concurrency = 128
-    num_prompts = 128
-    input_len = 3500
-    output_len = 1500
-    tpot = 20
+    benchmark_tool = AISBENCHMARK
+    aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
+    dataset_name = "image"
+    image_resolution = "1920x1080"
+    image_count = 1
+    max_concurrency = 16
+    num_prompts = 16
+    input_len = 30
+    output_len = 256
+    tpot = 50
 
-    def test_npu_qwen3_5_397b_1p2d_24p_3k5_1k_20ms(self):
-        """Run NPU performance test for Qwen3.5-397B-w8a8 1p2d"""
+    def test_npu_qwen3_5_397b_1p1d_16p_1080p_256_50ms(self):
+        """Run NPU performance test for Qwen3.5-397B-w8a8 1p1d"""
         self.run_throughput()
 
 
