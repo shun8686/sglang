@@ -5,7 +5,6 @@ import string
 
 import numpy as np
 from PIL import Image
-from sympy import true
 from transformers import AutoTokenizer
 
 
