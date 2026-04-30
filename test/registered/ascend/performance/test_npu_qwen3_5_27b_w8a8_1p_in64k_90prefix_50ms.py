@@ -97,7 +97,7 @@ class TestNPUQwen3_5_27B_1P_In64k_90Prefix_High(TestAscendPerformanceTestCaseBas
     num_prompts = 8
     input_len = 65536
     output_len = 1024
-    aisbench_request_rate = 0.9
+    aisbench_repeat_rate = 0.9
     random_range_ratio = 0.1
     tpot = 50
     output_token_throughput = 100
