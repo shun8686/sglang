@@ -85,7 +85,7 @@ class TestNPUGLM5_1_W4A8_32P_In3k5_Out1k5(TestAscendPerfMultiNodePdMixTestCaseBa
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     dataset_name = "random"
-    max_concurrency = 4
+    max_concurrency = 2
     num_prompts = 8
     input_len = 131072
     output_len = 1024

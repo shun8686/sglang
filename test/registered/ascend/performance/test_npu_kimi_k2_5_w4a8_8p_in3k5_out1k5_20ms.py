@@ -12,10 +12,10 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-8-npu-a3",
     nightly=True,
-    disabled="performance testcase",
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 KIMI_K2_5_3K5_20MS_ENVS = {
@@ -27,8 +27,6 @@ KIMI_K2_5_3K5_20MS_ENVS = {
     "HCCL_BUFFSIZE": "1200",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
-    "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
 }
 
 KIMI_K2_5_3K5_20MS_OTHER_ARGS = [
@@ -45,17 +43,13 @@ KIMI_K2_5_3K5_20MS_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--tp-size",
-    8,
-    "--nnodes",
-    1,
+    16,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
-    256,
+    128,
     "--chunked-prefill-size",
     16384,
-    "--context-length",
-    8192,
     "--max-prefill-tokens",
     16384,
     "--enable-multimodal",
@@ -99,8 +93,9 @@ class TestNPUKimiK2_5_W4A8_8P_In3k5_Out1k5_20ms(TestAscendPerformanceTestCaseBas
     other_args = KIMI_K2_5_3K5_20MS_OTHER_ARGS
     envs = KIMI_K2_5_3K5_20MS_ENVS
     dataset_name = "random"
-    max_concurrency = 160
-    num_prompts = 640
+    max_concurrency = 16
+    num_prompts = 16
+    request_rate = 1
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1

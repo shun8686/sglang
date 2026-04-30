@@ -12,10 +12,10 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-8-npu-a3",
     nightly=True,
-    disabled="performance testcase",
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 KIMI_K2_5_16K_50MS_ENVS = {
@@ -43,17 +43,13 @@ KIMI_K2_5_16K_50MS_OTHER_ARGS = [
     "--attention-backend",
     "ascend",
     "--tp-size",
-    8,
-    "--nnodes",
-    1,
+    16,
     "--mem-fraction-static",
     0.8,
     "--max-running-requests",
     128,
     "--chunked-prefill-size",
-    -1,
-    "--context-length",
-    20000,
+    16384,
     "--max-prefill-tokens",
     16384,
     "--enable-multimodal",
@@ -97,13 +93,14 @@ class TestNPUKimiK2_5_W4A8_8P_In16k_Out1k_50ms(TestAscendPerformanceTestCaseBase
     other_args = KIMI_K2_5_16K_50MS_OTHER_ARGS
     envs = KIMI_K2_5_16K_50MS_ENVS
     dataset_name = "random"
-    max_concurrency = 80
-    num_prompts = 320
+    max_concurrency = 48
+    num_prompts = 48
+    request_rate = 1
     input_len = 16384
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 1500
+    output_token_throughput = 1000
 
     def test_npu_kimi_k2_5_w4a8_8p_in16k_out1k_50ms(self):
         """Run NPU performance test for Kimi-K2.5-w4a8 in16k out1k 50ms"""

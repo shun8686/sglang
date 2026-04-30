@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
+    AISBENCHMARK_DATASET_MM_CUSTOM_GEN,
     BENCHMARK_TOOL_DEFAULT,
     KIMI_K2_5_EAGLE3_MODEL_PATH,
     KIMI_K2_5_W4A8_MODEL_PATH,
@@ -139,26 +139,29 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_16P_In16k_Out1k_50ms(
+class TestNPUKimiK2_5_W4A8_1P1D_16P_MM_1024x1024_Out1k_50ms(
     TestAscendPerfMultiNodePdSepTestCaseBase
 ):
-    """Test NPU performance for Kimi-K2.5-w4a8 1P+1D 16p: input_len=16384, output_len=1024, TPOT=50ms"""
+    """Test NPU multimodal performance for Kimi-K2.5-w4a8 1P+1D 16p: image_resolution=1024, image_count=1, output_len=1024, TPOT=50ms"""
 
     model_config = MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    dataset_name = "random"
-    max_concurrency = 48
-    num_prompts = 48
+    aisbench_dataset_type = AISBENCHMARK_DATASET_MM_CUSTOM_GEN
+    backend = "sglang-oai-chat"
+    dataset_name = "image"
+    image_resolution = "1920x1080"
+    image_count = 1
+    max_concurrency = 16
+    num_prompts = 16
     request_rate = 1
-    input_len = 16384
+    input_len = 30
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 1000
+    output_token_throughput = 600
 
-    def test_npu_kimi_k2_5_w4a8_1p1d_16p_in16k_out1k_50ms(self):
-        """Run NPU performance test for 1P+1D 16p with 16k input, 1k output, TPOT=50ms"""
+    def test_npu_kimi_k2_5_w4a8_1p1d_16p_mm_1024x1024_out1k_50ms(self):
+        """Run NPU multimodal performance test for 1P+1D 16p with 1024x1024 image, 1k output"""
         self.run_throughput()
 
 

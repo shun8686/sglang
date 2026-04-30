@@ -1,9 +1,8 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_performance_utils import (
-    AISBENCHMARK_DATASET_DEFAULT,
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     BENCHMARK_TOOL_DEFAULT,
-    TestAscendPerformanceTestCaseBase,
+    TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ascend.test_ascend_utils import (
     KIMI_K2_5_EAGLE3_MODEL_PATH,
@@ -12,13 +11,12 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=1800,
-    suite="nightly-8-npu-a3",
+    est_time=3600,
+    suite="nightly-16-npu-a3",
     nightly=True,
-    disabled="Currently it is executed by the npu performance workflow.",
 )
 
-KIMI_K2_5_3K5_50MS_ENVS = {
+ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
@@ -29,7 +27,7 @@ KIMI_K2_5_3K5_50MS_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-KIMI_K2_5_3K5_50MS_OTHER_ARGS = [
+OTHER_ARGS = [
     "--skip-server-warmup",
     "--quantization",
     "modelslim",
@@ -48,6 +46,8 @@ KIMI_K2_5_3K5_50MS_OTHER_ARGS = [
     0.8,
     "--max-running-requests",
     128,
+    "--context-length",
+    256000,
     "--chunked-prefill-size",
     16384,
     "--max-prefill-tokens",
@@ -84,27 +84,23 @@ KIMI_K2_5_3K5_50MS_OTHER_ARGS = [
 ]
 
 
-class TestNPUKimiK2_5_W4A8_8P_In3k5_Out1k5_50ms(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for Kimi-K2.5-w4a8 8p in3k5 out1k5 50ms TPOT"""
+class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Kimi-K2.5-w4a8 on AIME 2025"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = KIMI_K2_5_W4A8_MODEL_PATH
-    other_args = KIMI_K2_5_3K5_50MS_OTHER_ARGS
-    envs = KIMI_K2_5_3K5_50MS_ENVS
-    dataset_name = "random"
-    max_concurrency = 96
-    num_prompts = 96
-    request_rate = 1
-    input_len = 3500
-    output_len = 1500
-    random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 1540
+    other_args = OTHER_ARGS
+    envs = ENVS
+    accuracy = 0.3
+    dataset_type = "aime2025"
+    dataset_name = "aime2025_gen"
+    batch_size = 64
+    generation_kwargs = dict(temperature=1.0, top_p=0.95)
+    max_out_len = 220000
 
-    def test_npu_kimi_k2_5_w4a8_8p_in3k5_out1k5_50ms(self):
-        """Run NPU performance test for Kimi-K2.5-w4a8 in3k5 out1k5 50ms"""
-        self.run_throughput()
+    def test_npu_kimi_k2_5_aime25(self):
+        """Run NPU accuracy test for Kimi-K2.5 on AIME 2025"""
+        self.run_accuracy()
 
 
 if __name__ == "__main__":
