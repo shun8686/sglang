@@ -45,6 +45,7 @@ KIMI_K2_5_W4A8_PREFILL_ARGS = [
     "modelslim",
     "--dtype",
     "bfloat16",
+    "--trust-remote-code",
     "--disaggregation-mode",
     "prefill",
     "--nnodes",
