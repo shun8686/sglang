@@ -45,6 +45,7 @@ KIMI_K2_5_W4A8_PREFILL_ARGS = [
     "modelslim",
     "--dtype",
     "bfloat16",
+    "--trust-remote-code",
     "--disaggregation-mode",
     "prefill",
     "--nnodes",
@@ -158,7 +159,7 @@ class TestNPUKimiK2_5_W4A8_2P1D_32P_MM_1080p_Out256_50ms(
     image_count = 1
     max_concurrency = 16
     num_prompts = 16
-    request_rate = 0.9
+    request_rate = 1
     input_len = 30
     output_len = 256
     random_range_ratio = 1

@@ -46,6 +46,8 @@ OTHER_ARGS = [
     0.8,
     "--max-running-requests",
     128,
+    "--context-length",
+    256000,
     "--chunked-prefill-size",
     16384,
     "--max-prefill-tokens",
@@ -93,6 +95,7 @@ class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
     batch_size = 64
+    generation_kwargs = dict(temperature=1.0, top_p=0.95)
     max_out_len = 220000
 
     def test_npu_kimi_k2_5_aime25(self):

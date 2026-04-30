@@ -45,6 +45,7 @@ KIMI_K2_5_W4A8_PREFILL_ARGS = [
     "modelslim",
     "--dtype",
     "bfloat16",
+    "--trust-remote-code",
     "--disaggregation-mode",
     "prefill",
     "--nnodes",
@@ -155,7 +156,7 @@ class TestNPUKimiK2_5_W4A8_2P1D_32P_In3k5_Out1k5_20ms(
     dataset_name = "random"
     max_concurrency = 16
     num_prompts = 16
-    request_rate = 0.24
+    request_rate = 1
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1

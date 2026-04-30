@@ -95,7 +95,7 @@ class TestNPUKimiK2_5_W4A8_8P_In32k_Out512_100ms(TestAscendPerformanceTestCaseBa
     dataset_name = "random"
     max_concurrency = 48
     num_prompts = 48
-    request_rate = 0.74
+    request_rate = 1
     aisbench_repeat_rate = 0.9
     input_len = 16384
     output_len = 1024

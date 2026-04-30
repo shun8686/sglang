@@ -153,7 +153,7 @@ class TestNPUKimiK2_5_W4A8_1P1D_16P_MM_1024x1024_Out1k_50ms(
     image_count = 1
     max_concurrency = 16
     num_prompts = 16
-    request_rate = 0.34
+    request_rate = 1
     input_len = 30
     output_len = 1024
     random_range_ratio = 1
