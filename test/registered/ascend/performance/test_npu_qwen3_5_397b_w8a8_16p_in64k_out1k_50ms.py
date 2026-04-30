@@ -3,7 +3,7 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    QWEN3_5_397B_W4A8_MODEL_PATH,
+    QWEN3_5_397B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -41,7 +41,7 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    65536,
+    70000,
     "--prefill-max-requests",
     1,
     "--disable-radix-cache",
@@ -49,7 +49,7 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     "--max-running-requests",
     32,
     "--mem-fraction-static",
-    0.57,
+    0.75,
     "--max-total-tokens",
     1065000,
     "--cuda-graph-bs",
@@ -96,7 +96,7 @@ class TestNPUQwen3_5_397B_64K(TestAscendPerformanceTestCaseBase):
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    model = QWEN3_5_397B_W4A8_MODEL_PATH
+    model = QWEN3_5_397B_W8A8_MODEL_PATH
     other_args = QWEN3_5_397B_64K_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"

@@ -3,16 +3,16 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
-    QWEN3_5_397B_W4A8_MODEL_PATH,
+    QWEN3_5_397B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-16-npu-a3",
     nightly=True,
-    disabled="performance testcase",
+    disabled="Currently it is executed by the npu performance workflow.",
 )
 
 QWEN3_5_397B_ENVS = {
@@ -41,15 +41,15 @@ QWEN3_5_397B_3K5_OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    17500,
+    17000,
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    448,
+    256,
     "--mem-fraction-static",
     0.8,
     "--max-total-tokens",
-    320000,
+    1500000,
     "--cuda-graph-bs",
     2,
     4,
@@ -61,11 +61,6 @@ QWEN3_5_397B_3K5_OTHER_ARGS = [
     24,
     28,
     32,
-    36,
-    48,
-    52,
-    54,
-    56,
     "--quantization",
     "modelslim",
     "--enable-multimodal",
@@ -96,24 +91,24 @@ QWEN3_5_397B_3K5_OTHER_ARGS = [
 ]
 
 
-class TestNPUQwen3_5_397B_3K5(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for Qwen3.5-397B-w4a8 16p in3k5 out1k5"""
+class TestNPUQwen3_5_397B_16K_1k_20ms(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for Qwen3.5-397B-w4a8 16p in16k out1k"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    model = QWEN3_5_397B_W4A8_MODEL_PATH
+    model = QWEN3_5_397B_W8A8_MODEL_PATH
     other_args = QWEN3_5_397B_3K5_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"
-    max_concurrency = 256
-    num_prompts = 256
-    input_len = 3500
-    output_len = 1500
+    max_concurrency = 64
+    num_prompts = 64
+    input_len = 16384
+    output_len = 1024
     random_range_ratio = 1
-    tpot = 50
-    output_token_throughput = 300
+    tpot = 20
+    output_token_throughput = 150
 
-    def test_npu_qwen3_5_397b_3k5(self):
+    def test_npu_qwen3_5_397b_16K_1k_20ms(self):
         """Run NPU performance test for Qwen3.5-397B in3k5 out1k5"""
         self.run_throughput()
 

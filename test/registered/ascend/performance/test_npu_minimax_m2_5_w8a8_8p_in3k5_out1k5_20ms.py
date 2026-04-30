@@ -79,8 +79,6 @@ MINIMAX_M2_5_LOW_LATENCY_OTHER_ARGS = [
     "unquant",
     "--dtype",
     "bfloat16",
-    "--external-model-package",
-    "custom_eagle3",
 ]
 
 
