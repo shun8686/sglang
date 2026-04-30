@@ -65,7 +65,7 @@ KIMI_K2_5_W4A8_PREFILL_ARGS = [
     "--chunked-prefill-size",
     16384,
     "--context-length",
-    133120,
+    256000,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -105,7 +105,7 @@ KIMI_K2_5_W4A8_DECODE_ARGS = [
     "--chunked-prefill-size",
     65536,
     "--context-length",
-    133120,
+    256000,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -154,6 +154,7 @@ class TestNPUKimiK2_5_W4A8_2P1D_64P_GPQA(TestAscendAccuracyMultiNodePdSepTestCas
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
     max_concurrency = 128
+    generation_kwargs = dict(temperature=1.0, top_p=0.95)
     output_len = 220000
 
     def test_npu_kimi_k2_5_w4a8_2p1d_64p_gpqa(self):

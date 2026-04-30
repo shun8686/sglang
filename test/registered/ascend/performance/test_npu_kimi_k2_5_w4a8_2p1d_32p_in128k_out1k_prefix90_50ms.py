@@ -156,7 +156,7 @@ class TestNPUKimiK2_5_W4A8_2P1D_32P_In128k_Out1k_50ms(
     dataset_name = "random"
     max_concurrency = 4
     num_prompts = 4
-    request_rate = 0.9
+    request_rate = 1
     aisbench_repeat_rate = 0.9
     input_len = 3500
     output_len = 1500

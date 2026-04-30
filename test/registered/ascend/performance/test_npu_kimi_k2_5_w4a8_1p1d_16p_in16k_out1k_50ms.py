@@ -150,7 +150,7 @@ class TestNPUKimiK2_5_W4A8_1P1D_16P_In16k_Out1k_50ms(
     dataset_name = "random"
     max_concurrency = 48
     num_prompts = 48
-    request_rate = 0.74
+    request_rate = 1
     input_len = 16384
     output_len = 1024
     random_range_ratio = 1

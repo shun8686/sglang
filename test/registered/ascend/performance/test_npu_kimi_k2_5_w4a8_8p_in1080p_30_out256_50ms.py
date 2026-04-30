@@ -98,7 +98,7 @@ class TestNPUKimiK2_5_W4A8_8P_IN1080P_30_OUT256_50ms(TestAscendPerformanceTestCa
     image_count = 1
     max_concurrency = 16
     num_prompts = 16
-    request_rate = 0.9
+    request_rate = 1
     input_len = 30
     output_len = 256
     random_range_ratio = 1
