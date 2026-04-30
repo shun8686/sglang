@@ -48,9 +48,9 @@ NUM_PROMPTS="128"
 OUTPUT_PATH="./result"
 INTERNAL_TEMPLATE_DIR="/root/.cache/.cache/aisbench_auto_tools_prefix-master"
 
-REQUEST_RATE="0"
-REPEAT_RATE="0"
-DP="1"
+REQUEST_RATE=0
+REPEAT_RATE=0
+DP=1
 
 GENERATION_KWARGS=""
 
@@ -235,7 +235,7 @@ models = [
         path="$MODEL_PATH",
         model="$MODEL",
         stream=True,
-        request_rate="$REQUEST_RATE",
+        request_rate=${REQUEST_RATE},
         use_timestamp=False,
         retry=2,
         api_key="",
@@ -272,7 +272,7 @@ models = [
         abbr="vllm-api-function-call-chat",
         path="$MODEL_PATH",
         model="$MODEL",
-        request_rate="$REQUEST_RATE",
+        request_rate=${REQUEST_RATE},
         retry=2,
         api_key="",
         host_ip="$IP",
