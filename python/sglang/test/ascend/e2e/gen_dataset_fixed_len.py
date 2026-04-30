@@ -5,6 +5,7 @@ import string
 
 import numpy as np
 from PIL import Image
+from sympy import true
 from transformers import AutoTokenizer
 
 
@@ -280,7 +281,7 @@ def generate_gsm8k_dataset(
         input_len: Target input token length.
         output_file: Output JSONL file path.
     """
-    tokenizer = AutoTokenizer.from_pretrained(model_path)
+    tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     dataset = []
     with open(source_dataset_path, "r", encoding="utf-8") as f:
         for line in f:
