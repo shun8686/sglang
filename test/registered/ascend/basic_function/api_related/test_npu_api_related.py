@@ -61,7 +61,14 @@ class TestNpuApiRelated(CustomTestCase):
             cls.hf_chat_template_name,
             "--enable-cache-report",
         ]
-
+        MINIMAX_M2_5_EAGLE3_MODEL_PATH = (
+            "/root/.cache/modelscope/hub/models/Eco-Tech/MiniMax-M2.5-eagel-model-0318"
+        )
+        env = {
+            "PYTHONPATH": f"{MINIMAX_M2_5_EAGLE3_MODEL_PATH}:{os.environ.get('PYTHONPATH', '')}",
+        }
+        print("env111111111111111111111111111111111111111111111111111111111111111111111111111111:", env)
+        cls.process = popen_launch_server()
         cls.out_log_file = open("./cache_out_log.txt", "w+", encoding="utf-8")
         cls.err_log_file = open("./cache_err_log.txt", "w+", encoding="utf-8")
 
@@ -72,7 +79,9 @@ class TestNpuApiRelated(CustomTestCase):
             api_key=cls.api_key,
             other_args=other_args,
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
+            env=env,
         )
+
         cls.base_url_v1 = cls.base_url + "/v1"
 
     @classmethod
