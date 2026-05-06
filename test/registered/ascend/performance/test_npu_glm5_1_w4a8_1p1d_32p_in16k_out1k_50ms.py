@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
@@ -28,8 +29,8 @@ GLM_5_1_PD_SEP_PREFILL_ENVS = {
     "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",
     "TASK_QUEUE_ENABLE": "2",
     "ENABLE_PROFILING": "0",
-    "HCCL_SOCKET_IFNAME": "enp196s0f0",
-    "GLOO_SOCKET_IFNAME": "enp196s0f0",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
 }
 
 GLM_5_1_PD_SEP_DECODE_ENVS = {
@@ -44,8 +45,8 @@ GLM_5_1_PD_SEP_DECODE_ENVS = {
     "HCCL_BUFFSIZE": "650",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
     "TASK_QUEUE_ENABLE": "0",
-    "HCCL_SOCKET_IFNAME": "enp196s0f0",
-    "GLOO_SOCKET_IFNAME": "enp196s0f0",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
 }
 
 GLM_5_1_PD_SEP_PREFILL_ARGS = [

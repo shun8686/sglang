@@ -1,5 +1,6 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
@@ -19,8 +20,8 @@ GLM_5_1_TWO_NODE_ENVS = {
     "SGLANG_SET_CPU_AFFINITY": "1",
     "STREAMS_PER_DEVICE": "32",
     "SGLANG_ENABLE_SPEC_V2": "1",
-    "HCCL_SOCKET_IFNAME": "lo",
-    "GLOO_SOCKET_IFNAME": "lo",
+    "HCCL_SOCKET_IFNAME": NIC_NAME,
+    "GLOO_SOCKET_IFNAME": NIC_NAME,
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "HCCL_BUFFSIZE": "2000",
