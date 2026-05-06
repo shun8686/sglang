@@ -133,7 +133,7 @@ QWEN2_5_VL_72B_MODEL_PATH = (
 )
 KIMI_K2_5_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/Kimi-K2.5-w4a8"
 KIMI_K2_5_EAGLE3_MODEL_PATH = (
-    "/root/.cache/modelscope/hub/models/Eco-Tech/kimi-k2.5-eagle3"
+    "/root/.cache/modelscope/hub/models/lightseekorg/kimi-k2.5-eagle3"
 )
 GLM_4_7_FLASH_MODEL_PATH = "/root/.cache/modelscope/hub/models/ZhipuAI/GLM-4.7-Flash"
 GLM_5_1_W4A8_MODEL_PATH = "/root/.cache/modelscope/hub/models/Eco-Tech/GLM-5.1-w4a8"
