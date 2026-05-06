@@ -98,11 +98,6 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     #     self.num_prompts = 200
     #     self.run_accuracy()
 
-    @classmethod
-    def setUpClass(cls):
-        cls.base_url = "http://127.0.0.1:6666"
-        cls.dataset_type = "mmlu"
-
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     # base_url = DEFAULT_URL_FOR_TEST
     # model = QWEN3_30B_A3B_W8A8_MODEL_PATH
@@ -113,6 +108,7 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     max_concurrency = 100
     # dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
     dataset_name = "mmlu_gen_5_shot_str"
+    dataset_type = "mmlu"
     def test_accuracy(self):
         self.run_accuracy()
 

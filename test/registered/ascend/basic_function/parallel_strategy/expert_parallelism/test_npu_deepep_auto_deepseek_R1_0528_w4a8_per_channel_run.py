@@ -71,6 +71,9 @@ OTHER_ARGS = [
     "3",
     "--dtype",
     "bfloat16",
+    "--log-requests",
+    "--log-requests-level",
+    "3",
 ]
 
 
