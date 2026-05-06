@@ -10,7 +10,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="",
+    suite="nightly-16-npu-a3",
     nightly=True,
     disabled="performance testcase",
 )
@@ -41,7 +41,7 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    70000,
+    71680,
     "--prefill-max-requests",
     1,
     "--disable-radix-cache",
@@ -50,16 +50,10 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     32,
     "--mem-fraction-static",
     0.75,
-    "--max-total-tokens",
-    1065000,
     "--cuda-graph-bs",
     2,
     4,
-    6,
     8,
-    10,
-    12,
-    14,
     16,
     "--quantization",
     "modelslim",
@@ -74,18 +68,14 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     "bfloat16",
     "--mamba-ssm-dtype",
     "bfloat16",
-    "--dp-size",
-    2,
-    "--enable-dp-attention",
-    "--enable-dp-lm-head",
     "--speculative-algorithm",
     "NEXTN",
     "--speculative-num-steps",
-    3,
+    2,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    4,
+    3,
     "--speculative-draft-model-quantization",
     "unquant",
 ]
@@ -102,6 +92,7 @@ class TestNPUQwen3_5_397B_64K(TestAscendPerformanceTestCaseBase):
     dataset_name = "random"
     max_concurrency = 16
     num_prompts = 32
+    aisbench_repeat_rate = 0.9
     input_len = 65536
     output_len = 1024
     random_range_ratio = 1

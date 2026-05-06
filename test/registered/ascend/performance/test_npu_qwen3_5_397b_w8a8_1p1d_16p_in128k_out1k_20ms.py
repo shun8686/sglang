@@ -8,7 +8,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=1800,
-    suite="nightly-pd-sep-3-node",
+    suite="nightly-pd-sep-2-node",
     nightly=True,
     disabled="performance testcase",
 )
@@ -35,8 +35,8 @@ DECODE_ENVS = {
     "SGLANG_ENABLE_SPEC_V2": "1",
     "HCCL_BUFFSIZE": "2400",
     "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "128",
-    "HCCL_SOCKET_IFNAME": "enp196s0f0",
-    "GLOO_SOCKET_IFNAME": "enp196s0f0",
+    "HCCL_SOCKET_IFNAME": "lo",
+    "GLOO_SOCKET_IFNAME": "lo",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
 }
@@ -65,7 +65,7 @@ PREFILL_ARGS = [
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
-    8192,
+    133120,
     "--moe-a2a-backend",
     "deepep",
     "--deepep-mode",
@@ -99,11 +99,11 @@ DECODE_ARGS = [
     "--disaggregation-mode",
     "decode",
     "--nnodes",
-    2,
+    1,
     "--tp-size",
-    32,
+    16,
     "--ep-size",
-    32,
+    16,
     "--mem-fraction-static",
     0.75,
     "--max-running-requests",
@@ -122,12 +122,13 @@ DECODE_ARGS = [
     "low_latency",
     "--enable-dp-lm-head",
     "--dp-size",
-    2,
+    4,
     "--cuda-graph-bs",
     2,
     4,
     8,
     16,
+    32,
     "--disaggregation-transfer-backend",
     "ascend",
     "--watchdog-timeout",
@@ -164,21 +165,21 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUQwen3_5_397B_W8A8_1P2D_24P_In3k5_Out1k5_20ms(
+class TestNPUQwen3_5_397B_W8A8_1P1D_16P_In128k_Out1k_20ms(
     TestAscendPerfMultiNodePdSepTestCaseBase
 ):
-    """Test NPU performance for Qwen3.5-397B-w8a8 1p2d PD separation ..."""
+    """Test NPU performance for Qwen3.5-397B-w8a8 1p1d PD separation ..."""
 
     model_config = MODEL_CONFIG
 
-    max_concurrency = 128
-    num_prompts = 128
-    input_len = 3500
-    output_len = 1500
+    max_concurrency = 64
+    num_prompts = 64
+    input_len = 131072
+    output_len = 1024
     tpot = 20
 
-    def test_npu_qwen3_5_397b_1p2d_24p_3k5_1k_20ms(self):
-        """Run NPU performance test for Qwen3.5-397B-w8a8 1p2d"""
+    def test_npu_qwen3_5_397b_1p1d_16p_128k_1k_20ms(self):
+        """Run NPU performance test for Qwen3.5-397B-w8a8 1p1d"""
         self.run_throughput()
 
 
