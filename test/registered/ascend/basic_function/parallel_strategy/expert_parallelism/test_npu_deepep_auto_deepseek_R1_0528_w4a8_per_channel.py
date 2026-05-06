@@ -1,7 +1,7 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
-    TestAscendAccuracyTestCaseBase
+    TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ascend.test_ascend_utils import (
     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
