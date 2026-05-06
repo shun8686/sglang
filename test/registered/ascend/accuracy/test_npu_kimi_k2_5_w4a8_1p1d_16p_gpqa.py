@@ -65,7 +65,7 @@ PREFILL_ARGS = [
     "--max-running-requests",
     "16",
     "--context-length",
-    256000,
+    260000,
     "--chunked-prefill-size",
     32768,
     "--enable-multimodal",
@@ -103,7 +103,7 @@ DECODE_ARGS = [
     "--max-running-requests",
     16,
     "--context-length",
-    256000,
+    260000,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -154,7 +154,7 @@ class TestNPUKimiK2_5_W4A8_1P1D_32P_GPQA(TestAscendAccuracyMultiNodePdSepTestCas
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
     max_concurrency = 128
     generation_kwargs = dict(temperature=1.0, top_p=0.95)
-    output_len = 220000
+    output_len = 256000
 
     def test_npu_kimi_k2_5_w4a8_1p1d_32p_gpqa(self):
         """Run NPU accuracy test for Kimi-K2.5-w4a8 1p1d_32p on GPQA"""
