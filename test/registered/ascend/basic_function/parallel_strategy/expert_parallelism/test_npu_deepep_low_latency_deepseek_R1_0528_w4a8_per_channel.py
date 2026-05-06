@@ -1,6 +1,8 @@
 import unittest
 
-from sglang.test.ascend.e2e.test_npu_accuracy_utils import TestAscendAccuracyTestCaseBase
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    TestAscendAccuracyTestCaseBase
+)
 from sglang.test.ascend.test_ascend_utils import (
     DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH,
 )
@@ -72,6 +74,12 @@ OTHER_ARGS = [
 
 
 class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
+    """Testcase: Verify the accuracy of DeepSeek-R1 model on MMLU and GSM8K tasks with --deepep-mode low_latency on Ascend backend.
+
+    [Test Category] Parameter
+    [Test Target] --moe-a2a-backend; --deepep-mode
+    """
+
     model = DEEPSEEK_R1_0528_W4A8_PER_CHANNEL_WEIGHTS_PATH
     envs = ENVS
     other_args = OTHER_ARGS
@@ -93,4 +101,3 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
 
 if __name__ == "__main__":
     unittest.main()
-
