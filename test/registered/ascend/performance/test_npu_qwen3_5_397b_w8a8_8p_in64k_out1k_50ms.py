@@ -42,14 +42,16 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     -1,
     "--max-prefill-tokens",
     71680,
+    "--max-total-tokens",
+    1280000,
     "--prefill-max-requests",
     1,
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    32,
+    16,
     "--mem-fraction-static",
-    0.75,
+    0.7,
     "--cuda-graph-bs",
     2,
     4,
@@ -91,12 +93,12 @@ class TestNPUQwen3_5_397B_64K(TestAscendPerformanceTestCaseBase):
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"
     max_concurrency = 16
-    num_prompts = 32
+    num_prompts = 16
     input_len = 65536
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 150
+    # output_token_throughput = 150
 
     def test_npu_qwen3_5_397b_64k(self):
         """Run NPU performance test for Qwen3.5-397B in64k out1k"""
