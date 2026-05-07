@@ -97,6 +97,7 @@ class TestNPUQwen3_5_397B_3K5_1k5_50ms(TestAscendPerformanceTestCaseBase):
     output_len = 1500
     random_range_ratio = 1
     tpot = 50
+    aisbench_request_rate = 1
     # output_token_throughput = 300
 
     def test_npu_qwen3_5_397b_3k5(self):

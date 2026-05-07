@@ -49,7 +49,7 @@ QWEN3_5_397B_64K_OTHER_ARGS = [
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    16,
+    28,
     "--mem-fraction-static",
     0.7,
     "--cuda-graph-bs",
@@ -92,12 +92,13 @@ class TestNPUQwen3_5_397B_64K(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_5_397B_64K_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"
-    max_concurrency = 16
-    num_prompts = 16
+    max_concurrency = 28
+    num_prompts = 28
     input_len = 65536
     output_len = 1024
     random_range_ratio = 1
     tpot = 50
+    aisbench_request_rate = 1
     # output_token_throughput = 150
 
     def test_npu_qwen3_5_397b_64k(self):
