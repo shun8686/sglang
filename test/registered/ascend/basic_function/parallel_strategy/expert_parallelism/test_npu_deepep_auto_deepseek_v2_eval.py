@@ -66,6 +66,7 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     envs = ENVS
     other_args = OTHER_ARGS
     accuracy = 0.1
+    max_concurrency = 100
     # dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
     dataset_name = "mmlu_gen_5_shot_str"
     def test_accuracy(self):
