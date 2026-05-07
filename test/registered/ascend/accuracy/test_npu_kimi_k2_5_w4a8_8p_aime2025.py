@@ -95,7 +95,7 @@ class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
     batch_size = 64
-    generation_kwargs = dict(temperature=1.0, top_p=0.95)
+    generation_kwargs = "dict(temperature=1.0, top_p=0.95)"
     max_out_len = 256000
 
     def test_npu_kimi_k2_5_aime25(self):

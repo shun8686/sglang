@@ -479,6 +479,7 @@ def run_aisbench(
                 num_prompts=num_prompts,
                 image_dir=image_dir,
                 size=image_resolution,
+                trust_remote_code=True,
             )
             save_jsonl(data, dataset_file)
         dataset_path = dataset_file
