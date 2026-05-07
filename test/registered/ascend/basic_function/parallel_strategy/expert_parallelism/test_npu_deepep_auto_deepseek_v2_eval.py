@@ -69,6 +69,7 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     max_concurrency = 100
     # dataset_name = "demo_gsm8k_gen_4_shot_cot_chat_prompt"
     dataset_name = "mmlu_gen_5_shot_str"
+    output_len = 16
     def test_accuracy(self):
         self.run_accuracy()
 
