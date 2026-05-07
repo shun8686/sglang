@@ -95,7 +95,7 @@ class TestNPUKimiK2_5GPQA(TestAscendAccuracyTestCaseBase):
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
     batch_size = 128
-    generation_kwargs = dict(temperature=1.0, top_p=0.95)
+    generation_kwargs = "dict(temperature=1.0, top_p=0.95)"
     max_out_len = 256000
 
     def test_npu_kimi_k2_5_gpqa(self):
