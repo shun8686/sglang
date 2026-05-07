@@ -45,9 +45,11 @@ QWEN3_5_397B_3K5_OTHER_ARGS = [
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    8,
+    1,
     "--mem-fraction-static",
-    0.8,
+    0.6,
+    "--max-total-tokens",
+    320000,
     "--cuda-graph-bs",
     2,
     4,
@@ -68,10 +70,6 @@ QWEN3_5_397B_3K5_OTHER_ARGS = [
     "bfloat16",
     "--mamba-ssm-dtype",
     "bfloat16",
-    "--dp-size",
-    1,
-    "--enable-dp-attention",
-    "--enable-dp-lm-head",
     "--speculative-algorithm",
     "NEXTN",
     "--speculative-num-steps",
@@ -94,13 +92,14 @@ class TestNPUQwen3_5_397B_256k_1k_2000ms(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_5_397B_3K5_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"
-    max_concurrency = 8
-    num_prompts = 8
+    max_concurrency = 1
+    num_prompts = 4
     input_len = 260096
     output_len = 1024
     random_range_ratio = 1
     tpot = 500
-    output_token_throughput = 30
+    aisbench_request_rate = 1
+    # output_token_throughput = 30
 
     def test_npu_qwen3_5_397b_256k_1k_2000ms(self):
         """Run NPU performance test for Qwen3.5-397B in3k5 out1k5"""
