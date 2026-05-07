@@ -49,9 +49,11 @@ OTHER_ARGS = [
     1024,
     "--mem-fraction-static",
     0.68,
-    "--base-gpu-id",
-    8,
+    # "--base-gpu-id",
+    # 8,
     "--log-requests",
+    "--log-requests-level",
+    "3",
 ]
 
 class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
