@@ -84,8 +84,8 @@ def run_aisbench(
     cmd += f"--output-path {result_path} "
     cmd += f"--output-len {output_len} "
     cmd += f"--batch-size {max_concurrency} "
-    cmd += f"--num-prompts {num_prompts}"
-    cmd += f"--api {api}"
+    cmd += f"--num-prompts {num_prompts} "
+    cmd += f"--api {api} "
 
     if generation_kwargs:
         cmd += f" --generation-kwargs '{generation_kwargs}'"
