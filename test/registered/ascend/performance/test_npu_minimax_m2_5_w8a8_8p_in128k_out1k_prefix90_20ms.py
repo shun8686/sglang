@@ -12,12 +12,11 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="",
+    suite="npu-performance",
     nightly=True,
-    disabled="performance testcase",
 )
 
-MINIMAX_M2_5_128K_PREFIX_ENVS = {
+MINIMAX_M2_5_W8A8_8P_IN128K_OUT1K_PREFIX90_20MS_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -35,15 +34,15 @@ MINIMAX_M2_5_128K_PREFIX_ENVS = {
     "SGLANG_NPU_FUSED_MOE_MODE": "2",
     "SGLANG_NPU_DEEPEP_USE_FUSED_MOE_DECODE": "1",
     "SGLANG_NPU_FUSEEP_DECODE_ONLY": "1",
+    "SGLANG_EXTERNAL_MODEL_PACKAGE": "custom_eagle3",
+    "PYTHONPATH": f"{MINIMAX_M2_5_EAGLE3_MODEL_PATH}:{os.environ.get('PYTHONPATH', '')}",
     "ENABLE_PROFILING": "0",
     "PROFILING_BS": "28",
     "PROFILING_STAGE": "decode",
     "PROFILING_step": "10",
-    "PYTHONPATH": f"{MINIMAX_M2_5_EAGLE3_MODEL_PATH}:{os.environ.get('PYTHONPATH', '')}",
-    "SGLANG_EXTERNAL_MODEL_PACKAGE": "custom_eagle3",
 }
 
-MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
+MINIMAX_M2_5_W8A8_8P_IN128K_OUT1K_PREFIX90_20MS_OTHER_ARGS = [
     "--tp-size",
     16,
     "--dp-size",
@@ -55,15 +54,15 @@ MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
     "--mem-fraction-static",
     0.65,
     "--max-running-requests",
-    36,
+    8,
     "--chunked-prefill-size",
     -1,
     "--max-prefill-tokens",
     130000,
     "--cuda-graph-bs",
-    8,
-    16,
-    24,
+    1,
+    2,
+    4,
     "--moe-a2a-backend",
     "ascend_fuseep",
     "--deepep-mode",
@@ -90,28 +89,25 @@ MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5_W8A8_8P_In128k_Out1k_Prefix90(
-    TestAscendPerformanceTestCaseBase
-):
-    """Test NPU performance for MiniMax-M2.5-w8a8 8p single node prefix cache in128k out1k"""
+class TestNPUMiniMaxM2_5W8A8_8P_In128k_Out1k_Prefix90_20ms(TestAscendPerformanceTestCaseBase):
+    """MiniMax-M2.5-w8a8 8p (16 die) 128k input 1k output with 90% prefix cache low latency 20ms performance test"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = MINIMAX_M2_5_W8A8_MODEL_PATH
-    other_args = MINIMAX_M2_5_128K_PREFIX_OTHER_ARGS
-    envs = MINIMAX_M2_5_128K_PREFIX_ENVS
+    other_args = MINIMAX_M2_5_W8A8_8P_IN128K_OUT1K_PREFIX90_20MS_OTHER_ARGS
+    envs = MINIMAX_M2_5_W8A8_8P_IN128K_OUT1K_PREFIX90_20MS_ENVS
     dataset_name = "random"
-    max_concurrency = 8
-    num_prompts = 32
+    max_concurrency = 2
+    num_prompts = 8
     input_len = 131072
     output_len = 1024
     random_range_ratio = 1
     aisbench_repeat_rate = 0.9
-    tpot = 50
-    output_token_throughput = 200
+    tpot = 20
 
-    def test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix(self):
-        """Run NPU performance test for MiniMax-M2.5-w8a8 in128k out1k prefix"""
+    def test_npu_minimax_m2_5_w8a8_8p_in128k_out1k_prefix90_20ms(self):
+        """Run MiniMax-M2.5-w8a8 8p 128k/1k prefix90 low latency 20ms performance test"""
         self.run_throughput()
 
 
