@@ -89,7 +89,9 @@ MINIMAX_M2_5_W8A8_8P_IN128K_OUT1K_PREFIX90_20MS_OTHER_ARGS = [
 ]
 
 
-class TestNPUMiniMaxM2_5W8A8_8P_In128k_Out1k_Prefix90_20ms(TestAscendPerformanceTestCaseBase):
+class TestNPUMiniMaxM2_5W8A8_8P_In128k_Out1k_Prefix90_20ms(
+    TestAscendPerformanceTestCaseBase
+):
     """MiniMax-M2.5-w8a8 8p (16 die) 128k input 1k output with 90% prefix cache low latency 20ms performance test"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT

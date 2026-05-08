@@ -180,7 +180,9 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUMiniMaxM2_5W8A8_1P1D_16P_In64k_Out1k_Prefix90_50ms(TestAscendPerfMultiNodePdSepTestCaseBase):
+class TestNPUMiniMaxM2_5W8A8_1P1D_16P_In64k_Out1k_Prefix90_50ms(
+    TestAscendPerfMultiNodePdSepTestCaseBase
+):
     """MiniMax-M2.5-w8a8 PD Sep 1p1d 16p 64k input 1k output with 90% prefix cache performance test"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
