@@ -52,6 +52,7 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     envs = ENVS
     other_args = OTHER_ARGS
     api="completion"
+    max_concurrency = 100
 
     def test_gsm8k_accuracy(self):
         self.dataset_type = "gsm8k"
