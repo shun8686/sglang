@@ -154,7 +154,6 @@ GLM_5_1_PD_SEP_DECODE_ARGS = [
     "bfloat16",
     "--load-balance-method",
     "round_robin",
-
 ]
 
 GLM_5_1_PD_SEP_MODEL_CONFIG = {
