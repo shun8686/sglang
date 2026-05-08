@@ -595,7 +595,6 @@ elif [ "$MODE" == "accuracy" ]; then
         if [ "$API" == "completion" ]; then
             gen_model_config_file_vllm_api
         else
-            if
             gen_model_config_file_vllm_api_stream_chat
         fi
     fi
