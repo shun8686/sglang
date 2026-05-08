@@ -51,7 +51,7 @@ class TestDeepEpDeepseek(TestAscendAccuracyTestCaseBase):
     model = DEEPSEEK_V2_LITE_W8A8_WEIGHTS_PATH
     envs = ENVS
     other_args = OTHER_ARGS
-    api="completion"
+    api = "completion"
     max_concurrency = 100
 
     def test_gsm8k_accuracy(self):
