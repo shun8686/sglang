@@ -1002,7 +1002,7 @@ jobs:
             test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_16p_aime2025.py
             test_type: 'accuracy'
             prefill_decode_deployment: 'separation'
-            # Kimi 1p1d_16p accuracy
+            # Kimi 1p1d_24p accuracy
           - name: test_npu_kimi_k2_5_w4a8_1p1d_24p_aime2025
             prefill_size: 1
             decode_size: 2
