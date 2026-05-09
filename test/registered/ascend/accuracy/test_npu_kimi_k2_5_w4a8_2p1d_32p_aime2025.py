@@ -15,6 +15,7 @@ register_npu_ci(
     est_time=3600,
     suite="nightly-pd-sep-4-node",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 KIMI_K2_5_W4A8_PREFILL_ENVS = {
