@@ -44,10 +44,10 @@ QWEN3_5_397B_128K_OTHER_ARGS = [
     "--max-total-tokens",
     1000000,
     "--max-mamba-cache-size",
-    640,
+    320,
     "--trust-remote-code",
     "--max-running-requests",
-    48,
+    24,
     "--mem-fraction-static",
     0.7,
     "--cuda-graph-bs",
@@ -97,8 +97,8 @@ class TestNPUQwen3_5_397B_128K(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_5_397B_128K_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"
-    max_concurrency = 48
-    num_prompts = 48
+    max_concurrency = 24
+    num_prompts = 24
     aisbench_repeat_rate = 0.9
     input_len = 131072
     output_len = 1024

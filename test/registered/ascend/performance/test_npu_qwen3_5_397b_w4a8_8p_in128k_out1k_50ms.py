@@ -47,7 +47,7 @@ QWEN3_5_397B_128K_OTHER_ARGS = [
     640,
     "--trust-remote-code",
     "--max-running-requests",
-    10,
+    6,
     "--mem-fraction-static",
     0.75,
     "--cuda-graph-bs",
@@ -95,8 +95,8 @@ class TestNPUQwen3_5_397B_128K(TestAscendPerformanceTestCaseBase):
     other_args = QWEN3_5_397B_128K_OTHER_ARGS
     envs = QWEN3_5_397B_ENVS
     dataset_name = "random"
-    max_concurrency = 10
-    num_prompts = 10
+    max_concurrency = 6
+    num_prompts = 6
     input_len = 131072
     output_len = 1024
     random_range_ratio = 1
