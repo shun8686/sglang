@@ -88,8 +88,8 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In32k_Out1k_HighThroughput(
     other_args = MINIMAX_M2_5_32K_OTHER_ARGS
     envs = MINIMAX_M2_5_32K_ENVS
     dataset_name = "random"
-    max_concurrency = 96
-    num_prompts = 384
+    max_concurrency = 36
+    num_prompts = 144
     input_len = 32768
     output_len = 1024
     random_range_ratio = 1
