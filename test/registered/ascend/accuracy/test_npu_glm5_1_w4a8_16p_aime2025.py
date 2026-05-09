@@ -77,6 +77,7 @@ GLM_5_1_TWO_NODE_MODEL_CONFIG = {
     "node_envs": GLM_5_1_TWO_NODE_ENVS,
 }
 
+
 class TestNPUGLM5_1_W4A8_16P_AIME2025(TestAscendAccuracyMultiNodePdMixTestCaseBase):
     """Test NPU accuracy for GLM-5.1-w4a8 16p two node on AIME 2025"""
 

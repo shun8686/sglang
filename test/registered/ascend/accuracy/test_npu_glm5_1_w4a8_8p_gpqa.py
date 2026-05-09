@@ -70,6 +70,7 @@ GLM_5_1_NODE_OTHER_ARGS = [
     4,
 ]
 
+
 class TestNPUGLM5_1_W4A8_32P_GPQA(TestAscendAccuracyTestCaseBase):
     """Test NPU accuracy for GLM-5.1-w4a8 8p single node on GPQA"""
 
