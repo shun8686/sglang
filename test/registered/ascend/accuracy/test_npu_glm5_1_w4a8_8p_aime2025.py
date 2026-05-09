@@ -81,7 +81,7 @@ class TestNPUGLM5_1_W4A8_32P_AIME2025(TestAscendAccuracyTestCaseBase):
     accuracy = 0.8
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
-    batch_size = 64
+    max_concurrency = 64
     max_out_len = 8192
 
     def test_npu_glm5_1_w4a8_8p_aime2025(self):

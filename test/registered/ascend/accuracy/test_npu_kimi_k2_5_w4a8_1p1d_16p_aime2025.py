@@ -150,7 +150,7 @@ class TestNPUKimiK2_5_W4A8_1P1D_16P_AIME2025(
     accuracy = 0.8
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
-    max_concurrency = 64
+    max_concurrency = 128
     generation_kwargs = "dict(temperature=1.0, top_p=0.95)"
     output_len = 256000
 

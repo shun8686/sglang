@@ -81,7 +81,7 @@ class TestNPUGLM5_1_W4A8_32P_GPQA(TestAscendAccuracyTestCaseBase):
     accuracy = 0.8
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    batch_size = 128
+    max_concurrency = 128
     max_out_len = 1024
 
     def test_npu_glm5_1_w4a8_8p_gpqa(self):
