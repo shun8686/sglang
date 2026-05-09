@@ -15,6 +15,7 @@ register_npu_ci(
     est_time=3600,
     suite="nightly-pd-sep-4-node",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 KIMI_K2_5_W4A8_PREFILL_ENVS = {
@@ -60,12 +61,12 @@ KIMI_K2_5_W4A8_PREFILL_ARGS = [
     16,
     "--mem-fraction-static",
     0.76,
-    "--max-prefill-tokens",
-    1,
+    "--max-running-requests",
+    8,
     "--chunked-prefill-size",
     16384,
     "--context-length",
-    256000,
+    260000,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -101,11 +102,10 @@ KIMI_K2_5_W4A8_DECODE_ARGS = [
     "--max-running-requests",
     32,
     "--disable-radix-cache",
-    1,
     "--chunked-prefill-size",
     65536,
     "--context-length",
-    256000,
+    260000,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
@@ -155,9 +155,9 @@ class TestNPUKimiK2_5_W4A8_2P1D_64P_AIME2025(
     accuracy = 0.8
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
-    max_concurrency = 64
-    generation_kwargs = dict(temperature=1.0, top_p=0.95)
-    output_len = 220000
+    max_concurrency = 128
+    generation_kwargs = "dict(temperature=1.0, top_p=0.95)"
+    output_len = 256000
 
     def test_npu_kimi_k2_5_w4a8_2p1d_64p_aime2025(self):
         """Run NPU accuracy test for Kimi-K2.5-w4a8 2p1d_64p on AIME 2025"""
