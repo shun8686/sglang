@@ -102,7 +102,7 @@ class TestNPUKimiK2_5AIME25(TestAscendAccuracyTestCaseBase):
     accuracy = 0.3
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
-    batch_size = 64
+    max_concurrency = 128
     generation_kwargs = "dict(temperature=1.0, top_p=0.95)"
     max_out_len = 256000
 

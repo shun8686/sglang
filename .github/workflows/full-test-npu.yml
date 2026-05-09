@@ -987,21 +987,36 @@ jobs:
 #            test_case: test/registered/ascend/performance/test_npu_kimi_k2_5_w4a8_2p1d_32p_in128k_out1k_prefix90_50ms.py
 #            test_type: 'perf'
 #            prefill_decode_deployment: 'separation'
-#          # Kimi 1p1d_16p accuracy
-#          - name: test_npu_kimi_k2_5_w4a8_1p1d_16p_gpqa
-#            prefill_size: 1
-#            decode_size: 1
-#            router_size: 1
-#            test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_16p_gpqa.py
-#            test_type: 'accuracy'
-#            prefill_decode_deployment: 'separation'
-#          - name: test_npu_kimi_k2_5_w4a8_1p1d_16p_aime2025
-#            prefill_size: 1
-#            decode_size: 1
-#            router_size: 1
-#            test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_16p_aime2025.py
-#            test_type: 'accuracy'
-#            prefill_decode_deployment: 'separation'
+          # Kimi 1p1d_16p accuracy
+          - name: test_npu_kimi_k2_5_w4a8_1p1d_16p_gpqa
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+            test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_16p_gpqa.py
+            test_type: 'accuracy'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_kimi_k2_5_w4a8_1p1d_16p_aime2025
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+            test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_16p_aime2025.py
+            test_type: 'accuracy'
+            prefill_decode_deployment: 'separation'
+            # Kimi 1p1d_24p accuracy
+          - name: test_npu_kimi_k2_5_w4a8_1p1d_24p_aime2025
+            prefill_size: 1
+            decode_size: 2
+            router_size: 1
+            test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_24p_aime2025.py
+            test_type: 'accuracy'
+            prefill_decode_deployment: 'separation'
+          - name: test_npu_kimi_k2_5_w4a8_1p1d_24p_gpqa
+            prefill_size: 1
+            decode_size: 2
+            router_size: 1
+            test_case: test/registered/ascend/accuracy/test_npu_kimi_k2_5_w4a8_1p1d_24p_gpqa.py
+            test_type: 'accuracy'
+            prefill_decode_deployment: 'separation'
 #          # Kimi 2p1d_32p accuracy
 #          - name: test_npu_kimi_k2_5_w4a8_2p1d_32p_gpqa
 #            prefill_size: 2
