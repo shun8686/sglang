@@ -26,7 +26,7 @@ PREFILL_ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "60",
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
-    "HCCL_BUFFSIZE": "1200",
+    "HCCL_BUFFSIZE": "1800",
 }
 
 DECODE_ENVS = {
@@ -38,7 +38,7 @@ DECODE_ENVS = {
     "HCCL_SOCKET_IFNAME": NIC_NAME,
     "GLOO_SOCKET_IFNAME": NIC_NAME,
     "HCCL_BUFFSIZE": "1200",
-    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "32",
+    "SGLANG_DEEPEP_NUM_MAX_DISPATCH_TOKENS_PER_RANK": "64",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_NPU_USE_MLAPO": "1",
@@ -52,8 +52,6 @@ PREFILL_ARGS = [
     "bfloat16",
     "--disaggregation-mode",
     "prefill",
-    "--load-balance-method",
-    "round_robin",
     "--nnodes",
     "1",
     "--node-rank",
@@ -63,13 +61,12 @@ PREFILL_ARGS = [
     "ascend",
     "--device",
     "npu",
-    "--disable-radix-cache",
     "--tp-size",
     16,
     "--mem-fraction-static",
     0.78,
     "--max-running-requests",
-    16,
+    8,
     "--chunked-prefill-size",
     16384,
     "--enable-multimodal",
@@ -91,40 +88,43 @@ DECODE_ARGS = [
     "--disaggregation-mode",
     "decode",
     "--nnodes",
-    "1",
+    "2",
     "--trust-remote-code",
     "--attention-backend",
     "ascend",
     "--device",
     "npu",
     "--tp-size",
-    16,
+    32,
     "--mem-fraction-static",
-    0.78,
+    0.82,
     "--max-running-requests",
-    8,
+    32,
     "--enable-multimodal",
     "--mm-attention-backend",
     "ascend_attn",
     "--sampling-backend",
     "ascend",
+    "--enable-dp-attention",
+    "--dp-size",
+    4,
     "--disable-radix-cache",
     "--moe-a2a-backend",
     "deepep",
     "--deepep-mode",
     "auto",
     "--cuda-graph-bs",
-    16,
+    8,
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
     KIMI_K2_5_EAGLE3_MODEL_PATH,
     "--speculative-num-steps",
-    3,
+    1,
     "--speculative-eagle-topk",
     1,
     "--speculative-num-draft-tokens",
-    4,
+    2,
     "--speculative-draft-model-quantization",
     "unquant",
 ]
@@ -140,10 +140,10 @@ MODEL_CONFIG = {
 }
 
 
-class TestNPUKimiK2_5_W4A8_1P1D_16P_AIME2025(
+class TestNPUKimiK2_5_W4A8_1P1D_24P_AIME2025(
     TestAscendAccuracyMultiNodePdSepTestCaseBase
 ):
-    """Test NPU accuracy for Kimi-K2.5-w4a8 1p1d_16p on AIME 2025"""
+    """Test NPU accuracy for Kimi-K2.5-w4a8 1p1d_24p on AIME 2025"""
 
     model_config = MODEL_CONFIG
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
@@ -154,8 +154,8 @@ class TestNPUKimiK2_5_W4A8_1P1D_16P_AIME2025(
     generation_kwargs = "dict(temperature=1.0, top_p=0.95)"
     output_len = 256000
 
-    def test_npu_kimi_k2_5_w4a8_1p1d_16p_aime2025(self):
-        """Run NPU accuracy test for Kimi-K2.5-w4a8 1p1d_16p on AIME 2025"""
+    def test_npu_kimi_k2_5_w4a8_1p1d_24p_aime2025(self):
+        """Run NPU accuracy test for Kimi-K2.5-w4a8 1p1d_24p on AIME 2025"""
         self.run_accuracy()
 
 
