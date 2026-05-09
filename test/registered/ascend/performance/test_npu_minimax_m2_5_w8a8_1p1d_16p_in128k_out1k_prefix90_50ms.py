@@ -149,7 +149,6 @@ DECODE_ARGS = [
     3,
     "--speculative-draft-model-quantization",
     "unquant",
-    "--disaggregation-enable-decode-radix-cache",
     "--skip-server-warmup",
     "--cuda-graph-bs",
     2,
