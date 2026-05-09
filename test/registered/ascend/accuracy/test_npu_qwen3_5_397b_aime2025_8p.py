@@ -10,8 +10,8 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=3600,
-    suite="",
+    est_time=1800,
+    suite="nightly-16-npu-a3",
     nightly=True,
     disabled="accuracy testcase",
 )
@@ -51,7 +51,7 @@ QWEN3_5_397B_W4A8_1P_HIGH_OTHER_ARGS = [
     "--disable-radix-cache",
     "--trust-remote-code",
     "--max-running-requests",
-    4,
+    1,
     "--max-mamba-cache-size",
     60,
     "--mem-fraction-static",
@@ -82,24 +82,24 @@ QWEN3_5_397B_W4A8_1P_HIGH_OTHER_ARGS = [
 ]
 
 
-class TestNPUQwen3_5_397B_W4A8_1P_In3k5_Out1k5_High_GPQA(
+class TestNPUQwen3_5_397B_W4A8_1P_In3k5_Out1k5_High_AIME2025(
     TestAscendAccuracyTestCaseBase
 ):
-    """Test NPU accuracy for Qwen3.5-397B-W4A8 1p in3k5 out1k5 high throughput on GPQA"""
+    """Test NPU accuracy for Qwen3.5-397B-W4A8 1p in3k5 out1k5 high throughput on AIME2025"""
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = QWEN3_5_397B_W4A8_MODEL_PATH
     other_args = QWEN3_5_397B_W4A8_1P_HIGH_OTHER_ARGS
     envs = QWEN3_5_397B_W4A8_1P_HIGH_ENVS
     accuracy = 0.8
-    dataset_type = "gpqa"
-    dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    output_len = 1500
-    max_concurrency = 4
-    num_prompts = 448
+    dataset_type = "aime2025"
+    dataset_name = "aime2025_gen_0_shot_cot"
+    output_len = 8192
+    max_concurrency = 1
+    num_prompts = 100000
     generation_kwargs = '{"temperature": 0}'
 
-    def test_npu_qwen3_5_397b_w4a8_1p_in3k5_out1k5_high_gpqa(self):
+    def test_npu_qwen3_5_397b_w4a8_1p_in3k5_out1k5_high_aime2025(self):
         self.run_accuracy()
 
 
