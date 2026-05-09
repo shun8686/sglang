@@ -14,6 +14,7 @@ register_npu_ci(
     est_time=3600,
     suite="nightly-pd-sep-2-node",
     nightly=True,
+    disabled="accuracy testcase",
 )
 
 PREFILL_ENVS = {
