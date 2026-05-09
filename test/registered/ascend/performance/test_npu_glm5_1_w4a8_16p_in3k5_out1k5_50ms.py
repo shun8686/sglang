@@ -40,7 +40,7 @@ GLM_5_1_TWO_NODE_OTHER_ARGS = [
     16,
     "--enable-dp-attention",
     "--chunked-prefill-size",
-    131072,
+    65536,
     "--max-prefill-tokens",
     280000,
     "--trust-remote-code",

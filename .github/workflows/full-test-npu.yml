@@ -725,64 +725,64 @@ jobs:
             prefill_decode_deployment: 'separation'
           # GLM5 1p1d_32p (P: tp=16 + D: tp=16, total 32 cards)
           - name: test_npu_glm5_1_w4a8_1p1d_32p_gpqa
-            prefill_size: 1
-            decode_size: 1
+            prefill_size: 2
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/accuracy/test_npu_glm5_1_w4a8_1p1d_32p_gpqa.py
             test_type: 'accuracy'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_32p_aime2025
-            prefill_size: 1
-            decode_size: 1
+            prefill_size: 2
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/accuracy/test_npu_glm5_1_w4a8_1p1d_32p_aime2025.py
             test_type: 'accuracy'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_32p_in6k_5_out1k_5_90
-            prefill_size: 1
-            decode_size: 1
+            prefill_size: 2
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in6k_5_out1k_5_90.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
-          - name: test_npu_glm5_1_w4a8_1p1d_32p_in6k_5_out1k_5_100
-            prefill_size: 1
-            decode_size: 1
+          - name: test_npu_glm5_1_w4a8_1p1d_48p_in6k_5_out1k_5_100
+            prefill_size: 2
+            decode_size: 4
             router_size: 1
-            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in6k_5_out1k_5_100.py
+            test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_48p_in6k_5_out1k_5_100.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_32p_in16k_out1k_20ms
-            prefill_size: 1
-            decode_size: 1
+            prefill_size: 2
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in16k_out1k_20ms.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_32p_in64k_out1k
-            prefill_size: 1
-            decode_size: 1
+            prefill_size: 2
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in64k_out1k.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_32p_in128k_out1k
-            prefill_size: 1
-            decode_size: 1
+            prefill_size: 2
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_32p_in128k_out1k.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_48p_in64k_out1k_90
             prefill_size: 4
-            decode_size: 1
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_48p_in64k_out1k_90.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
           - name: test_npu_glm5_1_w4a8_1p1d_48p_in128k_out1k_90
-            prefill_size: 2
-            decode_size: 1
+            prefill_size: 4
+            decode_size: 2
             router_size: 1
             test_case: test/registered/ascend/performance/test_npu_glm5_1_w4a8_1p1d_48p_in128k_out1k_90.py
             test_type: 'perf'
