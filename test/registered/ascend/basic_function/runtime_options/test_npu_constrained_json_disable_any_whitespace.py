@@ -27,7 +27,7 @@ class TestJSONModeMixin:
             messages=[
                 {
                     "role": "user",
-                    "content": "Output a simple JSON with name and age only."
+                    "content": "Output a simple JSON with name and age only.",
                 },
             ],
             temperature=0,
@@ -65,7 +65,7 @@ class TestJSONModeMixin:
             messages=[
                 {
                     "role": "user",
-                    "content": "Output a simple JSON with name and age only."
+                    "content": "Output a simple JSON with name and age only.",
                 },
             ],
             temperature=0,
