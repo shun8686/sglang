@@ -62,6 +62,10 @@ QWEN3_5_397B_W4A8_1P_HIGH_OTHER_ARGS = [
     6,
     8,
     16,
+    "--moe-a2a-backend",
+    "ascend_fuseep",
+    "--deepep-mode",
+    "auto",
     "--enable-multimodal",
     "--quantization",
     "modelslim",
@@ -79,6 +83,8 @@ QWEN3_5_397B_W4A8_1P_HIGH_OTHER_ARGS = [
     1,
     "--speculative-num-draft-tokens",
     4,
+    "--speculative-draft-model-quantization",
+    "unquant",
 ]
 
 
