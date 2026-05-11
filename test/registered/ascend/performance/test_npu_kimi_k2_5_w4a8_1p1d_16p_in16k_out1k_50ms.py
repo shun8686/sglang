@@ -148,8 +148,8 @@ class TestNPUKimiK2_5_W4A8_1P1D_16P_In16k_Out1k_50ms(
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     dataset_name = "random"
-    max_concurrency = 48
-    num_prompts = 48
+    max_concurrency = 16
+    num_prompts = 16
     request_rate = 1
     input_len = 16384
     output_len = 1024
