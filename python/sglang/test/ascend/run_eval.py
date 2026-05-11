@@ -1,11 +1,11 @@
 import json
 import os
 
+from sglang.test.run_eval import run_eval_once
 from sglang.test.simple_eval_common import (
     make_report,
     set_ulimit,
 )
-from sglang.test.run_eval import run_eval_once
 
 
 def run_eval(args):
@@ -25,7 +25,9 @@ def run_eval(args):
         from sglang.test.ascend.simple_eval_mmlu import MMLUEval
 
         filename = "https://openaipublic.blob.core.windows.net/simple-evals/mmlu.csv"
-        eval_obj = MMLUEval(filename, args.num_examples, args.num_threads, getattr(args, "num_shots", 0))
+        eval_obj = MMLUEval(
+            filename, args.num_examples, args.num_threads, getattr(args, "num_shots", 0)
+        )
     else:
         raise ValueError(f"Invalid eval name: {args.eval_name}")
 

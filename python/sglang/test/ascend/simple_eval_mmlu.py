@@ -57,16 +57,29 @@ The last line of your response should be
 Answer: {Answer}
 """.strip()
 
+
 class MMLUEval(Eval):
-    def __init__(self, filename: str, num_examples: Optional[int], num_threads: int, num_shots: int):
+    def __init__(
+            self, filename: str,
+            num_examples: Optional[int],
+            num_threads: int,
+            num_shots: int
+    ):
         if "://" in filename:
             df = pandas.read_csv(filename, storage_options={"timeout": 30})
         else:
             df = pandas.read_csv(filename)
         examples = [row.to_dict() for _, row in df.iterrows()]
         if num_shots:
-            example_questions = "".join(format_multichoice_question_example(row) + "\n\n" for row in examples[:num_shots])
-            self.template = TEMPLATE_MULTICHOICE_EXAMPLE_BEGIN + example_questions + QUERY_TEMPLATE_MULTICHOICE
+            example_questions = "".join(
+                format_multichoice_question_example(row) + "\n\n"
+                for row in examples[:num_shots]
+            )
+            self.template = (
+                    TEMPLATE_MULTICHOICE_EXAMPLE_BEGIN
+                    + example_questions
+                    + QUERY_TEMPLATE_MULTICHOICE
+            )
             examples = examples[num_shots:]
         if num_examples:
             examples = random.Random(0).sample(examples, num_examples)

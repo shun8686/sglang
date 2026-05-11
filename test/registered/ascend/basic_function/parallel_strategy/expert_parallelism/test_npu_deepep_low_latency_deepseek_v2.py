@@ -91,5 +91,6 @@ class TestDeepEpDeepseek(CustomTestCase):
             f'Accuracy of {self.model} is {str(metrics["score"])}, is lower than {expect_accuracy}',
         )
 
+
 if __name__ == "__main__":
     unittest.main()
