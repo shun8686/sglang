@@ -60,10 +60,10 @@ Answer: {Answer}
 
 class MMLUEval(Eval):
     def __init__(
-            self, filename: str,
-            num_examples: Optional[int],
-            num_threads: int,
-            num_shots: int
+        self, filename: str,
+        num_examples: Optional[int],
+        num_threads: int,
+        num_shots: int
     ):
         if "://" in filename:
             df = pandas.read_csv(filename, storage_options={"timeout": 30})
@@ -76,9 +76,9 @@ class MMLUEval(Eval):
                 for row in examples[:num_shots]
             )
             self.template = (
-                    TEMPLATE_MULTICHOICE_EXAMPLE_BEGIN
-                    + example_questions
-                    + QUERY_TEMPLATE_MULTICHOICE
+                TEMPLATE_MULTICHOICE_EXAMPLE_BEGIN
+                + example_questions
+                + QUERY_TEMPLATE_MULTICHOICE
             )
             examples = examples[num_shots:]
         if num_examples:
