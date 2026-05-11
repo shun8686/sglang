@@ -28,6 +28,7 @@ from sglang.test.simple_eval_mmlu import subject2category
 def format_multichoice_question_example(row):
     return QUERY_TEMPLATE_MULTICHOICE.format(**row)
 
+
 QUERY_TEMPLATE_MULTICHOICE = """
 Answer the following multiple choice question. The last line of your response should be of the following format: 'Answer: $LETTER' (without quotes) where LETTER is one of ABCD. Think step by step before answering.
 
@@ -53,17 +54,18 @@ B {B}
 C {C}
 D {D}
 
-The last line of your response should be 
+The last line of your response should be
 Answer: {Answer}
 """.strip()
 
 
 class MMLUEval(Eval):
     def __init__(
-        self, filename: str,
+        self,
+        filename: str,
         num_examples: Optional[int],
         num_threads: int,
-        num_shots: int
+        num_shots: int,
     ):
         if "://" in filename:
             df = pandas.read_csv(filename, storage_options={"timeout": 30})
