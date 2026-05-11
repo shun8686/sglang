@@ -58,7 +58,7 @@ COMMON_CONFIG = {
         "--export-metrics-to-file-dir",
         os.path.abspath("."),
     ],
-    "request_timeout": 60,
+    "request_timeout": 300,
 }
 
 
