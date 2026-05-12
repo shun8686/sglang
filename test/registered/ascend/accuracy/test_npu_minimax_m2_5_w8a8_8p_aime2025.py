@@ -94,11 +94,12 @@ class TestNPUMiniMaxM2_5_W8A8_8P_AIME2025(TestAscendAccuracyTestCaseBase):
     model = MINIMAX_M2_5_W8A8_MODEL_PATH
     other_args = MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS
     envs = MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS
-    accuracy = 0.8
+    accuracy = 80
     dataset_type = "aime2025"
     dataset_name = "aime2025_gen"
     max_concurrency = 64
-    max_out_len = 8192
+    generation_kwargs = "dict(temperature=1.0)"
+    output_len = 65536
 
     def test_npu_minimax_m2_5_w8a8_8p_aime2025(self):
         """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
