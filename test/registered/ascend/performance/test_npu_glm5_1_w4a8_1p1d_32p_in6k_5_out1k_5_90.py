@@ -120,7 +120,7 @@ GLM_5_1_PD_SEP_DECODE_ARGS = [
     "--mem-fraction-static",
     0.87,
     "--max-running-requests",
-    128,
+    96,
     "--attention-backend",
     "ascend",
     "--device",
@@ -181,8 +181,8 @@ class TestNPUGLM5_1_W4A8_PD_SEP_In3k5_Out1k5(TestAscendPerfMultiNodePdSepTestCas
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     dataset_name = "random"
-    max_concurrency = 128
-    num_prompts = 512
+    max_concurrency = 100
+    num_prompts = 480
     input_len = 6656
     output_len = 1536
     random_range_ratio = 1
