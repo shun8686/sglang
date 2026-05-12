@@ -97,8 +97,9 @@ class TestNPUMiniMaxM2_5_W8A8_8P_GPQA(TestAscendAccuracyTestCaseBase):
     accuracy = 0.8
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    max_concurrency = 128
-    max_out_len = 1024
+    max_concurrency = 64
+    generation_kwargs = "dict(temperature=1.0)"
+    output_len = 65536
 
     def test_npu_minimax_m2_5_w8a8_8p_gpqa(self):
         """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput on GPQA"""
