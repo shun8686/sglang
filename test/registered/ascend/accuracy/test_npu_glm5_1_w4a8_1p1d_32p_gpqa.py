@@ -116,7 +116,7 @@ GLM_5_1_PD_SEP_DECODE_ARGS = [
     32,
     "--enable-dp-attention",
     "--mem-fraction-static",
-    0.87,
+    0.8,
     "--max-running-requests",
     24,
     "--attention-backend",
@@ -180,8 +180,8 @@ class TestNPUGLM5_1_W4A8_1P1D_64P_GPQA(TestAscendAccuracyMultiNodePdSepTestCaseB
     accuracy = 0.8
     dataset_type = "gpqa"
     dataset_name = "gpqa_gen_0_shot_cot_chat_prompt"
-    max_concurrency = 128
-    output_len = 1024
+    max_concurrency = 16
+    output_len = 65536
 
     def test_npu_glm5_1_w4a8_1p1d_64p_gpqa(self):
         """Run NPU accuracy test for GLM-5.1-w4a8 1p1d_64p on GPQA"""
