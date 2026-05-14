@@ -101,7 +101,7 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_LowLatency(
     output_len = 1500
     random_range_ratio = 1
     tpot = 20
-    output_token_throughput = 100
+    output_token_throughput = 3369.59
 
     def test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_low_latency(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 low latency"""

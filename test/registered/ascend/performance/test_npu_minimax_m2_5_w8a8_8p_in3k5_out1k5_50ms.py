@@ -100,7 +100,7 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(
     output_len = 1500
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 200
+    output_token_throughput = 5512.52
 
     def test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 high throughput"""
