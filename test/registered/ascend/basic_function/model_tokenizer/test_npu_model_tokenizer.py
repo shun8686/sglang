@@ -56,6 +56,8 @@ class TestNpuTokenizer(CustomTestCase):
             cls.tokenizer_path,
             "--tokenizer-worker-num",
             cls.tokenizer_worker_num,
+            "--model-loader-extra-config",
+            json.dumps({"enable_multithread_load": False, "num_threads": 2}),
             "--tokenizer-mode",
             "auto",
             "--load-format",

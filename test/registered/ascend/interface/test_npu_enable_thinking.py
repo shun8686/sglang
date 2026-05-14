@@ -39,7 +39,9 @@ class TestEnableThinking(CustomTestCase):
             "--mem-fraction-static",
             0.95,
             "--tp",
-            16,
+            2,
+            "--reasoning-parser",
+            "qwen3",
         ]
         cls.process = popen_launch_server(
             cls.model,
