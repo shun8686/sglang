@@ -1,4 +1,5 @@
 import unittest
+
 import numpy as np
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
@@ -161,7 +162,7 @@ class TestDeepSeekV32CacheAccuracy(TestAscendMultiNodePdSepTestCaseBase):
         self.assertGreaterEqual(
             acc_on,
             acc_off - self.degradation_tolerance,
-            msg="Accuracy degraded after enabling cache!"
+            msg="Accuracy degraded after enabling cache!",
         )
 
 

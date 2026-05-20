@@ -1,5 +1,6 @@
 import unittest
 import time
+
 import requests
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
@@ -115,6 +116,7 @@ MODEL_CONFIG_HIERARCHICAL_CACHE = {
     "router_args": [],
 }
 
+
 # ====================== Test Case ======================
 class TestDeepSeekV32HierarchicalCacheHit(TestAscendMultiNodePdSepTestCaseBase):
     @classmethod
@@ -185,6 +187,7 @@ class TestDeepSeekV32HierarchicalCacheHit(TestAscendMultiNodePdSepTestCaseBase):
 
         finally:
             self.stop_sglang_thread()
+
 
 if __name__ == "__main__":
     unittest.main()
