@@ -69,7 +69,7 @@ jobs:
     name: ${{ inputs.test_config_name }}
     runs-on: ${{ inputs.runner }}
     container:
-      image: swr.ap-southeast-1.myhuaweicloud.com/base_image/ascend-ci/sglang:main-x86
+      image: swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:main-cann8.5.0-a3
       env:
         KUBECONFIG: /root/.cache/.cache/kb.yaml
         KUBECTL: /root/.cache/.cache/kubectl
