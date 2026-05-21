@@ -42,8 +42,8 @@ on:
         default: 'single'
 
 concurrency:
-  group: single-test-npu-${{ github.ref }}
-  cancel-in-progress: true
+  group: single-test-npu-${{ inputs.ref || github.ref }}
+  cancel-in-progress: ${{ github.event_name != 'workflow_call' }}
 
 jobs:
   set-image-config:
@@ -58,18 +58,43 @@ jobs:
       - name: Set image config
         id: set-vars
         run: |
-          echo "ref=${{ inputs.ref || github.sha }}" >> $GITHUB_OUTPUT
-          echo "job_filter=${{ inputs.job_filter || 'all' }}" >> $GITHUB_OUTPUT
-          echo "image_a3=${{ inputs.image_a3 || 'swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11' }}" >> $GITHUB_OUTPUT
-          echo "skip_install_flag=${{ inputs.skip_install_flag || 'false' }}" >> $GITHUB_OUTPUT
-          echo "test_scope=${{ inputs.test_scope || 'multi' }}" >> $GITHUB_OUTPUT
+          if [ -z "${{ inputs.ref }}" ]; then
+            echo "ref=" >> $GITHUB_OUTPUT
+          else
+            echo "ref=${{ inputs.ref }}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -z "${{ inputs.job_filter }}" ]; then
+            echo "job_filter=all" >> $GITHUB_OUTPUT
+          else
+            echo "job_filter=${{ inputs.job_filter }}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -z "${{ inputs.image_a3 }}" ]; then
+            echo "image_a3=swr.cn-southwest-2.myhuaweicloud.com/base_image/ascend-ci/cann:8.5.0-a3-ubuntu22.04-py3.11" >> $GITHUB_OUTPUT
+          else
+            echo "image_a3=${{ inputs.image_a3 }}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -z "${{ inputs.skip_install_flag }}" ]; then
+            echo "skip_install_flag=false" >> $GITHUB_OUTPUT
+          else
+            echo "skip_install_flag=${{ inputs.skip_install_flag }}" >> $GITHUB_OUTPUT
+          fi
+
+          if [ -z "${{ inputs.test_scope }}" ]; then
+            echo "test_scope=multi" >> $GITHUB_OUTPUT
+          else
+            echo "test_scope=${{ inputs.test_scope }}" >> $GITHUB_OUTPUT
+          fi
 
   multi-node-tests:
     name: multi-node-poc
     needs: [ set-image-config ]
+    if: ${{ !cancelled() && (needs.set-image-config.outputs.test_scope == 'all' || needs.set-image-config.outputs.test_scope == 'multi') }}
     strategy:
       fail-fast: false
-      max-parallel: 2
+      max-parallel: 1
       matrix:
         test_config:
           - name: test_hierarchical_cache_hit
@@ -79,28 +104,27 @@ jobs:
             prefill_size: 1
             decode_size: 1
             router_size: 1
-          # - name: test_hierarchical_cache_accuracy
-          #   test_case: test/manual/ascend/test_hierarchical_cache_accuracy.py
-          #   test_type: 'perf'
-          #   prefill_decode_deployment: 'separation'
-          #   prefill_size: 1
-          #   decode_size: 1
-          #   router_size: 1
-          # - name: test_ascend_fusion_operator
-          #   test_case: test/manual/ascend/test_ascend_fusion_operator.py
-          #   test_type: 'perf'
-          #   prefill_decode_deployment: 'separation'
-          #   prefill_size: 1
-          #   decode_size: 1
-          #   router_size: 1
-          # - name: test_npu_variable_length_sequences
-          #   test_case: test/manual/ascend/test_npu_variable_length_sequences.py
-          #   test_type: 'perf'
-          #   prefill_decode_deployment: 'separation'
-          #   prefill_size: 3
-          #   decode_size: 1
-          #   router_size: 1
-
+          - name: test_hierarchical_cache_accuracy
+            test_case: test/manual/ascend/test_hierarchical_cache_accuracy.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+          - name: test_ascend_fusion_operator
+            test_case: test/manual/ascend/test_ascend_fusion_operator.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+            prefill_size: 1
+            decode_size: 1
+            router_size: 1
+          - name: test_npu_variable_length_sequences
+            test_case: test/manual/ascend/test_npu_variable_length_sequences.py
+            test_type: 'perf'
+            prefill_decode_deployment: 'separation'
+            prefill_size: 3
+            decode_size: 1
+            router_size: 1
     uses: ./.github/workflows/nightly-test-npu-e2e-multi-node.yml
     with:
       runner: linux-aarch64-a3-0
@@ -127,7 +151,9 @@ jobs:
         run: |
           FAILED=0
           echo "=== Check non-skipped jobs ==="
-          if ${{ contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') }}; then
+          ${{ contains(needs.*.result, 'failure') }} && FAILED=1
+          ${{ contains(needs.*.result, 'cancelled') }} && FAILED=1
+          if [ $FAILED -eq 1 ]; then
             echo "❌ Some jobs failed or cancelled"
             exit 1
           fi
