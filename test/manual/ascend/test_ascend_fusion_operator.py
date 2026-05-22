@@ -130,12 +130,12 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    
+
     # Configurable parameters for test
     num_test_runs = 3  # Number of runs to average for each configuration
     model_layers = 94  # Number of layers in QWEN3 235B model
     expected_per_layer_reduction_ms = 0.05  # 50 microseconds = 0.05 milliseconds
-    
+
     # Initialize model_config to avoid None reference issues
     model_config = MODEL_CONFIG_FUSION_DISABLED
 
@@ -176,21 +176,21 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
         # Set class attribute directly to ensure router thread can access it
         TestQwen235bFusionOperator.model_config = config
         tpot_values = []
-        
+
         try:
             self.start_pd_server()
             self.start_router_server()
-            
+
             for run_idx in range(self.num_test_runs):
                 metrics = self.run_throughput()
                 tpot_ms = metrics.get("tpot", 0.0)
                 tpot_values.append(tpot_ms)
                 print(f"Run {run_idx + 1}/{self.num_test_runs} - TPOT: {tpot_ms}ms")
-            
+
             if not tpot_values:
                 return 0.0
             return sum(tpot_values) / len(tpot_values)
-        
+
         finally:
             self.stop_sglang_thread()
 
@@ -206,19 +206,19 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
         print("Testing WITHOUT fusion operator...")
         tpot_disabled_avg = self.run_test_with_config(MODEL_CONFIG_FUSION_DISABLED)
         print(f"Average TPOT (disabled): {tpot_disabled_avg}ms")
-        
+
         # Test with fusion operator (average over num_test_runs)
         print("\nTesting WITH fusion operator...")
         tpot_enabled_avg = self.run_test_with_config(MODEL_CONFIG_FUSION_ENABLED)
         print(f"Average TPOT (enabled): {tpot_enabled_avg}ms")
-        
+
         # Calculate per-layer latency reduction
         total_latency_reduction_ms = tpot_disabled_avg - tpot_enabled_avg
         per_layer_reduction_ms = total_latency_reduction_ms / self.model_layers
-        
+
         print(f"\nTotal TPOT reduction: {total_latency_reduction_ms}ms")
         print(f"Per-layer reduction: {per_layer_reduction_ms}ms (target: {self.expected_per_layer_reduction_ms}ms)")
-        
+
         # Verify per-layer latency reduction meets the requirement
         self.assertGreaterEqual(
             per_layer_reduction_ms,
