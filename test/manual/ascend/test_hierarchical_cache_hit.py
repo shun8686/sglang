@@ -150,7 +150,7 @@ class TestDeepSeekV32HierarchicalCacheHit(TestAscendMultiNodePdSepTestCaseBase):
 
         self.assertEqual(response.status_code, 200, "Failed to call generate API")
         result = response.json()
-        cached_tokens = result.get("cached_tokens", 0)
+        cached_tokens = result.get("meta_info").get("cached_tokens", 0)
         print(response.text)
         return ttft, cached_tokens
 
