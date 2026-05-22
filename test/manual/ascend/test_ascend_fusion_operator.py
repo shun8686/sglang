@@ -1,15 +1,13 @@
 import unittest
 
-import retry
-
-from sglang.test.ascend.e2e.test_npu_accuracy_utils import AISBENCHMARK
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME, check_role
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
     QWEN3_235B_A22B_EAGLE_MODEL_PATH,
     QWEN3_235B_W8A8_MODEL_PATH,
-    TestAscendPerfMultiNodePdSepTestCaseBase, run_aisbench, assert_metrics,
+    TestAscendPerfMultiNodePdSepTestCaseBase,
+    run_aisbench,
 )
 
 # ====================== Base Configuration ======================
@@ -140,7 +138,6 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
     model_layers = 94  # Number of layers in QWEN3 235B model
     expected_per_layer_reduction_ms = 0.05  # 50 microseconds = 0.05 milliseconds
 
-    @retry()
     @check_role(allowed_roles=["router"])
     def run_throughput(self):
         metrics = run_aisbench(
