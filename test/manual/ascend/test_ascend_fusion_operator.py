@@ -47,51 +47,95 @@ BASE_DECODE_ENVS = {
 }
 
 BASE_PREFILL_ARGS = [
-    "--disaggregation-mode", "prefill",
-    "--nnodes", "1",
-    "--node-rank", "0",
-    "--tp-size", 16,
-    "--dp-size", 16,
-    "--mem-fraction-static", 0.6,
+    "--disaggregation-mode",
+    "prefill",
+    "--nnodes",
+    "1",
+    "--node-rank",
+    "0",
+    "--tp-size",
+    16,
+    "--dp-size",
+    16,
+    "--mem-fraction-static",
+    0.6,
     "--disable-radix-cache",
-    "--quantization", "modelslim",
-    "--speculative-algorithm", "EAGLE3",
-    "--speculative-draft-model-path", QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-    "--speculative-num-steps", 3,
-    "--speculative-eagle-topk", 1,
-    "--speculative-num-draft-tokens", 4,
-    "--speculative-draft-model-quantization", "unquant",
-    "--max-running-requests", 128,
-    "--chunked-prefill-size", 94208,
-    "--max-prefill-tokens", 262144,
+    "--quantization",
+    "modelslim",
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--max-running-requests",
+    128,
+    "--chunked-prefill-size",
+    94208,
+    "--max-prefill-tokens",
+    262144,
     "--enable-dp-attention",
-    "--moe-a2a-backend", "ascend_fuseep",
-    "--dtype", "bfloat16",
+    "--moe-a2a-backend",
+    "ascend_fuseep",
+    "--dtype",
+    "bfloat16",
 ]
 
 BASE_DECODE_ARGS = [
-    "--disaggregation-mode", "decode",
-    "--nnodes", "2",
-    "--tp-size", 32,
-    "--dp-size", 32,
-    "--mem-fraction-static", 0.83,
-    "--max-running-requests", 768,
-    "--quantization", "modelslim",
+    "--disaggregation-mode",
+    "decode",
+    "--nnodes",
+    "2",
+    "--tp-size",
+    32,
+    "--dp-size",
+    32,
+    "--mem-fraction-static",
+    0.83,
+    "--max-running-requests",
+    768,
+    "--quantization",
+    "modelslim",
     "--enable-dp-attention",
-    "--cuda-graph-bs", 6, 8, 12, 15, 18, 20, 22, 24,
-    "--speculative-algorithm", "EAGLE3",
-    "--speculative-draft-model-path", QWEN3_235B_A22B_EAGLE_MODEL_PATH,
-    "--speculative-num-steps", 3,
-    "--speculative-eagle-topk", 1,
-    "--speculative-num-draft-tokens", 4,
-    "--speculative-draft-model-quantization", "unquant",
-    "--watchdog-timeout", 9000,
-    "--context-length", 8192,
+    "--cuda-graph-bs",
+    6,
+    8,
+    12,
+    15,
+    18,
+    20,
+    22,
+    24,
+    "--speculative-algorithm",
+    "EAGLE3",
+    "--speculative-draft-model-path",
+    QWEN3_235B_A22B_EAGLE_MODEL_PATH,
+    "--speculative-num-steps",
+    3,
+    "--speculative-eagle-topk",
+    1,
+    "--speculative-num-draft-tokens",
+    4,
+    "--speculative-draft-model-quantization",
+    "unquant",
+    "--watchdog-timeout",
+    9000,
+    "--context-length",
+    8192,
     "--prefill-round-robin-balance",
     "--enable-dp-lm-head",
-    "--tokenizer-worker-num", 4,
-    "--dtype", "bfloat16",
-    "--load-balance-method", "round_robin",
+    "--tokenizer-worker-num",
+    4,
+    "--dtype",
+    "bfloat16",
+    "--load-balance-method",
+    "round_robin",
 ]
 
 # ====================== Configurations ======================
@@ -101,8 +145,10 @@ MODEL_CONFIG_FUSION_DISABLED = {
     "decode_envs": BASE_DECODE_ENVS,
     "prefill_args": BASE_PREFILL_ARGS,
     "decode_args": BASE_DECODE_ARGS + [
-        "--moe-a2a-backend", "deepep",
-        "--deepep-mode", "low_latency",
+        "--moe-a2a-backend", 
+        "deepep",
+        "--deepep-mode", 
+        "low_latency",
     ],
     "router_args": ["--mini-lb"],
 }
@@ -112,8 +158,10 @@ MODEL_CONFIG_FUSION_ENABLED = {
     "prefill_envs": BASE_PREFILL_ENVS,
     "decode_envs": BASE_DECODE_ENVS,
     "prefill_args": BASE_PREFILL_ARGS,
-    "decode_args": BASE_DECODE_ARGS + [
-        "--moe-a2a-backend", "ascend_fuseep",
+    "decode_args": BASE_DECODE_ARGS + 
+    [
+        "--moe-a2a-backend", 
+        "ascend_fuseep",
     ],
     "router_args": ["--mini-lb"],
 }
@@ -166,10 +214,10 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
     def run_test_with_config(self, config):
         """
         Run performance test multiple times with the given configuration and return average TPOT.
-        
+
         Args:
             config: Model configuration dictionary
-            
+
         Returns:
             Average TPOT (time per output token) in milliseconds
         """
@@ -224,8 +272,8 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
             per_layer_reduction_ms,
             self.expected_per_layer_reduction_ms,
             msg=f"Per-layer latency reduction {per_layer_reduction_ms}ms is less than expected {self.expected_per_layer_reduction_ms}ms. "
-                f"TPOT (disabled avg): {tpot_disabled_avg}ms, TPOT (enabled avg): {tpot_enabled_avg}ms, "
-                f"Total reduction: {total_latency_reduction_ms}ms, Layers: {self.model_layers}"
+            f"TPOT (disabled avg): {tpot_disabled_avg}ms, TPOT (enabled avg): {tpot_enabled_avg}ms, "
+            f"Total reduction: {total_latency_reduction_ms}ms, Layers: {self.model_layers}"
         )
 
 

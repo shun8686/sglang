@@ -1,4 +1,7 @@
 import unittest
+import requests
+import os
+import re
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
@@ -8,6 +11,10 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     ROUND_ROBIN,
     TestAscendPerfMultiNodePdSepTestCaseBase,
 )
+
+# ConfigMap相关配置
+CONFIGMAP_NAME = os.environ.get("KUBE_CONFIG_MAP")
+NAMESPACE = os.environ.get("NAMESPACE")
 
 MODEL_CONFIG = {
     "model_path": DEEPSEEK_R1_W8A8_MODEL_PATH,
@@ -146,8 +153,130 @@ class TestManualDeploy(TestAscendPerfMultiNodePdSepTestCaseBase):
     input_len = 300
     output_len = 20
     random_range_ratio = 1
-    host = "192.168.0.60"
-    port = 6699
+
+    @staticmethod
+    def query_configmap(configmap_name, namespace):
+        """从Kubernetes ConfigMap获取节点IP信息"""
+        import subprocess
+        try:
+            result = subprocess.run(
+                ["kubectl", "get", "configmap", configmap_name, "-n", namespace, "-o", "json"],
+                capture_output=True,
+                text=True,
+                timeout=30
+            )
+            if result.returncode == 0:
+                import json
+                return json.loads(result.stdout)
+        except Exception as e:
+            print(f"Failed to query ConfigMap: {e}")
+        return None
+
+    @staticmethod
+    def get_prefill_ips_from_configmap():
+        """从ConfigMap自动获取所有P节点的IP地址"""
+        if not CONFIGMAP_NAME or not NAMESPACE:
+            print("Warning: KUBE_CONFIG_MAP or NAMESPACE environment variable not set")
+            # 尝试从环境变量获取
+            prefill_ips = os.environ.get("PREFILL_IPS", "")
+            if prefill_ips:
+                return [ip.strip() for ip in prefill_ips.split(",") if ip.strip()]
+            return []
+
+        configmap = TestManualDeploy.query_configmap(CONFIGMAP_NAME, NAMESPACE)
+        if not configmap or "data" not in configmap:
+            print("Warning: ConfigMap data not available")
+            return []
+
+        prefill_ips = []
+        for pod_name, pod_ip in configmap["data"].items():
+            if pod_name.lower().endswith("prefill-0") or "prefill" in pod_name.lower():
+                prefill_ips.append(pod_ip)
+                print(f"Found P node: {pod_name} = {pod_ip}")
+        return prefill_ips
+
+    @staticmethod
+    def get_prefill_metrics(prefill_ip, port=8000):
+        """获取单个P节点的统计信息"""
+        try:
+            response = requests.get(f"http://{prefill_ip}:{port}/metrics", timeout=10)
+            if response.status_code == 200:
+                return TestManualDeploy.parse_metrics(response.text)
+        except Exception as e:
+            print(f"Failed to get metrics from {prefill_ip}:{port}: {e}")
+        return None
+
+    @staticmethod
+    def parse_metrics(metrics_text):
+        """解析Prometheus格式的metrics"""
+        parsed = {}
+        for line in metrics_text.split("\n"):
+            line = line.strip()
+            if line.startswith("#") or not line:
+                continue
+            parts = line.split()
+            if len(parts) >= 2:
+                name = parts[0]
+                try:
+                    value = float(parts[1])
+                    parsed[name] = value
+                except ValueError:
+                    pass
+        return parsed
+
+    def collect_prefill_metrics(self):
+        """收集所有P节点的metrics并打印统计"""
+        prefill_ips = self.get_prefill_ips_from_configmap()
+        if not prefill_ips:
+            print("Warning: No P nodes found, trying localhost")
+            prefill_ips = ["127.0.0.1"]
+
+        metrics = {}
+        for ip in prefill_ips:
+            m = self.get_prefill_metrics(ip)
+            if m:
+                metrics[ip] = m
+                print(f"\nP节点 {ip} 统计:")
+                print(f"  - 请求数: {m.get('sglang_prefill_requests_total', 0):.0f}")
+                print(f"  - Tokens数: {m.get('sglang_prefill_tokens_total', 0):.0f}")
+                print(f"  - 平均延迟: {m.get('sglang_prefill_latency_seconds', 0):.4f}s")
+        return metrics
+
+    def test_throughput_with_prefill_stats(self):
+        """测试吞吐量并统计每个P节点的请求数和tokens数"""
+        # 获取P节点IP
+        prefill_ips = self.get_prefill_ips_from_configmap()
+        if not prefill_ips:
+            print("Warning: No P nodes found from ConfigMap, using fallback")
+            prefill_ips = ["127.0.0.1"]
+
+        print("=== 测试开始前的P节点统计 ===")
+        initial_metrics = self.collect_prefill_metrics()
+
+        # 运行主测试
+        print("\n=== 开始运行吞吐量测试 ===")
+        self.run_throughput()
+
+        print("\n=== 测试结束后的P节点统计 ===")
+        final_metrics = self.collect_prefill_metrics()
+
+        # 计算增量
+        print("\n=== 测试期间的增量统计 ===")
+        total_requests = 0
+        total_tokens = 0
+        for ip in prefill_ips:
+            initial = initial_metrics.get(ip, {})
+            final = final_metrics.get(ip, {})
+            req_diff = final.get('sglang_prefill_requests_total', 0) - initial.get('sglang_prefill_requests_total', 0)
+            tok_diff = final.get('sglang_prefill_tokens_total', 0) - initial.get('sglang_prefill_tokens_total', 0)
+            total_requests += req_diff
+            total_tokens += tok_diff
+            print(f"\nP节点 {ip}:")
+            print(f"  - 处理请求数: {req_diff:.0f}")
+            print(f"  - 处理Tokens数: {tok_diff:.0f}")
+
+        print(f"\n=== 总计 ===")
+        print(f"所有P节点共处理: {total_requests:.0f} 个请求, {total_tokens:.0f} 个tokens")
 
     def test_throughput(self):
         self.run_throughput()
