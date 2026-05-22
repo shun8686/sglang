@@ -50,8 +50,8 @@ BASE_PREFILL_ARGS = [
     "--disaggregation-mode", "prefill",
     "--nnodes", "1",
     "--node-rank", "0",
-    "--tp-size", 32,
-    "--dp-size", 32,
+    "--tp-size", 16,
+    "--dp-size", 16,
     "--mem-fraction-static", 0.6,
     "--disable-radix-cache",
     "--quantization", "modelslim",
@@ -71,7 +71,7 @@ BASE_PREFILL_ARGS = [
 
 BASE_DECODE_ARGS = [
     "--disaggregation-mode", "decode",
-    "--nnodes", "1",
+    "--nnodes", "2",
     "--tp-size", 32,
     "--dp-size", 32,
     "--mem-fraction-static", 0.83,
