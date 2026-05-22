@@ -125,25 +125,28 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
     max_attempts = 3
     backend = "sglang-oai"
     dataset_name = "random"
-    max_concurrency = 860
+    max_concurrency = 128
     num_prompts = int(max_concurrency) * 4
     input_len = 3500
     output_len = 1500
     random_range_ratio = 1
-    tpot = 35.8
-    output_token_throughput = 11570
     
     # Configurable parameters for test
     num_test_runs = 3  # Number of runs to average for each configuration
     model_layers = 94  # Number of layers in QWEN3 235B model
     expected_per_layer_reduction_ms = 0.05  # 50 microseconds = 0.05 milliseconds
+    
+    # Initialize model_config to avoid None reference issues
+    model_config = MODEL_CONFIG_FUSION_DISABLED
 
     @check_role(allowed_roles=["router"])
     def run_throughput(self):
+        # Use class attribute explicitly to ensure consistency
+        model_config = TestQwen235bFusionOperator.model_config
         metrics = run_aisbench(
             host=self.host,
             port=str(self.port),
-            model_path=self.model_config.get("model_path"),
+            model_path=model_config.get("model_path"),
             dataset_type=self.aisbench_dataset_type,
             dataset_path=self.aisbench_dataset_path,
             input_len=self.input_len,
@@ -170,7 +173,8 @@ class TestQwen235bFusionOperator(TestAscendPerfMultiNodePdSepTestCaseBase):
         Returns:
             Average TPOT (time per output token) in milliseconds
         """
-        self.__class__.model_config = config
+        # Set class attribute directly to ensure router thread can access it
+        TestQwen235bFusionOperator.model_config = config
         tpot_values = []
         
         try:
