@@ -1,6 +1,9 @@
 import time
 import unittest
 
+import logger
+
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
@@ -226,41 +229,38 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendPerfMultiNodePdSepTestCas
         print("等待PD节点启动...")
         time.sleep(30)
 
-        try:
-            # 依次测试每个参数值
-            for value, should_succeed, description in self.test_cases:
-                print(f"\n{'='*60}")
-                print(f"测试: {description}")
-                print(f"参数值: '{value}'")
-                print(f"期望结果: {'启动成功' if should_succeed else '启动失败'}")
-                print("=" * 60)
+        # 依次测试每个参数值
+        for value, should_succeed, description in self.test_cases:
+            print(f"\n{'='*60}")
+            print(f"测试: {description}")
+            print(f"参数值: '{value}'")
+            print(f"期望结果: {'启动成功' if should_succeed else '启动失败'}")
+            print("=" * 60)
 
-                # 更新配置
-                self.__class__.model_config = self.create_model_config_with_param(value)
+            # 更新配置
+            self.__class__.model_config = self.create_model_config_with_param(value)
 
-                # 启动router并检查结果
-                success = self._test_single_value()
-                
-                # 验证结果
-                if should_succeed:
-                    self.assertTrue(
-                        success, msg=f"参数 '{value}' 应该启动成功，但实际失败"
-                    )
-                    print(f"✓ 验证通过: 服务启动成功")
-                else:
-                    self.assertFalse(
-                        success, msg=f"参数 '{value}' 应该启动失败，但实际成功"
-                    )
-                    print(f"✓ 验证通过: 服务启动失败（预期行为）")
+            # 启动router并检查结果
+            success = self._test_single_value()
 
-                # 清理当前router（为下一次测试做准备）
-                self.stop_sglang_thread()
-                time.sleep(5)  # 等待完全停止
-                
-        finally:
-            # 最后清理PD节点
-            print("\n清理PD节点...")
-            self.stop_sglang_thread()
+            # 验证结果
+            if should_succeed:
+                self.assertTrue(
+                    success, msg=f"参数 '{value}' 应该启动成功，但实际失败"
+                )
+                print(f"✓ 验证通过: 服务启动成功")
+            else:
+                self.assertFalse(
+                    success, msg=f"参数 '{value}' 应该启动失败，但实际成功"
+                )
+                print(f"✓ 验证通过: 服务启动失败（预期行为）")
+
+            # 清理当前router（为下一次测试做准备）
+            try:
+                kill_process_tree(self.process.pid)
+            except Exception as e:
+                logger.error(f"Error during tearDown: {e}")
+            time.sleep(5)  # 等待完全停止
 
         print("\n" + "=" * 60)
         print("所有测试完成!")
