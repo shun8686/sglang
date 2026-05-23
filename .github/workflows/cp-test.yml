@@ -95,7 +95,7 @@ jobs:
       matrix:
         test_config:
           - name: test_npu_cp_vs_nocp_ttft
-            test_case: test/registered/ascend/temp/test_npu_cp_vs_nocp_ttft.py
+            test_case: test/manual/ascend/test_npu_cp_dp_no_mtp_functional.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
             prefill_size: 2
