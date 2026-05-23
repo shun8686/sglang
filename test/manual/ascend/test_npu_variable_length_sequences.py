@@ -1,7 +1,7 @@
-import unittest
-import requests
 import os
-import re
+import unittest
+
+import requests
 
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import NIC_NAME
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
@@ -158,6 +158,7 @@ class TestManualDeploy(TestAscendPerfMultiNodePdSepTestCaseBase):
     def query_configmap(configmap_name, namespace):
         """从Kubernetes ConfigMap获取节点IP信息"""
         import subprocess
+
         try:
             result = subprocess.run(
                 [
@@ -168,7 +169,7 @@ class TestManualDeploy(TestAscendPerfMultiNodePdSepTestCaseBase):
                     "-n",
                     namespace,
                     "-o",
-                    "json"
+                    "json",
                 ],
                 capture_output=True,
                 text=True,
