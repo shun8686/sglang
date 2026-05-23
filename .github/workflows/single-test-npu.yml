@@ -120,7 +120,7 @@ jobs:
           #   router_size: 1
 
           - name: test_npu_load_balance
-            test_case: test\manual\ascend\test_npu_load_balance.py
+            test_case: test/manual/ascend/test_npu_load_balance.py
             test_type: 'perf'
             prefill_decode_deployment: 'separation'
             prefill_size: 3

@@ -97,6 +97,8 @@ MODEL_CONFIG = {
         "--disaggregation-transfer-backend",
         "ascend",
         "--disable-cuda-graph",
+        "--max-dispatch-tokens",
+        1024,
     ],
     "decode_args": [
         "--disaggregation-mode",
@@ -142,6 +144,8 @@ MODEL_CONFIG = {
         "--prefill-round-robin-balance",
         "--load-balance-method",
         ROUND_ROBIN,
+        "--max-dispatch-tokens",
+        1024,
     ],
     "router_args": [
         "--pd-disaggregation",
