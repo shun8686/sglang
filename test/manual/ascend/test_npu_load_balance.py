@@ -401,6 +401,7 @@ class TestManualDeploy(TestAscendPerfMultiNodePdSepTestCaseBase):
         """测试吞吐量并统计每个P节点的请求数和tokens数"""
         # 获取P节点IP（一次性获取，复用）
         prefill_ips = self.get_prefill_ips_from_configmap()
+        print(f"发现P节点IP: {prefill_ips}")
 
         print("=== 测试开始前的P节点统计 ===")
         initial_metrics = self.collect_prefill_metrics(prefill_ips)
