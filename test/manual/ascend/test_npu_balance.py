@@ -174,6 +174,7 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
     input_len = 300
     output_len = 20
     random_range_ratio = 1
+    tolerance_ratio = 0.01
 
     def get_router_metrics(self):
         """获取Router节点的metrics（使用prometheus端口29000）"""
@@ -212,14 +213,14 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
         
         for key, value in metrics.items():
             # 匹配 smg_worker_cb_outcomes_total{worker="http://xxx:8000",outcome="success"}
-            match = re.search(r'smg_worker_cb_outcomes_total\{worker="([^"]+)",outcome="success"\}', key)
+            match = re.search(r'smg_worker_cb_outcomes_total\{worker="([^"]+)",outcome="success"}', key)
             if match:
                 worker_url = match.group(1)
                 if value == total_requests:
                     decode_requests[worker_url] = value
                 else:
                     prefill_requests[worker_url] = value
-        
+
         return prefill_requests, decode_requests
 
     def assert_load_balance(self, requests_after, requests_before, tolerance_ratio):
@@ -291,7 +292,7 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
         print(f"{router_metrics_after=}")
         prefill_requests_after, decode_requests_after = self.parse_worker_requests(router_metrics_after)
         
-        self.assert_load_balance(prefill_requests_after, prefill_requests_before)
+        self.assert_load_balance(prefill_requests_after, prefill_requests_before, self.tolerance_ratio)
 
 
 if __name__ == "__main__":

@@ -181,13 +181,13 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
     """测试 --bucket-adjust-interval-secs 参数的合法性验证"""
 
     test_cases = [
-        # {"value": "1", "should_succeed": True, "description": "合法值: 最小正整数"},
-        # {"value": "4294967295", "should_succeed": True, "description": "合法值: 最大无符号32位整数"},
+        {"value": "1", "should_succeed": True, "description": "合法值: 最小正整数"},
+        {"value": "4294967295", "should_succeed": True, "description": "合法值: 最大无符号32位整数"},
         {"value": "0", "should_succeed": False, "description": "非法值: 0（小于最小值）"},
-        # {"value": "4294967296", "should_succeed": False, "description": "非法值: 超过最大无符号32位整数"},
-        # {"value": "5.1", "should_succeed": False, "description": "非法值: 浮点数"},
-        # {"value": "abc", "should_succeed": False, "description": "非法值: 纯字母字符串"},
-        # {"value": "@#$", "should_succeed": False, "description": "非法值: 特殊字符"},
+        {"value": "4294967296", "should_succeed": False, "description": "非法值: 超过最大无符号32位整数"},
+        {"value": "5.1", "should_succeed": False, "description": "非法值: 浮点数"},
+        {"value": "abc", "should_succeed": False, "description": "非法值: 纯字母字符串"},
+        {"value": "@#$", "should_succeed": False, "description": "非法值: 特殊字符"},
     ]
 
     @classmethod
