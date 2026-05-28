@@ -40,8 +40,9 @@ jobs:
 
           # Test cases
           test_cases=(
-            "test/registered/ascend/basic_function/lora/generated_tests_20260521/test_npu_lora_eviction.py"
-            "test/registered/ascend/basic_function/lora/generated_tests_20260521/test_npu_lora_update.py"
+            "test/registered/ascend/basic_function/utils/GENERATED_20260526/test_npu_model_file_verifier.py"
+            "test/registered/ascend/basic_function/utils/GENERATED_20260526/test_npu_request_logger.py"
+            "test/registered/ascend/basic_function/utils/GENERATED_20260526/test_npu_scheduler_status_logger.py"
           )
 
           for test_case in "${test_cases[@]}"; do
