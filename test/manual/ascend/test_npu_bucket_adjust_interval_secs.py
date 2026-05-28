@@ -257,7 +257,7 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
                     caught_exception = True
                 finally:
                     self.stop_sglang_thread()
-                    self.kill_process_if_alive()
+                    # self.kill_process_if_alive()
 
                 self.assert_result(value, not caught_exception, should_succeed)
 
