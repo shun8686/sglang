@@ -200,10 +200,10 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
 
     def parse_worker_requests(self, metrics):
         """解析各worker节点处理的请求数量
-        
+
         Args:
             metrics (dict): Router返回的metrics字典
-        
+
         Returns:
             tuple: (prefill_requests, decode_requests)
                 prefill_requests: dict, key为worker地址，value为处理请求数
@@ -234,7 +234,7 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
 
     def assert_load_balance(self, requests_after, requests_before, tolerance_ratio):
         """断言P节点处理请求负载均衡
-        
+
         Args:
             requests_after (dict): 测试后各P节点处理请求数
             requests_before (dict, optional): 测试前各P节点处理请求数. Defaults to None.
@@ -278,14 +278,17 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
 
             if deviation_abs > tolerance_abs:
                 unbalanced_workers.append((worker, req_count, deviation_abs))
-            print(f"    - {worker}: {req_count:.0f} 请求, 绝对偏差: {deviation_abs:.1f} 请求")
+            print(
+                f"    - {worker}: {req_count:.0f} 请求, 绝对偏差: {deviation_abs:.1f} 请求"
+            )
 
         try:
             assert (
-                max_deviation_abs <= tolerance_abs
+                    max_deviation_abs <= tolerance_abs
             ), f"P节点负载不均衡，最大绝对偏差{max_deviation_abs:.1f}请求超过容忍阈值{tolerance_abs}请求"
             print(
-                f"  - ✓ 断言通过：P节点负载均衡（最大绝对偏差{max_deviation_abs:.1f}请求 ≤ 容忍阈值{tolerance_abs}请求）")
+                f"  - ✓ 断言通过：P节点负载均衡（最大绝对偏差{max_deviation_abs:.1f}请求 ≤ 容忍阈值{tolerance_abs}请求）"
+            )
         except AssertionError as e:
             print(f"  - ✗ 断言失败：{e}")
             if unbalanced_workers:
@@ -307,7 +310,9 @@ class TestNPUBalance(TestAscendPerfMultiNodePdSepTestCaseBase):
             router_metrics_after
         )
 
-        self.assert_load_balance(prefill_requests_after, prefill_requests_before, self.tolerance_ratio)
+        self.assert_load_balance(
+            prefill_requests_after, prefill_requests_before, self.tolerance_ratio
+        )
 
 
 if __name__ == "__main__":
