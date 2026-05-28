@@ -193,6 +193,7 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
         cls.model = DEEPSEEK_R1_W8A8_MODEL_PATH
         cls.config = MODEL_CONFIG_BASE.copy()
         super().setUpClass()
+        cls.start_pd_server()
 
     @classmethod
     def tearDownClass(cls):
@@ -226,6 +227,7 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
     def kill_process_if_alive(self):
         try:
             kill_process_tree(self.process.pid)
+            self.stop_sglang_thread()
             sleep(30)
         except Exception:
             # 忽略清理异常，可能进程已提前退出
@@ -239,32 +241,27 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
         # self.assert_result(self.test_cases[0]["value"], self.is_router_server_running(), self.test_cases[0]["should_succeed"])
         # self.kill_process_if_alive()
         # time.sleep(5)  # 等待完全停止
-        try:
-            self.start_pd_server()
 
-            for test_case in self.test_cases:
-                self.print_test_case_info(test_case)
+        for test_case in self.test_cases:
+            self.print_test_case_info(test_case)
 
-                value = test_case["value"]
-                should_succeed = test_case["should_succeed"]
+            value = test_case["value"]
+            should_succeed = test_case["should_succeed"]
 
-                self.__class__.model_config = create_model_config_with_param(value)
+            self.__class__.model_config = create_model_config_with_param(value)
 
-                caught_exception = False
-                try:
-                    self.start_router_server()
-                except Exception:
-                    caught_exception = True
-                finally:
-                    self.stop_sglang_thread()
-                    # self.kill_process_if_alive()
+            caught_exception = False
+            try:
+                self.start_router_server()
+            except Exception:
+                caught_exception = True
+            finally:
+                self.stop_sglang_thread()
+                # self.kill_process_if_alive()
 
-                self.assert_result(value, not caught_exception, should_succeed)
+            self.assert_result(value, not caught_exception, should_succeed)
 
-                time.sleep(5)  # 等待完全停止
-
-        finally:
-            self.stop_sglang_thread()
+            time.sleep(5)  # 等待完全停止
 
         # # 依次测试每个参数值
         # for test_case in self.test_cases:
