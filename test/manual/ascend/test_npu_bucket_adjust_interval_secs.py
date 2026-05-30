@@ -5,7 +5,7 @@ from time import sleep
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
-    TestAscendMultiNodePdSepTestCaseBase,
+    TestAscendMultiNodePdSepTestCaseBase, check_role,
 )
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     DEEPSEEK_R1_W8A8_MODEL_PATH,
@@ -233,6 +233,8 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
             # 忽略清理异常，可能进程已提前退出
             pass
 
+    @classmethod
+    @check_role(allowed_roles=["router"])
     def test_bucket_adjust_interval_secs_validation(self):
         """测试 --bucket-adjust-interval-secs 参数的合法性验证"""
         print("=== 开始测试 --bucket-adjust-interval-secs 参数验证 ===\n")

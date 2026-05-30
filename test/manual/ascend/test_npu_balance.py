@@ -17,7 +17,7 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
 # ConfigMap相关配置
 CONFIGMAP_NAME = os.environ.get("KUBE_CONFIG_MAP")
 NAMESPACE = os.environ.get("NAMESPACE")
-PROMETHEUS_PORT = "29000"
+PROMETHEUS_PORT = 29000
 
 MODEL_CONFIG = {
     "model_path": DEEPSEEK_R1_W8A8_MODEL_PATH,
