@@ -3,7 +3,9 @@ import unittest
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
     TestAscendAccuracyTestCaseBase,
 )
-from sglang.test.ascend.e2e.test_npu_performance_utils import QWEN3_VL_8B_THINKING_MODEL_PATH
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    QWEN3_VL_8B_THINKING_MODEL_PATH,
+)
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
@@ -66,6 +68,7 @@ OTHER_ARGS = [
     # "--speculative-num-draft-tokens",
     # 5,
 ]
+
 
 class TestQwen3(TestAscendAccuracyTestCaseBase):
     model = QWEN3_VL_8B_THINKING_MODEL_PATH
