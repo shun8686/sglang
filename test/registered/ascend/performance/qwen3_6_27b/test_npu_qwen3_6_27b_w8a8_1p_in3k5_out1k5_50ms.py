@@ -1,8 +1,11 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    TestAscendAccuracyTestCaseBase,
+)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
-    BENCHMARK_TOOL_DEFAULT,
+    DEFAULT_URL_FOR_TEST,
     QWEN3_6_27B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -76,10 +79,30 @@ QWEN3_6_27B_3K5_1K5_OTHER_ARGS = [
 ]
 
 
+class TestNPUQwen3_6_27B_1P_GPQA(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Qwen3.6-27B-W8A8 1p on GPQA"""
+
+    model = QWEN3_6_27B_W8A8_MODEL_PATH
+    other_args = QWEN3_6_27B_3K5_1K5_OTHER_ARGS
+    envs = QWEN3_6_27B_3K5_1K5_ENVS
+    accuracy = 85.5
+    datasets = ["gpqa"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 8192, "temperature": 1.0}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_npu_qwen3_6_27b_1p_gpqa(self):
+        """Run NPU accuracy test for Qwen3.6-27B-W8A8 on GPQA"""
+        self.run_accuracy()
+
+
 class TestNPUQwen3_6_27B_1P_In3k5_Out1k5_50ms(TestAscendPerformanceTestCaseBase):
     """Test NPU performance for Qwen3.6-27B-w8a8 1p in3k5 out1k5 50ms"""
 
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    base_url = DEFAULT_URL_FOR_TEST
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_6_27B_W8A8_MODEL_PATH
     other_args = QWEN3_6_27B_3K5_1K5_OTHER_ARGS
@@ -92,6 +115,10 @@ class TestNPUQwen3_6_27B_1P_In3k5_Out1k5_50ms(TestAscendPerformanceTestCaseBase)
     random_range_ratio = 1
     tpot = 50
     output_token_throughput = 786.69
+
+    @classmethod
+    def setUpClass(cls):
+        pass
 
     def test_npu_qwen3_6_27b_1p_in3k5_out1k5_50ms(self):
         """Run NPU performance test for Qwen3.6-27B-w8a8 in3k5 out1k5 50ms"""
