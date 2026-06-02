@@ -1,7 +1,6 @@
 import unittest
 
 from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
-    BENCHMARK_TOOL_DEFAULT,
     TestAscendAccuracyTestCaseBase,
 )
 from sglang.test.ascend.test_ascend_utils import DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
@@ -15,31 +14,29 @@ register_npu_ci(
 )
 
 OTHER_ARGS = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.9",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        "16",
-        "--quantization",
-        "modelslim",
-        "--disable-radix-cache",
+    "--trust-remote-code",
+    "--mem-fraction-static",
+    "0.9",
+    "--attention-backend",
+    "ascend",
+    "--disable-cuda-graph",
+    "--tp-size",
+    "16",
+    "--quantization",
+    "modelslim",
+    "--disable-radix-cache",
 ]
 
 
 class TestNPUDeepSeek_V3_2_8P_AIME2025(TestAscendAccuracyTestCaseBase):
 
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = DEEPSEEK_V3_2_EXP_W8A8_WEIGHTS_PATH
     other_args = OTHER_ARGS
     accuracy = 93.1
-    dataset_type = "aime2025"
-    dataset_name = "aime2025_gen"
-    output_len = 65536
+    datasets = ["aime2025"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 65536, "temperature": 1.0}
     max_concurrency = 64
-    generation_kwargs = "dict(temperature=1.0)"
 
     def test_aime2025(self):
         self.run_accuracy()
