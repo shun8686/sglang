@@ -1,10 +1,13 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    TestAscendAccuracyTestCaseBase,
+)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
-    BENCHMARK_TOOL_DEFAULT,
-    QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH,
-    QWEN3_A3B_EAGLE_MODEL_PATH,
+    DEFAULT_URL_FOR_TEST,
+    QWEN3_32B_EAGLE_MODEL_PATH,
+    QWEN3_32B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -16,8 +19,7 @@ register_npu_ci(
     disabled="performance testcase",
 )
 
-QWEN3_30B_A3B_ENVS = {
-    "ASCEND_LAUNCH_BLOCKING": "0",
+QWEN3_32B_ENVS = {
     "SGLANG_DISAGGREGATION_BOOTSTRAP_TIMEOUT": "600",
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "HCCL_SOCKET_IFNAME": "lo",
@@ -26,11 +28,11 @@ QWEN3_30B_A3B_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
     "SGLANG_ENABLE_SPEC_V2": "1",
     "SGLANG_SCHEDULER_DECREASE_PREFILL_IDLE": "1",
-    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "200",
-    "HCCL_BUFFSIZE": "400",
+    "SGLANG_PREFILL_DELAYER_MAX_DELAY_PASSES": "100",
+    "SGLANG_NPU_USE_DEEPGEMM": "1",
 }
 
-QWEN3_30B_A3B_OTHER_ARGS = [
+QWEN3_32B_OTHER_ARGS = [
     "--trust-remote-code",
     "--nnodes",
     "1",
@@ -43,7 +45,7 @@ QWEN3_30B_A3B_OTHER_ARGS = [
     "--quantization",
     "modelslim",
     "--max-running-requests",
-    162,
+    101,
     "--disable-radix-cache",
     "--speculative-draft-model-quantization",
     "unquant",
@@ -54,7 +56,7 @@ QWEN3_30B_A3B_OTHER_ARGS = [
     "--speculative-algorithm",
     "EAGLE3",
     "--speculative-draft-model-path",
-    QWEN3_A3B_EAGLE_MODEL_PATH,
+    QWEN3_32B_EAGLE_MODEL_PATH,
     "--speculative-num-steps",
     3,
     "--speculative-eagle-topk",
@@ -62,47 +64,69 @@ QWEN3_30B_A3B_OTHER_ARGS = [
     "--speculative-num-draft-tokens",
     4,
     "--tp-size",
-    2,
+    4,
     "--mem-fraction-static",
-    0.87,
+    0.845,
     "--cuda-graph-bs",
-    1,
-    5,
-    15,
-    40,
-    70,
+    16,
+    32,
+    64,
+    72,
+    88,
+    90,
+    92,
+    94,
+    96,
+    97,
+    98,
+    99,
     100,
-    120,
-    130,
-    140,
-    146,
-    150,
-    154,
-    156,
-    158,
-    160,
-    162,
+    101,
     "--dtype",
     "bfloat16",
 ]
 
 
-class TestQwen30B(TestAscendPerformanceTestCaseBase):
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+class TestQwen32B_MMLUPro(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Qwen3-32B-W8A8 on MMLU-Pro"""
+
+    model = QWEN3_32B_W8A8_MODEL_PATH
+    other_args = QWEN3_32B_OTHER_ARGS
+    envs = QWEN3_32B_ENVS
+    accuracy = 65.54
+    datasets = ["mmlu_pro"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 8192, "temperature": 1.0}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_qwen3_32b_mmlu_pro(self):
+        """Run NPU accuracy test for Qwen3-32B-W8A8 on MMLU-Pro"""
+        self.run_accuracy()
+
+
+class TestQwen32B(TestAscendPerformanceTestCaseBase):
+    base_url = DEFAULT_URL_FOR_TEST
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    model = QWEN3_30B_A3B_W8A8_VLLM_MODEL_PATH
-    other_args = QWEN3_30B_A3B_OTHER_ARGS
-    envs = QWEN3_30B_A3B_ENVS
+    model = QWEN3_32B_W8A8_MODEL_PATH
+    other_args = QWEN3_32B_OTHER_ARGS
+    envs = QWEN3_32B_ENVS
     dataset_name = "random"
-    max_concurrency = 160
-    num_prompts = int(max_concurrency) * 4
-    input_len = 3500
-    output_len = 1500
+    max_concurrency = 100
+    num_prompts = 400
+    input_len = 3584
+    output_len = 1536
     random_range_ratio = 1
     tpot = 50
-    output_token_throughput = 3200
+    output_token_throughput = 1600
 
-    def test_qwen3_30b(self):
+    @classmethod
+    def setUpClass(cls):
+        pass
+
+    def test_qwen3_32b(self):
         self.run_throughput()
 
 
