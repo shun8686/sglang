@@ -83,7 +83,7 @@ class TestNPUQwen3_6_35BA3B_1P_AIME2026(TestAscendAccuracyTestCaseBase):
     model = QWEN3_6_35B_A3B_MODEL_PATH
     other_args = QWEN3_6_35B_A3B_3K5_1K5_OTHER_ARGS
     envs = QWEN3_6_35B_A3B_3K5_1K5_ENVS
-    accuracy = 0.1
+    accuracy = 92.7
     datasets = ["aime2026"]
     few_shot_num = 0
     generation_config = {"max_tokens": 8192, "temperature": 1.0}
