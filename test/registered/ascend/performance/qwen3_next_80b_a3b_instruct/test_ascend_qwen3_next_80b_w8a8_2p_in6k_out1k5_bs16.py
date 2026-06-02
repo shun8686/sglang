@@ -1,6 +1,10 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    TestAscendAccuracyTestCaseBase,
+)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    DEFAULT_URL_FOR_TEST,
     QWEN3_NEXT_80B_A3B_MODEL_PATH,
     QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
@@ -91,8 +95,29 @@ QWEN3_NEXT_80B_A3B_OTHER_ARGS = [
 ]
 
 
+class TestQwen3Next80BA3B_AIME2025(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Qwen3-Next-80B-A3B on AIME2025"""
+
+    model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
+    other_args = QWEN3_NEXT_80B_A3B_OTHER_ARGS
+    envs = QWEN3_NEXT_80B_A3B_ENVS
+    accuracy = 69.5
+    datasets = ["aime2025"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 8192, "temperature": 1.0}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_qwen3_next_80b_a3b_aime2025(self):
+        """Run NPU accuracy test for Qwen3-Next-80B-A3B on AIME2025"""
+        self.run_accuracy()
+
+
 class TestQwen3Next80BA3B(TestAscendPerformanceTestCaseBase):
     max_attempts = 5
+    base_url = DEFAULT_URL_FOR_TEST
     model = QWEN3_NEXT_80B_A3B_W8A8_MODEL_PATH
     other_args = QWEN3_NEXT_80B_A3B_OTHER_ARGS
     envs = QWEN3_NEXT_80B_A3B_ENVS
@@ -104,6 +129,10 @@ class TestQwen3Next80BA3B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 15.62
     output_token_throughput = 900
+
+    @classmethod
+    def setUpClass(cls):
+        pass
 
     def test_qwen3_next_80b_a3b(self):
         self.run_throughput()
