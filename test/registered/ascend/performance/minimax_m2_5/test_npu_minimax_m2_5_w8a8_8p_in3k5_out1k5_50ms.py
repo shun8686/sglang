@@ -1,25 +1,24 @@
 import os
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    BENCHMARK_TOOL_DEFAULT as ACCURACY_BENCHMARK_TOOL_DEFAULT,
+    TestAscendAccuracyTestCaseBase,
+)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
+    DEFAULT_URL_FOR_TEST,
     MINIMAX_M2_5_EAGLE3_MODEL_PATH,
     MINIMAX_M2_5_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
-from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
-    BENCHMARK_TOOL_DEFAULT,
-    TestAscendAccuracyTestCaseBase,
-)
-
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=3600,
-    suite="",
+    suite="nightly-16-npu-a3",
     nightly=True,
-    disabled="performance testcase",
 )
 
 MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS = {
@@ -88,12 +87,32 @@ MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS = [
 ]
 
 
+class TestNPUMiniMaxM2_5_W8A8_8P_AIME2025(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
+
+    model = MINIMAX_M2_5_W8A8_MODEL_PATH
+    other_args = MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS
+    envs = MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS
+    accuracy = 86.3
+    datasets = ["aime2025"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 8192, "temperature": 1.0}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_npu_minimax_m2_5_w8a8_8p_aime2025(self):
+        """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
+        self.run_accuracy()
+
+
 class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(
     TestAscendPerformanceTestCaseBase
 ):
     """Test NPU performance for MiniMax-M2.5-w8a8 8p single node high throughput in3k5 out1k5"""
 
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
+    base_url = DEFAULT_URL_FOR_TEST
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = MINIMAX_M2_5_W8A8_MODEL_PATH
     other_args = MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS
@@ -107,27 +126,13 @@ class TestNPUMiniMaxM2_5_W8A8_8P_In3k5_Out1k5_HighThroughput(
     tpot = 50
     output_token_throughput = 5512.52
 
+    @classmethod
+    def setUpClass(cls):
+        pass
+
     def test_npu_minimax_m2_5_w8a8_8p_in3k5_out1k5_high_throughput(self):
         """Run NPU performance test for MiniMax-M2.5-w8a8 high throughput"""
         self.run_throughput()
-
-class TestNPUMiniMaxM2_5_W8A8_8P_AIME2025(TestAscendAccuracyTestCaseBase):
-    """Test NPU accuracy for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
-
-    benchmark_tool = BENCHMARK_TOOL_DEFAULT
-    model = MINIMAX_M2_5_W8A8_MODEL_PATH
-    other_args = MINIMAX_M2_5_HIGH_THROUGHPUT_OTHER_ARGS
-    envs = MINIMAX_M2_5_HIGH_THROUGHPUT_ENVS
-    accuracy = 86.3
-    dataset_type = "aime2025"
-    dataset_name = "aime2025_gen"
-    max_concurrency = 64
-    generation_kwargs = "dict(temperature=1.0)"
-    output_len = 65536
-
-    def test_npu_minimax_m2_5_w8a8_8p_aime2025(self):
-        """Run NPU accuracy test for MiniMax-M2.5-w8a8 8p single node high throughput on AIME 2025"""
-        self.run_accuracy()
 
 
 if __name__ == "__main__":
