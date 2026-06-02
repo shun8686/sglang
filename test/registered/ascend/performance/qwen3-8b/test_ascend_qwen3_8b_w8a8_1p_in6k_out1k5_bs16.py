@@ -1,6 +1,10 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    TestAscendAccuracyTestCaseBase,
+)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    DEFAULT_URL_FOR_TEST,
     QWEN3_8B_EAGLE_MODEL_PATH,
     QWEN3_8B_W8A8_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
@@ -69,8 +73,29 @@ QWEN3_8B_OTHER_ARGS = [
 ]
 
 
+class TestQwen8B_MMLUPro(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Qwen3-8B-W8A8 on MMLU-Pro"""
+
+    model = QWEN3_8B_W8A8_MODEL_PATH
+    other_args = QWEN3_8B_OTHER_ARGS
+    envs = QWEN3_8B_ENVS
+    accuracy = 56.73
+    datasets = ["mmlu_pro"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 8192, "temperature": 1.0}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_qwen3_8b_mmlu_pro(self):
+        """Run NPU accuracy test for Qwen3-8B-W8A8 on MMLU-Pro"""
+        self.run_accuracy()
+
+
 class TestQwen8B(TestAscendPerformanceTestCaseBase):
     max_attempts = 5
+    base_url = DEFAULT_URL_FOR_TEST
     model = QWEN3_8B_W8A8_MODEL_PATH
     other_args = QWEN3_8B_OTHER_ARGS
     envs = QWEN3_8B_ENVS
@@ -82,6 +107,10 @@ class TestQwen8B(TestAscendPerformanceTestCaseBase):
     random_range_ratio = 1
     tpot = 11.79
     output_token_throughput = 930
+
+    @classmethod
+    def setUpClass(cls):
+        pass
 
     def test_qwen3_8b(self):
         self.run_throughput()
