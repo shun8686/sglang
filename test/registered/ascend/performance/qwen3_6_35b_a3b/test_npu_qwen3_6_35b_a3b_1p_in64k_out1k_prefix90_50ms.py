@@ -1,8 +1,12 @@
 import unittest
 
+from sglang.test.ascend.e2e.test_npu_accuracy_utils import (
+    TestAscendAccuracyTestCaseBase,
+)
 from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
+    DEFAULT_URL_FOR_TEST,
     QWEN3_6_35B_A3B_MODEL_PATH,
     TestAscendPerformanceTestCaseBase,
 )
@@ -89,11 +93,32 @@ QWEN3_6_35B_A3B_64K_PREFIX_OTHER_ARGS = [
 ]
 
 
+class TestNPUQwen3_6_35BA3B_1P_AIME2026(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for Qwen3.6-35B-A3B 1p on AIME2026"""
+
+    model = QWEN3_6_35B_A3B_MODEL_PATH
+    other_args = QWEN3_6_35B_A3B_64K_PREFIX_OTHER_ARGS
+    envs = QWEN3_6_35B_A3B_64K_PREFIX_ENVS
+    accuracy = 92.7
+    datasets = ["aime2026"]
+    few_shot_num = 0
+    generation_config = {"max_tokens": 8192, "temperature": 1.0}
+
+    @classmethod
+    def tearDownClass(cls):
+        pass
+
+    def test_npu_qwen3_6_35b_a3b_1p_aime2026(self):
+        """Run NPU accuracy test for Qwen3.6-35B-A3B on AIME2026"""
+        self.run_accuracy()
+
+
 class TestNPUQwen3_6_35BA3B_1P_In64k_Out1k_Prefix90_50ms(
     TestAscendPerformanceTestCaseBase
 ):
     """Test NPU performance for Qwen3.6-35B-A3B 1p in64k out1k prefix90 50ms"""
 
+    base_url = DEFAULT_URL_FOR_TEST
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = QWEN3_6_35B_A3B_MODEL_PATH
@@ -109,6 +134,10 @@ class TestNPUQwen3_6_35BA3B_1P_In64k_Out1k_Prefix90_50ms(
     tpot = 50
     aisbench_request_rate = 50
     output_token_throughput = 660
+
+    @classmethod
+    def setUpClass(cls):
+        pass
 
     def test_npu_qwen3_6_35b_a3b_1p_in64k_out1k_prefix90_50ms(self):
         """Run NPU performance test for Qwen3.6-35B-A3B in64k out1k prefix90 50ms"""
