@@ -89,6 +89,7 @@ jobs:
           fi
   nightly-poc-single-node-tests:
     name: single-node-poc
+    if: ${{ !cancelled() }}
     needs: [set-image-config]
     strategy:
       fail-fast: false
@@ -231,6 +232,7 @@ jobs:
       transformers_version: ''
   nightly-poc-multi-node-tests:
     name: multi-node-poc
+    if: ${{ !cancelled() }}
     needs: [set-image-config, nightly-poc-single-node-tests]
     strategy:
       fail-fast: false
@@ -259,6 +261,7 @@ jobs:
       transformers_version: ''
   nightly-poc-multi-node-mix-tests:
     name: multi-node-mix-poc
+    if: ${{ !cancelled() }}
     needs: [set-image-config, nightly-poc-single-node-tests, nightly-poc-multi-node-tests]
     strategy:
       fail-fast: false
