@@ -174,6 +174,7 @@ class TestDeepSeekV32HierarchicalCacheHit(TestAscendMultiNodePdSepTestCaseBase):
                 ttft_2, ttft_1, msg="TTFT should be reduced after cache hit"
             )
 
+
         finally:
             self.stop_sglang_thread()
 

@@ -3,6 +3,8 @@ import time
 import unittest
 from time import sleep
 
+import requests
+
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     TestAscendMultiNodePdSepTestCaseBase, check_role,
@@ -180,7 +182,7 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
     test_cases = [
         {"value": "1", "should_succeed": True, "description": "合法值: 最小正整数"},
         {"value": "4294967295", "should_succeed": True, "description": "合法值: 最大无符号32位整数"},
-        # {"value": "0", "should_succeed": False, "description": "非法值: 0（小于最小值）"},
+        {"value": "0", "should_succeed": False, "description": "非法值: 0（小于最小值）"},
         {"value": "4294967296", "should_succeed": False, "description": "非法值: 超过最大无符号32位整数"},
         {"value": "5.1", "should_succeed": False, "description": "非法值: 浮点数"},
         {"value": "abc", "should_succeed": False, "description": "非法值: 纯字母字符串"},
@@ -199,21 +201,31 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
     def tearDownClass(cls):
         super().tearDownClass()
 
-    def is_router_server_running(self):
-        """检查router服务器是否正常运行"""
-        try:
-            import socket
+    def is_router_server_running(self, timeout=30):
+        """检查router服务器是否正常运行，通过HTTP请求检测"""
+        url = f"http://127.0.0.1:{self.port}/health"
+        start_time = time.perf_counter()
+        check_interval = 2
 
-            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            sock.settimeout(5)
-            result = sock.connect_ex(("127.0.0.1", self.port))
-            sock.close()
-            print(f"result is {result}")
-            return result == 0
-        except Exception:
-            return False
+        while True:
+            try:
+                response = requests.get(url, timeout=5)
+                if response.status_code == 200:
+                    print(f"Router server at {url} is ready!")
+                    return True
+                else:
+                    print(f"Router server returned status code: {response.status_code}")
+            except Exception as e:
+                print(f"Router server not ready yet: {e}")
 
-    def print_test_case_info(self, test_case):
+            elapsed_time = time.perf_counter() - start_time
+            if elapsed_time > timeout:
+                print(f"Router server failed to start within {timeout}s")
+                return False
+            time.sleep(check_interval)
+
+    @staticmethod
+    def print_test_case_info(test_case):
         """打印测试用例信息"""
         value = test_case["value"]
         should_succeed = test_case["should_succeed"]
@@ -233,8 +245,25 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
             # 忽略清理异常，可能进程已提前退出
             pass
 
-    @classmethod
     @check_role(allowed_roles=["router"])
+    def validate_bucket_adjust_interval_secs(self, test_case):
+        self.print_test_case_info(test_case)
+
+        value = test_case["value"]
+        should_succeed = test_case["should_succeed"]
+
+        self.__class__.model_config = create_model_config_with_param(value)
+
+        try:
+            self.start_router_server()
+            # 检查router是否成功拉起
+            is_running = self.is_router_server_running(timeout=60)
+            self.assert_result(value, is_running, should_succeed)
+        finally:
+            self.stop_sglang_thread()
+            time.sleep(5)
+
+
     def test_bucket_adjust_interval_secs_validation(self):
         """测试 --bucket-adjust-interval-secs 参数的合法性验证"""
         print("=== 开始测试 --bucket-adjust-interval-secs 参数验证 ===\n")
@@ -245,54 +274,12 @@ class TestBucketAdjustIntervalSecsValidation(TestAscendMultiNodePdSepTestCaseBas
         # time.sleep(5)  # 等待完全停止
 
         for test_case in self.test_cases:
-            self.print_test_case_info(test_case)
-
-            value = test_case["value"]
-            should_succeed = test_case["should_succeed"]
-
-            self.__class__.model_config = create_model_config_with_param(value)
-
-            caught_exception = False
-            try:
-                self.start_router_server()
-            except Exception:
-                caught_exception = True
-            finally:
-                self.stop_sglang_thread()
-                # self.kill_process_if_alive()
-
-            self.assert_result(value, not caught_exception, should_succeed)
-
-            time.sleep(5)  # 等待完全停止
-
-        # # 依次测试每个参数值
-        # for test_case in self.test_cases:
-        #     # if test_case["value"] == self.initial_value:
-        #     #     continue
-        #
-        #     self.print_test_case_info(test_case)
-        #
-        #     value = test_case["value"]
-        #     should_succeed = test_case["should_succeed"]
-        #
-        #     self.__class__.model_config = create_model_config_with_param(value)
-        #
-        #     caught_exception = False
-        #     try:
-        #         self.start_pd_server()
-        #         self.start_router_server()
-        #     except Exception:
-        #         caught_exception = True
-        #     finally:
-        #         self.stop_sglang_thread()
-        #
-        #     self.assert_result(value, not caught_exception, should_succeed)
-        #
-        #     time.sleep(5)  # 等待完全停止
+            self.validate_bucket_adjust_interval_secs(test_case)
 
         print("\n" + "=" * 60)
         print("所有测试完成!")
         print("=" * 60)
+
 
     def assert_result(self, value, success, should_succeed):
         """断言测试结果"""
