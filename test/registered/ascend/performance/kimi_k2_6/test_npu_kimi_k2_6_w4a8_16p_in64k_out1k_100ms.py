@@ -8,7 +8,7 @@ from sglang.test.ascend.e2e.test_npu_performance_utils import (
     AISBENCHMARK_DATASET_DEFAULT,
     BENCHMARK_TOOL_DEFAULT,
     KIMI_K2_6_W4A8_MODEL_PATH,
-    TestAscendPerformanceTestCaseBase,
+    TestAscendPerfMultiNodePdMixTestCaseBase,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 
@@ -95,15 +95,18 @@ OTHER_ARGS = [
     "unquant",
 ]
 
+MODEL_CONFIG = {
+    "model_path": KIMI_K2_6_W4A8_MODEL_PATH,
+    "other_args": OTHER_ARGS,
+    "node_envs": ENVS,
+}
+
 
 class TestNPUKimiK2_6_W4A8_8P_AIME2025(TestAscendAccuracyMultiNodePdMixTestCaseBase):
 
-    model = KIMI_K2_6_W4A8_MODEL_PATH
-    other_args = OTHER_ARGS
-    envs = ENVS
+    model_config = MODEL_CONFIG
     accuracy = 0.961
     datasets = ["aime25"]
-    few_shot_num = 0
     eval_batch_size = 64
     generation_config = {"max_tokens": 65536, "temperature": 1.0}
 
@@ -111,12 +114,12 @@ class TestNPUKimiK2_6_W4A8_8P_AIME2025(TestAscendAccuracyMultiNodePdMixTestCaseB
         self.run_accuracy()
 
 
-class TestNPUKimiK2_6_W4A8_8P_In64k_Out1k_50ms(TestAscendPerformanceTestCaseBase):
+class TestNPUKimiK2_6_W4A8_8P_In64k_Out1k_50ms(
+    TestAscendPerfMultiNodePdMixTestCaseBase
+):
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     aisbench_dataset_type = AISBENCHMARK_DATASET_DEFAULT
-    model = KIMI_K2_6_W4A8_MODEL_PATH
-    other_args = OTHER_ARGS
-    envs = ENVS
+    model_config = MODEL_CONFIG
     dataset_name = "random"
     max_concurrency = 48
     num_prompts = 48
