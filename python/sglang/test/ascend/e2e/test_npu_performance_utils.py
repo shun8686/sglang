@@ -367,9 +367,22 @@ def run_bench_serving(
             "--gsp-prompts-per-group",
             str(num_prompts),
             "--gsp-system-prompt-len",
-            str(int((repeat_rate if repeat_rate is not None else 0.9) * input_len)) if input_len else "0",
+            (
+                str(int((repeat_rate if repeat_rate is not None else 0.9) * input_len))
+                if input_len
+                else "0"
+            ),
             "--gsp-question-len",
-            str(int((1 - (repeat_rate if repeat_rate is not None else 0.9)) * input_len)) if input_len else "0",
+            (
+                str(
+                    int(
+                        (1 - (repeat_rate if repeat_rate is not None else 0.9))
+                        * input_len
+                    )
+                )
+                if input_len
+                else "0"
+            ),
             "--gsp-output-len",
             str(output_len) if output_len else "0",
         ]
