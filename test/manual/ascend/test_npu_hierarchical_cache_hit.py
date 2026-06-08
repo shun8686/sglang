@@ -9,8 +9,12 @@ from sglang.test.ascend.e2e.test_npu_multi_node_utils import (
     TestAscendMultiNodePdSepTestCaseBase,
     check_role,
 )
-from sglang.test.ascend.e2e.test_npu_performance_utils import BENCHMARK_TOOL_DEFAULT, AISBENCHMARK_DATASET_DEFAULT, \
-    TestAscendPerfMultiNodePdSepTestCaseBase, run_aisbench
+from sglang.test.ascend.e2e.test_npu_performance_utils import (
+    BENCHMARK_TOOL_DEFAULT,
+    AISBENCHMARK_DATASET_DEFAULT,
+    TestAscendPerfMultiNodePdSepTestCaseBase,
+    run_aisbench,
+)
 from sglang.test.ascend.test_ascend_utils import (
     DEEPSEEK_V3_2_W8A8_WEIGHTS_PATH,
 )
