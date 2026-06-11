@@ -44,7 +44,7 @@ class TestLargeMaxNewTokens(CustomTestCase):
             api_key=cls.api_key,
             other_args=[
                 "--max-total-token",
-                "1536",
+                "1792",
                 "--context-len",
                 "8192",
                 "--decode-log-interval",
@@ -75,7 +75,7 @@ class TestLargeMaxNewTokens(CustomTestCase):
                 {"role": "system", "content": "You are a helpful AI assistant"},
                 {
                     "role": "user",
-                    "content": "Please repeat the word 'hello' for 100 times.",
+                    "content": "Please repeat the word 'hello' for 10000 times.",
                 },
             ],
             temperature=0,
