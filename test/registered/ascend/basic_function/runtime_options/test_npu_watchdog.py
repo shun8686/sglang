@@ -11,7 +11,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
 
 class TestWatchdogTimeout(CustomTestCase):
@@ -27,6 +27,7 @@ class TestWatchdogTimeout(CustomTestCase):
         expected_timeout_message = f"Scheduler watchdog timeout (self.watchdog_timeout={watchdog_timeout}, self.soft=False)"
         out_log_file = open("./out_log.txt", "w+", encoding="utf-8")
         err_log_file = open("./err_log.txt", "w+", encoding="utf-8")
+        process = None
         try:
             process = popen_launch_server(
                 QWEN3_0_6B_WEIGHTS_PATH,
@@ -50,7 +51,8 @@ class TestWatchdogTimeout(CustomTestCase):
         except Exception as e:
             print(f"Watchdog timeout triggered, service exited: {e}")
         finally:
-            kill_process_tree(process.pid)
+            if process is not None:
+                kill_process_tree(process.pid)
             out_log_file.close()
             err_log_file.close()
             os.remove("./out_log.txt")

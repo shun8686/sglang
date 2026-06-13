@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(
     est_time=500,
-    suite="nightly-1-npu-a3",
+    suite="full-1-npu-a3",
     nightly=True,
 )
 
@@ -33,8 +33,10 @@ class TestAscendCudaGraphGC(unittest.TestCase):
 
     @classmethod
     def tearDownClass(cls):
-        kill_process_tree(cls.server_process.pid)
-        os.remove(cls.gc_log)
+        if cls.server_process:
+            kill_process_tree(cls.server_process.pid)
+        if os.path.exists(cls.gc_log):
+            os.remove(cls.gc_log)
 
     def _launch_and_get_avail_mem(self, enable_cudagraph_gc: bool) -> float:
         other_args = [
@@ -71,9 +73,6 @@ class TestAscendCudaGraphGC(unittest.TestCase):
         kill_process_tree(self.server_process.pid)
         self.server_process = None
 
-        print(
-            f"[CudaGraph GC] enable={enable_cudagraph_gc}, available memory={avail_mem:.2f} GB"
-        )
         return avail_mem
 
     def test_gc_avail_mem_comparison(self):

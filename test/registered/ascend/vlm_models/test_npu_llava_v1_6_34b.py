@@ -9,7 +9,7 @@ from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
     est_time=400,
-    suite="nightly-4-npu-a3",
+    suite="full-4-npu-a3",
     nightly=True,
 )
 
@@ -34,8 +34,6 @@ class TestLlava(TestVLMModels):
         "--attention-backend",
         "ascend",
         "--disable-cuda-graph",
-        "--mm-per-request-timeout",
-        60,
         "--enable-multimodal",
         "--tokenizer-path",
         LLAVA_V1_6_34B_TOKENIZER_PATH,

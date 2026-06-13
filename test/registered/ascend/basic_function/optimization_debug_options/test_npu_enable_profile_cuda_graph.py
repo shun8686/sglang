@@ -13,7 +13,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=50, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=50, suite="full-1-npu-a3", nightly=True)
 
 
 class TestEnableProfileCudaGraph(CustomTestCase):
@@ -83,7 +83,7 @@ class TestEnableProfileCudaGraph(CustomTestCase):
         self.out_log_file.seek(0)
         content = self.out_log_file.read()
         self.assertTrue(len(content) > 0)
-        self.assertIn("profiler.py: Start parsing profiling data:", content)
+        self.assertIn("profiler.py: Start parsing profiling data in", content)
 
 
 if __name__ == "__main__":

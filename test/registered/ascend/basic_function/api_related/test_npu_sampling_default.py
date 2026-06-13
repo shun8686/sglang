@@ -17,7 +17,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-2-npu-a3", nightly=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -129,6 +129,7 @@ class BaseSamplingTest(CustomTestCase):
             "messages": [
                 {"role": "user", "content": "Test sampling parameters: 1+1=？"}
             ],
+            "max_tokens": 128,
         }
         if custom_params:
             req_body.update(custom_params)

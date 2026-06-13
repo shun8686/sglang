@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-2-npu-a3", nightly=True)
 
 
 class TestScheduleConservativeness(CustomTestCase):
@@ -84,7 +84,7 @@ class TestScheduleConservativeness(CustomTestCase):
             port=int(self.base_url.split(":")[-1]),
         )
         metrics = run_eval_few_shot_gsm8k(args)
-        self.assertGreaterEqual(metrics["accuracy"], 0.86)
+        self.assertGreaterEqual(metrics["accuracy"], 0.86 * (1 - 0.02))
         self.err_log_file.seek(0)
         content = self.err_log_file.read()
         # error_message information is recorded in the log

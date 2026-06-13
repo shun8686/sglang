@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-2-npu-a3", nightly=True)
 
 
 class TestMoreRunnerBackendTriton(CustomTestCase):
@@ -56,7 +56,6 @@ class TestMoreRunnerBackendTriton(CustomTestCase):
                 cls.moe_runner_backend,
             ],
             env={
-                "SGLANG_NPUDISABLE_ACL_FORMAT_WEIGHT": "1",
                 "HCCL_BUFFSIZE": "1024",
             },
         )
