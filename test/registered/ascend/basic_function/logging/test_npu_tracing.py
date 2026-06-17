@@ -129,7 +129,9 @@ class TestNPUTracing(TestNPULoggingBase):
 
         time.sleep(1)
 
-    def _test_trace_level(self, prompt, trace_level, expected_spans=None, max_new_tokens=32):
+    def _test_trace_level(
+            self, prompt, trace_level, expected_spans=None, max_new_tokens=32
+    ):
         """Helper to test a specific trace level.
 
         Args:
@@ -138,7 +140,9 @@ class TestNPUTracing(TestNPULoggingBase):
             expected_spans: Optional list of expected span names to verify.
             max_new_tokens: Maximum number of tokens to generate.
         """
-        self._send_request_and_wait(prompt, trace_level=trace_level, max_new_tokens=max_new_tokens)
+        self._send_request_and_wait(
+            prompt, trace_level=trace_level, max_new_tokens=max_new_tokens
+        )
 
         if trace_level == 0:
             self.assertEqual(

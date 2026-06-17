@@ -141,9 +141,7 @@ class TestNPUMetricsPriority(TestNPULoggingBase):
         self.assertEqual(metrics_response.status_code, 200)
         metrics = _parse_prometheus_metrics(metrics_response.text)
 
-        e2e_count = metrics.get(
-            "sglang:e2e_request_latency_seconds_count", []
-        )
+        e2e_count = metrics.get("sglang:e2e_request_latency_seconds_count", [])
         priority_values = {s.labels.get("priority", "") for s in e2e_count}
         self.assertIn(
             "0",
