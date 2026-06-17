@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sglang-risk/test_record.schema.json",
+  "title": "Test Record",
+  "type": "object",
+  "required": ["test_file", "test_class", "test_methods", "features_tested"],
+  "properties": {
+    "test_file": {
+      "type": "string",
+      "description": "Repo-relative path to the test file"
+    },
+    "test_class": {
+      "type": "string",
+      "description": "Python test class name"
+    },
+    "test_methods": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name", "type"],
+        "properties": {
+          "name": {"type": "string"},
+          "type": {
+            "type": "string",
+            "enum": ["e2e_accuracy", "e2e_correctness", "e2e_performance", "integration", "unit"]
+          },
+          "assertion_type": {
+            "type": "string",
+            "enum": ["threshold", "reference_comparison", "exact_match", "functional", "none"]
+          },
+          "has_reference_oracle": {"type": "boolean"},
+          "model_used": {"type": "string"},
+          "ci_suite": {"type": "string"},
+          "est_time_seconds": {"type": "integer"}
+        }
+      }
+    },
+    "features_tested": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Feature names this test covers"
+    },
+    "quality_score": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 5,
+      "description": "0=useless, 1=basic smoke, 3=moderate, 5=excellent oracle+fuzz+stress"
+    },
+    "ci_registrations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "suite": {"type": "string"},
+          "nightly": {"type": "boolean"},
+          "disabled": {"type": "string"}
+        }
+      }
+    },
+    "covers_files": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Source files covered by this test (for KG COVERS edges)"
+    },
+    "coverage_ratio": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Estimated coverage ratio of the target source files"
+    }
+  }
+}

@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPU 风险知识图谱 — Schema 设计 · 构建方案 · 与增量框架集成</title>
+<style>
+  :root {
+    --bg: #080b10; --surface: #0f131e; --surface2: #161c2c; --border: #1f2638;
+    --text: #e1e5ef; --text2: #81889e; --accent: #4da6ff; --green: #3fb950;
+    --yellow: #d29922; --red: #f85149; --purple: #a371f7; --orange: #f0883e;
+    --teal: #39d2c0; --pink: #f778ba; --cyan: #54e0e0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.68; }
+  .container { max-width:1140px; margin:0 auto; padding:40px 24px; }
+
+  header { text-align:center; padding:80px 24px 60px; background:linear-gradient(180deg, #0e1420 0%, #080c16 100%); border-bottom:1px solid var(--border); position:relative; overflow:hidden; }
+  header::before { content:''; position:absolute; top:-40%; left:-10%; width:120%; height:180%; background:radial-gradient(ellipse at 35% 50%, rgba(84,224,224,.07) 0%, transparent 55%), radial-gradient(ellipse at 65% 50%, rgba(163,113,247,.06) 0%, transparent 55%), radial-gradient(ellipse at 50% 80%, rgba(77,166,255,.04) 0%, transparent 40%); pointer-events:none; }
+  header h1 { font-size:2.2em; font-weight:750; background:linear-gradient(135deg, #54e0e0 0%, #4da6ff 40%, #a371f7 70%, #f778ba 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:14px; position:relative; }
+  header .subtitle { color:var(--text2); font-size:1.04em; position:relative; }
+  header .meta { margin-top:24px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; position:relative; }
+  header .meta span { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:7px 16px; font-size:.81em; color:var(--text2); }
+
+  section { margin:48px 0; }
+  h2 { font-size:1.48em; font-weight:680; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  h2 .num { background:var(--accent); color:#fff; font-size:.66em; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:7px; flex-shrink:0; font-weight:700; }
+  h3 { font-size:1.12em; font-weight:650; margin:26px 0 12px; color:#cdd3e0; }
+  h4 { font-size:1em; font-weight:600; margin:16px 0 8px; color:#bcc3d4; }
+  p { margin-bottom:10px; color:var(--text2); }
+  strong { color:var(--text); font-weight:650; }
+  em { color:var(--accent); font-style:normal; }
+  code { font-family:'JetBrains Mono','Cascadia Code','Fira Code',monospace; font-size:.87em; }
+  pre { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; overflow-x:auto; font-size:.79em; line-height:1.55; }
+  pre code { color:#c9d1d9; }
+
+  .tbl-wrap { overflow-x:auto; margin:14px 0; border:1px solid var(--border); border-radius:8px; }
+  table { width:100%; border-collapse:collapse; font-size:.85em; }
+  th,td { padding:9px 14px; text-align:left; }
+  th { background:var(--surface); font-weight:650; color:var(--text); white-space:nowrap; border-bottom:2px solid var(--border); font-size:.79em; text-transform:uppercase; letter-spacing:.04em; }
+  td { border-bottom:1px solid var(--border); color:var(--text2); }
+  tr:last-child td { border-bottom:none; }
+
+  .badge { display:inline-block; padding:3px 10px; border-radius:10px; font-size:.73em; font-weight:650; white-space:nowrap; }
+  .badge.red { background:rgba(248,81,73,.15); color:var(--red); }
+  .badge.orange { background:rgba(240,136,62,.15); color:var(--orange); }
+  .badge.yellow { background:rgba(210,153,34,.15); color:var(--yellow); }
+  .badge.green { background:rgba(63,185,80,.15); color:var(--green); }
+  .badge.blue { background:rgba(77,166,255,.15); color:var(--accent); }
+  .badge.purple { background:rgba(163,113,247,.15); color:var(--purple); }
+  .badge.teal { background:rgba(57,210,192,.15); color:var(--teal); }
+
+  .callout { background:rgba(77,166,255,.05); border:1px solid rgba(77,166,255,.14); border-radius:10px; padding:18px 22px; margin:16px 0; }
+  .callout h4 { margin-top:0; color:var(--accent); }
+  .callout.success { background:rgba(63,185,80,.05); border-color:rgba(63,185,80,.14); }
+  .callout.success h4 { color:var(--green); }
+  .callout.warn { background:rgba(240,136,62,.04); border-color:rgba(240,136,62,.14); }
+  .callout.warn h4 { color:var(--orange); }
+
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin:14px 0; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 16px; text-align:center; }
+  .stat-card .val { font-size:1.65em; font-weight:750; }
+  .stat-card .lbl { font-size:.79em; color:var(--text2); margin-top:3px; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin:14px 0; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; }
+  .card h4 { margin-top:0; display:flex; align-items:center; gap:8px; }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+
+  .arch-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; margin:16px 0; overflow-x:auto; }
+  .arch-box svg { min-width:750px; }
+
+  .schema-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(200px, 1fr)); gap:12px; margin:14px 0; }
+  .schema-node { background:var(--surface2); border:2px solid var(--border); border-radius:10px; padding:16px; text-align:center; }
+  .schema-node.Feature { border-color:var(--accent); }
+  .schema-node.SourceFile { border-color:var(--green); }
+  .schema-node.TestCase { border-color:var(--yellow); }
+  .schema-node.Defect { border-color:var(--red); }
+  .schema-node.Dependency { border-color:var(--purple); }
+  .schema-node .node-type { font-size:.72em; text-transform:uppercase; letter-spacing:.06em; margin-bottom:6px; }
+  .schema-node .node-props { font-size:.78em; color:var(--text2); text-align:left; }
+
+  .query-card { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:16px; margin:8px 0; }
+  .query-card .q { font-size:.82em; margin-bottom:6px; }
+  .query-card .q .kw { color:var(--accent); }
+  .query-card .q .node { color:var(--teal); }
+  .query-card .q .rel { color:var(--orange); }
+  .query-card .q .prop { color:var(--yellow); }
+
+  .integration-flow { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:16px 0; padding:16px; background:var(--surface); border-radius:10px; }
+  .integration-flow .box { background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:12px 18px; text-align:center; font-size:.84em; }
+  .integration-flow .arrow { color:var(--accent); font-size:1.2em; font-weight:700; }
+
+  footer { text-align:center; padding:40px 24px; color:var(--text2); font-size:.79em; border-top:1px solid var(--border); margin-top:60px; }
+
+  .four-docs { display:grid; grid-template-columns:repeat(4, 1fr); gap:10px; margin:16px 0; }
+  @media(max-width:768px) { .four-docs { grid-template-columns:1fr 1fr; } }
+  .four-docs .doc { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:14px; font-size:.82em; text-align:center; }
+  .four-docs .doc.current { border-color:var(--teal); background:rgba(57,210,192,.05); }
+  .four-docs .doc .doc-num { font-size:.7em; color:var(--text2); }
+  .four-docs .doc .doc-title { font-weight:650; color:var(--text); margin:4px 0; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NPU 风险知识图谱</h1>
+  <p class="subtitle">Schema 设计 · NetworkX 构建方案 · 与增量框架的融合 · /graphify 落地路径</p>
+  <div class="meta">
+    <span>🔗 5 类节点 · 7 类关系</span>
+    <span>📐 属性图 (LPG) 模型</span>
+    <span>🐍 NetworkX + 可选 Neo4j</span>
+    <span>🔍 12 种风险查询模式</span>
+    <span>🧩 与增量框架双向联动</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== Doc Series ===== -->
+<section>
+  <h2 style="border-bottom:none;padding-bottom:0;"><span class="num">0</span>四份文档的关系</h2>
+  <div class="four-docs">
+    <div class="doc"><div class="doc-num">Doc 1</div><div class="doc-title">覆盖审计层</div>测没测？</div>
+    <div class="doc"><div class="doc-num">Doc 2</div><div class="doc-title">风险策略层</div>哪里该多测？</div>
+    <div class="doc"><div class="doc-num">Doc 3</div><div class="doc-title">增量架构层</div>变化后如何更新？</div>
+    <div class="doc current"><div class="doc-num">Doc 4 ← 当前</div><div class="doc-title">知识图谱层</div>如何发现隐含风险？</div>
+  </div>
+  <p>前 3 份文档解决<strong>"分析→策略→持续"</strong>。本文档解决<strong>"关联推理"</strong>——JSON 擅长属性查询，KG 擅长<strong>跨层多跳传播、模式匹配、盲点发现</strong>。</p>
+</section>
+
+<!-- ===== Why KG ===== -->
+<section id="why">
+  <h2><span class="num">1</span>KG 解决 JSON 做不到的三件事</h2>
+
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid var(--red);">
+      <h4>🔴 级联影响分析</h4>
+      <p style="font-size:.84em;color:var(--text2);">JSON 能回答 "fuseep.py 属于哪些 feature？"（一层映射）。</p>
+      <p style="font-size:.84em;color:var(--accent);"><strong>KG 能回答</strong>: fuseep.py 的 bug 经由 DEPENDS_ON → TESTS_BY → SHARES_DEP 三层传播后，哪些关联特性的风险应同步上调？哪些测试可以提前预警？</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <h4>🟠 盲点检测</h4>
+      <p style="font-size:.84em;color:var(--text2);">JSON 能找到"风险评分最高"的特性。</p>
+      <p style="font-size:.84em;color:var(--accent);"><strong>KG 能发现</strong>: 介数中心性最高但风险评分最低的节点。比如 environ.py（评分 5/45）被 8+ 特性依赖——一个拼写错误就能瘫痪所有特性。JSON 永远看不到这个盲点。</p>
+    </div>
+    <div class="card" style="border-left:3px solid var(--yellow);">
+      <h4>🟡 多维模式匹配</h4>
+      <p style="font-size:.84em;color:var(--text2);">JSON 的嵌套查询表达能力有限。</p>
+      <p style="font-size:.84em;color:var(--accent);"><strong>KG 能回答</strong>: 找出所有满足 "平台差异度>3 ∧ 静默错误 ∧ 零有效测试 ∧ 最近 30 天有变更" 的特性——这是四重条件的图模式匹配，SQL/JQ 表达会非常冗长。</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>📐 定位</h4>
+    <p style="color:var(--text);">KG 不是替代 JSON Baseline——它是<strong>在 JSON 之上加了一层关系推理引擎</strong>。JSON 做 90% 的日常查询（轻量快速，O(1) 属性访问），KG 做那 10% 的关键推理（跨层传播、盲点检测、模式发现）。</p>
+  </div>
+</section>
+
+<!-- ===== Schema ===== -->
+<section id="schema">
+  <h2><span class="num">2</span>图谱 Schema 设计</h2>
+
+  <h3>2.1 节点类型（5 类）</h3>
+
+  <div class="schema-grid">
+    <div class="schema-node Feature">
+      <div class="node-type" style="color:var(--accent);">Feature</div>
+      <div class="node-props">
+        · name: str (PK)<br>
+        · category: str<br>
+        · risk_score: int<br>
+        · probability: int<br>
+        · impact: int<br>
+        · test_depth: str<br>
+        · fingerprint: str<br>
+        · n_tests: int<br>
+        · n_effective_tests: int<br>
+        · last_modified: date
+      </div>
+    </div>
+    <div class="schema-node SourceFile">
+      <div class="node-type" style="color:var(--green);">SourceFile</div>
+      <div class="node-props">
+        · path: str (PK)<br>
+        · file_type: str<br>
+        · complexity: int<br>
+        · change_freq_90d: int<br>
+        · n_bugs: int<br>
+        · platform_divergence: str<br>
+        · lines_of_code: int<br>
+        · last_commit: str
+      </div>
+    </div>
+    <div class="schema-node TestCase">
+      <div class="node-type" style="color:var(--yellow);">TestCase</div>
+      <div class="node-props">
+        · file: str (PK)<br>
+        · test_class: str<br>
+        · test_method: str<br>
+        · test_type: str<br>
+        · quality_score: int<br>
+        · assertion_type: str<br>
+        · has_oracle: bool<br>
+        · ci_suite: str<br>
+        · est_time_seconds: int
+      </div>
+    </div>
+    <div class="schema-node Defect">
+      <div class="node-type" style="color:var(--red);">Defect</div>
+      <div class="node-props">
+        · bug_id: str (PK)<br>
+        · description: str<br>
+        · severity: str<br>
+        · failure_mode: str<br>
+        · commit_fixed: str<br>
+        · date_fixed: date<br>
+        · is_silent: bool<br>
+        · modules_affected: list
+      </div>
+    </div>
+    <div class="schema-node Dependency">
+      <div class="node-type" style="color:var(--purple);">Dependency</div>
+      <div class="node-props">
+        · name: str (PK)<br>
+        · dep_type: str<br>
+        · version: str<br>
+        · provider: str<br>
+        · upgrade_risk: int<br>
+        · n_consumers: int<br>
+        · last_upgraded: date
+      </div>
+    </div>
+  </div>
+
+  <h3>2.2 关系类型（7 类，各带权重）</h3>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>关系名</th><th>方向</th><th>语义</th><th>权重含义</th><th>示例</th></tr>
+    <tr>
+      <td><code>IMPLEMENTS_IN</code></td>
+      <td>Feature → SourceFile</td>
+      <td>特性在哪个文件中实现</td>
+      <td>该文件在特性中的代码量占比 (0-1)</td>
+      <td>ascend_fuseep → fuseep.py (weight:0.8)</td>
+    </tr>
+    <tr>
+      <td><code>TESTED_BY</code></td>
+      <td>Feature → TestCase</td>
+      <td>特性的测试</td>
+      <td>测试有效性评分 (0-5)</td>
+      <td>ascend_fuseep → test_fuseep_oracle (weight:4)</td>
+    </tr>
+    <tr>
+      <td><code>DEPENDS_ON</code></td>
+      <td>Feature → Feature</td>
+      <td>特性间依赖</td>
+      <td>调用深度/耦合度 (1-5)</td>
+      <td>deepseek_v2 → ascend_fuseep (weight:4)</td>
+    </tr>
+    <tr>
+      <td><code>DEPENDS_ON</code></td>
+      <td>Feature → Dependency</td>
+      <td>特性依赖外部组件</td>
+      <td>耦合强度 (1-5)</td>
+      <td>ascend_fuseep → CANN 8.5.0 (weight:4)</td>
+    </tr>
+    <tr>
+      <td><code>AFFECTED_BY</code></td>
+      <td>Feature ← Defect</td>
+      <td>缺陷影响了哪些特性</td>
+      <td>缺陷对该特性的影响程度 (1-5)</td>
+      <td>ascend_fuseep ← BUG-2026-042 (weight:4)</td>
+    </tr>
+    <tr>
+      <td><code>FIXED_IN</code></td>
+      <td>Defect → SourceFile</td>
+      <td>缺陷在哪个文件中被修复</td>
+      <td>修复涉及的文件数 (归一化)</td>
+      <td>BUG-2026-042 → fuseep.py (weight:0.5)</td>
+    </tr>
+    <tr>
+      <td><code>COVERS</code></td>
+      <td>TestCase → SourceFile</td>
+      <td>测试覆盖哪个源文件</td>
+      <td>覆盖的代码行占比 (0-1)</td>
+      <td>test_fuseep_oracle → fuseep.py (weight:0.6)</td>
+    </tr>
+  </table>
+  </div>
+
+  <h3>2.3 图统计概览</h3>
+  <div class="stat-grid">
+    <div class="stat-card"><div class="val" style="color:var(--accent);">~80</div><div class="lbl">总节点数</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--green);">~200</div><div class="lbl">总关系边数</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--teal);">5</div><div class="lbl">节点类型</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--purple);">7</div><div class="lbl">关系类型</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--yellow);">~3.5</div><div class="lbl">平均度数</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--orange);">< 10ms</div><div class="lbl">单次查询延迟</div></div>
+  </div>
+  <p style="font-size:.82em;">这个规模对 NetworkX 内存图来说微不足道——10 万节点级别才需要考虑图数据库。当前 ~80 节点完全可以在 Python 进程内高效运行。</p>
+</section>
+
+<!-- ===== FuseEP Subgraph ===== -->
+<section id="subgraph">
+  <h2><span class="num">3</span>子图示例：以 FuseEP 为中心</h2>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 920 560" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow-blue" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--accent)"/></marker>
+        <marker id="arrow-green" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--green)"/></marker>
+        <marker id="arrow-red" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--red)"/></marker>
+        <marker id="arrow-purple" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--purple)"/></marker>
+        <marker id="arrow-yellow" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--yellow)"/></marker>
+        <marker id="arrow-orange" markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto"><path d="M0,0 L8,3 L0,6 Z" fill="var(--orange)"/></marker>
+      </defs>
+
+      <!-- Central node: FuseEP -->
+      <rect x="370" y="240" width="180" height="52" rx="10" fill="rgba(77,166,255,.12)" stroke="#4da6ff" stroke-width="2.5"/>
+      <text x="460" y="262" fill="var(--text)" font-size="14" text-anchor="middle" font-weight="700">ascend_fuseep</text>
+      <text x="460" y="280" fill="var(--text2)" font-size="10" text-anchor="middle">risk:34 · prob:18 · imp:16</text>
+
+      <!-- Up: Dependency CANN -->
+      <rect x="370" y="80" width="180" height="46" rx="8" fill="rgba(163,113,247,.08)" stroke="#a371f7" stroke-width="1.5"/>
+      <text x="460" y="100" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">CANN 8.5.0</text>
+      <text x="460" y="116" fill="var(--text2)" font-size="9" text-anchor="middle">Dependency · upgrade_risk:4</text>
+      <line x1="420" y1="126" x2="400" y2="240" stroke="#a371f7" stroke-width="1.8" marker-end="url(#arrow-purple)"/>
+      <text x="395" y="185" fill="var(--purple)" font-size="9" transform="rotate(-72, 395, 185)">DEPENDS_ON (coupling:4)</text>
+
+      <!-- Up-right: deepseek_v2 -->
+      <rect x="640" y="80" width="180" height="46" rx="8" fill="rgba(77,166,255,.06)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="730" y="100" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">deepseek_v2</text>
+      <text x="730" y="116" fill="var(--text2)" font-size="9" text-anchor="middle">Feature · risk:22 · depends on FuseEP</text>
+      <line x1="550" y1="260" x2="640" y2="120" stroke="var(--accent)" stroke-width="1.5" marker-end="url(#arrow-blue)"/>
+      <text x="620" y="195" fill="var(--accent)" font-size="9">DEPENDS_ON (depth:4)</text>
+
+      <!-- Right: Source files -->
+      <rect x="640" y="240" width="180" height="46" rx="8" fill="rgba(63,185,80,.08)" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="730" y="260" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">fuseep.py</text>
+      <text x="730" y="276" fill="var(--text2)" font-size="9" text-anchor="middle">SourceFile · complexity:5 · bugs:6</text>
+      <line x1="550" y1="268" x2="640" y2="263" stroke="var(--green)" stroke-width="1.8" marker-end="url(#arrow-green)"/>
+      <text x="595" y="258" fill="var(--green)" font-size="9">IMPLEMENTS_IN (0.8)</text>
+
+      <rect x="640" y="310" width="180" height="46" rx="8" fill="rgba(63,185,80,.08)" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="730" y="330" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">fused_moe_method_npu.py</text>
+      <text x="730" y="346" fill="var(--text2)" font-size="9" text-anchor="middle">SourceFile · complexity:4 · bugs:8</text>
+      <line x1="550" y1="280" x2="640" y2="328" stroke="var(--green)" stroke-width="1.4"/>
+      <text x="600" y="305" fill="var(--green)" font-size="9">IMPLEMENTS_IN (0.5)</text>
+
+      <!-- Down: Tests -->
+      <rect x="640" y="420" width="200" height="46" rx="8" fill="rgba(210,153,34,.08)" stroke="#d29922" stroke-width="1.5"/>
+      <text x="740" y="440" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">test_fuseep_oracle.py</text>
+      <text x="740" y="456" fill="var(--text2)" font-size="9" text-anchor="middle">TestCase · quality:4 · type:oracle</text>
+      <line x1="550" y1="282" x2="640" y2="438" stroke="#d29922" stroke-width="1.8" marker-end="url(#arrow-yellow)"/>
+      <text x="620" y="365" fill="var(--yellow)" font-size="9">TESTED_BY (effectiveness:4)</text>
+
+      <rect x="370" y="440" width="200" height="46" rx="8" fill="rgba(210,153,34,.08)" stroke="#d29922" stroke-width="1.2"/>
+      <text x="470" y="460" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">test_fuseep_fuzz.py</text>
+      <text x="470" y="476" fill="var(--text2)" font-size="9" text-anchor="middle">TestCase · quality:3 · type:fuzz</text>
+      <line x1="440" y1="292" x2="455" y2="440" stroke="#d29922" stroke-width="1.4" marker-end="url(#arrow-yellow)"/>
+      <text x="435" y="370" fill="var(--yellow)" font-size="9">TESTED_BY (3)</text>
+
+      <!-- Left: Defects -->
+      <rect x="60" y="210" width="200" height="46" rx="8" fill="rgba(248,81,73,.08)" stroke="#f85149" stroke-width="1.5"/>
+      <text x="160" y="230" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">BUG-2026-042</text>
+      <text x="160" y="246" fill="var(--text2)" font-size="9" text-anchor="middle">Defect · silent_corruption · severity:4</text>
+      <line x1="260" y1="240" x2="370" y2="260" stroke="var(--red)" stroke-width="1.8" marker-end="url(#arrow-red)"/>
+      <text x="315" y="238" fill="var(--red)" font-size="9">AFFECTED_BY (4)</text>
+
+      <rect x="60" y="300" width="200" height="46" rx="8" fill="rgba(248,81,73,.08)" stroke="#f85149" stroke-width="1.2"/>
+      <text x="160" y="320" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">BUG-2026-019</text>
+      <text x="160" y="336" fill="var(--text2)" font-size="9" text-anchor="middle">Defect · precision_loss · severity:3</text>
+      <line x1="260" y1="318" x2="370" y2="275" stroke="var(--red)" stroke-width="1.4" marker-end="url(#arrow-red)"/>
+      <text x="320" y="288" fill="var(--red)" font-size="9">AFFECTED_BY (3)</text>
+
+      <!-- Bug → File (FIXED_IN) dashed -->
+      <line x1="200" y1="256" x2="640" y2="260" stroke="#f0883e" stroke-width="1.2" stroke-dasharray="6,3" marker-end="url(#arrow-orange)"/>
+      <text x="420" y="252" fill="var(--orange)" font-size="8">FIXED_IN</text>
+
+      <!-- Left-bottom: dynamic_quant -->
+      <rect x="60" y="420" width="200" height="46" rx="8" fill="rgba(77,166,255,.06)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="160" y="440" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">dynamic_quant</text>
+      <text x="160" y="456" fill="var(--text2)" font-size="9" text-anchor="middle">Feature · risk:30 · shared bug pattern</text>
+      <!-- Shared defect pattern -->
+      <line x1="160" y1="280" x2="160" y2="420" stroke="var(--orange)" stroke-width="1.2" stroke-dasharray="4,4"/>
+      <text x="175" y="350" fill="var(--orange)" font-size="8">SHARES_DEFECT_PATTERN</text>
+    </svg>
+  </div>
+
+  <div class="callout">
+    <h4>🔍 这个子图揭示了 JSON 看不到的信息</h4>
+    <p style="color:var(--text);">① <strong>BUG-2026-042 的传播路径</strong>: 同时影响 FuseEP 和 dynamic_quant，且两者共享底层文件 fused_moe_method_npu.py → 修复时两个特性都需要回归测试。<br>
+    ② <strong>deepseek_v2 的间接风险</strong>: 它依赖 FuseEP (DEPENDS_ON depth:4)，FuseEP 的 bug 会透过调用链影响 deepseek_v2 的 MoE 路由 → 但 JSON 中 deepseek_v2 的风险评分不会自动反映这个依赖风险。<br>
+    ③ <strong>测试缺口可视化</strong>: FuseEP 有 2 个测试 (oracle + fuzz) 覆盖了 fuseep.py，但 fused_moe_method_npu.py 覆盖不足 → 图上看是两个 IMPLEMENTS_IN + COVERS 的缺口。</p>
+  </div>
+</section>
+
+<!-- ===== NetworkX Construction ===== -->
+<section id="build">
+  <h2><span class="num">4</span>NetworkX 构建方案</h2>
+
+  <h3>4.1 从已有数据到图的一键构建</h3>
+  <p>M0 全量分析已经产出 <code>features.json</code>、<code>tests.json</code>、<code>risk_profiles.json</code>、<code>dependency_map.json</code>。图和 JSON 是<strong>同一份数据的不同视图</strong>。</p>
+
+<pre><code># .sglang-risk/scripts/build_graph.py
+
+import json
+import networkx as nx
+from pathlib import Path
+from hashlib import sha256
+
+def build_risk_graph(baseline_dir: str) -> nx.MultiDiGraph:
+    """从 JSON baseline 构建属性图。增量更新时只需重新运行此函数。"""
+    G = nx.MultiDiGraph()
+    baseline = Path(baseline_dir)
+
+    # ── 加载基线数据 ──
+    features   = json.loads((baseline / "features.json").read_text())
+    tests      = json.loads((baseline / "tests.json").read_text())
+    profiles   = json.loads((baseline / "risk_profiles.json").read_text())
+    dep_map    = json.loads((baseline / "dependency_map.json").read_text())
+    defects    = json.loads(
+        (baseline.parent.parent / "db" / "defect_db.json").read_text()
+    )
+
+    # ── Step 1: 创建 Feature 节点 ──
+    for f in features:
+        p = profiles.get(f["name"], {})
+        G.add_node(f["name"],
+            type="Feature",
+            category=f["category"],
+            risk_score=p.get("composite_score", 0),
+            probability=p.get("probability", {}).get("total", 0),
+            impact=p.get("impact", {}).get("total", 0),
+            test_depth=p.get("test_depth", "L3"),
+            fingerprint=f.get("fingerprint", ""),
+            n_tests=len(f.get("tests", [])),
+            last_modified=f.get("last_modified", "")
+        )
+
+    # ── Step 2: 创建 SourceFile 节点 + IMPLEMENTS_IN 边 ──
+    for path, info in dep_map.items():
+        if info.get("is_test"):
+            continue
+        file_id = path.split("/")[-1]
+        G.add_node(file_id,
+            type="SourceFile",
+            path=path,
+            complexity=0,  # 后续由 Agent 填充
+            change_freq_90d=0,
+            n_bugs=0,
+            file_type=info.get("file_type", "source")
+        )
+        # IMPLEMENTS_IN: Feature → SourceFile
+        for feat_name in info.get("features", []):
+            if G.has_node(feat_name):
+                G.add_edge(feat_name, file_id,
+                    type="IMPLEMENTS_IN",
+                    weight=1.0 / len(info["features"])  # 按特性数均分
+                )
+
+    # ── Step 3: 创建 TestCase 节点 + TESTED_BY / COVERS 边 ──
+    for t in tests:
+        test_id = t["test_file"].split("/")[-1].replace(".py", "")
+        G.add_node(test_id,
+            type="TestCase",
+            test_type=t.get("test_type", "unknown"),
+            quality_score=t.get("quality_score", 0),
+            assertion_type=t.get("assertion_type", "threshold"),
+            has_oracle=t.get("has_reference_oracle", False),
+            ci_suite=t.get("ci_suite", "")
+        )
+        # TESTED_BY: Feature → TestCase
+        for feat_name in t.get("features_tested", []):
+            if G.has_node(feat_name):
+                G.add_edge(feat_name, test_id,
+                    type="TESTED_BY",
+                    weight=t.get("quality_score", 1)
+                )
+        # COVERS: TestCase → SourceFile (从 dep_map 反查)
+        for path, info in dep_map.items():
+            if info.get("is_test") and path == t["test_file"]:
+                for covered_file in info.get("covers_files", []):
+                    file_id = covered_file.split("/")[-1]
+                    if G.has_node(file_id):
+                        G.add_edge(test_id, file_id,
+                            type="COVERS",
+                            weight=info.get("coverage_ratio", 0.5)
+                        )
+
+    # ── Step 4: 创建 Defect 节点 + AFFECTED_BY / FIXED_IN 边 ──
+    for d in defects:
+        G.add_node(d["bug_id"],
+            type="Defect",
+            severity=d.get("severity", 3),
+            failure_mode=d.get("failure_mode", "unknown"),
+            is_silent=d.get("is_silent", False),
+            date_fixed=d.get("date_fixed", ""),
+            commit_fixed=d.get("commit_fixed", "")
+        )
+        for feat_name in d.get("features_affected", []):
+            if G.has_node(feat_name):
+                G.add_edge(d["bug_id"], feat_name,
+                    type="AFFECTED_BY",
+                    weight=d.get("severity", 3)
+                )
+        for file_path in d.get("files_fixed", []):
+            file_id = file_path.split("/")[-1]
+            if G.has_node(file_id):
+                G.add_edge(d["bug_id"], file_id,
+                    type="FIXED_IN",
+                    weight=1.0 / len(d["files_fixed"])
+                )
+
+    # ── Step 5: 推断 DEPENDS_ON (Feature → Feature) ──
+    # 两个 Feature 共享 SourceFile → 它们有间接耦合
+    file_to_features = {}
+    for u, v, data in G.edges(data=True):
+        if data.get("type") == "IMPLEMENTS_IN":
+            file_to_features.setdefault(v, []).append(u)
+
+    for file_id, feat_list in file_to_features.items():
+        if len(feat_list) > 1:
+            for i, a in enumerate(feat_list):
+                for b in feat_list[i+1:]:
+                    if not G.has_edge(a, b):
+                        G.add_edge(a, b, type="DEPENDS_ON", weight=2,
+                            via=f"shared_file:{file_id}")
+                        G.add_edge(b, a, type="DEPENDS_ON", weight=2,
+                            via=f"shared_file:{file_id}")
+
+    # ── Step 6: 创建 Dependency 外部节点 ──
+    deps = {
+        "CANN":       {"version":"8.5.0","dep_type":"runtime","upgrade_risk":4},
+        "torch_npu":  {"version":"2.5.1","dep_type":"python","upgrade_risk":3},
+        "sgl_kernel_npu":{"version":"2026.05","dep_type":"kernel","upgrade_risk":4},
+        "HCCL":       {"version":"8.5.0","dep_type":"comm","upgrade_risk":3},
+    }
+    for name, props in deps.items():
+        G.add_node(name, type="Dependency", **props)
+        # 所有 NPU 特性都依赖 CANN 和 torch_npu
+        for feat_name in [f["name"] for f in features]:
+            if G.has_node(feat_name):
+                coupling = 5 if name in ("CANN", "torch_npu") else 3
+                G.add_edge(feat_name, name, type="DEPENDS_ON", weight=coupling)
+
+    # ── Step 7: 计算图度量 ──
+    for node in G.nodes():
+        G.nodes[node]["degree"] = G.degree(node)
+    for node in G.nodes():
+        # 介数中心性（用无向图近似）
+        G_undirected = nx.Graph()
+        for u, v in G.edges():
+            G_undirected.add_edge(u, v)
+        if G_undirected.number_of_nodes() > 0:
+            bc = nx.betweenness_centrality(G_undirected)
+            G.nodes[node]["betweenness"] = bc.get(node, 0)
+
+    return G
+
+
+# ── 使用 ──
+if __name__ == "__main__":
+    G = build_risk_graph(".sglang-risk/baselines/latest/")
+    print(f"Nodes: {G.number_of_nodes()}, Edges: {G.number_of_edges()}")
+
+    # 导出为 JSON（供可视化 / 前端消费）
+    data = nx.node_link_data(G)
+    Path(".sglang-risk/graph/latest_graph.json").write_text(
+        json.dumps(data, indent=2, ensure_ascii=False)
+    )</code></pre>
+
+  <h3>4.2 增量更新图</h3>
+  <p>图的增量更新比 JSON 更简单——因为图本身就是<strong>集合运算</strong>的自然表达。</p>
+
+<pre><code>def update_graph_delta(G: nx.MultiDiGraph, delta: dict) -> nx.MultiDiGraph:
+    """对已有图应用 delta，返回更新后的图。"""
+
+    for change in delta["changes"]:
+        # 新增节点
+        if change["type"] == "new_feature":
+            G.add_node(change["name"], type="Feature", **change["props"])
+
+        # 更新节点属性
+        elif change["type"] == "risk_score_change":
+            G.nodes[change["feature"]]["risk_score"] = change["new_value"]
+
+        # 新增边
+        elif change["type"] == "new_test":
+            G.add_node(change["test_id"], type="TestCase", **change["props"])
+            G.add_edge(change["feature"], change["test_id"],
+                type="TESTED_BY", weight=change.get("quality_score", 1))
+
+        # 移除边（测试被删除）
+        elif change["type"] == "test_removed":
+            if G.has_edge(change["feature"], change["test_id"]):
+                G.remove_edge(change["feature"], change["test_id"])
+
+        # 新增缺陷
+        elif change["type"] == "new_defect_recorded":
+            G.add_node(change["bug_id"], type="Defect", **change["props"])
+            for feat in change["features_affected"]:
+                G.add_edge(change["bug_id"], feat,
+                    type="AFFECTED_BY", weight=change["severity"])
+
+    # 重算图度量（轻量，~80 节点）
+    G_undirected = nx.Graph()
+    for u, v in G.edges(): G_undirected.add_edge(u, v)
+    bc = nx.betweenness_centrality(G_undirected)
+    for node in G.nodes():
+        G.nodes[node]["betweenness"] = bc.get(node, 0)
+
+    return G</code></pre>
+</section>
+
+<!-- ===== Queries ===== -->
+<section id="queries">
+  <h2><span class="num">5</span>12 种风险查询模式</h2>
+  <p>NetworkX 的查询 API 对应 Cypher 语义。以下查询覆盖了 JSON 难以表达的所有风险场景。</p>
+
+  <h4>类型一：级联影响分析</h4>
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q1</span> <strong>单文件变更影响面</strong><br>
+      <code>"fuseep.py 改了 → 多少特性、测试需要关注？"</code>
+    </div>
+<pre><code>def impacted_features(G, file_id):
+    # 反向追溯: file ← IMPLEMENTS_IN ← Feature
+    direct = {u for u,v,d in G.in_edges(file_id) if d['type']=='IMPLEMENTS_IN'}
+    # 正向传播: Feature → DEPENDS_ON → Feature (2 跳)
+    all_impacted = set(direct)
+    for f in direct:
+        for _, neighbor, d in G.out_edges(f, data=True):
+            if d['type'] == 'DEPENDS_ON':
+                all_impacted.add(neighbor)
+    return all_impacted
+
+# fuseep.py → {ascend_fuseep, deepseek_v2, dynamic_quant}</code></pre>
+  </div>
+
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q2</span> <strong>依赖升级爆炸半径</strong><br>
+      <code>"CANN 升级到 8.6.0，影响哪些特性？按风险排序"</code>
+    </div>
+<pre><code>def cann_upgrade_blast_radius(G, dep_name):
+    features = []
+    for _, feat, d in G.in_edges(dep_name):
+        if d['type'] == 'DEPENDS_ON':
+            features.append((
+                feat,
+                G.nodes[feat]['risk_score'],
+                d['weight']  # coupling strength
+            ))
+    return sorted(features, key=lambda x: x[1], reverse=True)
+# → [("ascend_fuseep",34,4), ("dynamic_quant",30,4), ("dual_stream_moe",26,3), ...]</code></pre>
+  </div>
+
+  <h4>类型二：盲点检测</h4>
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q3</span> <strong>高介数低风险盲点</strong><br>
+      <code>"哪些节点位于信息传递的咽喉位置，但自身风险评分很低？"</code>
+    </div>
+<pre><code>def blind_spot_detection(G, bc_threshold=0.6, risk_threshold=20):
+    blinds = []
+    for node, data in G.nodes(data=True):
+        bc = data.get('betweenness', 0)
+        risk = data.get('risk_score', 0)
+        if bc > bc_threshold and risk < risk_threshold:
+            blinds.append((node, data['type'], bc, risk))
+    return sorted(blinds, key=lambda x: x[2], reverse=True)
+
+# → [("environ.py", "SourceFile", 0.82, 5), ...]
+# environ.py 是图结构中的关键枢纽，但风险评分只有 5/45 → 最大盲点</code></pre>
+  </div>
+
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q4</span> <strong>零有效测试的高耦合节点</strong><br>
+      <code>"依赖很多特性、但自己没有有效测试的 SourceFile"</code>
+    </div>
+<pre><code>def high_coupling_no_test(G):
+    for node, data in G.nodes(data=True):
+        if data['type'] != 'SourceFile': continue
+        out_degree = G.out_degree(node)  # 影响多少个 feature
+        # 检查是否有 COVERS 边
+        covered = any(
+            d['type'] == 'COVERS'
+            for _, _, d in G.in_edges(node, data=True)
+        )
+        if out_degree >= 3 and not covered:
+            yield node, out_degree, data['path']</code></pre>
+  </div>
+
+  <h4>类型三：多维模式匹配</h4>
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q5</span> <strong>"完美风暴"检测</strong><br>
+      <code>平台差异度>3 ∧ 静默错误模式 ∧ 零有效测试 ∧ 近30天变更</code>
+    </div>
+<pre><code>def perfect_storm(G, days=30):
+    from datetime import datetime, timedelta
+    cutoff = (datetime.now() - timedelta(days=days)).isoformat()
+    results = []
+    for node, data in G.nodes(data=True):
+        if data['type'] != 'Feature': continue
+        # 条件1: 平台差异度 > 3
+        has_divergence = any(
+            d['weight'] > 3 and G.nodes[v].get('platform_divergence') == 'fully_npu_private'
+            for _, v, d in G.out_edges(node, data=True) if d['type'] == 'IMPLEMENTS_IN'
+        )
+        # 条件2: 历史有静默错误缺陷
+        has_silent_defect = any(
+            G.nodes[u]['is_silent']
+            for u, _, d in G.in_edges(node, data=True) if d['type'] == 'AFFECTED_BY'
+        )
+        # 条件3: 零有效测试
+        n_effective = data.get('n_effective_tests', 0)
+        # 条件4: 30天内有变更
+        recent = data.get('last_modified', '') > cutoff
+        if has_divergence and has_silent_defect and n_effective == 0 and recent:
+            results.append((node, data['risk_score']))
+    return sorted(results, key=lambda x: x[1], reverse=True)</code></pre>
+  </div>
+
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q6</span> <strong>缺陷聚类——寻找"惯犯"模块</strong><br>
+      <code>"哪些 SourceFile 涉及的缺陷最多？这些缺陷有什么共同模式？"</code>
+    </div>
+<pre><code>def defect_hotspots(G):
+    file_defects = {}
+    for node, data in G.nodes(data=True):
+        if data['type'] != 'Defect': continue
+        for _, file_id, d in G.out_edges(node):
+            if d['type'] == 'FIXED_IN':
+                file_defects.setdefault(file_id, []).append({
+                    'bug_id': node,
+                    'failure_mode': data['failure_mode'],
+                    'is_silent': data['is_silent']
+                })
+    # 按缺陷数排序
+    return sorted(file_defects.items(), key=lambda x: len(x[1]), reverse=True)
+# → [("fused_moe_method_npu.py", [BUG-042, BUG-031, BUG-019, ...]), ...]</code></pre>
+  </div>
+
+  <h4>类型四：测试策略优化</h4>
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q7</span> <strong>测试有效性缺口排序</strong><br>
+      <code>"按 (风险 × (5 - 测试有效性)) 排序，优先补哪个特性的测试？"</code>
+    </div>
+<pre><code>def test_priority(G):
+    priority = []
+    for node, data in G.nodes(data=True):
+        if data['type'] != 'Feature': continue
+        test_edges = [
+            d['weight'] for _, _, d in G.out_edges(node, data=True)
+            if d['type'] == 'TESTED_BY'
+        ]
+        max_effectiveness = max(test_edges) if test_edges else 0
+        gap = 5 - max_effectiveness
+        score = data['risk_score'] * gap
+        priority.append((node, data['risk_score'], max_effectiveness, gap, score))
+    return sorted(priority, key=lambda x: x[4], reverse=True)</code></pre>
+  </div>
+
+  <h4>类型五：变更影响传播</h4>
+  <div class="query-card">
+    <div class="q">
+      <span class="kw">Q8</span> <strong>n-hop 影响传播</strong><br>
+      <code>"从这个文件出发，3 跳内的所有受影响节点"</code>
+    </div>
+<pre><code>def n_hop_impact(G, start_file, hops=3):
+    # 找到源文件节点
+    file_node = next(n for n,d in G.nodes(data=True)
+                     if d.get('path','').endswith(start_file))
+    # BFS 传播（沿 IMPLEMENTS_IN, DEPENDS_ON, AFFECTED_BY）
+    visited = set()
+    frontier = {file_node}
+    for _ in range(hops):
+        next_frontier = set()
+        for node in frontier:
+            for _, neighbor, d in G.out_edges(node):
+                if d['type'] in ('IMPLEMENTS_IN','DEPENDS_ON','AFFECTED_BY'):
+                    if neighbor not in visited:
+                        next_frontier.add(neighbor)
+        visited.update(frontier)
+        frontier = next_frontier - visited
+    return visited | frontier</code></pre>
+  </div>
+
+  <div class="two-col">
+    <div>
+      <h4>补充查询</h4>
+      <div class="query-card" style="font-size:.82em;">
+        <div class="q"><span class="kw">Q9</span> <strong>跨特性缺陷模式</strong><br>同一 failure_mode 影响了 >=2 个 Feature → 系统性风险</div>
+      </div>
+      <div class="query-card" style="font-size:.82em;">
+        <div class="q"><span class="kw">Q10</span> <strong>测试覆盖重叠度</strong><br>两个测试覆盖了完全相同的 Feature 和文件 → 冗余</div>
+      </div>
+    </div>
+    <div>
+      <div class="query-card" style="font-size:.82em;">
+        <div class="q"><span class="kw">Q11</span> <strong>依赖链最深的特性</strong><br>DEPENDS_ON 最长路径 → 最容易受连锁故障影响</div>
+      </div>
+      <div class="query-card" style="font-size:.82em;">
+        <div class="q"><span class="kw">Q12</span> <strong>"孤儿"测试</strong><br>TestCase 没有 TESTED_BY 边到任何 Feature → 测试配置错误</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Integration with Incremental ===== -->
+<section id="integration">
+  <h2><span class="num">6</span>KG 与增量框架的融合</h2>
+
+  <h3>6.1 变更影响传播：从单层到多层</h3>
+  <p>当前的 <code>dependency_map.json</code> 只做一层映射 (file → feature)。KG 做<strong>多层传播</strong>，二者串联而不是替代。</p>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg">
+      <!-- Title -->
+      <text x="440" y="24" fill="var(--text)" font-size="13" text-anchor="middle" font-weight="650">增量触发 → 影响面计算 (JSON + KG 协同)</text>
+
+      <!-- Step 1 -->
+      <rect x="30" y="50" width="190" height="56" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="125" y="72" fill="var(--teal)" font-size="10" text-anchor="middle" font-weight="700">Step 1: git diff</text>
+      <text x="125" y="92" fill="var(--text2)" font-size="9" text-anchor="middle">changed_files = [...]</text>
+
+      <line x1="220" y1="78" x2="255" y2="78" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 2 -->
+      <rect x="255" y="50" width="190" height="56" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="350" y="72" fill="var(--accent)" font-size="10" text-anchor="middle" font-weight="700">Step 2: JSON direct map</text>
+      <text x="350" y="92" fill="var(--text2)" font-size="9" text-anchor="middle">file→feature (O(1), 1hop)</text>
+
+      <line x1="445" y1="78" x2="480" y2="78" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 3 -->
+      <rect x="480" y="50" width="190" height="56" rx="8" fill="var(--surface2)" stroke="var(--purple)" stroke-width="1.5"/>
+      <text x="575" y="72" fill="var(--purple)" font-size="10" text-anchor="middle" font-weight="700">Step 3: KG propagation</text>
+      <text x="575" y="92" fill="var(--text2)" font-size="9" text-anchor="middle">沿 DEPENDS_ON/AFFECTED_BY 传播</text>
+
+      <line x1="670" y1="78" x2="705" y2="78" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 4 -->
+      <rect x="705" y="50" width="150" height="56" rx="8" fill="var(--surface2)" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="780" y="72" fill="var(--green)" font-size="10" text-anchor="middle" font-weight="700">Step 4: dedup</text>
+      <text x="780" y="92" fill="var(--text2)" font-size="9" text-anchor="middle">去重 → 精确重算集</text>
+
+      <!-- Output box -->
+      <rect x="250" y="140" width="380" height="40" rx="8" fill="rgba(63,185,80,.06)" stroke="rgba(63,185,80,.2)"/>
+      <text x="440" y="165" fill="var(--green)" font-size="11" text-anchor="middle" font-weight="650">需要重新风险评分的 Feature 集合（精确 · 无遗漏 · 最少 Agent 调用）</text>
+
+      <!-- Example box -->
+      <rect x="80" y="210" width="720" height="100" rx="8" fill="var(--surface2)" stroke="var(--border)" stroke-width="1"/>
+      <text x="100" y="235" fill="var(--text2)" font-size="10">示例: 修改了 <code>fuseep.py</code></text>
+      <text x="100" y="258" fill="var(--text2)" font-size="10">Step 2 JSON → <code>{ascend_fuseep}</code> (1个)</text>
+      <text x="100" y="278" fill="var(--text2)" font-size="10">Step 3 KG propagation 1-hop → <code>{deepseek_v2, qwen3_moe, glm4_moe}</code> (DEPENDS_ON, +3个)</text>
+      <text x="100" y="298" fill="var(--text2)" font-size="10">Step 3 KG propagation 2-hop (共享缺陷模式) → <code>{dynamic_quant}</code> (SHARES_DEFECT_PATTERN, +1个)</text>
+      <text x="100" y="316" fill="var(--green)" font-size="10" font-weight="650">Step 4 去重 → <code>{ascend_fuseep, deepseek_v2, qwen3_moe, glm4_moe, dynamic_quant}</code> 共5个 Feature = 5个 Risk-Scorer Agent</text>
+    </svg>
+  </div>
+
+  <h3>6.2 增量循环中的角色分工</h3>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>步骤</th><th>输入</th><th>引擎</th><th>输出</th><th>耗时</th></tr>
+    <tr>
+      <td>变更检测</td><td>git diff</td><td>Shell</td><td>changed_files</td>
+      <td>&lt;1s</td>
+    </tr>
+    <tr>
+      <td>直接映射</td><td>changed_files × dependency_map</td><td>JSON lookup</td>
+      <td>directly_affected_features</td>
+      <td>&lt;1s</td>
+    </tr>
+    <tr>
+      <td>传播分析</td><td>directly_affected_features × G</td>
+      <td>KG n-hop BFS</td>
+      <td>propagated_features</td>
+      <td>&lt;1s</td>
+    </tr>
+    <tr>
+      <td>指纹比对</td><td>union(direct, propagated) × fingerprint_db</td>
+      <td>SHA256 lookup</td>
+      <td>truly_changed_features (过滤指纹未变的)</td>
+      <td>&lt;1s</td>
+    </tr>
+    <tr>
+      <td>增量评分</td><td>truly_changed_features</td>
+      <td>Agent (Risk-Scorer)</td>
+      <td>delta risk scores</td>
+      <td>5-20s</td>
+    </tr>
+    <tr>
+      <td>图更新</td><td>delta × G</td>
+      <td>graph_delta_apply()</td>
+      <td>updated G</td>
+      <td>&lt;1s</td>
+    </tr>
+    <tr>
+      <td>Delta Report</td><td>delta × old baseline</td>
+      <td>Template</td>
+      <td>PR comment</td>
+      <td>&lt;1s</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="callout success">
+    <h4>✅ 关键效果</h4>
+    <p style="color:var(--text);">KG 的传播分析让受影响特性从 <strong>1 个提升到 5 个</strong>（上例），同时不增加 Agent 的无效调用（指纹比对过滤掉了真正没变的那些）。这实现了<strong>影响面全覆盖 + 计算成本严格正比于真实变更量</strong>。</p>
+  </div>
+
+  <h3>6.3 与 /graphify skill 的对接</h3>
+  <p><code>/graphify</code> skill 能将代码转为知识图谱（HTML 可视化 + JSON 数据 + 审计报告）。在 Agent Workflow 中，它可以直接作为一个 phase 嵌入：</p>
+
+<pre><code>// Workflow 中的 KG phase
+phase('Build Knowledge Graph')
+
+// 方式1: 调用 /graphify skill（如果已安装）
+const kgResult = await workflow('graphify', {
+  input: '.sglang-risk/baselines/latest/',
+  mode: 'risk-graph',
+  schema: 'npu_risk_schema.json'
+})
+
+// 方式2: 用 Agent 运行 build_graph.py
+const graphData = await agent(
+  'Build the NPU risk knowledge graph from the baseline data',
+  { label: 'kg:build', schema: GRAPH_SCHEMA }
+)
+
+// 输出产物
+// → .sglang-risk/graph/latest_graph.json    (NetworkX node-link data)
+// → .sglang-risk/graph/risk_graph.html      (/graphify 生成的可视化)
+// → .sglang-risk/graph/blind_spots.md       (/graphify 审计报告)</code></pre>
+</section>
+
+<!-- ===== Visualization ===== -->
+<section id="viz">
+  <h2><span class="num">7</span>可视化与交互</h2>
+
+  <h3>7.1 轻量可视化方案</h3>
+  <p>NetworkX 图可以直接输出为多种前端格式，不需要重型图数据库。</p>
+
+  <div class="card-grid">
+    <div class="card">
+      <h4>📊 静态报告</h4>
+      <p style="font-size:.84em;color:var(--text2);">PyVis / Graphviz → HTML 交互图（节点可点击、缩放、搜索）</p>
+      <p style="font-size:.82em;color:var(--accent);"><code>nt = nx.NetworkXGraph(G)<br>nt.show('risk_graph.html')</code></p>
+      <p style="font-size:.8em;color:var(--text2);">适用于: 每次全量分析产出的基线报告</p>
+    </div>
+    <div class="card">
+      <h4>🌐 CI 仪表板</h4>
+      <p style="font-size:.84em;color:var(--text2);">D3.js force-directed layout → 嵌入 GitHub Pages</p>
+      <p style="font-size:.82em;color:var(--accent);">node-link JSON → D3.js 渲染 → 颜色编码风险等级</p>
+      <p style="font-size:.8em;color:var(--text2);">适用于: 团队共享的实时风险地图</p>
+    </div>
+    <div class="card">
+      <h4>🔔 告警推送</h4>
+      <p style="font-size:.84em;color:var(--text2);">检测到变化 → 生成子图 diff → 推送到 Slack/飞书</p>
+      <p style="font-size:.82em;color:var(--accent);">Delta JSON → 提取受影响的子图 → 渲染为 PNG → 消息推送</p>
+      <p style="font-size:.8em;color:var(--text2);">适用于: PR 门禁结果的可视化通知</p>
+    </div>
+  </div>
+
+  <h3>7.2 可选升级路径</h3>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>现在（NetworkX）</th><th>未来（Neo4j / NebulaGraph）</th><th>升级契机</th></tr>
+    <tr><td>~80 节点，内存图</td><td>持久化存储，支持并发查询</td><td>特性数 > 200</td></tr>
+    <tr><td>Python 进程内查询</td><td>Cypher 声明式查询</td><td>查询复杂度超出 NetworkX API</td></tr>
+    <tr><td>手动导出 node-link JSON</td><td>图数据库原生 REST API</td><td>多个下游系统需要消费图数据</td></tr>
+    <tr><td>build_graph.py 每次重建</td><td>持续运行的图服务</td><td>需要 < 100ms 查询延迟</td></tr>
+    <tr><td>单机分析</td><td>分布式图计算 (PageRank, Community)</td><td>特性间出现非平凡社区结构</td></tr>
+  </table>
+  </div>
+  <p style="font-size:.82em;">当前 NPU 风险系统的规模（18 特性 + ~50 源文件 + ~108 测试 + ~20 缺陷），NetworkX 足够用到 M4 阶段。</p>
+</section>
+
+<!-- ===== Maturity ===== -->
+<section id="maturity">
+  <h2><span class="num">8</span>成熟度路径图</h2>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>等级</th><th>能力</th><th>数据模型</th><th>查询能力</th><th>何时达到</th></tr>
+    <tr>
+      <td><span class="badge teal">L0</span></td>
+      <td><strong>静态图谱</strong><br>全量分析时生成，作为可视化产物</td>
+      <td>NetworkX 内存图<br>node-link JSON 导出</td>
+      <td>PyVis 交互图<br>节点属性查询</td>
+      <td><strong>M0 (当前)</strong></td>
+    </tr>
+    <tr>
+      <td><span class="badge blue">L1</span></td>
+      <td><strong>增量更新图谱</strong><br>每次 delta 自动更新图</td>
+      <td>+ graph_delta_apply()<br>+ fingerprint 缓存</td>
+      <td>+ n-hop BFS 传播<br>+ 图度量重算</td>
+      <td>M1 (1-2周)</td>
+    </tr>
+    <tr>
+      <td><span class="badge purple">L2</span></td>
+      <td><strong>推理查询</strong><br>盲点检测 · 完美风暴 · 缺陷聚类</td>
+      <td>+ 关系权重调优<br>+ 缺陷模式库</td>
+      <td>+ 12 种标准查询<br>+ 自定义模式匹配</td>
+      <td>M2 (2-4周)</td>
+    </tr>
+    <tr>
+      <td><span class="badge orange">L3</span></td>
+      <td><strong>CI 集成</strong><br>PR 门禁 + 自动告警 + 仪表板</td>
+      <td>+ 持久化图（Neo4j Lite 或 SQLite+JSON）</td>
+      <td>+ Cypher 查询<br>+ 趋势图对比</td>
+      <td>M3 (1-2月)</td>
+    </tr>
+    <tr>
+      <td><span class="badge red">L4</span></td>
+      <td><strong>智能推理</strong><br>图神经网络预测高风险节点 · 自动发现新风险模式</td>
+      <td>+ 时间序列图快照<br>+ 图嵌入</td>
+      <td>+ 链路预测<br>+ 异常子图检测</td>
+      <td>M4 (3-6月)</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="callout warn">
+    <h4>⚠️ 不要过度工程化</h4>
+    <p style="color:var(--text);">L0-L2 用 NetworkX 即可，不需要任何外部依赖。L3 开始才考虑图数据库——而且前提是症状已经出现：查询太慢、多个系统需要消费图数据、节点数超过内存阈值。在到达这个点之前，<strong>NetworkX + node-link JSON 是最优解</strong>。</p>
+  </div>
+</section>
+
+<!-- ===== Deliverables ===== -->
+<section id="deliverables">
+  <h2><span class="num">9</span>交付物与文件布局</h2>
+
+<pre><code>.sglang-risk/
+├── graph/
+│   ├── build_graph.py              # 一键构建: JSON → NetworkX
+│   ├── update_graph.py             # 增量更新: delta → G
+│   ├── queries.py                  # 12 种标准查询函数
+│   ├── export_for_dashboard.py     # G → D3.js node-link JSON
+│   ├── latest_graph.json           # 当前图谱的 node-link 格式
+│   └── snapshots/
+│       └── 2026-05-30_graph.json   # 历史图快照（用于趋势对比）
+│
+├── schemas/
+│   └── risk_graph_schema.json      # 节点/关系/属性的 JSON Schema
+│
+├── baselines/                      # (已有) 全量分析基线
+├── deltas/                         # (已有) 增量 delta 记录
+├── trends/                         # (已有) 趋势聚合数据
+├── db/
+│   ├── defect_db.json             # (已有) 缺陷数据库
+│   └── feature_fingerprints.json  # (已有) 特性指纹
+│
+└── dashboard/
+    ├── index.html                  # (增强) 嵌入 D3.js 图可视化
+    └── graph_viz.js                # 图谱渲染逻辑</code></pre>
+</section>
+
+<!-- ===== Quick Start ===== -->
+<section id="quickstart">
+  <h2><span class="num">10</span>快速启动指南</h2>
+
+<pre><code># 1. 运行全量分析（产出 baseline）
+python .sglang-risk/scripts/run_full.py --mode baseline
+
+# 2. 从 baseline 构建图
+python .sglang-risk/graph/build_graph.py \
+    --baseline .sglang-risk/baselines/latest/ \
+    --output .sglang-risk/graph/latest_graph.json
+
+# 3. 运行盲点检测
+python -c "
+from graph.queries import blind_spot_detection, perfect_storm
+import networkx as nx, json
+
+G = nx.node_link_graph(
+    json.loads(open('.sglang-risk/graph/latest_graph.json').read())
+)
+
+print('=== Blind Spots ===')
+for name, typ, bc, risk in blind_spot_detection(G):
+    print(f'  {name} ({typ}): betweenness={bc:.2f}, risk={risk}')
+
+print('\n=== Perfect Storm ===')
+for name, risk in perfect_storm(G):
+    print(f'  {name}: risk={risk} → CRITICAL: add tests immediately')
+"
+
+# 4. 增量更新图（PR 触发时）
+python .sglang-risk/scripts/run_delta.py --mode pr_check
+python .sglang-risk/graph/update_graph.py \
+    --delta .sglang-risk/deltas/latest.json \
+    --graph .sglang-risk/graph/latest_graph.json</code></pre>
+</section>
+
+<!-- ===== Summary ===== -->
+<section id="summary">
+  <h2><span class="num">11</span>总结</h2>
+
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid var(--teal);">
+      <h4>📐 设计决策</h4>
+      <ul style="font-size:.85em;color:var(--text2);">
+        <li>属性图模型（5节点 + 7关系），不引入 RDF/OWL</li>
+        <li>NetworkX 优先，~80 节点内存图足够</li>
+        <li>KG 是 JSON 的补充层，不替代</li>
+        <li>图从已有 baseline JSON 自动构建，零额外人工</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <h4>🎯 核心价值</h4>
+      <ul style="font-size:.85em;color:var(--text2);">
+        <li><strong>级联影响</strong>: 1-hop JSON + n-hop KG → 无遗漏</li>
+        <li><strong>盲点检测</strong>: 高介数低风险节点（JSON 看不到）</li>
+        <li><strong>模式匹配</strong>: "完美风暴"等多条件组合查询</li>
+        <li><strong>图度量</strong>: 介数中心性 / PageRank / 社区发现</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <h4>🔄 与增量框架协同</h4>
+      <ul style="font-size:.85em;color:var(--text2);">
+        <li>git diff → JSON 直接映射 (O(1))</li>
+        <li>JSON 结果 → KG n-hop 传播 (O(E))</li>
+        <li>合并去重 → 指纹比对 → Agent 增量评分</li>
+        <li>评分结果 → 更新图 (O(Δ))</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout success" style="margin-top:18px;">
+    <h4>✅ 四份文档分工明确</h4>
+    <p style="color:var(--text);">
+      Doc 1: 覆盖审计 → 知道"测没测"<br>
+      Doc 2: 风险策略 → 知道"哪里多测、哪里少测、怎么测"<br>
+      Doc 3: 增量架构 → 知道"变化后如何高效更新"<br>
+      <strong>Doc 4: 知识图谱 → 知道"隐藏的关系、级联的风险、结构性的盲点"</strong><br>
+      Doc 3 和 Doc 4 互为补充——增量架构负责<strong>效率</strong>（只算变化的），KG 负责<strong>深度</strong>（发现隐含的）。
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>NPU Risk Knowledge Graph — Schema · Construction · Integration · 2026-05-30</p>
+  <p style="margin-top:4px;">5 节点类型 · 7 关系类型 · 12 查询模式 · NetworkX → Neo4j 平滑升级路径 · L0→L4 成熟度路线</p>
+</footer>
+
+</body>
+</html>

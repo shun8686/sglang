@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Eagle3 NPU 测试风险报告</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --text-muted: #8b949e;
+    --accent: #58a6ff;
+    --critical: #f85149;
+    --high: #f0883e;
+    --medium: #d29922;
+    --low: #3fb950;
+    --silent: #bc8cff;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    padding: 2rem;
+  }
+  .container { max-width: 1100px; margin: 0 auto; }
+  header {
+    text-align: center;
+    padding: 2rem 0 3rem;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 2rem;
+  }
+  header h1 { font-size: 2rem; margin-bottom: 0.5rem; }
+  header .subtitle { color: var(--text-muted); font-size: 1rem; }
+  .badge {
+    display: inline-block;
+    padding: 0.2em 0.7em;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin: 0 0.2em;
+  }
+  .badge-medium { background: #d2992222; color: var(--medium); border: 1px solid #d2992244; }
+  .badge-critical { background: #f8514922; color: var(--critical); border: 1px solid #f8514944; }
+  .badge-high { background: #f0883e22; color: var(--high); border: 1px solid #f0883e44; }
+  .badge-low { background: #3fb95022; color: var(--low); border: 1px solid #3fb95044; }
+  .badge-silent { background: #bc8cff22; color: var(--silent); border: 1px solid #bc8cff44; }
+
+  .alert {
+    border: 1px solid;
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 1.5rem 0;
+    font-size: 0.95rem;
+  }
+  .alert-warn { background: #d2992211; border-color: #d2992244; color: #e3b341; }
+  .alert-danger { background: #f8514911; border-color: #f8514944; color: #f85149; }
+  .alert-info { background: #58a6ff11; border-color: #58a6ff44; color: #58a6ff; }
+
+  .score-ring {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    margin: 1.5rem 0;
+  }
+  .ring { text-align: center; }
+  .ring .num { font-size: 2.5rem; font-weight: 700; line-height: 1.1; }
+  .ring .label { font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
+  .ring .num.med { color: var(--medium); }
+  .ring .num.prob { color: var(--high); }
+  .ring .num.impact { color: var(--accent); }
+
+  section { margin: 2.5rem 0; }
+  section h2 {
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+  section h2 .icon { font-size: 1.2rem; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    margin: 1rem 0;
+  }
+  thead { background: var(--surface); }
+  th {
+    text-align: left;
+    padding: 0.6rem 0.8rem;
+    border-bottom: 2px solid var(--border);
+    color: var(--text-muted);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td {
+    padding: 0.55rem 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  tr:hover { background: #ffffff05; }
+  td.file { font-family: 'Cascadia Code', 'Fira Code', monospace; font-size: 0.82rem; }
+  td.bug-id { font-family: monospace; font-weight: 600; }
+
+  .factor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.8rem;
+  }
+  .factor-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+  }
+  .factor-card .name {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 0.3rem;
+  }
+  .factor-card .score {
+    font-size: 1.6rem;
+    font-weight: 700;
+  }
+  .factor-card .desc {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 0.3rem;
+  }
+
+  .rec-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+    margin: 0.6rem 0;
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+  }
+  .rec-card .prio {
+    font-weight: 700;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    padding: 0.15em 0.5em;
+    border-radius: 4px;
+  }
+  .prio-p0 { background: #f8514922; color: var(--critical); }
+  .prio-p1 { background: #f0883e22; color: var(--high); }
+  .prio-p2 { background: #d2992222; color: var(--medium); }
+  .prio-p3 { background: #3fb95022; color: var(--low); }
+  .rec-card .body { flex: 1; }
+  .rec-card .title { font-weight: 600; margin-bottom: 0.2rem; }
+  .rec-card .covers { font-size: 0.8rem; color: var(--text-muted); }
+
+  .kg-insight {
+    background: var(--surface);
+    border-left: 3px solid var(--accent);
+    padding: 0.8rem 1rem;
+    margin: 0.6rem 0;
+    border-radius: 0 6px 6px 0;
+    font-size: 0.9rem;
+  }
+  .kg-insight .kg-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    color: var(--accent);
+    letter-spacing: 0.06em;
+    margin-bottom: 0.25rem;
+  }
+
+  .bar-wrap { margin: 0.5rem 0; }
+  .bar-label { display: flex; justify-content: space-between; font-size: 0.8rem; margin-bottom: 0.2rem; }
+  .bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; }
+  .bar-fill.med { background: var(--medium); }
+  .bar-fill.high { background: var(--high); }
+  .bar-fill.crit { background: var(--critical); }
+  .bar-fill.low { background: var(--low); }
+
+  .coupling-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 0.8rem 0;
+  }
+  .coupling-tag {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.82rem;
+  }
+  .coupling-tag .count { font-weight: 700; color: var(--accent); }
+
+  footer {
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    margin-top: 3rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  .check { color: var(--low); }
+  .cross { color: var(--critical); }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>🦅 Eagle3 NPU 测试风险报告</h1>
+  <p class="subtitle">
+    父特性: <strong>speculative_decoding</strong> &nbsp;⊃&nbsp; eagle3
+    <span class="badge badge-medium">MEDIUM RISK</span>
+    <span class="badge badge-silent">67% 静默缺陷率</span>
+  </p>
+  <div class="score-ring">
+    <div class="ring"><div class="num med">17<span style="font-size:1rem;color:#8b949e">/45</span></div><div class="label">综合评分</div></div>
+    <div class="ring"><div class="num prob">11<span style="font-size:1rem;color:#8b949e">/25</span></div><div class="label">发生概率</div></div>
+    <div class="ring"><div class="num impact">6<span style="font-size:1rem;color:#8b949e">/20</span></div><div class="label">影响程度</div></div>
+    <div class="ring"><div class="num" style="color:#8b949e">L2</div><div class="label">测试深度</div></div>
+  </div>
+  <p style="color: var(--text-muted); font-size:0.85rem;">
+    Scoped view · 关键词: <code>eagle3</code> · 匹配方式: agent_semantic_classification
+    &nbsp;|&nbsp; 生成时间: 2026-06-08
+  </p>
+</header>
+
+<!-- ====== ALERT ====== -->
+<div class="alert alert-warn">
+  <strong>⚠️ 核心风险：</strong>Eagle3 有 <strong>3 个专属缺陷</strong>（2 个静默 precision_loss，1 个 crash severity 10），
+  全部发生在 2026 年，集中在 <code>eagle_worker_v2.py</code> 和 NPU graph runner 中。
+  仅 <strong>1 个测试</strong> 且 <strong>无 oracle pattern 覆盖</strong>，
+  accept-rate 和 hidden-state 两类 bug 处于<strong>无防护</strong>状态。
+</div>
+
+<div class="alert alert-danger">
+  <strong>🔴 静默缺陷率 67%（2/3）远超 15% 警戒线。</strong>
+  这 2 个 bug 不会导致崩溃或输出错误，但会<strong>悄悄降低 speculative decoding 的加速效果</strong>，
+  现有 GSM8K 测试对它们完全盲。
+</div>
+
+<!-- ====== RISK FACTORS ====== -->
+<section>
+  <h2><span class="icon">📊</span> 风险因子分解</h2>
+  <div class="factor-grid">
+    <div class="factor-card">
+      <div class="name">代码复杂度</div>
+      <div class="score" style="color:var(--high)">4<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">继承自 speculative_decoding，核心 eagle3 文件 5,645 行</div>
+    </div>
+    <div class="factor-card">
+      <div class="name">变更频率</div>
+      <div class="score" style="color:var(--medium)">2<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">继承自父特性，时间衰减加权提交数</div>
+    </div>
+    <div class="factor-card">
+      <div class="name">历史缺陷</div>
+      <div class="score" style="color:var(--medium)">2<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">Agent 分类: 3/8 个父特性缺陷属于 eagle3</div>
+    </div>
+    <div class="factor-card">
+      <div class="name">依赖深度</div>
+      <div class="score" style="color:var(--low)">1<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">无上游特性依赖</div>
+    </div>
+    <div class="factor-card">
+      <div class="name">测试有效性</div>
+      <div class="score" style="color:var(--medium)">2<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">仅 1 个测试，无 oracle pattern，最佳质量 4/5</div>
+    </div>
+    <div class="factor-card">
+      <div class="name">用户暴露度</div>
+      <div class="score" style="color:var(--medium)">3<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">4 个模型家族使用 eagle3 speculative decoding</div>
+    </div>
+    <div class="factor-card">
+      <div class="name">失效严重度</div>
+      <div class="score" style="color:var(--medium)">3<span style="font-size:0.8rem;color:#8b949e">/5</span></div>
+      <div class="desc">崩溃 + 静默精度丢失，影响加速效果</div>
+    </div>
+  </div>
+
+  <div style="margin-top:1.5rem; display:grid; grid-template-columns:1fr 1fr; gap:1.5rem;">
+    <div>
+      <div class="bar-label"><span>发生概率</span><span>11/25</span></div>
+      <div class="bar-track"><div class="bar-fill high" style="width:44%"></div></div>
+    </div>
+    <div>
+      <div class="bar-label"><span>影响程度</span><span>6/20</span></div>
+      <div class="bar-track"><div class="bar-fill med" style="width:30%"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== DEFECT HISTORY ====== -->
+<section>
+  <h2><span class="icon">🐛</span> 缺陷历史 <span style="font-size:0.8rem;color:var(--text-muted)">(3 scoped / 8 total)</span></h2>
+  <table>
+    <thead>
+      <tr><th>Bug ID</th><th>类别</th><th>严重度</th><th>静默</th><th>日期</th><th>描述</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="bug-id" style="color:var(--critical)">BUG-2026-040</td>
+        <td><span class="badge badge-critical">crash</span></td>
+        <td><strong>10</strong></td>
+        <td><span class="cross">✗</span></td>
+        <td>2026-04-30</td>
+        <td>eagle3 hidden states capture 在 DP attention 模式下 batch&gt;1 崩溃</td>
+      </tr>
+      <tr>
+        <td class="bug-id" style="color:var(--silent)">BUG-2026-016</td>
+        <td><span class="badge badge-silent">precision_loss</span></td>
+        <td>3</td>
+        <td><span class="check">✓</span></td>
+        <td>2026-05-11</td>
+        <td>Eagle Worker v2 + PlanStream 下 mrope_position 竞态条件</td>
+      </tr>
+      <tr>
+        <td class="bug-id" style="color:var(--silent)">BUG-2026-098</td>
+        <td><span class="badge badge-silent">precision_loss</span></td>
+        <td>3</td>
+        <td><span class="check">✓</span></td>
+        <td>2026-03-30</td>
+        <td>eagle3 accept rate 计算错误—seq_len 未按 draft step 递增</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="kg-insight">
+    <div class="kg-label">🧠 KG 发现</div>
+    BUG-2026-016 和 BUG-2026-098 均为静默 precision_loss，现有 GSM8K 测试<strong>对两者都通过</strong>——
+    target model 修正了 draft 错误，最终数学答案仍然正确。只有 <code>logprob_rescore</code> oracle 能捕获这类 bug。
+  </div>
+</section>
+
+<!-- ====== TEST COVERAGE ====== -->
+<section>
+  <h2><span class="icon">🧪</span> 测试覆盖 <span style="font-size:0.8rem;color:var(--text-muted)">(1 scoped / 1 total, best=4/5, avg=4.0/5)</span></h2>
+  <table>
+    <thead>
+      <tr><th>测试文件</th><th>质量</th><th>Oracle</th><th>类型</th><th>CI Suite</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="file">test/registered/ascend/basic_function/speculative_inference/test_npu_eagle3.py</td>
+        <td>4/5</td>
+        <td><span class="cross">❌ 无</span></td>
+        <td>e2e_accuracy</td>
+        <td>nightly-1-npu-a3</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h3 style="font-size:1rem; margin-top:1.2rem; color:var(--text-muted);">当前 oracle 盲区</h3>
+  <table>
+    <thead>
+      <tr><th>缺陷模式</th><th>GSM8K 能否检测</th><th>原因</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>silent_precision_loss</td>
+        <td><span class="cross">❌ 盲</span></td>
+        <td>Target model 修正 draft 错误→最终答案正确→BUG-2026-016/098 均通过</td>
+      </tr>
+      <tr>
+        <td>accept_rate_error</td>
+        <td><span class="cross">❌ 盲</span></td>
+        <td>错误的 accept rate→target model 修正 tokens→输出仍正确→GSM8K 不变</td>
+      </tr>
+      <tr>
+        <td>logit_computation_error</td>
+        <td><span class="cross">❌ 盲</span></td>
+        <td>统计准确率对单个 logit 错误不敏感</td>
+      </tr>
+      <tr>
+        <td>token_divergence</td>
+        <td><span class="cross">❌ 盲</span></td>
+        <td>GSM8K 只检查最终数学答案正则提取，中间 token 分叉不可见</td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ====== MISSING ORACLE PATTERNS ====== -->
+<section>
+  <h2><span class="icon">🔓</span> 缺失的 Oracle 模式 <span style="font-size:0.8rem;color:var(--text-muted)">(KG 分析)</span></h2>
+  <table>
+    <thead>
+      <tr><th>Oracle 模式</th><th>类别</th><th>严格度</th><th>NPU 验证</th><th>可检测</th><th>盲区</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>exact_match_short</strong></td>
+        <td>exact_match</td>
+        <td><span class="badge badge-critical">hard</span></td>
+        <td><span class="check">✅</span></td>
+        <td>crash, token_divergence, accept_rate_error, compatibility</td>
+        <td>silent_precision_loss (bfloat16 near-tie)</td>
+      </tr>
+      <tr>
+        <td><strong>logprob_rescore</strong></td>
+        <td>logprob_comparison</td>
+        <td><span class="badge badge-high">soft</span></td>
+        <td><span class="check">✅</span></td>
+        <td>silent_precision_loss, logit_error, crash, token_divergence, accept_rate_error</td>
+        <td>performance_regression</td>
+      </tr>
+      <tr>
+        <td>token_oracle_canary</td>
+        <td>deterministic</td>
+        <td><span class="badge badge-critical">hard</span></td>
+        <td><span class="cross">❌ 未验证</span></td>
+        <td>crash, silent_precision_loss, token_divergence, accept_rate_error, logit_error</td>
+        <td>—</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="kg-insight">
+    <div class="kg-label">🧠 KG 推荐</div>
+    Feature 有静默 precision-loss 缺陷。添加 <code>logprob_rescore</code> oracle——
+    exact match 单独无法检测这类 bug（证据: eagle3 调查, BUG-2026-098）。
+  </div>
+</section>
+
+<!-- ====== SOURCE FILES ====== -->
+<section>
+  <h2><span class="icon">📁</span> 源代码文件 <span style="font-size:0.8rem;color:var(--text-muted)">(8 scoped / 12 total)</span></h2>
+  <table>
+    <thead>
+      <tr><th>文件</th><th style="text-align:right">行数</th><th style="text-align:right">缺陷数</th><th>平台</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="file">python/sglang/srt/speculative/eagle_worker_v2.py</td>
+        <td style="text-align:right">1,385</td>
+        <td style="text-align:right;color:var(--critical);font-weight:700">2</td>
+        <td><span class="badge badge-medium">partial</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/speculative/eagle_worker.py</td>
+        <td style="text-align:right">1,307</td>
+        <td style="text-align:right;color:var(--high);font-weight:700">1</td>
+        <td><span class="badge badge-medium">partial</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/speculative/eagle_info.py</td>
+        <td style="text-align:right">1,048</td>
+        <td style="text-align:right">0</td>
+        <td><span class="badge badge-medium">partial</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/speculative/multi_layer_eagle_worker.py</td>
+        <td style="text-align:right">814</td>
+        <td style="text-align:right;color:var(--high);font-weight:700">1</td>
+        <td><span class="badge badge-medium">partial</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/speculative/eagle_info_v2.py</td>
+        <td style="text-align:right">616</td>
+        <td style="text-align:right;color:var(--high);font-weight:700">1</td>
+        <td><span class="badge badge-medium">partial</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/speculative/eagle_utils.py</td>
+        <td style="text-align:right">289</td>
+        <td style="text-align:right">0</td>
+        <td><span class="badge badge-medium">partial</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/hardware_backend/npu/graph_runner/eagle_draft_npu_graph_runner.py</td>
+        <td style="text-align:right">115</td>
+        <td style="text-align:right;color:var(--high);font-weight:700">1</td>
+        <td><span class="badge badge-low">fully_npu_private</span></td>
+      </tr>
+      <tr>
+        <td class="file">python/sglang/srt/hardware_backend/npu/graph_runner/eagle_draft_extend_npu_graph_runner.py</td>
+        <td style="text-align:right">71</td>
+        <td style="text-align:right">0</td>
+        <td><span class="badge badge-low">fully_npu_private</span></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="kg-insight">
+    <div class="kg-label">🧠 KG 发现</div>
+    2 个 NPU-private 文件（<code>eagle_draft_npu_graph_runner.py</code>、<code>eagle_draft_extend_npu_graph_runner.py</code>）
+    无 CUDA 参考实现——精度漂移难以通过跨平台对比检测。这是 NPU 特有的测试盲区。
+  </div>
+</section>
+
+<!-- ====== SHARED DEFECT COUPLING ====== -->
+<section>
+  <h2><span class="icon">🔗</span> 共享缺陷耦合 <span style="font-size:0.8rem;color:var(--text-muted)">(KG 独有发现 — JSON 分析无法提供)</span></h2>
+  <p style="color:var(--text-muted);font-size:0.85rem;margin-bottom:0.8rem;">
+    通过 <code>SHARES_DEFECT_PATTERN</code> 边关联——这些特性的变更可能通过共享失效模式影响 eagle3
+  </p>
+  <div class="coupling-list">
+    <div class="coupling-tag">
+      <strong>attention_backend</strong>
+      &nbsp;<span class="count">5</span> 个共享缺陷
+      <br><span style="font-size:0.75rem;color:var(--text-muted)">silent_precision_loss</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>graph_compilation</strong>
+      &nbsp;<span class="count">2</span> 个共享缺陷
+      <br><span style="font-size:0.75rem;color:var(--text-muted)">silent_precision_loss</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>dp_attention</strong>
+      &nbsp;<span class="count">2</span> 个共享缺陷
+      <br><span style="font-size:0.75rem;color:var(--text-muted)">crash, silent_precision_loss</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>deterministic_inference</strong>
+      &nbsp;<span class="count">1</span> 个共享缺陷
+      <br><span style="font-size:0.75rem;color:var(--text-muted)">crash</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>chunked_prefill</strong>
+      &nbsp;<span class="count">1</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>hicache</strong>
+      &nbsp;<span class="count">1</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>hisparse</strong>
+      &nbsp;<span class="count">1</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>kv_cache_pool</strong>
+      &nbsp;<span class="count">1</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>quantized_kv_cache</strong>
+      &nbsp;<span class="count">1</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>scheduling</strong>
+      &nbsp;<span class="count">1</span>
+    </div>
+    <div class="coupling-tag">
+      <strong>moe</strong>
+      &nbsp;<span class="count">1</span>
+      <br><span style="font-size:0.75rem;color:var(--text-muted)">compatibility_issue</span>
+    </div>
+  </div>
+
+  <div class="kg-insight">
+    <div class="kg-label">🧠 KG 发现</div>
+    <strong>attention_backend 与 eagle3 共享 5 个缺陷模式</strong>——attention 变更很可能通过共享路径影响 eagle3，
+    但当前测试不会捕获这类回归。这是 JSON 风险评分无法揭示的结构性耦合。
+  </div>
+</section>
+
+<!-- ====== EXTERNAL DEPENDENCIES ====== -->
+<section>
+  <h2><span class="icon">🔌</span> 外部依赖风险</h2>
+  <table>
+    <thead>
+      <tr><th>依赖</th><th>风险评分</th><th>影响</th></tr>
+    </thead>
+    <tbody>
+      <tr><td><strong>CANN</strong></td><td><span class="badge badge-high">5</span></td><td>NPU 算子库升级直接覆盖 eagle3 draft 执行路径</td></tr>
+      <tr><td><strong>torch_npu</strong></td><td><span class="badge badge-high">5</span></td><td>PyTorch NPU 后端变更影响所有 eagle3 tensor 操作</td></tr>
+      <tr><td><strong>sgl_kernel_npu</strong></td><td><span class="badge badge-medium">3</span></td><td>自定义 NPU kernel 变更影响 eagle3 attention/采样</td></tr>
+      <tr><td><strong>HCCL</strong></td><td><span class="badge badge-medium">3</span></td><td>集合通信库变更影响 TP/DP 模式下的 eagle3 同步</td></tr>
+    </tbody>
+  </table>
+
+  <div class="kg-insight">
+    <div class="kg-label">🧠 KG 发现 — CANN 升级 blast radius</div>
+    CANN 风险评分虽为 5，但所有 NPU 特性都依赖它。一次 CANN 升级的 blast radius
+    覆盖整个 speculative decoding 栈，这个风险在 JSON 评分中<strong>不可见</strong>。
+  </div>
+</section>
+
+<!-- ====== RECOMMENDATIONS ====== -->
+<section>
+  <h2><span class="icon">📋</span> 可操作建议</h2>
+
+  <div class="rec-card">
+    <div class="prio prio-p0">P0</div>
+    <div class="body">
+      <div class="title">添加 logprob_rescore oracle</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.3rem;">
+        64 tokens · 单服务器 · tolerance 0.255
+      </div>
+      <div class="covers">覆盖: BUG-2026-016 (mrope_position), BUG-2026-098 (accept_rate)</div>
+      <div style="font-size:0.8rem;color:var(--accent);margin-top:0.3rem;">
+        唯一能捕获 silent_precision_loss 的 oracle 类型
+      </div>
+    </div>
+  </div>
+
+  <div class="rec-card">
+    <div class="prio prio-p1">P1</div>
+    <div class="body">
+      <div class="title">添加 exact_match_short oracle</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.3rem;">
+        16 tokens · 双服务器对比（NPU vs CUDA reference）
+      </div>
+      <div class="covers">覆盖: BUG-2026-040 (hidden states crash, severity 10)</div>
+      <div style="font-size:0.8rem;color:var(--accent);margin-top:0.3rem;">
+        快速检测 token divergence 和 crash，与 logprob_rescore 互补
+      </div>
+    </div>
+  </div>
+
+  <div class="rec-card">
+    <div class="prio prio-p2">P2</div>
+    <div class="body">
+      <div class="title">添加 accept_rate 直接断言</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.3rem;">
+        检查 <code>spec_accept_rate &gt; 0</code>（或与已知 baseline 对比）
+      </div>
+      <div class="covers">覆盖: BUG-2026-098 (accept_rate 计算错误)</div>
+    </div>
+  </div>
+
+  <div class="rec-card">
+    <div class="prio prio-p3">P3</div>
+    <div class="body">
+      <div class="title">扩展 multi-layer eagle + DP attention 测试场景</div>
+      <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.3rem;">
+        batch_size &gt; 1 的多层 eagle DP attention 模式
+      </div>
+      <div class="covers">覆盖: BUG-2026-040 (DP attention crash)</div>
+    </div>
+  </div>
+</section>
+
+<!-- ====== SUMMARY ====== -->
+<section>
+  <h2><span class="icon">📝</span> 总结</h2>
+  <table>
+    <thead><tr><th>维度</th><th>状态</th><th>风险</th></tr></thead>
+    <tbody>
+      <tr>
+        <td>综合评分</td>
+        <td>17/45</td>
+        <td><span class="badge badge-medium">MEDIUM</span></td>
+      </tr>
+      <tr>
+        <td>测试数量</td>
+        <td>1 个（无 oracle）</td>
+        <td><span class="badge badge-high">不足</span></td>
+      </tr>
+      <tr>
+        <td>静默缺陷率</td>
+        <td>2/3 (67%)</td>
+        <td><span class="badge badge-critical">高危</span></td>
+      </tr>
+      <tr>
+        <td>Oracle 覆盖</td>
+        <td>仅 GSM8K（盲区 4/4）</td>
+        <td><span class="badge badge-critical">严重不足</span></td>
+      </tr>
+      <tr>
+        <td>NPU 专属代码</td>
+        <td>2 个文件，186 行，无 CUDA 参考</td>
+        <td><span class="badge badge-medium">需关注</span></td>
+      </tr>
+      <tr>
+        <td>共享缺陷耦合</td>
+        <td>与 attention_backend 共享 5 个模式</td>
+        <td><span class="badge badge-medium">结构性风险</span></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<footer>
+  Generated by npu-risk-graph · Knowledge Graph + Agent Semantic Classification · 2026-06-08
+  &nbsp;|&nbsp; Parent feature: speculative_decoding · Score: 17/45 · Level: MEDIUM
+</footer>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sglang/npu-agent-test-map-schema",
+  "title": "Agent Test-to-Feature Mapping Schema",
+  "description": "Validates one batch of Agent-generated test-to-feature mappings.",
+  "type": "object",
+  "required": ["batch_id", "mappings"],
+  "properties": {
+    "batch_id": {
+      "type": "integer",
+      "description": "Batch index from pending_agent_baseline_batch.json"
+    },
+    "mappings": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["test_file", "features_tested", "quality_score"],
+        "properties": {
+          "test_file": {
+            "type": "string",
+            "description": "Repo-relative test file path, e.g. test/registered/ascend/basic_function/HiCache/test_npu_hicache_mha.py"
+          },
+          "features_tested": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 6,
+            "items": {
+              "type": "string",
+              "description": "Feature name from the 56-feature canonical list"
+            },
+            "description": "Features this test demonstrably exercises. Limit to 1-5. ascend_attention_backend should only be included if the test specifically targets attention mechanics, not just because it uses --attention-backend ascend."
+          },
+          "quality_score": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 5,
+            "description": "1=basic smoke, 2=threshold accuracy, 3=multi-config/subTest, 4=reference oracle, 5=full fuzz+stress+oracle suite"
+          },
+          "has_gsm8k_oracle": {
+            "type": "boolean",
+            "description": "True if the test uses GSM8KAscendMixin, run_eval_few_shot_gsm8k, or has a ground-truth accuracy benchmark"
+          },
+          "assertion_type": {
+            "type": "string",
+            "enum": ["threshold", "reference_comparison", "throughput", "deterministic"],
+            "description": "Primary assertion mechanism"
+          },
+          "test_type_override": {
+            "type": "string",
+            "enum": ["e2e_accuracy", "e2e_correctness", "e2e_performance", "integration", "unit"],
+            "description": "Override for the auto-detected test type if incorrect"
+          },
+          "has_reference_oracle": {
+            "type": "boolean",
+            "description": "True if the test compares against a reference model or ground-truth output"
+          },
+          "rationale": {
+            "type": "string",
+            "maxLength": 200,
+            "description": "One-sentence explanation of why these features were selected"
+          }
+        }
+      }
+    }
+  }
+}

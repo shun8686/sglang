@@ -1,0 +1,2753 @@
+{
+  "generated_at": "2026-06-10T09:50:40.339271+00:00",
+  "git_commit": "89410b380b2aa58662049e404d94ba79c0eeecb7",
+  "profiles": [
+    {
+      "feature": "attention_dense",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 19",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 19,
+              "categories": {
+                "precision_loss": 8,
+                "crash": 10,
+                "compatibility": 1
+              },
+              "last_bug_date": "2026-05-30T07:07:40Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 38 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 4,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 20,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "newly_split_20260610",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "attention_linear",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 3,
+            "rationale": "Past bugs: 3",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 3,
+              "categories": {
+                "crash": 1,
+                "precision_loss": 2
+              },
+              "last_bug_date": "2026-05-19T04:13:21Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 17 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 4,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 17,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "newly_split_20260610",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "attention_rotary",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 2,
+            "rationale": "Past bugs: 2",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 2,
+              "categories": {
+                "crash": 2
+              },
+              "last_bug_date": "2026-04-30T00:51:23Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 5,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 34 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 18,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "newly_split_20260610",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "moe",
+      "probability": {
+        "total": 14,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 5,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 7",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 7,
+              "categories": {
+                "crash": 5,
+                "compatibility": 1,
+                "compile_error": 1
+              },
+              "last_bug_date": "2026-05-19T13:47:02Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 14 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 4,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 21,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "55df4f9f7e41edb4bcb8019befe4e00f5b4a4ad8c2fe4ed78d50cc9dc98ef580",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "quantization",
+      "probability": {
+        "total": 12,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 8",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 8,
+              "categories": {
+                "crash": 7,
+                "precision_loss": 1
+              },
+              "last_bug_date": "2026-05-29T01:11:37Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 8,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 19 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 5,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 20,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "a64046b177b91e63226454231ecd61f47f87064f1013edc523243ee58c93247c",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "speculative_decoding",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 8",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 8,
+              "categories": {
+                "precision_loss": 5,
+                "crash": 2,
+                "compatibility": 1
+              },
+              "last_bug_date": "2026-05-19T13:47:02Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 5,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 3,
+            "rationale": "Used by 4 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 18,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "944513abb8a9a1b45662cbba0e8812c5c326460dd46ba61f655353e597e1a75e",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "graph_compilation",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 9",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 9,
+              "categories": {
+                "precision_loss": 2,
+                "perf_regression": 1,
+                "crash": 4,
+                "compatibility": 2
+              },
+              "last_bug_date": "2026-05-11T01:43:37Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 20,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "072eda703eb0a4f15ac59896be2681aa6d56cd031723c2db18502e69dd39516c",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "kv_cache_pool",
+      "probability": {
+        "total": 18,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 8",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 8,
+              "categories": {
+                "crash": 4,
+                "precision_loss": 3,
+                "compatibility": 1
+              },
+              "last_bug_date": "2026-05-19T04:13:21Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 6,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 24,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "c78c5eec298024871ba226d6ff86e799e93931ddb3061608a9418b9962cb521c",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "pd_disaggregation",
+      "probability": {
+        "total": 15,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "crash": 1
+              },
+              "last_bug_date": "2026-02-26T13:10:50Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 3,
+            "rationale": "Used by 4 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 5,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 22,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "a943c8250e2e21f43f2348014ae2d10c73d083818bfff55cde8a8b2b4b7a4f20",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "lora",
+      "probability": {
+        "total": 11,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 6,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 17,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "24f7f2ce647edd72ea8f7c3a29a9771b0c39f2527b345e33c772c6d1af08289a",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "hicache",
+      "probability": {
+        "total": 12,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 7",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 7,
+              "categories": {
+                "crash": 3,
+                "perf_regression": 1,
+                "compatibility": 1,
+                "precision_loss": 2
+              },
+              "last_bug_date": "2026-05-19T04:13:21Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 5,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 17,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "27120ac97756bb94f7c249f64043c52601f5638109ba114cb2d4c30722c3646b",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "dp_attention",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 6",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 6,
+              "categories": {
+                "crash": 4,
+                "precision_loss": 2
+              },
+              "last_bug_date": "2026-05-30T07:07:40Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 4,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 14,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "ba16fab3ad80e84b3f1d9f13f25f32567a3faf764b94b14e842f4d716a7658ed",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "weight_prefetch",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "perf_regression": 1
+              },
+              "last_bug_date": "2026-03-03T09:59:25Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 5,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 6 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 18,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "41ab4104f25100eb861c9a98b23a996131ccb85c77282ca1d61aca6c1504b42c",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "hardware_backend",
+      "probability": {
+        "total": 15,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 5,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 18",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 18,
+              "categories": {
+                "crash": 9,
+                "precision_loss": 2,
+                "perf_regression": 2,
+                "compatibility": 5
+              },
+              "last_bug_date": "2026-05-11T05:32:57Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 6,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 21,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "aee5034363581902ba064ea07cb016ced6d92364c5b0bb6b2f516c057e51bba0",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "forward_hooks",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 2,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 12,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "0f6f31f5acf739740f932c517ada5077be572caf372489ed0b56b8e34da68bc9",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "structured_outputs",
+      "probability": {
+        "total": 12,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "precision_loss": 1
+              },
+              "last_bug_date": "2026-04-16T06:34:24Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 15,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "009a60261c00fb0026d05f304a6be14c058e9d8bc95f6747b06eef7674bebe60",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "tool_parser",
+      "probability": {
+        "total": 9,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 4,
+            "rationale": "Best test quality: 1/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 12,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "2b595daa381cf777f4b33204fe5d7060b768336dd26e0b1a1b8a4568bad81fc4",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "separate_reasoning",
+      "probability": {
+        "total": 8,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 4,
+            "rationale": "Best test quality: 1/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 2,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 3,
+            "rationale": "Used by 4 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 10,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "b393a8cb88f94664c87e98b7078a218477ba5074db72f110ba11d365277ca5b3",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "observability",
+      "probability": {
+        "total": 9,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "compatibility": 1
+              },
+              "last_bug_date": "2026-05-09T09:48:25Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 4,
+            "rationale": "Best test quality: 1/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 2,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 11,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "0787b5038944a10a21afb179d31d402659cc7be53371e3153704df515fe7b55d",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "server_arguments",
+      "probability": {
+        "total": 6,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 3,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 9,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "574300a2b764508dc4a0225dfa7c4b45c6af55cc1ef87786f61df330ca6e1486",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "pipeline_parallelism",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 2,
+            "rationale": "Past bugs: 2",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 2,
+              "categories": {
+                "compatibility": 2
+              },
+              "last_bug_date": "2026-03-03T06:56:07Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 16,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "f0fc2003f084e7f74fb6f0a160226da3d9568346b8b7a7fa249cf92ca1026a17",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "sampling_backend",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "crash": 1
+              },
+              "last_bug_date": "2026-05-30T09:10:59Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 3,
+            "rationale": "Best test quality: 2/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 17,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "2ff4b1efb95bff31e366440998cedf71a5f6e52daa36a14d03eebf3e3902e7f3",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "offloading",
+      "probability": {
+        "total": 11,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 10",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 10,
+              "categories": {
+                "crash": 7,
+                "perf_regression": 1,
+                "precision_loss": 1,
+                "compatibility": 1
+              },
+              "last_bug_date": "2026-05-19T01:09:11Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 2,
+            "rationale": "Best test quality: 3/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 18,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "a2276ac730298d82c2108105609bb907c9742bd42bdff3782af0672f1c0491d7",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "expert_parallelism",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 3,
+            "rationale": "Past bugs: 3",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 3,
+              "categories": {
+                "crash": 3
+              },
+              "last_bug_date": "2026-05-30T12:01:20Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 8,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 14 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 5,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 18,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "277e69835737f022940e3750208abf348b3652cd3b43b31d88b1b5576a337ca1",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "dp_for_multi_modal_encoder",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 4,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "crash": 1
+              },
+              "last_bug_date": "2026-03-15T07:07:06Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 4,
+            "rationale": "Best test quality: 1/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 16,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "87115bedb92a76f4664c72e07c5d913adec76498b59fbfcb39ebe7dc75c89d6e",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "object_storage",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 2,
+            "rationale": "Past bugs: 2",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 2,
+              "categories": {
+                "crash": 2
+              },
+              "last_bug_date": "2026-04-08T06:15:49Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 16,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "edaeb59a99ca259d891c087f88ea6047b2c23cc54d2660282c8668e05b9ec6b5",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "sgl_model_gateway",
+      "probability": {
+        "total": 13,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 2,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 15,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "f5355ac3e812ea1198ba35009938a45e44951222b28bc6081d905095a01354d3",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "checkpoint_engine",
+      "probability": {
+        "total": 1,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "NPU unsupported — no tests needed",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 1,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 1,
+            "rationale": "Zero NPU users",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Cannot fail on NPU",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 2,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "fc78534091be8e9ef6c326068b94a9f9f3a9cb58fe498772aa26a395919bed31",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "deterministic_inference",
+      "probability": {
+        "total": 1,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "NPU unsupported — no tests needed",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 1,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 1,
+            "rationale": "Zero NPU users",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Cannot fail on NPU",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 2,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "61429d46188357b35f3855f7c00a45c670c9415827b0a22819f32ee47f99e05e",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "hisparse",
+      "probability": {
+        "total": 1,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "NPU unsupported — no tests needed",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 1,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 1,
+            "rationale": "Zero NPU users",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Cannot fail on NPU",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 2,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "31e76313cf579680abadb661c729709ae14aefad296b9b2d3167d50c2fabc37b",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "rfork",
+      "probability": {
+        "total": 1,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "NPU unsupported — no tests needed",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 1,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 1,
+            "rationale": "Zero NPU users",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Cannot fail on NPU",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 2,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "a5f1ea576f0161e14fae7ddcd0d9374c205d4ae2071b928924fda0513d1d72ec",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "data_parallelism",
+      "probability": {
+        "total": 11,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 2,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "Past bugs: 0",
+            "source": "defect_db",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 4,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 15,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "f8537a5f0a49e4a5bbfddbb20271b1d613b4d75020bc57daa2ed5f2292a938f9",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "tensor_parallelism",
+      "probability": {
+        "total": 12,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 2,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 5",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 5,
+              "categories": {
+                "crash": 3,
+                "compatibility": 2
+              },
+              "last_bug_date": "2026-03-31T07:37:33Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 8,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 4,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 20,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "376a53116349862893b53cf83273dfa8a4dc9577c91464cda1e209e712c92675",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "chunked_prefill",
+      "probability": {
+        "total": 11,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 4,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 2,
+            "rationale": "Past bugs: 2",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 2,
+              "categories": {
+                "crash": 1,
+                "precision_loss": 1
+              },
+              "last_bug_date": "2026-05-19T04:13:21Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 4,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 15,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "0bdb49b7e6b3ab68419ca0308845da93470463373137c641a71bb4c7a825d8b5",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "scheduling",
+      "probability": {
+        "total": 17,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 3,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 5",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 5,
+              "categories": {
+                "compatibility": 1,
+                "precision_loss": 3,
+                "crash": 1
+              },
+              "last_bug_date": "2026-05-19T04:13:21Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 3,
+            "rationale": "Best test quality: 2/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 6,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 23,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "8b6b68526220a92c6b493c559f4e4c0e7cbd1db3832c7940b3bfcfe4515d12b1",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "eplb",
+      "probability": {
+        "total": 16,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 3,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 2,
+            "rationale": "Past bugs: 2",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 2,
+              "categories": {
+                "crash": 2
+              },
+              "last_bug_date": "2026-06-01T07:32:14Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 2,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 7 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 18,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "e68274422ebb789e5449f56194445b3d4a5ff31021338516d43a976733e839ca",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "context_parallelism",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 3,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 2,
+            "rationale": "Past bugs: 2",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 2,
+              "categories": {
+                "compatibility": 2
+              },
+              "last_bug_date": "2026-03-03T06:56:07Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 4,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 3,
+            "rationale": "Used by 4 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 14,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "433eadee90584f3a95c9b73c01663840c7a3925bb2928d7c4174867064620764",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "multimodal",
+      "probability": {
+        "total": 14,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 3,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 6",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 6,
+              "categories": {
+                "perf_regression": 1,
+                "crash": 3,
+                "compatibility": 2
+              },
+              "last_bug_date": "2026-04-26T13:34:57Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "Best test quality: 4/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 7,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 4,
+            "rationale": "Used by 11 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 4,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 21,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "98b770694bfbfca3b3fb1f93f7995dd2994c1d45dee23ec05ae8c26ba6ffd22f",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "radix_cache",
+      "probability": {
+        "total": 10,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 3,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 1,
+            "rationale": "Past bugs: 1",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 1,
+              "categories": {
+                "crash": 1
+              },
+              "last_bug_date": "2026-04-30T00:51:23Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "Depends on 0 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 3,
+            "rationale": "Best test quality: 2/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 3,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 5,
+            "rationale": "Used by 1 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 2,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 13,
+      "level": "medium",
+      "test_depth": "L2",
+      "fingerprint": "e93f93be799a90cc89cb4e258d6dcce2dd5429e83cc0c78c24a9b8649ff43260",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "quantized_kv_cache",
+      "probability": {
+        "total": 1,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 0,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "dependency_depth": {
+            "score": 1,
+            "rationale": "NPU unsupported",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 1,
+            "rationale": "NPU unsupported — no tests needed",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 1,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 1,
+            "rationale": "Zero NPU users",
+            "source": "npu_participation",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 1,
+            "rationale": "Cannot fail on NPU",
+            "source": "npu_participation",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 2,
+      "level": "low",
+      "test_depth": "L3",
+      "fingerprint": "f1e49a5e762a6231a31021539e5c80d5ef0921c76c28ae1288546614fc7b0929",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    },
+    {
+      "feature": "multimodal_gen",
+      "probability": {
+        "total": 18,
+        "max": 25,
+        "factors": {
+          "code_complexity": {
+            "score": 4,
+            "rationale": "Cyclomatic complexity estimate",
+            "source": "AST",
+            "details": {}
+          },
+          "change_frequency": {
+            "score": 1,
+            "rationale": "Time-decay weighted commits over 365d (1/sqrt days_ago)",
+            "source": "git",
+            "details": {}
+          },
+          "historical_defects": {
+            "score": 5,
+            "rationale": "Past bugs: 8",
+            "source": "defect_db",
+            "details": {
+              "total_bugs": 8,
+              "categories": {
+                "crash": 6,
+                "precision_loss": 1,
+                "compatibility": 1
+              },
+              "last_bug_date": "2026-05-27T09:33:21Z"
+            }
+          },
+          "dependency_depth": {
+            "score": 2,
+            "rationale": "Depends on 1 other features",
+            "source": "features.json",
+            "details": {}
+          },
+          "test_effectiveness": {
+            "score": 5,
+            "rationale": "Best test quality: 0/5",
+            "source": "test_evaluator",
+            "details": {}
+          }
+        }
+      },
+      "impact": {
+        "total": 5,
+        "max": 20,
+        "factors": {
+          "user_exposure": {
+            "score": 3,
+            "rationale": "Used by 3 model families",
+            "source": "manual",
+            "details": {}
+          },
+          "failure_mode": {
+            "score": 3,
+            "rationale": "Severity: what happens when it breaks",
+            "source": "manual",
+            "details": {}
+          }
+        }
+      },
+      "composite_score": 23,
+      "level": "high",
+      "test_depth": "L1",
+      "fingerprint": "2f1121c49f54c3e13fa9b65f07935bd4259e5e16a819388823e0dae3544cb2cc",
+      "last_updated": "2026-06-10T09:50:40.339271+00:00"
+    }
+  ]
+}

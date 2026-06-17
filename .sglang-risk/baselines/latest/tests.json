@@ -1,0 +1,4038 @@
+{
+  "generated_at": "2026-06-10T09:50:31.519305+00:00",
+  "git_commit": "89410b380b2aa58662049e404d94ba79c0eeecb7",
+  "total_tests": 113,
+  "tests": [
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_hicache_mha.py",
+      "test_class": "TestAscendMhaHicache",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hicache",
+        "attention_dense"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_hicache_mla.py",
+      "test_class": "TestAscendMlaHicache",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hicache",
+        "attention_dense"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-4-npu-a3",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache.py",
+      "test_class": "TestNPUHierarchicalCache",
+      "test_methods": [
+        {
+          "name": "test_hierarchical_cache_not_reused_short_identical",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_hierarchical_cache_not_reused_different_long",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_hierarchical_cache_reused_long_identical",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hicache"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache_mla.py",
+      "test_class": "TestNpuHierarchicalCacheMla",
+      "test_methods": [
+        {
+          "name": "test_no_chunked_prefill_without_radix_cache",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hicache",
+        "chunked_prefill",
+        "attention_dense"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache_mutually_exclusive.py",
+      "test_class": "TestNpuHierarchicalCacheMutuallyExclusive",
+      "test_methods": [
+        {
+          "name": "test_hierarchical_cache_mutually_exclusive",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hicache",
+        "server_arguments"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache_ttft_mha.py",
+      "test_class": "TestNpuHierarchicalCacheTTFT",
+      "test_methods": [
+        {
+          "name": "test_no_chunked_prefill_without_radix_cache",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hicache"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/HiCache/test_npu_radix_cache.py",
+      "test_class": "TestNPURadixCache",
+      "test_methods": [
+        {
+          "name": "test_radix_cache_not_reused_different_long",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_radix_cache_not_reused_short_identical",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_radix_cache_reused_long_identical",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "radix_cache"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/backends/test_npu_sampling_backend.py",
+      "test_class": "TestAscendSamplingBackend",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_greedy",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "/root/.cache/modelscope/hub/models/Qwen/Qwen2.5-7B-Instruct",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "sampling_backend"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/dllm/test_npu_llada2_mini.py",
+      "test_class": "TestLLaDA2Mini",
+      "test_methods": [
+        {
+          "name": "test_bs_1_speed",
+          "type": "e2e_correctness",
+          "assertion_type": "mixed",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "stage-b-test-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "attention_dense"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-4-npu-a3",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/memory_and_scheduling/test_npu_no_chunked_prefill.py",
+      "test_class": "TestNoChunkedPrefill",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_no_chunked_prefill_without_radix_cache",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "chunked_prefill"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/offloading/test_npu_offload_modes.py",
+      "test_class": "TestAscendOffloadModes",
+      "test_methods": [
+        {
+          "name": "test_offload_mode_sharded_gpu",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 800
+        },
+        {
+          "name": "test_offload_mode_cpu",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 800
+        }
+      ],
+      "features_tested": [
+        "offloading"
+      ],
+      "quality_score": 3,
+      "ci_registrations": [
+        {
+          "est_time": 800,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/optimization_debug/test_npu_compile_graph_tp1_bf16.py",
+      "test_class": "TestAscendTp1Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "graph_compilation"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/optimization_debug/test_npu_graph_tp1_bf16.py",
+      "test_class": "TestAscendGraphTp1Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "graph_compilation"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/optimization_debug/test_npu_graph_tp2_bf16.py",
+      "test_class": "TestAscendGraphTp2Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-2-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "graph_compilation",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-2-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/optimization_debug/test_npu_piecewise_graph_prefill.py",
+      "test_class": "TestPiecewiseGraphPrefillCorrectness",
+      "test_methods": [
+        {
+          "name": "test_latency",
+          "type": "e2e_correctness",
+          "assertion_type": "mixed",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "graph_compilation"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep.py",
+      "test_class": "TestAscendDeepEP",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-16-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "expert_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-16-npu-a3",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_auto_deepseek_v3_2_w8a8.py",
+      "test_class": "TestDeepEpDeepseekV32",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "expert_parallelism",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_auto_qwen3_480b.py",
+      "test_class": "TestDeepEpQwen",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 200
+        },
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 200
+        }
+      ],
+      "features_tested": [
+        "expert_parallelism",
+        "quantization",
+        "dp_attention"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 200,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_auto_qwen3_next.py",
+      "test_class": "TestQwen3Next",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-8-npu-a3",
+          "est_time_seconds": 200
+        },
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-8-npu-a3",
+          "est_time_seconds": 200
+        }
+      ],
+      "features_tested": [
+        "expert_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 200,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_low_latency_deepseek_v3_2_w8a8.py",
+      "test_class": "TestDeepEpDeepseekV32",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 200
+        },
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 200
+        }
+      ],
+      "features_tested": [
+        "expert_parallelism",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 200,
+          "suite": "nightly-16-npu-a3",
+          "nightly": false
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_low_latency_qwen3_480b.py",
+      "test_class": "TestDeepEpQwen",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 200
+        },
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 200
+        }
+      ],
+      "features_tested": [
+        "expert_parallelism",
+        "quantization",
+        "dp_attention"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 200,
+          "suite": "nightly-16-npu-a3",
+          "nightly": false
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_low_latency_qwen3_next.py",
+      "test_class": "TestQwen3Next",
+      "test_methods": [
+        {
+          "name": "test_mmlu",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-8-npu-a3",
+          "est_time_seconds": 200
+        },
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-8-npu-a3",
+          "est_time_seconds": 200
+        }
+      ],
+      "features_tested": [
+        "moe",
+        "expert_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 200,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parameter/test_npu_fim_completion.py",
+      "test_class": "TestFimCompletion",
+      "test_methods": [
+        {
+          "name": "test_fim_completion",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "server_arguments"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parameter/test_npu_log_level.py",
+      "test_class": "TestLogLevel",
+      "test_methods": [
+        {
+          "name": "test_log_level",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_log_http_level",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "server_arguments"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parameter/test_npu_no_overlap_scheduler.py",
+      "test_class": "TestOverlapSchedule",
+      "test_methods": [
+        {
+          "name": "test_no_radix_attention_no_chunked_prefill",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_radix_attention_chunked_prefill",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_radix_attention_no_chunked_prefill",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_no_radix_attention_chunked_prefill",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "radix_cache",
+        "chunked_prefill",
+        "scheduling"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parameter/test_npu_original_logprobs.py",
+      "test_class": "TestOriginalLogprob",
+      "test_methods": [
+        {
+          "name": "test_logprob_match",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "server_arguments"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/parameter/test_npu_warmups.py",
+      "test_class": "TestAscendWarmups",
+      "test_methods": [
+        {
+          "name": "test_warmups_with_voice_chat",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "server_arguments"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_autoround_dense.py",
+      "test_class": "TestAscendAutoRoundDense",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_autoround_moe.py",
+      "test_class": "TestAscendAutoRoundMoE",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_gguf.py",
+      "test_class": "TestAscendGGUF",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 300
+        }
+      ],
+      "features_tested": [
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 300,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_gguf_moe.py",
+      "test_class": "TestAscendGGUFMoE",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 500
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "moe",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 500,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_gptq_moe.py",
+      "test_class": "TestAscendGPTQMoEInt4",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_w4a4_quantization.py",
+      "test_class": "TestAscendW4A4",
+      "test_methods": [
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "mixed",
+          "has_reference_oracle": true,
+          "model_used": "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3-32B-w4a4-LAOS",
+          "ci_suite": "stage-b-test-4-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_throughput",
+          "type": "e2e_correctness",
+          "assertion_type": "mixed",
+          "has_reference_oracle": true,
+          "model_used": "/root/.cache/modelscope/hub/models/Eco-Tech/Qwen3-32B-w4a4-LAOS",
+          "ci_suite": "stage-b-test-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-4-npu-a3",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/quant/test_npu_w8a8_quantization.py",
+      "test_class": "TestAscendW8A8CompressedTensors",
+      "test_methods": [
+        {
+          "name": "test_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "mixed",
+          "has_reference_oracle": true,
+          "model_used": "RedHatAI/Qwen2.5-0.5B-Instruct-quantized.w8a8",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_throughput",
+          "type": "e2e_correctness",
+          "assertion_type": "mixed",
+          "has_reference_oracle": true,
+          "model_used": "RedHatAI/Qwen2.5-0.5B-Instruct-quantized.w8a8",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/runtime_opts/test_npu_mla_fia_w8a8int8.py",
+      "test_class": "TestAscendMlaW8A8Int8",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-2-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "attention_dense",
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-2-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/runtime_opts/test_npu_mla_w8a8int8.py",
+      "test_class": "TestAscendMlaW8A8Int8",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "attention_dense",
+        "quantization",
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-4-npu-a3",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/runtime_opts/test_npu_tp1_bf16.py",
+      "test_class": "TestAscendTp1Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-1-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-1-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/runtime_opts/test_npu_tp2_bf16.py",
+      "test_class": "TestAscendTp2Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-2-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-2-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/runtime_opts/test_npu_tp2_fia_bf16.py",
+      "test_class": "TestAscendTp2Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-2-npu-a2",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "attention_dense",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-2-npu-a2",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/runtime_opts/test_npu_tp4_bf16.py",
+      "test_class": "TestAscendTp4Bf16",
+      "test_methods": [
+        {
+          "name": "test_a_gsm8k",
+          "type": "e2e_correctness",
+          "assertion_type": "threshold",
+          "has_reference_oracle": true,
+          "model_used": "(TEST_MODEL_MATRIX)",
+          "ci_suite": "stage-b-test-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "stage-b-test-4-npu-a3",
+          "nightly": false
+        },
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/basic_function/speculative_inference/test_npu_eagle3.py",
+      "test_class": "TestNpuEagle3",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "speculative_decoding"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/embedding_models/test_npu_bge_large_en_v1_5.py",
+      "test_class": "TestEmbeddingModels",
+      "test_methods": [
+        {
+          "name": "test_prefill_logits",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "full-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "attention_dense"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true,
+          "disabled": "embeddings are not all close"
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_api.py",
+      "test_class": "TestNpuApi",
+      "test_methods": [
+        {
+          "name": "test_top_k",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_rid",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_start_profile_2",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_temperature",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_stop_token_ids",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_generate_batch_texts",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_stop_token_ids",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_max_tokens",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_model_info",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_max_completion_tokens",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_stream",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_v1_models",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_start_profile_1",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_v1_loads",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_and_messages",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_ping",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_generate_input_ids",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_v1_models_path",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_generate_temperature",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_start_profile_3",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_prompt",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_health",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_health_generate",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_return_hidden_states",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_model",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_temperature",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_generate_single_text",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_rid",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_top_k",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_stream",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_model_parameters_hidden_states",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        },
+        {
+          "name": "test_api_server_info",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-npu-a3-merged",
+          "est_time_seconds": 1600
+        }
+      ],
+      "features_tested": [
+        "observability",
+        "separate_reasoning",
+        "sampling_backend"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 1600,
+          "suite": "nightly-npu-a3-merged",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_api_abort_request.py",
+      "test_class": "TestNpuApi",
+      "test_methods": [
+        {
+          "name": "test_api_abort_request",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "scheduling"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_api_encode.py",
+      "test_class": "TestNpuApi",
+      "test_methods": [
+        {
+          "name": "test_api_encode_01",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_api_encode_04",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_api_encode_02",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_api_encode_03",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_enable_thinking.py",
+      "test_class": "TestEnableThinking",
+      "test_methods": [
+        {
+          "name": "test_chat_completion_with_reasoning",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_stream_chat_completion_without_reasoning",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_stream_chat_completion_with_reasoning",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_chat_completion_without_reasoning",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "separate_reasoning"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_matched_stop.py",
+      "test_class": "TestMatchedStop",
+      "test_methods": [
+        {
+          "name": "test_finish_stop_eos",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_finish_length",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_finish_stop_str",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_openai_function_calling.py",
+      "test_class": "TestOpenAIServerFunctionCalling",
+      "test_methods": [
+        {
+          "name": "test_pythonic_tool_call_streaming",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_streaming_multiple_choices_without_tools",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_calling_streaming_simple",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_calling_streaming_no_tool_call",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_call_strict",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_pythonic_tool_call_prompt",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_call_required",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_calling_format",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_call_specific",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_streaming_multiple_choices_finish_reason",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_function_calling_streaming_args_parsing",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "tool_parser"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_openai_server_ignore_eos.py",
+      "test_class": "TestOpenAIServerIgnoreEOS",
+      "test_methods": [
+        {
+          "name": "test_ignore_eos",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/interface/test_npu_penalty.py",
+      "test_class": "TestPenalty",
+      "test_methods": [
+        {
+          "name": "test_default_values",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_frequency_penalty",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_presence_penalty",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_min_new_tokens",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_penalty_mixed",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "sampling_backend"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_ascend_dbrx_instruct.py",
+      "test_class": "TestDbrx",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "attention_dense",
+        "moe",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_ascend_minimax_m2.py",
+      "test_class": "TestMiniMaxM2",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "attention_linear",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_ascend_trinity_mini.py",
+      "test_class": "TestTrinityMini",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "attention_dense",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_afm_4_5b.py",
+      "test_class": "TestAFM",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "attention_dense"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_baichuan2_13b_chat.py",
+      "test_class": "TestBaichuan",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "attention_dense"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_c4ai_command_r_v01.py",
+      "test_class": "TestC4AI",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "attention_dense",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-2-npu-a3",
+          "nightly": false
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_chatglm2_6b.py",
+      "test_class": "TestChatGlm2",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_deepseek_v3_2_exp_w8a8.py",
+      "test_class": "TestDeepSeekV32",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "moe",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_exaone_3.py",
+      "test_class": "TestEXAONE",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": false
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_gemma_3_4b_it_llm.py",
+      "test_class": "TestGemma34B",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_glm4_9b_chat.py",
+      "test_class": "TestGLM49BChat",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_granite_3_0_3b_a800m.py",
+      "test_class": "TestGranite",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_granite_3_1_8b.py",
+      "test_class": "TestGranite",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_grok_2.py",
+      "test_class": "TestGrok2",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-16-npu-a3",
+          "nightly": false,
+          "disabled": "https://github.com/Ascend/sglang/issues/25"
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_internlm2_7b.py",
+      "test_class": "TestInternlm2",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_ling_lite.py",
+      "test_class": "TestLingLite",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_llama4_scount_17b_16e.py",
+      "test_class": "TestLlama4",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_llama_2_7b.py",
+      "test_class": "TestLlama",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_llama_2_7b_communications_compression.py",
+      "test_class": "TestLlama",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3"
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_mimo_7b_rl.py",
+      "test_class": "TestMiMo7BRL",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_minicpm3_4b.py",
+      "test_class": "TestMiniCPM3",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_mistral_7b.py",
+      "test_class": "TestMistral7B",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_persimmon_8b_chat.py",
+      "test_class": "TestPersimmon8BChat",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": false
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_phi_4_multimodal_llm.py",
+      "test_class": "TestPhi4",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_0_6b.py",
+      "test_class": "TestQwen306B",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend",
+        "chunked_prefill"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_1_7b_gptq_int8.py",
+      "test_class": "TestQwen317BGPTQInt8",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "per-commit-1-npu-a2"
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_235b_a22b_w8a8.py",
+      "test_class": "TestQwen3235BA22BW8A8",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend",
+        "moe",
+        "quantization",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_30b.py",
+      "test_class": "TestQwen330B",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_30b_attn_cp.py",
+      "test_class": "TestQwen330BAttnCP",
+      "test_methods": [
+        {
+          "name": "test_gsm8k_accuracy",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 500
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "context_parallelism",
+        "attention_dense",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 500,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_30b_w4a4.py",
+      "test_class": "TestQwen317BGPTQInt8",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "quantization",
+        "tensor_parallelism",
+        "moe"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "per-commit-2-npu-a2"
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_32b.py",
+      "test_class": "TestQwen332B",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_8b_communications_quantization.py",
+      "test_class": "TestQwen38BCommQuantization",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3"
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwen3_coder_480b_a35b.py",
+      "test_class": "TestQwen3Coder480BA35B",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "moe",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_qwq_32b_w8a8.py",
+      "test_class": "TestQWQ32BW8A8",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "tensor_parallelism",
+        "quantization"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_smollm_1_7b.py",
+      "test_class": "TestSmolLM",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/llm_models/test_npu_stablelm_2_1_6b.py",
+      "test_class": "TestStablelm",
+      "test_methods": [
+        {
+          "name": "test_default",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [
+        "graph_compilation",
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/rerank_models/test_npu_bge_reranker_v2_m3.py",
+      "test_class": "TestBgeReranker",
+      "test_methods": [
+        {
+          "name": "test_prefill_logits",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "attention_dense",
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/reward_models/test_npu_gemma_2_27b_v0_2.py",
+      "test_class": "TestRewardModels",
+      "test_methods": [
+        {
+          "name": "test_reward_scores",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "full-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/reward_models/test_npu_internlm2_7b_reward.py",
+      "test_class": "TestInternlm2",
+      "test_methods": [
+        {
+          "name": "test_assert_close_reward_scores",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "full-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hardware_backend",
+        "tensor_parallelism"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/reward_models/test_npu_llama_3_1_8b_v0_2.py",
+      "test_class": "TestLlama",
+      "test_methods": [
+        {
+          "name": "test_reward_scores",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "full-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hardware_backend"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/test_npu_memory_consumption.py",
+      "test_class": "TestMemoryConsumptionAscend",
+      "test_methods": [
+        {
+          "name": "test_memory_consumption",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-2-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "hardware_backend",
+        "tensor_parallelism",
+        "quantization",
+        "moe"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-2-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_ascend_glm_4_5v.py",
+      "test_class": "TestGLM4Models",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-8-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_deepseek_vl2.py",
+      "test_class": "TestDeepseekVl2",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_gemma_3_4b_it.py",
+      "test_class": "TestGemma34bModels",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_janus_pro_1b.py",
+      "test_class": "TestJanusPro1B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_janus_pro_7b.py",
+      "test_class": "TestJanusPro7B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_kimi_vl_a3b_instruct.py",
+      "test_class": "TestKimiVLA3BInstruct",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_llama_3_2_11b_vision_instruct.py",
+      "test_class": "TestLlama3211BVisionInstruct",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-1-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-1-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_mimo_vl_7b_rl.py",
+      "test_class": "TestMiMoModels",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_minicpm_o_2_6.py",
+      "test_class": "TestMiniCPMModelsO",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_minicpm_v_2_6.py",
+      "test_class": "TestMiniCPMModelsV",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_mistral_small_3_1_24b_instruct_2503.py",
+      "test_class": "TestMistralModels",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_phi4_multimodal_instruct.py",
+      "test_class": "TestPhi4Multimodal",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_qwen2_5_vl_3b_instruct.py",
+      "test_class": "TestQwen25VL3B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_qwen2_5_vl_72b_instruct.py",
+      "test_class": "TestQwen25VL72B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-8-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 2,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-8-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_qwen3_vl_235b_a22b_instruct.py",
+      "test_class": "TestQwen3VL235BA22B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-16-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-16-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_qwen3_vl_30b_a3b_instruct.py",
+      "test_class": "TestQwen3VL30BA3B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_qwen3_vl_4b_instruct.py",
+      "test_class": "TestQwen3VL4B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "full-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "full-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_qwen3_vl_8b_instruct.py",
+      "test_class": "TestQwen3VL8B",
+      "test_methods": [
+        {
+          "name": "test_vlm_mmmu_benchmark",
+          "type": "e2e_correctness",
+          "assertion_type": "reference_comparison",
+          "has_reference_oracle": true,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 4,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_vlm_basic.py",
+      "test_class": "TestNpuVlmBasic",
+      "test_methods": [
+        {
+          "name": "test_stream_image",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 300
+        },
+        {
+          "name": "test_n3_image",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 300
+        },
+        {
+          "name": "test_single_image_chat_completion",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 300
+        },
+        {
+          "name": "test_multi_images_chat_completion",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 300
+        },
+        {
+          "name": "test_mixed_batch",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 300
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 300,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_vlm_eagle3.py",
+      "test_class": "TestNpuVlmEagle3",
+      "test_methods": [
+        {
+          "name": "test_single_image_eagle3",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        },
+        {
+          "name": "test_n3_image_eagle3",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "unknown",
+          "est_time_seconds": 0
+        }
+      ],
+      "features_tested": [],
+      "quality_score": 1,
+      "ci_registrations": [],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_vlm_encoder_dp.py",
+      "test_class": "TestNpuVlmEncoderDP",
+      "test_methods": [
+        {
+          "name": "test_single_image_encoder_dp",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_stream_image_encoder_dp",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        },
+        {
+          "name": "test_n3_image_encoder_dp",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 400
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "dp_for_multi_modal_encoder",
+        "tensor_parallelism"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 400,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    {
+      "test_file": "test/registered/ascend/vlm_models/test_npu_vlm_penalty.py",
+      "test_class": "TestNpuVlmPenalty",
+      "test_methods": [
+        {
+          "name": "test_frequency_penalty_with_image",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 200
+        },
+        {
+          "name": "test_presence_penalty_with_image",
+          "type": "e2e_accuracy",
+          "assertion_type": "threshold",
+          "has_reference_oracle": false,
+          "model_used": "",
+          "ci_suite": "nightly-4-npu-a3",
+          "est_time_seconds": 200
+        }
+      ],
+      "features_tested": [
+        "multimodal",
+        "sampling_backend"
+      ],
+      "quality_score": 1,
+      "ci_registrations": [
+        {
+          "est_time": 200,
+          "suite": "nightly-4-npu-a3",
+          "nightly": true
+        }
+      ],
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    }
+  ]
+}

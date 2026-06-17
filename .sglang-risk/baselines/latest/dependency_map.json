@@ -1,0 +1,3020 @@
+{
+  "generated_at": "2026-06-10T09:50:31.523316+00:00",
+  "git_commit": "89410b380b2aa58662049e404d94ba79c0eeecb7",
+  "total_entries": 282,
+  "dependency_map": {
+    "python/sglang/srt/hardware_backend/npu/attention/ascend_backend.py": {
+      "features": [
+        "attention_dense",
+        "dp_attention"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/attention/ascend_torch_native_backend.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/attention/mla_preprocess.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/modules/deepseek_v2_attention_mla_npu.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/base_attn_backend.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/attention_registry.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/vision.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/forward_batch_info.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/model_runner.py": {
+      "features": [
+        "attention_dense",
+        "deterministic_inference",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/attention/ascend_gdn_backend.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/attention/ascend_hybrid_linear_attn_backend.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/hybrid_linear_attn_backend.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/linear/gdn_backend.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/linear/kda_backend.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/linear/kernels/gdn_triton.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/fla/layernorm_gated.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/mamba/mamba.py": {
+      "features": [
+        "attention_linear"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/dsa/dsa_indexer.py": {
+      "features": [
+        "attention_linear",
+        "context_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/rotary_embedding/base.py": {
+      "features": [
+        "attention_rotary"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/rotary_embedding/mrope.py": {
+      "features": [
+        "attention_rotary"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/rotary_embedding/rope_variant.py": {
+      "features": [
+        "attention_rotary"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/rotary_embedding/utils.py": {
+      "features": [
+        "attention_rotary"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/moe/fuseep.py": {
+      "features": [
+        "moe",
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/moe/topk.py": {
+      "features": [
+        "moe"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/quantization/fused_moe_method_npu.py": {
+      "features": [
+        "moe"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/communicator.py": {
+      "features": [
+        "moe",
+        "weight_prefetch",
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/moe/ep_moe/layer.py": {
+      "features": [
+        "moe",
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/moe/fused_moe_triton/layer.py": {
+      "features": [
+        "moe"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/moe/topk.py": {
+      "features": [
+        "moe"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/moe/utils.py": {
+      "features": [
+        "moe"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/moe/moe_runner/deep_gemm.py": {
+      "features": [
+        "moe"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/quantization/awq_kernels.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/quantization/gptq_kernels.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/quantization/linear_method_npu.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/awq/schemes/awq_linear.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/awq/schemes/awq_moe.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/base_config.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/compressed_tensors/schemes/compressed_tensors_w8a8_int8.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/compressed_tensors/schemes/compressed_tensors_wNa16_moe.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/fp8.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/gptq/schemes/gptq_linear.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/gptq/schemes/gptq_moe.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/modelslim/schemes/modelslim_w4a4_int4.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/modelslim/schemes/modelslim_w4a4_int4_moe.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/modelslim/schemes/modelslim_w8a8_int8.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/unquant.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/utils.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/__init__.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/auto_round.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/awq/awq.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/compressed_tensors/compressed_tensors.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/gguf.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/quantization/modelslim/modelslim.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/configs/model_config.py": {
+      "features": [
+        "speculative_decoding",
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/graph_runner/eagle_draft_extend_npu_graph_runner.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/graph_runner/eagle_draft_npu_graph_runner.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/draft_utils.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/eagle_info.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/eagle_worker.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/eagle_worker_v2.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/spec_utils.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/dflash_worker.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/eagle_info_v2.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/eagle_utils.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/speculative/multi_layer_eagle_worker.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/compilation/npu_piecewise_backend.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/distributed/parallel_state.py": {
+      "features": [
+        "graph_compilation",
+        "hardware_backend",
+        "pipeline_parallelism",
+        "tensor_parallelism",
+        "context_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/graph_runner/npu_graph_runner.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/utils/common.py": {
+      "features": [
+        "graph_compilation",
+        "hardware_backend",
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/compilation/backend.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/compilation/weak_ref_tensor.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/utils.py": {
+      "features": [
+        "kv_cache_pool",
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/allocator_npu.py": {
+      "features": [
+        "kv_cache_pool"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/memory_pool_npu.py": {
+      "features": [
+        "kv_cache_pool",
+        "offloading"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/memory_pool.py": {
+      "features": [
+        "kv_cache_pool",
+        "quantized_kv_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/swa_memory_pool.py": {
+      "features": [
+        "kv_cache_pool",
+        "quantized_kv_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/memory_pool_host.py": {
+      "features": [
+        "kv_cache_pool"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/model_runner_kv_cache_mixin.py": {
+      "features": [
+        "kv_cache_pool",
+        "quantized_kv_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/ascend/conn.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/ascend/transfer_engine.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/decode_kvcache_offload_manager.py": {
+      "features": [
+        "pd_disaggregation",
+        "hicache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/kv_events.py": {
+      "features": [
+        "pd_disaggregation",
+        "hicache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/prefill.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/decode.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/encode_server.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/encode_receiver.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/disaggregation/encode_grpc_server.py": {
+      "features": [
+        "pd_disaggregation"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/lora/backend/ascend_backend.py": {
+      "features": [
+        "lora"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/utils.py": {
+      "features": [
+        "hicache",
+        "hardware_backend",
+        "offloading"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/cache_controller.py": {
+      "features": [
+        "hicache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/schedule_batch.py": {
+      "features": [
+        "hicache",
+        "hisparse",
+        "chunked_prefill",
+        "scheduling"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/dp_attention.py": {
+      "features": [
+        "dp_attention"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/cmo.py": {
+      "features": [
+        "weight_prefetch"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/models/qwen2_moe.py": {
+      "features": [
+        "weight_prefetch"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/models/qwen3.py": {
+      "features": [
+        "weight_prefetch"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/distributed/device_communicators/npu_communicator.py": {
+      "features": [
+        "hardware_backend",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/activation.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/layernorm.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/scheduler.py": {
+      "features": [
+        "hardware_backend",
+        "dp_for_multi_modal_encoder",
+        "hisparse",
+        "chunked_prefill",
+        "scheduling"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/models/glm4_moe.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/server_args.py": {
+      "features": [
+        "attention_dense",
+        "attention_linear",
+        "attention_rotary",
+        "moe",
+        "quantization",
+        "speculative_decoding",
+        "graph_compilation",
+        "kv_cache_pool",
+        "pd_disaggregation",
+        "lora",
+        "hicache",
+        "dp_attention",
+        "weight_prefetch",
+        "hardware_backend",
+        "forward_hooks",
+        "structured_outputs",
+        "tool_parser",
+        "separate_reasoning",
+        "observability",
+        "server_arguments",
+        "pipeline_parallelism",
+        "sampling_backend",
+        "offloading",
+        "expert_parallelism",
+        "dp_for_multi_modal_encoder",
+        "object_storage",
+        "sgl_model_gateway",
+        "checkpoint_engine",
+        "deterministic_inference",
+        "hisparse",
+        "rfork",
+        "data_parallelism",
+        "tensor_parallelism",
+        "chunked_prefill",
+        "scheduling",
+        "eplb",
+        "context_parallelism",
+        "multimodal",
+        "radix_cache",
+        "quantized_kv_cache",
+        "multimodal_gen"
+      ],
+      "risk_factors": [
+        "change_frequency"
+      ],
+      "file_type": "config"
+    },
+    "python/sglang/srt/layers/linear.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/logits_processor.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/utils/multi_platform.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/input_buffers.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/breakable_cuda_graph_runner.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/piecewise_cuda_graph_runner.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/environ.py": {
+      "features": [],
+      "risk_factors": [
+        "change_frequency"
+      ],
+      "file_type": "config"
+    },
+    "python/sglang/srt/utils/patch_torch.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/debug_utils/tensor_dump_forward_hook.py": {
+      "features": [
+        "forward_hooks"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/hook_manager.py": {
+      "features": [
+        "forward_hooks"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/constrained/xgrammar_backend.py": {
+      "features": [
+        "structured_outputs"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/function_call/base_format_detector.py": {
+      "features": [
+        "tool_parser"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/function_call/utils.py": {
+      "features": [
+        "tool_parser"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/parser/reasoning_parser.py": {
+      "features": [
+        "separate_reasoning"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/scheduler_components/metrics_reporter.py": {
+      "features": [
+        "observability"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/observability/req_time_stats.py": {
+      "features": [
+        "observability"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/scheduler_components/profiler_manager.py": {
+      "features": [
+        "observability"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/utils/profile_utils.py": {
+      "features": [
+        "observability"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/sampler.py": {
+      "features": [
+        "sampling_backend"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_loader/loader.py": {
+      "features": [
+        "offloading",
+        "object_storage",
+        "rfork"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/moe/token_dispatcher/deepep.py": {
+      "features": [
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "sgl-model-gateway/": {
+      "features": [
+        "sgl_model_gateway"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/checkpoint_engine/__init__.py": {
+      "features": [
+        "checkpoint_engine"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/checkpoint_engine/checkpoint_engine_worker.py": {
+      "features": [
+        "checkpoint_engine"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/checkpoint_engine/update.py": {
+      "features": [
+        "checkpoint_engine"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/scheduler_components/weight_updater.py": {
+      "features": [
+        "checkpoint_engine"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/cuda_graph_runner.py": {
+      "features": [
+        "deterministic_inference"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/hisparse_memory_pool.py": {
+      "features": [
+        "hisparse"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/hisparse_coordinator.py": {
+      "features": [
+        "hisparse"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/arg_groups/hisparse_hook.py": {
+      "features": [
+        "hisparse"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/dsa_backend.py": {
+      "features": [
+        "hisparse"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_loader/remote_instance_weight_loader_utils.py": {
+      "features": [
+        "rfork"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/entrypoints/engine_info_bootstrap_server.py": {
+      "features": [
+        "rfork"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/data_parallel_controller.py": {
+      "features": [
+        "data_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/scheduler_components/dp_attn.py": {
+      "features": [
+        "data_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/schedule_policy.py": {
+      "features": [
+        "scheduling"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/eplb_manager.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/eplb_algorithms/deepseek.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/eplb_algorithms/deepseek_vec.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/eplb_algorithms/elasticity_aware.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/expert_distribution.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/expert_location.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/expert_location_dispatch.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/expert_location_updater.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/eplb/eplb_simulator/reader.py": {
+      "features": [
+        "eplb"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/layers/attention/dsa/utils.py": {
+      "features": [
+        "context_parallelism"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/processors/base_processor.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/mm_utils.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/audio_from_video.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/internvl_utils.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/customized_mm_processor_utils.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/internvl_vit_cuda_graph_runner.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/vit_cuda_graph_runner.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/managers/mm_utils.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/graph_runner/vit_npu_graph_runner.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/modules/glm46v_processor.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/hardware_backend/npu/modules/qwen_vl_processor.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/models/qwen3_vl.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/multimodal/processors/ernie45_vl.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/radix_cache.py": {
+      "features": [
+        "radix_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/radix_cache_cpp.py": {
+      "features": [
+        "radix_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_executor/pool_configurator.py": {
+      "features": [
+        "quantized_kv_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/model_loader/weight_utils.py": {
+      "features": [
+        "quantized_kv_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/srt/mem_cache/common.py": {
+      "features": [
+        "quantized_kv_cache"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/multimodal_gen/runtime/platforms/npu.py": {
+      "features": [
+        "multimodal_gen"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/multimodal_gen/runtime/layers/quantization/mxfp4_npu.py": {
+      "features": [
+        "multimodal_gen"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/multimodal_gen/runtime/layers/quantization/mxfp8_npu.py": {
+      "features": [
+        "multimodal_gen"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "python/sglang/multimodal_gen/runtime/pipelines_core/stages/input_validation.py": {
+      "features": [
+        "multimodal_gen"
+      ],
+      "risk_factors": [
+        "code_complexity"
+      ],
+      "file_type": "source"
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_hicache_mha.py": {
+      "features": [
+        "hicache",
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_hicache_mla.py": {
+      "features": [
+        "hicache",
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache.py": {
+      "features": [
+        "hicache"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache_mla.py": {
+      "features": [
+        "hicache",
+        "chunked_prefill",
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache_mutually_exclusive.py": {
+      "features": [
+        "hicache",
+        "server_arguments"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_hierarchical_cache_ttft_mha.py": {
+      "features": [
+        "hicache"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/HiCache/test_npu_radix_cache.py": {
+      "features": [
+        "radix_cache"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/backends/test_npu_sampling_backend.py": {
+      "features": [
+        "sampling_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/dllm/test_npu_llada2_mini.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/memory_and_scheduling/test_npu_no_chunked_prefill.py": {
+      "features": [
+        "chunked_prefill"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/offloading/test_npu_offload_modes.py": {
+      "features": [
+        "offloading"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/optimization_debug/test_npu_compile_graph_tp1_bf16.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/optimization_debug/test_npu_graph_tp1_bf16.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/optimization_debug/test_npu_graph_tp2_bf16.py": {
+      "features": [
+        "graph_compilation",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/optimization_debug/test_npu_piecewise_graph_prefill.py": {
+      "features": [
+        "graph_compilation"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep.py": {
+      "features": [
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_auto_deepseek_v3_2_w8a8.py": {
+      "features": [
+        "expert_parallelism",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_auto_qwen3_480b.py": {
+      "features": [
+        "expert_parallelism",
+        "quantization",
+        "dp_attention"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_auto_qwen3_next.py": {
+      "features": [
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_low_latency_deepseek_v3_2_w8a8.py": {
+      "features": [
+        "expert_parallelism",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_low_latency_qwen3_480b.py": {
+      "features": [
+        "expert_parallelism",
+        "quantization",
+        "dp_attention"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_deepep_low_latency_qwen3_next.py": {
+      "features": [
+        "moe",
+        "expert_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parameter/test_npu_fim_completion.py": {
+      "features": [
+        "server_arguments"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parameter/test_npu_log_level.py": {
+      "features": [
+        "server_arguments"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parameter/test_npu_no_overlap_scheduler.py": {
+      "features": [
+        "radix_cache",
+        "chunked_prefill",
+        "scheduling"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parameter/test_npu_original_logprobs.py": {
+      "features": [
+        "server_arguments"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/parameter/test_npu_warmups.py": {
+      "features": [
+        "server_arguments"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_autoround_dense.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_autoround_moe.py": {
+      "features": [
+        "quantization",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_gguf.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_gguf_moe.py": {
+      "features": [
+        "quantization",
+        "moe",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_gptq_moe.py": {
+      "features": [
+        "quantization",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_w4a4_quantization.py": {
+      "features": [
+        "quantization",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/quant/test_npu_w8a8_quantization.py": {
+      "features": [
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/runtime_opts/test_npu_mla_fia_w8a8int8.py": {
+      "features": [
+        "quantization",
+        "attention_dense",
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/runtime_opts/test_npu_mla_w8a8int8.py": {
+      "features": [
+        "attention_dense",
+        "quantization",
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/runtime_opts/test_npu_tp1_bf16.py": {
+      "features": [
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/runtime_opts/test_npu_tp2_bf16.py": {
+      "features": [
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/runtime_opts/test_npu_tp2_fia_bf16.py": {
+      "features": [
+        "attention_dense",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/runtime_opts/test_npu_tp4_bf16.py": {
+      "features": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/basic_function/speculative_inference/test_npu_eagle3.py": {
+      "features": [
+        "speculative_decoding"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/embedding_models/test_npu_bge_large_en_v1_5.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_api.py": {
+      "features": [
+        "observability",
+        "separate_reasoning",
+        "sampling_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_api_abort_request.py": {
+      "features": [
+        "scheduling"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_api_encode.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_enable_thinking.py": {
+      "features": [
+        "separate_reasoning"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_matched_stop.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_openai_function_calling.py": {
+      "features": [
+        "tool_parser"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_openai_server_ignore_eos.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/interface/test_npu_penalty.py": {
+      "features": [
+        "sampling_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_ascend_dbrx_instruct.py": {
+      "features": [
+        "attention_dense",
+        "moe",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_ascend_minimax_m2.py": {
+      "features": [
+        "attention_linear",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_ascend_trinity_mini.py": {
+      "features": [
+        "attention_dense",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_afm_4_5b.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_baichuan2_13b_chat.py": {
+      "features": [
+        "attention_dense"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_c4ai_command_r_v01.py": {
+      "features": [
+        "attention_dense",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_chatglm2_6b.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_deepseek_v3_2_exp_w8a8.py": {
+      "features": [
+        "quantization",
+        "moe",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_exaone_3.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_gemma_3_4b_it_llm.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_glm4_9b_chat.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_granite_3_0_3b_a800m.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_granite_3_1_8b.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_grok_2.py": {
+      "features": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_internlm2_7b.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_ling_lite.py": {
+      "features": [
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_llama4_scount_17b_16e.py": {
+      "features": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_llama_2_7b.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_llama_2_7b_communications_compression.py": {
+      "features": [
+        "tensor_parallelism",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_mimo_7b_rl.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_minicpm3_4b.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_mistral_7b.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_persimmon_8b_chat.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_phi_4_multimodal_llm.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_0_6b.py": {
+      "features": [
+        "hardware_backend",
+        "chunked_prefill"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_1_7b_gptq_int8.py": {
+      "features": [
+        "hardware_backend",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_235b_a22b_w8a8.py": {
+      "features": [
+        "hardware_backend",
+        "moe",
+        "quantization",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_30b.py": {
+      "features": [
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_30b_attn_cp.py": {
+      "features": [
+        "tensor_parallelism",
+        "context_parallelism",
+        "attention_dense",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_30b_w4a4.py": {
+      "features": [
+        "quantization",
+        "tensor_parallelism",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_32b.py": {
+      "features": [
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_8b_communications_quantization.py": {
+      "features": [
+        "tensor_parallelism",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwen3_coder_480b_a35b.py": {
+      "features": [
+        "tensor_parallelism",
+        "moe",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_qwq_32b_w8a8.py": {
+      "features": [
+        "tensor_parallelism",
+        "quantization"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_smollm_1_7b.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/llm_models/test_npu_stablelm_2_1_6b.py": {
+      "features": [
+        "graph_compilation",
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/rerank_models/test_npu_bge_reranker_v2_m3.py": {
+      "features": [
+        "attention_dense",
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/reward_models/test_npu_gemma_2_27b_v0_2.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/reward_models/test_npu_internlm2_7b_reward.py": {
+      "features": [
+        "hardware_backend",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/reward_models/test_npu_llama_3_1_8b_v0_2.py": {
+      "features": [
+        "hardware_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/test_npu_memory_consumption.py": {
+      "features": [
+        "hardware_backend",
+        "tensor_parallelism",
+        "quantization",
+        "moe"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_ascend_glm_4_5v.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_deepseek_vl2.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_gemma_3_4b_it.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_janus_pro_1b.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_janus_pro_7b.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_kimi_vl_a3b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_llama_3_2_11b_vision_instruct.py": {
+      "features": [
+        "multimodal"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_mimo_vl_7b_rl.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_minicpm_o_2_6.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_minicpm_v_2_6.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_mistral_small_3_1_24b_instruct_2503.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_phi4_multimodal_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_qwen2_5_vl_3b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_qwen2_5_vl_72b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_qwen3_vl_235b_a22b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_qwen3_vl_30b_a3b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_qwen3_vl_4b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_qwen3_vl_8b_instruct.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_vlm_basic.py": {
+      "features": [
+        "multimodal",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_vlm_eagle3.py": {
+      "features": [],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_vlm_encoder_dp.py": {
+      "features": [
+        "multimodal",
+        "dp_for_multi_modal_encoder",
+        "tensor_parallelism"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    },
+    "test/registered/ascend/vlm_models/test_npu_vlm_penalty.py": {
+      "features": [
+        "multimodal",
+        "sampling_backend"
+      ],
+      "risk_factors": [
+        "test_effectiveness"
+      ],
+      "file_type": "test",
+      "is_test": true,
+      "covers_files": [],
+      "coverage_ratio": 0.0
+    }
+  }
+}

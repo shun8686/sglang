@@ -1,0 +1,729 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PR #25839 分析报告 — NPU Chunked Prefill + GDN 模型精度修复</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --fg: #c9d1d9;
+    --border: #30363d;
+    --accent: #58a6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #a371f7;
+    --code-bg: #161b22;
+    --hdr-bg: #161b22;
+    --card-bg: #161b22;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    background: var(--bg);
+    color: var(--fg);
+    line-height: 1.6;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  h1 { font-size: 28px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 24px; }
+  h2 { font-size: 22px; margin: 36px 0 16px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 18px; margin: 24px 0 12px; color: var(--accent); }
+  h4 { font-size: 16px; margin: 16px 0 8px; }
+
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .meta-item {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 18px;
+  }
+  .meta-item .label { font-size: 12px; color: #8b949e; text-transform: uppercase; letter-spacing: 0.5px; }
+  .meta-item .value { font-size: 16px; font-weight: 600; margin-top: 4px; }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .badge-green  { background: #1b3a2a; color: var(--green); }
+  .badge-red    { background: #3a1b1b; color: var(--red); }
+  .badge-yellow { background: #3a2e1b; color: var(--yellow); }
+  .badge-purple { background: #2a1b3a; color: var(--purple); }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0;
+    font-size: 14px;
+  }
+  th, td {
+    padding: 10px 14px;
+    border: 1px solid var(--border);
+    text-align: left;
+  }
+  th { background: var(--hdr-bg); font-weight: 600; }
+  tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+  }
+  code { font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; }
+  :not(pre) > code {
+    background: var(--code-bg);
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .callout {
+    border-left: 4px solid;
+    padding: 12px 18px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    background: var(--card-bg);
+  }
+  .callout-red    { border-color: var(--red); }
+  .callout-yellow { border-color: var(--yellow); }
+  .callout-green  { border-color: var(--green); }
+  .callout-blue   { border-color: var(--accent); }
+
+  .heatmap {
+    display: flex; gap: 20px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+  .heatmap-col {
+    flex: 1;
+    min-width: 280px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+  }
+  .heatmap-col h4 { text-align: center; margin-top: 0; }
+  .heatmap-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 4px;
+    margin-top: 12px;
+    font-size: 12px;
+    text-align: center;
+  }
+  .cell-hdr { font-weight: 600; padding: 6px; color: #8b949e; }
+  .cell-row-hdr { font-weight: 600; padding: 6px; text-align: right; color: #8b949e; font-size: 11px; }
+  .cell { padding: 8px 6px; border-radius: 4px; font-weight: 600; }
+  .cell-pass { background: #1b3a2a; color: var(--green); }
+  .cell-fail { background: #3a1b1b; color: var(--red); }
+  .cell-miss { background: #3a2e1b; color: var(--yellow); }
+
+  .flow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 0;
+    flex-wrap: wrap;
+    font-size: 14px;
+  }
+  .flow-box {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 8px 14px;
+    font-family: monospace;
+    font-size: 13px;
+  }
+  .flow-arrow { color: var(--accent); font-size: 18px; }
+
+  .toc { margin: 24px 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+
+  .section-number {
+    display: inline-block;
+    width: 28px; height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    background: var(--accent);
+    color: #fff;
+    font-weight: 700;
+    font-size: 14px;
+    margin-right: 10px;
+  }
+
+  .diff-add { color: var(--green); }
+  .diff-del { color: var(--red); }
+  .diff-hdr { color: var(--accent); }
+
+  .risk-bar {
+    display: flex; gap: 8px; margin: 12px 0;
+    height: 32px; border-radius: 6px; overflow: hidden;
+  }
+  .risk-seg { display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; color: #fff; }
+  .risk-high { background: var(--red); }
+  .risk-med  { background: var(--yellow); color: #111; }
+  .risk-low  { background: var(--green); }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin: 16px 0; }
+  @media (max-width: 800px) { .two-col { grid-template-columns: 1fr; } }
+
+  .code-caption {
+    font-size: 12px;
+    color: #8b949e;
+    margin-bottom: 2px;
+    font-weight: 600;
+  }
+</style>
+</head>
+<body>
+
+<h1>NPU Chunked Prefill + GDN 线性注意力精度修复分析报告</h1>
+
+<div class="meta-grid">
+  <div class="meta-item">
+    <div class="label">PR</div>
+    <div class="value"><a href="https://github.com/sgl-project/sglang/pull/25839" style="color:var(--accent)">#25839</a></div>
+  </div>
+  <div class="meta-item">
+    <div class="label">标题</div>
+    <div class="value">[NPU] Support chunk prefill for Qwen3.5/Qwen3.6 models</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">作者</div>
+    <div class="value">Liwansi (华为 Ascend)</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">状态 / 日期</div>
+    <div class="value">已合并 @ 2026-05-21</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">改动规模</div>
+    <div class="value">+8 / −8 行，2 个文件</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">影响平台</div>
+    <div class="value"><span class="badge badge-purple">NPU / Ascend</span></div>
+  </div>
+  <div class="meta-item">
+    <div class="label">涉及模型</div>
+    <div class="value">Qwen3.5, Qwen3.6, Qwen3-Next (全系 GDN)</div>
+  </div>
+  <div class="meta-item">
+    <div class="label">CI 结果</div>
+    <div class="value"><span class="badge badge-green">PR Test ✅</span> <span class="badge badge-yellow">Extra ❌→✅</span></div>
+  </div>
+</div>
+
+<!-- ====== TOC ====== -->
+<h2>目录</h2>
+<ol class="toc">
+  <li><a href="#s1">问题场景</a></li>
+  <li><a href="#s2">根因分析</a></li>
+  <li><a href="#s3">问题修改详解</a></li>
+  <li><a href="#s4">测试覆盖现状分析</a></li>
+  <li><a href="#s5">测试风险矩阵</a></li>
+  <li><a href="#s6">已补充测试用例</a></li>
+  <li><a href="#s7">测试建议与 CI 策略</a></li>
+</ol>
+
+<!-- ====== §1 Problem Scenario ====== -->
+<h2 id="s1"><span class="section-number">1</span>问题场景</h2>
+
+<h3>1.1 触发条件</h3>
+<p>在 <strong>NPU (Ascend)</strong> 平台上运行 <strong>Qwen3.5/Qwen3.6</strong> 等 GDN (Gated Delta Network) 混合线性注意力模型时，开启 <strong>chunked prefill</strong> 会导致输出精度严重下降。</p>
+
+<div class="flow">
+  <span class="flow-box">NPU 硬件</span>
+  <span class="flow-arrow">+</span>
+  <span class="flow-box">GDN 模型<br/>(Qwen3.5/3.6/Next)</span>
+  <span class="flow-arrow">+</span>
+  <span class="flow-box">chunked prefill<br/>(size=128)</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--red);background:#3a1b1b;">精度崩塌</span>
+</div>
+
+<h3>1.2 业务流程</h3>
+<p>在 chunked prefill 场景下，长序列被切分为多个 chunk 逐块处理：</p>
+
+<pre>
+┌─────────────┐    SSM State₁    ┌─────────────┐    SSM State₂    ┌─────────────┐
+│  Chunk 0    │ ───────────────→ │  Chunk 1    │ ───────────────→ │  Chunk 2    │
+│  (128 tok)  │                  │  (128 tok)  │                  │  (128 tok)  │
+└─────────────┘                  └─────────────┘                  └─────────────┘
+      │                               │                               │
+      └─── CoreAttnOut + <span style="color:var(--red)">last_recurrent_state</span> ───┘
+</pre>
+
+<p>每个 chunk 之间需要正确传递 <code>last_recurrent_state</code>（SSM 循环状态张量），下一 chunk 读取该状态继续计算。若状态张量维度布局被意外修改，后续 chunk 读取时会得到错误的状态。</p>
+
+<h3>1.3 现象</h3>
+<table>
+  <tr><th>场景</th><th>chunked prefill</th><th>ceval 精度</th></tr>
+  <tr>
+    <td>修复前</td>
+    <td><span class="badge badge-red">size=128</span></td>
+    <td>精度崩溃（接近随机）</td>
+  </tr>
+  <tr>
+    <td>修复后</td>
+    <td><span class="badge badge-green">size=128</span></td>
+    <td>正常（与 size=-1 一致）</td>
+  </tr>
+</table>
+
+<!-- ====== §2 Root Cause ====== -->
+<h2 id="s2"><span class="section-number">2</span>根因分析</h2>
+
+<h3>2.1 直接根因：多余的 <code>transpose(-1, -2)</code></h3>
+
+<p>在 <code>ascend_gdn_backend.py</code> 的 <code>forward_extend()</code> 中，chunked prefill 每个 chunk 结束时都要将当前 SSM 状态写入缓存。旧代码对 speculative decoding 路径做了 <code>transpose(-1, -2)</code>：</p>
+
+<pre>
+<span class="code-caption">修复前 — ascend_gdn_backend.py (旧代码已删除)</span>
+<span class="diff-del">- if not forward_batch.spec_algorithm.is_none():</span>
+<span class="diff-del">-     last_recurrent_state = last_recurrent_state.transpose(-1, -2).to(dtype)</span>
+<span class="diff-del">- else:</span>
+<span class="diff-del">-     last_recurrent_state = last_recurrent_state.to(dtype)</span>
+<span class="diff-del">- ssm_states[cache_indices] = last_recurrent_state</span>
+
+<span class="code-caption">修复后 — 统一处理，无 transpose</span>
+<span class="diff-add">+ last_recurrent_state = last_recurrent_state.to(ssm_states.dtype, copy=False)</span>
+<span class="diff-add">+ ssm_states[cache_indices] = last_recurrent_state</span>
+</pre>
+
+<p>当 <code>spec_algorithm</code> 虽为默认值（<code>NONE</code>）但存在某些特定上下文（如某些 forward mode 下 spec_algorithm 对象被设置为非 NONE 状态），会错误触发 transpose，使状态下一次被读取时维度不匹配。</p>
+
+<h3>2.2 深层根因：NPU 的 temporal_state 维度约定与 GPU 不同</h3>
+
+<p>在 <code>memory_pool.py</code> 的 <code>MambaPool.__init__()</code> 中，speculative decoding 场景需要构造 <code>intermediate_ssm_state_cache</code>。NPU 上的 <code>temporal_state</code> 默认布局（HV, K, V 维度顺序）与 <code>intermediate_ssm_state_cache</code> 期望的布局不一致，需要额外做 transpose：</p>
+
+<pre>
+<span class="code-caption">memory_pool.py — NPU 分支（新增）</span>
+<span class="diff-add">+ if _is_npu:</span>
+<span class="diff-add">+     temporal_state = temporal_state.transpose(-1, -2)</span>
+<span class="diff-add">+     temporal_state_shape = (</span>
+<span class="diff-add">+         *temporal_state_shape[:-2],</span>
+<span class="diff-add">+         temporal_state_shape[-1],</span>
+<span class="diff-add">+         temporal_state_shape[-2],</span>
+<span class="diff-add">+     )</span>
+  # Cache intermediate SSM states per draft token during target verify
+  intermediate_ssm_state_cache = torch.zeros(
+      size=(num_mamba_layers, spec_state_size + 1,
+            speculative_num_draft_tokens,
+            <span style="color:var(--accent)">temporal_state_shape[0]</span>,
+            <span style="color:var(--accent)">temporal_state_shape[1]</span>,
+            <span style="color:var(--accent)">temporal_state_shape[2]</span>),
+      ...)
+</pre>
+
+<h3>2.3 因果链</h3>
+
+<div class="flow">
+  <span class="flow-box" style="border-color:var(--red)">NPU temporal_state 维度<br/>与 GPU 顺序不同</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--red)">chunked prefill 下<br/>transpose 操作冲突</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--red)">SSM state 布局<br/>在 chunk 间不一致</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--red)">下一 chunk 读取<br/>错误状态</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--red)">精度崩塌</span>
+</div>
+
+<!-- ====== §3 Fix Details ====== -->
+<h2 id="s3"><span class="section-number">3</span>问题修改详解</h2>
+
+<div class="two-col">
+<div>
+<h3>文件 1：<code>ascend_gdn_backend.py</code></h3>
+<p><strong>位置：</strong><code>forward_extend()</code> 方法末尾</p>
+<p><strong>改动类型：</strong>简化 + 修复</p>
+<p><strong>影响路径：</strong>所有 NPU + GDN 模型的 chunked prefill</p>
+<pre><span class="diff-del">-8 lines</span>
+<span class="diff-add">+2 lines</span></pre>
+</div>
+<div>
+<h3>文件 2：<code>memory_pool.py</code></h3>
+<p><strong>位置：</strong><code>MambaPool.__init__()</code></p>
+<p><strong>改动类型：</strong>NPU 专用适配</p>
+<p><strong>影响路径：</strong>NPU + GDN + speculative decoding</p>
+<pre><span class="diff-add">+7 lines</span>
+<span class="diff-del">-0 lines</span></pre>
+</div>
+</div>
+
+<table>
+  <tr>
+    <th>改动</th>
+    <th>文件</th>
+    <th>旧行为</th>
+    <th>新行为</th>
+    <th>风险</th>
+  </tr>
+  <tr>
+    <td><strong>移除 spec_algorithm transpose</strong></td>
+    <td><code>ascend_gdn_backend.py</code></td>
+    <td>根据 spec_algorithm 状态决定是否对 <code>last_recurrent_state</code> 做 <code>transpose(-1, -2)</code></td>
+    <td>统一只做 <code>.to(dtype)</code>，不 transpose</td>
+    <td><span class="badge badge-green">低</span></td>
+  </tr>
+  <tr>
+    <td><strong>NPU temporal_state 维度适配</strong></td>
+    <td><code>memory_pool.py</code></td>
+    <td>temporal_state 使用 GPU 默认布局构造 intermediate cache</td>
+    <td>NPU 上先 transpose 再构造，保证维度一致</td>
+    <td><span class="badge badge-green">低</span></td>
+  </tr>
+</table>
+
+<div class="callout callout-yellow">
+<strong>⚠️ 残留关注点：</strong><code>ascend_gdn_backend.py:350-351</code> 的 <code>last_recurrent_state.to()</code> 调用位于 <code>if last_recurrent_state is not None</code> 块之外，与旧代码行为一致（旧代码的 spec 分支也在 None 检查外），但若以后 <code>last_recurrent_state</code> 可能在此处为 <code>None</code>，需增加保护。
+</div>
+
+<!-- ====== §4 Test Coverage ====== -->
+<h2 id="s4"><span class="section-number">4</span>测试覆盖现状分析</h2>
+
+<h3>4.1 NPU CI 测试套件概览</h3>
+<table>
+  <tr><th>Suite 类型</th><th>测试数量</th><th>运行频率</th><th>说明</th></tr>
+  <tr><td><code>stage-b-test-*-npu-*</code></td><td>~15</td><td><span class="badge badge-green">每次 PR</span></td><td>基础门禁测试</td></tr>
+  <tr><td><code>nightly-*-npu-a3</code></td><td>~90</td><td><span class="badge badge-yellow">每夜</span></td><td>夜间完整回归</td></tr>
+  <tr><td><code>full-*-npu-a3</code></td><td>~5</td><td><span class="badge badge-yellow">周期</span></td><td>全量周期测试</td></tr>
+  <tr><td><code>per-commit-*-npu-*</code></td><td>~2</td><td><span class="badge badge-green">每次提交</span></td><td>高频快速检查</td></tr>
+</table>
+
+<h3>4.2 三层维度交叉覆盖</h3>
+
+<p>该 bug 的触发需要同时满足三个条件：<strong>NPU</strong> + <strong>GDN 模型</strong> + <strong>chunked prefill 开启</strong>。</p>
+
+<h4>维度一：NPU + Chunked Prefill</h4>
+<table>
+  <tr><th>测试</th><th>模型</th><th>chunked prefill</th><th>模型类型</th><th>覆盖 GDN?</th></tr>
+  <tr>
+    <td><code>test_npu_no_overlap_scheduler</code></td>
+    <td>Llama-3.1-8B</td>
+    <td><span class="badge badge-green">128 ✅</span></td>
+    <td>标准 Attention</td>
+    <td><span class="badge badge-red">❌</span></td>
+  </tr>
+  <tr>
+    <td><code>test_npu_no_chunked_prefill</code></td>
+    <td>Llama-3.1-8B</td>
+    <td><span class="badge badge-red">-1 ❌</span></td>
+    <td>标准 Attention</td>
+    <td><span class="badge badge-red">❌</span></td>
+  </tr>
+  <tr>
+    <td><code>test_npu_deepep_auto_qwen3_next</code></td>
+    <td>Qwen3-Next-80B</td>
+    <td><span class="badge badge-red">-1 ❌</span></td>
+    <td><strong>GDN</strong></td>
+    <td><span class="badge badge-yellow">部分</span></td>
+  </tr>
+</table>
+
+<h4>维度二：NPU + GDN 模型</h4>
+<table>
+  <tr><th>测试</th><th>模型</th><th>NPU</th><th>chunked prefill</th></tr>
+  <tr>
+    <td><code>test_npu_deepep_auto_qwen3_next</code></td>
+    <td>Qwen3-Next-80B-A3B</td>
+    <td><span class="badge badge-green">✅</span></td>
+    <td><span class="badge badge-red">❌ 禁用</span></td>
+  </tr>
+  <tr>
+    <td><code>test_npu_deepep_low_latency_qwen3_next</code></td>
+    <td>Qwen3-Next-80B-A3B</td>
+    <td><span class="badge badge-green">✅</span></td>
+    <td><span class="badge badge-red">❌ 禁用</span></td>
+  </tr>
+</table>
+
+<div class="callout callout-red">
+<strong>🔴 关键发现：</strong>NPU 上仅有的 2 个 GDN 模型测试均为 DeepEP（Expert Parallelism）专项，且均显式设置 <code>--chunked-prefill-size -1</code>。 <strong>没有任何测试覆盖 NPU + GDN + chunked prefill 开启的精度路径。</strong>
+</div>
+
+<h4>维度三：全量 GDN 模型覆盖</h4>
+<table>
+  <tr><th>GDN 模型</th><th>Config 类</th><th>NPU 测试</th><th>GPU 测试</th></tr>
+  <tr><td>Qwen3-Next</td><td><code>Qwen3NextConfig</code></td><td>仅 DeepEP（8GPU, 无 chunk）</td><td><code>test_gdn_*</code> 单元测试</td></tr>
+  <tr><td>Qwen3.5</td><td><code>Qwen3_5Config</code></td><td><span class="badge badge-red">❌ 无</span></td><td>LoRA / 精度 E2E</td></tr>
+  <tr><td>Qwen3.5 MoE</td><td><code>Qwen3_5MoeConfig</code></td><td><span class="badge badge-red">❌ 无</span></td><td>AMD / GB300 E2E</td></tr>
+  <tr><td>Qwen3.6</td><td><code>Qwen3_5TextConfig</code></td><td><span class="badge badge-red">❌ 无</span></td><td>—</td></tr>
+  <tr><td>InternS2Preview</td><td><code>InternS2PreviewConfig</code></td><td><span class="badge badge-red">❌ 无</span></td><td>—</td></tr>
+  <tr><td>JetNemotron</td><td><code>JetNemotronConfig</code></td><td><span class="badge badge-red">❌ 无</span></td><td>GPU E2E</td></tr>
+  <tr><td>JetVLM</td><td><code>JetVLMConfig</code></td><td><span class="badge badge-red">❌ 无</span></td><td>—</td></tr>
+</table>
+
+<!-- ====== §5 Risk Matrix ====== -->
+<h2 id="s5"><span class="section-number">5</span>测试风险矩阵</h2>
+
+<h3>5.1 NPU 平台三层交叉热力图</h3>
+
+<div class="heatmap">
+  <div class="heatmap-col">
+    <h4>标准 Attention 模型<br/>(Llama, Qwen3)</h4>
+    <div class="heatmap-grid">
+      <span class="cell-hdr"></span><span class="cell-hdr">测过</span><span class="cell-hdr">精度</span>
+      <span class="cell-row-hdr">No Chunk</span><span class="cell cell-pass">✅</span><span class="cell cell-pass">✅</span>
+      <span class="cell-row-hdr">Chunk=128</span><span class="cell cell-pass">✅</span><span class="cell cell-pass">✅</span>
+      <span class="cell-row-hdr">SpecDecode</span><span class="cell cell-pass">✅</span><span class="cell cell-pass">✅</span>
+      <span class="cell-row-hdr">Spec+Chunk</span><span class="cell cell-fail">❌</span><span class="cell cell-fail">❌</span>
+    </div>
+  </div>
+  <div class="heatmap-col" style="border-color: var(--red);">
+    <h4>GDN 线性注意力模型<br/>(Qwen3.5/3.6/Next)</h4>
+    <div class="heatmap-grid">
+      <span class="cell-hdr"></span><span class="cell-hdr">测过</span><span class="cell-hdr">精度</span>
+      <span class="cell-row-hdr">No Chunk</span><span class="cell cell-miss">⚠️*</span><span class="cell cell-miss">⚠️*</span>
+      <span class="cell-row-hdr">Chunk=128</span><span class="cell cell-fail">❌</span><span class="cell cell-fail">❌</span>
+      <span class="cell-row-hdr">SpecDecode</span><span class="cell cell-fail">❌</span><span class="cell cell-fail">❌</span>
+      <span class="cell-row-hdr">Spec+Chunk</span><span class="cell cell-fail">❌</span><span class="cell cell-fail">❌</span>
+    </div>
+  </div>
+</div>
+<p style="font-size:12px;color:#8b949e">* No Chunk: 仅 DeepEP 8GPU 专项测试，使用 Qwen3-Next-80B，非精度回归测试</p>
+
+<h3>5.2 风险评估</h3>
+
+<table>
+  <tr><th style="width:5%">#</th><th>风险</th><th>等级</th><th>影响代码</th><th>已有防护</th><th>潜在后果</th></tr>
+  <tr>
+    <td>R1</td>
+    <td><strong>GDN chunked prefill<br/>SSM 状态传递</strong></td>
+    <td><span class="badge badge-red">🔴 高</span></td>
+    <td><code>ascend_gdn_backend.py:335-355</code></td>
+    <td><span class="badge badge-red">无</span></td>
+    <td>Qwen3.5/3.6/Next 模型在 NPU 上开启 chunked prefill 精度崩溃</td>
+  </tr>
+  <tr>
+    <td>R2</td>
+    <td><strong>GDN speculative<br/>状态管理</strong></td>
+    <td><span class="badge badge-yellow">🟡 中</span></td>
+    <td><code>memory_pool.py:303-309</code></td>
+    <td><span class="badge badge-red">无</span></td>
+    <td>NPU + GDN + speculative 场景下 temporal_state 维度错误</td>
+  </tr>
+  <tr>
+    <td>R3</td>
+    <td><strong>temporal_state_shape<br/>硬编码索引</strong></td>
+    <td><span class="badge badge-yellow">🟡 中</span></td>
+    <td><code>memory_pool.py:305-309</code></td>
+    <td><span class="badge badge-red">无</span></td>
+    <td>模型维度变化时索引可能失效</td>
+  </tr>
+  <tr>
+    <td>R4</td>
+    <td><strong>double write 幂等性</strong></td>
+    <td><span class="badge badge-green">🟢 低</span></td>
+    <td><code>ascend_gdn_backend.py:349,351</code></td>
+    <td><span class="badge badge-yellow">GSM8K 阈值≥0.38</span></td>
+    <td>双重写入依赖幂等，逻辑变更可能导致不一致</td>
+  </tr>
+</table>
+
+<div class="risk-bar">
+  <div class="risk-seg risk-high" style="flex:2;">🔴 High: R1 — chunked prefill + GDN state (0 tests)</div>
+  <div class="risk-seg risk-med"  style="flex:1.5;">🟡 Med: R2 + R3 — spec + shape (0 tests)</div>
+  <div class="risk-seg risk-low"  style="flex:0.5;">🟢 Low: R4</div>
+</div>
+
+<!-- ====== §6 Added Tests ====== -->
+<h2 id="s6"><span class="section-number">6</span>已补充测试用例</h2>
+
+<div class="callout callout-green">
+<strong>针对 R1（GDN chunked prefill）已新增专项测试：</strong>
+</div>
+
+<h3>6.1 新增文件</h3>
+<table>
+  <tr><th>文件</th><th>操作</th><th>说明</th></tr>
+  <tr>
+    <td><code>test/registered/ascend/basic_function/memory_and_scheduling/<br/>test_npu_gdn_chunked_prefill.py</code></td>
+    <td><strong>新增</strong></td>
+    <td>GDN chunked prefill 精度回归测试</td>
+  </tr>
+  <tr>
+    <td><code>python/sglang/test/ascend/test_ascend_utils.py</code></td>
+    <td><strong>修改</strong></td>
+    <td>新增 <code>QWEN3_5_0_8B_WEIGHTS_PATH</code> 和 <code>QWEN3_5_4B_WEIGHTS_PATH</code></td>
+  </tr>
+</table>
+
+<h3>6.2 测试设计</h3>
+<table>
+  <tr><th>测试类</th><th>模型</th><th>chunked prefill</th><th>accuracy ≥</th><th>作用</th></tr>
+  <tr>
+    <td><code>TestGDNChunkedPrefillEnabled</code></td>
+    <td>Qwen3.5-0.8B</td>
+    <td><span class="badge badge-green">128</span></td>
+    <td>0.35</td>
+    <td><strong>验证修复有效</strong> — chunked prefill 下精度正常</td>
+  </tr>
+  <tr>
+    <td><code>TestGDNChunkedPrefillDisabled</code></td>
+    <td>Qwen3.5-0.8B</td>
+    <td><span class="badge badge-red">-1</span></td>
+    <td>0.35</td>
+    <td><strong>基线对照</strong> — 排除模型本身的精度问题</td>
+  </tr>
+</table>
+
+<h3>6.3 测试关键参数</h3>
+<pre>
+--attention-backend ascend              <span style="color:#8b949e">// NPU GDN attention 后端</span>
+--chunked-prefill-size 128             <span style="color:#8b949e">// 触发 chunked prefill 路径</span>
+--disable-cuda-graph                   <span style="color:#8b949e">// 避免 graph 捕获干扰</span>
+--max-running-requests 16              <span style="color:#8b949e">// 控制并发</span>
+</pre>
+
+<h3>6.4 测试覆盖的代码路径</h3>
+
+<div class="flow">
+  <span class="flow-box">GSM8K 评测请求<br/>(长序列 prompt)</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box">chunked prefill<br/>拆分为多个 chunk</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--accent);">AscendGDNAttnBackend<br/>.forward_extend()</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--accent);">fused_gdn_gating<br/>+ kernel_dispatcher.extend()</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box" style="border-color:var(--accent);">ssm_states[cache_indices]<br/>= last_recurrent_state</span>
+  <span class="flow-arrow">→</span>
+  <span class="flow-box">下一 chunk<br/>读取状态继续计算</span>
+</div>
+
+<p style="color:var(--accent);font-size:13px;margin-top:8px;">→ 此路径正是 PR #25839 修复的核心代码。测试通过 GSM8K 的最终 accuracy 来端到端验证状态传递的正确性。</p>
+
+<h3>6.5 已知未覆盖路径</h3>
+<table>
+  <tr><th>缺失覆盖</th><th>原因</th><th>计划</th></tr>
+  <tr>
+    <td>NPU + GDN + speculative + chunked prefill</td>
+    <td>需要 GDN 模型的 EAGLE draft model，当前 NPU CI 无可用权重</td>
+    <td>P2 — 待 draft model 就绪后补充</td>
+  </tr>
+  <tr>
+    <td>NPU + GDN + <code>intermediate_ssm_state_cache</code></td>
+    <td>需 speculative_num_draft_tokens > 0，触发 spec verify 路径</td>
+    <td>P2 — 同上</td>
+  </tr>
+  <tr>
+    <td>多 chunk size 组合</td>
+    <td>仅覆盖 size=128</td>
+    <td>P3 — 成本/收益权衡</td>
+  </tr>
+</table>
+
+<!-- ====== §7 Recommendations ====== -->
+<h2 id="s7"><span class="section-number">7</span>测试建议与 CI 策略</h2>
+
+<h3>7.1 优先级排序</h3>
+
+<table>
+  <tr><th>优先级</th><th>操作</th><th>影响范围</th><th>收益</th></tr>
+  <tr>
+    <td><span class="badge badge-red">P0</span></td>
+    <td>
+      <strong>合入已补充的 <code>test_npu_gdn_chunked_prefill.py</code></strong><br/>
+      <span style="font-size:12px;color:#8b949e;">使用 Qwen3.5-0.8B，注册到 nightly-1-npu-a3</span>
+    </td>
+    <td>R1</td>
+    <td>直接覆盖本 PR 的 bug 路径</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-red">P0</span></td>
+    <td>
+      <strong>NPU CI 下载 Qwen3.5-0.8B 模型权重</strong><br/>
+      <span style="font-size:12px;color:#8b949e;">约 1.6GB BF16，<code>Qwen/Qwen3.5-0.8B</code></span>
+    </td>
+    <td>R1</td>
+    <td>测试运行的前提条件</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-yellow">P1</span></td>
+    <td>
+      <strong>Qwen3-Next DeepEP 测试启用 chunked prefill</strong><br/>
+      <span style="font-size:12px;color:#8b949e;">将 <code>test_npu_deepep_auto_qwen3_next.py</code> 的 <code>--chunked-prefill-size -1</code> 改为 <code>128</code>（如果与 DeepEP 兼容）</span>
+    </td>
+    <td>R1</td>
+    <td>零成本增加覆盖</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-yellow">P1</span></td>
+    <td>
+      <strong>增加 NPU + Qwen3.5 + EAGLE speculative 测试</strong><br/>
+      <span style="font-size:12px;color:#8b949e;">需要 Qwen3.5 draft model 权重</span>
+    </td>
+    <td>R2, R3</td>
+    <td>覆盖 speculative + GDN 路径</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-green">P2</span></td>
+    <td>
+      <strong>增加 NPU GDN attention 单元测试</strong><br/>
+      <span style="font-size:12px;color:#8b949e;">对标 GPU 的 <code>test/registered/attention/unittests/gdn/</code>，增加 NPU runner</span>
+    </td>
+    <td>R1-R4</td>
+    <td>快速、精准的 attention 层回归覆盖</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-green">P3</span></td>
+    <td>
+      <strong>多 chunk size 组合测试</strong><br/>
+      <span style="font-size:12px;color:#8b949e;">64, 128, 256, 512</span>
+    </td>
+    <td>R1</td>
+    <td>覆盖不同 chunk 边界条件</td>
+  </tr>
+</table>
+
+<h3>7.2 推荐 CI 注册策略</h3>
+
+<table>
+  <tr><th>测试</th><th>注册方式</th><th>Suite</th></tr>
+  <tr>
+    <td><code>test_npu_gdn_chunked_prefill</code> (新)</td>
+    <td>
+      <pre>register_npu_ci(est_time=400,
+    suite="nightly-1-npu-a3",
+    nightly=True)</pre>
+    </td>
+    <td>夜间回归 <code>nightly-1-npu-a3</code><br/>
+    <span style="font-size:12px;color:#8b949e;">（与其他 1-NPU 模型测试同 suite）</span></td>
+  </tr>
+</table>
+
+<h3>7.3 长期建议</h3>
+
+<ol>
+  <li><strong>建立 NPU GDN 模型 CI 基准</strong> — 至少保留一个 GDN 模型（Qwen3.5-0.8B 或 4B）在 NPU 夜间测试中，确保后续任何 GDN attention / chunked prefill 的修改不会在 NPU 上引入回归</li>
+  <li><strong>GDN attention 单元测试 NPU 化</strong> — GPU 端已有完善的 GDN attention 单元测试（triton / flashinfer / torch_native + eager / CG / spec verify），NPU 端应建立对应 runner</li>
+  <li><strong>speculative decoding + GDN 覆盖</strong> — 当 Qwen3.5 的 Eagle draft model 可用后，补充 NPU + GDN + EAGLE 组合测试</li>
+</ol>
+
+<hr style="margin: 40px 0 20px; border-color: var(--border);">
+
+<div style="font-size:12px; color:#8b949e; text-align: center;">
+  报告生成时间：2026-06-08 &nbsp;|&nbsp; 基于 SGLang PR #25839 分析 &nbsp;|&nbsp; 分支：main
+</div>
+
+</body>
+</html>

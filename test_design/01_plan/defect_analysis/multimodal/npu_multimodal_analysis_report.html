@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPU 多模态 n>1 并行采样问题分析报告 — PR #23685</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #c9d1d9;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --danger: #f85149;
+    --warn: #d29922;
+    --ok: #3fb950;
+    --purple: #a371f7;
+    --code-bg: #1c2128;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.7;
+    max-width: 1100px; margin: 0 auto; padding: 40px 24px;
+  }
+  h1 { font-size: 2em; border-bottom: 2px solid var(--border); padding-bottom: 16px; margin-bottom: 8px; }
+  h2 { font-size: 1.5em; margin: 48px 0 16px; padding-left: 12px; border-left: 4px solid var(--accent); }
+  h3 { font-size: 1.2em; margin: 32px 0 12px; color: var(--accent); }
+  p { margin: 12px 0; }
+  code { background: var(--code-bg); padding: 2px 6px; border-radius: 4px; font-size: 0.92em; }
+  pre { background: var(--code-bg); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; overflow-x: auto; margin: 16px 0; font-size: 0.88em; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; }
+  th, td { border: 1px solid var(--border); padding: 10px 14px; text-align: left; }
+  th { background: var(--surface); font-weight: 600; }
+  tr:nth-child(even) { background: #161b2233; }
+
+  .meta-box {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 10px 24px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 8px; padding: 20px 24px; margin: 24px 0;
+  }
+  .meta-box dt { color: var(--muted); font-size: 0.85em; }
+  .meta-box dd { font-weight: 600; }
+
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.82em; font-weight: 600; }
+  .badge-red { background: #f8514922; color: var(--danger); border: 1px solid #f8514944; }
+  .badge-yellow { background: #d2992222; color: var(--warn); border: 1px solid #d2992244; }
+  .badge-green { background: #3fb95022; color: var(--ok); border: 1px solid #3fb95044; }
+  .badge-purple { background: #a371f722; color: var(--purple); border: 1px solid #a371f744; }
+
+  .risk-p0 { background: #f8514908; border-left: 3px solid var(--danger); padding: 12px 16px; margin: 8px 0; }
+  .risk-p1 { background: #d2992208; border-left: 3px solid var(--warn); padding: 12px 16px; margin: 8px 0; }
+
+  .flow { display: flex; align-items: center; gap: 0; flex-wrap: wrap; margin: 20px 0; font-size: 0.88em; }
+  .flow-box { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; text-align: center; }
+  .flow-arrow { color: var(--muted); font-size: 1.2em; margin: 0 4px; }
+
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 28px; margin: 24px 0; }
+  .toc ol { margin-left: 20px; }
+  .toc li { margin: 6px 0; }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .summary-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 20px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; text-align: center; }
+  .card .num { font-size: 2em; font-weight: 700; }
+  .card .label { color: var(--muted); font-size: 0.88em; margin-top: 4px; }
+  .card.red .num { color: var(--danger); }
+  .card.yellow .num { color: var(--warn); }
+  .card.green .num { color: var(--ok); }
+
+  .check { color: var(--ok); }
+  .cross { color: var(--danger); }
+  .warn { color: var(--warn); }
+
+  @media (max-width: 768px) {
+    .meta-box { grid-template-columns: 1fr; }
+    .flow { flex-direction: column; }
+  }
+</style>
+</head>
+<body>
+
+<h1>🔬 NPU 多模态并行采样问题分析报告</h1>
+<p style="color: var(--muted); margin-top: 4px;">
+  关联 PR：<a href="https://github.com/sgl-project/sglang/pull/23685" style="color: var(--accent);">sgl-project/sglang#23685</a> ·
+  分析日期：2026-06-08 ·
+  分析范围：NPU (Ascend) 平台多模态测试覆盖
+</p>
+
+<div class="meta-box">
+  <div><dt>PR 标题</dt><dd>Fix image input bug when n > 1</dd></div>
+  <div><dt>作者</dt><dd>Liwansi (华为)</dd></div>
+  <div><dt>改动文件</dt><dd><code>python/sglang/srt/managers/mm_utils.py</code></dd></div>
+  <div><dt>改动规模</dt><dd>+17 / −4 行</dd></div>
+  <div><dt>状态</dt><dd><span class="badge badge-yellow">OPEN</span></dd></div>
+  <div><dt>目标分支</dt><dd>main</dd></div>
+</div>
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <strong>📑 目录</strong>
+  <ol>
+    <li><a href="#s1">问题场景</a></li>
+    <li><a href="#s2">根因分析</a></li>
+    <li><a href="#s3">修复方案分析</a>（含引用计数深度分析）</li>
+    <li><a href="#s4">NPU 平台影响分析</a></li>
+    <li><a href="#s5">测试覆盖分析</a></li>
+    <li><a href="#s6">NPU 平台测试风险矩阵</a></li>
+    <li><a href="#s7">NPU 测试建议</a>（含修复边界条件验证）</li>
+    <li><a href="#s8">总结与路线图</a></li>
+  </ol>
+</div>
+
+<!-- ===== 概览卡片 ===== -->
+<div class="summary-cards">
+  <div class="card red">
+    <div class="num">0</div>
+    <div class="label">NPU VLM 功能测试</div>
+  </div>
+  <div class="card red">
+    <div class="num">13</div>
+    <div class="label">NPU VLM 未覆盖功能维度</div>
+  </div>
+  <div class="card yellow">
+    <div class="num">1</div>
+    <div class="label">NPU 独有代码路径 (_is_npu sync)</div>
+  </div>
+  <div class="card green">
+    <div class="num">19</div>
+    <div class="label">NPU VLM MMMU 基准测试</div>
+  </div>
+</div>
+
+<!-- ===== 1. 问题场景 ===== -->
+<h2 id="s1">1. 问题场景</h2>
+
+<h3>1.1 触发条件</h3>
+<p>当用户通过 OpenAI 兼容 API 向多模态模型发送请求时，设置 <code>n &gt; 1</code>（并行采样参数）会导致服务端报错：</p>
+
+<pre><code>curl http://localhost:30000/v1/chat/completions \
+  -d '{
+    "model": "Qwen2.5-VL-3B-Instruct",
+    "messages": [{"role": "user", "content": [
+      {"type": "image_url", "image_url": {"url": "https://example.com/photo.jpg"}},
+      {"type": "text", "text": "描述这张图片"}
+    ]}],
+    <span style="color: var(--danger);">"n": 3</span>
+  }'</code></pre>
+
+<h3>1.2 参数 <code>n</code> 的含义</h3>
+<p><code>n</code> 是 OpenAI Chat Completions API 的<strong>并行采样数量</strong>：对同一个 prompt 生成 n 个独立 completion，每次采样从 logits 分布随机抽取 token，因此 n 条路径自然分叉产生不同输出。</p>
+
+<div class="flow">
+  <div class="flow-box">Prompt<br>+ 🖼️ 图片</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box">Choice[0]<br>"熊猫正在吃竹子…"</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box">Choice[1]<br>"图中一只熊猫坐着…"</div>
+  <div class="flow-arrow">→</div>
+  <div class="flow-box">Choice[2]<br>"照片展示熊猫在竹林…"</div>
+</div>
+
+<p><strong>关键点</strong>：n 个采样共享同一个 prompt，包括同一份图片数据。服务端内部会浅拷贝请求对象 n 次，每个 replica 引用同一个图片 tensor → 共享同一块共享内存。</p>
+
+<h3>1.3 现象对比</h3>
+
+<table>
+  <tr><th></th><th>修复前 (n=3)</th><th>修复后 (n=3)</th></tr>
+  <tr>
+    <td>结果</td>
+    <td><span class="cross">❌ 报错</span></td>
+    <td><span class="check">✅ 3 个 choices 正确返回</span></td>
+  </tr>
+  <tr>
+    <td>根因</td>
+    <td>共享内存被第一个 replica 提前 unlink</td>
+    <td>引用计数保护，所有 replica 完成后才释放</td>
+  </tr>
+</table>
+
+<!-- ===== 2. 根因分析 ===== -->
+<h2 id="s2">2. 根因分析</h2>
+
+<h3>2.1 完整数据流</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 24px; margin: 16px 0; font-size: 0.88em;">
+<pre style="margin: 0; border: none; padding: 0;">
+┌── TokenizerManager 进程 ──┐         ┌── Scheduler 进程 ────────┐
+│                            │         │                            │
+│ 1. _tokenize_one_request  │         │                            │
+│    └─ 图片 tensor (CPU)   │         │                            │
+│                            │         │                            │
+│ 2. n=3 → 浅拷贝 ×3         │         │                            │
+│    replica-1 ┐             │         │                            │
+│    replica-2 ├─ 同一 tensor │         │                            │
+│    replica-3 ┘             │         │                            │
+│                            │         │                            │
+│ 3. wrap_shm_features()    │         │                            │
+│    └─ ShmPointerMMData    │         │                            │
+│       shm_name="xxx"      │         │                            │
+│       ref_count = 1       │         │                            │
+│                            │         │                            │
+│ 4. ZMQ send_pyobj ────────┼──pickle─►│ 5. __setstate__          │
+│    └─ __getstate__()      │         │    └─ shm_open("xxx")     │
+│       ref_count++  → 2    │         │                            │
+│                            │         │ 6. unwrap_shm_features() │
+│                            │         │    └─ materialize()      │
+│                            │         │       clone tensor        │
+│                            │         │       <b>unlink("xxx")</b> ────┤
+│                            │         │                            │
+│                            │         │ 7. replica-2 materialize()│
+│                            │         │    └─ shm 已删除 → 💥 CRASH│
+└────────────────────────────┘         └────────────────────────────┘
+</pre>
+</div>
+
+<h3>2.2 根本原因</h3>
+
+<p>文件 <code>python/sglang/srt/managers/mm_utils.py</code>，类 <code>ShmPointerMMData</code> 的 <code>materialize()</code> 方法：</p>
+
+<pre><code><span style="color: var(--muted);"># 修复前 — 无条件 unlink</span>
+def materialize(self) -> torch.Tensor:
+    tensor = self.tensor.clone()
+    if self._shm_handle is not None:
+        self._shm_handle.close()
+        <span style="color: var(--danger);">try:
+            self._shm_handle.unlink()    # ← 第一个 replica 就删除了共享内存
+        except FileNotFoundError:
+            pass                         # ← 后续 replica 访问已被删除的 shm → 崩溃</span>
+        self._shm_handle = None
+    return tensor</code></pre>
+
+<p><strong>核心问题</strong>：同一个 <code>shm_name</code> 被 n 个 replica 共享，但 <code>unlink()</code> 在第一次 <code>materialize()</code> 时就被调用，导致后续 replica 无法访问共享内存中的数据。POSIX <code>shm_unlink()</code> 虽然只删除名字（已有 fd 仍可读写），但在某些环境下（特定内核配置、Windows、Ascend 驱动实现等），时序竞争会导致数据不可用。</p>
+
+<h3>2.3 风险模式抽象</h3>
+
+<div style="background: #f8514908; border: 1px solid #f8514933; border-radius: 8px; padding: 16px 20px; margin: 16px 0;">
+  <strong style="color: var(--danger);">🔴 通用模式：一份共享资源 + 多个消费者 + 无引用计数 → 资源提前释放</strong>
+  <p style="margin-top: 8px;">这个模式不仅影响 <code>n > 1</code>，理论上也影响：</p>
+  <ul style="margin-left: 20px; margin-top: 4px;">
+    <li><strong>TP > 1</strong>：每个 rank 各打开一次共享内存，rank 0 的 <code>materialize()</code> 可能在 rank 1 还没 <code>shm_open</code> 时就 <code>unlink</code></li>
+    <li><strong>n > 1 × TP > 1</strong>：消费者数 = n × TP，竞争更激烈</li>
+    <li><strong>Batch + n > 1</strong>：<code>_handle_batch_request</code> 的 n>1 分支（L1459）发送多个独立的 <code>_send_one_request</code></li>
+  </ul>
+</div>
+
+<!-- ===== 3. 修复方案分析 ===== -->
+<h2 id="s3">3. 修复方案分析</h2>
+
+<h3>3.1 修改内容</h3>
+
+<table>
+  <tr><th>位置</th><th>修改</th><th>说明</th></tr>
+  <tr>
+    <td><code>ShmPointerMMData</code> 类体</td>
+    <td>新增 <code>_shm_ref_counts = {}</code></td>
+    <td>类级别字典，按 shm_name → 引用计数</td>
+  </tr>
+  <tr>
+    <td><code>__init__</code></td>
+    <td>新增 <code>_shm_ref_counts[self.shm_name] = 1</code></td>
+    <td>创建者持有一个初始引用</td>
+  </tr>
+  <tr>
+    <td><code>__getstate__</code></td>
+    <td>新增 <code>_shm_ref_counts[self.shm_name] += 1</code></td>
+    <td>每次 pickle 序列化（发送给一个 replica）时递增</td>
+  </tr>
+  <tr>
+    <td><code>materialize</code></td>
+    <td>递减计数 → ≤0 时才 unlink</td>
+    <td>仅最后一个消费者释放共享内存</td>
+  </tr>
+</table>
+
+<h3>3.2 修复后的 materialize()</h3>
+
+<pre><code><span style="color: var(--muted);"># 修复后 — 引用计数保护</span>
+def materialize(self) -> torch.Tensor:
+    tensor = self.tensor.clone()
+    if self._shm_handle is not None:
+        self._shm_handle.close()
+        <span style="color: var(--ok);"># 递减引用计数，仅最后一个消费者 unlink
+        if self.shm_name in ShmPointerMMData._shm_ref_counts:
+            ShmPointerMMData._shm_ref_counts[self.shm_name] -= 1
+            if ShmPointerMMData._shm_ref_counts[self.shm_name] <= 0:
+                try:
+                    shared_memory.SharedMemory(name=self.shm_name).unlink()
+                    del ShmPointerMMData._shm_ref_counts[self.shm_name]
+                except FileNotFoundError:
+                    pass</span>
+        self._shm_handle = None
+    return tensor</code></pre>
+
+<h3>3.3 引用计数修复的深度分析</h3>
+
+<p>修复的核心思路是正确的，但在引用计数的生命周期管理上存在几个需要关注的边界情况。</p>
+
+<h4>3.3.1 引用计数生命周期追踪</h4>
+
+<p>以最简单的 n=3 + TP=1 场景为例，追踪 <code>_shm_ref_counts</code> 的完整变化：</p>
+
+<pre><code><span style="color: var(--muted);"># TokenizerManager 进程 (发送端)</span>
+ShmPointerMMData.__init__()          → ref[shm_A] = 1   <span style="color: var(--muted);"># 创建</span>
+__getstate__()  (replica-1 pickle)   → ref[shm_A] = 2   <span style="color: var(--muted);"># ZMQ 序列化</span>
+__getstate__()  (replica-2 pickle)   → ref[shm_A] = 3
+__getstate__()  (replica-3 pickle)   → ref[shm_A] = 4
+
+<span style="color: var(--muted);"># Scheduler 进程 (接收端) — 注意：不同进程！</span>
+<span style="color: var(--muted);"># 此进程有自己独立的 _shm_ref_counts，shm_A 不在其中！</span>
+replica-1: __setstate__() → shm_open(shm_A)
+replica-1: materialize()  → ref 中无 shm_A → <span style="color: var(--warn);">跳过递减 → 跳过 unlink</span>
+replica-2: materialize()  → <span style="color: var(--warn);">同上</span>
+replica-3: materialize()  → <span style="color: var(--warn);">同上</span>
+
+<span style="color: var(--muted);"># 结果：发送端 ref=4 永不归零，接收端 ref 中无记录</span>
+<span style="color: var(--danger);">→ 共享内存 shm_A 永远不被 unlink → 内存泄漏！</span></code></pre>
+
+<div class="risk-p0">
+  <strong>🔴 P0 — 引用计数仅在同一进程内有效</strong>
+  <p><code>_shm_ref_counts</code> 是类级别的 Python dict，仅存在于单个 Python 解释器进程中。<code>__getstate__</code> 在发送端（TokenizerManager）递增，但 <code>materialize()</code> 在接收端（Scheduler）递减——<strong>两端是不同的进程，各自有独立的 ref dict</strong>。接收端的 ref dict 中没有 shm_A 的条目，递减逻辑被跳过，shm 永远不会被 unlink。</p>
+  <p><strong>为什么 Bug 仍然被修好了？</strong> 因为之前 n=1 时 <code>materialize()</code> 无条件 unlink（工作正常）；n>1 时第一个 replica unlink 后别的 replica 访问不到数据（💥）。现在改为引用计数后，n=3 时 <strong>没有一个 replica 会 unlink</strong>（ref 不在 dict 中），数据始终可用——但也始终泄漏。这是一个"用内存泄漏换正确性"的取舍。</p>
+</div>
+
+<h4>3.3.2 有 TP broadcast 时的引用计数</h4>
+
+<p>当 TP > 1 时，流程中多了一次 <code>broadcast_pyobj</code>，引用计数在<strong>同一进程内</strong>多了一次 <code>__getstate__</code>：</p>
+
+<pre><code><span style="color: var(--muted);"># Scheduler rank 0 进程</span>
+replica: __setstate__() → shm_open(shm_A)
+<span style="color: var(--muted);"># broadcast_pyobj 到 rank 1, 2, 3 ...</span>
+broadcast_pyobj → __getstate__()  <span style="color: var(--muted);"># rank 0 上再次 pickle → 如果 _shm_ref_counts 中有 shm_A 则 ++</span>
+<span style="color: var(--muted);"># 但 rank 0 的 ref dict 中同样没有 shm_A（由 ZMQ 接收时 __setstate__ 不创建条目）</span></code></pre>
+
+<p>TP broadcast 同样不会在接收端的 ref dict 中创建条目，引用计数链路依旧断裂。</p>
+
+<h4>3.3.3 完整的风险清单</h4>
+
+<div class="risk-p0">
+  <strong>🔴 P0 — 跨进程引用计数断裂（上述 3.3.1）</strong>
+  <p>发送端递增、接收端递减，两端是不同进程 → 共享内存泄漏是必然的，只是被原 Bug 的错误行为掩盖了。正确做法应是在 <code>__setstate__</code> 中初始化 ref 计数，或在接收端也维护计数。</p>
+</div>
+
+<div class="risk-p0" style="margin-top: 12px;">
+  <strong>🔴 P0 — 单次发送场景 ref 永远不归零</strong>
+  <p>即使不考虑跨进程问题，审视同一进程内的计数逻辑：<code>__init__</code> → ref=1，<code>__getstate__</code> → ref=2，<code>materialize()</code> → ref=1。之后 ref 永远停留在 1，共享内存同样不会释放。n=1 的正常路径也存在这个"静默泄漏"。</p>
+</div>
+
+<div class="risk-p1" style="margin-top: 12px;">
+  <strong>🟡 P1 — <code>__del__</code> 未递减引用计数</strong>
+  <p>当前 <code>__del__</code> 只 close handle 不 unlink。如果某个 replica 对象被垃圾回收但从未调用 <code>materialize()</code>（例如请求被 abort、异常路径），对应的引用计数不会被递减，导致其他正常 consumer 永远等不到 ref ≤ 0 的时刻。</p>
+</div>
+
+<div class="risk-p0" style="margin-top: 12px;">
+  <strong>🔴 P0 — 原始对象的引用泄漏</strong>
+  <p>在 TokenizerManager 发送端，原始 <code>ShmPointerMMData</code> 对象在 <code>_send_one_request</code> 返回后不再被引用，由 GC 回收。<code>__del__</code> 只 close 不 unlink，且不递减引用计数。原始对象持有的 ref=1 永远无法释放。</p>
+</div>
+
+<div class="risk-p1" style="margin-top: 12px;">
+  <strong>🟡 P1 — 线程安全</strong>
+  <p><code>_shm_ref_counts</code> 是普通 dict，无锁保护。多线程并发 <code>__getstate__</code> 或 <code>materialize()</code> 可能产生竞态条件。</p>
+</div>
+
+<h4>3.3.4 建议的修复方向</h4>
+
+<pre><code><span style="color: var(--muted);"># 方案 A：在 __setstate__ 中初始化接收端引用计数</span>
+def __setstate__(self, state):
+    ...
+    self._shm_handle = shared_memory.SharedMemory(name=self.shm_name)
+    <span style="color: var(--ok);"># 接收端首次打开 shm 时创建计数条目
+    ShmPointerMMData._shm_ref_counts.setdefault(self.shm_name, 0)</span>
+    ...
+
+<span style="color: var(--muted);"># 方案 B：放弃引用计数，用更简单的"n 副本感知"方案</span>
+<span style="color: var(--muted);"># 发送端预先知道 n 的值，在 ShmPointerMMData 初始化时告知 expected_consumers
+# consumer_id 通过 ZMQ message 传递，materialize 时检查是否最后一个 consumer</span>
+
+<span style="color: var(--muted);"># 方案 C：在 __del__ 中补齐计数递减 + 条件 unlink</span>
+def __del__(self):
+    if getattr(self, "_shm_handle", None) is not None:
+        self._shm_handle.close()
+        self._shm_handle = None
+    <span style="color: var(--ok);"># 安全网：如果 materialize 从未被调用，del 时递减计数
+    if hasattr(self, "shm_name") and self.shm_name in ShmPointerMMData._shm_ref_counts:
+        ShmPointerMMData._shm_ref_counts[self.shm_name] -= 1
+        if ShmPointerMMData._shm_ref_counts[self.shm_name] <= 0:
+            try: shared_memory.SharedMemory(name=self.shm_name).unlink()
+            except: pass</span></code></pre>
+
+<!-- ===== 4. NPU 平台影响分析 ===== -->
+<h2 id="s4">4. NPU 平台影响分析</h2>
+
+<h3>4.1 NPU 的传输模式</h3>
+
+<p>关键函数 <code>_determine_tensor_transport_mode()</code>：</p>
+
+<pre><code>def _determine_tensor_transport_mode(server_args: ServerArgs) -> TensorTransportMode:
+    is_cross_node = server_args.dist_init_addr
+    if is_cross_node:
+        return "default"       <span style="color: var(--muted);"># 跨节点 → 内联传输，不经过共享内存</span>
+    else:
+        return "cuda_ipc"      <span style="color: var(--muted);"># 单节点 → 共享内存传输</span></code></pre>
+
+<p>在 <code>wrap_shm_features()</code> 中：</p>
+
+<pre><code>def wrap_shm_features(obj):
+    if _get_is_default_transport() or ...:
+        return obj              <span style="color: var(--muted);"># "default" 模式 → NO-OP，直接返回</span>
+    <span style="color: var(--muted);"># "cuda_ipc" 模式 → ShmPointerMMData 包装激活</span>
+    for item in obj.mm_inputs.mm_items:
+        item.feature = _wrap_tensor_or_list(item.feature)  <span style="color: var(--muted);">← 这里创建 ShmPointerMMData</span></code></pre>
+
+<div style="background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px 20px; margin: 16px 0;">
+  <strong>结论：</strong>NPU 单节点 CI（所有现有 <code>nightly-*-npu-a3</code> runner）的 <code>dist_init_addr</code> 为 <code>None</code>，→ 传输模式为 <code>"cuda_ipc"</code> → <strong><code>ShmPointerMMData</code> 路径完全激活</strong> → PR #23685 修复的代码路径在 NPU 上切实执行。
+</div>
+
+<h3>4.2 NPU 独有代码路径</h3>
+
+<p>在 <code>mm_utils.py:773-774</code> 中有一个 <strong>NPU 专属同步点</strong>：</p>
+
+<pre><code>def get_embedding_and_mask(...):
+    ...
+    embedding, input_ids = _get_chunked_prefill_embedding(...)
+    <span style="color: var(--purple);">if _is_npu:
+        torch.npu.current_stream().synchronize()  # ← NPU ONLY</span>
+    special_multimodal_mask = _get_multimodal_mask(input_ids, placeholder_tensor)
+    ...</code></pre>
+
+<p>这行 <code>synchronize()</code> 确保 NPU stream 上的多模态 embedding 计算完成后，才开始生成 mask。如果此同步缺失或时序不当，会导致 embedding 和 mask 位置对不上。这个路径 <strong>仅在 NPU 上执行，CUDA CI 无法覆盖</strong>。</p>
+
+<!-- ===== 5. 测试覆盖分析 ===== -->
+<h2 id="s5">5. 测试覆盖分析</h2>
+
+<h3>5.1 ShmPointerMMData 单元测试覆盖</h3>
+
+<table>
+  <tr><th>测试对象</th><th>CUDA CI</th><th>NPU CI</th></tr>
+  <tr><td><code>ShmPointerMMData.__init__</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>ShmPointerMMData.__getstate__</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>ShmPointerMMData.__setstate__</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>ShmPointerMMData.materialize()</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>wrap_shm_features()</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>unwrap_shm_features()</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>has_shm_features()</code></td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td><code>_finalize_shm_features()</code> (TP 多 rank)</td><td><span class="cross">❌</span></td><td><span class="cross">❌</span></td></tr>
+</table>
+
+<h3>5.2 NPU VLM 测试总览</h3>
+
+<p>NPU 侧共有 19 个 VLM 测试文件，<strong>全部使用同一个模式</strong>：</p>
+
+<pre><code><span style="color: var(--muted);"># 每个 NPU VLM 测试的结构完全一致</span>
+class TestSomeVLMModel(TestVLMModels):
+    model = WEIGHTS_PATH
+    mmmu_accuracy = 0.2
+
+    def test_vlm_mmmu_benchmark(self):
+        self._run_vlm_mmmu_test()  <span style="color: var(--muted);"># ← MMMU 精度跑分，limit=50，temperature=0，n=1</span></code></pre>
+
+<div class="summary-cards">
+  <div class="card red">
+    <div class="num">100%</div>
+    <div class="label">NPU VLM 测试是 MMMU 精度基准</div>
+  </div>
+  <div class="card red">
+    <div class="num">0</div>
+    <div class="label">NPU VLM 功能测试用例</div>
+  </div>
+  <div class="card yellow">
+    <div class="num">0</div>
+    <div class="label">NPU interface 测试使用多模态模型</div>
+  </div>
+</div>
+
+<h3>5.3 覆盖盲区详解</h3>
+
+<p><strong>所有 NPU interface 测试</strong>（<code>test_npu_api.py</code>、<code>test_npu_penalty.py</code>、<code>test_npu_openai_function_calling.py</code>、<code>test_npu_matched_stop.py</code> 等）全部加载 <code>Llama-3.2-1B-Instruct</code>（纯文本模型），不涉及多模态。这意味着：</p>
+
+<table>
+  <tr><th>特性</th><th>NPU LLM 测试</th><th>NPU VLM 测试</th></tr>
+  <tr><td>penalty (frequency/presence)</td><td><span class="check">✅</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td>function calling</td><td><span class="check">✅</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td>matched_stop</td><td><span class="check">✅</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td>ignore_eos</td><td><span class="check">✅</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td>enable_thinking</td><td><span class="check">✅</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td>streaming</td><td><span class="check">✅</span></td><td><span class="cross">❌</span></td></tr>
+  <tr><td>n > 1</td><td><span class="cross">❌</span></td><td><span class="check">✅ (刚加)</span></td></tr>
+  <tr><td>多图 / 视频 / 音频</td><td>N/A</td><td><span class="cross">❌</span></td></tr>
+</table>
+
+<!-- ===== 6. 风险矩阵 ===== -->
+<h2 id="s6">6. NPU 平台测试风险矩阵</h2>
+
+<h3>6.1 按严重程度分级</h3>
+
+<div class="risk-p0">
+  <strong>🔴 P0 — 高概率触发，无任何测试覆盖</strong>
+  <table style="margin-top: 8px;">
+    <tr><th>#</th><th>风险场景</th><th>与 PR #23685 同类？</th></tr>
+    <tr>
+      <td>1</td>
+      <td><strong>VLM + stream=True</strong>：流式输出中共享内存被提前释放</td>
+      <td><span class="badge badge-red">是</span> — 同样是一个 shm 被多个异步 generator 引用</td>
+    </tr>
+    <tr>
+      <td>2</td>
+      <td><strong>VLM + stream + n>1</strong>：流式 × 并行采样叠加，n 个 stream generator</td>
+      <td><span class="badge badge-red">是</span> — n × stream chunks 同时消费共享内存</td>
+    </tr>
+    <tr>
+      <td>3</td>
+      <td><strong>VLM + n>1 + TP>1</strong>：n × TP 个消费者，跨进程引用计数不同步</td>
+      <td><span class="badge badge-red">是</span> — 引用计数修复的跨进程边界情况</td>
+    </tr>
+    <tr>
+      <td>4</td>
+      <td><strong>VLM + batch + n>1</strong>：<code>_handle_batch_request</code> n>1 分支</td>
+      <td><span class="badge badge-red">是</span> — 多个请求 × 多个 replica</td>
+    </tr>
+  </table>
+</div>
+
+<div class="risk-p1" style="margin-top: 16px;">
+  <strong>🟡 P1 — 中概率，特定条件下触发</strong>
+  <table style="margin-top: 8px;">
+    <tr><th>#</th><th>风险场景</th><th>原因</th></tr>
+    <tr>
+      <td>5</td>
+      <td><strong>NPU stream 同步失效</strong></td>
+      <td>NPU 独有 <code>synchronize()</code> 路径无直接功能测试，仅靠 MMMU 精度间接验证</td>
+    </tr>
+    <tr>
+      <td>6</td>
+      <td><strong>precomputed_embeddings + n>1</strong></td>
+      <td><code>CudaIpcTensorTransportProxy</code> 路径同样有单 tensor 多消费者问题</td>
+    </tr>
+    <tr>
+      <td>7</td>
+      <td><strong>processor_output + n>1</strong></td>
+      <td>pixel_values + image_grid_thw 等原始 tensor 更大，共享内存竞争影响更大</td>
+    </tr>
+    <tr>
+      <td>8</td>
+      <td><strong>multi-image + n>1</strong></td>
+      <td>多个 mm_items 各有独立的 shm，错误域扩大</td>
+    </tr>
+  </table>
+</div>
+
+<h3>6.2 完整覆盖矩阵</h3>
+
+<table>
+  <tr>
+    <th style="width: 130px;">维度</th>
+    <th style="width: 80px;">n=1</th>
+    <th style="width: 80px;">n>1</th>
+    <th style="width: 80px;">stream</th>
+    <th style="width: 80px;">batch</th>
+    <th style="width: 80px;">TP>1</th>
+    <th style="width: 80px;">penalty</th>
+    <th style="width: 80px;">func-call</th>
+  </tr>
+  <tr>
+    <td>单图</td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="check">✅ (新)</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="warn">⚠ MMMU</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+  </tr>
+  <tr>
+    <td>多图</td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+  </tr>
+  <tr>
+    <td>视频</td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+  </tr>
+  <tr>
+    <td>音频</td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+  </tr>
+  <tr>
+    <td>混合模态</td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+  </tr>
+  <tr>
+    <td>precomputed</td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+    <td><span class="cross">❌</span></td>
+  </tr>
+</table>
+
+<p style="color: var(--muted); font-size: 0.88em;">⚠ MMMU = MMMU 精度基准中伴随有 TP>1 配置，但不是专门的功能测试。</p>
+
+<!-- ===== 7. NPU 测试建议 ===== -->
+<h2 id="s7">7. NPU 测试建议</h2>
+
+<h3>7.1 总体策略</h3>
+
+<div style="background: var(--surface); border: 1px solid var(--ok); border-radius: 8px; padding: 16px 20px; margin: 16px 0;">
+  <strong style="color: var(--ok);">核心原则：用最轻量的模型，覆盖最多样的路径，不增加新的 CI runner</strong>
+  <p style="margin-top: 4px;">所有功能测试复用 <code>Qwen2.5-VL-3B-Instruct</code>（NPU 上最轻量 VLM，权重已缓存），全部放入 <code>nightly-4-npu-a3</code>。</p>
+</div>
+
+<h3>7.2 建议 1（P0）：NPU VLM 基础功能测试</h3>
+
+<table>
+  <tr><th>文件</th><td><code>test/registered/ascend/vlm_models/test_npu_vlm_basic.py</code></td></tr>
+  <tr><th>模型</th><td>Qwen2.5-VL-3B-Instruct (TP=4)</td></tr>
+  <tr><th>预估时间</th><td>~300s</td></tr>
+  <tr><th>CI 注册</th><td><code>register_npu_ci(est_time=300, suite="nightly-4-npu-a3", nightly=True)</code></td></tr>
+</table>
+
+<table>
+  <tr><th>测试用例</th><th>验证内容</th><th>覆盖的风险维度</th></tr>
+  <tr>
+    <td><code>test_single_image</code></td>
+    <td>单图 + n=1，验证返回非空描述</td>
+    <td>基础 NPU VLM 功能</td>
+  </tr>
+  <tr>
+    <td><code>test_multi_images</code></td>
+    <td>两张图同时输入，验证两图均被描述</td>
+    <td>mm_items 多元素处理 + offsets</td>
+  </tr>
+  <tr>
+    <td><code>test_mixed_batch</code></td>
+    <td>有图 + 无图请求并发 (ThreadPoolExecutor)</td>
+    <td>mm_inputs=None 路径 + 并发安全</td>
+  </tr>
+  <tr>
+    <td><code>test_stream_image</code></td>
+    <td>stream=True + 单图，收集所有 chunks</td>
+    <td>流式 + 共享内存生命周期</td>
+  </tr>
+  <tr>
+    <td><code>test_n3_image</code></td>
+    <td>n=3 + 单图，验证 3 choices 非空且不重复</td>
+    <td>n>1 + 共享内存引用计数（PR #23685 回归）</td>
+  </tr>
+</table>
+
+<h3>7.3 建议 2（P0）：ShmPointerMMData 单元测试</h3>
+
+<table>
+  <tr><th>文件</th><td><code>test/manual/vlm/test_mm_utils.py</code>（扩展现有文件）</td></tr>
+  <tr><th>预估时间</th><td>~5s（纯 CPU，无模型加载）</td></tr>
+</table>
+
+<pre><code>class TestShmPointerMMData(unittest.TestCase):
+
+    def test_single_materialize(self):
+        """单次 create → materialize → 验证数据正确 + 共享内存已释放"""
+        ...
+
+    def test_multi_pickle_ref_count(self):
+        """模拟 n=3：pickle 3 次 → 每个 replica materialize →
+           验证前 2 次不 unlink，第 3 次 unlink"""
+        ...
+
+    def test_ref_count_cleanup_on_exception(self):
+        """异常路径：materialize 一半就抛异常 → ref 计数不泄漏"""
+        ...</code></pre>
+
+<h3>7.4 建议 3（P0）：PR #23685 修复的边界条件测试</h3>
+
+<table>
+  <tr><th>文件</th><td><code>test/manual/vlm/test_mm_utils.py</code>（扩展现有文件）</td></tr>
+  <tr><th>目标</th><td>直接验证 <code>ShmPointerMMData</code> 引用计数修复在 NPU 上的正确性</td></tr>
+  <tr><th>预估时间</th><td>~10s（纯 CPU 单元测试，无需 GPU/NPU）</td></tr>
+</table>
+
+<p>这些测试针对 3.3 节中分析的引用计数生命周期问题，在 NPU CI 环境中运行以验证 POSIX shm 语义和跨进程行为：</p>
+
+<pre><code>class TestShmPointerMMDataFix(CustomTestCase):
+    """验证 PR #23685 引用计数修复的各种边界条件"""
+
+    def test_multi_pickle_same_process(self):
+        """同进程 n=3 模拟：pickle 3 次 → 3 次 materialize → 验证最后一次释放 shm"""
+        tensor = torch.randn(100, 100)
+
+        # 创建 → ref=1
+        shm = ShmPointerMMData(tensor)
+        name = shm.shm_name
+
+        # pickle 3 次（模拟 n=3 发送）→ ref=4
+        states = [shm.__getstate__() for _ in range(3)]
+
+        # 3 次 materialize → ref=1, 0?? unlink?
+        for i, state in enumerate(states):
+            replica = ShmPointerMMData.__new__(ShmPointerMMData)
+            replica.__setstate__(state)
+            result = replica.materialize()
+            self.assertTrue(torch.equal(result, tensor),
+                            f"Replica {i}: data mismatch")
+
+        # ★ 关键断言：所有 consumer 完成后 shm 应被释放
+        # 当前实现下此断言预期 FAIL——ref 计数跨进程断裂
+        with self.assertRaises(FileNotFoundError,
+                               msg="shm should be unlinked after all consumers finish"):
+            shared_memory.SharedMemory(name=name)
+
+    def test_cross_process_simulation(self):
+        """跨进程场景：发送端递增 + 接收端递减 → 验证接收端 __setstate__ 初始化 ref"""
+        tensor = torch.randn(100, 100)
+        shm = ShmPointerMMData(tensor)
+        state = shm.__getstate__()
+        name = shm.shm_name
+
+        # 模拟接收端（独立"进程"——实际上在同进程但模拟接收端行为）
+        # 当前 __setstate__ 不会初始化 _shm_ref_counts
+        receiver = ShmPointerMMData.__new__(ShmPointerMMData)
+        receiver.__setstate__(state)
+
+        # ★ 关键断言：接收端的 ref dict 中应能找到 shm_name
+        # 当前实现下此断言预期 FAIL——证明了 3.3.1 的跨进程断裂问题
+        self.assertIn(
+            name,
+            ShmPointerMMData._shm_ref_counts,
+            "BUG: __setstate__ should init ref count for cross-process consumers"
+        )
+
+    def test_del_cleanup_ref_count(self):
+        """验证 __del__ 在异常路径下正确递减引用计数"""
+        tensor = torch.randn(100, 100)
+        shm = ShmPointerMMData(tensor)
+        name = shm.shm_name
+        initial_ref = ShmPointerMMData._shm_ref_counts.get(name, 0)
+
+        # 模拟 replica 对象被 GC 回收（从未调用 materialize）
+        del shm
+        import gc; gc.collect()
+
+        # ★ 关键断言：__del__ 应递减引用计数
+        # 当前实现下此断言预期 FAIL——__del__ 只 close 不 unlink
+        current_ref = ShmPointerMMData._shm_ref_counts.get(name, 0)
+        self.assertLess(
+            current_ref, initial_ref,
+            "BUG: __del__ should decrement ref count on cleanup"
+        )
+
+        # Cleanup: manually unlink the leaked shm
+        try:
+            shared_memory.SharedMemory(name=name).unlink()
+            ShmPointerMMData._shm_ref_counts.pop(name, None)
+        except FileNotFoundError:
+            pass
+
+    def test_tp_broadcast_extra_getstate(self):
+        """模拟 TP broadcast：验证 broadcast_pyobj 的额外 __getstate__ 被正确计数"""
+        tensor = torch.randn(100, 100)
+        shm = ShmPointerMMData(tensor)
+        name = shm.shm_name
+
+        ref_after_init = ShmPointerMMData._shm_ref_counts.get(name, 0)
+
+        # 第一次 pickle (ZMQ send)
+        state1 = shm.__getstate__()
+        ref_after_zmq = ShmPointerMMData._shm_ref_counts.get(name, 0)
+
+        # 第二次 pickle (TP broadcast_pyobj)
+        state2 = shm.__getstate__()
+        ref_after_broadcast = ShmPointerMMData._shm_ref_counts.get(name, 0)
+
+        # 验证每次 __getstate__ 都递增
+        self.assertEqual(ref_after_zmq, ref_after_init + 1,
+                         "ZMQ pickle should increment ref")
+        self.assertEqual(ref_after_broadcast, ref_after_zmq + 1,
+                         "TP broadcast should increment ref")
+
+        # Cleanup leaked shm
+        try:
+            shared_memory.SharedMemory(name=name).unlink()
+            ShmPointerMMData._shm_ref_counts.pop(name, None)
+        except FileNotFoundError:
+            pass</code></pre>
+
+<div class="risk-p0" style="margin-top: 12px;">
+  <strong>⚠️ 预期结果</strong>
+  <p>以上 4 个测试中有 3 个<strong>预期会 FAIL</strong>（标记为 BUG 的断言），因为它们直接暴露了 3.3 节分析的引用计数设计缺陷。这些"失败测试"作为<strong>技术债的可视化标记</strong>——一旦引用计数设计得到完善，这些测试就会 PASS，届时变为回归保护。</p>
+</div>
+
+<h3>7.5 建议 4（P1）：NPU Stream 同步验证</h3>
+
+<table>
+  <tr><th>文件</th><td>附加到 <code>test_npu_vlm_basic.py</code></td></tr>
+  <tr><th>目标</th><td>验证 <code>mm_utils.py:773</code> 的 <code>torch.npu.current_stream().synchronize()</code> 有效性</td></tr>
+</table>
+
+<pre><code>def test_multimodal_embedding_consistency(self):
+    """循环 50 次 embed → mask 验证对齐"""
+    for _ in range(50):
+        embedding, mask, input_ids = get_embedding_and_mask(...)
+        self.assertEqual(mask.sum(), embedding.shape[0],
+            "NPU sync failure: embedding/mask misalignment")</code></pre>
+
+<h3>7.6 建议 5（P1）：Penalty × VLM 交叉验证</h3>
+
+<table>
+  <tr><th>文件</th><td><code>test/registered/ascend/vlm_models/test_npu_vlm_penalty.py</code></td></tr>
+  <tr><th>预估时间</th><td>~200s</td></tr>
+</table>
+
+<p>NPU 已有 <code>test_npu_penalty.py</code>（纯文本）。新增 VLM 版本验证多模态下 frequency_penalty / presence_penalty 正常工作：</p>
+
+<pre><code>def test_frequency_penalty_with_image(self):
+    resp = client.chat.completions.create(
+        messages=[..., {"type": "image_url", ...}],
+        frequency_penalty=2.0, n=2
+    )
+    # 验证 2 个 choice 之间重复度低于阈值</code></pre>
+
+<h3>7.7 建议 6（P2）：Function Calling × VLM</h3>
+
+<p>扩展 NPU function calling 测试，增加图片 + JSON 结构化输出场景（例如"识别图中物体并返回 JSON 列表"）。</p>
+
+<h3>7.8 实施路线图</h3>
+
+<table>
+  <tr><th>阶段</th><th>时间</th><th>交付物</th><th>增量时间</th></tr>
+  <tr>
+    <td><span class="badge badge-red">Phase 1</span></td>
+    <td>本周</td>
+    <td>
+      ① <code>test_npu_vlm_basic.py</code>（5 个用例）<br>
+      ② <code>test_mm_utils.py</code> 扩展 ShmPointerMMData 基础测试（3 个用例）
+    </td>
+    <td>~305s</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-red">Phase 1.5</span></td>
+    <td>本周</td>
+    <td>
+      ③ PR #23685 修复边界条件验证（4 个用例，含预期 FAIL 的技术债标记）
+    </td>
+    <td>~10s</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-yellow">Phase 2</span></td>
+    <td>下周</td>
+    <td>
+      ④ NPU stream 同步验证<br>
+      ⑤ Penalty × VLM
+    </td>
+    <td>~400s</td>
+  </tr>
+  <tr>
+    <td><span class="badge badge-purple">Phase 3</span></td>
+    <td>后续</td>
+    <td>
+      ⑥ Function calling × VLM<br>
+      ⑦ Stream × n>1 × VLM<br>
+      ⑧ 完善 ShmPointerMMData 引用计数方案
+    </td>
+    <td>~400s</td>
+  </tr>
+</table>
+
+<!-- ===== 8. 总结 ===== -->
+<h2 id="s8">8. 总结与路线图</h2>
+
+<h3>8.1 关键发现</h3>
+
+<ol>
+  <li><strong>PR #23685 修复了一个真实 Bug 但遗留了设计缺陷</strong>：引用计数方案在<strong>同进程内</strong>有效（解决了 n 个 replica 并发 materialize 的竞争），但在<strong>跨进程</strong>场景下（TokenizerManager → Scheduler 的 ZMQ 传输，以及 TP broadcast）引用计数链路断裂，导致共享内存静默泄漏。详细分析见 <a href="#s3">3.3 节</a>。</li>
+  <li><strong>NPU VLM 测试只有一种形态</strong>：100% 的 NPU VLM 测试是 MMMU 精度跑分（n=1, temp=0, batch eval）。这不是功能测试——它验证"精度不退化"，验证不了"功能不崩溃"。</li>
+  <li><strong>NPU 存在独有代码路径但无专属保护</strong>：<code>_is_npu</code> 同步点是 NPU-only，正确性仅靠 MMMU 精度间接验证。</li>
+  <li><strong>13 个 VLM 功能维度在 NPU 上完全空白</strong>：单图/多图/视频/音频/流式/混合 batch/precomputed/processor_output/penalty/function calling/matched stop/HiCache/LoRA —— 全部未测。</li>
+  <li><strong>测试成本可控</strong>：Phase 1 + 1.5 增量为 ~315 秒（约 5 分钟），不增加新的 CI runner，全部复用现有 <code>nightly-4-npu-a3</code>。其中 Phase 1.5 的 ShmPointerMMData 边界条件测试可作为<strong>技术债可视化标记</strong>——预期部分 FAIL，直接暴露引用计数的残余问题。</li>
+</ol>
+
+<h3>8.2 一句话总结</h3>
+
+<div style="background: var(--surface); border: 2px solid var(--accent); border-radius: 12px; padding: 24px; margin: 24px 0; text-align: center; font-size: 1.05em;">
+  NPU 多模态测试当前是<strong>"精度看门狗"</strong>而非<strong>"功能防护网"</strong>。
+  PR #23685 暴露的 Bug 正好落在两者的真空地带——
+  精度测试（n=1, temp=0）<strong>永远无法触发</strong>它，
+  而功能测试（n=3, stream=True）<strong>根本不存在</strong>。
+</div>
+
+<hr style="border-color: var(--border); margin: 32px 0 16px;">
+<p style="color: var(--muted); font-size: 0.82em; text-align: center;">
+  Generated by Claude Code · 2026-06-08 · sgl-project/sglang PR #23685 Analysis
+</p>
+
+</body>
+</html>

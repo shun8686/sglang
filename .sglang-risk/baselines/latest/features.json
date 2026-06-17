@@ -1,0 +1,1053 @@
+{
+  "generated_at": "2026-06-10T09:50:31.353406+00:00",
+  "git_commit": "89410b380b2aa58662049e404d94ba79c0eeecb7",
+  "total_features": 41,
+  "features": [
+    {
+      "name": "attention_dense",
+      "category": "attention",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/attention/ascend_backend.py",
+        "python/sglang/srt/hardware_backend/npu/attention/ascend_torch_native_backend.py",
+        "python/sglang/srt/hardware_backend/npu/attention/mla_preprocess.py",
+        "python/sglang/srt/hardware_backend/npu/modules/deepseek_v2_attention_mla_npu.py",
+        "python/sglang/srt/layers/attention/base_attn_backend.py",
+        "python/sglang/srt/layers/attention/attention_registry.py",
+        "python/sglang/srt/layers/attention/vision.py",
+        "python/sglang/srt/model_executor/forward_batch_info.py",
+        "python/sglang/srt/model_executor/model_runner.py"
+      ],
+      "complexity": 4,
+      "description": "NPU dense attention backends: FlashInfer-compatible ascend FIA backend with MLA (Multi-head Latent Attention) support for DeepSeek-V2/V3/Qwen3, PyTorch-native SDPA fallback for unsupported configurations. Also includes vision attention (ViT self-attention for multimodal models), base_attn_backend abstraction, and attention_registry routing. Shared integration files: forward_batch_info, model_runner.",
+      "models_using": [
+        "AF-MoE",
+        "Baichuan",
+        "DBRX",
+        "DeepSeek",
+        "DeepSeek-NextN",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "Dots-VLM-ViT",
+        "Ernie4",
+        "GLM-4V",
+        "GLM4-MoE",
+        "GLM4-MoE-Lite-NextN",
+        "GLM4-MoE-NextN",
+        "GPT-OSS",
+        "Gemma2",
+        "Grok",
+        "IDEFICS2",
+        "Kimi-K25",
+        "LLaMA",
+        "LLaMA4",
+        "LlaDA2",
+        "LongCat-Flash",
+        "LongCat-Flash-NextN",
+        "MindSpore",
+        "MiniCPMV-ViT",
+        "MiniMax-M2",
+        "PaddleOCR-VL",
+        "Qwen2-MoE",
+        "Qwen2-VL",
+        "Qwen2.5-VL",
+        "Qwen3",
+        "Qwen3-MoE",
+        "Qwen3-Next",
+        "Qwen3-Omni-MoE",
+        "Qwen3-VL",
+        "Qwen3.5",
+        "StableLM",
+        "Xverse-MoE"
+      ],
+      "fingerprint": "newly_split_20260610",
+      "last_modified": "2026-06-10T07:00:41.376010+00:00",
+      "source": "manual_split_from_attention_backend",
+      "npu_participation": "strong",
+      "failure_mode": 4,
+      "split_from": "attention_backend"
+    },
+    {
+      "name": "attention_linear",
+      "category": "attention",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/attention/ascend_gdn_backend.py",
+        "python/sglang/srt/hardware_backend/npu/attention/ascend_hybrid_linear_attn_backend.py",
+        "python/sglang/srt/layers/attention/hybrid_linear_attn_backend.py",
+        "python/sglang/srt/layers/attention/linear/gdn_backend.py",
+        "python/sglang/srt/layers/attention/linear/kda_backend.py",
+        "python/sglang/srt/layers/attention/linear/kernels/gdn_triton.py",
+        "python/sglang/srt/layers/attention/fla/layernorm_gated.py",
+        "python/sglang/srt/layers/attention/mamba/mamba.py",
+        "python/sglang/srt/layers/attention/dsa/dsa_indexer.py"
+      ],
+      "complexity": 4,
+      "description": "NPU linear/efficient attention backends: Gated Delta Net (GDN) with Triton/NPU kernels, KDA (Kernelized Delta Attention) linear backend, Mamba2 state-space model (SSM) attention, hybrid full+linear attention for mixed-attention models. Also includes DSA (DeepSeek Sparse Attention) indexer for sparse token routing. Flash Linear Attention (FLA) components for chunk-based linear computation.",
+      "models_using": [
+        "Bailing-MoE-Linear",
+        "DeepSeek-V4",
+        "DeepSeek-NextN",
+        "LongCat-Flash-NextN",
+        "Qwen3-Next",
+        "DFlash",
+        "LongCat-Flash",
+        "Kimi-K25",
+        "LlaDA2",
+        "GPT-OSS",
+        "Grok",
+        "Ernie4",
+        "MiniMax-M2",
+        "MindSpore",
+        "StableLM",
+        "Qwen3",
+        "Qwen3.5"
+      ],
+      "fingerprint": "newly_split_20260610",
+      "last_modified": "2026-06-10T07:00:41.376010+00:00",
+      "source": "manual_split_from_attention_backend",
+      "npu_participation": "strong",
+      "failure_mode": 4,
+      "split_from": "attention_backend"
+    },
+    {
+      "name": "attention_rotary",
+      "category": "attention",
+      "source_files": [
+        "python/sglang/srt/layers/rotary_embedding/base.py",
+        "python/sglang/srt/layers/rotary_embedding/mrope.py",
+        "python/sglang/srt/layers/rotary_embedding/rope_variant.py",
+        "python/sglang/srt/layers/rotary_embedding/utils.py"
+      ],
+      "complexity": 2,
+      "description": "Rotary Position Embedding (RoPE) on NPU: standard RoPE (base), Multi-section RoPE (mrope) for multimodal and hybrid models, and RoPE variants (rope_variant) for model-specific position encoding strategies. Pure mathematical transformation applied to attention query/key tensors.",
+      "models_using": [
+        "AF-MoE",
+        "Baichuan",
+        "DBRX",
+        "DeepSeek",
+        "DeepSeek-NextN",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "Ernie4",
+        "GLM-4V",
+        "GLM4-MoE",
+        "GLM4-MoE-Lite-NextN",
+        "GLM4-MoE-NextN",
+        "GPT-OSS",
+        "Gemma2",
+        "Grok",
+        "Kimi-K25",
+        "LLaMA",
+        "LLaMA4",
+        "LlaDA2",
+        "LongCat-Flash",
+        "LongCat-Flash-NextN",
+        "MindSpore",
+        "MiniMax-M2",
+        "Qwen2-MoE",
+        "Qwen2-VL",
+        "Qwen2.5-VL",
+        "Qwen3",
+        "Qwen3-MoE",
+        "Qwen3-Next",
+        "Qwen3-Omni-MoE",
+        "Qwen3-VL",
+        "Qwen3.5",
+        "StableLM",
+        "Xverse-MoE"
+      ],
+      "fingerprint": "newly_split_20260610",
+      "last_modified": "2026-06-10T07:00:41.376010+00:00",
+      "source": "manual_split_from_attention_backend",
+      "npu_participation": "strong",
+      "failure_mode": 2,
+      "split_from": "attention_backend"
+    },
+    {
+      "name": "moe",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/moe/fuseep.py",
+        "python/sglang/srt/hardware_backend/npu/moe/topk.py",
+        "python/sglang/srt/hardware_backend/npu/quantization/fused_moe_method_npu.py",
+        "python/sglang/srt/layers/communicator.py",
+        "python/sglang/srt/layers/moe/ep_moe/layer.py",
+        "python/sglang/srt/layers/moe/fused_moe_triton/layer.py",
+        "python/sglang/srt/layers/moe/topk.py",
+        "python/sglang/srt/layers/moe/utils.py",
+        "python/sglang/srt/layers/moe/moe_runner/deep_gemm.py"
+      ],
+      "complexity": 5,
+      "description": "MoE on NPU: fused expert dispatch with FRACTAL_NZ weights, DeepEP low-latency fused expert parallelism (FuseEP), npu_moe_gating_top_k_softmax routing, dual-stream shared/routed expert execution. Supports W4A4/W8A8/BF16 fused MoE quantization and expert-parallel dispatch across NPU ranks.",
+      "models_using": [
+        "AF-MoE",
+        "Bailing-MoE-Linear",
+        "DBRX",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "GLM4-MoE",
+        "GLM4-MoE-Lite-NextN",
+        "GLM4-MoE-NextN",
+        "Qwen2-MoE",
+        "Qwen3-MoE",
+        "Qwen3-Omni-MoE",
+        "Xverse-MoE",
+        "DeepSeek-NextN",
+        "LongCat-Flash-NextN"
+      ],
+      "fingerprint": "55df4f9f7e41edb4bcb8019befe4e00f5b4a4ad8c2fe4ed78d50cc9dc98ef580",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "strong",
+      "failure_mode": 4
+    },
+    {
+      "name": "quantization",
+      "category": "quantization",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/quantization/awq_kernels.py",
+        "python/sglang/srt/hardware_backend/npu/quantization/gptq_kernels.py",
+        "python/sglang/srt/hardware_backend/npu/quantization/linear_method_npu.py",
+        "python/sglang/srt/layers/quantization/awq/schemes/awq_linear.py",
+        "python/sglang/srt/layers/quantization/awq/schemes/awq_moe.py",
+        "python/sglang/srt/layers/quantization/base_config.py",
+        "python/sglang/srt/layers/quantization/compressed_tensors/schemes/compressed_tensors_w8a8_int8.py",
+        "python/sglang/srt/layers/quantization/compressed_tensors/schemes/compressed_tensors_wNa16_moe.py",
+        "python/sglang/srt/layers/quantization/fp8.py",
+        "python/sglang/srt/layers/quantization/gptq/schemes/gptq_linear.py",
+        "python/sglang/srt/layers/quantization/gptq/schemes/gptq_moe.py",
+        "python/sglang/srt/layers/quantization/modelslim/schemes/modelslim_w4a4_int4.py",
+        "python/sglang/srt/layers/quantization/modelslim/schemes/modelslim_w4a4_int4_moe.py",
+        "python/sglang/srt/layers/quantization/modelslim/schemes/modelslim_w8a8_int8.py",
+        "python/sglang/srt/layers/quantization/unquant.py",
+        "python/sglang/srt/layers/quantization/utils.py",
+        "python/sglang/srt/layers/quantization/__init__.py",
+        "python/sglang/srt/layers/quantization/auto_round.py",
+        "python/sglang/srt/layers/quantization/awq/awq.py",
+        "python/sglang/srt/layers/quantization/compressed_tensors/compressed_tensors.py",
+        "python/sglang/srt/layers/quantization/gguf.py",
+        "python/sglang/srt/layers/quantization/modelslim/modelslim.py"
+      ],
+      "complexity": 4,
+      "description": "Quantization on NPU: W8A8 static int8 linear with FRACTAL_NZ format cast, W4A4 dynamic linear with int4 weight packing, AWQ weight repacking for Ascend, GPTQ int4 kernels. FP8 quantization via shared fp8.py with NPU platform check. All use torch.ops.npu custom operators.",
+      "models_using": [
+        "AF-MoE",
+        "Baichuan",
+        "Bailing-MoE-Linear",
+        "ChatGLM",
+        "DBRX",
+        "DeepSeek-NextN",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "GLM4-MoE",
+        "GLM4-MoE-Lite-NextN",
+        "GLM4-MoE-NextN",
+        "Gemma2",
+        "LLaMA",
+        "LongCat-Flash-NextN",
+        "Qwen2-MoE",
+        "Qwen3",
+        "Qwen3-MoE",
+        "Qwen3-Omni-MoE",
+        "Xverse-MoE"
+      ],
+      "fingerprint": "a64046b177b91e63226454231ecd61f47f87064f1013edc523243ee58c93247c",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "strong",
+      "failure_mode": 5
+    },
+    {
+      "name": "speculative_decoding",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/configs/model_config.py",
+        "python/sglang/srt/hardware_backend/npu/graph_runner/eagle_draft_extend_npu_graph_runner.py",
+        "python/sglang/srt/hardware_backend/npu/graph_runner/eagle_draft_npu_graph_runner.py",
+        "python/sglang/srt/speculative/draft_utils.py",
+        "python/sglang/srt/speculative/eagle_info.py",
+        "python/sglang/srt/speculative/eagle_worker.py",
+        "python/sglang/srt/speculative/eagle_worker_v2.py",
+        "python/sglang/srt/speculative/spec_utils.py",
+        "python/sglang/srt/speculative/dflash_worker.py",
+        "python/sglang/srt/speculative/eagle_info_v2.py",
+        "python/sglang/srt/speculative/eagle_utils.py",
+        "python/sglang/srt/speculative/multi_layer_eagle_worker.py"
+      ],
+      "complexity": 4,
+      "description": "EAGLE speculative decoding on NPU: torch.npu.NPUGraph draft and extend graph runners remapping torch.cuda APIs to torch.npu. Supports MTP draft verification with fused state update via sgl_kernel_npu gather-scatter kernel. Adaptive speculative decoding (EMA-based tier switching) works on NPU through EAGLE worker — policy layer is platform-agnostic.",
+      "models_using": [
+        "DeepSeek",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "DeepSeek-NextN"
+      ],
+      "fingerprint": "944513abb8a9a1b45662cbba0e8812c5c326460dd46ba61f655353e597e1a75e",
+      "last_modified": "2026-06-03T06:23:41.905657+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "strong",
+      "last_modified_reason": "description: merged adaptive_speculative_decoding doc",
+      "failure_mode": 3
+    },
+    {
+      "name": "graph_compilation",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/compilation/npu_piecewise_backend.py",
+        "python/sglang/srt/configs/model_config.py",
+        "python/sglang/srt/distributed/parallel_state.py",
+        "python/sglang/srt/hardware_backend/npu/graph_runner/npu_graph_runner.py",
+        "python/sglang/srt/utils/common.py",
+        "python/sglang/srt/compilation/backend.py",
+        "python/sglang/srt/compilation/weak_ref_tensor.py"
+      ],
+      "complexity": 4,
+      "description": "NPU graph capture and compilation: torch.npu.NPUGraph with torch.compile(backend=npugraph_ex), CPU-updatable graphs with background-thread sequence length updates, auto_dispatch_capture, and per-layer piecewise compilation with concrete-size entries and shape caching.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "072eda703eb0a4f15ac59896be2681aa6d56cd031723c2db18502e69dd39516c",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "strong",
+      "failure_mode": 3
+    },
+    {
+      "name": "kv_cache_pool",
+      "category": "memory",
+      "source_files": [
+        "python/sglang/srt/disaggregation/utils.py",
+        "python/sglang/srt/hardware_backend/npu/allocator_npu.py",
+        "python/sglang/srt/hardware_backend/npu/memory_pool_npu.py",
+        "python/sglang/srt/mem_cache/memory_pool.py",
+        "python/sglang/srt/mem_cache/swa_memory_pool.py",
+        "python/sglang/srt/mem_cache/memory_pool_host.py",
+        "python/sglang/srt/model_executor/model_runner_kv_cache_mixin.py"
+      ],
+      "complexity": 3,
+      "description": "NPU KV cache memory pool management: FIA-aware buffer creation with continuous memory layout, Mamba conv_state initialization for speculative decoding, and NPU-optimized paged allocation using Triton alloc_extend_kernel for small pages with CPU fallback.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "c78c5eec298024871ba226d6ff86e799e93931ddb3061608a9418b9962cb521c",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "strong",
+      "failure_mode": 2
+    },
+    {
+      "name": "pd_disaggregation",
+      "category": "distributed",
+      "source_files": [
+        "python/sglang/srt/disaggregation/ascend/conn.py",
+        "python/sglang/srt/disaggregation/ascend/transfer_engine.py",
+        "python/sglang/srt/disaggregation/decode_kvcache_offload_manager.py",
+        "python/sglang/srt/disaggregation/kv_events.py",
+        "python/sglang/srt/disaggregation/prefill.py",
+        "python/sglang/srt/disaggregation/utils.py",
+        "python/sglang/srt/disaggregation/decode.py",
+        "python/sglang/srt/disaggregation/encode_server.py",
+        "python/sglang/srt/disaggregation/encode_receiver.py",
+        "python/sglang/srt/disaggregation/encode_grpc_server.py"
+      ],
+      "complexity": 4,
+      "description": "PD/EPD Disaggregation: separates prefill and decode across nodes (PD), and optionally encoder from prefill for VLM (EPD). EPD adds encoder-only servers with Mooncake/zmq transfer backends, global multimodal embedding cache, and gRPC encoder mode. NPU participation: medium — Ascend-specific transfer engine (SDMA/DEVICE_RDMA), ENCODER_ONLY attention support, batch KV/aux/state buffer registration, multi-layer KV transfer with pipeline parallelism.",
+      "models_using": [
+        "DeepSeek",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "DeepSeek-NextN"
+      ],
+      "fingerprint": "a943c8250e2e21f43f2348014ae2d10c73d083818bfff55cde8a8b2b4b7a4f20",
+      "last_modified": "2026-06-03T06:23:41.905657+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "medium",
+      "last_modified_reason": "description + source_files: merged epd_disaggregation doc, added encode_receiver.py + encode_grpc_server.py",
+      "failure_mode": 5
+    },
+    {
+      "name": "lora",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/lora/backend/ascend_backend.py"
+      ],
+      "complexity": 2,
+      "description": "LoRA on NPU: batched SGMV operations on LoRA A and B matrices using torch.ops.npu.sgmv_shrink and torch.ops.npu.sgmv_expand with scaling.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "24f7f2ce647edd72ea8f7c3a29a9771b0c39f2527b345e33c772c6d1af08289a",
+      "last_modified": "2026-06-02T12:53:57.445680+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "medium",
+      "failure_mode": 2
+    },
+    {
+      "name": "hicache",
+      "category": "memory",
+      "source_files": [
+        "python/sglang/srt/disaggregation/decode_kvcache_offload_manager.py",
+        "python/sglang/srt/disaggregation/kv_events.py",
+        "python/sglang/srt/hardware_backend/npu/utils.py",
+        "python/sglang/srt/managers/cache_controller.py",
+        "python/sglang/srt/managers/schedule_batch.py"
+      ],
+      "complexity": 3,
+      "description": "Hierarchical KV Cache: tiered storage management (GPU → host memory → disk). Uses kernel_ascend IO backend with page_first_kv_split (MLA) or page_first_direct (MHA) memory layout. Depends on radix_cache for prefix matching. NPU participation is configuration-only (weak).",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "27120ac97756bb94f7c249f64043c52601f5638109ba114cb2d4c30722c3646b",
+      "last_modified": "2026-06-02T12:53:57.445680+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "weak",
+      "failure_mode": 3
+    },
+    {
+      "name": "dp_attention",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/attention/ascend_backend.py",
+        "python/sglang/srt/layers/dp_attention.py"
+      ],
+      "complexity": 2,
+      "description": "Data Parallelism attention on NPU: NPU attention backend uses get_attention_tp_size from shared dp_attention module for TP-aware attention under data parallelism. NPU participation is minimal (one import).",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "ba16fab3ad80e84b3f1d9f13f25f32567a3faf764b94b14e842f4d716a7658ed",
+      "last_modified": "2026-06-02T12:53:57.445680+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "weak",
+      "failure_mode": 2
+    },
+    {
+      "name": "weight_prefetch",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/cmo.py",
+        "python/sglang/srt/layers/communicator.py",
+        "python/sglang/srt/models/qwen2_moe.py",
+        "python/sglang/srt/models/qwen3.py"
+      ],
+      "complexity": 3,
+      "description": "Ascend Cache Management Operation (CMO) weight prefetch: prefetches model weights into L2 cache on dedicated NPU stream using torch_npu.npu_prefetch, overlapping memory access with AIV or communication kernels. Ascend-hardware-specific feature.",
+      "models_using": [
+        "DeepSeek",
+        "DeepSeek-NextN",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "Qwen2-MoE",
+        "Qwen3"
+      ],
+      "fingerprint": "41ab4104f25100eb861c9a98b23a996131ccb85c77282ca1d61aca6c1504b42c",
+      "last_modified": "2026-06-02T12:53:57.445680+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "strong",
+      "failure_mode": 2
+    },
+    {
+      "name": "hardware_backend",
+      "category": "platform",
+      "source_files": [
+        "python/sglang/srt/distributed/device_communicators/npu_communicator.py",
+        "python/sglang/srt/distributed/parallel_state.py",
+        "python/sglang/srt/hardware_backend/npu/utils.py",
+        "python/sglang/srt/layers/activation.py",
+        "python/sglang/srt/layers/layernorm.py",
+        "python/sglang/srt/managers/scheduler.py",
+        "python/sglang/srt/models/glm4_moe.py",
+        "python/sglang/srt/server_args.py",
+        "python/sglang/srt/utils/common.py",
+        "python/sglang/srt/layers/linear.py",
+        "python/sglang/srt/layers/logits_processor.py",
+        "python/sglang/srt/layers/utils/multi_platform.py",
+        "python/sglang/srt/model_executor/input_buffers.py",
+        "python/sglang/srt/model_executor/breakable_cuda_graph_runner.py",
+        "python/sglang/srt/model_executor/piecewise_cuda_graph_runner.py",
+        "python/sglang/srt/environ.py",
+        "python/sglang/srt/utils/patch_torch.py"
+      ],
+      "complexity": 3,
+      "description": "NPU hardware backend initialization and platform adaptation: SKU-specific memory tuning (Ascend 910B1-B4), FRACTAL_NZ format casting, fused MoE dispatch mode selection, dual-stream execution, chunked prefill auto-sizing, NPU-native operator forwarding (SwiGLU, GeGLU, RMSNorm, top-k/top-p sampling). Integrates with scheduler and server_args. NPU distributed communication: quantized all-reduce with int8 all-gather via torch_npu.npu_dynamic_quant.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "cross_cutting": true,
+      "fingerprint": "aee5034363581902ba064ea07cb016ced6d92364c5b0bb6b2f516c057e51bba0",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "npu_participation": "medium",
+      "failure_mode": 2
+    },
+    {
+      "name": "forward_hooks",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/debug_utils/tensor_dump_forward_hook.py",
+        "python/sglang/srt/model_executor/hook_manager.py"
+      ],
+      "complexity": 1,
+      "npu_participation": "platform_agnostic",
+      "description": "Forward hooks for model debugging and tensor inspection. Pure Python hooks injected into model forward pass. Works on NPU without platform-specific code.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "0f6f31f5acf739740f932c517ada5077be572caf372489ed0b56b8e34da68bc9",
+      "last_modified": "2026-06-02T12:58:35.099265+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "structured_outputs",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/constrained/xgrammar_backend.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "platform_agnostic",
+      "description": "Constrained decoding for structured outputs (JSON schema, regex, EBNF, structural tags). Uses xgrammar CPU-side grammar compilation. Supports reasoning models (DeepSeek R1, QwQ) with free-form thinking sections via --reasoning-parser integration. Works on NPU without platform-specific code.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "009a60261c00fb0026d05f304a6be14c058e9d8bc95f6747b06eef7674bebe60",
+      "last_modified": "2026-06-03T06:23:41.905657+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "last_modified_reason": "description: merged structured_outputs_for_reasoning_models doc",
+      "failure_mode": 2
+    },
+    {
+      "name": "tool_parser",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/function_call/base_format_detector.py",
+        "python/sglang/srt/function_call/utils.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "platform_agnostic",
+      "description": "Function call / tool use format parsing. CPU-side text processing for detecting and parsing tool call formats. Works on NPU without platform-specific code.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "2b595daa381cf777f4b33204fe5d7060b768336dd26e0b1a1b8a4568bad81fc4",
+      "last_modified": "2026-06-02T12:58:35.099265+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "separate_reasoning",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/parser/reasoning_parser.py"
+      ],
+      "complexity": 1,
+      "npu_participation": "platform_agnostic",
+      "description": "Separate reasoning content extraction. Parses <｜end▁of▁thinking｜> for reasoning traces. CPU-side text processing. Works on NPU without platform-specific code.",
+      "models_using": [
+        "DeepSeek",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "DeepSeek-NextN"
+      ],
+      "fingerprint": "b393a8cb88f94664c87e98b7078a218477ba5074db72f110ba11d365277ca5b3",
+      "last_modified": "2026-06-02T12:58:35.099265+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "observability",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/managers/scheduler_components/metrics_reporter.py",
+        "python/sglang/srt/observability/req_time_stats.py",
+        "python/sglang/srt/managers/scheduler_components/profiler_manager.py",
+        "python/sglang/srt/utils/profile_utils.py"
+      ],
+      "complexity": 1,
+      "npu_participation": "platform_agnostic",
+      "description": "Observability: request timing, metrics reporting, profiling. Platform-agnostic infrastructure. Works on NPU without platform-specific code.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "0787b5038944a10a21afb179d31d402659cc7be53371e3153704df515fe7b55d",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "server_arguments",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/server_args.py"
+      ],
+      "complexity": 1,
+      "npu_participation": "platform_agnostic",
+      "description": "Server argument parsing including NPU-specific flags. Platform-agnostic CLI/env config that reads NPU flags like SGLANG_NPU_*. NPU-specific config logic is in backend feature.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "574300a2b764508dc4a0225dfa7c4b45c6af55cc1ef87786f61df330ca6e1486",
+      "last_modified": "2026-06-02T12:58:35.099265+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "pipeline_parallelism",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/distributed/parallel_state.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "platform_agnostic",
+      "description": "Pipeline parallelism: send/recv between pipeline stages via torch.distributed. NPU supported through HCCL process group initialization in parallel_state.py. Platform-agnostic pipeline scheduling.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "f0fc2003f084e7f74fb6f0a160226da3d9568346b8b7a7fa249cf92ca1026a17",
+      "last_modified": "2026-06-02T13:01:59.176446+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "sampling_backend",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/layers/sampler.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "medium",
+      "description": "Ascend NPU sampling backend: fused top-k, top-p, and min-p sampling via torch_npu.npu_top_k_top_p, bypassing explicit softmax on the host. Configured via --sampling-backend ascend. Dedicated NPU code path in shared sampler.py.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "2ff4b1efb95bff31e366440998cedf71a5f6e52daa36a14d03eebf3e3902e7f3",
+      "last_modified": "2026-06-03T01:52:19.265975+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 3
+    },
+    {
+      "name": "offloading",
+      "category": "memory",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/memory_pool_npu.py",
+        "python/sglang/srt/hardware_backend/npu/utils.py",
+        "python/sglang/srt/model_loader/loader.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "medium",
+      "description": "CPU weight offloading on NPU: supports --cpu-offload-gb, --offload-mode (cpu/meta/sharded_gpu), --offload-group-size, --offload-prefetch-step. NPU memory pool and backend config integrate with shared model_loader for weight offloading.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "a2276ac730298d82c2108105609bb907c9742bd42bdff3782af0672f1c0491d7",
+      "last_modified": "2026-06-03T01:52:19.265975+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 3
+    },
+    {
+      "name": "expert_parallelism",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/hardware_backend/npu/moe/fuseep.py",
+        "python/sglang/srt/layers/communicator.py",
+        "python/sglang/srt/layers/moe/ep_moe/layer.py",
+        "python/sglang/srt/layers/moe/token_dispatcher/deepep.py"
+      ],
+      "complexity": 4,
+      "npu_participation": "strong",
+      "description": "Expert parallelism on NPU: FuseEP (DeepEP-compatible) fused expert parallelism with --moe-a2a-backend ascend_fuseep. Token-to-expert dispatch via DeepEP communication backbone with NPU fused routing and grouped matmul. Configured via --expert-parallel-size, --ep-dispatch-algorithm, --ep-num-redundant-experts. Shares fuseep.py implementation file with moe feature.",
+      "models_using": [
+        "AF-MoE",
+        "Bailing-MoE-Linear",
+        "DBRX",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "GLM4-MoE",
+        "GLM4-MoE-Lite-NextN",
+        "GLM4-MoE-NextN",
+        "Qwen2-MoE",
+        "Qwen3-MoE",
+        "Qwen3-Omni-MoE",
+        "Xverse-MoE",
+        "DeepSeek-NextN",
+        "LongCat-Flash-NextN"
+      ],
+      "fingerprint": "277e69835737f022940e3750208abf348b3652cd3b43b31d88b1b5576a337ca1",
+      "last_modified": "2026-06-03T03:09:03.770823+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 5
+    },
+    {
+      "name": "dp_for_multi_modal_encoder",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/managers/scheduler.py",
+        "python/sglang/srt/server_args.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "platform_agnostic",
+      "description": "Data Parallelism for VLM vision encoder: places ViT in data parallel while keeping LLM in tensor parallel for lower TTFT and higher throughput. Supports Qwen2.5-VL, Qwen3-VL, InternVL, GLM-4.5V/4.6V. Dispatch-level feature, no GPU/NPU kernel dependency.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "87115bedb92a76f4664c72e07c5d913adec76498b59fbfcb39ebe7dc75c89d6e",
+      "last_modified": "2026-06-03T02:39:51.151090+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "object_storage",
+      "category": "interface",
+      "source_files": [
+        "python/sglang/srt/model_loader/loader.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "platform_agnostic",
+      "description": "Direct model loading from object storage (S3, GCS, Azure Blob, S3-compatible). Uses runai_streamer to stream safetensor weights without full local download. Supports distributed streaming on cuda-alike devices including NPU. I/O-layer feature.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "edaeb59a99ca259d891c087f88ea6047b2c23cc54d2660282c8668e05b9ec6b5",
+      "last_modified": "2026-06-03T02:39:51.151090+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "sgl_model_gateway",
+      "category": "interface",
+      "source_files": [
+        "sgl-model-gateway/"
+      ],
+      "complexity": 3,
+      "npu_participation": "platform_agnostic",
+      "description": "SGLang Model Gateway (SMG): high-performance Rust-based model-routing gateway for large-scale LLM deployments. Provides load balancing (cache-aware, power-of-two, round-robin), HTTP/gRPC/PD routing, circuit breakers, rate limiting, K8s service discovery, Prometheus/OTel observability, and MCP integration. Runs as an independent CPU process, fully platform-agnostic.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "f5355ac3e812ea1198ba35009938a45e44951222b28bc6081d905095a01354d3",
+      "last_modified": "2026-06-03T02:39:51.151090+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "checkpoint_engine",
+      "category": "distributed",
+      "source_files": [
+        "python/sglang/srt/checkpoint_engine/__init__.py",
+        "python/sglang/srt/checkpoint_engine/checkpoint_engine_worker.py",
+        "python/sglang/srt/checkpoint_engine/update.py",
+        "python/sglang/srt/managers/scheduler_components/weight_updater.py",
+        "python/sglang/srt/server_args.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "not_supported",
+      "description": "MoonshotAI checkpoint-engine distributed weight loading: parameter server architecture with broadcast/P2P/all modes via torchrun. Requires checkpoint-engine[p2p] pip package. Not supported on NPU — uses torchrun + NCCL-based parameter server communication not available in Ascend HCCL environment.",
+      "models_using": [
+        "Not applicable (NPU unsupported)"
+      ],
+      "fingerprint": "fc78534091be8e9ef6c326068b94a9f9f3a9cb58fe498772aa26a395919bed31",
+      "last_modified": "2026-06-03T02:42:36.244929+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "deterministic_inference",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/server_args.py",
+        "python/sglang/srt/model_executor/model_runner.py",
+        "python/sglang/srt/model_executor/cuda_graph_runner.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "not_supported",
+      "description": "Batch-invariant deterministic inference ensuring consistent outputs across runs. Only supports FlashInfer, FlashAttention 3 (FA3), and Triton attention backends. Not supported on NPU — NPU attention backends (ascend_backend, ascend_gdn_backend, ascend_hybrid_linear_attn_backend, ascend_torch_native_backend) are not in the supported list.",
+      "models_using": [
+        "Not applicable (NPU unsupported)"
+      ],
+      "fingerprint": "61429d46188357b35f3855f7c00a45c670c9415827b0a22819f32ee47f99e05e",
+      "last_modified": "2026-06-03T02:42:36.244929+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "hisparse",
+      "category": "attention",
+      "source_files": [
+        "python/sglang/srt/mem_cache/hisparse_memory_pool.py",
+        "python/sglang/srt/managers/hisparse_coordinator.py",
+        "python/sglang/srt/arg_groups/hisparse_hook.py",
+        "python/sglang/srt/managers/schedule_batch.py",
+        "python/sglang/srt/managers/scheduler.py",
+        "python/sglang/srt/layers/attention/dsa_backend.py"
+      ],
+      "complexity": 4,
+      "npu_participation": "not_supported",
+      "description": "HiSparse hierarchical sparse attention: maintains small GPU hot KV buffer with full KV in CPU pinned memory, on-demand swap-in CUDA kernel, PD disaggregation direct-to-host RDMA transfer. Only for DSA models (DeepSeek-V3.2, GLM-5.1) and DeepSeek V4. Not supported on NPU — relies on CUDA kernel (flashmla_sparse/flashmla_kv), Blackwell fp8_e4m3 KV dtype, and RDMA transfer patterns not available on Ascend.",
+      "models_using": [
+        "Not applicable (NPU unsupported)"
+      ],
+      "fingerprint": "31e76313cf579680abadb661c729709ae14aefad296b9b2d3167d50c2fabc37b",
+      "last_modified": "2026-06-03T02:42:36.244929+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "rfork",
+      "category": "distributed",
+      "source_files": [
+        "python/sglang/srt/model_loader/remote_instance_weight_loader_utils.py",
+        "python/sglang/srt/model_loader/loader.py",
+        "python/sglang/srt/server_args.py",
+        "python/sglang/srt/entrypoints/engine_info_bootstrap_server.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "not_supported",
+      "description": "R-Fork (Tensor Remote Fork): zero-copy GPU-to-GPU weight loading from a running seed instance to a new instance. Backends: NCCL (default), TransferEngine, or ModelExpress with NIXL transport. Not supported on NPU — NCCL is NVIDIA-specific, Ascend uses HCCL; TransferEngine and ModelExpress NIXL transports are NVIDIA-only.",
+      "models_using": [
+        "Not applicable (NPU unsupported)"
+      ],
+      "fingerprint": "a5f1ea576f0161e14fae7ddcd0d9374c205d4ae2071b928924fda0513d1d72ec",
+      "last_modified": "2026-06-03T02:42:36.244929+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "data_parallelism",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/managers/data_parallel_controller.py",
+        "python/sglang/srt/managers/scheduler_components/dp_attn.py"
+      ],
+      "complexity": 2,
+      "npu_participation": "platform_agnostic",
+      "description": "Standard Data Parallelism: replicates entire model across multiple GPU sets via --dp-size. Dispatches independent request batches to each replica with in-process load balancing (round_robin, total_requests, total_tokens). Uses torch.distributed process groups, fully platform-agnostic. NPU supported through HCCL backend.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "f8537a5f0a49e4a5bbfddbb20271b1d613b4d75020bc57daa2ed5f2292a938f9",
+      "last_modified": "2026-06-03T03:11:58.011280+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 3
+    },
+    {
+      "name": "tensor_parallelism",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/distributed/parallel_state.py",
+        "python/sglang/srt/distributed/device_communicators/npu_communicator.py",
+        "python/sglang/srt/model_executor/model_runner.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "medium",
+      "description": "Tensor Parallelism: shards model weights across GPUs within a node. Core inference parallelism via torch.distributed with HCCL process groups on NPU. NPU communicator provides quantized all-reduce with int8 all-gather via torch_npu.npu_dynamic_quant. Integrated with model_runner for TP-aware execution.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "376a53116349862893b53cf83273dfa8a4dc9577c91464cda1e209e712c92675",
+      "last_modified": "2026-06-03T03:15:08.421283+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 4
+    },
+    {
+      "name": "chunked_prefill",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/managers/scheduler.py",
+        "python/sglang/srt/managers/schedule_batch.py",
+        "python/sglang/srt/server_args.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "weak",
+      "description": "Chunked Prefill: splits long prefill prompts into token chunks to balance memory and latency. Controlled via --chunked-prefill-size and --enable-mixed-chunk. Supports dynamic chunking for PP. NPU participation is weak — only a page size constraint (no larger than block_size) for NPU backend compatibility.",
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "0bdb49b7e6b3ab68419ca0308845da93470463373137c641a71bb4c7a825d8b5",
+      "last_modified": "2026-06-03T03:17:37.526610+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "scheduling",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/managers/scheduler.py",
+        "python/sglang/srt/managers/schedule_batch.py",
+        "python/sglang/srt/managers/schedule_policy.py"
+      ],
+      "complexity": 4,
+      "npu_participation": "medium",
+      "description": "Request scheduling and continuous batching: admission control, prefill/decode scheduling, memory-aware batching, priority policies (FCFS, LPM), and schedule loop orchestration. NPU participation: ZBAL memory allocator init via init_zbal_on_npu(), page size constraints for NPU backend compatibility, NPU memory pool integration.",
+      "cross_cutting": true,
+      "models_using": [
+        "All models on NPU"
+      ],
+      "fingerprint": "8b6b68526220a92c6b493c559f4e4c0e7cbd1db3832c7940b3bfcfe4515d12b1",
+      "last_modified": "2026-06-03T03:19:36.530843+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "eplb",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/eplb/eplb_manager.py",
+        "python/sglang/srt/eplb/eplb_algorithms/deepseek.py",
+        "python/sglang/srt/eplb/eplb_algorithms/deepseek_vec.py",
+        "python/sglang/srt/eplb/eplb_algorithms/elasticity_aware.py",
+        "python/sglang/srt/eplb/expert_distribution.py",
+        "python/sglang/srt/eplb/expert_location.py",
+        "python/sglang/srt/eplb/expert_location_dispatch.py",
+        "python/sglang/srt/eplb/expert_location_updater.py",
+        "python/sglang/srt/eplb/eplb_simulator/reader.py",
+        "python/sglang/srt/server_args.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "platform_agnostic",
+      "description": "Expert Parallelism Load Balancer (EPLB): DeepSeek-sourced dynamic expert load balancing for MoE models. Analyzes expert activation statistics to compute optimal expert arrangements, minimizing GPU utilization variance. Supports periodic rebalancing, expert replication, elasticity-aware placement. Controlled via --enable-eplb. Pure algorithmic layer — platform-agnostic.",
+      "models_using": [
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "DeepSeek-NextN",
+        "GLM4-MoE",
+        "GLM4-MoE-NextN",
+        "Qwen2-MoE",
+        "Qwen3-MoE"
+      ],
+      "fingerprint": "e68274422ebb789e5449f56194445b3d4a5ff31021338516d43a976733e839ca",
+      "last_modified": "2026-06-03T03:21:08.085490+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "context_parallelism",
+      "category": "parallelism",
+      "source_files": [
+        "python/sglang/srt/distributed/parallel_state.py",
+        "python/sglang/srt/server_args.py",
+        "python/sglang/srt/layers/attention/dsa/utils.py",
+        "python/sglang/srt/layers/attention/dsa/dsa_indexer.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "weak",
+      "description": "Context Parallelism: shards long-context sequences across GPUs for attention computation. Controlled via --attn-cp-size, --enable-prefill-context-parallel, --enable-dsa-prefill-context-parallel. Supports DSA (DeepSeek Sparse Attention) CP for prefill. NPU participation: weak — works through shared HCCL process group in parallel_state.py, no dedicated NPU CP code.",
+      "models_using": [
+        "DeepSeek",
+        "DeepSeek-V2",
+        "DeepSeek-V4",
+        "DeepSeek-NextN"
+      ],
+      "fingerprint": "433eadee90584f3a95c9b73c01663840c7a3925bb2928d7c4174867064620764",
+      "last_modified": "2026-06-03T03:22:14.925458+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 3
+    },
+    {
+      "name": "multimodal",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/srt/multimodal/processors/base_processor.py",
+        "python/sglang/srt/multimodal/mm_utils.py",
+        "python/sglang/srt/multimodal/audio_from_video.py",
+        "python/sglang/srt/multimodal/internvl_utils.py",
+        "python/sglang/srt/multimodal/customized_mm_processor_utils.py",
+        "python/sglang/srt/multimodal/internvl_vit_cuda_graph_runner.py",
+        "python/sglang/srt/multimodal/vit_cuda_graph_runner.py",
+        "python/sglang/srt/managers/mm_utils.py",
+        "python/sglang/srt/server_args.py",
+        "python/sglang/srt/hardware_backend/npu/graph_runner/vit_npu_graph_runner.py",
+        "python/sglang/srt/hardware_backend/npu/modules/glm46v_processor.py",
+        "python/sglang/srt/hardware_backend/npu/modules/qwen_vl_processor.py",
+        "python/sglang/srt/models/qwen3_vl.py",
+        "python/sglang/srt/utils/common.py",
+        "python/sglang/srt/multimodal/processors/ernie45_vl.py"
+      ],
+      "complexity": 4,
+      "npu_participation": "strong",
+      "description": "Multimodal pipeline: processor framework, ViT graph runners (CUDA on GPU, NPU on Ascend), Qwen VL/GLM-4.6V processors, audio extraction, prefix/global MM caching. NPU has dedicated ViT NPU graph runner + Qwen VL/GLM-4.6V patch processors. CUDA Graph for VLM encoder (SGLANG_VIT_ENABLE_CUDA_GRAPH=1) supported on GPU via ViTCudaGraphRunner; NPU uses vit_npu_graph_runner.",
+      "models_using": [
+        "Qwen2-VL",
+        "Qwen2.5-VL",
+        "Qwen3-VL",
+        "GLM-4V",
+        "GLM-4.5V",
+        "GLM-4.6V",
+        "InternVL",
+        "IDEFICS2",
+        "MiniCPMV-ViT",
+        "Dots-VLM-ViT",
+        "PaddleOCR-VL"
+      ],
+      "fingerprint": "98b770694bfbfca3b3fb1f93f7995dd2994c1d45dee23ec05ae8c26ba6ffd22f",
+      "last_modified": "2026-06-03T06:23:41.905657+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "last_modified_reason": "description: merged cuda_graph_for_multi_modal_encoder doc",
+      "failure_mode": 4
+    },
+    {
+      "name": "radix_cache",
+      "category": "memory",
+      "source_files": [
+        "python/sglang/srt/mem_cache/radix_cache.py",
+        "python/sglang/srt/mem_cache/radix_cache_cpp.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "platform_agnostic",
+      "description": "Radix Cache: automatic prefix caching using radix tree data structure. Finds longest common prefix across requests to reuse KV cache, avoiding redundant prefill computation. Pure CPU-side algorithm — platform-agnostic. Foundation layer that HiCache builds upon for tiered storage.",
+      "models_using": [
+        "All models"
+      ],
+      "fingerprint": "e93f93be799a90cc89cb4e258d6dcce2dd5429e83cc0c78c24a9b8649ff43260",
+      "last_modified": "2026-06-03T03:39:30.368454+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 2
+    },
+    {
+      "name": "quantized_kv_cache",
+      "category": "memory",
+      "source_files": [
+        "python/sglang/srt/server_args.py",
+        "python/sglang/srt/model_executor/model_runner_kv_cache_mixin.py",
+        "python/sglang/srt/model_executor/pool_configurator.py",
+        "python/sglang/srt/model_loader/weight_utils.py",
+        "python/sglang/srt/mem_cache/swa_memory_pool.py",
+        "python/sglang/srt/mem_cache/memory_pool.py",
+        "python/sglang/srt/mem_cache/common.py"
+      ],
+      "complexity": 3,
+      "npu_participation": "not_supported",
+      "description": "Quantized KV Cache: reduces KV cache memory footprint via lower-precision storage (FP8 E5M2/E4M3, FP4 E2M1). Supports per-tensor scaling factors from checkpoints or JSON config. Not supported on NPU — NPU attention backends (ascend_backend, ascend_gdn_backend, ascend_hybrid_linear_attn_backend, ascend_torch_native_backend) lack fused dequant+attention kernel support for quantized KV cache. Using without fused kernel support causes severe throughput degradation.",
+      "models_using": [
+        "Not applicable (NPU unsupported)"
+      ],
+      "fingerprint": "f1e49a5e762a6231a31021539e5c80d5ef0921c76c28ae1288546614fc7b0929",
+      "last_modified": "2026-06-03T06:23:41.905657+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 1
+    },
+    {
+      "name": "multimodal_gen",
+      "category": "inference_engine",
+      "source_files": [
+        "python/sglang/multimodal_gen/runtime/platforms/npu.py",
+        "python/sglang/multimodal_gen/runtime/layers/quantization/mxfp4_npu.py",
+        "python/sglang/multimodal_gen/runtime/layers/quantization/mxfp8_npu.py",
+        "python/sglang/multimodal_gen/runtime/pipelines_core/stages/input_validation.py"
+      ],
+      "complexity": 4,
+      "npu_participation": "strong",
+      "description": "NPU-accelerated multimodal generation (diffusion models): text-to-image/video via MXFP4/MXFP8 quantized DiT inference. Includes NPU platform adapter (npu.py), custom quantization kernels (mxfp4_npu, mxfp8_npu), and input validation with NPU branching.",
+      "models_using": [
+        "Qwen Image",
+        "Flux",
+        "Wan"
+      ],
+      "dependent_features": [
+        "graph_compilation"
+      ],
+      "fingerprint": "2f1121c49f54c3e13fa9b65f07935bd4259e5e16a819388823e0dae3544cb2cc",
+      "last_modified": "2026-06-03T10:00:20.174998+00:00",
+      "source": "sglang_docs_graphify_v6",
+      "failure_mode": 3
+    }
+  ]
+}

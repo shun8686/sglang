@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPU 历史缺陷挖掘 — 两阶段架构 · 增量追加 · 共享中间层</title>
+<style>
+  :root {
+    --bg: #070a10; --surface: #0e1220; --surface2: #151c2e; --border: #1e263c;
+    --text: #e1e5ef; --text2: #7f87a0; --accent: #4da6ff; --green: #3fb950;
+    --yellow: #d29922; --red: #f85149; --purple: #a371f7; --orange: #f0883e;
+    --teal: #39d2c0; --pink: #f778ba;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', system-ui, sans-serif; background:var(--bg); color:var(--text); line-height:1.68; }
+  .container { max-width:1140px; margin:0 auto; padding:40px 24px; }
+
+  header { text-align:center; padding:80px 24px 60px; background:linear-gradient(180deg, #0d1422 0%, #070b14 100%); border-bottom:1px solid var(--border); position:relative; overflow:hidden; }
+  header::before { content:''; position:absolute; top:-40%; left:-10%; width:120%; height:180%; background:radial-gradient(ellipse at 40% 50%, rgba(248,81,73,.06) 0%, transparent 50%), radial-gradient(ellipse at 60% 50%, rgba(240,136,62,.04) 0%, transparent 50%); pointer-events:none; }
+  header h1 { font-size:2.2em; font-weight:750; background:linear-gradient(135deg, #f85149 0%, #f0883e 40%, #d29922 70%, #4da6ff 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:14px; position:relative; }
+  header .subtitle { color:var(--text2); font-size:1.02em; position:relative; }
+  header .meta { margin-top:22px; display:flex; gap:12px; justify-content:center; flex-wrap:wrap; position:relative; }
+  header .meta span { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:7px 16px; font-size:.81em; color:var(--text2); }
+
+  section { margin:48px 0; }
+  h2 { font-size:1.48em; font-weight:680; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  h2 .num { background:var(--accent); color:#fff; font-size:.66em; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:7px; flex-shrink:0; font-weight:700; }
+  h3 { font-size:1.12em; font-weight:650; margin:26px 0 12px; color:#cdd3e0; }
+  h4 { font-size:1em; font-weight:600; margin:16px 0 8px; color:#bcc3d4; }
+  p { margin-bottom:10px; color:var(--text2); }
+  strong { color:var(--text); font-weight:650; }
+  em { color:var(--accent); font-style:normal; }
+  code { font-family:'JetBrains Mono','Cascadia Code','Fira Code',monospace; font-size:.86em; }
+  pre { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; overflow-x:auto; font-size:.79em; line-height:1.55; }
+  pre code { color:#c9d1d9; }
+
+  .tbl-wrap { overflow-x:auto; margin:14px 0; border:1px solid var(--border); border-radius:8px; }
+  table { width:100%; border-collapse:collapse; font-size:.85em; }
+  th,td { padding:9px 14px; text-align:left; }
+  th { background:var(--surface); font-weight:650; color:var(--text); white-space:nowrap; border-bottom:2px solid var(--border); font-size:.79em; text-transform:uppercase; letter-spacing:.04em; }
+  td { border-bottom:1px solid var(--border); color:var(--text2); }
+  tr:last-child td { border-bottom:none; }
+
+  .badge { display:inline-block; padding:3px 10px; border-radius:10px; font-size:.73em; font-weight:650; white-space:nowrap; }
+  .badge.red { background:rgba(248,81,73,.15); color:var(--red); }
+  .badge.orange { background:rgba(240,136,62,.15); color:var(--orange); }
+  .badge.yellow { background:rgba(210,153,34,.15); color:var(--yellow); }
+  .badge.green { background:rgba(63,185,80,.15); color:var(--green); }
+  .badge.blue { background:rgba(77,166,255,.15); color:var(--accent); }
+  .badge.purple { background:rgba(163,113,247,.15); color:var(--purple); }
+  .badge.teal { background:rgba(57,210,192,.15); color:var(--teal); }
+
+  .callout { background:rgba(77,166,255,.05); border:1px solid rgba(77,166,255,.14); border-radius:10px; padding:18px 22px; margin:16px 0; }
+  .callout h4 { margin-top:0; color:var(--accent); }
+  .callout.success { background:rgba(63,185,80,.05); border-color:rgba(63,185,80,.14); }
+  .callout.success h4 { color:var(--green); }
+  .callout.danger { background:rgba(248,81,73,.05); border-color:rgba(248,81,73,.14); }
+  .callout.danger h4 { color:var(--red); }
+  .callout.warn { background:rgba(240,136,62,.04); border-color:rgba(240,136,62,.14); }
+  .callout.warn h4 { color:var(--orange); }
+
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(150px, 1fr)); gap:12px; margin:14px 0; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 16px; text-align:center; }
+  .stat-card .val { font-size:1.6em; font-weight:750; }
+  .stat-card .lbl { font-size:.79em; color:var(--text2); margin-top:3px; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:14px; margin:14px 0; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; }
+  .card h4 { margin-top:0; display:flex; align-items:center; gap:8px; }
+  .card ul { list-style:none; font-size:.84em; color:var(--text2); }
+  .card ul li { padding:3px 0; }
+  .card ul li::before { content:"▸ "; color:var(--accent); }
+
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  .three-col { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+  @media(max-width:768px) { .two-col,.three-col { grid-template-columns:1fr; } }
+
+  .arch-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; margin:16px 0; overflow-x:auto; }
+  .arch-box svg { min-width:700px; }
+
+  .flow-diagram { display:flex; flex-direction:column; gap:0; margin:16px 0; }
+  .flow-row { display:flex; align-items:center; gap:12px; padding:4px 0; }
+  .flow-row .step { min-width:180px; background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:10px 14px; font-size:.84em; }
+  .flow-row .step h4 { margin:0 0 2px; font-size:.95em; }
+  .flow-row .step p { margin:0; font-size:.8em; color:var(--text2); }
+  .flow-row .arrow { padding:0 8px; font-size:1.4em; color:var(--accent); font-weight:700; flex-shrink:0; }
+  .flow-row .connector { width:2px; height:24px; background:var(--border); margin-left:90px; }
+
+  .comparison-grid { display:grid; grid-template-columns:1fr 1fr; gap:0; margin:16px 0; border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+  .comparison-grid .col { padding:20px; }
+  .comparison-grid .col:first-child { background:rgba(248,81,73,.03); border-right:1px solid var(--border); }
+  .comparison-grid .col:last-child { background:rgba(63,185,80,.03); }
+  .comparison-grid .col h4 { margin-top:0; display:flex; align-items:center; gap:8px; }
+
+  .db-schema { background:var(--surface2); border-radius:8px; padding:18px; margin:12px 0; }
+  .db-schema .field { display:flex; margin:4px 0; font-size:.84em; }
+  .db-schema .field .fname { min-width:180px; color:var(--teal); font-weight:600; }
+  .db-schema .field .ftype { min-width:100px; color:var(--text2); }
+  .db-schema .field .fdesc { color:var(--text2); }
+
+  .five-docs { display:grid; grid-template-columns:repeat(5, 1fr); gap:8px; margin:16px 0; }
+  @media(max-width:768px) { .five-docs { grid-template-columns:1fr 1fr; } }
+  .five-docs .doc { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:12px; font-size:.8em; text-align:center; }
+  .five-docs .doc.current { border-color:var(--red); background:rgba(248,81,73,.04); }
+  .five-docs .doc .doc-num { font-size:.68em; color:var(--text2); }
+  .five-docs .doc .doc-title { font-weight:650; color:var(--text); margin:3px 0; }
+
+  footer { text-align:center; padding:40px 24px; color:var(--text2); font-size:.79em; border-top:1px solid var(--border); margin-top:60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NPU 历史缺陷挖掘</h1>
+  <p class="subtitle">两阶段架构——首次全量深挖建库 + 持续增量追加——defect_db.json 作为共享中间层</p>
+  <div class="meta">
+    <span>⛏️ Phase A: 全量历史深挖（一次性）</span>
+    <span>📥 Phase B: 增量追加（daily cron）</span>
+    <span>🔍 数据源: PR 优先 (confidence 0.8-0.95) / Commit 兜底</span>
+    <span>🗄️ defect_db.json 单向追加 · 多消费者只读</span>
+    <span>🤖 Agent-PR + Agent-Commit 双轨分类</span>
+    <span>🔮 Near-Miss: 被 review 拦截的潜在 bug</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== Doc Series ===== -->
+<section>
+  <h2 style="border-bottom:none;padding-bottom:0;"><span class="num">0</span>五份文档的关系</h2>
+  <div class="five-docs">
+    <div class="doc"><div class="doc-num">Doc 1</div><div class="doc-title">覆盖审计层</div>测没测？</div>
+    <div class="doc"><div class="doc-num">Doc 2</div><div class="doc-title">风险策略层</div>哪里多测？</div>
+    <div class="doc"><div class="doc-num">Doc 3</div><div class="doc-title">增量架构层</div>变化后更新？</div>
+    <div class="doc"><div class="doc-num">Doc 4</div><div class="doc-title">知识图谱层</div>隐藏风险？</div>
+    <div class="doc current"><div class="doc-num">Doc 5 ← 当前</div><div class="doc-title">缺陷挖掘层</div>数据怎么来？</div>
+  </div>
+  <p>本文档解决<strong>风险因子中最关键的数据源——历史缺陷——如何采集、分类、存储和持续更新</strong>。它是整个风险系统的"感知层"，其他四份文档依赖它的输出。</p>
+</section>
+
+<!-- ===== Core Decision ===== -->
+<section id="decision">
+  <h2><span class="num">1</span>核心设计决策：为什么不是"全量分析每次重挖"</h2>
+
+  <div class="comparison-grid">
+    <div class="col">
+      <h4>❌ 每次全量分析重挖</h4>
+      <ul style="font-size:.84em;color:var(--text2);list-style:none;">
+        <li>▸ 每次跑 <code>git log --grep</code> 扫描 25000+ commits</li>
+        <li>▸ 耗时线性增长: 今天 25000 → 6月后 30000 → 1年后 36000</li>
+        <li>▸ 99% 的 commit 上次已经分析过，重复计算浪费</li>
+        <li>▸ Agent 重复调用做同样的分类判断</li>
+        <li>▸ 全量分析变重 → 不愿意频繁跑 → 数据变旧</li>
+        <li>▸ 缺陷数据和代码分析耦合 → 改一个文件要重新挖全量历史</li>
+      </ul>
+    </div>
+    <div class="col">
+      <h4>✅ 两阶段架构</h4>
+      <ul style="font-size:.84em;color:var(--text2);list-style:none;">
+        <li>▸ Phase A: 历史深挖只跑<strong>一次</strong>（M0 初始化）</li>
+        <li>▸ Phase B: 增量只扫描 <code>{last_scan}..HEAD</code>（通常 0-20 个新 commit）</li>
+        <li>▸ 耗时恒定: 每天增量扫描 <strong>&lt;2s</strong></li>
+        <li>▸ Agent 只分析<strong>新</strong> commit，不重复</li>
+        <li>▸ 缺陷 DB 独立维护 → 随时可以查询，不受全量分析频率约束</li>
+        <li>▸ 全量分析和缺陷采集<strong>完全解耦</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>🧠 关键洞察</h4>
+    <p style="color:var(--text);">缺陷数据是<strong>单向累积的不可变历史</strong>。已存在的 bug fix commit 永远不会消失，永远不会改变。所以"重新挖掘历史"是纯粹的浪费——只有<strong>新出现的 commit</strong> 值得分析。这与代码风险评分完全不同（代码随时在变，需要重算）。</p>
+  </div>
+</section>
+
+<!-- ===== Architecture ===== -->
+<section id="architecture">
+  <h2><span class="num">2</span>两阶段架构全景</h2>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 920 520" xmlns="http://www.w3.org/2000/svg">
+      <!-- Phase A box -->
+      <rect x="20" y="10" width="420" height="220" rx="10" fill="var(--surface2)" stroke="var(--red)" stroke-width="2"/>
+      <text x="230" y="38" fill="var(--red)" font-size="14" text-anchor="middle" font-weight="700">Phase A: 历史深挖（M0 · 一次性）</text>
+
+      <!-- Git log -->
+      <rect x="50" y="55" width="360" height="36" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+      <text x="230" y="78" fill="var(--text)" font-size="11" text-anchor="middle">git log --all --grep "npu|ascend|CANN" --since="ever"</text>
+
+      <line x1="230" y1="91" x2="230" y2="110" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Raw extraction -->
+      <rect x="50" y="110" width="160" height="36" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+      <text x="130" y="133" fill="var(--text2)" font-size="10" text-anchor="middle">raw_defects.txt</text>
+
+      <!-- Agent analysis -->
+      <rect x="250" y="110" width="160" height="36" rx="6" fill="rgba(240,136,62,.08)" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="330" y="133" fill="var(--orange)" font-size="10" text-anchor="middle">Agent 语义分类</text>
+
+      <line x1="210" y1="128" x2="250" y2="128" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="230" y1="146" x2="230" y2="170" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- seed DB -->
+      <rect x="80" y="170" width="300" height="40" rx="8" fill="rgba(63,185,80,.08)" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="230" y="195" fill="var(--green)" font-size="12" text-anchor="middle" font-weight="650">defect_db.json (seed · ~30-50 records)</text>
+
+      <!-- Phase B box -->
+      <rect x="480" y="10" width="420" height="220" rx="10" fill="var(--surface2)" stroke="var(--orange)" stroke-width="2"/>
+      <text x="690" y="38" fill="var(--orange)" font-size="14" text-anchor="middle" font-weight="700">Phase B: 增量追加（Daily Cron · 持续）</text>
+
+      <rect x="510" y="55" width="360" height="36" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+      <text x="690" y="78" fill="var(--text)" font-size="11" text-anchor="middle">git log {last_scan_commit}..HEAD --grep "fix|bug|npu|ascend"</text>
+
+      <line x1="690" y1="91" x2="690" y2="110" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="510" y="110" width="160" height="36" rx="6" fill="var(--surface)" stroke="var(--border)"/>
+      <text x="590" y="133" fill="var(--text2)" font-size="10" text-anchor="middle">new_commits.txt</text>
+
+      <rect x="710" y="110" width="160" height="36" rx="6" fill="rgba(240,136,62,.08)" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="790" y="133" fill="var(--orange)" font-size="10" text-anchor="middle">Agent 增量分类</text>
+
+      <line x1="670" y1="128" x2="710" y2="128" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="690" y1="146" x2="690" y2="170" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="540" y="170" width="300" height="40" rx="8" fill="rgba(63,185,80,.08)" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="690" y="188" fill="var(--green)" font-size="11" text-anchor="middle" font-weight="650">追加到 defect_db.json</text>
+      <text x="690" y="203" fill="var(--text2)" font-size="9" text-anchor="middle">更新 last_scan_commit</text>
+
+      <!-- Merge arrow -->
+      <line x1="380" y1="190" x2="530" y2="190" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6,3"/>
+      <text x="460" y="182" fill="var(--accent)" font-size="9" text-anchor="middle">Seed →</text>
+
+      <!-- Central DB -->
+      <rect x="280" y="270" width="360" height="56" rx="10" fill="rgba(57,210,192,.06)" stroke="var(--teal)" stroke-width="2.5"/>
+      <text x="460" y="294" fill="var(--teal)" font-size="15" text-anchor="middle" font-weight="700">defect_db.json</text>
+      <text x="460" y="314" fill="var(--text2)" font-size="10" text-anchor="middle">持久化 · 单向追加 · 唯一写入者: 增量追加进程</text>
+
+      <!-- Consumers -->
+      <line x1="330" y1="326" x2="250" y2="370" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="460" y1="326" x2="460" y2="370" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="590" y1="326" x2="670" y2="370" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="120" y="370" width="220" height="40" rx="8" fill="rgba(77,166,255,.06)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="230" y="395" fill="var(--text)" font-size="11" text-anchor="middle">全量分析（只读）</text>
+
+      <rect x="350" y="370" width="220" height="40" rx="8" fill="rgba(77,166,255,.06)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="460" y="395" fill="var(--text)" font-size="11" text-anchor="middle">增量评估（只读）</text>
+
+      <rect x="580" y="370" width="220" height="40" rx="8" fill="rgba(77,166,255,.06)" stroke="var(--accent)" stroke-width="1.2"/>
+      <text x="690" y="395" fill="var(--text)" font-size="11" text-anchor="middle">KG 图构建（只读）</text>
+
+      <!-- Legend -->
+      <rect x="200" y="440" width="520" height="60" rx="8" fill="var(--surface)" stroke="var(--border)"/>
+      <text x="220" y="460" fill="var(--green)" font-size="10">■ 只写一次（首次建库）</text>
+      <text x="400" y="460" fill="var(--orange)" font-size="10">■ 唯一持续写入者</text>
+      <text x="220" y="482" fill="var(--accent)" font-size="10">■ 多消费者只读</text>
+      <text x="400" y="482" fill="var(--purple)" font-size="10">■ 无写冲突 · 完全解耦</text>
+    </svg>
+  </div>
+
+  <div class="callout success">
+    <h4>✅ 关键设计原则</h4>
+    <p style="color:var(--text);"><strong>单一写入者</strong>: 只有增量追加进程能写 defect_db.json。全量分析、增量评估、KG 构建都是只读消费者。这消除了并发写入冲突——你不需要锁、不需要事务、不需要担心两个分析流程同时修改同一条缺陷记录。</p>
+  </div>
+</section>
+
+<!-- ===== PR vs Commit ===== -->
+<section id="pr-vs-commit">
+  <h2><span class="num">3</span>数据源选择：PR 优先，Commit 兜底</h2>
+
+  <h3>3.1 为什么这是架构级决策</h3>
+  <p>缺陷挖掘的数据源选择直接影响 Agent 分类的<strong>置信度、信息量和维护成本</strong>。选错了不是"效果差一点"，而是"Agent 从阅读理解变成猜谜"——confidence 从 0.9 跌到 0.5，大量记录需要人工复核。</p>
+
+  <div class="comparison-grid">
+    <div class="col">
+      <h4>📝 Commit-Only 方式的局限</h4>
+      <ul style="font-size:.84em;color:var(--text2);list-style:none;">
+        <li>▸ 只有 1 行 title + 可选 body（通常为空）</li>
+        <li>▸ 没有复现步骤 → Agent 无法判断严重度</li>
+        <li>▸ 没有讨论 → 无法知道影响范围</li>
+        <li>▸ 没有标签 → 无法快速分类</li>
+        <li>▸ 没有 review → 丢失"差点成 bug"的信号</li>
+        <li>▸ Agent 从 3 行文本推断全部信息</li>
+        <li>▸ 典型 confidence: <strong>0.5-0.7</strong></li>
+      </ul>
+    </div>
+    <div class="col">
+      <h4>✅ PR-First 方式的优势</h4>
+      <ul style="font-size:.84em;color:var(--text2);list-style:none;">
+        <li>▸ Description: 问题/复现/根因 三段式</li>
+        <li>▸ Review comments: reviewer 的质疑暴露隐藏风险</li>
+        <li>▸ Labels: bug/critical/NPU 自动分类</li>
+        <li>▸ Linked issues: 用户报告的问题上下文</li>
+        <li>▸ Timeline: labeled/milestoned/merged 时间线</li>
+        <li>▸ Near-miss 信号: review 中拦截的潜在 bug</li>
+        <li>▸ Agent 做"阅读理解"非"考古猜测"</li>
+        <li>▸ 典型 confidence: <strong>0.8-0.95</strong></li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>3.2 同一条 Bug Fix 的信息量对比</h3>
+
+  <div class="two-col">
+    <div>
+      <h4>Commit 能提供的</h4>
+      <div style="background:var(--surface2);border-radius:8px;padding:14px;font-size:.84em;">
+        <code style="color:var(--text2);">commit 8d3f12a91...<br>
+        Author: dev<br>
+        Date: 2026-05-15<br><br>
+        [NPU] Fix W4A8 scale overflow<br>
+        in dynamic_quant at bs=256<br><br>
+        - Changed clamp range<br>
+        - Added boundary check</code>
+      </div>
+      <p style="font-size:.78em;color:var(--text2);margin-top:6px;">3 行文本。Agent 需要从中推断：严重度？根因？是否静默错误？影响范围？</p>
+    </div>
+    <div>
+      <h4>PR 能提供的</h4>
+      <div style="background:var(--surface2);border-radius:8px;padding:14px;font-size:.84em;">
+        <div style="color:var(--text);font-weight:650;margin-bottom:4px;">Description:</div>
+        <code style="color:var(--text2);">## Problem<br>bs>=256 on A3 → dynamic quant<br>produces incorrect results.<br>CANN 8.5.0 changed npu_dynamic_quant<br>output range: [-128,127] instead of<br>[-127,127].<br><br>## Reproduce<br>bs=256, tp=8, DeepSeek-V3-W8A8<br>→ accuracy 0.88→0.12, <strong><span style="color:var(--red);">no crash</span></strong><br><br>## Root Cause<br>CANN 8.5.0 API change</code>
+        <div style="color:var(--text);font-weight:650;margin:8px 0 4px;">Review Comments:</div>
+        <code style="color:var(--text2);">Reviewer A: "Does this affect W4A8<br>path too?"<br>Author: "Yes, added fix for that."<br><br>Reviewer B: "Should we add a CI test<br>for bs=256?"<br>Author: "Added large_batch test."</code>
+        <div style="color:var(--text);font-weight:650;margin:8px 0 4px;">Labels: <span class="badge red">bug</span> <span class="badge orange">NPU</span> <span class="badge purple">CANN-8.5.0</span></div>
+      </div>
+      <p style="font-size:.78em;color:var(--green);margin-top:6px;">"no crash" → 直接判定静默错误。Review 讨论确认了 W4A8 也受影响。信息已经在那，Agent 只需提取。</p>
+    </div>
+  </div>
+
+  <div class="tbl-wrap" style="margin-top:18px;">
+  <table>
+    <tr><th>信息维度</th><th>Commit Only</th><th>PR</th><th>Agent 提取难度变化</th></tr>
+    <tr><td>问题描述</td><td>1 行标题</td><td>Problem / Reproduce / Root Cause 三段式</td><td><span class="badge green">推断→提取，置信度 +0.3</span></td></tr>
+    <tr><td>复现步骤</td><td><span class="badge red">❌</span></td><td><span class="badge green">✅</span> 含具体参数 (bs, tp, model)</td><td>可直接用于生成回归测试</td></tr>
+    <tr><td>根因分析</td><td><span class="badge red">❌</span></td><td><span class="badge green">✅</span> 明确标注 root cause</td><td>Agent 无需推断 → 直接填充 root_cause 字段</td></tr>
+    <tr><td>是否静默错误</td><td>Agent 猜测</td><td>"no crash" / "silently" 直接写明</td><td><span class="badge green">推断→提取，is_silent 准确率 95%+</span></td></tr>
+    <tr><td>影响范围</td><td>Agent 从 diff 推断</td><td>Review 讨论明确列出受影响模块</td><td>features_affected 更完整</td></tr>
+    <tr><td>测试建议</td><td><span class="badge red">❌</span></td><td>Review 中常直接提出测试需求</td><td>可直接填入 test_type_needed</td></tr>
+    <tr><td>关联 Issue</td><td><span class="badge red">❌</span></td><td>Linked Issues (GitHub auto-link)</td><td>提供用户视角的问题描述</td></tr>
+    <tr><td>CANN 版本关联</td><td><span class="badge red">❌</span></td><td>Label 或描述中明确提及</td><td>可追踪版本依赖风险</td></tr>
+  </table>
+  </div>
+
+  <h3>3.3 但 Commit 不能被完全替代</h3>
+  <p>两种场景下 commit 是必要的兜底：</p>
+  <div class="two-col">
+    <div>
+      <div class="card" style="margin-top:0;">
+        <h4>场景 1: 老仓库历史</h4>
+        <p style="font-size:.84em;color:var(--text2);">sglang 早期可能没有强制 PR 流程，或 PR 已因 branch 清理而丢失。Commit 是 Git 中唯一永久保留的记录——<strong>永远不会丢失</strong>。</p>
+      </div>
+    </div>
+    <div>
+      <div class="card" style="margin-top:0;">
+        <h4>场景 2: PR 信息本身不足</h4>
+        <p style="font-size:.84em;color:var(--text2);">有些 PR 的 description 就是一句 "fix bug"，review 也只有 "LGTM"。这种情况下 PR 并不比 commit 更有价值——走 commit 浅层分析即可。</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>3.4 查询链路设计</h3>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 900 460" xmlns="http://www.w3.org/2000/svg">
+      <!-- Step 1 -->
+      <rect x="40" y="10" width="200" height="48" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="140" y="32" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">git log 获取候选 commit</text>
+      <text x="140" y="50" fill="var(--text2)" font-size="9" text-anchor="middle">candidates.txt</text>
+
+      <line x1="240" y1="34" x2="290" y2="34" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 2 -->
+      <rect x="290" y="10" width="220" height="48" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="400" y="32" fill="var(--text)" font-size="12" text-anchor="middle" font-weight="650">gh api search PR (per commit)</text>
+      <text x="400" y="50" fill="var(--text2)" font-size="9" text-anchor="middle">gh api search/issues?q=sha:{sha}</text>
+
+      <!-- Fork -->
+      <line x1="510" y1="34" x2="560" y2="34" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="560" y1="10" x2="560" y2="280" stroke="var(--border)" stroke-width="1.5" stroke-dasharray="4,3"/>
+
+      <!-- Has PR -->
+      <rect x="580" y="10" width="280" height="110" rx="8" fill="rgba(63,185,80,.04)" stroke="var(--green)" stroke-width="1.5"/>
+      <text x="720" y="36" fill="var(--green)" font-size="13" text-anchor="middle" font-weight="700">有 PR 且质量高 (~70%)</text>
+
+      <rect x="600" y="50" width="240" height="56" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="720" y="70" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="650">Agent-PR 深度分析</text>
+      <text x="720" y="90" fill="var(--text2)" font-size="9" text-anchor="middle">输入: description + reviews + labels + timeline</text>
+      <text x="720" y="104" fill="var(--green)" font-size="9" text-anchor="middle" font-weight="650">confidence: 0.8-0.95</text>
+
+      <!-- No PR -->
+      <rect x="580" y="140" width="280" height="110" rx="8" fill="rgba(240,136,62,.04)" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="720" y="166" fill="var(--orange)" font-size="13" text-anchor="middle" font-weight="700">无 PR 或质量低 (~30%)</text>
+
+      <rect x="600" y="180" width="240" height="56" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="720" y="200" fill="var(--text)" font-size="11" text-anchor="middle" font-weight="650">Agent-Commit 浅层分析</text>
+      <text x="720" y="220" fill="var(--text2)" font-size="9" text-anchor="middle">输入: commit message + diff stats</text>
+      <text x="720" y="234" fill="var(--orange)" font-size="9" text-anchor="middle" font-weight="650">confidence: 0.5-0.7 → 标记人工审核</text>
+
+      <!-- Both merge down -->
+      <line x1="720" y1="120" x2="720" y2="275" stroke="var(--border)" stroke-width="1.5"/>
+      <line x1="720" y1="250" x2="720" y2="275" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Merge point -->
+      <rect x="580" y="275" width="280" height="44" rx="8" fill="rgba(57,210,192,.06)" stroke="var(--teal)" stroke-width="1.5"/>
+      <text x="720" y="297" fill="var(--teal)" font-size="12" text-anchor="middle" font-weight="650">写入 defect_db.json</text>
+      <text x="720" y="312" fill="var(--text2)" font-size="9" text-anchor="middle">含 source 字段: "pr" | "commit"</text>
+
+      <!-- Near-miss -->
+      <line x1="720" y1="319" x2="720" y2="350" stroke="var(--purple)" stroke-width="1.2"/>
+      <rect x="560" y="350" width="320" height="60" rx="8" fill="rgba(163,113,247,.04)" stroke="var(--purple)" stroke-width="1.2"/>
+      <text x="720" y="372" fill="var(--purple)" font-size="11" text-anchor="middle" font-weight="650">Near-Miss 信号提取（仅 PR）</text>
+      <text x="720" y="392" fill="var(--text2)" font-size="9" text-anchor="middle">Review 中 "almost bug" / "good catch" 讨论 → 低权重风险标记 (weight:0.3)</text>
+
+      <!-- Legend -->
+      <rect x="120" y="430" width="660" height="22" rx="5" fill="var(--surface)"/>
+      <text x="200" y="445" fill="var(--green)" font-size="10">Agent-PR: 精确分类</text>
+      <text x="380" y="445" fill="var(--orange)" font-size="10">Agent-Commit: 粗略分类 + 人工审核</text>
+      <text x="660" y="445" fill="var(--purple)" font-size="10">Near-Miss: 被 review 拦截的潜在 bug</text>
+    </svg>
+  </div>
+
+  <h3>3.5 Agent 分工与 Prompt 差异</h3>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>维度</th><th>Agent-PR（深度）</th><th>Agent-Commit（浅层）</th></tr>
+    <tr><td>输入数据</td><td>PR description + review comments + labels + linked issues + timeline</td><td>commit message + git diff --stat + touched files</td></tr>
+    <tr><td>处理量</td><td>~70% 候选条目</td><td>~30% 候选条目</td></tr>
+    <tr><td>Prompt 复杂度</td><td>结构化字段提取（阅读理解）</td><td>需推断缺失字段（考古猜测）</td></tr>
+    <tr><td>输出 confidence</td><td>0.8-0.95</td><td>0.5-0.7</td></tr>
+    <tr><td>人工审核</td><td>仅 confidence &lt; 0.8 需审核</td><td><strong>全部标记需人工审核</strong></td></tr>
+    <tr><td>Near-Miss 提取</td><td><span class="badge green">✅</span> 从 review 讨论中提取</td><td><span class="badge red">❌</span> 不可用</td></tr>
+    <tr><td><code>test_would_catch</code></td><td>从 review 讨论直接获取</td><td>Agent 从 fix 类型推断（不准）</td></tr>
+    <tr><td><code>test_type_needed</code></td><td>Review 常明确建议测试类型</td><td>Agent 从 category 反推（不准）</td></tr>
+  </table>
+  </div>
+
+  <h3>3.6 PR Review 的 Near-Miss 信号——Commit 永远做不到的事</h3>
+  <p>PR review comments 中有一种独特的信息：<strong>被 reviewer 拦截的潜在 bug</strong>。这不是已经发生的缺陷，而是"如果 reviewer 没注意到，它就是下一个 BUG-2026-XXX"。</p>
+
+  <div class="card" style="border-left:3px solid var(--purple);margin-top:12px;">
+    <h4>🔮 Near-Miss 示例</h4>
+    <div style="background:var(--surface2);border-radius:6px;padding:14px;font-size:.84em;">
+      <div style="color:var(--text);font-weight:650;margin-bottom:4px;">PR #24592 — Review Comment Thread:</div>
+      <code style="color:var(--text2);">
+        <strong>Reviewer A:</strong> "This approach looks correct, but did you consider<br>
+        &nbsp;&nbsp;that CANN 8.5.0 changed the default stream behavior?<br>
+        &nbsp;&nbsp;Under heavy load, this could cause a race condition in<br>
+        &nbsp;&nbsp;the dual-stream dispatch path."<br><br>
+        <strong>Author:</strong> "You're right — I didn't catch that. I'll add a stream<br>
+        &nbsp;&nbsp;sync at the dispatch boundary. Good catch."<br><br>
+        <strong>Author:</strong> [commits fix] "Added torch.npu.synchronize() before<br>
+        &nbsp;&nbsp;token dispatch in dual-stream path."
+      </code>
+    </div>
+    <p style="font-size:.84em;color:var(--text2);margin-top:8px;">这个 thread 告诉你：① fused_moe_method_npu.py 在多 stream 场景下容易出错 ② CANN 版本升级是触发因素 ③ 如果没有 review，这就是一个 <strong>silent_corruption</strong> 类型的线上 bug。Agent 可以把这类信号提取为<strong>低权重的风险标记</strong>。</p>
+  </div>
+
+  <h4>Near-Miss → Risk Signal 的结构化输出</h4>
+
+<pre><code>{
+  "type": "near_miss",
+  "source_pr": 24592,
+  "source_comment_url": "https://github.com/sgl-project/sglang/pull/24592#discussion_r...",
+  "risk_pattern": "CANN version API change + stream synchronization gap",
+  "module": "fused_moe_method_npu.py",
+  "symptom_if_not_caught": "silent_corruption",
+  "would_affect_features": ["ascend_fuseep", "dual_stream_moe"],
+  "trigger_condition": "CANN 8.5.0 + dual-stream enabled + heavy load",
+  "caught_by": "code_review",
+  "reviewer_comment_sentiment": "concerned",  // reviewer 表达了担忧
+  "weight": 0.3,  // 不是实际缺陷，但提示该区域需额外测试关注
+  "recommendation": "Add stress test for dual-stream dispatch under simulated heavy load"
+}</code></pre>
+
+  <p style="font-size:.84em;">Near-Miss 的 <code>weight:0.3</code> 意味着它不会直接推高风险评分，但会在 KG 图中形成一条虚线关系边，当多个 near-miss 指向同一模块时，累积效应会触发告警。这是<strong>纯 commit 分析永远无法获得的信息维度</strong>。</p>
+
+  <h3>3.7 实现脚本</h3>
+
+<pre><code>#!/bin/bash
+# .sglang-risk/defect_mining/enrich_with_pr.sh
+# 对每个候选 commit 查询关联 PR
+
+while IFS='|' read -r sha date msg; do
+  # gh api 查询包含此 commit 的 PR
+  PR_DATA=$(gh api "search/issues?q=repo:sgl-project/sglang+type:pr+sha:${sha}" \
+    --jq '.items[0] | {number, title, body, labels: [.labels[].name]}' 2>/dev/null)
+
+  if [ -n "$PR_DATA" ] && [ "$PR_DATA" != "null" ]; then
+    PR_NUM=$(echo "$PR_DATA" | jq -r '.number')
+    PR_BODY=$(echo "$PR_DATA" | jq -r '.body')
+    LABEL_COUNT=$(echo "$PR_DATA" | jq -r '.labels | length')
+
+    # 判断 PR 质量: description 长度 + labels 数量
+    BODY_LEN=$(echo "$PR_BODY" | wc -c)
+    if [ "$BODY_LEN" -gt 200 ] || [ "$LABEL_COUNT" -gt 1 ]; then
+      # 高质量 PR → 获取 review comments
+      REVIEWS=$(gh api "repos/sgl-project/sglang/pulls/${PR_NUM}/comments" \
+        --jq '[.[] | {user:.user.login, body, path, diff_hunk}]' 2>/dev/null)
+
+      TIMELINE=$(gh api "repos/sgl-project/sglang/issues/${PR_NUM}/timeline" \
+        --jq '[.[] | select(.event=="labeled") | .label.name]' 2>/dev/null)
+
+      echo "{\"source\":\"pr\",\"quality\":\"high\",\"pr_number\":$PR_NUM, ...}" >> enriched.json
+    else
+      # 低质量 PR → 降级为 commit 分析
+      echo "{\"source\":\"commit\",\"quality\":\"low\",\"sha\":\"$sha\", ...}" >> enriched.json
+    fi
+  else
+    # 无 PR → commit only
+    echo "{\"source\":\"commit\",\"quality\":\"fallback\",\"sha\":\"$sha\", ...}" >> enriched.json
+  fi
+done < candidates.txt</code></pre>
+
+  <div class="callout warn" style="margin-top:18px;">
+    <h4>⚠️ GitHub API 速率限制</h4>
+    <p style="color:var(--text);">Phase A 历史深挖时可能一次查询数百个 commit。GitHub API 限制为 5000 req/h（认证用户）。建议对批量查询使用 <code>gh search issues</code> 的批量模式，或缓存已查询的 PR 结果。Phase B 增量追加每天只查 0-5 个新 commit，不受限。</p>
+  </div>
+</section>
+
+<!-- ===== Data Model ===== -->
+<section id="datamodel">
+  <h2><span class="num">4</span>defect_db.json 数据模型</h2>
+
+  <h3>3.1 Schema 设计</h3>
+
+  <div class="db-schema">
+    <div class="field"><span class="fname">_meta.last_scan_commit</span><span class="ftype">string (SHA)</span><span class="fdesc">增量扫描的起点。每次追加后更新为最新扫描到的 commit</span></div>
+    <div class="field"><span class="fname">_meta.last_scan_at</span><span class="ftype">ISO 8601</span><span class="fdesc">上次扫描时间戳</span></div>
+    <div class="field"><span class="fname">_meta.total_defects</span><span class="ftype">int</span><span class="fdesc">当前缺陷总数</span></div>
+    <div class="field"><span class="fname">_meta.schema_version</span><span class="ftype">string</span><span class="fdesc">Schema 版本号，用于迁移</span></div>
+    <div style="height:8px;"></div>
+    <div class="field"><span class="fname">defects[].bug_id</span><span class="ftype">string (PK)</span><span class="fdesc">唯一标识: BUG-YYYY-NNN</span></div>
+    <div class="field"><span class="fname">defects[].commit_sha</span><span class="ftype">string</span><span class="fdesc">修复该缺陷的 commit SHA</span></div>
+    <div class="field"><span class="fname">defects[].date_fixed</span><span class="ftype">ISO 8601</span><span class="fdesc">修复日期</span></div>
+    <div class="field"><span class="fname">defects[].title</span><span class="ftype">string</span><span class="fdesc">缺陷简述（来自 commit message）</span></div>
+    <div class="field"><span class="fname">defects[].description</span><span class="ftype">string</span><span class="fdesc">Agent 生成的详细描述</span></div>
+    <div class="field"><span class="fname">defects[].category</span><span class="ftype">enum</span><span class="fdesc">precision_loss | crash | perf_regression | memory_leak | silent_corruption | compatibility | compile_error</span></div>
+    <div class="field"><span class="fname">defects[].severity</span><span class="ftype">int (1-5)</span><span class="fdesc">严重程度: 5=静默错误/数据损坏, 1=编译警告</span></div>
+    <div class="field"><span class="fname">defects[].is_silent</span><span class="ftype">bool</span><span class="fdesc">是否为静默错误（无 crash/无报错）</span></div>
+    <div class="field"><span class="fname">defects[].failure_mode</span><span class="ftype">string</span><span class="fdesc">故障表现: wrong_output | nan_values | oom | hang | slow | crash</span></div>
+    <div class="field"><span class="fname">defects[].files_fixed</span><span class="ftype">string[]</span><span class="fdesc">修复涉及的文件列表（来自 git diff --name-only）</span></div>
+    <div class="field"><span class="fname">defects[].features_affected</span><span class="ftype">string[]</span><span class="fdesc">受影响的 NPU 特性（Agent 推断）</span></div>
+    <div class="field"><span class="fname">defects[].root_cause</span><span class="ftype">string</span><span class="fdesc">根因分类: format_cast | quant_scale | stream_sync | graph_capture | hccl_timeout | cann_api | ...</span></div>
+    <div class="field"><span class="fname">defects[].test_would_catch</span><span class="ftype">bool</span><span class="fdesc">如果当时有对应测试，能否捕获？</span></div>
+    <div class="field"><span class="fname">defects[].test_type_needed</span><span class="ftype">string</span><span class="fdesc">如果当时有测试，需要什么类型？oracle | fuzz | stress | regression</span></div>
+    <div class="field"><span class="fname">defects[].tags</span><span class="ftype">string[]</span><span class="fdesc">关键词标签: e.g. ["FRACTAL_NZ", "dynamic_quant", "w4a8"]</span></div>
+    <div class="field"><span class="fname">defects[].confidence</span><span class="ftype">float (0-1)</span><span class="fdesc">Agent 分类置信度。&lt;0.7 标记为需人工审核</span></div>
+    <div class="field"><span class="fname">defects[].agent_version</span><span class="ftype">string</span><span class="fdesc">生成此记录的 Agent 版本标识</span></div>
+  </div>
+
+  <h3>3.2 一条真实记录的样子</h3>
+
+<pre><code>{
+  "_meta": {
+    "last_scan_commit": "6b6963f42...",
+    "last_scan_at": "2026-05-30T04:00:00Z",
+    "total_defects": 31,
+    "schema_version": "1.1"
+  },
+  "defects": [
+    {
+      "bug_id": "BUG-2026-042",
+      "commit_sha": "8d3f12a91...",
+      "date_fixed": "2026-05-15T14:22:00+08:00",
+      "title": "[NPU] Fix W4A8 scale overflow in dynamic_quant at bs=256",
+      "description": "When batch_size >= 256, the dynamic quantization scale factor in fused_moe_method_npu.py overflowed int8 range, causing all subsequent token routing to produce garbage values. The model appeared to work normally (no crash, normal throughput) but output quality degraded silently.",
+      "category": "silent_corruption",
+      "severity": 5,
+      "is_silent": true,
+      "failure_mode": "wrong_output",
+      "files_fixed": [
+        "python/sglang/srt/hardware_backend/npu/quantization/fused_moe_method_npu.py"
+      ],
+      "features_affected": ["ascend_fuseep", "dynamic_quant"],
+      "root_cause": "quant_scale",
+      "test_would_catch": true,
+      "test_type_needed": "oracle",
+      "tags": ["dynamic_quant", "w4a8", "scale_overflow", "large_batch"],
+      "confidence": 0.92,
+      "agent_version": "2026.05.28"
+    }
+  ]
+}</code></pre>
+</section>
+
+<!-- ===== Phase A ===== -->
+<section id="phase-a">
+  <h2><span class="num">5</span>Phase A: 历史深挖（M0 · 一次性）</h2>
+
+  <h3>4.1 流程</h3>
+
+  <div class="flow-diagram">
+    <div class="flow-row">
+      <div class="step"><h4>⛏️ Step 1: Git Log 全量提取</h4><p>git log --all --grep 双重过滤 → raw dump</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><h4>🧹 Step 2: 噪音过滤</h4><p>正则 + 规则 → 剔除 false positive</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><h4>🤖 Step 3: Agent 批量分类</h4><p>并行 Agent 分析每条 raw entry</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><h4>✅ Step 4: 人工抽检</h4><p>低置信度 (&lt;0.7) 记录人工审核</p></div>
+      <div class="arrow">→</div>
+      <div class="step"><h4>🗄️ Step 5: 写入 seed DB</h4><p>defect_db.json 初始化</p></div>
+    </div>
+  </div>
+
+  <h4>Step 1: 双重过滤的 grep 策略</h4>
+  <p>不是简单的单次 grep。用<strong>两步策略</strong>最大化召回率同时控制噪音：</p>
+
+<pre><code># 第一遍: 宽松召回（最大化覆盖）
+# 匹配 "fix/bug/repair/correct/patch + 出现在 NPU 相关文件中"
+git log --all --since="2024-01-01" \
+  --grep="fix\|bug\|repair\|correct\|patch\|resolve\|address" \
+  -- "python/sglang/srt/hardware_backend/npu/**" \
+     "python/sglang/srt/layers/moe/token_dispatcher/fuseep.py" \
+     "python/sglang/srt/layers/quantization/**" \
+     "python/sglang/srt/disaggregation/ascend/**" \
+     "python/sglang/srt/lora/backend/ascend_backend.py" \
+  --format="%H|%ai|%s" \
+  > raw_primary.txt
+
+# 第二遍: 补充跨模块修复（commit message 提到 NPU 但文件不在 npu/ 下）
+git log --all --since="2024-01-01" \
+  --grep="npu\|ascend\|NPU\|Ascend\|CANN\|HCCL\|torch_npu\|sgl_kernel_npu" \
+  --format="%H|%ai|%s|%b" \
+  > raw_secondary.txt
+
+# 合并去重
+cat raw_primary.txt raw_secondary.txt | sort -u > raw_all.txt</code></pre>
+
+  <h4>Step 2: 噪音过滤规则</h4>
+  <p>很多匹配到的 commit 不是真正的缺陷修复——比如添加新功能的 commit 也包含 "fix typo"、重构代码等。规则过滤：</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>规则</th><th>示例</th><th>动作</th></tr>
+    <tr><td>commit message 含 "typo" / "format" / "lint" / "doc" / "comment"</td><td>"fix typo in readme"</td><td><span class="badge green">剔除</span></td></tr>
+    <tr><td>只改了 .md / .rst / .txt 文件</td><td>-- "docs/**" only</td><td><span class="badge green">剔除</span></td></tr>
+    <tr><td>commit message 含 "cherry-pick" / "revert"</td><td>重复或回退</td><td><span class="badge yellow">标记去重</span></td></tr>
+    <tr><td>改动行数 < 5（仅 import 调整等）</td><td>trivial change</td><td><span class="badge yellow">低优先级</span></td></tr>
+    <tr><td>含 "bump version" / "upgrade dep"</td><td>版本升级，非 bug fix</td><td><span class="badge green">剔除</span></td></tr>
+  </table>
+  </div>
+
+  <h4>Step 3: Agent 并行分类</h4>
+  <p>过滤后通常剩余 50-100 条候选记录。启动 3-5 个并行 Agent，每个分析 15-30 条：</p>
+
+<pre><code>// Workflow 片段
+phase('Defect Mining: Agent Classification')
+const rawEntries = parseRawDefects('raw_filtered.txt')
+
+const classified = await parallel(
+  chunk(rawEntries, 3).map((batch, i) => () =>
+    agent(DEFECT_CLASSIFY_PROMPT(batch), {
+      label: `defect:batch${i}`,
+      schema: DEFECT_SCHEMA  // 强制结构化输出
+    })
+  )
+)
+
+// 合并 + 去重（同一 bug 可能被多个 commit 修复）
+const deduped = deduplicateByFilesAndFeature(
+  classified.filter(Boolean).flatMap(r => r.defects)
+)</code></pre>
+
+  <h3>4.2 Agent 分类 Prompt 设计</h3>
+
+<pre><code>DEFECT_CLASSIFY_PROMPT:
+  "你是一个 NPU 缺陷分类专家。分析以下 git commit 记录，
+   判断它们是否代表一个真实的 NPU 相关缺陷修复。
+
+   对每条记录，你需要:
+   1. 判断是否为真实缺陷修复（vs 新功能/重构/文档/格式）
+   2. 分类: precision_loss | crash | perf_regression | memory_leak |
+           silent_corruption | compatibility | compile_error
+   3. 判断严重度 (1-5)，重点关注是否为静默错误
+   4. 推断根因: format_cast | quant_scale | stream_sync | graph_capture | ...
+   5. 推断受影响的 NPU 特性
+   6. 评估: 如果当时有对应测试，能否捕获？
+   7. 给出置信度 (0-1)
+
+   输出 JSON Schema: { defects: [{ bug_id, category, severity, ... }] }"</code></pre>
+
+  <h3>4.3 人工抽检策略</h3>
+  <p>不是每条都审。只审 <strong>confidence < 0.7</strong> 的记录，通常占 15-20%。Agent 输出中自动标记需审核项，人工确认后 confidence 更新为 1.0（人工确认）或修正分类。</p>
+
+  <div class="stat-grid">
+    <div class="stat-card"><div class="val" style="color:var(--orange);">~100</div><div class="lbl">raw 候选 commit</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--accent);">~50</div><div class="lbl">过滤后候选</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--green);">~30</div><div class="lbl">确认真实缺陷</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--purple);">3-5</div><div class="lbl">并行 Agent 数</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--yellow);">~2min</div><div class="lbl">Agent 分类耗时</div></div>
+    <div class="stat-card"><div class="val" style="color:var(--teal);">5-8</div><div class="lbl">需人工审核条目</div></div>
+  </div>
+</section>
+
+<!-- ===== Phase B ===== -->
+<section id="phase-b">
+  <h2><span class="num">6</span>Phase B: 增量追加（Daily Cron · 持续）</h2>
+
+  <h3>5.1 极简流程</h3>
+
+<pre><code>#!/bin/bash
+# .sglang-risk/scripts/defect_append.sh
+# 每天 04:00 UTC 执行
+
+DB=".sglang-risk/db/defect_db.json"
+LAST=$(jq -r '._meta.last_scan_commit' "$DB")
+
+# 只扫新 commit
+NEW_COMMITS=$(git log ${LAST}..HEAD \
+  --grep="fix\|bug\|npu\|ascend\|CANN" \
+  --format="%H|%ai|%s" \
+  -- "python/sglang/srt/")
+
+if [ -z "$NEW_COMMITS" ]; then
+  echo "No new commits to scan."
+  exit 0
+fi
+
+# Agent 增量分类
+python -c "
+from defect_miner import classify_incremental, append_to_db
+new_defects = classify_incremental('''$NEW_COMMITS''')
+append_to_db('$DB', new_defects)
+"</code></pre>
+
+  <h3>5.2 增量 vs 全量的 Agent 差异</h3>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>维度</th><th>Phase A（全量深挖）</th><th>Phase B（增量追加）</th></tr>
+    <tr><td>输入规模</td><td>~100 raw commits</td><td>通常 0-5 raw commits</td></tr>
+    <tr><td>Agent 数量</td><td>3-5 并行</td><td>1 个（串行足够）</td></tr>
+    <tr><td>Prompt 差异</td><td>批量分析 + 去重逻辑</td><td>单条分析，无需去重</td></tr>
+    <tr><td>耗时</td><td>~2 min</td><td>~5s（包括 git log）</td></tr>
+    <tr><td>去重需求</td><td>高（同一 bug 多次修复）</td><td>无（新 commit 不可能是旧 bug）</td></tr>
+    <tr><td>人工抽检</td><td>confidence &lt; 0.7 的审核</td><td>全部新记录（数量少）</td></tr>
+    <tr><td>失败处理</td><td>重试整个 batch</td><td>跳过该条，下次重试</td></tr>
+  </table>
+  </div>
+
+  <div class="callout warn">
+    <h4>⚠️ 边界情况处理</h4>
+    <p style="color:var(--text);"><strong>force rebuild 场景</strong>: 如果怀疑 defect_db.json 数据有问题（如 Agent 分类错误），提供 <code>--force-rescan</code> 标志，清空 DB 重新运行 Phase A。这个场景极少发生（几个月一次），不需要为此把每次全量分析都绑上全量缺陷重挖。</p>
+  </div>
+</section>
+
+<!-- ===== Consumer Integration ===== -->
+<section id="consumers">
+  <h2><span class="num">7</span>消费者集成：三个下游如何消费 defect_db</h2>
+
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <h4>📊 消费者 1: 全量分析</h4>
+      <p style="font-size:.84em;color:var(--text2);">用途: 填充 risk_profiles 的 <code>historical_defects</code> 因子</p>
+<pre><code style="font-size:.76em;"># 全量分析读取缺陷数据
+def get_historical_defect_score(feature_name):
+    defects = load_defect_db()
+    relevant = [
+        d for d in defects
+        if feature_name in d['features_affected']
+    ]
+    # 评分: 最近90天缺陷数 × 平均严重度
+    recent = [d for d in relevant
+              if days_since(d['date_fixed']) <= 90]
+    if not recent: return 1
+    avg_severity = mean(d['severity'] for d in recent)
+    return min(5, len(recent) * avg_severity / 3)</code></pre>
+    </div>
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <h4>🔄 消费者 2: 增量评估</h4>
+      <p style="font-size:.84em;color:var(--text2);">用途: PR check 时查询受影响特性是否有历史缺陷</p>
+<pre><code style="font-size:.76em;"># PR 修改了 fuseep.py
+# 查询: 这个文件历史上出过什么 bug？
+def check_defect_history(changed_files):
+    defects = load_defect_db()
+    warnings = []
+    for f in changed_files:
+        file_defects = [
+            d for d in defects
+            if any(f.endswith(ff) for ff in d['files_fixed'])
+        ]
+        if file_defects:
+            # 按 failure_mode 聚类
+            modes = Counter(
+                d['failure_mode'] for d in file_defects
+            )
+            warnings.append({
+                'file': f,
+                'past_defects': len(file_defects),
+                'common_modes': modes.most_common(3)
+            })
+    return warnings</code></pre>
+    </div>
+    <div class="card" style="border-left:3px solid var(--purple);">
+      <h4>🧩 消费者 3: KG 图构建</h4>
+      <p style="font-size:.84em;color:var(--text2);">用途: 创建 Defect 节点 + AFFECTED_BY 和 FIXED_IN 边</p>
+<pre><code style="font-size:.76em;"># build_graph.py 中读取缺陷
+def add_defect_nodes(G, defect_db_path):
+    defect_db = json.loads(Path(defect_db_path).read_text())
+    for d in defect_db['defects']:
+        G.add_node(d['bug_id'],
+            type='Defect',
+            category=d['category'],
+            severity=d['severity'],
+            is_silent=d['is_silent'],
+            failure_mode=d['failure_mode']
+        )
+        # AFFECTED_BY: Defect → Feature
+        for feat in d['features_affected']:
+            if G.has_node(feat):
+                G.add_edge(d['bug_id'], feat,
+                    type='AFFECTED_BY',
+                    weight=d['severity']
+                )
+        # FIXED_IN: Defect → SourceFile
+        for file_path in d['files_fixed']:
+            file_id = file_path.split('/')[-1]
+            if G.has_node(file_id):
+                G.add_edge(d['bug_id'], file_id,
+                    type='FIXED_IN', weight=0.5
+                )</code></pre>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Agent Prompt Design ===== -->
+<section id="prompt">
+  <h2><span class="num">8</span>Agent 分类 Prompt 详细设计</h2>
+
+  <p>这是整个链路中最依赖 Agent 质量的环节。Prompt 需要包含分类标准 + NPU 领域知识 + 输出约束。</p>
+
+<pre><code>你是一个 NPU（华为 Ascend）平台的缺陷分析专家。
+
+## 任务
+分析以下 git commit 记录，判断哪些是真实的 NPU 缺陷修复。
+对每条确认为缺陷的记录，进行结构化分类。
+
+## 分类标准
+
+### Category（缺陷类型）
+- precision_loss: 数值精度丢失（如 FP32→BF16 误差，quant scale 漂移）
+- crash: 程序崩溃（segfault, CUDA illegal memory, HCCL timeout）
+- perf_regression: 性能退化（throughput 下降 >10%）
+- memory_leak: 内存泄漏或 OOM
+- silent_corruption: 静默数据损坏（无 crash，输出悄悄变错）
+- compatibility: 版本兼容问题（CANN/torch_npu 升级导致）
+- compile_error: 编译/构建问题
+
+### Severity（严重度 1-5）
+5 = 静默错误（用户无感知但结果错误，最危险）
+4 = crash 或 OOM（用户立即感知但影响面大）
+3 = 精度退化（可检测到但可能被忽略）
+2 = 性能退化
+1 = 编译/构建问题
+
+### Root Cause（根因分类）
+- format_cast: FRACTAL_NZ 格式转换问题
+- quant_scale: 量化 scale 计算错误
+- stream_sync: 多 stream 同步问题
+- graph_capture: NPU Graph 捕获/重放问题
+- hccl_timeout: HCCL 通信超时
+- cann_api: CANN API 使用错误
+- memory_layout: 内存布局/stride 问题
+- token_routing: MoE token dispatch 路由错误
+
+### is_silent 判断标准
+如果满足以下条件之一，标记为静默错误:
+- commit message 提到 "wrong output" / "incorrect result" / "精度"
+- 但没有任何 crash/error/timeout 关键词
+- 且修复不涉及异常处理逻辑
+
+## 输入数据
+{raw_commit_entries}
+
+## 输出格式
+严格按照以下 JSON Schema:
+{
+  "defects": [
+    {
+      "bug_id": "BUG-YYYY-NNN",
+      "commit_sha": "...",
+      "category": "silent_corruption",
+      "severity": 5,
+      "is_silent": true,
+      "failure_mode": "wrong_output",
+      "root_cause": "quant_scale",
+      "features_affected": ["ascend_fuseep", "dynamic_quant"],
+      "test_would_catch": true,
+      "test_type_needed": "oracle",
+      "confidence": 0.92,
+      "rationale": "一句话解释分类依据"
+    }
+  ]
+}</code></pre>
+
+  <div class="callout">
+    <h4>💡 持续优化的 Prompt</h4>
+    <p style="color:var(--text);">confidence 低的记录是 Prompt 优化的主要信号。定期（每月）review confidence &lt; 0.7 的记录，找出 Agent 反复分错的模式，补充到 Prompt 的"分类标准"中。本质上这是一个<strong>human-in-the-loop 的持续学习循环</strong>。</p>
+  </div>
+</section>
+
+<!-- ===== File Layout ===== -->
+<section id="files">
+  <h2><span class="num">9</span>文件布局与工具链</h2>
+
+<pre><code>.sglang-risk/
+├── db/
+│   └── defect_db.json              # ★ 核心数据库（单向追加）
+│
+├── defect_mining/
+│   ├── extract_historical.py       # Phase A: git log 全量提取 + 噪音过滤
+│   ├── enrich_with_pr.sh           # Phase A/B: 查询关联 PR + review comments
+│   ├── classify_pr.py              # Agent-PR: 深度分析（description + reviews）
+│   ├── classify_commit.py          # Agent-Commit: 浅层分析（兜底）
+│   ├── extract_near_miss.py        # PR Review 中的 near-miss 信号提取
+│   ├── append_daily.py             # Phase B: 增量追加（daily cron 入口）
+│   ├── deduplicate.py              # 去重逻辑
+│   ├── prompts.py                  # Agent-PR + Agent-Commit 两套 Prompt 模板
+│   └── review_queue.py             # 低置信度记录待审队列
+│
+├── scripts/
+│   ├── run_full.py                 # 全量分析（读取 defect_db，不写入）
+│   ├── run_delta.py                # 增量评估（读取 defect_db，不写入）
+│   └── defect_append.sh            # Daily cron 脚本
+│
+├── graph/
+│   └── build_graph.py              # KG 构建（读取 defect_db，创建 Defect 节点）
+│
+└── trends/
+    └── update_trends.py            # 趋势聚合（读取 defect_db，计算缺陷率）</code></pre>
+</section>
+
+<!-- ===== Integration with Full Pipeline ===== -->
+<section id="pipeline">
+  <h2><span class="num">10</span>与全量/增量管线的时序关系</h2>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 920 310" xmlns="http://www.w3.org/2000/svg">
+      <!-- Timeline -->
+      <line x1="80" y1="40" x2="880" y2="40" stroke="var(--border)" stroke-width="1"/>
+      <text x="80" y="30" fill="var(--text2)" font-size="10">M0 (初始化)</text>
+      <text x="300" y="30" fill="var(--text2)" font-size="10">M1 (日常 PR)</text>
+      <text x="520" y="30" fill="var(--text2)" font-size="10">每日 04:00</text>
+      <text x="720" y="30" fill="var(--text2)" font-size="10">每周一 06:00</text>
+
+      <!-- M0 -->
+      <rect x="40" y="55" width="170" height="60" rx="8" fill="rgba(248,81,73,.08)" stroke="var(--red)" stroke-width="1.5"/>
+      <text x="125" y="80" fill="var(--red)" font-size="11" text-anchor="middle" font-weight="650">Phase A: 历史深挖</text>
+      <text x="125" y="100" fill="var(--text2)" font-size="9" text-anchor="middle">git log --since="ever"</text>
+
+      <rect x="240" y="55" width="170" height="60" rx="8" fill="rgba(77,166,255,.08)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="325" y="80" fill="var(--accent)" font-size="11" text-anchor="middle" font-weight="650">全量分析 M0</text>
+      <text x="325" y="100" fill="var(--text2)" font-size="9" text-anchor="middle">读取 seed DB</text>
+
+      <line x1="210" y1="85" x2="240" y2="85" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="225" y="78" fill="var(--text2)" font-size="8" text-anchor="middle">→</text>
+
+      <rect x="210" y="140" width="200" height="50" rx="8" fill="var(--surface2)" stroke="var(--green)" stroke-width="1.2"/>
+      <text x="310" y="160" fill="var(--green)" font-size="10" text-anchor="middle" font-weight="650">defect_db.json 初始化</text>
+      <text x="310" y="178" fill="var(--text2)" font-size="9" text-anchor="middle">~30 records · last_scan = HEAD</text>
+
+      <!-- M1 daily -->
+      <rect x="470" y="55" width="200" height="60" rx="8" fill="rgba(240,136,62,.08)" stroke="var(--orange)" stroke-width="1.5"/>
+      <text x="570" y="78" fill="var(--orange)" font-size="11" text-anchor="middle" font-weight="650">Phase B: 增量追加</text>
+      <text x="570" y="98" fill="var(--text2)" font-size="9" text-anchor="middle">git log {last}..HEAD</text>
+
+      <!-- Weekly -->
+      <rect x="720" y="55" width="170" height="60" rx="8" fill="rgba(77,166,255,.08)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="805" y="80" fill="var(--accent)" font-size="11" text-anchor="middle" font-weight="650">全量分析（每周）</text>
+      <text x="805" y="100" fill="var(--text2)" font-size="9" text-anchor="middle">读 DB + 基线刷新</text>
+
+      <!-- Dependencies -->
+      <line x1="310" y1="190" x2="310" y2="240" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4,3"/>
+      <line x1="570" y1="115" x2="570" y2="140" stroke="var(--green)" stroke-width="1.2"/>
+      <rect x="495" y="140" width="150" height="30" rx="5" fill="var(--surface2)" stroke="var(--green)" stroke-width="1"/>
+      <text x="570" y="160" fill="var(--green)" font-size="10" text-anchor="middle">追加新记录</text>
+
+      <line x1="570" y1="170" x2="570" y2="240" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4,3"/>
+      <line x1="805" y1="115" x2="805" y2="240" stroke="var(--accent)" stroke-width="1" stroke-dasharray="4,3"/>
+
+      <!-- Consumers -->
+      <rect x="140" y="240" width="160" height="36" rx="6" fill="var(--surface2)" stroke="var(--accent)"/>
+      <text x="220" y="263" fill="var(--text)" font-size="10" text-anchor="middle">historical_defects 评分</text>
+
+      <rect x="470" y="240" width="160" height="36" rx="6" fill="var(--surface2)" stroke="var(--accent)"/>
+      <text x="550" y="263" fill="var(--text)" font-size="10" text-anchor="middle">PR 缺陷历史查询</text>
+
+      <rect x="720" y="240" width="160" height="36" rx="6" fill="var(--surface2)" stroke="var(--accent)"/>
+      <text x="800" y="263" fill="var(--text)" font-size="10" text-anchor="middle">Defect 节点 + 边</text>
+    </svg>
+  </div>
+
+  <div class="callout success">
+    <h4>✅ 时序解耦</h4>
+    <p style="color:var(--text);">Phase A 只在 M0 初始化时跑一次。之后<strong>缺陷采集（daily）和全量分析（weekly）完全独立运行</strong>，互不阻塞。全量分析读 DB 时可能恰好增量进程在写——但因为是单向追加（append-only），不会发生数据竞争。</p>
+  </div>
+</section>
+
+<!-- ===== Summary ===== -->
+<section id="summary">
+  <h2><span class="num">11</span>总结</h2>
+
+  <div class="three-col">
+    <div class="card" style="border-left:3px solid var(--red);">
+      <h4>⛏️ Phase A</h4>
+      <ul style="font-size:.84em;">
+        <li>全量历史深挖</li>
+        <li>M0 初始化跑一次</li>
+        <li>双重 grep 过滤</li>
+        <li>3-5 Agent 并行分类</li>
+        <li>人工抽检低置信度</li>
+        <li>产出 seed defect_db</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--orange);">
+      <h4>📥 Phase B</h4>
+      <ul style="font-size:.84em;">
+        <li>增量追加</li>
+        <li>Daily cron 自动运行</li>
+        <li>仅扫描 {last}..HEAD</li>
+        <li>1 Agent 逐条分析</li>
+        <li>&lt;5s 完成</li>
+        <li>defect_db 单向追加</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--teal);">
+      <h4>🗄️ 共享中间层</h4>
+      <ul style="font-size:.84em;">
+        <li>单一写入者 (Phase B)</li>
+        <li>多消费者只读</li>
+        <li>全量分析读 DB 算评分</li>
+        <li>增量评估读 DB 做告警</li>
+        <li>KG 读 DB 建节点+边</li>
+        <li>完全解耦 · 零写冲突</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:18px;">
+    <h4>🎯 一句话结论</h4>
+    <p style="color:var(--text); font-size:1.05em;"><strong>历史深挖跟 M0 全量分析一起跑（首次建库），之后增量追加作为 daily cron 独立运行。defect_db.json 是所有分析流程的只读数据源，唯一的写入者是增量追加进程。</strong></p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>NPU Defect Mining Architecture — Two-Phase · PR-First · Incremental Append · Near-Miss Signals · 2026-05-30</p>
+  <p style="margin-top:4px;">Series: Doc 1 覆盖审计 · Doc 2 风险策略 · Doc 3 增量架构 · Doc 4 知识图谱 · Doc 5 缺陷挖掘</p>
+  <p style="margin-top:4px;">数据源: PR 优先 (Agent-PR confidence 0.8-0.95) → Commit 兜底 (Agent-Commit confidence 0.5-0.7) → Near-Miss (weight:0.3)</p>
+</footer>
+
+</body>
+</html>

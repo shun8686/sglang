@@ -1,0 +1,306 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://sglang/npu-risk-graph-schema",
+  "title": "NPU Risk Knowledge Graph Schema",
+  "description": "Node types, edge types, and property definitions for the NPU risk knowledge graph. Property graph (LPG) model: 8 node types, 11 edge types. Includes testing knowledge (OraclePattern, FailureMode) for test design guidance.",
+  "type": "object",
+  "properties": {
+    "directed": {"const": true},
+    "multigraph": {"const": true},
+    "graph": {
+      "type": "object",
+      "properties": {
+        "name": {"type": "string"},
+        "built_at": {"type": "string", "format": "date-time"},
+        "git_commit": {"type": "string"},
+        "last_updated_at": {"type": "string", "format": "date-time"},
+        "last_delta_id": {"type": "string"}
+      }
+    },
+    "nodes": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"$ref": "#/definitions/Feature"},
+          {"$ref": "#/definitions/SourceFile"},
+          {"$ref": "#/definitions/TestCase"},
+          {"$ref": "#/definitions/Defect"},
+          {"$ref": "#/definitions/NearMiss"},
+          {"$ref": "#/definitions/Dependency"},
+          {"$ref": "#/definitions/OraclePattern"},
+          {"$ref": "#/definitions/FailureMode"}
+        ]
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "oneOf": [
+          {"$ref": "#/definitions/IMPLEMENTS_IN"},
+          {"$ref": "#/definitions/TESTED_BY"},
+          {"$ref": "#/definitions/DEPENDS_ON"},
+          {"$ref": "#/definitions/AFFECTED_BY"},
+          {"$ref": "#/definitions/FIXED_IN"},
+          {"$ref": "#/definitions/COVERS"},
+          {"$ref": "#/definitions/SHARES_DEFECT_PATTERN"},
+          {"$ref": "#/definitions/WARNS_OF"},
+          {"$ref": "#/definitions/TEST_USES_PATTERN"},
+          {"$ref": "#/definitions/PATTERN_DETECTS"},
+          {"$ref": "#/definitions/PATTERN_BLIND_SPOT"}
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "Feature": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Feature name (PK)"},
+        "type": {"const": "Feature"},
+        "category": {"type": "string", "enum": ["attention", "distributed", "quantization", "inference_engine", "interface", "multimodal", "memory", "speculative"]},
+        "risk_score": {"type": "integer", "minimum": 0, "maximum": 45},
+        "probability": {"type": "integer"},
+        "impact": {"type": "integer"},
+        "level": {"type": "string", "enum": ["low", "medium", "high", "critical"]},
+        "test_depth": {"type": "string", "enum": ["L1", "L2", "L3"]},
+        "fingerprint": {"type": "string"},
+        "n_tests": {"type": "integer"},
+        "n_effective_tests": {"type": "integer"},
+        "n_source_files": {"type": "integer"},
+        "last_modified": {"type": "string", "format": "date-time"},
+        "complexity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "SourceFile": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Full repository path (PK)"},
+        "type": {"const": "SourceFile"},
+        "file_name": {"type": "string"},
+        "file_type": {"type": "string", "enum": ["python", "cpp", "header", "cuda", "shell", "yaml", "json", "markdown", "unknown"]},
+        "lines_of_code": {"type": "integer"},
+        "n_bugs": {"type": "integer"},
+        "complexity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "platform_divergence": {"type": "string", "enum": ["fully_npu_private", "partial", "shared"]},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "TestCase": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Test file path (PK)"},
+        "type": {"const": "TestCase"},
+        "test_class": {"type": "string"},
+        "test_type": {"type": "string"},
+        "quality_score": {"type": "integer", "minimum": 0, "maximum": 5},
+        "assertion_type": {"type": "string"},
+        "has_oracle": {"type": "boolean"},
+        "ci_suite": {"type": "string"},
+        "n_methods": {"type": "integer"},
+        "est_time_seconds": {"type": "integer"},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "Defect": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Bug ID (PK, e.g. BUG-2026-001)"},
+        "type": {"const": "Defect"},
+        "category": {"type": "string"},
+        "severity": {"type": "integer", "minimum": 1, "maximum": 5},
+        "is_silent": {"type": "boolean"},
+        "failure_mode": {"type": "string"},
+        "date_fixed": {"type": "string", "format": "date"},
+        "source": {"type": "string", "enum": ["commit", "pr", "label_scan"]},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "NearMiss": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "NEAR_MISS_PR{pr_number} (PK)"},
+        "type": {"const": "NearMiss"},
+        "risk_pattern": {"type": "string"},
+        "module": {"type": "string"},
+        "symptom": {"type": "string"},
+        "weight": {"type": "number", "minimum": 0, "maximum": 1},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "Dependency": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Dependency name (PK)"},
+        "type": {"const": "Dependency"},
+        "name": {"type": "string"},
+        "version": {"type": "string"},
+        "dep_type": {"type": "string", "enum": ["runtime", "python_pkg", "kernel", "communication"]},
+        "provider": {"type": "string"},
+        "upgrade_risk": {"type": "integer", "minimum": 1, "maximum": 5},
+        "n_consumers": {"type": "integer"},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "IMPLEMENTS_IN": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "Feature name"},
+        "target": {"type": "string", "description": "SourceFile path"},
+        "type": {"const": "IMPLEMENTS_IN"},
+        "weight": {"type": "number", "minimum": 0, "maximum": 1, "description": "Code share ratio (1 / n_source_files)"}
+      }
+    },
+    "TESTED_BY": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "Feature name"},
+        "target": {"type": "string", "description": "TestCase file path"},
+        "type": {"const": "TESTED_BY"},
+        "weight": {"type": "integer", "minimum": 0, "maximum": 5, "description": "Test quality score"}
+      }
+    },
+    "DEPENDS_ON": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string"},
+        "target": {"type": "string"},
+        "type": {"const": "DEPENDS_ON"},
+        "weight": {"type": "integer", "minimum": 1, "maximum": 5},
+        "via": {"type": "string", "description": "Edge provenance: explicit_dependency | shared_file:{name}"}
+      }
+    },
+    "AFFECTED_BY": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "Defect bug_id"},
+        "target": {"type": "string", "description": "Feature name"},
+        "type": {"const": "AFFECTED_BY"},
+        "weight": {"type": "integer", "minimum": 1, "maximum": 5, "description": "Defect severity"}
+      }
+    },
+    "FIXED_IN": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "Defect bug_id"},
+        "target": {"type": "string", "description": "SourceFile path"},
+        "type": {"const": "FIXED_IN"},
+        "weight": {"type": "number", "description": "1 / n_files_fixed"}
+      }
+    },
+    "COVERS": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "TestCase file path"},
+        "target": {"type": "string", "description": "SourceFile path"},
+        "type": {"const": "COVERS"},
+        "weight": {"type": "number", "description": "Inferred coverage weight"}
+      }
+    },
+    "SHARES_DEFECT_PATTERN": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "Feature A"},
+        "target": {"type": "string", "description": "Feature B"},
+        "type": {"const": "SHARES_DEFECT_PATTERN"},
+        "weight": {"type": "integer", "minimum": 1, "maximum": 5, "description": "min(5, shared_defect_count)"},
+        "shared_defect_count": {"type": "integer"},
+        "shared_failure_modes": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "WARNS_OF": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "NearMiss node ID"},
+        "target": {"type": "string", "description": "Feature name"},
+        "type": {"const": "WARNS_OF"},
+        "weight": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "OraclePattern": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Unique pattern identifier (PK, e.g. exact_match_short)"},
+        "type": {"const": "OraclePattern"},
+        "name": {"type": "string", "description": "Human-readable name"},
+        "category": {"type": "string", "enum": ["exact_match", "logprob_comparison", "deterministic_oracle", "statistical_threshold"], "description": "Oracle category"},
+        "max_safe_tokens": {"type": "integer", "description": "Max tokens this pattern is safe for (null = unlimited)"},
+        "tolerance": {"type": "number", "description": "Acceptable numerical tolerance (0 = exact)"},
+        "severity": {"type": "string", "enum": ["hard_oracle", "soft_oracle", "approximate"], "description": "How strict the oracle is"},
+        "requires_single_server": {"type": "boolean", "description": "Whether this pattern requires a single server instance"},
+        "npu_validated": {"type": "boolean", "description": "Whether this pattern has been validated on NPU"},
+        "reference_test": {"type": "string", "description": "Canonical test file that demonstrates this pattern"},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "FailureMode": {
+      "type": "object",
+      "required": ["id", "type"],
+      "properties": {
+        "id": {"type": "string", "description": "Failure mode identifier (PK, e.g. crash, silent_precision_loss)"},
+        "type": {"const": "FailureMode"},
+        "name": {"type": "string", "description": "Human-readable name"},
+        "description": {"type": "string"},
+        "is_silent": {"type": "boolean", "description": "Whether this failure mode produces no visible error"},
+        "detectable_by_oracle": {"type": "boolean", "description": "Whether any oracle pattern can reliably detect this"},
+        "degree": {"type": "integer"},
+        "betweenness": {"type": "number"}
+      }
+    },
+    "TEST_USES_PATTERN": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "TestCase file path"},
+        "target": {"type": "string", "description": "OraclePattern ID"},
+        "type": {"const": "TEST_USES_PATTERN"},
+        "weight": {"type": "number", "minimum": 0, "maximum": 1, "description": "Coverage strength of this pattern in this test (1 = primary oracle)"}
+      }
+    },
+    "PATTERN_DETECTS": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "OraclePattern ID"},
+        "target": {"type": "string", "description": "FailureMode ID"},
+        "type": {"const": "PATTERN_DETECTS"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1, "description": "Detection confidence (1 = guaranteed)"},
+        "evidence": {"type": "string", "description": "Why this pattern detects this failure mode"}
+      }
+    },
+    "PATTERN_BLIND_SPOT": {
+      "type": "object",
+      "required": ["source", "target", "type"],
+      "properties": {
+        "source": {"type": "string", "description": "OraclePattern ID"},
+        "target": {"type": "string", "description": "FailureMode ID"},
+        "type": {"const": "PATTERN_BLIND_SPOT"},
+        "reason": {"type": "string", "description": "Why this pattern cannot detect this failure mode"},
+        "mitigation": {"type": "string", "description": "Suggested complementary pattern to cover this blind spot"}
+      }
+    }
+  }
+}

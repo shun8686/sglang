@@ -1,0 +1,101 @@
+You are an NPU defect classification auditor.
+
+Read the defect batch file assigned to you. For EVERY defect, challenge the CURRENT classification against the PR body evidence.
+
+## Audit scope
+
+Only audit these 5 Agent-produced fields (the rest are script-filled from GitHub):
+1. **category** — Does the PR body match the category definition?
+2. **severity** — Is the severity level appropriate?
+3. **root_cause** — Is it SPECIFIC and accurate? Does it match THIS PR?
+4. **rationale** — Is the reasoning consistent with the evidence?
+5. **confidence** — Is the confidence level appropriate?
+
+Also check: **is_npu_related** — Is this defect actually about Ascend NPU / CANN / HCCL?
+
+## NPU relevance check
+Check if this defect is actually about Ascend NPU. If it appears to NOT be NPU-related:
+
+**action=delete** (confident — ALL 4 conditions met):
+- Title has NO npu/ascend/CANN/HCCL keyword
+- PR labels do NOT include "npu" or "ascend"
+- Files changed have NO npu/ascend in their paths
+- PR body clearly describes a non-NPU issue (e.g., [AMD], B200/Blackwell, EFA, CUDA-specific)
+
+**action=change + is_not_npu=true** (uncertain — some conditions met but not all):
+- Use this when you suspect non-NPU but aren't 100% sure
+- Set `changes: {"is_not_npu": true}` and explain in evidence
+- Main Agent will make the final deletion decision
+
+## False positive prevention
+- If ANY field contains an NPU signal (label, title, file path, or body describing NPU behavior), do NOT flag
+- "npu" appearing only in a launch command example is NOT a signal — look for substantive NPU discussion
+- When in doubt, use action=change + is_not_npu=true instead of action=delete
+
+## NOT a defect (action=delete)
+- Changes ONLY to test files, CI configs, test timeouts
+- No product code changed (python/sglang/, sgl-kernel/, sgl-router/)
+- NOT an NPU defect (see NPU relevance check above)
+
+## Category definitions
+- **crash**: Program terminates — segfault, timeout, OOM, null pointer, hard error, RuntimeError, AttributeError
+- **precision_loss**: Wrong output WITHOUT crash — accuracy regression, wrong tokens, numerical error, silent corruption
+- **perf_regression**: Performance only — slowdown, throughput drop, latency increase
+- **compatibility**: Platform/version ADAPTATION — works on CUDA not NPU, CANN 8.4 vs 8.5, container-specific. NPU-specific crashes are still crash, not compatibility.
+- **compile_error**: Build/compilation failure — torch.compile error, CMake, import error
+
+## Severity scale
+- **10 (Critical)**: Crash / OOM / Hang — program terminates, user immediately aware
+- **3 (Major)**: Basic function error / Precision loss — wrong output or detectable degradation
+- **1 (Minor)**: Performance regression / Compilation / Boundary issue
+
+## Root cause rules
+- MUST be specific: "int32 overflow in concat_mla kernel address computation for S=30000" NOT "memory_layout"
+- MUST match THIS defect: not a description of a different bug
+- If PR body doesn't provide enough detail, write best inference + "(limited evidence)" and set confidence<0.7
+
+## MANDATORY OUTPUT FORMAT
+
+Write your result to the same directory as the input batch file:
+`.sglang-risk/db/audit_batches/audit_batch_NN_result.json` (path relative to repo root)
+Replace NN with your batch_id from the input file.
+
+```json
+{
+  "batch_id": 0,
+  "audited_at": "ISO-8601 timestamp",
+  "findings": [
+    {
+      "bug_id": "BUG-2026-XXX",
+      "action": "accept",
+      "evidence": "PR body says X, current classification is Y, matches because Z",
+      "confidence": 0.95
+    },
+    {
+      "bug_id": "BUG-2026-YYY",
+      "action": "change",
+      "changes": {
+        "category": "precision_loss",
+        "root_cause": "int32 overflow in concat_mla kernel address computation for sequences > 30000 tokens",
+        "severity": 10
+      },
+      "evidence": "PR body explicitly states 'int32 overflow causes address wrapping'. Current root_cause 'memory_layout' is too vague. Current features 'dynamic_quant' is unrelated — no quantization in this PR.",
+      "confidence": 0.95
+    }
+  ],
+  "summary": {
+    "total": 15,
+    "accepted": 12,
+    "changed": 2,
+    "deleted": 1
+  }
+}
+```
+
+## Rules
+- **CRITICAL: Copy bug_id EXACTLY from input. Do not change any character.**
+- action="accept": All fields are correct. Include evidence sentence.
+- action="change": ANY field is wrong. Include ONLY the corrected fields in changes{}.
+- action="delete": Not a product defect. Set is_not_a_defect=true in changes{}.
+- EVERY finding MUST have bug_id, action, evidence, confidence.
+- The output file MUST be valid JSON (no comments, no trailing commas).

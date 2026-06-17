@@ -1,0 +1,62 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sglang-risk/feature.schema.json",
+  "title": "NPU Feature",
+  "description": "A single NPU platform feature extracted from source code",
+  "type": "object",
+  "required": ["name", "category", "source_files"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Unique feature identifier (snake_case)",
+      "examples": ["ascend_fuseep", "dual_stream_moe", "dynamic_quant"]
+    },
+    "category": {
+      "type": "string",
+      "enum": ["inference_engine", "distributed", "quantization", "attention", "advanced", "interface"]
+    },
+    "source_files": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Absolute or repo-relative paths to source files implementing this feature"
+    },
+    "config_keys": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "CLI args and config keys that enable/configure this feature"
+    },
+    "env_vars": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Environment variables that affect this feature"
+    },
+    "dependent_features": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Other features that this feature depends on"
+    },
+    "complexity": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 5,
+      "description": "Code complexity rating (1=simple, 5=very complex)"
+    },
+    "description": {
+      "type": "string",
+      "description": "Human-readable description of what this feature does"
+    },
+    "models_using": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Model architectures that use this feature"
+    },
+    "fingerprint": {
+      "type": "string",
+      "description": "SHA256 hash of normalized source code for change detection"
+    },
+    "last_modified": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

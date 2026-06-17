@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>npu-defect-mine — 设计文档</title>
+<style>
+  :root {
+    --bg: #0d1117;
+    --surface: #161b22;
+    --border: #30363d;
+    --text: #e6edf3;
+    --muted: #8b949e;
+    --accent: #58a6ff;
+    --accent2: #3fb950;
+    --warn: #d2991d;
+    --danger: #f85149;
+    --purple: #a371f7;
+    --code-bg: #1c2128;
+    --radius: 8px;
+    --shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--text); line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #1a1f2e 0%, #161b22 60%, #1a1f2e 100%);
+    border-bottom: 1px solid var(--border); padding: 3rem 1.5rem 2.5rem; text-align: center;
+  }
+  .header h1 { font-size: 2.2rem; font-weight: 700; letter-spacing: -0.5px; }
+  .header h1 span { color: var(--accent); }
+  .header .subtitle { color: var(--muted); margin-top: .5rem; font-size: 1rem; max-width: 650px; margin-inline: auto; }
+  .header .badges { margin-top: 1.2rem; display: flex; gap: .6rem; justify-content: center; flex-wrap: wrap; }
+  .badge {
+    display: inline-block; padding: .25rem .75rem; border-radius: 20px;
+    font-size: .8rem; font-weight: 600; background: rgba(88,166,255,.12); color: var(--accent);
+    border: 1px solid rgba(88,166,255,.25);
+  }
+  .badge.green { background: rgba(63,185,80,.12); color: var(--accent2); border-color: rgba(63,185,80,.25); }
+  .badge.warn { background: rgba(210,153,29,.12); color: var(--warn); border-color: rgba(210,153,29,.25); }
+  .badge.purple { background: rgba(163,113,247,.12); color: var(--purple); border-color: rgba(163,113,247,.25); }
+  .badge.red { background: rgba(248,81,73,.12); color: var(--danger); border-color: rgba(248,81,73,.25); }
+
+  /* Sections */
+  section { margin-top: 2.5rem; }
+  .section-title {
+    font-size: 1.35rem; font-weight: 700; padding-bottom: .5rem;
+    border-bottom: 1px solid var(--border); margin-bottom: 1.2rem;
+    display: flex; align-items: center; gap: .5rem;
+  }
+  .section-title .icon { font-size: 1.2rem; }
+
+  /* Cards */
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1.25rem 1.5rem; box-shadow: var(--shadow); margin-bottom: 1rem;
+  }
+  .card h3 { font-size: 1.05rem; margin-bottom: .5rem; color: var(--accent); }
+  .card p { color: var(--muted); font-size: .92rem; }
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem; }
+
+  /* Architecture Diagram */
+  .arch-diagram {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 2rem; text-align: center; margin: 1.5rem 0; overflow-x: auto;
+  }
+  .arch-diagram pre { text-align: left; display: inline-block; }
+  .arch-node {
+    display: inline-block; padding: .5rem 1rem; border-radius: 6px;
+    font-weight: 600; font-size: .9rem; margin: .25rem;
+  }
+  .arch-node.core { background: rgba(88,166,255,.18); border: 2px solid var(--accent); color: var(--accent); }
+  .arch-node.flow { background: rgba(63,185,80,.15); border: 1.5px solid var(--accent2); color: var(--accent2); }
+  .arch-node.util { background: rgba(163,113,247,.15); border: 1.5px solid var(--purple); color: var(--purple); }
+
+  /* Tables */
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: .88rem; }
+  th, td { padding: .6rem .85rem; text-align: left; border-bottom: 1px solid var(--border); }
+  th { font-weight: 600; color: var(--accent); background: rgba(22,27,34,.6); white-space: nowrap; }
+  tr:hover td { background: rgba(88,166,255,.04); }
+  td code { background: var(--code-bg); padding: .15rem .4rem; border-radius: 3px; font-size: .82rem; color: var(--accent2); }
+
+  /* Flow steps */
+  .flow-list { counter-reset: step; list-style: none; }
+  .flow-list li {
+    counter-increment: step; padding: .6rem 0 .6rem 2.2rem; position: relative;
+    border-left: 2px solid var(--border); margin-left: .8rem;
+  }
+  .flow-list li::before {
+    content: counter(step);
+    position: absolute; left: -.95rem; top: .55rem;
+    width: 1.5rem; height: 1.5rem; border-radius: 50%;
+    background: var(--accent); color: #fff;
+    font-size: .75rem; font-weight: 700; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .flow-list li code { background: var(--code-bg); padding: .1rem .35rem; border-radius: 3px; font-size: .8rem; }
+
+  /* Code blocks */
+  pre.code-block {
+    background: var(--code-bg); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 1rem 1.2rem; overflow-x: auto; font-size: .82rem; line-height: 1.5;
+  }
+
+  /* Decision table */
+  .decision { background: rgba(210,153,29,.08); border-left: 3px solid var(--warn); padding: .8rem 1rem; border-radius: 0 var(--radius) var(--radius) 0; margin: .8rem 0; }
+  .decision strong { color: var(--warn); }
+
+  /* Stats boxes */
+  .stat-box {
+    display: inline-flex; flex-direction: column; align-items: center;
+    padding: .8rem 1.5rem; background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); min-width: 90px; margin: .3rem;
+  }
+  .stat-box .num { font-size: 1.5rem; font-weight: 700; color: var(--accent); }
+  .stat-box .lbl { font-size: .78rem; color: var(--muted); margin-top: .15rem; }
+
+  /* TOC */
+  .toc { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.5rem 0; }
+  .toc a {
+    padding: .35rem .85rem; border-radius: 20px; font-size: .82rem; font-weight: 500;
+    border: 1px solid var(--border); color: var(--text); text-decoration: none;
+    transition: all .15s;
+  }
+  .toc a:hover { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  /* Footer */
+  .footer { text-align: center; color: var(--muted); font-size: .8rem; margin-top: 3rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1><span>npu-defect-mine</span> — 设计文档</h1>
+  <p class="subtitle">
+    NPU 缺陷数据库全生命周期管理：PR-first 提取 → Agent 语义分类 → 数据完整性守护 → 周期性审计
+  </p>
+  <div class="badges">
+    <span class="badge">4 个子工作流</span>
+    <span class="badge green">11 个 Python 脚本</span>
+    <span class="badge purple">PR-first 提取</span>
+    <span class="badge warn">Agent 语义分类</span>
+    <span class="badge red">Adversarial Audit</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- ============================================================ -->
+<!-- TOC -->
+<div class="toc">
+  <a href="#overview">概览</a>
+  <a href="#architecture">系统架构</a>
+  <a href="#data-model">数据模型</a>
+  <a href="#sub-workflows">子工作流</a>
+  <a href="#extraction">PR 提取引擎</a>
+  <a href="#classification">Agent 分类</a>
+  <a href="#audit">质量审计</a>
+  <a href="#scripts">脚本清单</a>
+  <a href="#design-decisions">关键设计决策</a>
+  <a href="#interaction">交互模式</a>
+</div>
+
+<!-- ============================================================ -->
+<section id="overview">
+  <h2 class="section-title"><span class="icon">🎯</span> 概览</h2>
+
+  <div class="card">
+    <h3>技能目标</h3>
+    <p>
+      为 sglang 项目的 NPU（华为昇腾 Ascend）相关代码缺陷建立结构化知识库。
+      从 GitHub 合并的 PR 中自动提取缺陷数据，由 AI Agent 进行语义分类，
+      并通过周期性审计确保数据质量。服务于下游的 NPU 风险测试框架。
+    </p>
+  </div>
+
+  <div style="display:flex; flex-wrap:wrap; gap:.5rem; margin-top:1rem; justify-content:center;">
+    <div class="stat-box"><span class="num">4</span><span class="lbl">子工作流</span></div>
+    <div class="stat-box"><span class="num">11</span><span class="lbl">Python 脚本</span></div>
+    <div class="stat-box"><span class="num">5</span><span class="lbl">缺陷类别</span></div>
+    <div class="stat-box"><span class="num">3</span><span class="lbl">severity 等级</span></div>
+    <div class="stat-box"><span class="num">2</span><span class="lbl">Agent prompt 模板</span></div>
+    <div class="stat-box"><span class="num">1</span><span class="lbl">JSON Schema</span></div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="architecture">
+  <h2 class="section-title"><span class="icon">🏗️</span> 系统架构</h2>
+
+  <div class="arch-diagram">
+<pre style="line-height:1.8; font-family:Consolas,monospace; font-size:.88rem;">
+                         ┌──────────────────────┐
+                         │   <span style="color:#58a6ff">defect_db.json</span>     │ ← 核心资产
+                         └──────────┬───────────┘
+           ┌────────────────────────┼──────────────────────────┐
+           │                        │                          │
+    ┌──────▼──────┐         ┌──────▼──────┐           ┌───────▼──────┐
+    │    init     │         │   update    │           │   maintain   │
+    │  首次建库   │         │  增量追加   │           │  质量维护    │
+    └──────┬──────┘         └──────┬──────┘           └───────┬──────┘
+           │                       │                          │
+    ┌──────▼───────────────────────▼──────────────────────────▼──────┐
+    │                       Shared Pipeline                          │
+    │  GitHub API → PR Extraction → Agent Classification → Merge     │
+    └────────────────────────────────────────────────────────────────┘
+</pre>
+  </div>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>🏁 init — 首次建库</h3>
+      <p>6 步（A-F）：PR 提取 → 写入 DB → Agent 分类 → 合并 → 全量审计 → 一致性检查。
+      从 2025-01-01 起扫描所有已合并 NPU 缺陷 PR。PR body 在提取阶段嵌入，100% 覆盖。</p>
+    </div>
+    <div class="card">
+      <h3>📥 update — 增量更新</h3>
+      <p>4 步（A-D）：扫描新 PR → Agent 分类 → 合并 → 可选一致性检查。
+      每次 ~0-5 条新缺陷。PR-first only，commit fallback 已移除。</p>
+    </div>
+    <div class="card">
+      <h3>🔧 maintain — 质量维护</h3>
+      <p>5 步（A-E）：完整性检查 → Agent Audit → 应用修正 → 删除非 NPU → 审计计数 + 重检。
+      日常抽样 ~30 条，支持 --full 全量审计。adversarial verify 确保分类质量。</p>
+    </div>
+    <div class="card">
+      <h3>📊 status — 状态查看</h3>
+      <p>只读查询，输出总量、needs_review 数量、category 分布、confidence 分桶、agent_version 分布。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="data-model">
+  <h2 class="section-title"><span class="icon">📦</span> 数据模型</h2>
+
+  <h3 style="margin-top:1rem;">Agent 产出字段（5 个，被审计）</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td><code>category</code></td><td>enum</td><td>crash | compatibility | precision_loss | compile_error | perf_regression</td></tr>
+      <tr><td><code>severity</code></td><td>int</td><td>10=Critical (crash/OOM/hang), 3=Major (function error/precision loss), 1=Minor (perf/compile/boundary)</td></tr>
+      <tr><td><code>root_cause</code></td><td>string</td><td>自由文本，一句话，必须具体（不允许泛型如 "cann_api"）</td></tr>
+      <tr><td><code>rationale</code></td><td>string</td><td>Agent 的分类推理依据</td></tr>
+      <tr><td><code>confidence</code></td><td>float</td><td>0.0-1.0，≥0.9 high，≥0.7 medium，&lt;0.7 needs_review</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:1.5rem;">脚本产出字段（8 个，自动填充）</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td><code>bug_id</code></td><td>string</td><td>格式 BUG-YYYY-NNN，如 BUG-2025-042</td></tr>
+      <tr><td><code>pr_title</code></td><td>string</td><td>PR 标题</td></tr>
+      <tr><td><code>pr_body</code></td><td>string</td><td>PR 正文（截断至 3000/5000 chars）</td></tr>
+      <tr><td><code>files_fixed</code></td><td>string[]</td><td>修复涉及的文件路径列表</td></tr>
+      <tr><td><code>source</code></td><td>enum</td><td>pr | commit</td></tr>
+      <tr><td><code>pr_number</code></td><td>int</td><td>GitHub PR 编号</td></tr>
+      <tr><td><code>commit_sha</code></td><td>string</td><td>合并 commit SHA</td></tr>
+      <tr><td><code>date_fixed</code></td><td>datetime</td><td>PR 合并时间</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:1.5rem;">审计追踪与标记</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>字段</th><th>类型</th><th>说明</th></tr>
+      <tr><td><code>audit_count</code></td><td>int</td><td>该缺陷已被审计的次数（每次 audit pass 后 +1）</td></tr>
+      <tr><td><code>needs_review</code></td><td>bool</td><td>由完整性检查（数据问题）或 Agent（低置信度）设置</td></tr>
+      <tr><td><code>agent_version</code></td><td>string</td><td>分类方法版本：heuristic_v2 | pending_agent_v1 | agent_workflow_v1</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:1.5rem;">_meta 元数据</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>字段</th><th>说明</th></tr>
+      <tr><td><code>last_scan_commit</code></td><td>最后一次扫描的 commit SHA</td></tr>
+      <tr><td><code>last_scan_at</code></td><td>最后一次扫描的 ISO-8601 时间戳</td></tr>
+      <tr><td><code>total_defects</code></td><td>缺陷总数</td></tr>
+      <tr><td><code>schema_version</code></td><td>数据模型版本号</td></tr>
+      <tr><td><code>agent_workflow_runs</code></td><td>历次 Agent 工作流运行记录</td></tr>
+      <tr><td><code>extraction_method</code></td><td>提取方法标识</td></tr>
+    </table>
+  </div>
+
+  <h3 style="margin-top:1.5rem;">Category 定义</h3>
+  <div class="table-wrap">
+    <table>
+      <tr><th>Category</th><th>定义</th><th>Severity</th></tr>
+      <tr><td><code>crash</code></td><td>程序终止 — segfault、timeout、OOM、null pointer、RuntimeError</td><td style="color:var(--danger);font-weight:700;">10</td></tr>
+      <tr><td><code>precision_loss</code></td><td>输出错误但不崩溃 — 精度回退、错误 token、数值错误、静默损坏</td><td style="color:var(--warn);font-weight:700;">3</td></tr>
+      <tr><td><code>compatibility</code></td><td>平台/版本适配 — CUDA 可运行 NPU 不行、CANN 版本差异、容器特定</td><td style="color:var(--warn);font-weight:700;">3</td></tr>
+      <tr><td><code>compile_error</code></td><td>编译/构建失败 — torch.compile 错误、CMake、import 错误</td><td style="color:var(--muted);">1</td></tr>
+      <tr><td><code>perf_regression</code></td><td>仅性能退化 — 吞吐下降、延迟增加</td><td style="color:var(--muted);">1</td></tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="sub-workflows">
+  <h2 class="section-title"><span class="icon">🔄</span> 子工作流详解</h2>
+
+  <div class="card">
+    <h3>Sub-workflow 1: init — 首次建库</h3>
+    <ol class="flow-list">
+      <li><strong>Step A: PR 提取</strong> — <code>extract_prs.py --since 2025-01-01</code> → pr_defects.json（含 body/labels/reviews/files/merge_commit）</li>
+      <li><strong>Step B: 写入 DB + 批次准备</strong> — <code>seed_defect_db.py --from-prs --agent</code> → defect_db.json + pending_agent_batch.json</li>
+      <li><strong>Step C: Agent 语义分类</strong> — Claude 读取 pending_agent_batch.json，调用 Workflow 工具进行 pipeline(pr_batches, classify, verify)</li>
+      <li><strong>Step D: 合并结果</strong> — <code>apply_agent_results.py</code> 将 Agent 产出写入 defect_db.json</li>
+      <li><strong>Step E: Agent Audit</strong> — <code>audit_sample.py --all --split 15</code>，并行 spawn Audit Agent → 主 Agent 分组确认 → 应用修正</li>
+      <li><strong>Step F (可选): 一致性检查</strong> — <code>consistency_check.py</code></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Sub-workflow 2: update — 增量更新</h3>
+    <ol class="flow-list">
+      <li><strong>Step A: 扫描 + 写入 + 批次</strong> — <code>append_daily.py --agent</code>，gh search prs merged:>={last_scan_at} + label:npu/ascend，四维校验后写入 DB</li>
+      <li><strong>Step B: Agent 分类</strong> — 同 init Step C</li>
+      <li><strong>Step C: 合并</strong> — <code>apply_agent_results.py</code></li>
+      <li><strong>Step D (可选): 一致性检查</strong></li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>Sub-workflow 3: maintain — 质量维护</h3>
+    <ol class="flow-list">
+      <li><strong>Step A: 完整性检查</strong> — <code>consistency_check.py</code>（必填字段、格式、枚举、值域、孤儿 commit）</li>
+      <li><strong>Step B: Agent Audit</strong> — 日常抽样 ~30 条（5 categories × 2 bands × 3 + compatibility 双倍 + needs_review），并行 spawn Audit Agent（7-8 个）→ 主 Agent 分组确认（A/B/C/D 四组）</li>
+      <li><strong>Step C: 应用修正</strong> — <code>apply_agent_results.py --input audit_report.json</code></li>
+      <li><strong>Step D: 删除非 NPU 缺陷</strong> — 主 Agent 从 DB 中移除 action=delete 的条目</li>
+      <li><strong>Step E: 审计计数 + 重检</strong> — <code>audit_finalize.py</code> + <code>consistency_check.py</code></li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="extraction">
+  <h2 class="section-title"><span class="icon">🔍</span> PR 提取引擎</h2>
+
+  <div class="card">
+    <h3>提取流程</h3>
+    <ol class="flow-list">
+      <li><strong>Label 搜索</strong> — gh search prs label:npu + label:ascend（去重）</li>
+      <li><strong>关键词标题搜索</strong> — "NPU"+"fix"、"Ascend"+"fix"、"CANN"+"fix" 等（补充无标签 PR）</li>
+      <li><strong>Fallback: git log + PR 关联</strong> — 对无 PR 的 commit，通过 gh search prs sha:{} 反查</li>
+      <li><strong>获取完整数据</strong> — PR body、files、labels、reviews、merge_commit，并执行 <code>is_genuinely_npu_defect()</code> 校验</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h3>四维 NPU 校验 — is_genuinely_npu_defect()</h3>
+    <p>每条 PR 必须满足以下至少一项才算真正的 NPU 缺陷：</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>维度</th><th>检查内容</th></tr>
+        <tr><td>1. Label</td><td>labels 中含 "npu" 或 "ascend"</td></tr>
+        <tr><td>2. Title tag</td><td>标题含 [NPU] / [Ascend] / [npu] / [ascend]</td></tr>
+        <tr><td>3. File path</td><td>文件路径含 "npu" 或 "ascend"（如 hardware_backend/npu/）</td></tr>
+        <tr><td>4. Body discussion</td><td>PR 正文中含实质性 NPU 讨论（剥离 Accuracy/Speed Tests 样板后匹配）</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="decision">
+    <strong>⚠ 提取过滤器（在源端跳过）：</strong>
+    Revert PR（title 以 "Revert" 开头）· 纯文档（所有文件在 docs/ 或 .md/.rst/.txt）· 非产品代码（无文件在 python/、sgl-kernel/、sgl-router/）
+  </div>
+
+  <div class="card" style="margin-top:1rem;">
+    <h3>Word-Boundary 正则（误报预防）</h3>
+    <pre class="code-block"># ✅ 正确 — 使用 \b 词边界
+\bnpu\b    # 匹配 "npu" 但不匹配 "input" (i-n-p-u-t), "nonpublic", "unplug"
+\bcann\b   # 匹配 "cann" 但不匹配 "cannot", "scanning", "scanner"
+\bascend\b # 不匹配样板启动命令中的 "ascend"
+
+# 已知误报来源：
+# "--device npu --attention-backend ascend" 在 PR 的 "Accuracy Tests" 章节中
+# 是样板文本，不代表实质性 NPU 讨论。已在 body 检查中剥离。</pre>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="classification">
+  <h2 class="section-title"><span class="icon">🤖</span> Agent 语义分类</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>AGENT_PR_PROMPT</h3>
+      <p><strong>输入：</strong>PR title、body（2000 chars）、labels、review comments、linked issues、files changed</p>
+      <p><strong>置信度：</strong>0.80-0.95（PR 数据丰富）</p>
+      <p><strong>使用场景：</strong>所有 source=pr 的缺陷</p>
+    </div>
+    <div class="card">
+      <h3>AGENT_COMMIT_PROMPT</h3>
+      <p><strong>输入：</strong>commit SHA、message、files changed、diff stats</p>
+      <p><strong>置信度：</strong>0.50-0.70 上限（数据有限）</p>
+      <p><strong>使用场景：</strong>仅有 commit 数据无 PR 的缺陷，强制 needs_review=true</p>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Workflow 执行模式</h3>
+    <pre class="code-block">pipeline(pr_batches, classify, verify)
+  ├─ classify: 15 defects/batch，Agent 读 batch JSON → 输出分类
+  └─ verify:   对 confidence &lt; 0.7 的条目做 adversarial verify
+                (spawn 独立 Agent 尝试驳斥分类)
+
+agent() for commit_batch — 单次调用，强制 needs_review: true
+
+Output → agent_results.json → apply_agent_results.py → defect_db.json</pre>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="audit">
+  <h2 class="section-title"><span class="icon">🛡️</span> 质量审计体系</h2>
+
+  <div class="card">
+    <h3>抽样策略</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>优先级</th><th>策略</th><th>数量</th></tr>
+        <tr><td style="color:var(--danger)">P0</td><td>所有 needs_review 条目</td><td>不计入限额</td></tr>
+        <tr><td>P1</td><td>每类 audit_count 最低的 N 条（低 confidence 优先）</td><td>5 × N</td></tr>
+        <tr><td>P2</td><td>每类 audit_count 最低的 N 条（高 confidence 优先）</td><td>5 × N</td></tr>
+        <tr><td>P3</td><td>compatibility 双倍采样（已知 catch-all 类别）</td><td>+N</td></tr>
+      </table>
+    </div>
+    <p style="margin-top:.8rem;color:var(--muted);">
+      日常: --sample-size 3 → ~30 条（5×3×2 + 3 + needs_review）<br>
+      全量: --all --split 15（首次分类后 + 每月建议）
+    </p>
+  </div>
+
+  <div class="card">
+    <h3>Audit Agent 审计范围</h3>
+    <p>仅审计 <strong>5 个 Agent 产出字段</strong>（category、severity、root_cause、rationale、confidence），脚本字段不审。</p>
+    <p style="margin-top:.5rem;">还检查 <strong>is_npu_related</strong>：该缺陷是否真的与 Ascend NPU/CANN/HCCL 相关。</p>
+  </div>
+
+  <div class="card">
+    <h3>主 Agent 分组确认策略</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>组别</th><th>变更内容</th><th>确认方式</th><th>原因</th></tr>
+        <tr><td style="color:var(--danger)">A 组</td><td>category 变更</td><td>逐条确认</td><td>影响最大，category 决定 severity 等级和下游分析</td></tr>
+        <tr><td style="color:var(--warn)">B 组</td><td>root_cause / rationale 重写</td><td>批量采纳</td><td>文字优化，审核价值低于 category</td></tr>
+        <tr><td style="color:var(--accent2)">C 组</td><td>severity / confidence 微调</td><td>批量采纳</td><td>数值调整，通常合理</td></tr>
+        <tr><td style="color:var(--purple)">D 组</td><td>is_not_npu=true</td><td>主 Agent 判断</td><td>升级为 delete 还是保留 needs_review</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>争议解决机制（Step 3.5）</h3>
+    <p>对 A 组中存疑的 category 变更：</p>
+    <ol style="padding-left:1.5rem; color:var(--muted); margin-top:.5rem;">
+      <li>Spawn 1 个独立 Audit agent（不告知争议内容，只给 PR body + category 定义）</li>
+      <li>比较：原始分类 vs 第一次审计建议 vs 独立审计意见</li>
+      <li>主 Agent 做最终判决（基于论据质量，不做简单投票）</li>
+    </ol>
+  </div>
+
+  <div class="decision">
+    <strong>⚠ 关键规则：</strong>
+    bug_id 必须原样抄写不得改动（曾出现 2025→2026 抄错）·
+    action=accept 时 changes 为空，只写 evidence ·
+    action=change 时 changes 包含所有修正字段 ·
+    action=delete 需 ALL 4 条件满足才确认删除
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="scripts">
+  <h2 class="section-title"><span class="icon">📜</span> 脚本清单</h2>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>脚本</th><th>角色</th><th>使用的子工作流</th></tr>
+      <tr>
+        <td><code>extract_prs.py</code></td>
+        <td>PR-first 缺陷提取：Label 搜索 → 关键词搜索 → git log fallback → 获取完整 PR 数据 → NPU 校验</td>
+        <td>init</td>
+      </tr>
+      <tr>
+        <td><code>seed_defect_db.py</code></td>
+        <td>从 pr_defects.json 创建 seed DB + 自动准备 Agent 批次</td>
+        <td>init</td>
+      </tr>
+      <tr>
+        <td><code>append_daily.py</code></td>
+        <td>PR-first 增量追加：scan 新 PR → validate NPU → dedup + append</td>
+        <td>update</td>
+      </tr>
+      <tr>
+        <td><code>classify_pr.py</code></td>
+        <td>将 PR 缺陷格式化为 Agent 分类批次（15/批），渲染 AGENT_PR_PROMPT</td>
+        <td>init, update, maintain</td>
+      </tr>
+      <tr>
+        <td><code>classify_commit.py</code></td>
+        <td>将 commit-only 缺陷格式化为 Agent 分类批次，渲染 AGENT_COMMIT_PROMPT</td>
+        <td>init, maintain</td>
+      </tr>
+      <tr>
+        <td><code>apply_agent_results.py</code></td>
+        <td>Schema 验证 + 合并 Agent 分类结果到 defect_db；自动转换 audit findings → classification</td>
+        <td>所有</td>
+      </tr>
+      <tr>
+        <td><code>consistency_check.py</code></td>
+        <td>数据完整性检查：必填字段、格式、枚举、值域、重复、孤儿 commit、NPU 信号</td>
+        <td>maintain</td>
+      </tr>
+      <tr>
+        <td><code>audit_sample.py</code></td>
+        <td>分层抽样：优先 needs_review，按 audit_count ASC 排序，每类取低+高 confidence 各 N 条</td>
+        <td>maintain</td>
+      </tr>
+      <tr>
+        <td><code>audit_finalize.py</code></td>
+        <td>审计计数 +1：扫描所有 audit_batch_*_result.json，增量所有已审计缺陷的 audit_count</td>
+        <td>maintain</td>
+      </tr>
+      <tr>
+        <td><code>status_check.py</code></td>
+        <td>只读状态快照：总量、needs_review、类别分布、confidence 分桶、版本分布</td>
+        <td>status</td>
+      </tr>
+      <tr>
+        <td><code>prompts.py</code></td>
+        <td>Agent prompt 模板（AGENT_PR_PROMPT、AGENT_COMMIT_PROMPT、NEAR_MISS_PROMPT）</td>
+        <td>所有</td>
+      </tr>
+    </table>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="design-decisions">
+  <h2 class="section-title"><span class="icon">💡</span> 关键设计决策</h2>
+
+  <div class="card-grid">
+    <div class="card">
+      <h3>1. PR-first 而非 commit-first</h3>
+      <p>从 commit 消息提取信息量严重不足。PR 提供 body、reviews、labels、files 等多维度数据，
+      使 Agent 能做出高质量分类（confidence 0.8-0.95 vs 0.5-0.7）。100% PR body 覆盖。</p>
+    </div>
+
+    <div class="card">
+      <h3>2. Word-boundary 正则防止误匹配</h3>
+      <p>"npu" 是 "input" 的子串，"cann" 是 "cannot" 的子串。\b 词边界防止这类误匹配。
+      这是从实际误报中总结出的关键修复。</p>
+    </div>
+
+    <div class="card">
+      <h3>3. 四维 NPU 校验而非单一维度</h3>
+      <p>仅靠 label 校验会漏掉无标签 PR；仅靠 body 匹配容易匹配到样板文本。
+      四维联合校验（label + title tag + file path + body）平衡召回与精确。</p>
+    </div>
+
+    <div class="card">
+      <h3>4. 分层审计而非随机抽样</h3>
+      <p>按 audit_count ASC 排序确保每个缺陷最终都被审计到（审计最少的优先）。
+      compatibility 双倍采样因为它已知是 catch-all 类别。低 confidence 优先因为更需要验证。</p>
+    </div>
+
+    <div class="card">
+      <h3>5. 分组确认而非逐条确认</h3>
+      <p>A 组（category 变更）逐条确认因为影响最大；B/C 组批量采纳节省人力。
+      这平衡了质量保障与效率。</p>
+    </div>
+
+    <div class="card">
+      <h3>6. adversarial verify + 争议解决</h3>
+      <p>对 confidence &lt; 0.7 的条目 spawn 独立 Agent 尝试驳斥。对 category 变更存疑时
+      spawn 独立盲审 Agent，主 Agent 基于论据质量判决而非简单投票。</p>
+    </div>
+
+    <div class="card">
+      <h3>7. PR body 样板剥离</h3>
+      <p>PR 的 "Accuracy Tests" 和 "Speed Tests" 章节中的 --device npu 启动命令是样板，
+      不代表实质性 NPU 讨论。在 body 检查前剥离这些章节。</p>
+    </div>
+
+    <div class="card">
+      <h3>8. 双路径 Agent 分类</h3>
+      <p>PR 数据走深度分析（AGENT_PR_PROMPT，高置信度），commit-only 走浅层分析
+      （AGENT_COMMIT_PROMPT，低置信度 + 强制 needs_review）。避免对贫数据过度自信。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="interaction">
+  <h2 class="section-title"><span class="icon">🔗</span> 交互模式</h2>
+
+  <div class="card">
+    <h3>触发方式</h3>
+    <pre class="code-block">/npu-defect-mine init            # 首次建库
+/npu-defect-mine update          # 增量更新
+/npu-defect-mine maintain        # 质量维护（日常抽样 ~20 条）
+/npu-defect-mine maintain --full # 质量维护（全量审计）
+/npu-defect-mine status          # 查看状态
+
+# 或自然语言触发器：
+"初始化缺陷库"、"更新缺陷数据"、"维护缺陷库"、"检查缺陷库状态"</pre>
+  </div>
+
+  <div class="card">
+    <h3>Claude + Python 分工</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>职责</th><th>承担者</th></tr>
+        <tr><td>GitHub API 交互、数据提取、去重</td><td style="color:var(--accent2)">Python 脚本</td></tr>
+        <tr><td>NPU 校验、枚举验证、格式检查</td><td style="color:var(--accent2)">Python 脚本</td></tr>
+        <tr><td>语义分类（category/severity/root_cause）</td><td style="color:var(--purple)">Claude Agent (Workflow)</td></tr>
+        <tr><td>质量审计（挑战分类、修正建议）</td><td style="color:var(--purple)">Claude Agent (Audit)</td></tr>
+        <tr><td>审计结果汇总、分组确认、争议判决</td><td style="color:var(--purple)">Claude 主 Agent</td></tr>
+        <tr><td>Schema 验证 + 结果合并入库</td><td style="color:var(--accent2)">Python 脚本</td></tr>
+        <tr><td>数据库状态查询</td><td style="color:var(--accent2)">Python 脚本</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>降级方案（无 Claude Code Workflow）</h3>
+    <pre class="code-block"># 使用启发式关键词匹配（confidence 0.4-0.6）
+python .claude/skills/npu-defect-mine/scripts/seed_defect_db.py      # 无 --agent
+python .claude/skills/npu-defect-mine/scripts/append_daily.py        # 无 --agent (category=unknown)</pre>
+  </div>
+
+  <div class="card">
+    <h3>数据流图</h3>
+    <pre class="code-block" style="line-height:1.8;">
+GitHub API ──→ extract_prs.py ──→ pr_defects.json
+                                       │
+                     ┌─────────────────▼─────────────────────┐
+                     │        seed_defect_db.py               │
+                     │  ┌──────────────────────────────────┐  │
+                     │  │     classify_pr.py               │  │
+                     │  │   classify_commit.py             │  │
+                     │  └──────────────┬───────────────────┘  │
+                     │                 ▼                      │
+                     │     pending_agent_batch.json           │
+                     └─────────────────┬─────────────────────┘
+                                       │
+                              Claude Workflow
+                              (pipeline classify + verify)
+                                       │
+                                       ▼
+                              agent_results.json
+                                       │
+                         apply_agent_results.py
+                                       │
+                                       ▼
+         ┌─────────────────── defect_db.json ────────────────────┐
+         │                          │                             │
+    consistency_check.py    audit_sample.py              status_check.py
+         │                          │
+         │                   audit_batch_*.json
+         │                          │
+         │                   Claude Audit Agents
+         │                          │
+         │                   audit_report.json ──→ apply ──→ audit_finalize.py
+         │
+    issues report</pre>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<section id="key-files">
+  <h2 class="section-title"><span class="icon">📂</span> 关键文件路径</h2>
+
+  <div class="table-wrap">
+    <table>
+      <tr><th>文件</th><th>路径</th></tr>
+      <tr><td>核心数据库</td><td><code>.sglang-risk/db/defect_db.json</code></td></tr>
+      <tr><td>JSON Schema</td><td><code>.claude/skills/npu-defect-mine/scripts/defect_db_schema.json</code></td></tr>
+      <tr><td>共享工具库</td><td><code>.claude/skills/npu-defect-mine/scripts/common.py</code></td></tr>
+      <tr><td>Agent prompt 模板</td><td><code>.claude/skills/npu-defect-mine/scripts/prompts.py</code></td></tr>
+      <tr><td>Audit prompt 规范</td><td><code>.claude/skills/npu-defect-mine/scripts/audit_prompt.txt</code></td></tr>
+      <tr><td>PR 提取输出</td><td><code>.sglang-risk/db/pr_defects.json</code></td></tr>
+      <tr><td>Agent 批次文件</td><td><code>.sglang-risk/db/pending_agent_batch.json</code></td></tr>
+      <tr><td>Agent 结果文件</td><td><code>.sglang-risk/db/agent_results.json</code></td></tr>
+      <tr><td>审计批次目录</td><td><code>.sglang-risk/db/audit_batches/</code></td></tr>
+      <tr><td>审计报告</td><td><code>.sglang-risk/db/audit_report.json</code></td></tr>
+    </table>
+  </div>
+</section>
+
+<div class="footer">
+  npu-defect-mine design document — generated 2026-06-04 — part of the sglang NPU risk testing framework
+</div>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,1072 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGLang NPU 平台测试质量分析与 Agent 辅助方案设计</title>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #22262f;
+    --border: #2a2e3a;
+    --text: #e1e4eb;
+    --text2: #9398a5;
+    --accent: #4da6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #a371f7;
+    --orange: #f0883e;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+  }
+  .container { max-width: 1100px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: linear-gradient(180deg, #161b22 0%, var(--bg) 100%);
+    border-bottom: 1px solid var(--border);
+  }
+  header h1 {
+    font-size: 2.2em;
+    font-weight: 700;
+    background: linear-gradient(135deg, #58a6ff, #a371f7);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 12px;
+  }
+  header .subtitle { color: var(--text2); font-size: 1.05em; }
+  header .meta { margin-top: 20px; display: flex; gap: 20px; justify-content: center; flex-wrap: wrap; }
+  header .meta span {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 14px;
+    font-size: .85em;
+    color: var(--text2);
+  }
+
+  /* Section */
+  section { margin: 48px 0; }
+  h2 {
+    font-size: 1.55em;
+    font-weight: 650;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    background: var(--accent);
+    color: #fff;
+    font-size: .7em;
+    width: 28px; height: 28px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 6px;
+    flex-shrink: 0;
+  }
+  h3 {
+    font-size: 1.18em;
+    font-weight: 600;
+    margin: 28px 0 12px;
+    color: #c8d1d9;
+  }
+  p { margin-bottom: 12px; color: var(--text2); }
+  strong { color: var(--text); }
+
+  /* Cards */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin: 20px 0; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+  }
+  .stat-card .val { font-size: 2em; font-weight: 700; }
+  .stat-card .lbl { font-size: .82em; color: var(--text2); margin-top: 4px; }
+  .stat-card.accent .val { color: var(--accent); }
+  .stat-card.green .val { color: var(--green); }
+  .stat-card.yellow .val { color: var(--yellow); }
+  .stat-card.red .val { color: var(--red); }
+  .stat-card.purple .val { color: var(--purple); }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: .9em; }
+  th, td { padding: 10px 14px; text-align: left; }
+  th { background: var(--surface); font-weight: 600; color: var(--text); white-space: nowrap; border-bottom: 2px solid var(--border); }
+  td { border-bottom: 1px solid var(--border); color: var(--text2); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.02); }
+
+  /* Badges */
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 10px; font-size: .78em; font-weight: 600; }
+  .badge.crit { background: rgba(248,81,73,.15); color: var(--red); }
+  .badge.high { background: rgba(240,136,62,.15); color: var(--orange); }
+  .badge.med { background: rgba(210,153,34,.15); color: var(--yellow); }
+  .badge.low { background: rgba(63,185,80,.15); color: var(--green); }
+
+  /* Architecture diagram */
+  .arch { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 24px; margin: 16px 0; }
+  .arch svg { width: 100%; }
+  .arch .node { fill: var(--surface2); stroke: var(--border); stroke-width: 1.5; }
+  .arch .node.accent { stroke: var(--accent); }
+  .arch .label { fill: var(--text); font-size: 12px; text-anchor: middle; }
+  .arch .sublabel { fill: var(--text2); font-size: 10px; text-anchor: middle; }
+  .arch .edge { stroke: var(--border); stroke-width: 1.5; fill: none; }
+  .arch .edge.accent { stroke: var(--accent); }
+
+  /* Phase boxes */
+  .phase-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin: 16px 0; }
+  .phase-card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px; }
+  .phase-card h4 { font-size: 1em; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .phase-card .dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+  .phase-card .dot.p1 { background: var(--accent); }
+  .phase-card .dot.p2 { background: var(--green); }
+  .phase-card .dot.p3 { background: var(--yellow); }
+  .phase-card .dot.p4 { background: var(--purple); }
+  .phase-card .dot.p5 { background: var(--orange); }
+  .phase-card ul { list-style: none; font-size: .85em; color: var(--text2); }
+  .phase-card ul li { padding: 3px 0; }
+  .phase-card ul li::before { content: "→ "; color: var(--accent); }
+
+  /* Agent table */
+  .agent-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; margin: 12px 0; }
+  .agent-item { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; font-size: .84em; }
+  .agent-item .agent-id { font-weight: 700; color: var(--text); }
+  .agent-item .agent-scope { color: var(--text2); margin-top: 2px; }
+
+  /* Code block */
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; font-size: .82em; line-height: 1.5; }
+  code { font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', monospace; color: #c9d1d9; }
+
+  /* Summary box */
+  .callout {
+    background: rgba(77,166,255,.08);
+    border: 1px solid rgba(77,166,255,.2);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .callout h4 { margin-bottom: 8px; color: var(--accent); }
+  .callout.warn { background: rgba(240,136,62,.08); border-color: rgba(240,136,62,.2); }
+  .callout.warn h4 { color: var(--orange); }
+  .callout p { color: var(--text); margin-bottom: 6px; }
+
+  /* Feature matrix */
+  .matrix td:first-child { font-weight: 600; color: var(--text); white-space: nowrap; }
+  .matrix td:nth-child(3) { text-align: center; }
+  .matrix td:nth-child(4) { text-align: center; }
+  .matrix td:nth-child(5) { text-align: center; }
+  .matrix td:nth-child(6) { text-align: center; }
+
+  /* Footer */
+  footer { text-align: center; padding: 40px 24px; color: var(--text2); font-size: .82em; border-top: 1px solid var(--border); margin-top: 60px; }
+
+  /* TOC */
+  .toc { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 20px 24px; margin: 20px 0; }
+  .toc ol { margin-left: 20px; color: var(--text2); }
+  .toc a { color: var(--accent); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  .risk-table td:first-child { font-weight: 600; color: var(--text); }
+  .risk-table td:nth-child(2) { text-align: center; }
+  .risk-table td:nth-child(3) { text-align: center; }
+
+  @media (max-width: 768px) {
+    .stat-grid { grid-template-columns: repeat(2, 1fr); }
+    .phase-grid { grid-template-columns: 1fr; }
+    header h1 { font-size: 1.5em; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SGLang NPU 平台测试质量分析<br>与 Agent 辅助方案设计</h1>
+  <p class="subtitle">基于代码库全量扫描的测试覆盖审计与自动化改进方案</p>
+  <div class="meta">
+    <span>📅 2026-05-30</span>
+    <span>🔬 扫描: 108 测试文件 + 105 源文件</span>
+    <span>💻 平台: Ascend NPU (910B / A3)</span>
+    <span>🤖 方案: Workflow + Multi-Agent</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== TOC ===== -->
+<div class="toc">
+  <h3 style="margin-top:0;">📋 目录</h3>
+  <ol>
+    <li><a href="#s1">现状全景扫描 — NPU 特性分类与测试统计</a></li>
+    <li><a href="#s2">差距分析 — 特性×测试 覆盖矩阵</a></li>
+    <li><a href="#s3">测试质量维度分析</a></li>
+    <li><a href="#s4">Agent 辅助方案架构设计</a></li>
+    <li><a href="#s5">Workflow 脚本设计</a></li>
+    <li><a href="#s6">可行性评估与风险</a></li>
+    <li><a href="#s7">落地路线图</a></li>
+  </ol>
+</div>
+
+<!-- ===== Section 1: 现状 ===== -->
+<section id="s1">
+<h2><span class="num">1</span>现状全景扫描</h2>
+
+<h3>1.1 核心数据</h3>
+<div class="stat-grid">
+  <div class="stat-card accent">
+    <div class="val">18</div>
+    <div class="lbl">NPU 独立特性</div>
+  </div>
+  <div class="stat-card green">
+    <div class="val">108</div>
+    <div class="lbl">CI 注册测试文件</div>
+  </div>
+  <div class="stat-card yellow">
+    <div class="val">142</div>
+    <div class="lbl">测试方法总数</div>
+  </div>
+  <div class="stat-card red">
+    <div class="val">0</div>
+    <div class="lbl">单元测试</div>
+  </div>
+  <div class="stat-card purple">
+    <div class="val">105+</div>
+    <div class="lbl">is_npu() 分支文件</div>
+  </div>
+  <div class="stat-card">
+    <div class="val">100%</div>
+    <div class="lbl">端到端测试占比</div>
+  </div>
+</div>
+
+<h3>1.2 NPU 特性分类</h3>
+<p>经过全代码库扫描，将 NPU 平台特性分为 <strong>6 大领域、18 个子特性</strong>：</p>
+
+<div class="tbl-wrap">
+<table>
+  <tr><th>领域</th><th>子特性</th><th>核心代码位置</th></tr>
+  <tr>
+    <td rowspan="4"><strong>推理引擎</strong></td>
+    <td>TP1/2/4 基础推理</td>
+    <td><code>hardware_backend/npu/graph_runner/</code></td>
+  </tr>
+  <tr>
+    <td>Piecewise CUDA Graph Prefill</td>
+    <td><code>compilation/npu_piecewise_backend.py</code></td>
+  </tr>
+  <tr>
+    <td>dLLM (扩散 LLM)</td>
+    <td><code>models/llada2.py</code></td>
+  </tr>
+  <tr>
+    <td>模型 Offloading</td>
+    <td><code>server_args.py</code> 相关配置</td>
+  </tr>
+  <tr>
+    <td rowspan="4"><strong>分布式</strong></td>
+    <td>DeepEP Expert Parallelism</td>
+    <td><code>test_npu_deepep*.py</code> (6 文件)</td>
+  </tr>
+  <tr>
+    <td>Ascend FuseEP (Fused EP MoE)</td>
+    <td><code>layers/moe/token_dispatcher/fuseep.py</code></td>
+  </tr>
+  <tr>
+    <td>NPU Disaggregation (PD 分离)</td>
+    <td><code>disaggregation/ascend/</code> (3 文件)</td>
+  </tr>
+  <tr>
+    <td>Dual-Stream MoE</td>
+    <td><code>environ.py</code> — <code>SGLANG_NPU_USE_MULTI_STREAM</code></td>
+  </tr>
+  <tr>
+    <td rowspan="3"><strong>量化</strong></td>
+    <td>W8A8 / W4A4 / W4A8 / MXFP8</td>
+    <td><code>hardware_backend/npu/quantization/</code></td>
+  </tr>
+  <tr>
+    <td>GPTQ / AutoRound / AWQ</td>
+    <td><code>quantization/awq_kernels.py</code></td>
+  </tr>
+  <tr>
+    <td>GGUF / Compressed-Tensors</td>
+    <td><code>layers/quantization/gguf.py</code></td>
+  </tr>
+  <tr>
+    <td rowspan="3"><strong>Attention</strong></td>
+    <td>Ascend Attention Backend (MHA/MLA)</td>
+    <td><code>attention/ascend_backend.py</code> (2253 行)</td>
+  </tr>
+  <tr>
+    <td>GDN / Hybrid Linear / Mamba</td>
+    <td><code>attention/ascend_gdn_backend.py</code></td>
+  </tr>
+  <tr>
+    <td>Fused MLA Preprocess (MLAPO)</td>
+    <td><code>attention/mla_preprocess.py</code></td>
+  </tr>
+  <tr>
+    <td rowspan="4"><strong>高级特性</strong></td>
+    <td>HiCache (Radix / Hierarchical)</td>
+    <td><code>--hicache-io-backend kernel_ascend</code></td>
+  </tr>
+  <tr>
+    <td>Speculative Decoding (EAGLE3)</td>
+    <td><code>graph_runner/eagle_draft_npu_graph_runner.py</code></td>
+  </tr>
+  <tr>
+    <td>LoRA Ascend Backend</td>
+    <td><code>lora/backend/ascend_backend.py</code></td>
+  </tr>
+  <tr>
+    <td>VLM / Multimodal</td>
+    <td><code>graph_runner/vit_npu_graph_runner.py</code></td>
+  </tr>
+</table>
+</div>
+
+<h3>1.3 测试模式分析</h3>
+<p>当前 NPU 测试几乎全部采用以下三种模式之一：</p>
+<div class="tbl-wrap">
+<table>
+  <tr><th>模式</th><th>占比</th><th>特征</th><th>质量评价</th></tr>
+  <tr>
+    <td><strong>模式A: GSM8K 精度+吞吐</strong></td>
+    <td>~80%</td>
+    <td>启动服务器 → 跑 GSM8K 200题 → <code>assertGreaterEqual(accuracy, 0.x)</code></td>
+    <td><span class="badge low">基础冒烟</span> 可发现严重 breakage，无法定位根因</td>
+  </tr>
+  <tr>
+    <td><strong>模式B: 功能正确性对比</strong></td>
+    <td>~15%</td>
+    <td>SGLang 输出 vs HF 参考输出，逐 token 对比 + 数值容差</td>
+    <td><span class="badge med">较好</span> 有明确正确性 oracle</td>
+  </tr>
+  <tr>
+    <td><strong>模式C: 基础功能验证</strong></td>
+    <td>~5%</td>
+    <td>单次请求 + 简单吞吐断言</td>
+    <td><span class="badge high">弱</span> 仅验证不崩溃</td>
+  </tr>
+</table>
+</div>
+
+<h3>1.4 CI 基础设施</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>Suite</th><th>硬件</th><th>触发方式</th><th>分区数</th></tr>
+  <tr><td><code>stage-b-test-1-npu-a2</code></td><td>1× Ascend 910B</td><td>PR</td><td>2</td></tr>
+  <tr><td><code>stage-b-test-2-npu-a2</code></td><td>2× Ascend 910B</td><td>PR</td><td>2</td></tr>
+  <tr><td><code>stage-b-test-4-npu-a3</code></td><td>4× Ascend A3</td><td>PR</td><td>1</td></tr>
+  <tr><td><code>stage-b-test-16-npu-a3</code></td><td>16× Ascend A3</td><td>PR</td><td>1</td></tr>
+  <tr><td><code>nightly-*-npu-a3</code></td><td>1/2/4/8/16× A3</td><td>定时</td><td>1-2</td></tr>
+  <tr><td><code>multimodal-gen-*-npu-a3</code></td><td>1/2/8× A3</td><td>PR (路径过滤)</td><td>1</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ===== Section 2: 差距分析 ===== -->
+<section id="s2">
+<h2><span class="num">2</span>差距分析 — 特性×测试 覆盖矩阵</h2>
+
+<h3>2.1 高缺口特性</h3>
+<div class="tbl-wrap">
+<table class="matrix">
+  <tr>
+    <th>特性</th><th>代码复杂度</th><th>现有测试</th><th>单元测试</th><th>正确性测试</th><th>缺口等级</th>
+  </tr>
+  <tr>
+    <td>Ascend FuseEP</td>
+    <td>高</td>
+    <td><span class="badge crit">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge crit">🔴 Critical</span></td>
+  </tr>
+  <tr>
+    <td>NPU Disaggregation (PD分离)</td>
+    <td>高</td>
+    <td><span class="badge crit">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge crit">🔴 Critical</span></td>
+  </tr>
+  <tr>
+    <td>Dual-Stream MoE</td>
+    <td>中</td>
+    <td><span class="badge crit">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge crit">🔴 Critical</span></td>
+  </tr>
+  <tr>
+    <td>LoRA Ascend Backend</td>
+    <td>中</td>
+    <td><span class="badge crit">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge crit">🔴 Critical</span></td>
+  </tr>
+  <tr>
+    <td>GDN / Hybrid Linear Attention</td>
+    <td>中</td>
+    <td><span class="badge high">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge high">🟠 High</span></td>
+  </tr>
+  <tr>
+    <td>SGL-Kernel NPU</td>
+    <td>高</td>
+    <td><span class="badge high">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge high">🟠 High</span></td>
+  </tr>
+  <tr>
+    <td>Mamba / NSA Attention</td>
+    <td>中</td>
+    <td><span class="badge high">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge high">🟠 High</span></td>
+  </tr>
+  <tr>
+    <td>Structured / Constrained Output</td>
+    <td>低</td>
+    <td><span class="badge high">0</span></td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge high">🟠 High</span></td>
+  </tr>
+  <tr>
+    <td>Piecewise Graph Prefill</td>
+    <td>中</td>
+    <td>1 (E2E)</td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge med">🟡 Medium</span></td>
+  </tr>
+  <tr>
+    <td>dLLM</td>
+    <td>低</td>
+    <td>1 (E2E)</td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge med">🟡 Medium</span></td>
+  </tr>
+  <tr>
+    <td>Speculative Decoding</td>
+    <td>高</td>
+    <td>1 (E2E)</td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge med">🟡 Medium</span></td>
+  </tr>
+  <tr>
+    <td>MLA Preprocess (MLAPO)</td>
+    <td>中</td>
+    <td>2 (E2E)</td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge med">🟡 Medium</span></td>
+  </tr>
+  <tr>
+    <td>Attention CP</td>
+    <td>低</td>
+    <td>1 (E2E)</td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge med">🟡 Medium</span></td>
+  </tr>
+  <tr>
+    <td>Communication Compression</td>
+    <td>低</td>
+    <td>1 (E2E)</td>
+    <td>❌</td>
+    <td>❌</td>
+    <td><span class="badge med">🟡 Medium</span></td>
+  </tr>
+  <tr>
+    <td>基础 TP 推理</td>
+    <td>—</td>
+    <td>50+ (E2E)</td>
+    <td>❌</td>
+    <td>⚠️ 少数</td>
+    <td><span class="badge low">🟢 Low</span></td>
+  </tr>
+  <tr>
+    <td>HiCache</td>
+    <td>中</td>
+    <td>7 (E2E)</td>
+    <td>❌</td>
+    <td>⚠️ 部分</td>
+    <td><span class="badge low">🟢 Low</span></td>
+  </tr>
+  <tr>
+    <td>量化 (W8A8/W4A4/AWQ/GPTQ)</td>
+    <td>高</td>
+    <td>8 (E2E)</td>
+    <td>❌</td>
+    <td>⚠️ 部分</td>
+    <td><span class="badge low">🟢 Low</span></td>
+  </tr>
+  <tr>
+    <td>VLM / Multimodal</td>
+    <td>低</td>
+    <td>17 (E2E)</td>
+    <td>❌</td>
+    <td>⚠️ 部分</td>
+    <td><span class="badge low">🟢 Low</span></td>
+  </tr>
+</table>
+</div>
+
+<h3>2.2 缺口统计</h3>
+<div class="stat-grid">
+  <div class="stat-card red"><div class="val">4</div><div class="lbl">🔴 Critical 缺口</div></div>
+  <div class="stat-card" style="border-color: var(--orange);"><div class="val" style="color:var(--orange);">4</div><div class="lbl">🟠 High 缺口</div></div>
+  <div class="stat-card yellow"><div class="val">6</div><div class="lbl">🟡 Medium 缺口</div></div>
+  <div class="stat-card green"><div class="val">4</div><div class="lbl">🟢 覆盖充分</div></div>
+</div>
+</section>
+
+<!-- ===== Section 3: 测试质量维度 ===== -->
+<section id="s3">
+<h2><span class="num">3</span>测试质量维度分析</h2>
+
+<div class="tbl-wrap">
+<table>
+  <tr><th>维度</th><th>现状</th><th>缺口描述</th></tr>
+  <tr>
+    <td><strong>单元测试</strong></td>
+    <td><span class="badge crit">0</span></td>
+    <td>NPU kernel、attention backend、量化方法均缺乏独立 UT</td>
+  </tr>
+  <tr>
+    <td><strong>正确性测试</strong></td>
+    <td><span class="badge high">少数 (~10%)</span></td>
+    <td>大多数模型测试只有精度阈值（如 accuracy ≥ 0.3），无参考对比基准</td>
+  </tr>
+  <tr>
+    <td><strong>压力/鲁棒性测试</strong></td>
+    <td><span class="badge crit">0</span></td>
+    <td>无 OOM 恢复、并发极限、长序列极限测试</td>
+  </tr>
+  <tr>
+    <td><strong>回归测试</strong></td>
+    <td><span class="badge high">弱</span></td>
+    <td>精度阈值过宽（0.3），难以捕获精度退化</td>
+  </tr>
+  <tr>
+    <td><strong>组合测试</strong></td>
+    <td><span class="badge crit">0</span></td>
+    <td>量化×TP、HiCache×MLA、EP×量化 等交叉维度未覆盖</td>
+  </tr>
+  <tr>
+    <td><strong>错误路径测试</strong></td>
+    <td><span class="badge crit">0</span></td>
+    <td>无 negative test（错误输入、异常配置、资源耗尽）</td>
+  </tr>
+  <tr>
+    <td><strong>Mock/轻量测试</strong></td>
+    <td><span class="badge crit">0</span></td>
+    <td>无 mock attention backend、无轻量验证机制，所有测试依赖真实模型下载</td>
+  </tr>
+</table>
+</div>
+
+<div class="callout warn">
+  <h4>⚠️ 核心发现</h4>
+  <p><strong>108 个测试文件全部是端到端集成测试</strong>——每个都启动真实 SGLang 服务器、下载模型、运行评估。这种"全有或全无"的测试策略意味着：</p>
+  <p>① 反馈周期长（单测 60-400s）<br>② 依赖网络和模型可用性<br>③ 难以覆盖边界条件和错误路径<br>④ 精度退化难以检测（阈值过宽）</p>
+</div>
+</section>
+
+<!-- ===== Section 4: Agent 架构 ===== -->
+<section id="s4">
+<h2><span class="num">4</span>Agent 辅助方案架构设计</h2>
+
+<h3>4.1 整体架构</h3>
+
+<div class="arch">
+<svg viewBox="0 0 950 380" xmlns="http://www.w3.org/2000/svg">
+  <!-- Top level -->
+  <rect x="325" y="10" width="300" height="40" rx="8" class="node accent"/>
+  <text x="475" y="36" class="label" font-size="14">顶层 Workflow: npu-test-audit</text>
+
+  <!-- Edges from top -->
+  <line x1="380" y1="50" x2="150" y2="90" class="edge"/>
+  <line x1="475" y1="50" x2="475" y2="90" class="edge"/>
+  <line x1="570" y1="50" x2="800" y2="90" class="edge"/>
+
+  <!-- Phase 1 -->
+  <rect x="40" y="90" width="220" height="50" rx="6" class="node"/>
+  <text x="150" y="112" class="label">Phase 1: 特性提取</text>
+  <text x="150" y="128" class="sublabel">6 并行 Agent · 结构化输出</text>
+
+  <!-- Phase 2 -->
+  <rect x="365" y="90" width="220" height="50" rx="6" class="node"/>
+  <text x="475" y="112" class="label">Phase 2: 测试覆盖映射</text>
+  <text x="475" y="128" class="sublabel">5 并行 Agent · 结构化输出</text>
+
+  <!-- Phase 3 -->
+  <rect x="690" y="90" width="220" height="50" rx="6" class="node"/>
+  <text x="800" y="112" class="label">Phase 3: 差距分析</text>
+  <text x="800" y="128" class="sublabel">Pipeline: 检测→评级→建议</text>
+
+  <!-- Edges to Phase 3 -->
+  <line x1="260" y1="140" x2="365" y2="140" class="edge accent"/>
+  <line x1="585" y1="140" x2="690" y2="140" class="edge accent"/>
+
+  <!-- Merged arrow to Phase 4 -->
+  <line x1="475" y1="190" x2="475" y2="220" class="edge accent"/>
+
+  <!-- Phase 4 -->
+  <rect x="325" y="220" width="300" height="50" rx="6" class="node"/>
+  <text x="475" y="242" class="label">Phase 4: 综合报告</text>
+  <text x="475" y="258" class="sublabel">1 Synthesis Agent · Markdown</text>
+
+  <!-- Outputs -->
+  <line x1="475" y1="270" x2="475" y2="300" class="edge"/>
+
+  <rect x="100" y="300" width="160" height="36" rx="6" class="node" style="fill:rgba(77,166,255,.1);"/>
+  <text x="180" y="322" class="label" font-size="11">features.json</text>
+
+  <rect x="290" y="300" width="160" height="36" rx="6" class="node" style="fill:rgba(77,166,255,.1);"/>
+  <text x="370" y="322" class="label" font-size="11">tests.json</text>
+
+  <rect x="480" y="300" width="160" height="36" rx="6" class="node" style="fill:rgba(63,185,80,.1);"/>
+  <text x="560" y="322" class="label" font-size="11">gaps.json</text>
+
+  <rect x="670" y="300" width="160" height="36" rx="6" class="node" style="fill:rgba(163,113,247,.1);"/>
+  <text x="750" y="322" class="label" font-size="11">suggestions.md</text>
+</svg>
+</div>
+
+<h3>4.2 Phase 详情</h3>
+
+<div class="phase-grid">
+  <div class="phase-card">
+    <h4><span class="dot p1"></span>Phase 1: 代码特性提取</h4>
+    <ul>
+      <li>6 个并行 Agent 扫描不同目录</li>
+      <li>输出 JSON Schema 结构化数据</li>
+      <li>覆盖: 推理引擎/分布式/量化/Attention/高级特性/接口</li>
+      <li>深度阅读关键源文件以理解语义</li>
+    </ul>
+    <div style="margin-top:12px;">
+      <span class="badge low">并行执行</span>
+      <span style="color:var(--text2);font-size:.82em;margin-left:8px;">~60s</span>
+    </div>
+  </div>
+  <div class="phase-card">
+    <h4><span class="dot p2"></span>Phase 2: 测试覆盖映射</h4>
+    <ul>
+      <li>5 个并行 Agent 扫描测试目录</li>
+      <li>提取: 测试类型/断言方式/质量评分</li>
+      <li>覆盖: 全部 108 个测试文件</li>
+      <li>自动分类测试模式 (A/B/C)</li>
+    </ul>
+    <div style="margin-top:12px;">
+      <span class="badge low">并行执行</span>
+      <span style="color:var(--text2);font-size:.82em;margin-left:8px;">~60s</span>
+    </div>
+  </div>
+  <div class="phase-card">
+    <h4><span class="dot p3"></span>Phase 3: 差距分析</h4>
+    <ul>
+      <li>Pipeline 模式: 每条特性独立流经 3 stage</li>
+      <li>Stage 1: 缺口检测 (匹配特性↔测试)</li>
+      <li>Stage 2: 严重度评级 (4维度评分)</li>
+      <li>Stage 3: 建议生成 (仅 critical/high)</li>
+    </ul>
+    <div style="margin-top:12px;">
+      <span class="badge med">Pipeline</span>
+      <span style="color:var(--text2);font-size:.82em;margin-left:8px;">~90s</span>
+    </div>
+  </div>
+  <div class="phase-card">
+    <h4><span class="dot p4"></span>Phase 4: 综合报告</h4>
+    <ul>
+      <li>1 个 Synthesis Agent</li>
+      <li>整合 Phase 1-3 的所有结构化数据</li>
+      <li>生成人类可读的 Markdown 报告</li>
+      <li>含执行摘要/覆盖矩阵/建议清单/统计仪表板</li>
+    </ul>
+    <div style="margin-top:12px;">
+      <span class="badge low">单 Agent</span>
+      <span style="color:var(--text2);font-size:.82em;margin-left:8px;">~30s</span>
+    </div>
+  </div>
+</div>
+
+<h3>4.3 Agent 分工详情</h3>
+
+<div class="tbl-wrap">
+<table>
+  <tr><th>Phase</th><th>Agent</th><th>扫描范围</th><th>预计文件</th><th>输出</th></tr>
+  <tr><td rowspan="6">Phase 1<br>特性提取</td>
+    <td><span class="agent-id">Agent A</span></td>
+    <td class="agent-scope">graph_runner/ + compilation/ + model_executor/</td>
+    <td>~15</td>
+    <td rowspan="6">Feature JSON</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent B</span></td>
+    <td class="agent-scope">distributed/ + disaggregation/ascend/ + fuseep</td>
+    <td>~10</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent C</span></td>
+    <td class="agent-scope">quantization/ + layers/quantization/*npu*</td>
+    <td>~12</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent D</span></td>
+    <td class="agent-scope">attention/ (5 backend 文件)</td>
+    <td>~5</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent E</span></td>
+    <td class="agent-scope">lora/ + speculative/ + sampler (ascend) + environ NPU</td>
+    <td>~12</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent F</span></td>
+    <td class="agent-scope">server_args.py NPU + VLM processor + multimodal_gen NPU</td>
+    <td>~8</td>
+  </tr>
+  <tr><td rowspan="5">Phase 2<br>测试映射</td>
+    <td><span class="agent-id">Agent G</span></td>
+    <td class="agent-scope">basic_function/ 全部子目录</td>
+    <td>~35</td>
+    <td rowspan="5">Test JSON</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent H</span></td>
+    <td class="agent-scope">llm_models/ + vlm_models/</td>
+    <td>~55</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent I</span></td>
+    <td class="agent-scope">interface/ + parameter/ + reward/ + embedding/ + rerank/</td>
+    <td>~18</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent J</span></td>
+    <td class="agent-scope">.github/workflows/*npu*.yml + run_suite.py NPU suites</td>
+    <td>~6</td>
+  </tr>
+  <tr><td><span class="agent-id">Agent K</span></td>
+    <td class="agent-scope">multimodal_gen/test/ NPU + sgl-kernel NPU refs</td>
+    <td>~5</td>
+  </tr>
+  <tr><td>Phase 3</td>
+    <td><span class="agent-id">Pipeline Agents</span></td>
+    <td class="agent-scope">每 critical/high 特性 3 stage (gap→severity→suggest)</td>
+    <td>—</td>
+    <td>Gap + Severity + Suggestion JSON</td>
+  </tr>
+  <tr><td>Phase 4</td>
+    <td><span class="agent-id">Synthesis Agent</span></td>
+    <td class="agent-scope">整合所有 Phase 1-3 输出</td>
+    <td>—</td>
+    <td>report.md</td>
+  </tr>
+</table>
+</div>
+
+<h3>4.4 关键设计决策</h3>
+
+<div class="tbl-wrap">
+<table>
+  <tr><th>决策</th><th>选择</th><th>理由</th></tr>
+  <tr>
+    <td>编排方式</td>
+    <td><strong>1 个顶层 Workflow</strong></td>
+    <td>phase 进度可视化、token 预算追踪、脚本化可重复运行</td>
+  </tr>
+  <tr>
+    <td>Phase 1+2 模式</td>
+    <td><strong>parallel() 并行 fan-out</strong></td>
+    <td>Agent 扫描范围互不重叠，可完全并行</td>
+  </tr>
+  <tr>
+    <td>Phase 3 模式</td>
+    <td><strong>pipeline() 链式处理</strong></td>
+    <td>每条特性独立流经 3 个 stage，无需 barrier 等待其他特性</td>
+  </tr>
+  <tr>
+    <td>Agent 读取深度</td>
+    <td><strong>分层: 深度/浅层/不读</strong></td>
+    <td>Phase 1 深度读代码、Phase 2 浅层扫描测试、Phase 3 纯数据转换</td>
+  </tr>
+  <tr>
+    <td>结构化输出</td>
+    <td><strong>全部 JSON Schema 约束</strong></td>
+    <td>保证下游 machine-readable，避免解析歧义</td>
+  </tr>
+  <tr>
+    <td>建议生成验证</td>
+    <td><strong>3 视角对抗审查</strong></td>
+    <td>可行性/唯一性/覆盖率三个 lens 交叉验证建议质量</td>
+  </tr>
+</table>
+</div>
+</section>
+
+<!-- ===== Section 5: Workflow Script ===== -->
+<section id="s5">
+<h2><span class="num">5</span>Workflow 脚本设计</h2>
+
+<h3>5.1 核心代码路径</h3>
+
+<pre><code>export const meta = {
+  name: 'npu-test-quality-analysis',
+  description: 'Analyze NPU test quality and generate improvement suggestions',
+  phases: [
+    { title: 'Extract Features', detail: '6 parallel agents scanning NPU source' },
+    { title: 'Map Coverage', detail: '5 parallel agents scanning test files' },
+    { title: 'Analyze Gaps', detail: 'Pipeline: gap→severity→suggestion per feature' },
+    { title: 'Synthesize Report', detail: 'Final comprehensive markdown report' },
+  ],
+}
+
+// ====== Phase 1: 并行提取特性 ======
+phase('Extract Features')
+const features = await parallel([
+  () => agent(FEATURE_EXTRACT_INFERENCE,   {label:'feat:inference',  schema:FEATURE_SCHEMA}),
+  () => agent(FEATURE_EXTRACT_DISTRIBUTED, {label:'feat:distributed',schema:FEATURE_SCHEMA}),
+  () => agent(FEATURE_EXTRACT_QUANT,       {label:'feat:quant',      schema:FEATURE_SCHEMA}),
+  () => agent(FEATURE_EXTRACT_ATTN,        {label:'feat:attention',  schema:FEATURE_SCHEMA}),
+  () => agent(FEATURE_EXTRACT_ADVANCED,    {label:'feat:advanced',   schema:FEATURE_SCHEMA}),
+  () => agent(FEATURE_EXTRACT_INTERFACE,   {label:'feat:interface',  schema:FEATURE_SCHEMA}),
+])
+
+// ====== Phase 2: 并行映射测试覆盖 ======
+phase('Map Coverage')
+const tests = await parallel([
+  () => agent(TEST_SCAN_BASIC,     {label:'test:basic_func',  schema:TEST_SCHEMA}),
+  () => agent(TEST_SCAN_MODELS,    {label:'test:models',      schema:TEST_SCHEMA}),
+  () => agent(TEST_SCAN_INTERFACE, {label:'test:interface',   schema:TEST_SCHEMA}),
+  () => agent(TEST_SCAN_CI,        {label:'test:ci_workflows',schema:TEST_SCHEMA}),
+  () => agent(TEST_SCAN_KERNEL,    {label:'test:sgl_kernel',  schema:TEST_SCHEMA}),
+])
+
+// ====== Phase 3: Pipeline 分析 ======
+phase('Analyze Gaps')
+const allFeatures = features.filter(Boolean).flatMap(f => f.items)
+const allTests = tests.filter(Boolean).flatMap(t => t.tests)
+
+const results = await pipeline(
+  allFeatures,
+  // Stage 1: 缺口检测
+  async (feature) => {
+    const gap = await agent(GAP_DETECT_PROMPT(feature, allTests), {
+      label: `gap:${feature.name}`,
+      schema: GAP_SCHEMA
+    })
+    if (!gap.has_test) {
+      // Stage 2: 严重度评级
+      const severity = await agent(SEVERITY_PROMPT(gap), {
+        label: `severity:${feature.name}`,
+        schema: SEVERITY_SCHEMA
+      })
+      // Stage 3: 建议生成 (仅 critical/high)
+      if (severity.level === 'critical' || severity.level === 'high') {
+        const suggestion = await agent(SUGGEST_PROMPT(gap, severity), {
+          label: `suggest:${feature.name}`,
+          schema: SUGGESTION_SCHEMA
+        })
+        return { ...gap, ...severity, suggestions: suggestion.items }
+      }
+      return { ...gap, ...severity, suggestions: [] }
+    }
+    return { feature: feature.name, has_test: true, severity: null }
+  }
+)
+
+// ====== Phase 4: 综合报告 ======
+phase('Synthesize Report')
+const report = await agent(SYNTHESIS_PROMPT(allFeatures, allTests, results))
+
+return { features: allFeatures, tests: allTests, gaps: results, report }</code></pre>
+
+<h3>5.2 严重度评级维度</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>维度</th><th>评分 (1-5)</th><th>说明</th></tr>
+  <tr><td>用户可见性</td><td>1-5</td><td>该特性是否直接影响推理结果或性能？</td></tr>
+  <tr><td>代码复杂度</td><td>1-5</td><td>出 bug 的概率有多高？（代码行数、分支数、依赖数）</td></tr>
+  <tr><td>变更频率</td><td>1-5</td><td>最近是否活跃开发？从 git log 提取近期 commit 数</td></tr>
+  <tr><td>CUDA 参照覆盖度</td><td>1-5</td><td>CUDA 平台同类特性有多少测试？（对比基准）</td></tr>
+</table>
+</div>
+<p style="margin-top:8px;"><strong>综合严重度</strong> = 四维总分: <span class="badge crit">≥18 Critical</span> <span class="badge high">14-17 High</span> <span class="badge med">10-13 Medium</span> <span class="badge low">&lt;10 Low</span></p>
+
+<h3>5.3 建议输出格式</h3>
+
+<pre><code>{
+  "gap_feature": "ascend_fuseep",
+  "severity": "critical",
+  "suggestions": [
+    {
+      "title": "添加 FuseEP Token Dispatch 单元测试",
+      "priority": "P0",
+      "test_type": "unit",
+      "description": "验证 NpuFuseEPDispatcher 的 dispatch/combine 正确性",
+      "approach": "构造虚拟 input tensors + 调用 dispatcher + 对比 golden",
+      "estimated_lines": 80,
+      "target_suite": "stage-b-test-1-npu-a2",
+      "reference": "CUDA 平台 moe_ep 测试: test/registered/moe/"
+    }
+  ]
+}</code></pre>
+</section>
+
+<!-- ===== Section 6: Feasibility ===== -->
+<section id="s6">
+<h2><span class="num">6</span>可行性评估与风险</h2>
+
+<h3>6.1 资源估算</h3>
+<div class="stat-grid">
+  <div class="stat-card accent"><div class="val">25-40</div><div class="lbl">Agent 调用总数</div></div>
+  <div class="stat-card green"><div class="val">2 批</div><div class="lbl">并行批次</div></div>
+  <div class="stat-card yellow"><div class="val">3-5 min</div><div class="lbl">预计总耗时</div></div>
+  <div class="stat-card purple"><div class="val">200-400K</div><div class="lbl">Token 消耗估算</div></div>
+</div>
+
+<h3>6.2 可行性评估</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>维度</th><th>评级</th><th>说明</th></tr>
+  <tr><td>技术可行性</td><td><span class="badge low">✅ 高</span></td><td>Agent 有完整文件读写能力，扫描范围明确，无外部 API 依赖</td></tr>
+  <tr><td>准确性</td><td><span class="badge med">⚠️ 中-高</span></td><td>特性提取准确度高（结构化 Schema 约束）；测试建议需人工二次确认</td></tr>
+  <tr><td>完整性</td><td><span class="badge med">⚠️ 中</span></td><td><code>is_npu()</code> 分散在 105+ 文件中，可能遗漏隐式特性分支</td></tr>
+  <tr><td>效率</td><td><span class="badge low">✅ 高</span></td><td>Phase 1+2 完全并行，Phase 3 pipeline 模式最大化吞吐</td></tr>
+  <tr><td>可重复性</td><td><span class="badge low">✅ 高</span></td><td>Workflow 脚本可保存为 .claude/workflows/，定期运行或 CI 触发</td></tr>
+  <tr><td>Token 消耗</td><td><span class="badge med">⚠️ 中等</span></td><td>200K-400K tokens，控制在合理范围内</td></tr>
+</table>
+</div>
+
+<h3>6.3 风险矩阵</h3>
+<div class="tbl-wrap">
+<table class="risk-table">
+  <tr><th>风险</th><th>概率</th><th>影响</th><th>缓解措施</th></tr>
+  <tr>
+    <td>特性遗漏（is_npu() 隐式分支）</td>
+    <td><span class="badge med">中</span></td>
+    <td><span class="badge med">中</span></td>
+    <td>Phase 1 Agent 增加专项 prompt: "搜索所有 <code>is_npu()</code> 条件分支"</td>
+  </tr>
+  <tr>
+    <td>Agent 特性理解偏差</td>
+    <td><span class="badge low">低</span></td>
+    <td><span class="badge med">中</span></td>
+    <td>JSON Schema 约束输出格式 + 人工抽查 20% 结果</td>
+  </tr>
+  <tr>
+    <td>测试分类错误</td>
+    <td><span class="badge med">中</span></td>
+    <td><span class="badge low">低</span></td>
+    <td>quality_score 由明确标准判定（是否有参考对比？是否检查数值容差？）</td>
+  </tr>
+  <tr>
+    <td>建议不可落地</td>
+    <td><span class="badge med">中</span></td>
+    <td><span class="badge high">高</span></td>
+    <td>每个建议带 <code>reference</code> 字段指向 CUDA 同类测试；人工 review 确认</td>
+  </tr>
+  <tr>
+    <td>模型/网络依赖导致 Agent 失败</td>
+    <td><span class="badge low">低</span></td>
+    <td><span class="badge high">高</span></td>
+    <td>Agent 只读本地文件，不启动服务器、不下载模型</td>
+  </tr>
+</table>
+</div>
+</section>
+
+<!-- ===== Section 7: Roadmap ===== -->
+<section id="s7">
+<h2><span class="num">7</span>落地路线图</h2>
+
+<h3>Phase 0 — 立即可执行 ⚡</h3>
+<div class="phase-grid">
+  <div class="phase-card">
+    <h4><span class="dot p1"></span>1. 运行 Workflow</h4>
+    <ul>
+      <li>编写完整 Workflow 脚本</li>
+      <li>执行 Phase 1-3</li>
+      <li>输出 structured JSON + suggestions</li>
+    </ul>
+    <div style="margin-top:8px;"><span class="badge low">~5 min</span></div>
+  </div>
+  <div class="phase-card">
+    <h4><span class="dot p2"></span>2. 人工审核</h4>
+    <ul>
+      <li>逐条确认 severity 评级</li>
+      <li>修正 Agent 误判</li>
+      <li>标注 false positive</li>
+    </ul>
+    <div style="margin-top:8px;"><span class="badge med">~1 hour</span></div>
+  </div>
+  <div class="phase-card">
+    <h4><span class="dot p3"></span>3. Quick Wins</h4>
+    <ul>
+      <li>挑选 3-5 个工作量 &lt;2h 的缺口</li>
+      <li>优先补测试</li>
+      <li>建立成功案例模板</li>
+    </ul>
+    <div style="margin-top:8px;"><span class="badge low">~1 day</span></div>
+  </div>
+</div>
+
+<h3>Phase 1 — 1 周内</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>#</th><th>任务</th><th>说明</th></tr>
+  <tr><td>4</td><td><strong>补 P0 缺口</strong></td><td>为 Ascend FuseEP、Disaggregation、LoRA 各添加 ≥1 个基础冒烟测试</td></tr>
+  <tr><td>5</td><td><strong>建立 NPU 测试模板</strong></td><td>基于 <code>write-sglang-test</code> skill，扩展 NPU 专用 fixture（mock ascend backend）</td></tr>
+  <tr><td>6</td><td><strong>改进现有测试</strong></td><td>对精度阈值过低的测试（如 0.3），收窄到合理水平或改为参考对比模式</td></tr>
+  <tr><td>7</td><td><strong>添加 CI 门禁规则</strong></td><td>对 🔴 特性，新 PR 修改其代码时自动触发对应测试</td></tr>
+</table>
+</div>
+
+<h3>Phase 2 — 持续</h3>
+<div class="tbl-wrap">
+<table>
+  <tr><th>#</th><th>任务</th><th>说明</th></tr>
+  <tr><td>8</td><td><strong>定期审计</strong></td><td>Workflow 脚本保存为 <code>.claude/workflows/npu-test-audit.js</code>，每月运行更新报告</td></tr>
+  <tr><td>9</td><td><strong>建立覆盖仪表板</strong></td><td>基于结构化 JSON 输出，生成测试覆盖趋势图</td></tr>
+  <tr><td>10</td><td><strong>组合测试矩阵</strong></td><td>量化×EP、HiCache×MLA、TP×量化 等交叉维度测试</td></tr>
+  <tr><td>11</td><td><strong>引入 Mock Fixture</strong></td><td>减少对真实模型下载的依赖，加速测试反馈</td></tr>
+</table>
+</div>
+</section>
+
+<!-- ===== Summary ===== -->
+<div class="callout">
+  <h4>📊 总结</h4>
+  <p><strong>Agent 辅助方案完全可行</strong>。核心价值：</p>
+  <p>① <strong>速度</strong> — 3-5 分钟完成人工 2-3 天的工作量<br>
+  ② <strong>系统性</strong> — 不会因疲劳或疏忽遗漏特性<br>
+  ③ <strong>结构化</strong> — JSON Schema 保证输出可直接用于下游工具（CI 配置、测试骨架生成）<br>
+  ④ <strong>可重复</strong> — 脚本化后可持续追踪测试债务的收敛</p>
+  <p style="margin-top:12px;"><strong>最大风险</strong>是建议质量——Agent 对 NPU 硬件特性的理解有限，生成的测试建议需要人工确认可行性和优先级。</p>
+</div>
+
+</div>
+
+<footer>
+  <p>SGLang NPU Test Quality Analysis · Generated 2026-05-30 · Claude Code + Multi-Agent Workflow</p>
+  <p style="margin-top:4px;">Repository: <code>sgl-project/sglang</code> · Branch: <code>main</code></p>
+</footer>
+
+</body>
+</html>

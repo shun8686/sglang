@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sglang-risk/defect_db.schema.json",
+  "title": "Defect Database",
+  "type": "object",
+  "required": ["_meta", "defects"],
+  "properties": {
+    "_meta": {
+      "type": "object",
+      "required": ["last_scan_commit", "last_scan_at", "total_defects", "schema_version"],
+      "properties": {
+        "last_scan_commit": {"type": "string", "description": "SHA of the last scanned commit"},
+        "last_scan_at": {"type": "string", "format": "date-time"},
+        "total_defects": {"type": "integer"},
+        "schema_version": {"type": "string"}
+      }
+    },
+    "defects": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["bug_id", "commit_sha", "category", "severity"],
+        "properties": {
+          "bug_id": {"type": "string", "pattern": "^BUG-\\d{4}-\\d{3}$"},
+          "commit_sha": {"type": "string"},
+          "date_fixed": {"type": "string", "format": "date-time"},
+          "title": {"type": "string"},
+          "description": {"type": "string"},
+          "category": {
+            "type": "string",
+            "enum": ["precision_loss", "crash", "perf_regression", "memory_leak",
+                     "compatibility", "compile_error"]
+          },
+          "severity": {"type": "integer", "minimum": 1, "maximum": 5},
+          "files_fixed": {"type": "array", "items": {"type": "string"}},
+          "root_cause": {"type": "string"},
+          "tags": {"type": "array", "items": {"type": "string"}},
+          "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+          "agent_version": {"type": "string"},
+          "source": {"type": "string", "enum": ["pr", "commit"], "description": "Data source type"},
+          "pr_number": {"type": "integer", "description": "GitHub PR number if source is 'pr'"},
+          "needs_review": {"type": "boolean", "description": "Flagged for human review if confidence < 0.7"}
+        }
+      }
+    },
+    "near_misses": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["source_pr", "risk_pattern", "module"],
+        "properties": {
+          "type": {"type": "string", "const": "near_miss"},
+          "source_pr": {"type": "integer"},
+          "source_comment_url": {"type": "string"},
+          "risk_pattern": {"type": "string"},
+          "module": {"type": "string"},
+          "symptom_if_not_caught": {"type": "string"},
+          "would_affect_features": {"type": "array", "items": {"type": "string"}},
+          "trigger_condition": {"type": "string"},
+          "caught_by": {"type": "string", "const": "code_review"},
+          "weight": {"type": "number", "minimum": 0, "maximum": 0.5},
+          "recommendation": {"type": "string"}
+        }
+      }
+    }
+  }
+}

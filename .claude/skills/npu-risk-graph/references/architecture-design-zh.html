@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPU 风险知识图谱 — 架构设计文档</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --border: #30363d;
+    --text: #c9d1d9; --text-secondary: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149;
+    --purple: #a371f7; --pink: #f778ba; --orange: #f0883e; --teal: #39d2c0;
+    --code-bg: #1c2128;
+    --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+    --mono: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); line-height: 1.8; max-width: 1200px; margin: 0 auto; padding: 40px 24px; }
+  h1 { font-size: 2em; color: #e6edf3; margin-bottom: 8px; }
+  h1 .sub { color: var(--text-secondary); font-size: 0.5em; font-weight: 400; display: block; margin-top: 4px; }
+  h2 { font-size: 1.4em; color: #e6edf3; margin: 48px 0 16px 0; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  h3 { font-size: 1.1em; color: #e6edf3; margin: 28px 0 12px 0; }
+  h4 { font-size: 1em; color: var(--text); margin: 20px 0 8px 0; }
+  p { margin: 8px 0; }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  code { font-family: var(--mono); font-size: 0.9em; background: var(--code-bg); padding: 2px 6px; border-radius: 4px; white-space: nowrap; }
+  pre { font-family: var(--mono); font-size: 0.82em; background: var(--code-bg); padding: 16px 20px; border-radius: 8px; border: 1px solid var(--border); overflow-x: auto; line-height: 1.5; margin: 12px 0; }
+  table { width: 100%; border-collapse: collapse; margin: 12px 0; font-size: 0.92em; }
+  th, td { padding: 10px 14px; text-align: left; border: 1px solid var(--border); }
+  th { background: var(--surface); color: #e6edf3; font-weight: 600; white-space: nowrap; }
+  td { background: var(--code-bg); }
+  td code { background: none; padding: 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 24px; margin: 16px 0; }
+  .card h3 { margin-top: 0; }
+  .badge { display: inline-block; padding: 2px 8px; border-radius: 12px; font-size: 0.78em; font-weight: 600; margin-right: 4px; }
+  .badge-critical { background: var(--red); color: #fff; }
+  .badge-high { background: var(--orange); color: #fff; }
+  .badge-medium { background: var(--yellow); color: #000; }
+  .badge-low { background: var(--green); color: #000; }
+  .badge-info { background: var(--accent); color: #000; }
+  .badge-purple { background: var(--purple); color: #fff; }
+  .highlight-box { background: rgba(88,166,255,0.06); border: 1px solid rgba(88,166,255,0.2); border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+
+  .arch-diagram { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 32px 24px; margin: 20px 0; position: relative; overflow-x: auto; }
+  .arch-layer { display: flex; align-items: center; justify-content: center; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+  .arch-box { padding: 10px 16px; border-radius: 6px; font-size: 0.82em; font-weight: 600; white-space: nowrap; text-align: center; min-width: 100px; border: 2px solid; }
+  .arch-arrow { display: flex; justify-content: center; align-items: center; color: var(--text-secondary); font-size: 1.2em; margin: 4px 0; }
+
+  .toc { display: flex; flex-wrap: wrap; gap: 6px 18px; }
+  .toc a { font-size: 0.9em; }
+
+  .oracle-matrix td:first-child { font-weight: 600; }
+  .oracle-matrix .y { color: var(--green); font-weight:700; }
+  .oracle-matrix .p { color: var(--yellow); }
+  .oracle-matrix .n { color: var(--red); }
+</style>
+</head>
+<body>
+
+<h1>
+  NPU 风险知识图谱
+  <span class="sub">架构设计文档 · v2.0 · 2026年6月</span>
+</h1>
+
+<div class="highlight-box">
+  <strong>摘要：</strong> NPU 风险知识图谱（<code>npu-risk-graph</code>）是一个多层分析系统，
+  从异构数据源构建属性图，计算风险评分、检测盲点、推荐 Oracle 测试模式，
+  并为 SGLang Ascend NPU 后端的测试投资决策提供指导。
+  v2.0 新增 <strong>测试知识系统</strong>：4 种 Oracle 模式、7 种故障模式、自动检测扫描器、
+  图谱驱动的测试设计推荐。
+</div>
+
+<!-- ================================================================== -->
+<h2>目录</h2>
+<div class="toc">
+  <a href="#arch">1. 架构总览</a>
+  <a href="#data-flow">2. 数据流</a>
+  <a href="#graph-model">3. 图模型（8节点/11边）</a>
+  <a href="#scoring">4. 风险评分</a>
+  <a href="#delta">5. Delta 引擎</a>
+  <a href="#queries">6. 查询系统</a>
+  <a href="#test-knowledge">7. 测试知识系统（NEW）</a>
+  <a href="#agents">8. Agent 工作流</a>
+  <a href="#features-generation">9. 特性生成</a>
+  <a href="#visualization">10. 可视化</a>
+  <a href="#cli">11. CLI 接口</a>
+  <a href="#file-structure">12. 文件结构</a>
+  <a href="#kg-value">13. KG vs JSON</a>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="arch">1. 架构总览</h2>
+
+<p>系统遵循<strong>三层架构 + 测试知识层</strong>：</p>
+
+<div class="arch-diagram">
+  <div style="color:var(--text-secondary);font-size:0.8em;margin-bottom:4px;">▸ 数据源</div>
+  <div class="arch-layer">
+    <div class="arch-box" style="background:rgba(77,166,255,0.12);border-color:var(--accent);color:var(--accent);">sglang 文档</div>
+    <div class="arch-box" style="background:rgba(63,185,80,0.12);border-color:var(--green);color:var(--green);">源代码</div>
+    <div class="arch-box" style="background:rgba(210,153,34,0.12);border-color:var(--yellow);color:var(--yellow);">测试套件</div>
+    <div class="arch-box" style="background:rgba(248,81,73,0.12);border-color:var(--red);color:var(--red);">缺陷 DB</div>
+    <div class="arch-box" style="background:rgba(163,113,247,0.12);border-color:var(--purple);color:var(--purple);">Graphify KG</div>
+  </div>
+
+  <div class="arch-arrow">↓ 提取 + 映射 ↓</div>
+
+  <div style="color:var(--text-secondary);font-size:0.8em;margin-bottom:4px;">▸ 基线数据</div>
+  <div class="arch-layer">
+    <div class="arch-box" style="background:rgba(57,210,192,0.12);border-color:var(--teal);color:var(--teal);">features.json</div>
+    <div class="arch-box" style="background:rgba(57,210,192,0.12);border-color:var(--teal);color:var(--teal);">tests.json</div>
+    <div class="arch-box" style="background:rgba(57,210,192,0.12);border-color:var(--teal);color:var(--teal);">risk_profiles.json</div>
+    <div class="arch-box" style="background:rgba(57,210,192,0.12);border-color:var(--teal);color:var(--teal);">dependency_map.json</div>
+  </div>
+
+  <div class="arch-arrow">↓ build_graph.py（10步 + Step 3.5 测试模式集成）↓</div>
+
+  <div style="color:var(--text-secondary);font-size:0.8em;margin-bottom:4px;">▸ 知识图谱 + 测试知识</div>
+  <div class="arch-layer">
+    <div class="arch-box" style="background:rgba(163,113,247,0.15);border-color:var(--purple);color:var(--purple);">
+      NetworkX MultiDiGraph<br>
+      <small>8 种节点类型 · 11 种边类型</small><br>
+      <small>+ OraclePattern · FailureMode 节点</small>
+    </div>
+    <div style="color:var(--text-secondary);font-size:1.5em;">→</div>
+    <div class="arch-box" style="background:rgba(248,81,73,0.12);border-color:var(--red);color:var(--red);">
+      查询系统 (15+)<br><small>含测试知识查询</small>
+    </div>
+    <div style="color:var(--text-secondary);font-size:1.5em;">→</div>
+    <div class="arch-box" style="background:rgba(63,185,80,0.12);border-color:var(--green);color:var(--green);">D3.js 可视化</div>
+  </div>
+
+  <div class="arch-layer" style="margin-top:8px;">
+    <div class="arch-box" style="background:rgba(248,136,62,0.12);border-color:var(--orange);color:var(--orange);">
+      detect_oracle_patterns.py<br><small>AST 扫描 → 自动识别 Oracle 模式</small>
+    </div>
+    <div style="color:var(--text-secondary);font-size:1em;">⇄</div>
+    <div class="arch-box" style="background:rgba(248,136,62,0.12);border-color:var(--orange);color:var(--orange);">
+      test_patterns.json<br><small>Oracle 定义 + 关联</small>
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <h3>核心设计原则</h3>
+  <ol>
+    <li><strong>单一数据源：</strong><code>features.json</code> 是唯一权威特性注册表。</li>
+    <li><strong>确定性优先，Agent 兜底：</strong>机械匹配处理常见情况；Agent 语义范围限定处理边界场景。</li>
+    <li><strong>默认为增量模式：</strong>Delta 引擎仅检测变更文件，仅重新评分受影响特性。</li>
+    <li><strong>图谱驱动测试设计：</strong>缺陷画像 → 推荐 Oracle 模式 → 生成测试代码。</li>
+  </ol>
+</div>
+
+<!-- ================================================================== -->
+<h2 id="graph-model">2. 图模型</h2>
+
+<h3 id="nodes">2.1 节点类型（8 种）</h3>
+
+<table>
+  <tr><th>类型</th><th>ID 格式</th><th>关键属性</th><th>数量</th></tr>
+  <tr><td><code>Feature</code></td><td>snake_case 特性名</td><td>risk_score, probability, impact, level, test_depth, betweenness</td><td>~39</td></tr>
+  <tr><td><code>SourceFile</code></td><td>仓库相对路径</td><td>lines_of_code, n_bugs, platform_divergence</td><td>~169</td></tr>
+  <tr><td><code>TestCase</code></td><td>测试文件路径</td><td>quality_score, has_oracle, assertion_type, ci_suite</td><td>~109</td></tr>
+  <tr><td><code>Defect</code></td><td>BUG-YYYY-NNN</td><td>severity, is_silent, failure_mode, date_fixed</td><td>~70</td></tr>
+  <tr><td><code>Dependency</code></td><td>外部依赖名</td><td>dep_type, upgrade_risk, n_consumers</td><td>4</td></tr>
+  <tr><td><code>NearMiss</code></td><td>NEAR_MISS_PR{num}</td><td>risk_pattern, weight</td><td>~10</td></tr>
+  <tr><td style="background:rgba(248,136,62,0.08);"><code>OraclePattern</code> <span class="badge badge-high">NEW</span></td>
+    <td style="background:rgba(248,136,62,0.08);">模式 ID</td>
+    <td style="background:rgba(248,136,62,0.08);">category, max_safe_tokens, tolerance, severity, npu_validated</td>
+    <td style="background:rgba(248,136,62,0.08);">4</td></tr>
+  <tr><td style="background:rgba(248,136,62,0.08);"><code>FailureMode</code> <span class="badge badge-high">NEW</span></td>
+    <td style="background:rgba(248,136,62,0.08);">故障模式 ID</td>
+    <td style="background:rgba(248,136,62,0.08);">is_silent, detectable_by_oracle</td>
+    <td style="background:rgba(248,136,62,0.08);">7</td></tr>
+</table>
+
+<h3 id="edges">2.2 边类型（11 种）</h3>
+
+<table>
+  <tr><th>边类型</th><th>方向</th><th>权重</th><th>语义</th></tr>
+  <tr><td><code>IMPLEMENTS_IN</code></td><td>Feature → SourceFile</td><td>代码占比</td><td>特性实现在此文件中</td></tr>
+  <tr><td><code>TESTED_BY</code></td><td>Feature → TestCase</td><td>测试质量 0-5</td><td>特性被此测试覆盖</td></tr>
+  <tr><td><code>COVERS</code></td><td>TestCase → SourceFile</td><td>推断的覆盖权重</td><td>测试覆盖此源文件</td></tr>
+  <tr><td><code>AFFECTED_BY</code></td><td>Defect → Feature</td><td>严重度 1-5</td><td>缺陷影响此特性</td></tr>
+  <tr><td><code>FIXED_IN</code></td><td>Defect → SourceFile</td><td>1/n_files</td><td>缺陷在此文件中修复</td></tr>
+  <tr><td><code>DEPENDS_ON</code></td><td>Feature → Feature / Dependency</td><td>1-5</td><td>依赖关系（显式或共享文件）</td></tr>
+  <tr><td><code>SHARES_DEFECT_PATTERN</code></td><td>Feature ↔ Feature</td><td>共享缺陷数</td><td>两特性有相同 failure_mode 的缺陷</td></tr>
+  <tr><td><code>WARNS_OF</code></td><td>NearMiss → Feature</td><td>0-1</td><td>Near-miss PR 为此特性提供风险信号</td></tr>
+  <tr><td style="background:rgba(248,136,62,0.08);"><code>TEST_USES_PATTERN</code> <span class="badge badge-high">NEW</span></td>
+    <td style="background:rgba(248,136,62,0.08);">TestCase → OraclePattern</td>
+    <td style="background:rgba(248,136,62,0.08);">0-1</td>
+    <td style="background:rgba(248,136,62,0.08);">测试使用了此 Oracle 模式</td></tr>
+  <tr><td style="background:rgba(248,136,62,0.08);"><code>PATTERN_DETECTS</code> <span class="badge badge-high">NEW</span></td>
+    <td style="background:rgba(248,136,62,0.08);">OraclePattern → FailureMode</td>
+    <td style="background:rgba(248,136,62,0.08);">置信度 0-1</td>
+    <td style="background:rgba(248,136,62,0.08);">此 Oracle 模式能检测该故障</td></tr>
+  <tr><td style="background:rgba(248,136,62,0.08);"><code>PATTERN_BLIND_SPOT</code> <span class="badge badge-high">NEW</span></td>
+    <td style="background:rgba(248,136,62,0.08);">OraclePattern → FailureMode</td>
+    <td style="background:rgba(248,136,62,0.08);">—</td>
+    <td style="background:rgba(248,136,62,0.08);">此 Oracle 模式无法检测该故障（盲区）</td></tr>
+</table>
+
+<!-- ================================================================== -->
+<h2 id="test-knowledge">3. 测试知识系统 <span class="badge badge-high">NEW in v2.0</span></h2>
+
+<div class="highlight-box">
+  <strong>核心问题：</strong>如何判断一个测试"好"还是"不好"？
+  答案取决于它用了什么 <strong>Oracle 模式</strong>——即测试判断"通过/失败"的策略。
+  四种模式按严格程度排列，对应不同的缺陷检测能力。
+</div>
+
+<h3>3.1 四种 Oracle 模式</h3>
+
+<table class="oracle-matrix">
+  <tr><th>模式</th><th>严格度</th><th>怎么做</th><th>安全距离</th><th>能检测</th><th>盲区</th></tr>
+  <tr>
+    <td><code>gsm8k_accuracy</code></td>
+    <td><span class="badge badge-low">最弱</span></td>
+    <td>跑 1319 道 GSM8K 数学题，看正确率 ≥ 阈值</td>
+    <td>不限</td>
+    <td>crash、灾难性故障</td>
+    <td>静默精度丢失、token 偏离、accept rate 错误</td>
+  </tr>
+  <tr>
+    <td><code>exact_match_short</code></td>
+    <td><span class="badge badge-medium">硬 Oracle</span></td>
+    <td>双服务器 temperature=0，逐字比对 16 token</td>
+    <td><strong>16 tokens</strong></td>
+    <td>crash、显式 token 错误、逻辑 bug</td>
+    <td>bfloat16 平局翻转（>16 tokens）、不改变 argmax 的 logit 偏差</td>
+  </tr>
+  <tr>
+    <td><code>logprob_rescore</code></td>
+    <td><span class="badge badge-high">软 Oracle</span></td>
+    <td>单服务器 decode vs prefill 重评分，logprob 差值 < 0.255</td>
+    <td>64 tokens</td>
+    <td><strong>静默精度丢失、logit 错误</strong>、crash、token 偏离</td>
+    <td>性能回退</td>
+  </tr>
+  <tr>
+    <td><code>token_oracle_canary</code></td>
+    <td><span class="badge badge-critical">最强（仅 CUDA）</span></td>
+    <td>确定性哈希采样器——任意 token 偏差立即报错</td>
+    <td>不限</td>
+    <td><strong>一切</strong>——包括位置错误、KV cache 损坏</td>
+    <td><span class="badge badge-medium">NPU 不支持</span>（2026-06 验证失败）</td>
+  </tr>
+</table>
+
+<h4>bfloat16 精度限制（exact_match_short 为何限 16 token）</h4>
+
+<div class="card">
+  <p>这是本系统通过实战验证发现的测试知识：</p>
+  <ul>
+    <li><strong>根因：</strong>投机解码的 batched forward 与 sequential forward 在 bfloat16 下浮点累加顺序不同，差异约 1e-4 级别。</li>
+    <li><strong>触发条件：</strong>当两个 token 的 logprob 差异 < 1e-4 时（即精确平局），argmax 可能翻转。</li>
+    <li><strong>实证：</strong>eagle3 Oracle 测试中，baseline 在 token 14648 和 78158 上 logprob 均为 -1.250591（精确平局）。Eagle3 因 bfloat16 噪声打破平局，分别变为 -1.286224 和 -1.161224。</li>
+    <li><strong>结论：</strong>精确比对在 16 token 内几乎不会遇到平局；长序列需改用 logprob_rescore + tolerance 0.255。</li>
+  </ul>
+</div>
+
+<h3>3.2 故障模式分类（7 种）</h3>
+
+<table>
+  <tr><th>故障模式</th><th>静默?</th><th>示例</th></tr>
+  <tr><td><code>crash</code></td><td>否</td><td>服务器崩溃、CUDA/NPU kernel 故障</td></tr>
+  <tr><td><code>silent_precision_loss</code></td><td><span class="badge badge-critical">是</span></td><td>输出看似正确但数值有偏差——位置编码错误、logit 偏移</td></tr>
+  <tr><td><code>token_divergence</code></td><td>否</td><td>temperature=0 下 token 序列与参考不一致</td></tr>
+  <tr><td><code>accept_rate_error</code></td><td><span class="badge badge-critical">是</span></td><td>投机接受率算错，target model 可纠正但吞吐受损</td></tr>
+  <tr><td><code>logit_computation_error</code></td><td><span class="badge badge-critical">是</span></td><td>tree attention 掩码错误或 KV cache 损坏导致 logit 偏差</td></tr>
+  <tr><td><code>performance_regression</code></td><td><span class="badge badge-critical">是</span></td><td>吞吐/延迟退化，不影响正确性</td></tr>
+  <tr><td><code>compatibility_issue</code></td><td>否</td><td>模型或配置兼容性破坏</td></tr>
+</table>
+
+<h3>3.3 Oracle 模式 vs 故障模式检测矩阵</h3>
+
+<table>
+  <tr><th>故障模式</th><th>gsm8k_accuracy</th><th>exact_match_short</th><th>logprob_rescore</th><th>token_oracle_canary</th></tr>
+  <tr><td>crash</td><td class="y">✅</td><td class="y">✅</td><td class="y">✅</td><td class="y">✅</td></tr>
+  <tr><td>token_divergence</td><td class="n">❌</td><td class="y">✅</td><td class="y">✅</td><td class="y">✅</td></tr>
+  <tr><td>compatibility_issue</td><td class="p">⚠️</td><td class="y">✅</td><td class="y">✅</td><td class="y">✅</td></tr>
+  <tr><td>accept_rate_error</td><td class="n">❌</td><td class="p">⚠️</td><td class="y">✅</td><td class="y">✅</td></tr>
+  <tr><td>silent_precision_loss</td><td class="n">❌</td><td class="n">❌</td><td class="y">✅</td><td class="y">✅</td></tr>
+  <tr><td>logit_computation_error</td><td class="n">❌</td><td class="n">❌</td><td class="y">✅</td><td class="y" style="color:var(--yellow);">✅ <small>(CUDA)</small></td></tr>
+  <tr><td>performance_regression</td><td class="n">❌</td><td class="n">❌</td><td class="n">❌</td><td class="n">❌</td></tr>
+  <tr style="font-weight:700;background:var(--surface);"><td>覆盖的故障模式数</td><td>2/7</td><td>3.5/7</td><td>6/7</td><td>6/7 <small>(CUDA)</small></td></tr>
+</table>
+
+<h3>3.4 自动检测扫描器</h3>
+
+<p><code>detect_oracle_patterns.py</code> 通过 AST 分析自动从现有测试代码中识别 Oracle 模式：</p>
+
+<table>
+  <tr><th>Oracle 模式</th><th>检测信号</th><th>检测精度</th><th>召回率</th></tr>
+  <tr><td>gsm8k_accuracy</td><td>继承 <code>GSM8KMixin</code> / <code>GSM8KAscendMixin</code></td><td>100%</td><td>100%</td></tr>
+  <tr><td>exact_match_short</td><td><code>assertEqual(output, ref)</code> + temperature=0 + max_new_tokens ≤ 32 + 生成调用</td><td>75%</td><td>75%</td></tr>
+  <tr><td>logprob_rescore</td><td><code>test_logprob_*</code> 方法 + max_new_tokens=0 重评分阶段 + tolerance 断言</td><td>93%</td><td>88%</td></tr>
+  <tr><td>token_oracle_canary</td><td>继承 <code>CanaryE2EBase</code> + ENABLE_TOKEN_ORACLE 环境变量</td><td>100%</td><td>78%</td></tr>
+  <tr style="font-weight:700;background:var(--surface);"><td>总体（加权）</td><td>0.75 置信度阈值过滤</td><td><strong>97%</strong></td><td><strong>92%</strong></td></tr>
+</table>
+
+<p>扫描覆盖 823 个测试文件，识别出 98 个高置信度 Oracle 模式关联（全部自动入库）、14 个低置信度候选（待人工审核）。</p>
+
+<h3>3.5 NPU 图谱覆盖现状</h3>
+
+<div class="card">
+  <p><strong>NPU 图谱中 39 个测试的 Oracle 模式分布：</strong></p>
+  <ul>
+    <li><code>gsm8k_accuracy</code>：39/39（100%）——<strong>全部依赖最弱的 Oracle</strong></li>
+    <li><code>exact_match_short</code>：0</li>
+    <li><code>logprob_rescore</code>：0</li>
+    <li><code>token_oracle_canary</code>：0（2026-06 验证：<strong>NPU 不支持</strong>，CUDA only）</li>
+  </ul>
+  <p style="margin-top:12px;color:var(--red);"><strong>→ NPU 测试栈对静默精度丢失零检测能力。</strong>
+  可用 Oracle 仅 3 种：gsm8k_accuracy、exact_match_short、logprob_rescore。
+  attention_backend（risk=20，有 silent_precision_loss 缺陷）零 Oracle 覆盖。</p>
+</div>
+
+<h3>3.6 维护流程</h3>
+
+<table>
+  <tr><th>操作</th><th>命令</th><th>效果</th></tr>
+  <tr><td>扫描存量测试</td><td><code>/npu-risk-graph pattern scan</code></td><td>AST 分析 → 自动更新 test_patterns.json</td></tr>
+  <tr><td>查看关联列表</td><td><code>/npu-risk-graph pattern list</code></td><td>列出所有 test→pattern 关联</td></tr>
+  <tr><td>重建图谱</td><td><code>/npu-risk-graph build</code></td><td>将新关联加载为 TEST_USES_PATTERN 边</td></tr>
+  <tr><td>查询盲区</td><td><code>queries.py --oracle-blind-spots &lt;test&gt;</code></td><td>某个测试的 Oracle 盲区</td></tr>
+  <tr><td>推荐 Oracle</td><td><code>queries.py --recommend-oracle &lt;feature&gt;</code></td><td>基于缺陷画像推荐 Oracle 模式</td></tr>
+  <tr><td>全景总览</td><td><code>queries.py --pattern-coverage</code></td><td>Oracle 模式使用统计</td></tr>
+</table>
+
+<!-- ================================================================== -->
+<h2 id="scoring">4. 风险评分模型</h2>
+
+<p>与 v1.0 相同，保持不变。每个特性的综合评分 = 概率因子（5项，最高25分）+ 影响因子（2项，最高20分）= 最高45分。</p>
+
+<table>
+  <tr><th>因子</th><th>评分</th><th>来源</th></tr>
+  <tr><td>code_complexity</td><td>1-5</td><td>AST 圈复杂度估算</td></tr>
+  <tr><td>change_frequency</td><td>1-5</td><td>Git：365天内的时间衰减加权提交数</td></tr>
+  <tr><td>historical_defects</td><td>1-5</td><td>defect_db：历史缺陷计数</td></tr>
+  <tr><td>dependency_depth</td><td>1-5</td><td>features.json：依赖特性数</td></tr>
+  <tr><td>test_effectiveness</td><td>1-5</td><td>测试评估器：最佳测试质量 0-5 → 反比映射</td></tr>
+  <tr><td>user_exposure</td><td>1-5</td><td>人工标注：使用的模型族数量</td></tr>
+  <tr><td>failure_mode</td><td>1-5</td><td>人工标注：故障后果严重度</td></tr>
+</table>
+
+<p>风险等级：critical (≥28) → high (20-27) → medium (12-19) → low (&lt;12)。</p>
+
+<!-- ================================================================== -->
+<h2 id="queries">5. 查询系统</h2>
+
+<table>
+  <tr><th>查询</th><th>CLI 标志</th><th>返回内容</th></tr>
+  <tr><td>特征风险报告</td><td><code>--feature &lt;name&gt;</code></td><td>完整风险画像（缺陷、测试、依赖、推荐）</td></tr>
+  <tr><td>全局报告</td><td><code>--report</code></td><td>盲点 + 完美风暴 + 热点 + 优先级 + 孤立测试</td></tr>
+  <tr><td>盲点检测</td><td><code>--blind-spots</code></td><td>高介数 + 低风险节点（结构性盲点）</td></tr>
+  <tr><td>完美风暴</td><td><code>--perfect-storm</code></td><td>NPU 私有 + 静默缺陷 + 零有效测试</td></tr>
+  <tr><td>缺陷热点</td><td><code>--defect-hotspots</code></td><td>"惯犯"源文件（最多 FIXED_IN 边）</td></tr>
+  <tr><td>测试优先级</td><td><code>--test-priority</code></td><td>风险 × 测试缺口排名</td></tr>
+  <tr><td>孤立测试</td><td><code>--orphans</code></td><td>无 TESTED_BY 边的测试节点（配置错误）</td></tr>
+  <tr><td>变更影响</td><td><code>--impact &lt;file&gt;</code></td><td>直接 + 1-hop + 2-hop 传播</td></tr>
+  <tr><td>Agent 语义范围限定</td><td><code>--prepare-agent</code> / <code>--apply-agent</code></td><td>子特性风险画像（如 "eagle3"）</td></tr>
+  <tr style="background:rgba(248,136,62,0.06);"><td><strong>Oracle 盲区</strong> <span class="badge badge-high">NEW</span></td>
+    <td><code>--oracle-blind-spots [test]</code></td><td>测试的 Oracle 模式无法检测哪些故障</td></tr>
+  <tr style="background:rgba(248,136,62,0.06);"><td><strong>推荐 Oracle</strong> <span class="badge badge-high">NEW</span></td>
+    <td><code>--recommend-oracle &lt;feature&gt;</code></td><td>基于缺陷画像推荐 Oracle 模式组合</td></tr>
+  <tr style="background:rgba(248,136,62,0.06);"><td><strong>Oracle 全景</strong> <span class="badge badge-high">NEW</span></td>
+    <td><code>--pattern-coverage</code></td><td>各 Oracle 模式使用统计 + 未覆盖特性</td></tr>
+</table>
+
+<p><strong>Python 导入查询：</strong></p>
+<pre>import sys; sys.path.insert(0, ".claude/skills/npu-risk-graph/scripts")
+from queries import load_graph, oracle_blind_spots, recommend_oracle_for_feature, test_pattern_coverage
+G = load_graph()</pre>
+
+<!-- ================================================================== -->
+<h2 id="kg-value">6. 知识图谱相较于纯 JSON 的增量价值</h2>
+
+<p>补充 v1.0 的 5 项价值，v2.0 新增：</p>
+<ul>
+  <li><strong>Oracle 模式盲区：</strong>图谱可以回答"test_npu_eagle3 能检测静默精度丢失吗？"
+    — 沿 TEST_USES_PATTERN → PATTERN_BLIND_SPOT 遍历即可得到答案。纯 JSON 需要人工理解两种数据并推理。</li>
+  <li><strong>缺陷驱动的 Oracle 推荐：</strong>图谱根据 feature 的历史缺陷 failure_mode，反向查 PATTERN_DETECTS 边，
+    自动推荐能覆盖这些故障的 Oracle 模式组合。这是多跳推理，JSON 无法做到。</li>
+  <li><strong>测试投资全景：</strong><code>--pattern-coverage</code> 一目了然地展示哪些特性零 Oracle 覆盖、
+    哪些 Oracle 模式完全未被使用。驱动测试投资的全局优先级排序。</li>
+</ul>
+
+<!-- ================================================================== -->
+<h2 id="cli">7. CLI 接口与斜杠命令</h2>
+
+<table>
+  <tr><th>斜杠命令</th><th>CLI 等价</th></tr>
+  <tr><td><code>/npu-risk-graph</code></td><td><code>export_for_dashboard.py --format summary</code></td></tr>
+  <tr><td><code>/npu-risk-graph query &lt;name&gt;</code></td><td><code>queries.py --feature &lt;name&gt;</code></td></tr>
+  <tr><td><code>/npu-risk-graph build</code></td><td><code>build_graph.py --baseline latest</code></td></tr>
+  <tr><td><code>/npu-risk-graph features</code></td><td>Agent 驱动：文档 → features.json</td></tr>
+  <tr><td><code>/npu-risk-graph baseline</code></td><td><code>run_full.py</code></td></tr>
+  <tr><td><code>/npu-risk-graph update</code></td><td><code>run_delta.py --mode full_delta</code></td></tr>
+  <tr><td><code>/npu-risk-graph backfill</code></td><td><code>backfill_defect_features.py</code></td></tr>
+  <tr><td><code>/npu-risk-graph impact &lt;file&gt;</code></td><td><code>queries.py --impact &lt;file&gt;</code></td></tr>
+  <tr><td><code>/npu-risk-graph visualize</code></td><td><code>visualize_graph.py</code></td></tr>
+  <tr style="background:rgba(248,136,62,0.06);"><td><code>/npu-risk-graph pattern scan</code> <span class="badge badge-high">NEW</span></td>
+    <td><code>detect_oracle_patterns.py</code></td></tr>
+  <tr style="background:rgba(248,136,62,0.06);"><td><code>/npu-risk-graph pattern list</code> <span class="badge badge-high">NEW</span></td>
+    <td><code>detect_oracle_patterns.py --list</code></td></tr>
+</table>
+
+<p><strong>测试生成：</strong>不是独立命令——<code>/npu-risk-graph query</code> 产生带 ID 的测试建议，用户在对话中选择建议项（如"写 T-001 和 T-003"），skill 根据报告上下文生成代码，输出到 <code>.sglang-risk/testcases/</code>。</p>
+
+<!-- ================================================================== -->
+<h2 id="file-structure">8. 文件结构参考</h2>
+
+<pre>
+.claude/skills/npu-risk-graph/
+├── SKILL.md
+├── references/
+│   ├── features-workflow.md
+│   ├── features_schema.md
+│   └── architecture-design-zh.html    ← 本文档
+├── workflows/
+│   ├── baseline-mapping.js            # Agent Workflow: test→feature
+│   └── defect-backfill.js             # Agent Workflow: defect→feature
+└── scripts/
+    ├── common.py                       # 共享工具
+    ├── run_full.py                     # 全量基线分析
+    ├── run_delta.py                    # 增量 Delta 引擎
+    ├── build_graph.py                  # JSON → NetworkX (+Step 3.5 测试模式)
+    ├── queries.py                      # 15 个查询函数 + CLI
+    ├── detect_oracle_patterns.py       # AST 扫描 → 自动识别 Oracle 模式 [NEW]
+    ├── detect_new_docs.py              # 文档覆盖检测
+    ├── validate_features.py            # Schema 验证
+    ├── visualize_graph.py              # D3.js HTML 生成
+    └── export_for_dashboard.py         # 仪表盘数据导出
+
+.sglang-risk/
+├── testcases/                          # 生成的测试设计产物（不参与 KG 构建）[NEW]
+│   └── test_npu_eagle3_oracle.py       # 权威双 Oracle eagle3 测试
+├── graph/
+│   ├── latest_graph.json               # 当前图谱（node-link 格式）
+│   └── agent_bundle_*.json             # Agent 语义范围限定包
+├── baselines/latest/                   # 基线 JSON
+├── deltas/                             # Delta 记录
+├── db/
+│   ├── defect_db.json                  # 缺陷数据库
+│   └── test_patterns.json              # Oracle 模式 + 故障模式 + 原型 [NEW]
+└── schemas/
+    └── risk_graph_schema.json          # LPG Schema（8 节点类型, 11 边类型）[UPDATED]
+</pre>
+
+<!-- ================================================================== -->
+<p style="text-align:center;color:var(--text-secondary);margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+  NPU 风险知识图谱 · 架构设计文档 v2.0 · 2026年6月<br>
+  更新内容：测试知识系统（OraclePattern / FailureMode 节点、自动检测扫描器、图谱驱动测试推荐）
+</p>
+
+</body>
+</html>

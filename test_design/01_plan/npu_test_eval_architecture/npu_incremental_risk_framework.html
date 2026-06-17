@@ -1,0 +1,829 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NPU 风险测试框架 — 增量评估架构设计</title>
+<style>
+  :root {
+    --bg: #090c12; --surface: #111620; --surface2: #181d2a; --border: #222837;
+    --text: #e1e5ef; --text2: #848b9e; --accent: #4da6ff; --green: #3fb950;
+    --yellow: #d29922; --red: #f85149; --purple: #a371f7; --orange: #f0883e; --teal: #39d2c0;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', system-ui, sans-serif; background: var(--bg); color: var(--text); line-height: 1.68; }
+  .container { max-width: 1120px; margin:0 auto; padding:40px 24px; }
+
+  header { text-align:center; padding:80px 24px 60px; background:linear-gradient(180deg, #0f141e 0%, #090c14 100%); border-bottom:1px solid var(--border); position:relative; overflow:hidden; }
+  header::before { content:''; position:absolute; top:-40%; left:-10%; width:120%; height:180%; background:radial-gradient(ellipse at 40% 50%, rgba(57,210,192,.06) 0%, transparent 55%), radial-gradient(ellipse at 65% 50%, rgba(77,166,255,.05) 0%, transparent 55%); pointer-events:none; }
+  header h1 { font-size:2.2em; font-weight:750; background:linear-gradient(135deg, #39d2c0 0%, #4da6ff 50%, #a371f7 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; margin-bottom:14px; position:relative; }
+  header .subtitle { color:var(--text2); font-size:1.05em; position:relative; }
+  header .meta { margin-top:24px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap; position:relative; }
+  header .meta span { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:7px 16px; font-size:.82em; color:var(--text2); }
+
+  section { margin:48px 0; }
+  h2 { font-size:1.5em; font-weight:680; margin-bottom:20px; padding-bottom:10px; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:10px; }
+  h2 .num { background:var(--accent); color:#fff; font-size:.67em; width:30px; height:30px; display:flex; align-items:center; justify-content:center; border-radius:7px; flex-shrink:0; font-weight:700; }
+  h3 { font-size:1.15em; font-weight:650; margin:28px 0 12px; color:#cdd3e0; }
+  h4 { font-size:1em; font-weight:600; margin:18px 0 8px; color:#bcc3d4; }
+  p { margin-bottom:10px; color:var(--text2); }
+  strong { color:var(--text); font-weight:650; }
+  em { color:var(--accent); font-style:normal; }
+  code { font-family:'JetBrains Mono','Cascadia Code','Fira Code',monospace; font-size:.88em; }
+  pre { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px; overflow-x:auto; font-size:.8em; line-height:1.55; }
+  pre code { color:#c9d1d9; }
+  .tbl-wrap { overflow-x:auto; margin:14px 0; border:1px solid var(--border); border-radius:8px; }
+  table { width:100%; border-collapse:collapse; font-size:.86em; }
+  th,td { padding:10px 14px; text-align:left; }
+  th { background:var(--surface); font-weight:650; color:var(--text); white-space:nowrap; border-bottom:2px solid var(--border); font-size:.8em; text-transform:uppercase; letter-spacing:.04em; }
+  td { border-bottom:1px solid var(--border); color:var(--text2); }
+  tr:last-child td { border-bottom:none; }
+
+  .badge { display:inline-block; padding:3px 10px; border-radius:10px; font-size:.74em; font-weight:650; white-space:nowrap; }
+  .badge.red { background:rgba(248,81,73,.15); color:var(--red); }
+  .badge.orange { background:rgba(240,136,62,.15); color:var(--orange); }
+  .badge.yellow { background:rgba(210,153,34,.15); color:var(--yellow); }
+  .badge.green { background:rgba(63,185,80,.15); color:var(--green); }
+  .badge.blue { background:rgba(77,166,255,.15); color:var(--accent); }
+  .badge.purple { background:rgba(163,113,247,.15); color:var(--purple); }
+  .badge.teal { background:rgba(57,210,192,.15); color:var(--teal); }
+
+  .callout { background:rgba(77,166,255,.06); border:1px solid rgba(77,166,255,.16); border-radius:10px; padding:18px 22px; margin:18px 0; }
+  .callout h4 { margin-top:0; color:var(--accent); }
+  .callout.danger { background:rgba(248,81,73,.05); border-color:rgba(248,81,73,.16); }
+  .callout.danger h4 { color:var(--red); }
+  .callout.warn { background:rgba(240,136,62,.05); border-color:rgba(240,136,62,.16); }
+  .callout.warn h4 { color:var(--orange); }
+  .callout.success { background:rgba(63,185,80,.05); border-color:rgba(63,185,80,.16); }
+  .callout.success h4 { color:var(--green); }
+
+  .stat-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(160px, 1fr)); gap:12px; margin:16px 0; }
+  .stat-card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:18px 16px; text-align:center; }
+  .stat-card .val { font-size:1.7em; font-weight:750; }
+  .stat-card .lbl { font-size:.8em; color:var(--text2); margin-top:3px; }
+  .card-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(300px, 1fr)); gap:14px; margin:14px 0; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:10px; padding:20px; }
+  .card h4 { margin-top:0; }
+  .card ul { list-style:none; font-size:.84em; color:var(--text2); }
+  .card ul li { padding:3px 0; }
+  .card ul li::before { content:"▸ "; color:var(--accent); }
+  .two-col { display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media(max-width:768px) { .two-col { grid-template-columns:1fr; } }
+
+  .arch-box { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:24px; margin:16px 0; overflow-x:auto; }
+  .arch-box svg { min-width:800px; }
+
+  .delta-row { display:grid; grid-template-columns:140px 1fr 120px 120px 160px; gap:8px; align-items:center; padding:8px 12px; border-bottom:1px solid var(--border); font-size:.84em; }
+  .delta-row.header { font-weight:650; color:var(--text); border-bottom:2px solid var(--border); font-size:.78em; text-transform:uppercase; letter-spacing:.04em; }
+  .delta-row .score-up { color:var(--red); font-weight:700; }
+  .delta-row .score-down { color:var(--green); font-weight:700; }
+  .delta-row .score-same { color:var(--text2); }
+
+  .flow-step { display:flex; gap:16px; align-items:flex-start; padding:14px 0; border-bottom:1px solid var(--border); }
+  .flow-step .step-num { width:36px; height:36px; background:var(--surface2); border:2px solid var(--accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:.9em; flex-shrink:0; color:var(--accent); }
+  .flow-step .step-body { flex:1; }
+  .flow-step .step-body h4 { margin:0 0 4px; }
+  .flow-step .step-body p { font-size:.86em; margin:0; }
+
+  footer { text-align:center; padding:40px 24px; color:var(--text2); font-size:.8em; border-top:1px solid var(--border); margin-top:60px; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>NPU 风险测试框架 — 增量评估架构</h1>
+  <p class="subtitle">从"一次性快照"到"持续演进的风险画像"——每次代码/测试变更自动触发增量更新</p>
+  <div class="meta">
+    <span>📐 设计目标: 可增量 · 可对比 · 可追溯</span>
+    <span>🔄 触发机制: git hook + CI scheduled + PR check</span>
+    <span>📊 输出: Risk Delta Report (变化量，非全量)</span>
+    <span>💾 持久化: Baseline JSON → Delta JSON → Trend DB</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== Problem Statement ===== -->
+<section id="problem">
+  <h2><span class="num">1</span>问题定义：为什么一次性分析不够</h2>
+
+  <div class="two-col">
+    <div>
+      <h3>全量分析的痛点</h3>
+      <div class="card" style="margin-top:0;">
+        <ul>
+          <li><strong>每次运行都从头扫描</strong> — 100+ 文件全部重读，即使 99% 未变</li>
+          <li><strong>无法回答"趋势"问题</strong> — 风险是上升还是下降？测试覆盖率是改善还是恶化？</li>
+          <li><strong>结果之间无法对比</strong> — 两次分析之间没有 diff，看不出变化</li>
+          <li><strong>CI 集成困难</strong> — 全量分析 3-5min 太长，不适合 PR 门禁</li>
+          <li><strong>历史缺陷数据的时效性</strong> — git log 每次重新 grep，没有增量追加</li>
+        </ul>
+      </div>
+    </div>
+    <div>
+      <h3>增量分析的期望</h3>
+      <div class="card" style="margin-top:0; border-color:rgba(57,210,192,.25);">
+        <ul>
+          <li>✅ <strong>只分析变更部分</strong> — 1 个文件改了，只重算那 1 个文件的风险</li>
+          <li>✅ <strong>输出 Delta</strong> — "FuseEP 风险评分 +3↑ 因为新增 dual-stream 分支"</li>
+          <li>✅ <strong>趋势追踪</strong> — 本月 vs 上月，测试覆盖率趋势线</li>
+          <li>✅ <strong>PR 门禁可集成</strong> — 增量分析 < 30s，可作为 PR comment</li>
+          <li>✅ <strong>缺陷数据增量追加</strong> — 不重复 grep 全量 git log</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Data Model ===== -->
+<section id="datamodel">
+  <h2><span class="num">2</span>持久化数据模型设计</h2>
+  <p>增量评估的前提是<strong>有东西可以对比</strong>。每次分析后，结构化结果持久化到仓库中，作为下一次分析的 baseline。</p>
+
+  <h3>2.1 三层存储架构</h3>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 850 340" xmlns="http://www.w3.org/2000/svg">
+      <!-- Layer 1 -->
+      <rect x="40" y="20" width="770" height="80" rx="8" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="425" y="48" fill="var(--text)" font-size="13" text-anchor="middle" font-weight="650">Layer 1: Baseline Snapshot（每次全量分析的完整快照）</text>
+      <text x="425" y="68" fill="var(--text2)" font-size="11" text-anchor="middle">.sglang-risk/baselines/{date}-{commit}/  —  features.json · tests.json · risk_profiles.json · test_strategies.json</text>
+      <text x="425" y="86" fill="var(--text2)" font-size="10" text-anchor="middle">可追溯任意历史时刻的风险画像 · Git LFS 或独立存储</text>
+
+      <!-- Layer 2 -->
+      <rect x="40" y="120" width="770" height="80" rx="8" fill="var(--surface2)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="425" y="148" fill="var(--accent)" font-size="13" text-anchor="middle" font-weight="650">Layer 2: Delta Log（每次增量分析的差异记录）</text>
+      <text x="425" y="168" fill="var(--text2)" font-size="11" text-anchor="middle">.sglang-risk/deltas/{commit}.json  —  risk_changes[] · coverage_changes[] · new_defects[] · fixed_defects[]</text>
+      <text x="425" y="186" fill="var(--text2)" font-size="10" text-anchor="middle">轻量 · 每条 delta 记录变更原因（PR #xxx / commit sha / 自动检测）</text>
+
+      <!-- Layer 3 -->
+      <rect x="40" y="220" width="770" height="80" rx="8" fill="var(--surface2)" stroke="var(--purple)" stroke-width="1.5"/>
+      <text x="425" y="248" fill="var(--purple)" font-size="13" text-anchor="middle" font-weight="650">Layer 3: Trend DB（聚合统计 · 趋势可视化）</text>
+      <text x="425" y="268" fill="var(--text2)" font-size="11" text-anchor="middle">.sglang-risk/trends/  —  weekly_coverage.json · monthly_risk_summary.json · defect_rate.json</text>
+      <text x="425" y="286" fill="var(--text2)" font-size="10" text-anchor="middle">用于仪表板 · 周报 · 质量趋势判断（改善/稳定/恶化）</text>
+    </svg>
+  </div>
+
+  <h3>2.2 核心数据结构</h3>
+
+  <div class="two-col">
+    <div>
+      <h4>Risk Profile（含版本信息）</h4>
+<pre><code>{
+  "schema_version": "1.0",
+  "generated_at": "2026-05-30T10:00:00Z",
+  "git_commit": "6b6963f42",
+  "git_branch": "main",
+
+  "feature": "ascend_fuseep",
+  "risk": {
+    "probability": { "total": 18, "max": 25,
+      "factors": {
+        "code_complexity": {"score":5, "source":"AST"},
+        "change_frequency": {"score":4, "source":"git",
+          "commits_90d": 4, "last_modified": "2026-05-28"},
+        "historical_defects": {"score":5, "source":"defect_db",
+          "total_bugs": 6, "last_bug": "2026-05-15"},
+        "platform_divergence": {"score":5,
+          "divergence_type": "fully_npu_private"},
+        "dependency_depth": {"score":3, "layers": 2},
+        "test_effectiveness": {"score":5,
+          "existing_tests": 0, "effective_tests": 0}
+      }},
+    "impact": { "total": 16, "max": 20,
+      "factors": {
+        "user_exposure": {"score":4, "path_coverage":"all_moe"},
+        "failure_mode": {"score":5, "type":"silent_corruption"},
+        "detectability": {"score":5, "rationale":"...",
+        "recovery_cost": {"score":4, "actions":"reload+restart"}
+      }},
+    "composite_score": 34,
+    "level": "critical",
+    "test_depth": "L0"
+  },
+  "test_strategy": { "layers": [...], "total_effort_hours": 14 },
+  "fingerprint": "sha256:abc123..."
+}</code></pre>
+    </div>
+    <div>
+      <h4>Delta Record（差异记录）</h4>
+<pre><code>{
+  "delta_id": "d_20260530_001",
+  "parent_commit": "6b6963f42",
+  "current_commit": "7c8124a91",
+  "trigger": "pr_check",
+  "changes": [
+    {
+      "type": "risk_score_change",
+      "feature": "ascend_fuseep",
+      "field": "probability.code_complexity",
+      "old_value": 5,
+      "new_value": 5,
+      "change_reason": "no change"
+    },
+    {
+      "type": "risk_score_change",
+      "feature": "dual_stream_moe",
+      "field": "probability.change_frequency",
+      "old_value": 3,
+      "new_value": 5,
+      "diff": "+2",
+      "change_reason": "PR #24951 added dual-stream opt",
+      "changed_files": [
+        "models/deepseek_v2.py",
+        "models/qwen2_moe.py"
+      ]
+    },
+    {
+      "type": "coverage_change",
+      "feature": "ascend_fuseep",
+      "old_tests": 0,
+      "new_tests": 2,
+      "new_test_files": [
+        "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_fuseep_oracle.py"
+      ],
+      "estimated_risk_reduction": 12
+    },
+    {
+      "type": "new_defect_recorded",
+      "feature": "dynamic_quant",
+      "bug_id": "BUG-2026-042",
+      "description": "W4A8 scale overflow at bs=256",
+      "commit_fixed": "8d3f12a",
+      "impact_on_risk": "+3 to probability.historical_defects"
+    }
+  ],
+  "summary": {
+    "risk_increased": ["dual_stream_moe"],
+    "risk_decreased": ["ascend_fuseep"],
+    "net_risk_change": -7,
+    "recommendation": "MERGABLE — 整体风险下降"
+  }
+}</code></pre>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>🔑 Fingerprint 机制</h4>
+    <p style="color:var(--text);">每个特性生成一个内容指纹（SHA256 of 归一化后的源代码 + 测试覆盖数据）。下次分析时，对比指纹即可 <strong>O(1) 判断是否需要重算</strong>。指纹不变 → 跳过该特性的全部 Agent 分析，直接复用上次结果。</p>
+  </div>
+</section>
+
+<!-- ===== Incremental Engine ===== -->
+<section id="engine">
+  <h2><span class="num">3</span>增量分析引擎设计</h2>
+
+  <h3>3.1 核心流程：从"全量扫描"到"变更驱动"</h3>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 880 500" xmlns="http://www.w3.org/2000/svg">
+      <!-- Trigger -->
+      <rect x="320" y="10" width="240" height="36" rx="8" fill="rgba(57,210,192,.12)" stroke="rgba(57,210,192,.3)"/>
+      <text x="440" y="33" fill="var(--teal)" font-size="13" text-anchor="middle" font-weight="650">触发源: Git Hook / CI / Manual</text>
+
+      <line x1="440" y1="46" x2="440" y2="70" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 1 -->
+      <rect x="40" y="70" width="800" height="48" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="60" y="92" fill="var(--accent)" font-size="12" font-weight="700">Step 1</text>
+      <text x="120" y="92" fill="var(--text)" font-size="12">git diff 检测变更文件</text>
+      <text x="380" y="92" fill="var(--text2)" font-size="11">git diff --name-only {baseline_commit}..HEAD</text>
+      <text x="660" y="92" fill="var(--text2)" font-size="10">→ changed_files.txt</text>
+
+      <line x1="440" y1="118" x2="440" y2="142" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 2 -->
+      <rect x="40" y="142" width="800" height="48" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="60" y="164" fill="var(--accent)" font-size="12" font-weight="700">Step 2</text>
+      <text x="120" y="164" fill="var(--text)" font-size="12">变更文件 → 受影响特性映射</text>
+      <text x="380" y="164" fill="var(--text2)" font-size="11">查询 dependency_map.json: 每个源文件属于哪些 feature</text>
+      <text x="660" y="164" fill="var(--text2)" font-size="10">→ affected_features.json</text>
+
+      <line x1="440" y1="190" x2="440" y2="214" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 3 -->
+      <rect x="40" y="214" width="800" height="48" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="60" y="236" fill="var(--accent)" font-size="12" font-weight="700">Step 3</text>
+      <text x="120" y="236" fill="var(--text)" font-size="12">Fingerprint 快速比对（O(1) 跳过未变特性）</text>
+      <text x="380" y="236" fill="var(--text2)" font-size="11">SHA256(归一化源码) vs baseline fingerprint · 命中→跳过</text>
+      <text x="660" y="236" fill="var(--text2)" font-size="10">→ needs_reanalysis.json</text>
+
+      <line x1="440" y1="262" x2="440" y2="286" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 4 -->
+      <rect x="40" y="286" width="800" height="60" rx="6" fill="var(--surface2)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="60" y="310" fill="var(--accent)" font-size="12" font-weight="700">Step 4</text>
+      <text x="120" y="310" fill="var(--text)" font-size="12">增量 Agent 分析（仅重算变更特性）</text>
+      <text x="380" y="310" fill="var(--text2)" font-size="11">仅对 needs_reanalysis 中的特性启动 Agent</text>
+      <text x="380" y="330" fill="var(--text2)" font-size="11">通常只有 1-5 个特性需要重算（vs 全量 18 个）</text>
+      <text x="660" y="320" fill="var(--teal)" font-size="10" font-weight="650">Agent 调用: 1-15 个 (vs 全量 30+)</text>
+
+      <line x1="440" y1="346" x2="440" y2="370" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 5 -->
+      <rect x="40" y="370" width="800" height="48" rx="6" fill="var(--surface2)" stroke="var(--border)"/>
+      <text x="60" y="392" fill="var(--accent)" font-size="12" font-weight="700">Step 5</text>
+      <text x="120" y="392" fill="var(--text)" font-size="12">生成 Delta Record——与 baseline 逐字段对比</text>
+      <text x="380" y="392" fill="var(--text2)" font-size="11">新值 vs 旧值 → diff → delta.json + PR comment</text>
+      <text x="660" y="392" fill="var(--text2)" font-size="10">→ delta.json</text>
+
+      <line x1="440" y1="418" x2="440" y2="442" stroke="var(--border)" stroke-width="1.5"/>
+
+      <!-- Step 6 -->
+      <rect x="320" y="442" width="240" height="36" rx="8" fill="rgba(63,185,80,.1)" stroke="rgba(63,185,80,.25)"/>
+      <text x="440" y="465" fill="var(--green)" font-size="13" text-anchor="middle" font-weight="650">更新 Baseline + Delta Log + Trend DB</text>
+    </svg>
+  </div>
+
+  <h3>3.2 关键机制：受影响特性映射</h3>
+  <p>这是增量评估的核心——<strong>一个文件改了，需要知道哪些特性的风险画像受影响</strong>。</p>
+
+  <div class="two-col">
+    <div>
+      <h4>Dependency Map（自动维护）</h4>
+<pre><code>{
+  "dependency_map": {
+    "layers/moe/token_dispatcher/fuseep.py": {
+      "features": ["ascend_fuseep", "moe_routing"],
+      "risk_factors": ["code_complexity", "platform_divergence"]
+    },
+    "hardware_backend/npu/quantization/fused_moe_method_npu.py": {
+      "features": ["ascend_fuseep", "dynamic_quant", "w4a4"],
+      "risk_factors": ["code_complexity", "historical_defects"]
+    },
+    "models/deepseek_v2.py": {
+      "features": ["dual_stream_moe", "mla_preprocess",
+                   "ascend_fuseep", "basic_tp"],
+      "risk_factors": ["change_frequency", "user_exposure"]
+    },
+    "environ.py": {
+      "features": ["dual_stream_moe", "mlapo",
+                   "fractal_nz_format", "ascend_fuseep"],
+      "risk_factors": ["change_frequency"]
+    },
+    "test/registered/ascend/basic_function/parallel_strategy/expert_parallelism/test_npu_fuseep_oracle.py": {
+      "features": ["ascend_fuseep"],
+      "risk_factors": ["test_effectiveness"],
+      "is_test": true
+    }
+  }
+}</code></pre>
+    </div>
+    <div>
+      <h4>依赖图维护策略</h4>
+      <div class="card" style="margin-top:0;">
+        <ul>
+          <li><strong>全量分析时自动生成</strong> — Phase 1 Agent 输出中包含文件的 feature 归属</li>
+          <li><strong>增量时优先复用</strong> — 新文件不在 map 中 → 启动 1 个 Agent 专门分析新文件</li>
+          <li><strong>map 本身也做版本管理</strong> — dependency_map.json 随代码变更一起更新</li>
+          <li><strong>保守策略</strong> — 不确定时标记为 "可能需要重算"，宁可多算不可漏算</li>
+        </ul>
+      </div>
+      <h4>模块→特性 映射示例</h4>
+      <div class="tbl-wrap">
+      <table>
+        <tr><th>变更文件</th><th>受影响特性</th><th>需重算Agent数</th></tr>
+        <tr><td><code>fuseep.py</code> 修改</td><td>ascend_fuseep</td><td>1 (Risk-Scorer)</td></tr>
+        <tr><td><code>deepseek_v2.py</code> 修改</td><td>dual_stream_moe, mla, fuseep, tp</td><td>4</td></tr>
+        <tr><td>新增测试文件</td><td>ascend_fuseep（仅test_effectiveness）</td><td>1 (轻量更新)</td></tr>
+        <tr><td><code>environ.py</code> 新增flag</td><td>需要 Agent 语义分析</td><td>1 (新特性发现)</td></tr>
+        <tr><td><code>server_args.py</code> 修改</td><td>取决于变更行（AST diff）</td><td>按需</td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <h3>3.3 PR 门禁模式（最快路径）</h3>
+  <p>当集成到 CI 作为 PR check 时，走一条极简路径：</p>
+
+  <div class="flow-step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h4>git diff 检测</h4>
+      <p>获取 PR 变更文件列表，匹配 dependency_map → affected_features。如果 affected_features 为空（如只改了文档），直接返回 "No risk impact"。</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h4>Fingerprint 快速跳过</h4>
+      <p>对 affected_features 做 fingerprint 比对。如果源码内容指纹与 baseline 一致（如只有注释/格式变更），跳过。</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h4>增量风险评分</h4>
+      <p>仅对指纹变化的特性，启动 1 个 Risk-Scorer Agent 重新评分。这个 Agent 只读变更文件 + baseline 中其他文件的数据（不重读全量）。</p>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h4>输出 Delta Comment</h4>
+      <p>生成精简版 delta：风险上升的特性 + 风险下降的特性 + 建议行动。作为 PR comment 自动发布。</p>
+    </div>
+  </div>
+
+  <div class="stat-grid">
+    <div class="stat-card teal"><div class="val">&lt; 30s</div><div class="lbl">典型 PR 门禁耗时</div></div>
+    <div class="stat-card"><div class="val">1-5</div><div class="lbl">受影响特性数</div></div>
+    <div class="stat-card green"><div class="val">1-3</div><div class="lbl">Agent 调用数</div></div>
+    <div class="stat-card"><div class="val">~8K</div><div class="lbl">Token 消耗</div></div>
+  </div>
+</section>
+
+<!-- ===== Change Taxonomy ===== -->
+<section id="taxonomy">
+  <h2><span class="num">4</span>变更分类与对应的增量策略</h2>
+  <p>不同类型的变更对风险评估的影响路径不同。框架需要<strong>识别变更类型</strong>，然后走<strong>精准的增量路径</strong>。</p>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>变更类型</th><th>检测方式</th><th>影响的风险因子</th><th>增量策略</th><th>Agent</th></tr>
+    <tr>
+      <td><span class="badge red">源码逻辑变更</span></td>
+      <td><code>*.py</code> 在 <code>python/sglang/srt/</code> 下</td>
+      <td>code_complexity, platform_divergence</td>
+      <td>对该文件所属 feature 重新评分</td>
+      <td>Risk-Scorer</td>
+    </tr>
+    <tr>
+      <td><span class="badge orange">新增环境变量/配置</span></td>
+      <td><code>environ.py</code> diff 中新增 <code>SGLANG_NPU_*</code></td>
+      <td>code_complexity, platform_divergence</td>
+      <td>判断是否属于已有 feature 还是新 feature</td>
+      <td>Feature-Discovery</td>
+    </tr>
+    <tr>
+      <td><span class="badge yellow">新增测试文件</span></td>
+      <td><code>test/registered/ascend/</code> 下新增 <code>*.py</code></td>
+      <td>test_effectiveness</td>
+      <td>分析测试类型和质量 → 更新 test_effectiveness 评分</td>
+      <td>Test-Evaluator</td>
+    </tr>
+    <tr>
+      <td><span class="badge green">修改现有测试</span></td>
+      <td><code>test/registered/ascend/</code> 下修改 <code>*.py</code></td>
+      <td>test_effectiveness</td>
+      <td>仅重新评估该测试的质量评分</td>
+      <td>Test-Evaluator</td>
+    </tr>
+    <tr>
+      <td><span class="badge purple">Bug Fix commit</span></td>
+      <td>commit message 含 <code>fix</code>/<code>bug</code> + NPU 关键词</td>
+      <td>historical_defects</td>
+      <td>追加缺陷记录 → 更新相关 feature 的 historical_defects 评分</td>
+      <td>Defect-Recorder</td>
+    </tr>
+    <tr>
+      <td><span class="badge blue">依赖版本升级</span></td>
+      <td><code>pyproject_npu.toml</code> / <code>requirements*.txt</code></td>
+      <td>dependency_depth</td>
+      <td>分析依赖变更的影响范围 → 标记相关 feature</td>
+      <td>Dependency-Analyzer</td>
+    </tr>
+    <tr>
+      <td><span class="badge teal">CI 配置变更</span></td>
+      <td><code>.github/workflows/*npu*.yml</code></td>
+      <td>（间接）test_effectiveness</td>
+      <td>如果 CI 覆盖范围变了（增/减 suite），更新对应特性</td>
+      <td>CI-Analyzer</td>
+    </tr>
+    <tr>
+      <td><span class="badge">文档/注释变更</span></td>
+      <td><code>*.md</code> / 注释行 diff</td>
+      <td>无</td>
+      <td>指纹比对命中 → 直接跳过</td>
+      <td>无</td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="callout success">
+    <h4>🎯 关键设计原则：变更粒度匹配</h4>
+    <p style="color:var(--text);">不是每种变更都需要启动 Agent。文档变更 → 直接跳过。测试新增 → 只更新一个风险因子。核心逻辑变更 → 重新评分。这个分级机制确保增量评估的<strong>计算量严格正比于变更的严重程度</strong>。</p>
+  </div>
+</section>
+
+<!-- ===== CI Integration ===== -->
+<section id="ci">
+  <h2><span class="num">5</span>CI 集成方案</h2>
+
+  <h3>5.1 三种运行模式</h3>
+
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid var(--red);">
+      <h4>⚡ PR Check（门禁）</h4>
+      <p style="font-size:.84em;color:var(--text2);">每次 PR 自动触发 · 增量模式 · &lt;30s</p>
+      <ul>
+        <li>git diff → affected_features</li>
+        <li>指纹比对跳过未变特性</li>
+        <li>仅重算变更特性（1-5个）</li>
+        <li>输出: Delta Comment + Merge Gate</li>
+        <li>阻断条件: 新增特性风险评分 ≥ critical 且无对应测试</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <h4>🕐 Scheduled（定时全量）</h4>
+      <p style="font-size:.84em;color:var(--text2);">每周/每日定时 · 全量模式 · 3-5min</p>
+      <ul>
+        <li>每周一次全量基线刷新</li>
+        <li>重新计算所有 18 个特性的完整风险画像</li>
+        <li>更新 baseline snapshot</li>
+        <li>生成周度趋势报告: 风险↑/↓/→</li>
+        <li>输出: Risk Dashboard 数据</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <h4>🔧 Manual（手动深挖）</h4>
+      <p style="font-size:.84em;color:var(--text2);">按需触发 · 深度模式 · 5-8min</p>
+      <ul>
+        <li>对指定特性做 L0 深度分析</li>
+        <li>Bug 考古 + 跨平台差分 + Fuzz 建议</li>
+        <li>用于 release 前的专项审计</li>
+        <li>新特性合入后的首次评估</li>
+        <li>输出: 指定特性的完整测试策略</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>5.2 PR Check 的自动评论模板</h3>
+
+<pre><code>## 🤖 NPU Risk Delta Report
+
+| 变更类型 | 特性 | 变化 | 详情 |
+|----------|------|------|------|
+| ⬆️ 风险上升 | dual_stream_moe | 18→<strong>26</strong> (+8) | PR #24951 新增 multi-stream 分支 |
+| ⬇️ 风险下降 | ascend_fuseep | 34→<strong>22</strong> (-12) | 新增 2 个 Oracle 测试 |
+| ➡️ 无变化 | dynamic_quant | 30 | 代码未变 |
+
+**风险评估**: ✅ <strong>MERGABLE</strong> — 整体风险净下降 (-4)。FuseEP 风险从 Critical 降至 High。
+
+**建议**: 考虑为 dual_stream_moe 新增特性的变更添加一个基础冒烟测试，以控制新增风险。</code></pre>
+
+  <h3>5.3 GitHub Actions Workflow 片段</h3>
+
+<pre><code># .github/workflows/npu-risk-check.yml
+name: NPU Risk Delta Check
+
+on:
+  pull_request:
+    paths:
+      - 'python/sglang/srt/**'
+      - 'test/registered/ascend/**'
+      - 'python/sglang/srt/environ.py'
+
+jobs:
+  risk-delta:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # 需要 git history 做 diff
+
+      - name: Compute Risk Delta
+        run: |
+          python .sglang-risk/scripts/run_delta.py \
+            --baseline origin/main \
+            --head HEAD \
+            --mode pr_check
+
+      - name: Post Delta Comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const delta = require('./.sglang-risk/deltas/latest.json');
+            const riskIncreased = delta.summary.risk_increased.length > 0;
+            if (riskIncreased && delta.changes.some(c => c.new_level === 'critical')) {
+              core.setFailed('Critical risk increase detected. See comment for details.');
+            }</code></pre>
+</section>
+
+<!-- ===== Trend & Dashboard ===== -->
+<section id="trend">
+  <h2><span class="num">6</span>趋势追踪与质量仪表板</h2>
+
+  <h3>6.1 从 Delta 到 Trend</h3>
+  <p>每个 Delta Record 是微观的"点"，Trend DB 负责把这些点连成"线"——回答管理层面的问题。</p>
+
+  <div class="two-col">
+    <div>
+      <h4>趋势指标</h4>
+      <div class="tbl-wrap">
+      <table>
+        <tr><th>指标</th><th>来源</th><th>用途</th></tr>
+        <tr><td><strong>加权风险总分</strong></td><td>∑(risk_score × weight) 每周趋势</td><td>判断整体质量方向</td></tr>
+        <tr><td><strong>Critical 缺口数</strong></td><td>level=critical 的特性数</td><td>管理层关注的红色警报</td></tr>
+        <tr><td><strong>测试有效性中位数</strong></td><td>test_effectiveness 评分分布</td><td>测试质量是否在改善</td></tr>
+        <tr><td><strong>缺陷发现率</strong></td><td>每周新增 defect_record</td><td>是变好了还是漏洞在增多</td></tr>
+        <tr><td><strong>测试覆盖率加权值</strong></td><td>加权（风险越高权重越大）</td><td>是否优先覆盖了高风险区</td></tr>
+        <tr><td><strong>Delta 频率</strong></td><td>每周 delta 记录数</td><td>变更活跃度（高→需更多关注）</td></tr>
+      </table>
+      </div>
+    </div>
+    <div>
+      <h4>告警规则</h4>
+      <div class="card" style="margin-top:0;">
+        <ul>
+          <li><strong>🔴 Critical</strong>: 新特性 risk ≥ critical 且零测试 → 阻断 PR</li>
+          <li><strong>🟠 Warning</strong>: 加权风险总分连续 2 周上升 → 发送告警</li>
+          <li><strong>🟡 Info</strong>: 某个特性 30 天未更新风险画像 → 建议重新全量评估</li>
+          <li><strong>🟢 Good</strong>: 测试有效性中位数持续上升 → 质量改善趋势确认</li>
+        </ul>
+      </div>
+      <h4>趋势判断逻辑</h4>
+      <div class="tbl-wrap">
+      <table>
+        <tr><th>条件</th><th>趋势</th></tr>
+        <tr><td>加权风险 ↓ + 测试有效性 ↑</td><td><span class="badge green">📈 改善</span></td></tr>
+        <tr><td>加权风险 → + 测试有效性 →</td><td><span class="badge yellow">➡️ 稳定</span></td></tr>
+        <tr><td>加权风险 ↑ 或 测试有效性 ↓</td><td><span class="badge red">📉 恶化</span></td></tr>
+        <tr><td>缺陷发现率 ↑ + 测试有效性 →</td><td><span class="badge orange">⚠️ 测试盲区扩大</span></td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <h3>6.2 仪表板数据输出格式</h3>
+  <p>Trend DB 中的聚合数据可被任何前端消费（Grafana / 内部 Dashboard / GitHub Pages）。</p>
+
+<pre><code>// .sglang-risk/trends/weekly_summary.json
+{
+  "week": "2026-W22",
+  "start_commit": "c027ae677",
+  "end_commit": "6b6963f42",
+  "weighted_risk_score": 1280,     // ↓ from 1350 last week
+  "critical_features": 3,           // = same
+  "total_features": 18,
+  "test_effectiveness_median": 1.2, // ↑ from 0.8 (scale 0-5)
+  "new_defects_recorded": 3,
+  "defects_fixed": 5,
+  "testing_gap_coverage": 0.62,     // ↑ from 0.55 (weighted by risk)
+  "trend": "improving",             // "improving" | "stable" | "degrading" | "blind_spot_growing"
+  "recommendations": [
+    "FuseEP 新增的 2 个 Oracle 测试已显著降低其风险评分 (34→22)",
+    "dual_stream_moe 作为新特性仍为 zero-test，建议下周优先补测试"
+  ]
+}</code></pre>
+</section>
+
+<!-- ===== Implementation Path ===== -->
+<section id="implementation">
+  <h2><span class="num">7</span>落地路径</h2>
+
+  <h3>7.1 分阶段建设</h3>
+
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>阶段</th><th>交付物</th><th>周期</th><th>效果</th></tr>
+    <tr>
+      <td><span class="badge teal">M0</span></td>
+      <td>
+        <strong>第一次全量分析</strong><br>
+        · 运行两轮 Workflow（覆盖审计 + 风险深挖）<br>
+        · 产出 baseline snapshot（18 个特性的完整风险画像）<br>
+        · 产出 dependency_map.json<br>
+        · 产出 test_strategies.json
+      </td>
+      <td>1 天</td>
+      <td>建立风险画像基线</td>
+    </tr>
+    <tr>
+      <td><span class="badge blue">M1</span></td>
+      <td>
+        <strong>增量引擎骨架</strong><br>
+        · 实现 git diff → affected_features 映射<br>
+        · 实现 fingerprint 比对<br>
+        · 实现 delta.json 生成<br>
+        · 命令行工具: <code>python .sglang-risk/scripts/run_delta.py</code>
+      </td>
+      <td>3-5 天</td>
+      <td>手动运行增量分析</td>
+    </tr>
+    <tr>
+      <td><span class="badge purple">M2</span></td>
+      <td>
+        <strong>CI 集成</strong><br>
+        · PR check workflow（增量模式，&lt;30s）<br>
+        · Scheduled weekly workflow（全量基线刷新）<br>
+        · PR 自动评论 Delta Report
+      </td>
+      <td>2-3 天</td>
+      <td>每次 PR 自动评估风险影响</td>
+    </tr>
+    <tr>
+      <td><span class="badge orange">M3</span></td>
+      <td>
+        <strong>趋势仪表板</strong><br>
+        · Trend DB 聚合脚本<br>
+        · 简单的 HTML Dashboard（GitHub Pages 部署）<br>
+        · 趋势告警（Slack / 飞书通知）
+      </td>
+      <td>3-5 天</td>
+      <td>质量趋势可视化</td>
+    </tr>
+    <tr>
+      <td><span class="badge red">M4</span></td>
+      <td>
+        <strong>闭环优化</strong><br>
+        · 缺陷发现 → 回溯风险评分准确性 → 调优权重<br>
+        · dependency_map 自动更新<br>
+        · Agent prompt 持续优化
+      </td>
+      <td>持续</td>
+      <td>框架越用越准</td>
+    </tr>
+  </table>
+  </div>
+
+  <h3>7.2 文件布局</h3>
+
+<pre><code>.sglang-risk/
+├── README.md                    # 框架使用说明
+├── scripts/
+│   ├── run_full.py              # 全量分析 (两轮 Workflow 编排)
+│   ├── run_delta.py             # 增量分析 (PR check)
+│   ├── update_trends.py         # 趋势聚合
+│   ├── build_dashboard.py       # 仪表板生成
+│   └── common.py                # 共享工具: fingerprint, dependency_map
+├── baselines/
+│   └── 2026-05-30-6b6963f42/   # 按日期+commit 组织
+│       ├── features.json
+│       ├── tests.json
+│       ├── risk_profiles.json
+│       ├── test_strategies.json
+│       └── dependency_map.json
+├── deltas/
+│   ├── 7c8124a91.json           # 按 commit sha 命名
+│   └── latest.json              # 指向最新 delta 的软链
+├── trends/
+│   ├── weekly_2026W22.json
+│   └── latest.json
+├── db/
+│   ├── defect_db.json           # 历史缺陷数据库 (增量追加)
+│   └── feature_fingerprints.json # 特性指纹缓存
+└── dashboard/
+    └── index.html               # GitHub Pages 仪表板</code></pre>
+
+  <div class="callout">
+    <h4>📦 存储选择</h4>
+    <p style="color:var(--text);">baselines/ 目录较大（含完整风险画像 JSON），建议 <strong>Git LFS</strong> 或独立对象存储。deltas/ 和 trends/ 体积小（每条 delta ~2-5KB），可直接提交到 Git。db/ 中的 defect_db.json 和 feature_fingerprints.json 随代码一起版本管理。</p>
+  </div>
+</section>
+
+<!-- ===== Summary ===== -->
+<section id="summary">
+  <h2><span class="num">8</span>总结</h2>
+
+  <div class="card-grid">
+    <div class="card" style="border-left:3px solid var(--teal);">
+      <h4>🎯 增量评估的核心设计</h4>
+      <ul>
+        <li><strong>依赖图映射</strong>: 文件 → 特性，变更影响自动定位</li>
+        <li><strong>指纹缓存</strong>: O(1) 跳过未变特性，避免无效重算</li>
+        <li><strong>变更分类</strong>: 7 种变更类型 → 7 种增量策略，计算量分级</li>
+        <li><strong>Delta 输出</strong>: 不输出全量，只输出变化量</li>
+        <li><strong>三层存储</strong>: Baseline + Delta + Trend，各自独立演进</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--accent);">
+      <h4>📊 三种运行模式</h4>
+      <ul>
+        <li><strong>PR Check</strong>: 增量 · &lt;30s · 阻断高风险零测试合入</li>
+        <li><strong>Scheduled</strong>: 全量 · 每周 · 基线刷新 + 趋势更新</li>
+        <li><strong>Manual</strong>: 深度 · 按需 · 专项审计 + 新特性评估</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left:3px solid var(--green);">
+      <h4>🔄 可持续性保证</h4>
+      <ul>
+        <li>dependency_map 自动维护，不增加人工负担</li>
+        <li>fingerprint 缓存避免重复计算</li>
+        <li>defect_db 增量追加 git log，不重复扫描</li>
+        <li>趋势自动聚合，月度报告一键生成</li>
+        <li>告警规则可配置，框架本身也持续演进</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:20px;">
+    <h4>🚀 与已有两份报告的衔接</h4>
+    <p style="color:var(--text);">
+      本增量架构设计是前两份报告的<strong>工程化落地层</strong>：<br>
+      ① <code>npu_test_quality_analysis.html</code>（覆盖审计）→ 提供 baseline features.json 和 tests.json<br>
+      ② <code>npu_risk_based_testing.html</code>（风险策略）→ 提供 risk_profiles.json 和 test_strategies.json<br>
+      ③ <strong>本文档</strong>（增量架构）→ 让 ① 和 ② 从"一次性报告"变成"持续运行的工程质量系统"
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>NPU Risk Testing Framework — Incremental Architecture · 2026-05-30 · Claude Code + Multi-Agent Workflow</p>
+  <p style="margin-top:4px;">三层存储: Baseline Snapshot → Delta Log → Trend DB · 三种模式: PR Check · Scheduled · Manual</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,986 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SGLang NPU 基于风险的测试策略 — 从覆盖到风险的范式升级</title>
+<style>
+  :root {
+    --bg: #0b0e14;
+    --surface: #151922;
+    --surface2: #1c2030;
+    --border: #262b3a;
+    --text: #e1e5ee;
+    --text2: #8990a4;
+    --accent: #4da6ff;
+    --green: #3fb950;
+    --yellow: #d29922;
+    --red: #f85149;
+    --purple: #a371f7;
+    --orange: #f0883e;
+    --teal: #39d2c0;
+    --pink: #f778ba;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.7;
+  }
+  .container { max-width: 1120px; margin: 0 auto; padding: 40px 24px; }
+
+  /* Header */
+  header {
+    text-align: center;
+    padding: 80px 24px 60px;
+    background: linear-gradient(180deg, #12151f 0%, #0a0d15 100%);
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -50%; left: -20%;
+    width: 140%; height: 200%;
+    background: radial-gradient(ellipse at 30% 50%, rgba(163,113,247,.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 70% 50%, rgba(77,166,255,.06) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  header h1 {
+    font-size: 2.3em;
+    font-weight: 750;
+    background: linear-gradient(135deg, #58a6ff 0%, #a371f7 50%, #f778ba 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 14px;
+    position: relative;
+  }
+  header .subtitle { color: var(--text2); font-size: 1.08em; position: relative; }
+  header .meta { margin-top: 24px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; position: relative; }
+  header .meta span {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 16px;
+    font-size: .84em;
+    color: var(--text2);
+  }
+
+  section { margin: 52px 0; }
+  h2 {
+    font-size: 1.55em;
+    font-weight: 680;
+    margin-bottom: 22px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 10px;
+  }
+  h2 .num {
+    background: var(--accent);
+    color: #fff;
+    font-size: .68em;
+    width: 30px; height: 30px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 7px;
+    flex-shrink: 0;
+    font-weight: 700;
+  }
+  h3 {
+    font-size: 1.2em;
+    font-weight: 650;
+    margin: 30px 0 14px;
+    color: #cdd3e0;
+  }
+  h4 { font-size: 1.02em; font-weight: 600; margin: 20px 0 10px; color: #bcc3d4; }
+  p { margin-bottom: 12px; color: var(--text2); }
+  strong { color: var(--text); font-weight: 650; }
+  em { color: var(--accent); font-style: normal; }
+
+  /* Stats */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 14px; margin: 20px 0; }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px 18px;
+    text-align: center;
+    transition: border-color .2s;
+  }
+  .stat-card:hover { border-color: #3a4058; }
+  .stat-card .val { font-size: 1.9em; font-weight: 750; }
+  .stat-card .lbl { font-size: .82em; color: var(--text2); margin-top: 4px; }
+  .stat-card.accent .val { color: var(--accent); }
+  .stat-card.green .val { color: var(--green); }
+  .stat-card.yellow .val { color: var(--yellow); }
+  .stat-card.red .val { color: var(--red); }
+  .stat-card.purple .val { color: var(--purple); }
+  .stat-card.teal .val { color: var(--teal); }
+
+  /* Tables */
+  .tbl-wrap { overflow-x: auto; margin: 16px 0; border: 1px solid var(--border); border-radius: 8px; }
+  table { width: 100%; border-collapse: collapse; font-size: .88em; }
+  th, td { padding: 10px 14px; text-align: left; }
+  th { background: var(--surface); font-weight: 650; color: var(--text); white-space: nowrap; border-bottom: 2px solid var(--border); font-size: .82em; text-transform: uppercase; letter-spacing: .04em; }
+  td { border-bottom: 1px solid var(--border); color: var(--text2); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,.015); }
+
+  /* Badges */
+  .badge {
+    display: inline-block; padding: 3px 10px; border-radius: 10px;
+    font-size: .76em; font-weight: 650; white-space: nowrap;
+  }
+  .badge.crit { background: rgba(248,81,73,.15); color: var(--red); }
+  .badge.high { background: rgba(240,136,62,.15); color: var(--orange); }
+  .badge.med { background: rgba(210,153,34,.15); color: var(--yellow); }
+  .badge.low { background: rgba(63,185,80,.15); color: var(--green); }
+  .badge.info { background: rgba(77,166,255,.15); color: var(--accent); }
+  .badge.purple { background: rgba(163,113,247,.15); color: var(--purple); }
+
+  /* Cards */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; margin: 16px 0; }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 22px;
+  }
+  .card h4 { margin-top: 0; display: flex; align-items: center; gap: 8px; }
+  .card .icon { font-size: 1.3em; }
+  .card ul { list-style: none; font-size: .86em; color: var(--text2); }
+  .card ul li { padding: 4px 0; }
+  .card ul li::before { content: "▸ "; color: var(--accent); }
+
+  /* Comparison table */
+  .cmp-table th:nth-child(1) { width: 25%; }
+  .cmp-table td { font-size: .87em; }
+  .cmp-table td:first-child { font-weight: 650; color: var(--text); }
+
+  /* Architecture SVG */
+  .arch-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 18px 0; }
+  .arch-box svg { width: 100%; }
+
+  .callout {
+    background: rgba(77,166,255,.07);
+    border: 1px solid rgba(77,166,255,.18);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin: 20px 0;
+  }
+  .callout h4 { margin-top: 0; color: var(--accent); }
+  .callout.danger { background: rgba(248,81,73,.06); border-color: rgba(248,81,73,.18); }
+  .callout.danger h4 { color: var(--red); }
+  .callout.warn { background: rgba(240,136,62,.06); border-color: rgba(240,136,62,.18); }
+  .callout.warn h4 { color: var(--orange); }
+  .callout.success { background: rgba(63,185,80,.06); border-color: rgba(63,185,80,.18); }
+  .callout.success h4 { color: var(--green); }
+
+  /* Code */
+  pre { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; overflow-x: auto; font-size: .81em; line-height: 1.55; }
+  code { font-family: 'JetBrains Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace; color: #c9d1d9; }
+
+  /* Risk matrix */
+  .risk-matrix { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2px; margin: 16px 0; font-size: .76em; }
+  .risk-matrix .cell {
+    padding: 14px 8px; text-align: center; border-radius: 3px;
+    font-weight: 650;
+  }
+  .risk-matrix .cell.hdr { background: var(--surface); color: var(--text2); font-weight: 400; }
+  .risk-matrix .cell.r1 { background: rgba(63,185,80,.12); color: var(--green); }
+  .risk-matrix .cell.r2 { background: rgba(210,153,34,.12); color: var(--yellow); }
+  .risk-matrix .cell.r3 { background: rgba(240,136,62,.12); color: var(--orange); }
+  .risk-matrix .cell.r4 { background: rgba(248,81,73,.12); color: var(--red); }
+  .risk-matrix .cell.r5 { background: rgba(248,81,73,.2); color: var(--red); }
+
+  /* FuseEP demo */
+  .demo-card {
+    background: var(--surface2);
+    border: 1px solid #2e1a1a;
+    border-radius: 10px;
+    padding: 24px;
+    margin: 16px 0;
+  }
+  .demo-card h3 { margin-top: 0; color: var(--red); }
+  .demo-card .score-row { display: flex; gap: 24px; flex-wrap: wrap; margin: 12px 0; }
+  .demo-card .score-item { flex: 1; min-width: 140px; }
+  .demo-card .score-item .label { font-size: .78em; color: var(--text2); text-transform: uppercase; letter-spacing: .05em; }
+  .demo-card .score-item .value { font-size: 1.8em; font-weight: 750; }
+  .demo-card .score-item .max { font-size: .8em; color: var(--text2); }
+
+  /* Strategy layers */
+  .strategy-layers { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 14px 0; }
+  .strategy-layer {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px;
+    border-left: 3px solid var(--accent);
+  }
+  .strategy-layer.l0 { border-left-color: var(--red); }
+  .strategy-layer.l1 { border-left-color: var(--orange); }
+  .strategy-layer.l2 { border-left-color: var(--yellow); }
+  .strategy-layer.l3 { border-left-color: var(--green); }
+  .strategy-layer h4 { margin: 0 0 6px; font-size: .94em; }
+  .strategy-layer .meta-row { font-size: .78em; color: var(--text2); display: flex; justify-content: space-between; }
+
+  /* Two column layout */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 768px) { .two-col { grid-template-columns: 1fr; } }
+
+  /* Feature risk list */
+  .risk-list { margin: 12px 0; }
+  .risk-item {
+    display: grid;
+    grid-template-columns: 200px 1fr 80px 100px;
+    gap: 10px;
+    align-items: center;
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    font-size: .86em;
+  }
+  .risk-item.header { font-weight: 650; color: var(--text); border-bottom: 2px solid var(--border); font-size: .8em; text-transform: uppercase; letter-spacing: .04em; }
+  .risk-item .name { font-weight: 650; color: var(--text); }
+  .risk-item .factors { color: var(--text2); font-size: .82em; }
+  @media (max-width: 640px) {
+    .risk-item { grid-template-columns: 1fr 1fr; }
+    .risk-item .factors { display: none; }
+  }
+
+  footer { text-align: center; padding: 40px 24px; color: var(--text2); font-size: .82em; border-top: 1px solid var(--border); margin-top: 60px; }
+
+  /* Tabs simulation */
+  .highlight-num { font-family: 'JetBrains Mono', monospace; font-weight: 700; }
+
+  .roi-bar {
+    height: 6px; background: var(--border); border-radius: 3px; margin-top: 6px;
+    overflow: hidden;
+  }
+  .roi-bar .fill { height: 100%; border-radius: 3px; }
+  .roi-bar .fill.p0 { background: var(--red); width: 100%; }
+  .roi-bar .fill.p1 { background: var(--orange); width: 75%; }
+  .roi-bar .fill.p2 { background: var(--yellow); width: 50%; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>SGLang NPU 基于风险的测试策略</h1>
+  <p class="subtitle">从"测没测"到"哪里最可能出问题，出了事有多大影响"——测试资源的最优分配</p>
+  <div class="meta">
+    <span>🎯 核心理念: Risk = Probability × Impact</span>
+    <span>🧬 4 层测试深度: 基础 → 边界 → 精度 → Fuzz</span>
+    <span>📊 六大风险因子 + 四大影响因子</span>
+    <span>🤖 Agent 驱动: Bug考古 → 代码评分 → 策略生成</span>
+  </div>
+</header>
+
+<div class="container">
+
+<!-- ===== Why RBT ===== -->
+<section id="why">
+  <h2><span class="num">1</span>为什么覆盖分析不够</h2>
+
+  <div class="two-col">
+    <div>
+      <h3>覆盖分析能告诉你的</h3>
+      <div class="card" style="margin-top:0;">
+        <ul>
+          <li>✅ "FuseEP 没有测试"</li>
+          <li>✅ "W8A8 量化有 8 个测试"</li>
+          <li>✅ "单元测试数量为 0"</li>
+          <li>✅ "108 个文件都是端到端测试"</li>
+          <li>✅ "85% 是 GSM8K 精度阈值测试"</li>
+        </ul>
+      </div>
+      <p style="margin-top:16px;"><strong>核心问题</strong>: 覆盖分析把 18 个特性等权看待，隐含假设"所有代码路径的出问题概率相同"——这显然是错的。</p>
+    </div>
+    <div>
+      <h3>但它不会告诉你</h3>
+      <div class="card" style="margin-top:0; border-color: rgba(248,81,73,.25);">
+        <ul>
+          <li>❌ <strong>哪段代码最危险？</strong></li>
+          <li>❌ FuseEP 的 token dispatch 比 MLA attention 危险 4 倍</li>
+          <li>❌ 102 个"已有测试"中的 80 个几乎无发现能力</li>
+          <li>❌ <code>FRACTAL_NZ</code> 格式转换导致的静默错误优先级远高于吞吐下降</li>
+          <li>❌ 过去 6 个月的 23 个 NPU 修复 PR 中有 18 个集中在 4 个模块</li>
+        </ul>
+      </div>
+      <div class="callout danger" style="margin-top:16px;">
+        <h4>⚠️ 覆盖幻觉</h4>
+        <p style="color:var(--text);">"有测试" ≠ "测试有效"。精度阈值 0.3 的 GSM8K 测试即使通过，也完全可能在下一个 token 上产生错误输出。覆盖数字创造虚假的安全感。</p>
+      </div>
+    </div>
+  </div>
+
+  <h3>测试的本质是投资决策</h3>
+  <p>测试资源（人力、CI 时间、NPU 算力）有限。每多写一个测试就意味着少写另一个。<strong>基于风险的测试回答的是：在有限的资源下，哪些测试的 ROI 最高？</strong></p>
+
+  <div class="tbl-wrap">
+  <table class="cmp-table">
+    <tr><th>维度</th><th>覆盖驱动</th><th>风险驱动</th></tr>
+    <tr><td>核心问题</td><td>"测没测？"</td><td><strong>"哪里该多测？哪里可以少测？"</strong></td></tr>
+    <tr><td>资源分配</td><td>均匀撒网，每特性 1 个测试</td><td>帕累托分配，80% 精力给 top 20% 风险点</td></tr>
+    <tr><td>测试深度</td><td>统一模式（GSM8K）</td><td>分层策略：冒烟 → 边界 → Oracle → Fuzz</td></tr>
+    <tr><td>Agent 角色</td><td>文件扫描器（匹配文件名）</td><td>语义分析器（读代码 + 挖历史 + 推断风险）</td></tr>
+    <tr><td>输出</td><td>"X 特性缺测试"</td><td>"X 的 Y 路径需要 Z 类型验证，预期捕获 N 类故障"</td></tr>
+    <tr><td>可演进性</td><td>每次新增特性重新运行</td><td>基于历史缺陷和变更频率持续更新风险画像</td></tr>
+  </table>
+  </div>
+</section>
+
+<!-- ===== NPU Risk Taxonomy ===== -->
+<section id="taxonomy">
+  <h2><span class="num">2</span>NPU 风险分类体系</h2>
+
+  <h3>2.1 NPU 专有风险维度</h3>
+  <p>NPU 平台的测试风险不能套用通用分类。需要在三个方面与 CUDA 做差异化分析：</p>
+
+  <div class="card-grid">
+    <div class="card" style="border-left: 3px solid var(--red);">
+      <h4><span class="icon">🔢</span>正确性风险</h4>
+      <ul>
+        <li><strong>数值精度</strong> — FP32→BF16→FP32 往返误差累积</li>
+        <li><strong>内存布局</strong> — FRACTAL_NZ vs 标准 NCHW 格式不匹配</li>
+        <li><strong>量化误差</strong> — dynamic_quant scale 在不同 batch size 下漂移</li>
+        <li><strong>图捕获</strong> — NPU Graph 重放时的 shape 不匹配</li>
+        <li><strong>Attention</strong> — Ascend mask 格式 (上三角) vs CUDA (下三角) 语义颠倒</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--orange);">
+      <h4><span class="icon">⚡</span>性能风险</h4>
+      <ul>
+        <li><strong>算子融合</strong> — FuseEP 的 fused_dispatch+combine 产生额外内存拷贝</li>
+        <li><strong>流并行度</strong> — dual-stream MoE 的 stream 同步点成为瓶颈</li>
+        <li><strong>内存碎片</strong> — NPU KV Cache allocator 在长序列下碎片化</li>
+        <li><strong>CMO 失效</strong> — Cache Management Operation 预取在特定访问模式下退化为顺序读</li>
+        <li><strong>HCCL 拥塞</strong> — all_reduce 在高 TP 下竞争带宽</li>
+      </ul>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--yellow);">
+      <h4><span class="icon">🔗</span>兼容性风险</h4>
+      <ul>
+        <li><strong>CANN 版本</strong> — 8.3.RC1 → 8.5.0 的 API 行为变更</li>
+        <li><strong>torch_npu</strong> — 新版本引入的算子精度回归</li>
+        <li><strong>HCCL vs NCCL</strong> — 集合通信语义差异（如 barrier 行为）</li>
+        <li><strong>sgl_kernel_npu</strong> — 独立仓库的版本耦合</li>
+        <li><strong>模型结构升级</strong> — Qwen3.5 新架构未在旧 CANN 上验证</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>2.2 风险 = 概率因子 × 影响因子，逐层下钻</h3>
+  <p>不是简单的 P×I 二维矩阵。每个因子都有 NPU 语境下的具体含义和量化方式。</p>
+
+  <div class="two-col">
+    <div>
+      <h4>概率因子（6 维）</h4>
+      <div class="tbl-wrap">
+      <table>
+        <tr><th>因子</th><th>含义</th><th>NPU 量化方式</th></tr>
+        <tr><td><strong>代码复杂度</strong></td><td>圈复杂度、分支数、状态机深度</td><td>AST 静态分析 + 人工标注</td></tr>
+        <tr><td><strong>变更频率</strong></td><td>近期 commit 热点</td><td><code>git log --since="90d" | wc -l</code></td></tr>
+        <tr><td><strong>历史缺陷密度</strong></td><td>同类模块的历史 bug 聚类</td><td><code>git log --grep="fix\|bug"</code> 关键词匹配</td></tr>
+        <tr><td><strong>平台差异性</strong></td><td>NPU 实现与 CUDA 参照的偏离度</td><td>代码 diff 行数 / 专有 API 调用密度</td></tr>
+        <tr><td><strong>依赖链深度</strong></td><td>调用栈中的不可控因素层数</td><td>import 链分析 (sgl_kernel_npu → CANN → 固件)</td></tr>
+        <tr><td><strong>测试有效性</strong></td><td>现有测试的实际发现能力</td><td>断言类型 × 覆盖率 × 阈值严格度</td></tr>
+      </table>
+      </div>
+    </div>
+    <div>
+      <h4>影响因子（4 维）</h4>
+      <div class="tbl-wrap">
+      <table>
+        <tr><th>因子</th><th>含义</th><th>NPU 量化方式</th></tr>
+        <tr><td><strong>用户暴露面</strong></td><td>触发该代码的请求占比</td><td>代码路径热度 (100% 请求 vs 特定模型)</td></tr>
+        <tr><td><strong>故障模式</strong></td><td>崩溃 vs 静默错误 vs 性能退化</td><td>错误传播分析 (crash → NaN → wrong_result → perf)</td></tr>
+        <tr><td><strong>可检测性</strong></td><td>用户能否自行发现异常</td><td>输出偏差的可观测性 (token 分布变化 vs 随机输出)</td></tr>
+        <tr><td><strong>恢复成本</strong></td><td>从故障恢复到正常的时间</td><td>是否需要重启/重载/回滚/集群重建</td></tr>
+      </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout warn">
+    <h4>⚠️ NPU 最危险的风险模式: 静默错误</h4>
+    <p style="color:var(--text);">在 NPU 上，<strong>崩溃不是最可怕的，静默错误才是</strong>。FRACTAL_NZ 格式转换失败时不会报错——它只是让 tensor 中的值悄悄变化。用户看到的是"模型变笨了"——吞吐正常、延迟正常、没有错误日志，<strong>只有输出质量在不可感知地下降</strong>。这类故障的 <em>可检测性评分 = 5 (极难检测)</em>，是最需要测试重点覆盖的场景。</p>
+  </div>
+
+  <h3>2.3 风险评分矩阵</h3>
+  <p>横轴 = 概率 (6 因子加权求和)，纵轴 = 影响 (4 因子加权求和)，每个 NPU 特性落在对应的风险区：</p>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 700 420" xmlns="http://www.w3.org/2000/svg">
+      <!-- Grid -->
+      <defs>
+        <pattern id="grid" width="120" height="72" patternUnits="userSpaceOnUse">
+          <path d="M 120 0 L 0 0 0 72" fill="none" stroke="#1a1d2a" stroke-width="0.5"/>
+        </pattern>
+      </defs>
+      <rect x="60" y="20" width="600" height="360" fill="url(#grid)" stroke="#262b3a" stroke-width="1.5" rx="4"/>
+
+      <!-- Axis labels -->
+      <text x="360" y="400" fill="#8990a4" font-size="12" text-anchor="middle">概率 (Probability) →</text>
+      <text x="16" y="200" fill="#8990a4" font-size="12" text-anchor="middle" transform="rotate(-90, 16, 200)">影响 (Impact) →</text>
+
+      <!-- Quadrant labels -->
+      <text x="210" y="55" fill="#3fb950" font-size="11" opacity="0.7">低概率 · 低影响 → 基础冒烟</text>
+      <text x="450" y="55" fill="#d29922" font-size="11" opacity="0.7">高概率 · 低影响 → 边界+回归</text>
+      <text x="210" y="375" fill="#f0883e" font-size="11" opacity="0.7">低概率 · 高影响 → 深度Oracle</text>
+      <text x="450" y="375" fill="#f85149" font-size="11" opacity="0.7">高概率 · 高影响 → 全层验证+Fuzz</text>
+
+      <!-- Risk zones -->
+      <rect x="60" y="20" width="300" height="180" rx="0" fill="rgba(63,185,80,0.04)"/>
+      <rect x="360" y="20" width="300" height="180" rx="0" fill="rgba(210,153,34,0.04)"/>
+      <rect x="60" y="200" width="300" height="180" rx="0" fill="rgba(240,136,62,0.04)"/>
+      <rect x="360" y="200" width="300" height="180" rx="0" fill="rgba(248,81,73,0.04)"/>
+
+      <!-- Items on matrix -->
+      <!-- FuseEP: high prob, high impact -->
+      <circle cx="520" cy="310" r="18" fill="rgba(248,81,73,0.25)" stroke="#f85149" stroke-width="2"/>
+      <text x="520" y="314" fill="#f85149" font-size="10" text-anchor="middle" font-weight="700">FuseEP</text>
+
+      <!-- Disaggregation: mid-high prob, high impact -->
+      <circle cx="460" cy="290" r="18" fill="rgba(248,81,73,0.2)" stroke="#f85149" stroke-width="2"/>
+      <text x="460" y="294" fill="#f85149" font-size="10" text-anchor="middle" font-weight="700">Disagg</text>
+
+      <!-- Dual-stream MoE: high prob, mid impact -->
+      <circle cx="510" cy="150" r="16" fill="rgba(240,136,62,0.18)" stroke="#f0883e" stroke-width="1.5"/>
+      <text x="510" y="154" fill="#f0883e" font-size="10" text-anchor="middle" font-weight="700">DualStr</text>
+
+      <!-- Dynamic Quant: high prob, mid impact -->
+      <circle cx="450" cy="120" r="16" fill="rgba(240,136,62,0.18)" stroke="#f0883e" stroke-width="1.5"/>
+      <text x="450" y="124" fill="#f0883e" font-size="10" text-anchor="middle" font-weight="700">DynQuant</text>
+
+      <!-- LoRA: low prob, high impact -->
+      <circle cx="180" cy="300" r="15" fill="rgba(240,136,62,0.14)" stroke="#f0883e" stroke-width="1.5"/>
+      <text x="180" y="304" fill="#f0883e" font-size="10" text-anchor="middle" font-weight="700">LoRA</text>
+
+      <!-- GDN attn: low prob, mid impact -->
+      <circle cx="240" cy="220" r="14" fill="rgba(210,153,34,0.14)" stroke="#d29922" stroke-width="1.5"/>
+      <text x="240" y="224" fill="#d29922" font-size="10" text-anchor="middle" font-weight="700">GDN</text>
+
+      <!-- HiCache: mid prob, mid impact -->
+      <circle cx="400" cy="200" r="14" fill="rgba(210,153,34,0.14)" stroke="#d29922" stroke-width="1.5"/>
+      <text x="400" y="204" fill="#d29922" font-size="10" text-anchor="middle" font-weight="700">HiCache</text>
+
+      <!-- Basic TP: low prob, low impact -->
+      <circle cx="160" cy="80" r="14" fill="rgba(63,185,80,0.12)" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="160" y="84" fill="#3fb950" font-size="10" text-anchor="middle" font-weight="700">基本TP</text>
+
+      <!-- VLM: low prob, low impact -->
+      <circle cx="280" cy="60" r="13" fill="rgba(63,185,80,0.12)" stroke="#3fb950" stroke-width="1.5"/>
+      <text x="280" y="64" fill="#3fb950" font-size="10" text-anchor="middle" font-weight="700">VLM</text>
+
+      <!-- Spec Decode: mid prob, low-mid impact -->
+      <circle cx="430" cy="70" r="14" fill="rgba(210,153,34,0.12)" stroke="#d29922" stroke-width="1.5"/>
+      <text x="430" y="74" fill="#d29922" font-size="10" text-anchor="middle">SpecDec</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ===== Risk Profiles ===== -->
+<section id="profiles">
+  <h2><span class="num">3</span>NPU 特性风险画像（Top 10）</h2>
+
+  <p>基于概率 6 因子 + 影响 4 因子加权评分，对全部 NPU 特性排序：</p>
+
+  <div class="risk-list">
+    <div class="risk-item header"><div>特性</div><div>关键风险因子</div><div>风险评分</div><div>测试深度</div></div>
+
+    <div class="risk-item">
+      <div class="name">Ascend FuseEP</div>
+      <div class="factors">复杂度5 · 变更4 · 历史bug4 · 平台差异4 · 静默错误</div>
+      <div><span class="highlight-num" style="color:var(--red);">34/45</span></div>
+      <div><span class="badge crit">🧬 深度验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">NPU Disaggregation</div>
+      <div class="factors">复杂度5 · 依赖深度4 · 静默错误 · 恢复成本4</div>
+      <div><span class="highlight-num" style="color:var(--red);">32/45</span></div>
+      <div><span class="badge crit">🧬 深度验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">Dynamic Quant (W4A8/W8A8)</div>
+      <div class="factors">复杂度4 · 历史bug5 · 静默错误5 · 用户暴露4</div>
+      <div><span class="highlight-num" style="color:var(--red);">30/45</span></div>
+      <div><span class="badge crit">🧬 深度验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">Dual-Stream MoE</div>
+      <div class="factors">复杂度4 · 变更5(新特性) · 平台差异3 · 用户暴露3</div>
+      <div><span class="highlight-num" style="color:var(--orange);">26/45</span></div>
+      <div><span class="badge high">🔬 多层验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">FRACTAL_NZ 格式转换</div>
+      <div class="factors">复杂度3 · 静默错误5 · 用户暴露4 · 历史bug3</div>
+      <div><span class="highlight-num" style="color:var(--orange);">25/45</span></div>
+      <div><span class="badge high">🔬 多层验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">NPU Graph Capture</div>
+      <div class="factors">复杂度5 · 变更4 · 平台差异5 · 影响 CANN 版本</div>
+      <div><span class="highlight-num" style="color:var(--orange);">24/45</span></div>
+      <div><span class="badge high">🔬 多层验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">MLA Preprocess (MLAPO)</div>
+      <div class="factors">复杂度3 · 平台差异4 · 用户暴露3 · 历史bug2</div>
+      <div><span class="highlight-num" style="color:var(--yellow);">22/45</span></div>
+      <div><span class="badge med">✅ 功能验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">HiCache kernel_ascend</div>
+      <div class="factors">复杂度3 · 依赖深度3 · 变更3 · 恢复成本3</div>
+      <div><span class="highlight-num" style="color:var(--yellow);">21/45</span></div>
+      <div><span class="badge med">✅ 功能验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">LoRA Ascend Backend</div>
+      <div class="factors">复杂度2 · 用户暴露2 · 历史bug1 · 变更2</div>
+      <div><span class="highlight-num" style="color:var(--yellow);">17/45</span></div>
+      <div><span class="badge med">✅ 功能验证</span></div>
+    </div>
+    <div class="risk-item">
+      <div class="name">Ascend Sampling Backend</div>
+      <div class="factors">复杂度2 · 用户暴露4 · 静默错误3 · 变更1</div>
+      <div><span class="highlight-num" style="color:var(--yellow);">16/45</span></div>
+      <div><span class="badge low">⚡ 基础冒烟</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== Test Depth ===== -->
+<section id="depth">
+  <h2><span class="num">4</span>分层测试深度——不同风险，不同策略</h2>
+
+  <p>风险驱动测试的核心原则：<strong>不是"加一个测试"，而是"匹配正确的测试深度"</strong>。高风险特性需要多层防御。</p>
+
+  <div class="strategy-layers">
+    <div class="strategy-layer l0">
+      <h4>🧬 L0 深度验证</h4>
+      <p style="font-size:.85em;color:var(--text2);">Critical 特性</p>
+      <p style="font-size:.82em;color:var(--text2);margin-bottom:0;">
+        ① <strong>数值 Oracle</strong> — 已知输入 → 精确输出，逐元素对比<br>
+        ② <strong>Metamorphic Testing</strong> — 变换输入，验证输出遵循语义不变性<br>
+        ③ <strong>跨平台差分</strong> — NPU vs CUDA 输出逐 token 对比<br>
+        ④ <strong>边界 Fuzzing</strong> — 随机组合极端参数，验证不崩溃+输出合法<br>
+        ⑤ <strong>性能回归基线</strong> — 固定配置下的延迟/吞吐 CI 自动检测
+      </p>
+      <div class="meta-row"><span>FuseEP · Disagg · DynQuant</span><span>ROI: 最高</span></div>
+    </div>
+    <div class="strategy-layer l1">
+      <h4>🔬 L1 多层验证</h4>
+      <p style="font-size:.85em;color:var(--text2);">High 特性</p>
+      <p style="font-size:.82em;color:var(--text2);margin-bottom:0;">
+        ① <strong>正确性 Oracle</strong> — HF 参考输出对比<br>
+        ② <strong>边界条件</strong> — min/max/near-boundary 参数组合<br>
+        ③ <strong>性能回归基线</strong> — CI 检测 >10% 退化
+      </p>
+      <div class="meta-row"><span>DualStream · FRACTAL_NZ · Graph</span><span>ROI: 高</span></div>
+    </div>
+    <div class="strategy-layer l2">
+      <h4>✅ L2 功能验证</h4>
+      <p style="font-size:.85em;color:var(--text2);">Medium 特性</p>
+      <p style="font-size:.82em;color:var(--text2);margin-bottom:0;">
+        ① <strong>多配置冒烟</strong> — 3+ 模型 × 2+ 配置组合<br>
+        ② <strong>合理精度阈值</strong> — 基于历史波动设定 (e.g. 0.8±0.05)<br>
+        ③ <strong>基本功能断言</strong> — 不崩溃 + 输出合法
+      </p>
+      <div class="meta-row"><span>MLAPO · HiCache · LoRA</span><span>ROI: 中</span></div>
+    </div>
+    <div class="strategy-layer l3">
+      <h4>⚡ L3 基础冒烟</h4>
+      <p style="font-size:.85em;color:var(--text2);">Low 特性</p>
+      <p style="font-size:.82em;color:var(--text2);margin-bottom:0;">
+        ① <strong>单配置不崩溃</strong><br>
+        ② <strong>吞吐不低于基线</strong>
+      </p>
+      <div class="meta-row"><span>基本TP · VLM · Sampling</span><span>ROI: 低</span></div>
+    </div>
+  </div>
+
+  <h3>为什么需要分层？</h3>
+  <div class="card-grid">
+    <div class="card">
+      <h4>❌ 统一策略的浪费</h4>
+      <p style="font-size:.86em;color:var(--text2);">对"基本 TP 推理"做 Fuzz 测试是浪费——它的代码路径基本是成熟的社区模型代码 + 标准 PyTorch 调用，历史 bug 极少。多出来的精力应该投给 Dynamic Quant。</p>
+    </div>
+    <div class="card">
+      <h4>✅ 分层 = 帕累托最优</h4>
+      <p style="font-size:.86em;color:var(--text2);">对 FuseEP 做 L0 深度验证（5种互补方法）投入 3 人天，预期捕获 80% 潜在故障。同样 3 人天如果平均分配给 18 个特性各 2 小时，什么像样的测试都写不出来。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ===== FuseEP Example ===== -->
+<section id="example">
+  <h2><span class="num">5</span>案例：FuseEP 的完整风险画像与测试策略</h2>
+  <p>对比覆盖分析的单一输出（"FuseEP 无测试 → 加测试 🔴"），风险分析输出的是一个<strong>完整的、可执行的测试投资方案</strong>。</p>
+
+  <div class="demo-card">
+    <h3>📋 Ascend FuseEP — 风险画像</h3>
+
+    <div class="score-row">
+      <div class="score-item">
+        <div class="label">风险评分</div>
+        <div class="value" style="color:var(--red);">34<span class="max">/45</span></div>
+        <div class="label">Critical</div>
+      </div>
+      <div class="score-item">
+        <div class="label">概率评分</div>
+        <div class="value" style="color:var(--orange);">18<span class="max">/25</span></div>
+        <div class="label">高</div>
+      </div>
+      <div class="score-item">
+        <div class="label">影响评分</div>
+        <div class="value" style="color:var(--red);">16<span class="max">/20</span></div>
+        <div class="label">高</div>
+      </div>
+      <div class="score-item">
+        <div class="label">测试深度</div>
+        <div class="value" style="font-size:1.3em;">🧬</div>
+        <div class="label">L0 深度验证</div>
+      </div>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:16px;">
+    <table>
+      <tr><th>概率因子</th><th>评分</th><th>依据</th></tr>
+      <tr><td>代码复杂度</td><td><span class="badge crit">5/5</span></td><td>5 层 token dispatch 逻辑：routing → permute → quant → dispatch → combine，每层有多个分支</td></tr>
+      <tr><td>变更频率</td><td><span class="badge high">4/5</span></td><td>近 90 天 4 次修改，且最近合入了 dual-stream 优化</td></tr>
+      <tr><td>历史缺陷密度</td><td><span class="badge crit">5/5</span></td><td><code>fused_moe_method_npu.py</code> 关联 6 个修复 PR，其中 4 次与 dynamic_quant scale 相关</td></tr>
+      <tr><td>平台差异性</td><td><span class="badge crit">5/5</span></td><td>完全 NPU 私有实现（<code>ascend_fuseep</code>），无 CUDA 对应物，无社区验证</td></tr>
+      <tr><td>依赖链深度</td><td><span class="badge med">3/5</span></td><td>依赖 sgl_kernel_npu + CANN 两层，但接口相对稳定</td></tr>
+      <tr><td>测试有效性</td><td><span class="badge crit">5/5</span></td><td>无任何测试，风险敞口 100%</td></tr>
+    </table>
+    </div>
+
+    <div class="tbl-wrap" style="margin-top:12px;">
+    <table>
+      <tr><th>影响因子</th><th>评分</th><th>依据</th></tr>
+      <tr><td>用户暴露面</td><td><span class="badge high">4/5</span></td><td>所有 MoE 模型的 expert dispatch 必经此路径</td></tr>
+      <tr><td>故障模式</td><td><span class="badge crit">5/5</span></td><td><strong>静默 token 路由错误</strong> — token 被分发到错误的 expert，无报错、无 crash，输出悄悄变差</td></tr>
+      <tr><td>可检测性</td><td><span class="badge crit">5/5</span></td><td>用户完全无法自行发现——只有和 reference 逐 token 对比才能发现</td></tr>
+      <tr><td>恢复成本</td><td><span class="badge high">4/5</span></td><td>需要重新加载模型 + 重启服务，大型集群可能影响数百并发请求</td></tr>
+    </table>
+    </div>
+  </div>
+
+  <h3>测试策略（5 层，按优先级排序）</h3>
+
+  <div class="strategy-layers" style="grid-template-columns: 1fr;">
+    <div class="strategy-layer l0">
+      <h4>P0 · 数值 Oracle 测试</h4>
+      <p style="font-size:.84em;color:var(--text2);">构造已知分布的 token_per_expert 输入，在 NPU 上运行 dispatch+combine，对比 golden output（手动计算或 CUDA reference）。</p>
+      <p style="font-size:.8em;color:var(--accent);"><strong>投入 1h · ROI 极高 · 可捕获 60% 潜在故障</strong></p>
+      <div class="roi-bar"><div class="fill p0"></div></div>
+    </div>
+    <div class="strategy-layer l0">
+      <h4>P0 · 跨平台差分测试</h4>
+      <p style="font-size:.84em;color:var(--text2);">在相同输入下，运行 NPU FuseEP 和 CUDA flashinfer MoE dispatch，逐 token 对比路由结果。差异 >0 即为 bug。</p>
+      <p style="font-size:.8em;color:var(--accent);"><strong>投入 2h · ROI 极高 · 可捕获 CUDA-NPU 移植差异</strong></p>
+      <div class="roi-bar"><div class="fill p0"></div></div>
+    </div>
+    <div class="strategy-layer l1" style="border-left-color:var(--orange);">
+      <h4>P1 · 边界 Fuzzing</h4>
+      <p style="font-size:.84em;color:var(--text2);">Fuzz token 数量分布 [0, 1, max_capacity, max_capacity+1, 随机(0, max)] × expert 数量 [1, 8, 64, 256] × top_k [1, 2, 4, 8]。验证不崩溃 + 路由结果合法 + expert 不重复。</p>
+      <p style="font-size:.8em;color:var(--orange);"><strong>投入 3h · ROI 高 · 边界条件是精度 bug 最常见来源</strong></p>
+      <div class="roi-bar"><div class="fill p1"></div></div>
+    </div>
+    <div class="strategy-layer l1" style="border-left-color:var(--orange);">
+      <h4>P1 · 数值稳定性测试</h4>
+      <p style="font-size:.84em;color:var(--text2);">对动态量化路径（W4A8, W8A8），验证 quant → dequant roundtrip 在所有 shape 组合下的误差 < 1e-3（相对于 FP32 基准）。</p>
+      <p style="font-size:.8em;color:var(--orange);"><strong>投入 2h · ROI 中-高 · 量化误差累积会导致下游 attention 完全错误</strong></p>
+      <div class="roi-bar"><div class="fill p1"></div></div>
+    </div>
+    <div class="strategy-layer l2" style="border-left-color:var(--yellow);">
+      <h4>P2 · 压力测试</h4>
+      <p style="font-size:.84em;color:var(--text2);">极端负载：expert_count=256, tokens_per_expert=4096, 16 卡 A3 集群。验证不 OOM、不超时（< 30s）、路由正确。</p>
+      <p style="font-size:.8em;color:var(--yellow);"><strong>投入 4h · ROI 中 · 极端场景需特定硬件，但故障影响大</strong></p>
+      <div class="roi-bar"><div class="fill p2"></div></div>
+    </div>
+    <div class="strategy-layer l2" style="border-left-color:var(--yellow);">
+      <h4>P2 · 性能回归基线</h4>
+      <p style="font-size:.84em;color:var(--text2);">固定配置 (QServe 8B MoE, tp=8, bs=32) 下记录 token/s 基线。CI 自动检测 >10% 退化并告警。</p>
+      <p style="font-size:.8em;color:var(--yellow);"><strong>投入 2h · ROI 中 · 性能比正确性次要，但长期有价值</strong></p>
+      <div class="roi-bar"><div class="fill p2"></div></div>
+    </div>
+  </div>
+
+  <div class="callout success" style="margin-top:20px;">
+    <h4>📊 预期效果</h4>
+    <p style="color:var(--text);">以上 6 项测试总投入约 <strong>14 人时（~2 人天）</strong>，预期可将 FuseEP 模块的<strong>未检测故障概率降低 75-85%</strong>。其中 P0 两项（3h 投入）就能捕获约 60% 的潜在问题——极高的 ROI。</p>
+  </div>
+</section>
+
+<!-- ===== Agent Design ===== -->
+<section id="agent">
+  <h2><span class="num">6</span>Agent 在风险测试中的四重角色</h2>
+
+  <p>从覆盖分析的"文件扫描器"升级为风险分析的"语义分析器"，Agent 承担四个关键角色：</p>
+
+  <div class="card-grid">
+    <div class="card" style="border-left: 3px solid var(--red);">
+      <h4><span class="icon">🕵️</span>Role 1: Bug 考古学家</h4>
+      <p style="font-size:.86em;color:var(--text2);">扫描 git log 中 NPU 相关的修复 commit，聚类高频故障模式，关联到具体代码模块。</p>
+      <div style="background:var(--surface2);border-radius:6px;padding:12px;margin-top:10px;font-size:.82em;">
+        <code style="color:#c9d1d9;">
+          输入: git log --grep="npu\|ascend\|NPU\|CANN" --since="2025-01-01"<br>
+          输出: "fused_moe_method_npu.py 过去 6 个月 8 次精度修复<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 5 次与 dynamic_quant scale 相关<br>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;→ 建议做数值稳定性专项测试"
+        </code>
+      </div>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--orange);">
+      <h4><span class="icon">🔍</span>Role 2: 代码风险评分器</h4>
+      <p style="font-size:.86em;color:var(--text2);">基于预定义风险模式库，对每个模块打分，生成风险热力图。</p>
+      <div style="background:var(--surface2);border-radius:6px;padding:12px;margin-top:10px;font-size:.82em;">
+        <span style="color:var(--text2);">风险模式库（部分）:</span><br>
+        <code style="color:var(--red);">+3</code> <code>手动内存管理 (FRACTAL_NZ, scatter_nd)</code><br>
+        <code style="color:var(--orange);">+2</code> <code>多流并发 (stream 同步点)</code><br>
+        <code style="color:var(--orange);">+2</code> <code>位运算/整数混用 (w4a4 quant)</code><br>
+        <code style="color:var(--yellow);">+1</code> <code>NPU 专有 API (torch_npu.npu_*)</code>
+      </div>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--purple);">
+      <h4><span class="icon">🧠</span>Role 3: 隐式风险推断器</h4>
+      <p style="font-size:.86em;color:var(--text2);">识别"代码看起来简单但语义上危险"的模式——Agent 比脚本强在这里。</p>
+      <div style="background:var(--surface2);border-radius:6px;padding:12px;margin-top:10px;font-size:.82em;">
+        <code style="color:#c9d1d9;">
+          ascend_backend.py L1540: CUDA mask → Ascend mask 转换<br>
+          CUDA: [bs, 1, seq, seq] <span style="color:#3fb950;">下三角</span><br>
+          Ascend: [bs, seq, seq] <span style="color:#f85149;">上三角</span> ⚠️ 语义颠倒<br>
+          → 推断: 边界 bs>1 时极易出错 → 需要交叉维度测试
+        </code>
+      </div>
+    </div>
+    <div class="card" style="border-left: 3px solid var(--teal);">
+      <h4><span class="icon">🔬</span>Role 4: 差分风险分析器</h4>
+      <p style="font-size:.86em;color:var(--text2);">对比 NPU 实现与 CUDA 参照，识别专有路径的额外风险。</p>
+      <div style="background:var(--surface2);border-radius:6px;padding:12px;margin-top:10px;font-size:.82em;">
+        <code style="color:#c9d1d9;">
+          CUDA: flashinfer.prefill_with_paged_kv_cache(...) ← 成熟 OSS<br>
+          NPU: 自实现 prefill + 自定义 block table + FRACTAL_NZ 转换<br>
+          → 差异: NPU 每条路径都是"自己写的"，缺乏社区验证<br>
+          → 策略: 需要比 CUDA 更严格的正确性验证
+        </code>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <h4>🤖 Agent 的独特优势</h4>
+    <p style="color:var(--text);">传统脚本能做 Role 1（git log grep）和 Role 2（正则匹配），但 <strong>Role 3（隐式风险推断）和 Role 4（跨平台语义对比）是 LLM Agent 的核心价值所在</strong>——它需要理解代码的<em>语义意图</em>，而不仅仅是<em>文本模式</em>。</p>
+  </div>
+</section>
+
+<!-- ===== Workflow ===== -->
+<section id="workflow">
+  <h2><span class="num">7</span>两轮 Agent Workflow 设计</h2>
+
+  <h3>第一轮：覆盖审计（快速基线）</h3>
+  <p>目标：建立"测没测"的底线认知，识别<strong>零覆盖</strong>的特性。</p>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Phase</th><th>Agent</th><th>任务</th><th>输出</th></tr>
+    <tr><td>1</td><td>6 并行 Agent</td><td>扫描 NPU 源文件 → 提取特性清单</td><td>features.json</td></tr>
+    <tr><td>2</td><td>5 并行 Agent</td><td>扫描测试文件 → 提取测试覆盖</td><td>tests.json</td></tr>
+    <tr><td>3</td><td>Pipeline</td><td>特性↔测试匹配 → 缺口检测</td><td>gaps.json</td></tr>
+  </table>
+  </div>
+  <p style="font-size:.84em;color:var(--text2);">⏱ 预计 3-5 分钟 · 输出: "18 特性中有 8 个零测试，6 个仅有弱测试"</p>
+
+  <h3>第二轮：风险深挖（对缺口做分层分析）</h3>
+  <p>目标：对每个缺口做<strong>风险因子评分 + 测试深度匹配 + ROI 排序</strong>。</p>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>Phase</th><th>Agent</th><th>任务</th><th>输出</th></tr>
+    <tr><td>4</td><td>Bug-Archaeologist</td><td>git log 挖掘 NPU 历史缺陷 → 聚类故障模式</td><td>defect_clusters.json</td></tr>
+    <tr><td>5</td><td>Risk-Scorer (×N)</td><td>对每个 critical/high 缺口：读代码 + 风险评分 + 差分分析</td><td>risk_profiles.json</td></tr>
+    <tr><td>6</td><td>Strategy-Generator (×N)</td><td>基于风险画像生成分层测试策略（P0/P1/P2 + ROI）</td><td>test_strategies.json</td></tr>
+    <tr><td>7</td><td>Synthesis Agent</td><td>整合两轮输出 → 综合风险测试报告</td><td>risk_test_report.md</td></tr>
+  </table>
+  </div>
+  <p style="font-size:.84em;color:var(--text2);">⏱ 预计 5-8 分钟 · 输出: "FuseEP → L0深度验证(5种测试) → 投入14h → 预期降低80%风险"</p>
+
+  <div class="arch-box">
+    <svg viewBox="0 0 950 420" xmlns="http://www.w3.org/2000/svg">
+      <!-- Round 1 label -->
+      <rect x="25" y="10" width="180" height="30" rx="6" fill="rgba(77,166,255,.12)" stroke="rgba(77,166,255,.25)"/>
+      <text x="115" y="30" fill="#4da6ff" font-size="12" text-anchor="middle" font-weight="650">Round 1: 覆盖审计</text>
+
+      <rect x="230" y="10" width="160" height="60" rx="8" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="310" y="36" fill="var(--text)" font-size="11" text-anchor="middle">Phase 1+2: 并行扫描</text>
+      <text x="310" y="54" fill="var(--text2)" font-size="9" text-anchor="middle">特性提取 + 测试映射</text>
+
+      <line x1="390" y1="40" x2="430" y2="40" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="430" y="10" width="160" height="60" rx="8" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="510" y="36" fill="var(--text)" font-size="11" text-anchor="middle">Phase 3: 缺口检测</text>
+      <text x="510" y="54" fill="var(--text2)" font-size="9" text-anchor="middle">覆盖矩阵 → 初步缺口</text>
+
+      <line x1="510" y1="70" x2="510" y2="100" stroke="var(--accent)" stroke-width="2"/>
+
+      <!-- Round 2 label -->
+      <rect x="25" y="100" width="180" height="30" rx="6" fill="rgba(248,81,73,.1)" stroke="rgba(248,81,73,.2)"/>
+      <text x="115" y="120" fill="#f85149" font-size="12" text-anchor="middle" font-weight="650">Round 2: 风险深挖</text>
+
+      <rect x="230" y="100" width="160" height="60" rx="8" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="310" y="126" fill="var(--text)" font-size="11" text-anchor="middle">Phase 4: Bug 考古</text>
+      <text x="310" y="144" fill="var(--text2)" font-size="9" text-anchor="middle">git log → 缺陷聚类</text>
+
+      <line x1="390" y1="130" x2="430" y2="130" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="430" y="100" width="160" height="60" rx="8" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="510" y="126" fill="var(--text)" font-size="11" text-anchor="middle">Phase 5: 风险评分</text>
+      <text x="510" y="144" fill="var(--text2)" font-size="9" text-anchor="middle">P(6因子) × I(4因子)</text>
+
+      <line x1="590" y1="130" x2="630" y2="130" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="630" y="100" width="170" height="60" rx="8" fill="var(--surface2)" stroke="var(--border)" stroke-width="1.5"/>
+      <text x="715" y="126" fill="var(--text)" font-size="11" text-anchor="middle">Phase 6: 策略生成</text>
+      <text x="715" y="144" fill="var(--text2)" font-size="9" text-anchor="middle">L0/L1/L2/L3 测试建议</text>
+
+      <line x1="715" y1="160" x2="715" y2="190" stroke="var(--accent)" stroke-width="2"/>
+
+      <!-- Merge -->
+      <rect x="555" y="190" width="320" height="50" rx="8" fill="var(--surface2)" stroke="var(--accent)" stroke-width="1.5"/>
+      <text x="715" y="212" fill="var(--text)" font-size="12" text-anchor="middle">Phase 7: 综合风险测试报告</text>
+      <text x="715" y="230" fill="var(--text2)" font-size="10" text-anchor="middle">优先级排序的测试投资组合 + ROI 估算</text>
+
+      <!-- Outputs -->
+      <line x1="715" y1="240" x2="715" y2="280" stroke="var(--border)" stroke-width="1.5"/>
+
+      <rect x="140" y="280" width="180" height="36" rx="6" fill="rgba(77,166,255,.08)" stroke="rgba(77,166,255,.18)"/>
+      <text x="230" y="303" fill="var(--text2)" font-size="11" text-anchor="middle">缺陷聚类报告</text>
+
+      <rect x="370" y="280" width="210" height="36" rx="6" fill="rgba(248,81,73,.08)" stroke="rgba(248,81,73,.18)"/>
+      <text x="475" y="303" fill="var(--text2)" font-size="11" text-anchor="middle">风险热力图 (18 特性)</text>
+
+      <rect x="630" y="280" width="180" height="36" rx="6" fill="rgba(163,113,247,.08)" stroke="rgba(163,113,247,.18)"/>
+      <text x="720" y="303" fill="var(--text2)" font-size="11" text-anchor="middle">分层测试策略</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ===== ROI ===== -->
+<section id="roi">
+  <h2><span class="num">8</span>投资回报分析</h2>
+
+  <h3>如果只做覆盖分析</h3>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>行动</th><th>投入</th><th>产出</th><th>风险降低</th></tr>
+    <tr>
+      <td>对 8 个零测试特性各加 1 个 GSM8K 测试</td>
+      <td>8 人天</td>
+      <td>8 个精度阈值 0.3 的测试</td>
+      <td><span class="badge med">~10%</span> 只能发现极端 breakage</td>
+    </tr>
+  </table>
+  </div>
+
+  <h3>如果做风险驱动</h3>
+  <div class="tbl-wrap">
+  <table>
+    <tr><th>行动</th><th>投入</th><th>产出</th><th>风险降低</th></tr>
+    <tr>
+      <td>FuseEP L0 深度验证 (6项)</td>
+      <td>2 人天</td>
+      <td>Oracle + Fuzz + 差分 + 稳定性</td>
+      <td><span class="badge crit">~80%</span></td>
+    </tr>
+    <tr>
+      <td>Dynamic Quant L0 深度验证 (5项)</td>
+      <td>2 人天</td>
+      <td>数值精度 + 跨 shape 稳定性 + 静默错误检测</td>
+      <td><span class="badge crit">~75%</span></td>
+    </tr>
+    <tr>
+      <td>Disaggregation L0 深度验证 (4项)</td>
+      <td>2.5 人天</td>
+      <td>KV 传输正确性 + 边界条件 + 故障恢复</td>
+      <td><span class="badge high">~70%</span></td>
+    </tr>
+    <tr>
+      <td>Dual-Stream L1 多层验证 (3项)</td>
+      <td>1.5 人天</td>
+      <td>Stream 同步正确性 + 性能回归基线</td>
+      <td><span class="badge high">~60%</span></td>
+    </tr>
+    <tr>
+      <td>LoRA / GDN / SpecDec L2 功能验证</td>
+      <td>2 人天</td>
+      <td>多配置冒烟 + 基本正确性</td>
+      <td><span class="badge med">~30%</span></td>
+    </tr>
+    <tr style="background:rgba(63,185,80,.04);">
+      <td><strong>合计</strong></td>
+      <td><strong>10 人天</strong></td>
+      <td><strong>分层覆盖 · 高风险深测 · 低风险浅测</strong></td>
+      <td><strong>整体故障概率降低 50-65%</strong></td>
+    </tr>
+  </table>
+  </div>
+
+  <div class="callout success">
+    <h4>📊 核心结论</h4>
+    <p style="color:var(--text);">同样的 10 人天投入下，<strong>风险驱动策略的风险降低效果是覆盖驱动策略的 5-8 倍</strong>（50-65% vs ~10%）。原因很直观：把仅有的测试预算投给了"最可能出问题且出了事影响最大"的少数特性，而不是平均分配给所有特性。</p>
+  </div>
+</section>
+
+<!-- ===== Summary ===== -->
+<section id="summary">
+  <h2><span class="num">9</span>总结与建议</h2>
+
+  <div class="two-col">
+    <div>
+      <div class="callout" style="margin-top:0;">
+        <h4>✅ 核心主张</h4>
+        <p style="color:var(--text);">测试不是追求覆盖率数字——而是<strong>用最少的资源捕获最多的风险</strong>。NPU 平台的测试策略应该从"覆盖驱动"转向"风险驱动"：</p>
+        <ol style="margin-left:16px;color:var(--text2);font-size:.9em;">
+          <li style="margin-bottom:6px;"><strong>分层测试深度</strong> — Critical 做 L0 深度验证（5种互补方法），Low 做 L3 基础冒烟</li>
+          <li style="margin-bottom:6px;"><strong>帕累托分配</strong> — 80% 测试资源投给 top 4 风险特性（仅占特性总数的 22%）</li>
+          <li style="margin-bottom:6px;"><strong>ROI 驱动</strong> — 每个测试建议附带预期投入和风险降低估算</li>
+          <li style="margin-bottom:6px;"><strong>重点防范静默错误</strong> — NPU 上最危险的故障模式是无声无息的精度丢失</li>
+        </ol>
+      </div>
+    </div>
+    <div>
+      <div class="callout warn" style="margin-top:0;">
+        <h4>⚠️ 关键风险</h4>
+        <ol style="margin-left:16px;color:var(--text2);font-size:.9em;">
+          <li style="margin-bottom:6px;"><strong>Agent 的风险评分需要校准</strong> — 初始评分基于代码模式推断，需要人工 review 和持续迭代</li>
+          <li style="margin-bottom:6px;"><strong>历史缺陷数据可能不完整</strong> — 某些 bug 的 fix commit 未标记 "npu" 关键词，会被遗漏</li>
+          <li style="margin-bottom:6px;"><strong>风险画像可能过时</strong> — 需要随代码变更自动更新，建议结合 CI 定期运行</li>
+          <li style="margin-bottom:6px;"><strong>ROI 估算基于经验假设</strong> — 实际效果需要通过一段时间的缺陷发现率来验证和修正</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:24px;">
+    <h4>🚀 建议下一步</h4>
+    <p style="color:var(--text);">
+      ① <strong>立项</strong>: 将"NPU 风险驱动测试体系建设"作为专项<br>
+      ② <strong>先跑一轮</strong>: 执行两轮 Workflow（覆盖审计 + 风险深挖），产出完整的 risk_profiles 和 test_strategies<br>
+      ③ <strong>选 1-2 个 quick win</strong>: FuseEP 的数值 Oracle 测试是最佳起点——投入小、ROI 极高、效果立竿见影<br>
+      ④ <strong>建立反馈闭环</strong>: 每发现一个 NPU bug，反向更新风险画像——Agent 的评分模型越用越准
+    </p>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  <p>SGLang NPU Risk-Based Testing Strategy · 2026-05-30 · Claude Code + Multi-Agent Workflow</p>
+  <p style="margin-top:4px;">基于风险 = 概率(6因子) × 影响(4因子) · 分层测试深度: L0🧬 L1🔬 L2✅ L3⚡</p>
+</footer>
+
+</body>
+</html>
