@@ -26,7 +26,7 @@ class TestDataParallelism(CustomTestCase, GSM8KMixin):
     3. GSM8K accuracy verification
     """
 
-    gsm8k_accuracy_thres = 0.37
+    gsm8k_accuracy_thres = 0.37  # Lowered from 0.7 for DP mode compatibility
 
     @classmethod
     def setUpClass(cls):
