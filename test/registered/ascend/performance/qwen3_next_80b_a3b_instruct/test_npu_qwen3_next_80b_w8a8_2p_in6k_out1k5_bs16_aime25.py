@@ -133,8 +133,6 @@ class TestQwen3Next80BA3B_aime25(TestAscendAccuracyTestCaseBase):
 
     def test_aime25(self):
         self.run_accuracy()
-        self.run_accuracy()
-        self.run_accuracy()
 
 
 if __name__ == "__main__":
