@@ -30,7 +30,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=100, suite="full-1-npu-a3", nightly=True)
 
 CHUNKED_PREFILL_SIZE = 256
 
