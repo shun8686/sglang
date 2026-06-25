@@ -24,6 +24,8 @@ class TestRequestLengthValidation(CustomTestCase):
     [Test Target] --max-total-tokens, --context-length
     """
 
+    model = QWEN3_0_6B_WEIGHTS_PATH
+
     @classmethod
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
@@ -31,7 +33,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         # Start server with auto truncate disabled
         cls.process = popen_launch_server(
-            QWEN3_0_6B_WEIGHTS_PATH,
+            cls.model,
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
@@ -85,7 +87,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=QWEN3_0_6B_WEIGHTS_PATH,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
@@ -106,7 +108,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=QWEN3_0_6B_WEIGHTS_PATH,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
@@ -127,7 +129,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=QWEN3_0_6B_WEIGHTS_PATH,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
@@ -165,7 +167,7 @@ class TestRequestLengthValidation(CustomTestCase):
 
         with self.assertRaises(openai.BadRequestError) as cm:
             client.chat.completions.create(
-                model=QWEN3_0_6B_WEIGHTS_PATH,
+                model=self.model,
                 messages=[
                     {"role": "user", "content": long_text},
                 ],
