@@ -74,7 +74,6 @@ class TestRequestLengthValidation(CustomTestCase):
         completions_tokens = response.usage.completion_tokens
         self.assertGreater(completions_tokens, 0)
 
-
     def test_input_length_longer_than_context_length(self):
         """
         Verify whether the interface normally throws an exception when the number of tokens of the
