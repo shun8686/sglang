@@ -14,7 +14,7 @@ register_npu_ci(est_time=100, suite="full-1-npu-a3", nightly=True)
 
 
 class TestMatchedStop(CustomTestCase, MatchedStopMixin):
-    """Testcase: Test configuring 'matched_stop' to different values(string, EOS token, length) correctly identifies
+    """Testcase: Test configuring 'matched_stop' to different values(string, EOS token, length, Regular) correctly identifies
     it as a stop signal.
 
     [Test Category] Interface
