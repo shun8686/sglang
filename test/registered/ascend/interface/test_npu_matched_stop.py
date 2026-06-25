@@ -14,6 +14,12 @@ register_npu_ci(est_time=100, suite="full-1-npu-a3", nightly=True)
 
 
 class TestMatchedStop(CustomTestCase, MatchedStopMixin):
+    """Testcase: Test configuring 'matched_stop' to different values(string, EOS token, length) correctly identifies
+    it as a stop signal.
+
+    [Test Category] Interface
+    [Test Target] /v1/chat/completions; /v1/completions
+    """
     @classmethod
     def setUpClass(cls):
         cls.model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
@@ -23,10 +29,10 @@ class TestMatchedStop(CustomTestCase, MatchedStopMixin):
             cls.base_url,
             timeout=300,
             other_args=[
-            "--max-running-requests",
-            "10",
-            "--attention-backend",
-            "ascend",
+                "--max-running-requests",
+                "10",
+                "--attention-backend",
+                "ascend",
             ],
         )
 
