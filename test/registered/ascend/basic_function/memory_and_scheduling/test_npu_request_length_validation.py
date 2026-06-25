@@ -49,8 +49,18 @@ class TestRequestLengthValidation(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
+    def create_openai_client(self):
+        return openai.Client(
+            api_key=self.api_key, base_url=f"{DEFAULT_URL_FOR_TEST}/v1"
+        )
+
     def test_input_length_no_longer_than_context_length_success(self):
-        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        '''
+        Verify that the interface can be requested successfully when the length of the
+        text input by the user does not exceed the model context length.
+        '''
+
+        client = self.create_openai_client()
         long_text = "hello " * 500
         response = client.chat.completions.create(
             model=self.model,
@@ -64,7 +74,12 @@ class TestRequestLengthValidation(CustomTestCase):
 
 
     def test_input_length_longer_than_context_length(self):
-        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        '''
+        Verify whether the interface normally throws an exception when the number of tokens of the
+        input text exceeds the model context length.
+        '''
+
+        client = self.create_openai_client()
 
         long_text = "hello " * 1200  # Will tokenize to more than context length
 
@@ -80,7 +95,12 @@ class TestRequestLengthValidation(CustomTestCase):
         self.assertIn("is longer than the model's context length", str(cm.exception))
 
     def test_input_length_longer_than_maximum_allowed_length(self):
-        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        '''
+        Verify whether the interface can throw exceptions correctly when the length of the
+        incoming text exceeds the maximum context limit of the model.
+        '''
+
+        client = self.create_openai_client()
 
         long_text = "hello " * 999  # the maximum allowed length is 994 tokens
 
@@ -96,7 +116,12 @@ class TestRequestLengthValidation(CustomTestCase):
         self.assertIn("is longer than the model's context length", str(cm.exception))
 
     def test_input_length_longer_than_context_length_streaming(self):
-        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        '''
+        In the streaming invocation scenario, verify whether an error is thrown normally when the length of the
+        input text exceeds the model's context window.
+        '''
+
+        client = self.create_openai_client()
 
         long_text = "hello " * 1200
 
@@ -113,7 +138,12 @@ class TestRequestLengthValidation(CustomTestCase):
         self.assertIn("is longer than the model's context length", str(cm.exception))
 
     def test_not_longer_max_tokens_validation_success(self):
-        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        '''
+        When the verification request does not exceed the maximum token limit,
+        the interface call verification logic is executed normally.
+        '''
+
+        client = self.create_openai_client()
         long_text = "hello "
         response = client.chat.completions.create(
             model=self.model,
@@ -127,7 +157,9 @@ class TestRequestLengthValidation(CustomTestCase):
         self.assertGreater(completions_tokens, 0)
 
     def test_max_tokens_validation(self):
-        client = openai.Client(api_key=self.api_key, base_url=f"{self.base_url}/v1")
+        '''Exception verification for exceeding the limit of the max_tokens parameter'''
+
+        client = self.create_openai_client()
 
         long_text = "hello "
 
@@ -147,6 +179,11 @@ class TestRequestLengthValidation(CustomTestCase):
         )
 
     def test_token_ids_logprob_out_of_vocabulary(self):
+        '''
+        Verify whether the interface can correctly return an error when checking the
+        token_ids_logprob parameter outside the range of the incoming vocabulary list.
+        '''
+
         headers = {"Authorization": f"Bearer {self.api_key}"}
         for token_ids_logprob in ([-1], [2_000_000_000]):
             response = requests.post(
@@ -182,6 +219,11 @@ class TestRequestLengthValidation(CustomTestCase):
             self.assertIn("flat list of integers", response.text)
 
     def test_token_ids_logprob_batch_with_one_oov(self):
+        '''
+        Verify When sending batch requests, if token IDs outside the vocabulary are included in token_ids_logprob,
+        the API return error messages correctly
+        '''
+
         headers = {"Authorization": f"Bearer {self.api_key}"}
         response = requests.post(
             f"{self.base_url}/generate",
@@ -197,6 +239,11 @@ class TestRequestLengthValidation(CustomTestCase):
         self.assertIn("out-of-vocabulary", response.text)
 
     def test_token_ids_logprob_valid(self):
+        '''
+        Verify that a valid token_ids_logprob request with in-vocabulary
+        token IDs is accepted and returns 200.
+        '''
+
         headers = {"Authorization": f"Bearer {self.api_key}"}
         response = requests.post(
             f"{self.base_url}/generate",
