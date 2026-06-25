@@ -90,7 +90,8 @@ _INLINE_IMAGE_URL = (
 
 # Register NPU CI.  Only TestNpuEPDDisaggregationMultiEncoders runs in CI
 # (the other three classes are marked ``@unittest.skipIf(is_in_ci(), ...)``).
-register_npu_ci(est_time=400, suite="full-4-npu-a3", nightly=True)
+# MultiEncoders uses 8 NPUs (encode1: 0-1, encode2: 2-3, prefill: 4-5, decode: 6-7).
+register_npu_ci(est_time=400, suite="full-8-npu-a3", nightly=True)
 
 
 def _file_to_data_url(path: str, mime: str = "image/png") -> str:
@@ -620,7 +621,10 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             f"prefill={cls.prefill_port}, decode={cls.decode_port}"
         )
 
-        # Start two encode servers in parallel (NPU 0 and NPU 2 base).
+        # Start two encode servers in parallel.
+        # NPU allocation (8 NPUs available, TP=2 per server):
+        #   encode1 -> NPU 0-1, encode2 -> NPU 2-3,
+        #   prefill -> NPU 4-5, decode  -> NPU 6-7
         t1 = threading.Thread(target=cls._start_encode1, args=(cls.encode_port1, 0))
         t2 = threading.Thread(target=cls._start_encode2, args=(cls.encode_port2, 2))
         t1.start()
@@ -688,7 +692,11 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
 
     @classmethod
     def start_prefill(cls, encoder_urls=None):
-        """Start prefill pointing at BOTH encoder URLs (load balancing)."""
+        """Start prefill pointing at BOTH encoder URLs (load balancing).
+
+        Uses NPU 4-5 (base-gpu-id=4) to avoid OOM: encode1 occupies NPU 0-1,
+        encode2 occupies NPU 2-3, so prefill must use NPU 4-5.
+        """
         encoder_urls = f"{cls.encode_url1},{cls.encode_url2}"
         prefill_args = [
             "--language-only",
@@ -703,7 +711,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             "--tp",
             cls.tp_size,
             "--base-gpu-id",
-            "1",
+            "4",
             "--port",
             cls.prefill_port,
         ]
@@ -714,6 +722,30 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             base_url=cls.prefill_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=prefill_args,
+        )
+
+    @classmethod
+    def start_decode(cls):
+        """Start decode on NPU 6-7 (base-gpu-id=6)."""
+        decode_args = [
+            "--disaggregation-mode",
+            "decode",
+            "--disaggregation-bootstrap-port",
+            cls.bootstrap_port,
+            "--tp",
+            cls.tp_size,
+            "--base-gpu-id",
+            "6",
+            "--port",
+            cls.decode_port,
+        ]
+        decode_args += cls.transfer_backend + cls.rdma_devices
+        decode_args += NPU_COMMON_ARGS
+        cls.process_decode = popen_launch_server(
+            cls.model,
+            base_url=cls.decode_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=decode_args,
         )
 
     @classmethod
