@@ -141,6 +141,13 @@ class TestJSONModeXGrammar(ServerWithGrammarBackend, TestJSONModeMixin):
 
     backend = "xgrammar"
 
+class TestJSONModeOutlines(ServerWithGrammarBackend, TestJSONModeMixin):
+    backend = "outlines"
+
+
+class TestJSONModeLLGuidance(ServerWithGrammarBackend, TestJSONModeMixin):
+    backend = "llguidance"
+
 
 if __name__ == "__main__":
     unittest.main()
