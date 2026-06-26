@@ -26,6 +26,15 @@ jobs:
         run: |
           npu-smi info
 
+      - name: Install dependencies
+        shell: bash
+        run: |
+          pip install datasets evaluate
+          git clone --branch v0.3.3 --depth 1 https://github.com/EvolvingLMMs-Lab/lmms-eval.git
+          cd ./lmms-eval
+          pip install .
+          cd ..
+
       - name: Run test
         timeout-minutes: 240
         env:
