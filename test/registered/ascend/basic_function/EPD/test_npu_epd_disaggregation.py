@@ -66,10 +66,25 @@ NPU_COMMON_ARGS = [
     "0.8",
 ]
 
-# Ascend NPU backend does not support _local_scalar_dense_npu for UInt64,
-# which is used by the multimodal hash computation. Setting this env var
-# replaces the hash with a random UUID, allowing multimodal hashing to be
-# skipped on NPU.
+# NPU environment variables required for Ascend PD disaggregation.
+# - ASCEND_MF_STORE_URL: Centralized storage URL for Ascend Transfer Engine
+#   (MemFabric).  The prefill server hosts the config store at this address
+#   and the decode server connects to it.  Without this the transfer engine
+#   fails with "input store URL is null".
+# - SGLANG_MM_SKIP_COMPUTE_HASH: Ascend backend does not support
+#   _local_scalar_dense_npu for UInt64 used by multimodal hash computation;
+#   replaces the hash with a random UUID.
+NPU_ENV = {
+    **os.environ,
+    "ASCEND_MF_STORE_URL": "tcp://127.0.0.1:24666",
+    "SGLANG_MM_SKIP_COMPUTE_HASH": "True",
+    "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
+    "HCCL_BUFFSIZE": "200",
+    "TRANSFORMERS_VERBOSITY": os.getenv("TRANSFORMERS_VERBOSITY", "error"),
+}
+
+# Also set the hash-skip flag in the parent process environment so any
+# in-process multimodal utilities (e.g. test helpers) pick it up.
 os.environ["SGLANG_MM_SKIP_COMPUTE_HASH"] = "True"
 
 # Default encoder transfer backend on NPU (mooncake is GPU/RDMA-only).
@@ -193,6 +208,7 @@ class NpuEPDBase(PDDisaggregationServerBase):
             base_url=url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=encode_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -223,6 +239,7 @@ class NpuEPDBase(PDDisaggregationServerBase):
             base_url=cls.prefill_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=prefill_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -247,6 +264,7 @@ class NpuEPDBase(PDDisaggregationServerBase):
             base_url=cls.decode_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=decode_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -429,6 +447,7 @@ class TestNpuEPDDisaggregationOneEncoder(MMMUMixin, NpuEPDBase):
             base_url=url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=encode_args,
+            env=NPU_ENV,
         )
 
 
@@ -492,6 +511,7 @@ class TestNpuEPDDisaggregationQwen35(NpuEPDBase):
             base_url=url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=encode_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -520,6 +540,7 @@ class TestNpuEPDDisaggregationQwen35(NpuEPDBase):
             base_url=cls.language_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=language_args,
+            env=NPU_ENV,
         )
 
     def _client(self):
@@ -666,6 +687,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             base_url=f"http://{cls.base_host}:{port}",
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=encode_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -688,6 +710,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             base_url=f"http://{cls.base_host}:{port}",
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=encode_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -722,6 +745,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             base_url=cls.prefill_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=prefill_args,
+            env=NPU_ENV,
         )
 
     @classmethod
@@ -746,6 +770,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, NpuEPDBase):
             base_url=cls.decode_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=decode_args,
+            env=NPU_ENV,
         )
 
     @classmethod
