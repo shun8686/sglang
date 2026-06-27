@@ -32,7 +32,7 @@ jobs:
           export PIP_INDEX_URL=https://repo.huaweicloud.com/repository/pypi/simple
           export PIP_TRUSTED_HOST=repo.huaweicloud.com
           pip install --retries 10 --timeout 300 datasets==2.16.1 evaluate>=0.4.0
-          pip install --retries 10 --timeout 300 pytz jsonlines numpy pillow tqdm transformers openai
+          pip install --retries 10 --timeout 300 pytz jsonlines numpy pillow tqdm transformers openai accelerate peft
           git clone --branch v0.3.3 --depth 1 https://github.com/EvolvingLMMs-Lab/lmms-eval.git
 
       - name: Run test
