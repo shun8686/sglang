@@ -1,7 +1,7 @@
 name: Single Test (NPU)
 # HiCache storage file backend / runtime attach-detach / EAGLE3 variant.
 # Adapted from PR #710 (speculative-inference single-test-npu.yml) with the
-# image bumped to cann9.0.0-a3-20260611 and the runner set to a3-4.
+# image bumped to cann9.0.0-a3-20260622 and the runner set to a3-4.
 
 on:
   pull_request:
@@ -29,7 +29,7 @@ jobs:
     name: single-node-poc
     runs-on: linux-aarch64-a3-4
     container:
-      image: swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-20260611
+      image: swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-20260622
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
