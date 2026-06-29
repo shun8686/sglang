@@ -19,5 +19,9 @@ class TestMistral7B(GSM8KAscendMixin, CustomTestCase):
     accuracy = 0.36
 
 
+class TestMistral7BChatTemplate(TestMistral7B):
+    other_args = GSM8KAscendMixin.other_args + ["--chat-template", "mistral"]
+
+
 if __name__ == "__main__":
     unittest.main()
