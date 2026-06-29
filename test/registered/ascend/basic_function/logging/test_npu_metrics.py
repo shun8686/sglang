@@ -114,7 +114,7 @@ class TestNPUMetrics2NPU(_BaseTestNPUMetrics):
         "2",
         "--enable-dp-attention",
     ]
-    repeat_requests_num = 5
+    repeat_requests_num = 6
     verify_metrics_extra = True
 
 
