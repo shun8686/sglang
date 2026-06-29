@@ -62,6 +62,16 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
         _verify_metrics_common(self, metrics_text, metrics, expect_mfu_metrics=self.enable_mfu_metrics)
 
         def _check_dp_cooperation_metrics(metrics):
+            # In the GPU scenario test case
+            # (test/registered/observability/test_metrics.py), the 2-card scenario
+            # contains assertions about the following monitoring metrics:
+            #   ("sglang:dp_cooperation_forward_execution_seconds_total",
+            #    {"category": "extend"}),
+            #   ("sglang:dp_cooperation_forward_execution_seconds_total",
+            #    {"category": "decode"}),
+            # However, these two indicators were not found during execution on the
+            # GPU, and it is uncertain whether it is a problem or if monitoring of
+            # these indicators is currently not supported.
             metrics_to_check = [
                 (
                     "sglang:dp_cooperation_realtime_tokens_total",
@@ -71,14 +81,6 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
                     "sglang:dp_cooperation_realtime_tokens_total",
                     {"mode": "decode"},
                 ),
-                # (
-                #     "sglang:dp_cooperation_forward_execution_seconds_total",
-                #     {"category": "extend"},
-                # ),
-                # (
-                #     "sglang:dp_cooperation_forward_execution_seconds_total",
-                #     {"category": "decode"},
-                # ),
             ]
             _check_metrics_positive(self, metrics, metrics_to_check)
 
@@ -342,7 +344,6 @@ def _verify_metrics_common(test_case, metrics_text, metrics, expect_mfu_metrics:
                 )
 
 
-'''
 _DI_MARKER_PATH = "/tmp/sglang_di_test_marker"
 
 
@@ -518,7 +519,7 @@ def _clear_sglang_metrics_from_default_registry() -> None:
             REGISTRY.unregister(collector)
 
 
-class TestStatLoggersDIRecording(CustomTestCase):
+class TestNPUStatLoggersDIRecording(CustomTestCase):
     """Boot a real ``sgl.Engine`` with a custom scheduler collector that
     swaps the four DI hook classes for a FakeRayMetric-style recording
     double and verify that emissions land on the double.
@@ -627,13 +628,15 @@ class TestStatLoggersDIRecording(CustomTestCase):
         any_running = by_name["sglang:num_running_reqs"][0]
         self.assertIn("model_name", any_running["tags"])
         self.assertEqual(any_running["tags"]["model_name"], _MODEL_NAME)
-'''
+
 
 if __name__ == "__main__":
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    # suite.addTests(loader.loadTestsFromTestCase(TestNPUMetricsMFUDisabled))
-    # suite.addTests(loader.loadTestsFromTestCase(TestNPUMetricsMFUEnabled))
+    suite.addTests(loader.loadTestsFromTestCase(TestNPUMetricsMFUDisabled))
+    suite.addTests(loader.loadTestsFromTestCase(TestNPUMetricsMFUEnabled))
     suite.addTests(loader.loadTestsFromTestCase(TestNPUMetrics2NPU))
+    suite.addTests(loader.loadTestsFromTestCase(TestNPUStatLoggersDI))
+    suite.addTests(loader.loadTestsFromTestCase(TestNPUStatLoggersDIRecording))
     runner = unittest.TextTestRunner()
     runner.run(suite)
