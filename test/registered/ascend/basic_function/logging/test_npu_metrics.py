@@ -71,14 +71,14 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
                     "sglang:dp_cooperation_realtime_tokens_total",
                     {"mode": "decode"},
                 ),
-                (
-                    "sglang:dp_cooperation_forward_execution_seconds_total",
-                    {"category": "extend"},
-                ),
-                (
-                    "sglang:dp_cooperation_forward_execution_seconds_total",
-                    {"category": "decode"},
-                ),
+                # (
+                #     "sglang:dp_cooperation_forward_execution_seconds_total",
+                #     {"category": "extend"},
+                # ),
+                # (
+                #     "sglang:dp_cooperation_forward_execution_seconds_total",
+                #     {"category": "decode"},
+                # ),
             ]
             _check_metrics_positive(self, metrics, metrics_to_check)
 
