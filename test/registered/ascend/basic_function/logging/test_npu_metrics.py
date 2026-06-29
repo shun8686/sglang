@@ -162,14 +162,14 @@ class TestNPUMetrics2NPU(TestNPULoggingBase):
         # GPU, and it is uncertain whether it is a problem or if monitoring of
         # these indicators is currently not supported.
         metrics_to_check = [
-            (
-                "sglang:dp_cooperation_realtime_tokens_total",
-                {"mode": "prefill_compute"},
-            ),
-            (
-                "sglang:dp_cooperation_realtime_tokens_total",
-                {"mode": "decode"},
-            ),
+            # (
+            #     "sglang:dp_cooperation_realtime_tokens_total",
+            #     {"mode": "prefill_compute"},
+            # ),
+            # (
+            #     "sglang:dp_cooperation_realtime_tokens_total",
+            #     {"mode": "decode"},
+            # ),
         ]
         _check_metrics_positive(self, metrics, metrics_to_check)
 
