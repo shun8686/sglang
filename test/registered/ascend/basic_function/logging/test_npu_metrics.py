@@ -628,4 +628,8 @@ class TestStatLoggersDIRecording(CustomTestCase):
 '''
 
 if __name__ == "__main__":
-    unittest.main()
+    loader = unittest.TestLoader()
+    suite = unittest.TestSuite()
+    suite.addTests(loader.loadTestsFromTestCase(TestNPUMetricsMFUDisabled))
+    runner = unittest.TextTestRunner()
+    runner.run(suite)
