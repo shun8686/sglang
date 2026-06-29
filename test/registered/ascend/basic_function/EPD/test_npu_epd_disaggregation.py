@@ -35,8 +35,8 @@ from urllib.parse import urlparse
 
 import openai
 import requests
-from sglang.srt.utils import kill_process_tree
 
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     IMAGES_MAN_PATH,
     QWEN2_5_VL_3B_INSTRUCT_WEIGHTS_PATH,
@@ -131,7 +131,9 @@ def _chat_completion(base_url: str, model: str, content: list, **kwargs) -> str:
     }
     payload.update(kwargs)
     resp = requests.post(f"{base_url}/v1/chat/completions", json=payload, timeout=300)
-    assert resp.status_code == 200, f"Request failed {resp.status_code}: {resp.text[:300]}"
+    assert (
+        resp.status_code == 200
+    ), f"Request failed {resp.status_code}: {resp.text[:300]}"
     return resp.json().get("choices", [{}])[0].get("message", {}).get("content", "")
 
 
@@ -378,7 +380,9 @@ class TestNpuEPDDisaggregationOmni(NpuEPDBase):
             {"type": "image_url", "image_url": {"url": _INLINE_IMAGE_URL}},
             {"type": "text", "text": "Describe this image in a sentence."},
         ]
-        text = _chat_completion(self.lb_url, self.model, content, temperature=0, max_tokens=256)
+        text = _chat_completion(
+            self.lb_url, self.model, content, temperature=0, max_tokens=256
+        )
         print(f"[Omni EPD] Image response: {text}")
         self.assertGreater(len(text), 0)
 
