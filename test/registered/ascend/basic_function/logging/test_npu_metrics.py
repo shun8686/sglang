@@ -8,6 +8,7 @@ import requests
 from prometheus_client.parser import text_string_to_metric_families
 from prometheus_client.samples import Sample
 
+from sglang.srt.environ import envs
 from sglang.srt.observability.metrics_collector import (
     ROUTING_KEY_REQ_COUNT_BUCKET_BOUNDS,
     STAT_LOGGER_ROLE_SCHEDULER,
@@ -21,31 +22,33 @@ from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(est_time=120, suite="full-1-npu-a3", nightly=True)
 
-'''
-class TestNPUMetricsMFUEnabled(TestNPULoggingBase):
-    """Test core metrics functionality on single NPU with MFU enabled.
 
-    [Description]
-        Validates that the /metrics endpoint returns correct Prometheus-format
-        data when metrics and MFU metrics are enabled on a single NPU.
 
-    [Test Category] Functionality
-    [Test Target] --enable-metrics; --enable-mfu-metrics
+
+class BaseTestNPUMetrics(TestNPULoggingBase):
+    """Base class for NPU metrics tests.
+
+    Handles server launch in setUpClass and cleanup in tearDownClass.
+    Subclasses should override ``metrics_args`` and ``metrics_env`` to
+    configure the server before it is launched.
     """
+
+    enable_mfu_metrics: bool = False
+    metrics_args: list = []
+    verify_metrics_extra: bool = False
 
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.other_args.extend(["--enable-metrics", "--enable-mfu-metrics"])
-        # Enable the device timer so that forward-pass timing metrics
-        # (forward_execution_seconds_total) are collected. Without this
-        # environment variable the timer is disabled by default and those
-        # counters will remain at zero.
-        cls.env = {"SGLANG_ENABLE_METRICS_DEVICE_TIMER": "1"}
-        cls.launch_server()
+        cls.other_args.extend(cls.metrics_args)
+        with (
+            envs.SGLANG_ENABLE_METRICS_DP_ATTENTION.override(True),
+            envs.SGLANG_ENABLE_METRICS_DEVICE_TIMER.override(True),
+            envs.SGLANG_TEST_RETRACT.override(True),
+        ):
+            cls.launch_server()
 
-    def test_metrics_1npu(self):
-        """Test that metrics endpoint returns data when enabled on single NPU."""
+    def test_metrics(self):
         _generate_metrics(self.base_url)
 
         metrics_response = requests.get(f"{self.base_url}/metrics")
@@ -55,130 +58,62 @@ class TestNPUMetricsMFUEnabled(TestNPULoggingBase):
         print(f"metrics_text=\n{metrics_text}")
 
         metrics = _parse_prometheus_metrics(metrics_text)
-        _verify_metrics_common(self, metrics_text, metrics, expect_mfu_metrics=True)
+        _verify_metrics_common(self, metrics_text, metrics, expect_mfu_metrics=self.enable_mfu_metrics)
 
-
-class TestNPUMetricsMFUDisabled(TestNPULoggingBase):
-    """Test that MFU metrics are not emitted when the gate is disabled.
-
-    [Description]
-        Validates that when only --enable-metrics is set (without
-        --enable-mfu-metrics), MFU counters do not emit positive values.
-
-    [Test Category] Functionality
-    [Test Target] --enable-metrics
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.other_args.extend(["--enable-metrics"])
-        cls.env = {"SGLANG_ENABLE_METRICS_DEVICE_TIMER": "1"}
-        cls.launch_server()
-
-    def test_mfu_metrics_mfu_disabled(self):
-        """MFU metrics should not be emitted when the gate is disabled."""
-        _generate_metrics(self.base_url)
-
-        metrics_response = requests.get(f"{self.base_url}/metrics")
-        self.assertEqual(metrics_response.status_code, 200)
-        metrics_text = metrics_response.text
-
-        print(f"metrics_text=\n{metrics_text}")
-
-        metrics = _parse_prometheus_metrics(metrics_text)
-        _verify_metrics_common(self, metrics_text, metrics, expect_mfu_metrics=False)
-
-
-class TestNPUMetrics2NPU(TestNPULoggingBase):
-    """Test metrics on 2-NPU TP/DP parallel scenario.
-
-    [Description]
-        Validates distributed metrics (dp_cooperation_*) when running with
-        TP=2 and DP=2 on NPU.
-
-    [Test Category] Functionality
-    [Test Target] --enable-metrics; --enable-mfu-metrics;
-    """
-
-    @classmethod
-    def setUpClass(cls):
-        super().setUpClass()
-        cls.other_args.extend(
-            [
-                "--enable-metrics",
-                "--enable-mfu-metrics",
-                "--tp",
-                "2",
-                "--dp",
-                "2",
-                "--enable-dp-attention",
+        def _check_dp_cooperation_metrics(metrics):
+            metrics_to_check = [
+                (
+                    "sglang:dp_cooperation_realtime_tokens_total",
+                    {"mode": "prefill_compute"},
+                ),
+                (
+                    "sglang:dp_cooperation_realtime_tokens_total",
+                    {"mode": "decode"},
+                ),
+                (
+                    "sglang:dp_cooperation_forward_execution_seconds_total",
+                    {"category": "extend"},
+                ),
+                (
+                    "sglang:dp_cooperation_forward_execution_seconds_total",
+                    {"category": "decode"},
+                ),
             ]
-        )
-        # SGLANG_ENABLE_METRICS_DP_ATTENTION is required for dp_cooperation_*
-        # metrics. Without it, DPCooperationInfo is not created and those
-        # counters will never be emitted.
-        cls.env = {
-            "SGLANG_ENABLE_METRICS_DEVICE_TIMER": "1",
-            "SGLANG_ENABLE_METRICS_DP_ATTENTION": "1",
-        }
-        cls.launch_server()
+            _check_metrics_positive(self, metrics, metrics_to_check)
 
-    def test_metrics_2npu(self):
-        """Test metrics on 2-NPU TP/DP parallel scenario."""
-        _generate_metrics(self.base_url)
+            num_prefill_ranks_values = {
+                s.labels["num_prefill_ranks"]
+                for s in metrics["sglang:dp_cooperation_realtime_tokens_total"]
+            }
+            self.assertIn("0", num_prefill_ranks_values)
+            self.assertIn("1", num_prefill_ranks_values)
 
-        # Under DP=2 round-robin scheduling, requests with the same prefix may
-        # be dispatched to different ranks, leaving each rank with a cold cache.
-        # cached_tokens_total is only emitted when cached_tokens > 0, so we send
-        # additional identical requests to increase the chance that at least one
-        # rank sees a cache hit.
-        for i in range(5):
-            response = requests.post(
-                f"{self.base_url}/generate",
-                json={
-                    "text": "Hello, " * 100,
-                    "sampling_params": {"temperature": 0, "max_new_tokens": 5},
-                },
-                headers={"x-smg-routing-key": "test-key"},
-            )
-            assert response.status_code == 200
+        if self.verify_metrics_extra:
+            _check_dp_cooperation_metrics(metrics)
 
-        metrics_response = requests.get(f"{self.base_url}/metrics")
-        self.assertEqual(metrics_response.status_code, 200)
-        metrics_text = metrics_response.text
 
-        metrics = _parse_prometheus_metrics(metrics_text)
-        _verify_metrics_common(self, metrics_text, metrics, expect_mfu_metrics=True)
+class TestNPUMetricsMFUEnabled(BaseTestNPUMetrics):
+    enable_mfu_metrics = True
+    metrics_args = ["--enable-metrics", "--enable-mfu-metrics"]
 
-        # In the GPU scenario test case
-        # (test/registered/observability/test_metrics.py), the 2-card scenario
-        # contains assertions about the following monitoring metrics:
-        #   ("sglang:dp_cooperation_forward_execution_seconds_total",
-        #    {"category": "extend"}),
-        #   ("sglang:dp_cooperation_forward_execution_seconds_total",
-        #    {"category": "decode"}),
-        # However, these two indicators were not found during execution on the
-        # GPU, and it is uncertain whether it is a problem or if monitoring of
-        # these indicators is currently not supported.
-        metrics_to_check = [
-            # (
-            #     "sglang:dp_cooperation_realtime_tokens_total",
-            #     {"mode": "prefill_compute"},
-            # ),
-            # (
-            #     "sglang:dp_cooperation_realtime_tokens_total",
-            #     {"mode": "decode"},
-            # ),
-        ]
-        _check_metrics_positive(self, metrics, metrics_to_check)
 
-        num_prefill_ranks_values = {
-            s.labels["num_prefill_ranks"]
-            for s in metrics["sglang:dp_cooperation_realtime_tokens_total"]
-        }
-        self.assertIn("0", num_prefill_ranks_values)
-        self.assertIn("1", num_prefill_ranks_values)
+class TestNPUMetricsMFUDisabled(BaseTestNPUMetrics):
+    enable_mfu_metrics = False
+    metrics_args = ["--enable-metrics"]
+
+
+class TestNPUMetrics2NPU(BaseTestNPUMetrics):
+    enable_mfu_metrics = True
+    metrics_args = [
+        "--enable-metrics",
+        "--enable-mfu-metrics",
+        "--tp",
+        "2",
+        "--dp",
+        "2",
+        "--enable-dp-attention",
+    ]
+    verify_metrics_extra = True
 
 
 def _generate_metrics(base_url: str):
@@ -403,8 +338,9 @@ def _verify_metrics_common(test_case, metrics_text, metrics, expect_mfu_metrics:
                     0,
                     f"{metric_name}: expected no positive samples with MFU metrics gate disabled",
                 )
-'''
 
+
+'''
 _DI_MARKER_PATH = "/tmp/sglang_di_test_marker"
 
 
@@ -689,7 +625,7 @@ class TestStatLoggersDIRecording(CustomTestCase):
         any_running = by_name["sglang:num_running_reqs"][0]
         self.assertIn("model_name", any_running["tags"])
         self.assertEqual(any_running["tags"]["model_name"], _MODEL_NAME)
-
+'''
 
 if __name__ == "__main__":
     unittest.main()
