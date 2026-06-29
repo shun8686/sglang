@@ -92,17 +92,17 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
             _check_dp_cooperation_metrics(metrics)
 
 
-class TestNPUMetricsMFUEnabled(BaseTestNPUMetrics):
+class TestNPUMetricsMFUEnabled(_BaseTestNPUMetrics):
     enable_mfu_metrics = True
     metrics_args = ["--enable-metrics", "--enable-mfu-metrics"]
 
 
-class TestNPUMetricsMFUDisabled(BaseTestNPUMetrics):
+class TestNPUMetricsMFUDisabled(_BaseTestNPUMetrics):
     enable_mfu_metrics = False
     metrics_args = ["--enable-metrics"]
 
 
-class TestNPUMetrics2NPU(BaseTestNPUMetrics):
+class TestNPUMetrics2NPU(_BaseTestNPUMetrics):
     enable_mfu_metrics = True
     metrics_args = [
         "--enable-metrics",
