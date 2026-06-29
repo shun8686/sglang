@@ -25,7 +25,7 @@ register_npu_ci(est_time=120, suite="full-1-npu-a3", nightly=True)
 
 
 
-class BaseTestNPUMetrics(TestNPULoggingBase):
+class _BaseTestNPUMetrics(TestNPULoggingBase):
     """Base class for NPU metrics tests.
 
     Handles server launch in setUpClass and cleanup in tearDownClass.
