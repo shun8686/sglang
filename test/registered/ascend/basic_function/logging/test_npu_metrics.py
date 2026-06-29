@@ -35,6 +35,7 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
 
     enable_mfu_metrics: bool = False
     metrics_args: list = []
+    repeat_requests_num: int = 2
     verify_metrics_extra: bool = False
 
     @classmethod
@@ -49,7 +50,7 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
             cls.launch_server()
 
     def test_metrics(self):
-        _generate_metrics(self.base_url)
+        _generate_metrics(self.base_url, self.repeat_requests_num)
 
         metrics_response = requests.get(f"{self.base_url}/metrics")
         self.assertEqual(metrics_response.status_code, 200)
@@ -113,10 +114,11 @@ class TestNPUMetrics2NPU(_BaseTestNPUMetrics):
         "2",
         "--enable-dp-attention",
     ]
+    repeat_requests_num = 5
     verify_metrics_extra = True
 
 
-def _generate_metrics(base_url: str):
+def _generate_metrics(base_url: str, repeat_requests_num: int = 2) -> None:
     """Send requests to generate metrics data.
 
     The workload is intentionally generous so that every counter and
@@ -156,7 +158,7 @@ def _generate_metrics(base_url: str):
 
     # 2) Repeated requests with a routing key: populates routing-key histograms
     #    and cached_tokens_total (the second request may hit the KV cache).
-    for i in range(2):
+    for i in range(repeat_requests_num):
         response = requests.post(
             f"{base_url}/generate",
             json={
