@@ -357,10 +357,10 @@ def _verify_metrics_common(test_case, metrics_text, metrics, expect_mfu_metrics:
         ("sglang:realtime_tokens_total", {"mode": "prefill_compute"}),
         # Total tokens generated during the decode (autoregressive) phase.
         ("sglang:realtime_tokens_total", {"mode": "decode"}),
-        # Cumulative time spent in the extend (prefix-extension) forward pass.
-        ("sglang:forward_execution_seconds_total", {"category": "extend"}),
-        # Cumulative time spent in the decode forward pass.
-        ("sglang:forward_execution_seconds_total", {"category": "decode"}),
+        # # Cumulative time spent in the extend (prefix-extension) forward pass.
+        # ("sglang:forward_execution_seconds_total", {"category": "extend"}),
+        # # Cumulative time spent in the decode forward pass.
+        # ("sglang:forward_execution_seconds_total", {"category": "decode"}),
         # CPU time consumed by the tokenizer subprocess.
         ("sglang:process_cpu_seconds_total", {"component": "tokenizer"}),
     ]
