@@ -9,7 +9,7 @@ import requests
 from sglang.srt.environ import envs
 from sglang.srt.utils import kill_process_tree
 # from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
-QWEN3_0_6B_WEIGHTS_PATH="/home/weights/Qwen/Qwen3-0.6B"
+QWEN3_0_6B_WEIGHTS_PATH="/home/weights/Qwen3-0.6B"
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
