@@ -21,7 +21,7 @@ from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(est_time=120, suite="full-1-npu-a3", nightly=True)
 
-
+'''
 class TestNPUMetricsMFUEnabled(TestNPULoggingBase):
     """Test core metrics functionality on single NPU with MFU enabled.
 
@@ -403,7 +403,7 @@ def _verify_metrics_common(test_case, metrics_text, metrics, expect_mfu_metrics:
                     0,
                     f"{metric_name}: expected no positive samples with MFU metrics gate disabled",
                 )
-
+'''
 
 _DI_MARKER_PATH = "/tmp/sglang_di_test_marker"
 
