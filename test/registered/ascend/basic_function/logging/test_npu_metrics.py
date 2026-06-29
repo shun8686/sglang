@@ -15,14 +15,12 @@ from sglang.srt.observability.metrics_collector import (
     SchedulerMetricsCollector,
 )
 # from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH as _MODEL_NAME
-_MODEL_NAME="/home/weights/Qwen3-0.6B"
+_MODEL_NAME = "/home/weights/Qwen3-0.6B"
 from sglang.test.ascend.test_npu_logging import TestNPULoggingBase
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(est_time=120, suite="full-1-npu-a3", nightly=True)
-
-
 
 
 class _BaseTestNPUMetrics(TestNPULoggingBase):
@@ -96,16 +94,55 @@ class _BaseTestNPUMetrics(TestNPULoggingBase):
 
 
 class TestNPUMetricsMFUEnabled(_BaseTestNPUMetrics):
+    """Test core metrics functionality on single NPU with MFU enabled.
+
+    [Description]
+        Validates that the /metrics endpoint returns correct Prometheus-format
+        data when both --enable-metrics and --enable-mfu-metrics are enabled
+        on a single NPU. Verifies that essential metrics (throughput, latency,
+        token counts, cache hit rate, etc.) and MFU metrics (estimated FLOPs,
+        read/write bytes) are all present and contain positive values.
+
+    [Test Category] Functionality
+    [Test Target] --enable-metrics; --enable-mfu-metrics
+    """
+
     enable_mfu_metrics = True
     metrics_args = ["--enable-metrics", "--enable-mfu-metrics"]
 
 
 class TestNPUMetricsMFUDisabled(_BaseTestNPUMetrics):
+    """Test that MFU metrics are not emitted when the gate is disabled.
+
+    [Description]
+        Validates that when only --enable-metrics is set (without
+        --enable-mfu-metrics), the essential metrics are still exported
+        correctly but MFU counters (estimated_flops_per_gpu_total,
+        estimated_read_bytes_per_gpu_total, estimated_write_bytes_per_gpu_total)
+        are either absent or remain at zero.
+
+    [Test Category] Functionality
+    [Test Target] --enable-metrics
+    """
+
     enable_mfu_metrics = False
     metrics_args = ["--enable-metrics"]
 
 
 class TestNPUMetrics2NPU(_BaseTestNPUMetrics):
+    """Test metrics on 2-NPU TP/DP parallel scenario.
+
+    [Description]
+        Validates distributed metrics (dp_cooperation_*) when running with
+        TP=2 and DP=2 on NPU. Verifies that dp_cooperation_realtime_tokens_total
+        is emitted with correct num_prefill_ranks labels (both "0" and "1"),
+        and that all essential metrics and MFU metrics are present with
+        positive values under the multi-NPU configuration.
+
+    [Test Category] Functionality
+    [Test Target] --enable-metrics; --enable-mfu-metrics
+    """
+
     enable_mfu_metrics = True
     metrics_args = [
         "--enable-metrics",
@@ -296,10 +333,10 @@ def _verify_metrics_common(test_case, metrics_text, metrics, expect_mfu_metrics:
         ("sglang:realtime_tokens_total", {"mode": "prefill_compute"}),
         # Total tokens generated during the decode (autoregressive) phase.
         ("sglang:realtime_tokens_total", {"mode": "decode"}),
-        # # Cumulative time spent in the extend (prefix-extension) forward pass.
-        # ("sglang:forward_execution_seconds_total", {"category": "extend"}),
-        # # Cumulative time spent in the decode forward pass.
-        # ("sglang:forward_execution_seconds_total", {"category": "decode"}),
+        # Cumulative time spent in the extend (prefix-extension) forward pass.
+        ("sglang:forward_execution_seconds_total", {"category": "extend"}),
+        # Cumulative time spent in the decode forward pass.
+        ("sglang:forward_execution_seconds_total", {"category": "decode"}),
         # CPU time consumed by the tokenizer subprocess.
         ("sglang:process_cpu_seconds_total", {"component": "tokenizer"}),
     ]
@@ -406,6 +443,7 @@ class TestNPUStatLoggersDI(CustomTestCase):
             "Custom SchedulerMetricsCollector was not instantiated; "
             "stat_loggers DI did not take effect.",
         )
+
 
 # Path to the cross-process marker file for the FakeRayMetric-style recording
 # variant below. Distinct from ``_DI_MARKER_PATH`` so the two scheduler
