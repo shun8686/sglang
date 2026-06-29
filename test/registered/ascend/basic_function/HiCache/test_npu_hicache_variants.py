@@ -1,9 +1,5 @@
 """NPU adaptation of the EAGLE3 variant from test_hicache_variants.py.
 
-Verifies HiCache + EAGLE3 speculative decoding coexistence on NPU. Placed
-in a dedicated file (not test_npu_hicache.py) because EAGLE3 needs tp=4
-while that file is 1-NPU. See the migration report for full rationale.
-
 Usage:
     python3 -m pytest test/registered/ascend/basic_function/HiCache/test_npu_hicache_variants.py -v
 """
@@ -33,7 +29,12 @@ register_npu_ci(
 
 
 class TestHiCacheEagle(CustomTestCase):
-    """HiCache + EAGLE3 speculative decoding coexistence test."""
+    """HiCache + EAGLE3 speculative decoding: verify they coexist without
+    regressing MMLU accuracy.
+
+    [Test Category] Functional
+    [Test Target] --enable-hierarchical-cache + --speculative-algorithm EAGLE3
+    """
 
     model = QWEN3_8B_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
@@ -41,9 +42,6 @@ class TestHiCacheEagle(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        # NOTE: --disable-radix-cache (from spec-only NPU test) is dropped
-        # because HiCache's device tier IS the radix cache; the two are
-        # mutually exclusive and would raise ValueError at startup.
         cls.process = popen_launch_server(
             cls.model,
             cls.base_url,

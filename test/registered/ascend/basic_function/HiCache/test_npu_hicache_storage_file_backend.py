@@ -1,8 +1,5 @@
 """NPU adaptation of test_hicache_storage_file_backend.py.
 
-Verifies HiCache file storage backend backup/prefetch on NPU. See the
-migration report for NPU adaptation rationale.
-
 Usage:
     python3 -m pytest test/registered/ascend/basic_function/HiCache/test_npu_hicache_storage_file_backend.py -v
 """
@@ -37,6 +34,8 @@ register_npu_ci(
     nightly=False,
 )
 
+# Force deterministic inference so that the cached_tokens assertion is stable
+# across runs (mirrors the GPU test's SGLANG_ENABLE_DETERMINISTIC_INFERENCE=1).
 os.environ.setdefault("SGLANG_ENABLE_DETERMINISTIC_INFERENCE", "1")
 
 
@@ -45,8 +44,16 @@ def _is_in_ci() -> bool:
 
 
 class HiCacheStorageBaseMixin:
-    """Base mixin class with common setup and utilities."""
+    """Shared setup / helpers for the file-backend storage tests.
 
+    Mirrors `HiCacheStorageBaseMixin` from the GPU test
+    `test_hicache_storage_file_backend.py`. Each concrete test class
+    selects its own model and server arguments by overriding
+    `_get_model_name()` / `_get_extra_server_args()`.
+    """
+
+    # Number of tokens used for the backup/prefetch probe. Kept identical to
+    # the GPU test so the `cached_tokens > 700` threshold stays meaningful.
     probe_prompt_tokens = 768
 
     @classmethod
@@ -104,8 +111,11 @@ class HiCacheStorageBaseMixin:
         if cls.process:
             kill_process_tree(cls.process.pid)
 
+    # ---------- helpers ----------
+
     def gen_prompt(self, num_tokens: int) -> str:
         """Generate a prompt whose tokenized length is >= num_tokens."""
+        # Repeat a base sentence and trim to the requested token count.
         base = "The quick brown fox jumps over the lazy dog. "
         text = base
         while len(self.tokenizer.encode(text)) < num_tokens:
@@ -133,9 +143,13 @@ class HiCacheStorageBaseMixin:
         return int(response_json.get("meta_info", {}).get("cached_tokens", 0))
 
     def flush_cache(self):
-        """Flush device-tier cache. Retries with backoff because NPU radix-tree
-        node release is delayed: /flush_cache may transiently return 400 even
-        when queue=0/running=0.
+        """Flush the device-tier radix cache so the next request is forced to
+        pull from the remote (file) storage backend.
+
+        On NPU, `/flush_cache` may transiently return 400 with "Cache not
+        flushed because there are pending requests" even though
+        #queue-req=0 and #running-req=0, because the just-finished request's
+        radix-tree node has not been released yet. Retry with backoff.
         """
         backoff = [0.5, 1.0, 2.0, 4.0, 8.0]
         last_text = ""
@@ -156,31 +170,56 @@ class HiCacheStorageBaseMixin:
         assert False, f"Flush cache failed after {len(backoff)} retries: {last_text}"
 
     def trigger_offloading_and_flush(self):
-        """Evict the prefix from device tier, then flush device cache."""
-        # Long unrelated prompt evicts the previous prefix to file backend.
+        """Force device-cache offload to remote storage, then flush device cache.
+
+        Sending a large unrelated prompt evicts the previous prefix from the
+        device tier (forcing it to be offloaded to the file backend); the
+        subsequent `/flush_cache` clears the device tier so the next request
+        with the original prefix must hit the remote storage.
+        """
         offload_prompt = self.gen_prompt(2048)
         self.send_request(offload_prompt, max_tokens=1)
         self.flush_cache()
 
+    # ---------- core test ----------
+
     def test_basic_backup_and_prefetch(self):
-        """A prefix cached then flushed from device tier must be served from
-        the remote file backend on the next request."""
+        """A prefix that was cached, then flushed from the device tier, must be
+        served from the remote file backend on the next request."""
+        logging.warning(
+            "\n=== test_basic_backup_and_prefetch [%s] ===", self.__class__.__name__
+        )
         base_prompt = self.gen_prompt(self.probe_prompt_tokens)
 
-        # 1) Populate device cache with the prefix.
-        self.send_request(base_prompt, max_tokens=150)
+        # 1) First request - populate device cache with the prefix.
+        response1 = self.send_request(base_prompt, max_tokens=150)
+        logging.warning(
+            "first request cached_tokens=%d",
+            self.get_cached_tokens(response1),
+        )
 
-        # 2) Offload to remote storage and clear device cache.
+        # 2) Force the prefix to be offloaded to remote storage and clear the
+        #    device cache.
         self.trigger_offloading_and_flush()
 
-        # 3) Same prefix must hit the remote (file) backend.
+        # 3) Second request with the same prefix - must hit the remote (file)
+        #    backend, so the vast majority of the 768 prefix tokens are cached.
         response2 = self.send_request(base_prompt, max_tokens=150)
         cached_tokens = self.get_cached_tokens(response2)
-        self.assertGreater(cached_tokens, 700)
+        logging.warning("second request cached_tokens=%d (expect > 700)", cached_tokens)
+        self.assertGreater(
+            cached_tokens,
+            700,
+            "Remote (file backend) cache miss: cached_tokens=%d" % cached_tokens,
+        )
 
 
 class TestHiCacheStoragePageFirstDirectIO(HiCacheStorageBaseMixin, CustomTestCase):
-    """Variant: page_first_direct mem-layout + direct IO backend (CI runs this)."""
+    """Variant: page_first_direct mem-layout + direct IO backend (single NPU).
+
+    This is the only variant that runs in CI; the other three variants below
+    are skipped in CI to avoid redundant coverage (see their docstrings).
+    """
 
     @classmethod
     def _get_extra_server_args(cls) -> list:
@@ -198,7 +237,13 @@ class TestHiCacheStoragePageFirstDirectIO(HiCacheStorageBaseMixin, CustomTestCas
     _is_in_ci(), "Skipped in CI: page_first is remapped to page_first_direct on NPU"
 )
 class TestHiCacheStoragePageFirstLayout(HiCacheStorageBaseMixin, CustomTestCase):
-    """Variant: page_first mem-layout (remapped to page_first_direct on NPU)."""
+    """Variant: page_first mem-layout.
+
+    Skipped in CI because NPU does not support `page_first` and internally
+    remaps it to `page_first_direct`, which is already covered by
+    `TestHiCacheStoragePageFirstDirectIO`. Kept here for parity with the GPU
+    test and for manual / nightly runs.
+    """
 
     @classmethod
     def _get_extra_server_args(cls) -> list:
@@ -214,10 +259,16 @@ class TestHiCacheStoragePageFirstLayout(HiCacheStorageBaseMixin, CustomTestCase)
 
 @unittest.skipIf(
     _is_in_ci(),
-    "Skipped in CI: MLA + file backend covered by test_npu_hicache_mla.py",
+    "Skipped in CI: MLA + file backend covered by test_npu_hicache_mla.py smoke",
 )
 class TestHiCacheStorageMLA(HiCacheStorageBaseMixin, CustomTestCase):
-    """Variant: MLA model + file backend (tp=2)."""
+    """Variant: MLA model + file backend (tp=2).
+
+    Uses DeepSeek-Coder-V2-Lite (the NPU-available MLA model closest to the
+    GPU test's DeepSeek-Coder-V2-Lite-Instruct). Skipped in CI to keep the
+    suite short; the MLA + HiCache combination is already smoke-tested by
+    `test_npu_hicache_mla.py`.
+    """
 
     @classmethod
     def _get_model_name(cls) -> str:
@@ -237,7 +288,13 @@ class TestHiCacheStorageMLA(HiCacheStorageBaseMixin, CustomTestCase):
 
 @unittest.skipIf(_is_in_ci(), "Skipped in CI: long-running accuracy consistency check")
 class TestHiCacheStorageAccuracy(HiCacheStorageBaseMixin, CustomTestCase):
-    """Variant: GSM8K accuracy must be consistent before/after flushing cache."""
+    """Variant: GSM8K accuracy must be consistent before / after flushing cache.
+
+    Ported from the GPU `TestHiCacheStorageAccuracy.test_eval_accuracy`. The
+    GPU version asserts two GSM8K runs (before / after flush) differ by < 0.03
+    and both > 0.6. We reuse `run_eval` (NPU convention) instead of
+    `MGSMEnMixin`. Skipped in CI because it is a long-running evaluation.
+    """
 
     accuracy_threshold = 0.6
     accuracy_delta = 0.03
@@ -271,13 +328,19 @@ class TestHiCacheStorageAccuracy(HiCacheStorageBaseMixin, CustomTestCase):
         return float(metrics["score"])
 
     def test_eval_accuracy(self):
-        """GSM8K score must not drift across cache flush."""
+        logging.warning("\n=== test_eval_accuracy [%s] ===", self.__class__.__name__)
         score_before = self._run_gsm8k()
         self.flush_cache()
         score_after = self._run_gsm8k()
+        logging.warning("gsm8k score before=%.4f after=%.4f", score_before, score_after)
         self.assertGreaterEqual(score_before, self.accuracy_threshold)
         self.assertGreaterEqual(score_after, self.accuracy_threshold)
-        self.assertLess(abs(score_before - score_after), self.accuracy_delta)
+        self.assertLess(
+            abs(score_before - score_after),
+            self.accuracy_delta,
+            "GSM8K score drifted across cache flush: %.4f vs %.4f"
+            % (score_before, score_after),
+        )
 
 
 if __name__ == "__main__":
