@@ -67,7 +67,9 @@ class TestAscendCudaGraphGC(unittest.TestCase):
             with open(self.gc_log, "r", encoding="utf-8") as f:
                 content = f.read()
 
-            match = re.search(r"Capture.*graph end\..*avail mem=([\d\.]+) GB", content, re.IGNORECASE)
+            match = re.search(
+                r"Capture.*graph end\..*avail mem=([\d\.]+) GB", content, re.IGNORECASE
+            )
             self.assertIsNotNone(match, "Capture npu graph end log not found")
 
             avail_mem = float(match.group(1))
