@@ -1,0 +1,194 @@
+import os
+import tempfile
+import unittest
+
+import requests
+
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_0_6B_WEIGHTS_PATH,
+    QWEN3_8B_WEIGHTS_PATH,
+)
+from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.test_utils import (
+    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
+    CustomTestCase,
+    popen_launch_server,
+)
+
+register_npu_ci(est_time=60, suite="nightly-1-npu-a3", nightly=True)
+
+# Common ascend launch args shared by both test classes
+# --attention-backend ascend is a fixture, not a test factor
+_COMMON_ARGS = [
+    "--attention-backend",
+    "ascend",
+    "--device",
+    "npu",
+    "--dtype",
+    "bfloat16",
+    "--trust-remote-code",
+    "--mem-fraction-static",
+    "0.8",
+]
+
+
+class TestWeightLoaderMmapDefault(CustomTestCase):
+    """Default mmap enabled — server starts and generates correctly.
+
+    [Test Category] Parameter
+    [Test Target] --weight-loader-disable-mmap (default=False, mmap on)
+    """
+
+    model = QWEN3_0_6B_WEIGHTS_PATH
+    base_url = DEFAULT_URL_FOR_TEST
+
+    @classmethod
+    def setUpClass(cls):
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=_COMMON_ARGS,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_generate_with_default_mmap(self):
+        """Health check + simple generate with default mmap enabled."""
+        resp = requests.get(self.base_url + "/health", timeout=30)
+        self.assertEqual(resp.status_code, 200)
+
+        data = {
+            "text": "Hello, my name is",
+            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
+        }
+        resp = requests.post(
+            self.base_url + "/generate", json=data, timeout=30
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("text", resp.json())
+
+
+class TestWeightLoaderDisableMmap(CustomTestCase):
+    """--weight-loader-disable-mmap — server starts and generates correctly.
+
+    [Test Category] Parameter
+    [Test Target] --weight-loader-disable-mmap
+    """
+
+    model = QWEN3_0_6B_WEIGHTS_PATH
+    base_url = DEFAULT_URL_FOR_TEST
+
+    @classmethod
+    def setUpClass(cls):
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=[
+                *_COMMON_ARGS,
+                "--weight-loader-disable-mmap",  # Target parameter
+            ],
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_generate_with_disable_mmap(self):
+        """Health check + simple generate with mmap disabled."""
+        resp = requests.get(self.base_url + "/health", timeout=30)
+        self.assertEqual(resp.status_code, 200)
+
+        data = {
+            "text": "Hello, my name is",
+            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
+        }
+        resp = requests.post(
+            self.base_url + "/generate", json=data, timeout=30
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("text", resp.json())
+
+
+class TestWeightLoaderPrefetchTp4(CustomTestCase):
+    """--weight-loader-prefetch-checkpoints with tp-size=4 — verify prefetch
+    log across 4 ranks and custom thread count.
+
+    [Test Category] Parameter
+    [Test Target] --weight-loader-prefetch-checkpoints, --weight-loader-prefetch-num-threads
+    """
+
+    model = QWEN3_8B_WEIGHTS_PATH
+    base_url = DEFAULT_URL_FOR_TEST
+
+    @classmethod
+    def setUpClass(cls):
+        cls.out_file = tempfile.NamedTemporaryFile(
+            mode="w+", suffix=".txt", delete=False
+        )
+        cls.err_file = tempfile.NamedTemporaryFile(
+            mode="w+", suffix=".txt", delete=False
+        )
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=[
+                *_COMMON_ARGS,
+                "--tp-size",
+                "4",  # 4 ranks split prefetch across shards
+                "--weight-loader-prefetch-checkpoints",
+                "--weight-loader-prefetch-num-threads",
+                "3",  # Custom thread count, matches 2.log pattern
+            ],
+            return_stdout_stderr=(cls.out_file, cls.err_file),
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+        cls.out_file.close()
+        cls.err_file.close()
+        os.unlink(cls.out_file.name)
+        os.unlink(cls.err_file.name)
+
+    def test_prefetch_log_4ranks_and_generate(self):
+        """Verify prefetch log with per-rank shard count and custom threads."""
+        with open(self.err_file.name) as f:
+            log_content = f.read()
+
+        # Each rank logs its shard assignment: "prefetching X/Y checkpoint shards"
+        self.assertIn(
+            "prefetching",
+            log_content,
+            "Prefetch log keyword not found in stderr",
+        )
+        # Custom thread count must appear in the log line
+        self.assertIn(
+            "3 threads per rank",
+            log_content,
+            "Custom thread count (3) not found in prefetch log",
+        )
+
+        # Server must be healthy and able to generate
+        resp = requests.get(self.base_url + "/health", timeout=30)
+        self.assertEqual(resp.status_code, 200)
+
+        data = {
+            "text": "Hello, my name is",
+            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
+        }
+        resp = requests.post(
+            self.base_url + "/generate", json=data, timeout=30
+        )
+        self.assertEqual(resp.status_code, 200)
+        self.assertIn("text", resp.json())
+
+
+if __name__ == "__main__":
+    unittest.main()
