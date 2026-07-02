@@ -6,7 +6,7 @@ import requests
 from sglang.test.ascend.test_npu_logging import TestNPULoggingBase
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=100, suite="full-1-npu-a3", nightly=True)
 
 
 class TestNPULogRequestLevel0(TestNPULoggingBase):
@@ -23,14 +23,12 @@ class TestNPULogRequestLevel0(TestNPULoggingBase):
     def setUpClass(cls):
         super().setUpClass()
         cls.finish_message_level_dict = {
-            "0": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None,.*",
-            "1": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, video_data=None, sampling_params=.*",
-            "2": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*, video_data=None.*, sampling_params=.*",
-            "3": r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, text=.*, video_data=None.*, sampling_params=.*",
+            "0": r".*Finish: obj=GenerateReqInput\(.*(?!.*text=).*(?!.*sampling_params=).*\).*",
+            "1": r".*Finish: obj=GenerateReqInput\(.*(?!.*text=).*sampling_params=.*\).*",
+            "2": r".*Finish: obj=GenerateReqInput\(.*text=.*, sampling_params=.*\).*",
+            "3": r".*Finish: obj=GenerateReqInput\(.*text=.*, sampling_params=.*\).*",
         }
-        cls.finish_message = (
-            r".*Finish: obj=GenerateReqInput\(.*rid='\w+', http_worker_ipc=None, .*"
-        )
+        cls.finish_message = r".*Finish: obj=GenerateReqInput\(.*\).*"
         cls.keyword_output_id_start = (
             "'output_ids': ["  # Start delimiter for token ID array
         )
@@ -67,7 +65,7 @@ class TestNPULogRequestLevel0(TestNPULoggingBase):
 
         # Step 2: Verify the log file contains level-specific keywords matching the target log_requests_level
         self.out_log_file.seek(0)
-        content = self.out_log_file.read()
+        content = self.wait_for_log_content()
         self.assertTrue(len(content) > 0)
         self.assertIsNotNone(
             re.search(

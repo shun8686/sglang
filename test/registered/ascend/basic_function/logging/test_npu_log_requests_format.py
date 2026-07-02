@@ -1,11 +1,12 @@
 import json
+import re
 import unittest
 
 from sglang.test.ascend.output_capturer import OutputCapturer
 from sglang.test.ascend.test_npu_logging import TestNPULoggingBase
 from sglang.test.ci.ci_register import register_npu_ci
 
-register_npu_ci(est_time=100, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=100, suite="full-1-npu-a3", nightly=True)
 
 
 class TestNPULogRequestsFormatText(TestNPULoggingBase):
@@ -45,13 +46,22 @@ class TestNPULogRequestsFormatJson(TestNPULogRequestsFormatText):
         self.inference_once()
 
         content = self.output_capturer.get_all()
+        ts_pattern = re.compile(r"^\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}]\s*")
         received_found = False
         finished_found = False
         for line in content.splitlines():
-            if not line.strip() or not line.startswith("{"):
+            s = line.strip()
+            if not s:
+                continue
+
+            # Match valid timestamps
+            if s.startswith("["):
+                s = ts_pattern.sub("", s)
+
+            if not s.startswith("{"):
                 continue
             try:
-                data = json.loads(line)
+                data = json.loads(s)
             except json.JSONDecodeError:
                 continue
 
