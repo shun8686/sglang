@@ -79,17 +79,38 @@ class TestWeightLoaderPrefetchTp4(CustomTestCase):
         with open(self.err_file.name) as f:
             log_content = f.read()
 
-        # Each rank logs its shard assignment: "prefetching X/Y checkpoint shards"
+        # Each rank announces its shard assignment with this exact format
         self.assertIn(
             "prefetching",
             log_content,
             "Prefetch log keyword not found in stderr",
         )
-        # Custom thread count must appear in the log line
         self.assertIn(
-            "3 threads per rank",
+            "4 local ranks sharing the work, 3 threads per rank",
             log_content,
-            "Custom thread count (3) not found in prefetch log",
+            "Expected '4 local ranks sharing the work, 3 threads per rank' not found",
+        )
+        # Rank 0 gets 2/5 shards (5 files / 4 ranks = extra 1), others get 1/5
+        self.assertIn(
+            "Rank 0: prefetching 2/5 checkpoint shards",
+            log_content,
+            "Rank 0 shard assignment (2/5) not found",
+        )
+        self.assertIn(
+            "Rank 1: prefetching 1/5 checkpoint shards",
+            log_content,
+            "Rank 1 shard assignment (1/5) not found",
+        )
+        # Prefetch percentage progress: confirms the process ran to completion
+        self.assertIn(
+            "Rank 0: prefetching checkpoint files: 20% (2/2)",
+            log_content,
+            "Rank 0 prefetch completion (2/2) not found",
+        )
+        self.assertIn(
+            "Rank 1: prefetching checkpoint files: 10% (1/1)",
+            log_content,
+            "Rank 1 prefetch completion (1/1) not found",
         )
 
         # Server must be healthy and able to generate
