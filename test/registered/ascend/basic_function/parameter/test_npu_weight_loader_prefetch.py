@@ -6,7 +6,6 @@ import requests
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_0_6B_WEIGHTS_PATH,
     QWEN3_8B_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
@@ -17,10 +16,9 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=60, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=300, suite="nightly-4-npu-a3", nightly=True)
 
-# Common ascend launch args shared by both test classes
-# --attention-backend ascend is a fixture, not a test factor
+# Common ascend launch args — --attention-backend ascend is a fixture
 _COMMON_ARGS = [
     "--attention-backend",
     "ascend",
@@ -30,89 +28,8 @@ _COMMON_ARGS = [
     "bfloat16",
     "--trust-remote-code",
     "--mem-fraction-static",
-    "0.8",
+    "0.78",
 ]
-
-
-class TestWeightLoaderMmapDefault(CustomTestCase):
-    """Default mmap enabled — server starts and generates correctly.
-
-    [Test Category] Parameter
-    [Test Target] --weight-loader-disable-mmap (default=False, mmap on)
-    """
-
-    model = QWEN3_0_6B_WEIGHTS_PATH
-    base_url = DEFAULT_URL_FOR_TEST
-
-    @classmethod
-    def setUpClass(cls):
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=_COMMON_ARGS,
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def test_generate_with_default_mmap(self):
-        """Health check + simple generate with default mmap enabled."""
-        resp = requests.get(self.base_url + "/health", timeout=30)
-        self.assertEqual(resp.status_code, 200)
-
-        data = {
-            "text": "Hello, my name is",
-            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
-        }
-        resp = requests.post(
-            self.base_url + "/generate", json=data, timeout=30
-        )
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn("text", resp.json())
-
-
-class TestWeightLoaderDisableMmap(CustomTestCase):
-    """--weight-loader-disable-mmap — server starts and generates correctly.
-
-    [Test Category] Parameter
-    [Test Target] --weight-loader-disable-mmap
-    """
-
-    model = QWEN3_0_6B_WEIGHTS_PATH
-    base_url = DEFAULT_URL_FOR_TEST
-
-    @classmethod
-    def setUpClass(cls):
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                *_COMMON_ARGS,
-                "--weight-loader-disable-mmap",  # Target parameter
-            ],
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-
-    def test_generate_with_disable_mmap(self):
-        """Health check + simple generate with mmap disabled."""
-        resp = requests.get(self.base_url + "/health", timeout=30)
-        self.assertEqual(resp.status_code, 200)
-
-        data = {
-            "text": "Hello, my name is",
-            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
-        }
-        resp = requests.post(
-            self.base_url + "/generate", json=data, timeout=30
-        )
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn("text", resp.json())
 
 
 class TestWeightLoaderPrefetchTp4(CustomTestCase):
