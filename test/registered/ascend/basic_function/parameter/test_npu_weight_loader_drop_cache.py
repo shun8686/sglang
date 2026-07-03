@@ -34,7 +34,7 @@ _COMMON_ARGS = [
 
 
 def _vmtouch_file(filepath):
-    """Run vmtouch and return (resident_pages, percentage, raw_stdout, raw_stderr).
+    """Run vmtouch and return (resident_pages, percentage_str, raw_stdout, raw_stderr).
     Format: Resident Pages: 910157/968961 36/36 93.9%
     """
     try:
@@ -58,26 +58,23 @@ def _vmtouch_file(filepath):
         return -1, "", "", str(e)
 
 
-def _print_vmtouch(safetensor_files, weight_dir, label):
-    """Print vmtouch results for all safetensor files."""
-    print(f"\n=== vmtouch {label} ===")
+def _collect_vmtouch(safetensor_files, weight_dir):
+    """Return list of (fname, resident_pages, percentage_str)."""
+    results = []
     for fname in safetensor_files:
         fpath = os.path.join(weight_dir, fname)
-        resident, pct, stdout, stderr = _vmtouch_file(fpath)
+        resident, pct, _, _ = _vmtouch_file(fpath)
+        results.append((fname, resident, pct))
         if resident >= 0:
             print(f"vmtouch: {fname} Resident Pages={resident} ({pct})")
         else:
-            print(f"vmtouch: {fname} FAILED stderr={stderr[:200]}")
-            if stdout:
-                for line in stdout.split("\n")[:5]:
-                    if line.strip():
-                        print(f"  DEBUG: {line.strip()}")
-    print(f"=== end vmtouch {label} ===\n")
+            print(f"vmtouch: {fname} FAILED")
+    return results
 
 
 class TestWeightLoaderDropCache(CustomTestCase):
-    """--weight-loader-drop-cache-after-load — verify page cache after
-    drop-cache.  vmtouch runs while server is still alive.
+    """--weight-loader-drop-cache-after-load with disable-mmap —
+    page cache should be low after loading.
 
     [Test Category] Parameter
     [Test Target] --weight-loader-drop-cache-after-load
@@ -115,8 +112,8 @@ class TestWeightLoaderDropCache(CustomTestCase):
         os.unlink(cls.out_file.name)
         os.unlink(cls.err_file.name)
 
-    def test_drop_cache_after_load(self):
-        """Launch with drop-cache-after-load, vmtouch right after server ready — no generate."""
+    def test_drop_cache_on(self):
+        """At least one safetensors shard has page cache well below 100%."""
         resp = requests.get(self.base_url + "/health", timeout=30)
         self.assertEqual(resp.status_code, 200)
 
@@ -124,13 +121,20 @@ class TestWeightLoaderDropCache(CustomTestCase):
         safetensor_files = sorted(
             f for f in os.listdir(weight_dir) if f.endswith(".safetensors")
         )
-        _print_vmtouch(safetensor_files, weight_dir, "drop-cache ON")
+        results = _collect_vmtouch(safetensor_files, weight_dir)
+
+        self.assertGreater(len(results), 0, "No safetensor files found")
+        not_full = [r for r in results if r[1] >= 0 and r[2] != "100%"]
+        self.assertGreater(
+            len(not_full),
+            0,
+            f"Expected at least one file below 100% page cache, got all 100%: {results}",
+        )
 
 
 class TestWeightLoaderDropCacheOff(CustomTestCase):
-    """Default (no drop-cache) — baseline for comparing page cache with
-    TestWeightLoaderDropCache.  vmtouch runs after server shutdown for
-    a fair comparison.
+    """Default (no drop-cache) with disable-mmap — baseline: all page cache
+    should remain at 100% after loading.
 
     [Test Category] Parameter
     [Test Target] --weight-loader-drop-cache-after-load (off, baseline)
@@ -167,8 +171,8 @@ class TestWeightLoaderDropCacheOff(CustomTestCase):
         os.unlink(cls.out_file.name)
         os.unlink(cls.err_file.name)
 
-    def test_drop_cache_off_baseline(self):
-        """Launch without drop-cache, vmtouch right after server ready — no generate."""
+    def test_drop_cache_off(self):
+        """All safetensors shards should remain at 100% page cache."""
         resp = requests.get(self.base_url + "/health", timeout=30)
         self.assertEqual(resp.status_code, 200)
 
@@ -176,7 +180,15 @@ class TestWeightLoaderDropCacheOff(CustomTestCase):
         safetensor_files = sorted(
             f for f in os.listdir(weight_dir) if f.endswith(".safetensors")
         )
-        _print_vmtouch(safetensor_files, weight_dir, "drop-cache OFF")
+        results = _collect_vmtouch(safetensor_files, weight_dir)
+
+        self.assertGreater(len(results), 0, "No safetensor files found")
+        for fname, resident, pct in results:
+            self.assertEqual(
+                pct,
+                "100%",
+                f"Expected {fname} at 100% page cache, got {pct} (resident={resident})",
+            )
 
 
 if __name__ == "__main__":
