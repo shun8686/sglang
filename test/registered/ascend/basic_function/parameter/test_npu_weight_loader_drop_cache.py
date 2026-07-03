@@ -29,6 +29,7 @@ _COMMON_ARGS = [
     "--trust-remote-code",
     "--mem-fraction-static",
     "0.78",
+    "--weight-loader-disable-mmap",
 ]
 
 
