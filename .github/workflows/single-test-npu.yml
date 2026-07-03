@@ -29,6 +29,7 @@ jobs:
       - name: Install dependencies
         run: |
           pip install tabulate
+          apt-get update && apt-get install -y vmtouch
 
       - name: Run test
         timeout-minutes: 120
