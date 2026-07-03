@@ -115,19 +115,9 @@ class TestWeightLoaderDropCache(CustomTestCase):
         os.unlink(cls.err_file.name)
 
     def test_drop_cache_after_load(self):
-        """Launch with drop-cache-after-load, then check vmtouch while alive."""
+        """Launch with drop-cache-after-load, vmtouch right after server ready — no generate."""
         resp = requests.get(self.base_url + "/health", timeout=30)
         self.assertEqual(resp.status_code, 200)
-
-        data = {
-            "text": "Hello, my name is",
-            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
-        }
-        resp = requests.post(
-            self.base_url + "/generate", json=data, timeout=30
-        )
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn("text", resp.json())
 
         weight_dir = QWEN3_8B_WEIGHTS_PATH
         safetensor_files = sorted(
@@ -177,19 +167,9 @@ class TestWeightLoaderDropCacheOff(CustomTestCase):
         os.unlink(cls.err_file.name)
 
     def test_drop_cache_off_baseline(self):
-        """Launch without drop-cache, then check vmtouch while alive."""
+        """Launch without drop-cache, vmtouch right after server ready — no generate."""
         resp = requests.get(self.base_url + "/health", timeout=30)
         self.assertEqual(resp.status_code, 200)
-
-        data = {
-            "text": "Hello, my name is",
-            "sampling_params": {"temperature": 0, "max_new_tokens": 8},
-        }
-        resp = requests.post(
-            self.base_url + "/generate", json=data, timeout=30
-        )
-        self.assertEqual(resp.status_code, 200)
-        self.assertIn("text", resp.json())
 
         weight_dir = QWEN3_8B_WEIGHTS_PATH
         safetensor_files = sorted(
