@@ -2,13 +2,13 @@
 
 [Test Category] Speculative Decoding
 [Test Target] --speculative-skip-dp-mlp-sync;
---speculative-algorithm=EAGLE3 (positive) / DFLASH (negative);
+--speculative-algorithm=EAGLE (positive) / DFLASH (negative);
 --enable-dp-attention; --enable-dp-lm-head; --tp-size; --dp-size
 [Platform] NPU (Ascend A3, CANN 9.0.0)
 [Porting Source] New test case
 
 Test strategy:
-  - Positive: EAGLE3 + skip-dp-mlp-sync -> server starts, GSM8K passes
+  - Positive: EAGLE + skip-dp-mlp-sync -> server starts, GSM8K passes
   - Negative: DFLASH + skip-dp-mlp-sync -> server crashes with Assert error,
     captured via subprocess.run, stderr asserted to contain expected message.
     This ensures CI does NOT fail when the assert is correctly triggered.
@@ -61,11 +61,16 @@ NPU_ENV = {
 
 
 class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
-    """Positive test: EAGLE3 + skip-dp-mlp-sync should work correctly.
+    """Positive test: EAGLE + skip-dp-mlp-sync should work correctly.
 
     --speculative-skip-dp-mlp-sync skips the DP MLP synchronization step
-    in EAGLE3 speculative decoding with DP attention. This improves
+    in EAGLE speculative decoding with DP attention. This improves
     performance by avoiding unnecessary cross-DP communication.
+
+    Note: The assert in speculative_hook.py requires
+    speculative_algorithm == "EAGLE" (not EAGLE3). We use the EAGLE3 draft
+    model weights with --speculative-algorithm EAGLE, which the framework
+    accepts because EAGLE3 is a superset of EAGLE.
     """
 
     @classmethod
@@ -77,7 +82,7 @@ class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
         launch_args = [
             "--trust-remote-code",
             "--speculative-algorithm",
-            "EAGLE3",
+            "EAGLE",
             "--speculative-num-steps",
             "6",
             "--speculative-eagle-topk",
@@ -102,7 +107,7 @@ class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
             "--speculative-skip-dp-mlp-sync",
         ]
 
-        logger.info("Starting EAGLE3 + skip-dp-mlp-sync server on NPU...")
+        logger.info("Starting EAGLE + skip-dp-mlp-sync server on NPU...")
         logger.info("Model: %s", cls.model)
         logger.info("Draft model: %s", cls.draft_model)
         logger.info("TP=2, DP=2, skip_dp_mlp_sync=True")
@@ -147,7 +152,7 @@ class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
 
         if is_in_ci():
             write_github_step_summary(
-                f"### test_gsm8k (EAGLE3 skip-dp-mlp-sync on NPU)\n"
+                f"### test_gsm8k (EAGLE skip-dp-mlp-sync on NPU)\n"
                 f'{metrics["score"]=:.3f}\n'
                 f"{avg_spec_accept_length=}\n"
             )
@@ -160,8 +165,8 @@ class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
 class TestNPUSkipDPMLPSyncNegative(unittest.TestCase):
     """Negative test: non-EAGLE algorithm + skip-dp-mlp-sync should be rejected.
 
-    --speculative-skip-dp-mlp-sync is only supported with EAGLE algorithm.
-    When used with DFLASH (or other non-EAGLE algorithms), the server should
+    --speculative-skip-dp-mlp-sync is only supported with EAGLE algorithm
+    (not EAGLE3, not DFLASH). When used with DFLASH, the server should
     assert and refuse to start.
 
     This test uses subprocess.run to capture the crash output and verify
