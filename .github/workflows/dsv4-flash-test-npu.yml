@@ -21,6 +21,7 @@ jobs:
     runs-on: linux-aarch64-a3-16
     container:
       image: swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-B090
+      options: --pull always
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
