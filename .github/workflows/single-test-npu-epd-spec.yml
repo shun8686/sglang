@@ -42,12 +42,14 @@ jobs:
           pip install --quiet tabulate
 
           # Test cases - EPD + Speculative Decoding
-          # Order: fast/stable first, slow/aggressive last
+          # Order: fast/stable first. DFLASH is moved to last because it
+          # currently triggers an NPU aicore exception (error 507015) during
+          # verify, which is an algorithm-level issue under investigation.
           test_cases=(
-            "test/registered/ascend/basic_function/speculative_inference/test_npu_dflash_speculative.py"
-            "test/registered/ascend/basic_function/speculative_inference/test_npu_adaptive_speculative.py"
-            "test/registered/ascend/basic_function/speculative_inference/test_npu_skip_dp_mlp_sync.py"
             "test/registered/ascend/basic_function/EPD/test_npu_epd_dynamic_register.py"
+            "test/registered/ascend/basic_function/speculative_inference/test_npu_skip_dp_mlp_sync.py"
+            "test/registered/ascend/basic_function/speculative_inference/test_npu_adaptive_speculative.py"
+            "test/registered/ascend/basic_function/speculative_inference/test_npu_dflash_speculative.py"
           )
 
           for test_case in "${test_cases[@]}"; do
@@ -88,12 +90,24 @@ jobs:
           mkdir -p ${log_path}
           echo "Log path: ${log_path}"
 
+          # Run all test cases; record failures but do not stop the loop so
+          # that every case gets a chance to run and produce logs.
+          overall_failed=0
           for test_case in "${test_cases[@]}"; do
             tc_name=$(basename ${test_case} .py)
             echo "Running test case ${test_case}"
-            python -u ${sglang_source_path}/${test_case}
-            echo "Finished test case ${test_case}"
+            if python -u ${sglang_source_path}/${test_case}; then
+              echo "Finished test case ${test_case} (success)"
+            else
+              echo "::error::Test case ${test_case} FAILED, continuing with the next case."
+              overall_failed=1
+            fi
           done
+
+          if [ "${overall_failed}" -ne 0 ]; then
+            echo "::error::One or more test cases failed. See logs above."
+            exit 1
+          fi
 
           plog_path="/root/ascend/log/debug/plog"
           if [ -d "$plog_path" ];then
