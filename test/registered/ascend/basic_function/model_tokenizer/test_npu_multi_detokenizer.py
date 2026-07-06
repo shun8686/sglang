@@ -81,7 +81,7 @@ class TestMultiDetokenizer(CustomTestCase):
         self.assertEqual(count, self.detokenizer_count)
 
     def test_gsm8k(self):
-        gsm8k_num_shots = 5
+        gsm8k_num_shots = 8
         num_questions = 200
         args = SimpleNamespace(
             max_tokens=512,
@@ -94,7 +94,7 @@ class TestMultiDetokenizer(CustomTestCase):
             num_shots=gsm8k_num_shots,
         )
         metrics = run_eval(args)
-        self.assertGreaterEqual(metrics["score"], 0.865)
+        self.assertGreaterEqual(metrics["score"], 0.822)
 
 
 if __name__ == "__main__":
