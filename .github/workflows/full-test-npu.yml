@@ -120,6 +120,7 @@ jobs:
       image_a2: ${{ needs.set-image-config.outputs.image_a2 }}
       image_a3: ${{ needs.set-image-config.outputs.image_a3 }}
       skip_install_flag: ${{ needs.set-image-config.outputs.skip_install_flag }}
+      skip_dashboard: true
     secrets: inherit
 
   full-1-npu-a3:
@@ -876,12 +877,16 @@ jobs:
       - full-4-npu-a3
       - full-8-npu-a3
       - full-16-npu-a3
-      - nightly-poc-single-node-tests
-      - nightly-poc-multi-node-tests
-      - nightly-poc-multi-node-mix-tests
     runs-on: ubuntu-latest
     if: ${{ !cancelled() }}
     steps:
+      - name: Download nightly summary
+        uses: actions/download-artifact@v4
+        with:
+          name: nightly-summary
+          path: /tmp/nightly-summary
+        continue-on-error: true
+
       - name: Download all metrics
         uses: actions/download-artifact@v4
         with:
@@ -891,28 +896,11 @@ jobs:
 
       - name: Generate results table
         run: |
-          group_icon() {
-            case "$1" in
-              success)   echo "✅" ;;
-              failure)   echo "❌" ;;
-              cancelled) echo "⏭️" ;;
-              skipped)   echo "⏭️" ;;
-              *)         echo "❓" ;;
-            esac
-          }
-
-          single_result="${{ needs.nightly-poc-single-node-tests.result }}"
-          multi_result="${{ needs.nightly-poc-multi-node-tests.result }}"
-          mix_result="${{ needs.nightly-poc-multi-node-mix-tests.result }}"
-
-          echo "## Full Test POC Results" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Group | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-------|--------|" >> $GITHUB_STEP_SUMMARY
-          echo "| single-node-poc | $(group_icon ${single_result}) ${single_result} |" >> $GITHUB_STEP_SUMMARY
-          echo "| multi-node-poc | $(group_icon ${multi_result}) ${multi_result} |" >> $GITHUB_STEP_SUMMARY
-          echo "| multi-node-mix-poc | $(group_icon ${mix_result}) ${mix_result} |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          # Prepend nightly summary if available
+          if [ -f /tmp/nightly-summary/nightly-summary.md ]; then
+            cat /tmp/nightly-summary/nightly-summary.md >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+          fi
 
           echo "## Per-Test Metrics" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -948,7 +936,5 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           FAIL=0
-          if [ "${single_result}" != "success" ] && [ "${single_result}" != "skipped" ]; then FAIL=1; fi
-          if [ "${multi_result}" != "success" ] && [ "${multi_result}" != "skipped" ]; then FAIL=1; fi
-          if [ "${mix_result}" != "success" ] && [ "${mix_result}" != "skipped" ]; then FAIL=1; fi
+          ${{ needs.nighly-test-npu.result != 'success' && needs.nighly-test-npu.result != 'skipped' }} && FAIL=1
           exit $FAIL
