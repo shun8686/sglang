@@ -318,7 +318,7 @@ jobs:
       prefill_decode_deployment: 'mix'
       transformers_version: ''
   check-all-jobs:
-    if: ${{ !cancelled() }}
+    if: ${{ !cancelled() && github.event_name != 'workflow_call' }}
     needs:
       - nightly-poc-single-node-a2-tests
       - nightly-poc-single-node-tests
@@ -335,19 +335,6 @@ jobs:
 
       - name: Generate results table
         run: |
-          status_emoji() {
-            case "$1" in
-              pass)   echo "✅" ;;
-              fail)   echo "❌" ;;
-              *)      echo "❓" ;;
-            esac
-          }
-
-          single_result_a2="${{ needs.nightly-poc-single-node-a2-tests.result }}"
-          single_result="${{ needs.nightly-poc-single-node-tests.result }}"
-          multi_result="${{ needs.nightly-poc-multi-node-tests.result }}"
-          mix_result="${{ needs.nightly-poc-multi-node-mix-tests.result }}"
-
           group_icon() {
             case "$1" in
               success)   echo "✅" ;;
@@ -357,6 +344,11 @@ jobs:
               *)         echo "❓" ;;
             esac
           }
+
+          single_result_a2="${{ needs.nightly-poc-single-node-a2-tests.result }}"
+          single_result="${{ needs.nightly-poc-single-node-tests.result }}"
+          multi_result="${{ needs.nightly-poc-multi-node-tests.result }}"
+          mix_result="${{ needs.nightly-poc-multi-node-mix-tests.result }}"
 
           echo "## Nightly Test Results" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
@@ -403,4 +395,6 @@ jobs:
 
           FAIL=0
           if [ "${single_result}" != "success" ] && [ "${single_result}" != "skipped" ]; then FAIL=1; fi
+          if [ "${multi_result}" != "success" ] && [ "${multi_result}" != "skipped" ]; then FAIL=1; fi
+          if [ "${mix_result}" != "success" ] && [ "${mix_result}" != "skipped" ]; then FAIL=1; fi
           exit $FAIL
