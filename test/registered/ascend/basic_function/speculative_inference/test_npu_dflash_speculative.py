@@ -4,7 +4,6 @@
 [Test Target] --speculative-algorithm=DFLASH;
 --speculative-draft-model-path;
 --speculative-dflash-block-size;
---speculative-draft-window-size;
 --speculative-draft-attention-backend
 [Platform] NPU (Ascend A3, CANN 9.0.0)
 [Porting Source] New test case (no GPU counterpart for DFLASH on NPU CI)
@@ -13,6 +12,7 @@
 import os
 import unittest
 from types import SimpleNamespace
+from urllib.parse import urlparse
 
 import requests
 
@@ -52,14 +52,14 @@ NPU_ENV = {
 
 
 class TestNPUDFlashSpeculative(CustomTestCase):
-    """Test DFLASH speculative decoding on NPU.
+    """Test DFLASH speculative decoding on NPU in a single fused test.
 
-    DFLASH (Draft Flash) is a speculative decoding algorithm that uses a
-    block-structured draft model. This test verifies:
-    1. Server starts successfully with DFLASH parameters
-    2. Basic inference produces correct output
-    3. GSM8K accuracy meets threshold
-    4. Speculative accept length is reasonable (> 1.0)
+    DFLASH (Draft Flash) uses a block-structured draft model (b16, lossy).
+    This test verifies in one pass:
+    1. /server_info reflects DFLASH config (algorithm + block_size)
+    2. Basic inference produces output
+    3. GSM8K accuracy meets threshold (score > 0.55)
+    4. avg_spec_accept_length > 1.0 (speculation is beneficial)
     """
 
     @classmethod
@@ -114,8 +114,27 @@ class TestNPUDFlashSpeculative(CustomTestCase):
     def tearDownClass(cls):
         kill_process_tree(cls.process.pid)
 
-    def test_a_server_info(self):
-        """Verify DFLASH configuration is reflected in /server_info."""
+    def test_dflash_speculative(self):
+        """Verify DFLASH config, inference, GSM8K accuracy, and speculation benefit.
+
+        Single fused test covering all observation points:
+        - /server_info: algorithm=DFLASH, block_size=16
+        - Basic inference: non-empty response
+        - GSM8K: score > 0.55 (b16 lossy draft allows lower threshold than EAGLE3)
+        - avg_spec_accept_length > 1.0 (speculation provides speedup)
+
+        Threshold rationale:
+        - score > 0.55: DFLASH b16 is a lossy block-structured draft that trades
+          accuracy for faster drafting. Observed scores on NPU A3 range
+          [0.545, 0.7]. 0.55 is the lower bound of this range; scores below
+          indicate the draft model is degraded. The EAGLE3 threshold (0.69)
+          does not apply because DFLASH uses a different (b16) checkpoint.
+        - avg_spec_accept_length > 1.0: if <= 1.0, speculation provides no
+          benefit (every draft token rejected). This is queried from
+          /server_info after eval; if the server crashed (NPU aicore 507015),
+          the error surfaces directly rather than being silently skipped.
+        """
+        # 1. Verify /server_info config
         resp = requests.get(self.base_url + "/server_info", timeout=30)
         self.assertEqual(resp.status_code, 200)
         info = resp.json()
@@ -144,38 +163,18 @@ class TestNPUDFlashSpeculative(CustomTestCase):
             "speculative_dflash_block_size should be 16",
         )
 
-    def test_b_basic_inference(self):
-        """Verify basic inference works with DFLASH."""
-        from urllib.parse import urlparse
-
+        # 2. Basic inference
         parsed = urlparse(self.base_url)
-        args = BenchArgs(
-            host=parsed.hostname,
-            port=parsed.port,
-        )
+        args = BenchArgs(host=parsed.hostname, port=parsed.port)
         response = send_one_prompt(args, print_output=False)
         self.assertIsNotNone(response)
         self.assertGreater(len(response), 0)
         logger.info("Basic inference response: %s", response[:200])
 
-    def test_c_gsm8k(self):
-        """Verify GSM8K accuracy with DFLASH speculative decoding.
-
-        Threshold rationale:
-        - score > 0.50: DFLASH uses a lossy block-structured draft model (b16),
-          which trades a small accuracy drop for faster drafting. On NPU A3 we
-          observed scores in [0.545, 0.7] across runs, so 0.50 leaves headroom
-          for NPU aicore hardware jitter (error 507015) and draft precision
-          fluctuation. The original GPU-side threshold 0.69 does not apply here
-          because the NPU DFLASH draft model is a different (b16) checkpoint.
-        - avg_spec_accept_length > 1.0: only asserted when the server is still
-          alive after eval. NPU aicore exceptions (507015) may crash the server
-          near the end of the 200-example run; in that case the metric is
-          unavailable and we log a warning instead of failing the test.
-        """
+        # 3. GSM8K accuracy
         requests.get(self.base_url + "/flush_cache", timeout=30)
 
-        args = SimpleNamespace(
+        eval_args = SimpleNamespace(
             base_url=self.base_url,
             model=self.model,
             eval_name="gsm8k",
@@ -184,46 +183,35 @@ class TestNPUDFlashSpeculative(CustomTestCase):
             num_examples=200,
             num_threads=128,
         )
-        metrics = run_eval(args)
-
+        metrics = run_eval(eval_args)
         logger.info("GSM8K metrics: %s", metrics)
 
-        avg_spec_accept_length = None
-        server_alive = False
-        try:
-            resp = requests.get(self.base_url + "/server_info", timeout=30)
-            if resp.status_code == 200:
-                server_alive = True
-                server_info = resp.json()
-                if "internal_states" in server_info and len(server_info["internal_states"]) > 0:
-                    internal_state = server_info["internal_states"][0]
-                    if "avg_spec_accept_length" in internal_state:
-                        avg_spec_accept_length = internal_state["avg_spec_accept_length"]
-                    elif "spec_accept_length" in internal_state:
-                        avg_spec_accept_length = internal_state["spec_accept_length"]
-        except Exception as e:
-            logger.warning(
-                "Server appears to have crashed during/after GSM8K eval (NPU "
-                "aicore exception 507015 is a known intermittent hardware "
-                "issue). Skipping avg_spec_accept_length assertion. Error: %s",
-                e,
-            )
+        # 4. avg_spec_accept_length (no fault tolerance; real errors surface)
+        resp = requests.get(self.base_url + "/server_info", timeout=30)
+        self.assertEqual(resp.status_code, 200)
+        server_info = resp.json()
+        internal_state = server_info["internal_states"][0]
+        avg_spec_accept_length = internal_state.get("avg_spec_accept_length")
+        if avg_spec_accept_length is None:
+            avg_spec_accept_length = internal_state.get("spec_accept_length")
 
         if is_in_ci():
             write_github_step_summary(
-                f"### test_gsm8k (DFLASH on NPU)\n"
+                f"### test_dflash_speculative (DFLASH on NPU)\n"
                 f'{metrics["score"]=:.3f}\n'
                 f"{avg_spec_accept_length=}\n"
-                f"server_alive_after_eval={server_alive}\n"
             )
 
-        self.assertGreater(metrics["score"], 0.50, "GSM8K score should be > 0.50")
-        if avg_spec_accept_length is not None:
-            self.assertGreater(
-                avg_spec_accept_length,
-                1.0,
-                "avg_spec_accept_length should be > 1.0 for DFLASH to be beneficial",
-            )
+        self.assertGreater(metrics["score"], 0.55, "GSM8K score should be > 0.55")
+        self.assertIsNotNone(
+            avg_spec_accept_length,
+            "avg_spec_accept_length should be available in /server_info",
+        )
+        self.assertGreater(
+            avg_spec_accept_length,
+            1.0,
+            "avg_spec_accept_length should be > 1.0 for DFLASH to be beneficial",
+        )
 
 
 if __name__ == "__main__":

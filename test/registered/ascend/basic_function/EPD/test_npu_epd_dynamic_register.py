@@ -6,19 +6,15 @@
 [Platform] NPU (Ascend A3, CANN 9.0.0)
 [Porting Source] New test case
 
-This test verifies the new EPD dynamic registration mechanism:
-  - --encoder-bootstrap-port: Starts EncoderBootstrapServer in the
-    language-only process to receive encoder registrations.
-  - --encoder-register-urls: Used by encoder-only server to register
-    itself with the language server at startup.
-
-Test flow:
+This test verifies the new EPD dynamic registration mechanism in a single
+fused workflow:
   1. Start language-only server with --encoder-bootstrap-port 8997
   2. Start encoder-only server with --encoder-register-urls http://127.0.0.1:8997
-  3. Verify encoder is registered (encoder /health + language /server_info)
-  4. Send VLM request, verify correct response (proves end-to-end registration)
-  5. Stop encoder, verify it goes offline (encoder /health fails)
-  6. Restart encoder, send VLM request to verify re-registration
+  3. Verify both servers healthy
+  4. Verify encoder registered (encoder /health + language /server_info)
+  5. Send VLM request, verify correct response (end-to-end registration proof)
+  6. Stop encoder, verify it goes offline (encoder /health fails)
+  7. Restart encoder, send VLM request to verify re-registration
 """
 
 import os
@@ -70,7 +66,7 @@ TEST_IMAGE_BASE64 = (
 
 
 class TestNPUEPDDynamicRegister(CustomTestCase):
-    """Test EPD dynamic registration and runtime encoder up/down."""
+    """Test EPD dynamic registration and runtime encoder up/down in one workflow."""
 
     @classmethod
     def setUpClass(cls):
@@ -164,66 +160,8 @@ class TestNPUEPDDynamicRegister(CustomTestCase):
             time.sleep(2)
         return False
 
-    def test_a_both_servers_healthy(self):
-        """Verify both language and encoder servers are healthy."""
-        self.assertTrue(
-            self._wait_for_health(self.language_url),
-            "Language server should be healthy",
-        )
-        self.assertTrue(
-            self._wait_for_health(self.encoder_url), "Encoder server should be healthy"
-        )
-        logger.info("Both servers are healthy.")
-
-        # Check encoder /health returns 200
-        resp = requests.get(self.encoder_url + "/health", timeout=10)
-        self.assertEqual(resp.status_code, 200)
-
-        # Check language /health returns 200
-        resp = requests.get(self.language_url + "/health", timeout=10)
-        self.assertEqual(resp.status_code, 200)
-
-    def test_b_encoder_registered(self):
-        """Verify encoder is registered in language server.
-
-        The /list_encoder_urls endpoint is not available in the current image.
-        Instead we verify registration indirectly:
-          1. Encoder /health returns 200 (encoder is alive).
-          2. Language server /server_info shows language_only=True and
-             encoder_bootstrap_port is set (bootstrap is active).
-          3. The end-to-end VLM request in test_c proves the language server
-             can actually dispatch to the encoder.
-        """
-        # 1. Encoder is alive
-        resp = requests.get(self.encoder_url + "/health", timeout=30)
-        self.assertEqual(resp.status_code, 200)
-        logger.info("Encoder /health = 200 (encoder is alive).")
-
-        # 2. Language server has bootstrap port configured
-        resp = requests.get(self.language_url + "/server_info", timeout=30)
-        self.assertEqual(resp.status_code, 200)
-        info = resp.json()
-        self.assertTrue(
-            info.get("language_only"),
-            f"language_only should be True, got: {info.get('language_only')}",
-        )
-        bootstrap_port = info.get("encoder_bootstrap_port")
-        self.assertIsNotNone(
-            bootstrap_port,
-            "encoder_bootstrap_port should be set in server_info",
-        )
-        logger.info(
-            "Language server /server_info: language_only=True, "
-            "encoder_bootstrap_port=%s",
-            bootstrap_port,
-        )
-        logger.info(
-            "Encoder is registered (verified via encoder /health + "
-            "language /server_info; end-to-end proof in test_c)."
-        )
-
-    def test_c_vlm_request(self):
-        """Verify VLM request routes to encoder and returns correct response."""
+    def _send_vlm_request(self):
+        """Send a VLM request and return the response content."""
         payload = {
             "model": self.model,
             "messages": [
@@ -250,34 +188,68 @@ class TestNPUEPDDynamicRegister(CustomTestCase):
         resp = requests.post(
             self.language_url + "/v1/chat/completions",
             json=payload,
-            timeout=120,
+            timeout=180,
         )
-        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.status_code, 200, f"VLM request failed: {resp.text}")
         result = resp.json()
         content = result["choices"][0]["message"]["content"]
-
         self.assertIsNotNone(content)
         self.assertGreater(len(content), 0)
+        return content
+
+    def test_epd_dynamic_register(self):
+        """Verify EPD dynamic registration lifecycle in a single workflow.
+
+        Fused test covering all observation points:
+        1. Both servers healthy (/health returns 200)
+        2. Encoder registered (encoder /health + language /server_info)
+        3. VLM request succeeds (end-to-end registration proof)
+        4. Encoder goes offline when stopped (/health fails)
+        5. Encoder re-registers after restart (VLM request succeeds again)
+        """
+        # 1. Verify both servers healthy
+        self.assertTrue(
+            self._wait_for_health(self.language_url),
+            "Language server should be healthy",
+        )
+        self.assertTrue(
+            self._wait_for_health(self.encoder_url),
+            "Encoder server should be healthy",
+        )
+        logger.info("Both servers are healthy.")
+
+        # 2. Verify encoder registered via /server_info
+        resp = requests.get(self.encoder_url + "/health", timeout=30)
+        self.assertEqual(resp.status_code, 200)
+
+        resp = requests.get(self.language_url + "/server_info", timeout=30)
+        self.assertEqual(resp.status_code, 200)
+        info = resp.json()
+        self.assertTrue(
+            info.get("language_only"),
+            f"language_only should be True, got: {info.get('language_only')}",
+        )
+        bootstrap_port = info.get("encoder_bootstrap_port")
+        self.assertIsNotNone(
+            bootstrap_port,
+            "encoder_bootstrap_port should be set in server_info",
+        )
+        logger.info(
+            "Language server /server_info: language_only=True, "
+            "encoder_bootstrap_port=%s",
+            bootstrap_port,
+        )
+
+        # 3. VLM request (end-to-end proof of registration)
+        content = self._send_vlm_request()
         logger.info("VLM response: %s", content[:200])
 
-    def test_d_encoder_offline(self):
-        """Verify encoder goes offline when stopped.
-
-        The /list_encoder_urls endpoint is not available. Instead we verify
-        the encoder is offline by checking that its /health endpoint no
-        longer responds. The language server's health-check loop will
-        evict the encoder after consecutive failures (visible in logs).
-        """
+        # 4. Stop encoder, verify it goes offline
         logger.info("Stopping encoder server...")
+        kill_process_tree(self.__class__.encoder_process.pid)
 
-        if hasattr(self, "encoder_process"):
-            kill_process_tree(self.__class__.encoder_process.pid)
-
-        # Wait for the encoder process to be fully terminated and for the
-        # language server's health-check to evict it.
         time.sleep(15)
 
-        # Verify encoder /health no longer responds (encoder is offline)
         encoder_healthy = False
         try:
             resp = requests.get(self.encoder_url + "/health", timeout=5)
@@ -290,20 +262,8 @@ class TestNPUEPDDynamicRegister(CustomTestCase):
             "Encoder /health should fail after the encoder is stopped",
         )
         logger.info("Encoder is offline (encoder /health no longer responds).")
-        logger.info("Encoder offline test completed.")
 
-    def test_e_encoder_re_register(self):
-        """Verify encoder can re-register after restart.
-
-        The /list_encoder_urls endpoint is not available. Instead we verify
-        re-registration end-to-end by:
-          1. Restarting the encoder (which calls /register_encoder_url on
-             the bootstrap server during startup).
-          2. Waiting for the encoder /health to return 200.
-          3. Sending a VLM request through the language server and verifying
-             a successful response (proves the re-registered encoder is
-             actually being used).
-        """
+        # 5. Restart encoder, verify re-registration via VLM request
         logger.info("Restarting encoder server...")
 
         encoder_args = [
@@ -340,44 +300,7 @@ class TestNPUEPDDynamicRegister(CustomTestCase):
             "Encoder server should be healthy after restart",
         )
 
-        # Verify re-registration end-to-end via a VLM request
-        payload = {
-            "model": self.model,
-            "messages": [
-                {
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image_url",
-                            "image_url": {
-                                "url": f"data:image/png;base64,{TEST_IMAGE_BASE64}"
-                            },
-                        },
-                        {
-                            "type": "text",
-                            "text": "What color is this image? Answer in one word.",
-                        },
-                    ],
-                }
-            ],
-            "max_tokens": 64,
-            "temperature": 0,
-        }
-
-        resp = requests.post(
-            self.language_url + "/v1/chat/completions",
-            json=payload,
-            timeout=180,
-        )
-        self.assertEqual(
-            resp.status_code,
-            200,
-            "VLM request should succeed after encoder re-registration",
-        )
-        result = resp.json()
-        content = result["choices"][0]["message"]["content"]
-        self.assertIsNotNone(content)
-        self.assertGreater(len(content), 0)
+        content = self._send_vlm_request()
         logger.info("VLM response after re-register: %s", content[:200])
         logger.info("Encoder successfully re-registered (verified end-to-end).")
 

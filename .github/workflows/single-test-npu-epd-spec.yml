@@ -2,7 +2,7 @@ name: Single Test (NPU) - EPD & Speculative
 # test round: EPD dynamic register + Speculative decoding (DFLASH, Adaptive, skip-dp-mlp-sync)
 #   - test_npu_dflash_speculative.py     (DFLASH: block-size + GSM8K)
 #   - test_npu_adaptive_speculative.py   (Adaptive: upshift/downshift + GSM8K, ported from GPU)
-#   - test_npu_skip_dp_mlp_sync.py       (skip-dp-mlp-sync: positive EAGLE3 + negative DFLASH Assert)
+#   - test_npu_skip_dp_mlp_sync.py       (skip-dp-mlp-sync: positive EAGLE + negative EAGLE3 Assert)
 #   - test_npu_epd_dynamic_register.py   (EPD: --encoder-bootstrap-port + --encoder-register-urls)
 on:
   pull_request:
@@ -18,7 +18,7 @@ jobs:
     name: single-node-poc
     runs-on: linux-aarch64-a3-4
     container:
-      image: swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-B090
+      image: swr.cn-south-west-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-B090-20260703
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -42,9 +42,8 @@ jobs:
           pip install --quiet tabulate
 
           # Test cases - EPD + Speculative Decoding
-          # Order: fast/stable first. DFLASH is moved to last because it
-          # currently triggers an NPU aicore exception (error 507015) during
-          # verify, which is an algorithm-level issue under investigation.
+          # Order: fast/stable first. DFLASH is moved to last because its
+          # GSM8K eval (200 examples, 128 threads) is the longest running.
           test_cases=(
             "test/registered/ascend/basic_function/EPD/test_npu_epd_dynamic_register.py"
             "test/registered/ascend/basic_function/speculative_inference/test_npu_skip_dp_mlp_sync.py"
