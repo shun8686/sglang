@@ -1024,3 +1024,13 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
+
+
+def _get_npu_url_for_test():
+    """Return the test server URL with port offset based on ASCEND_RT_VISIBLE_DEVICES."""
+    device_id = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0").split(",")[0])
+    base_port = 10000 if is_in_ci() else 20000
+    return f"http://127.0.0.1:{base_port + device_id * 100}"
+
+
+DEFAULT_NPU_URL_FOR_TEST = _get_npu_url_for_test()

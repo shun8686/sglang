@@ -42,8 +42,8 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(
-    est_time=900,
-    suite="nightly-2-npu-a3",
+    est_time=700,
+    suite="full-2-npu-a3",
     nightly=True,
 )
 
@@ -61,7 +61,7 @@ def _npu_server_args(tp_size=1, **extra):
         "bfloat16",
         "--mem-fraction-static",
         "0.95",
-        "--disable-cuda-graph",
+        # "--disable-cuda-graph",
         "--max-running-requests",
         "8",
         "--tp-size",
@@ -77,7 +77,7 @@ def _npu_server_args(tp_size=1, **extra):
 # ──────────────────────────────────────────────────────────────────────
 # Validation helpers
 # ──────────────────────────────────────────────────────────────────────
-def _get_decode_logprob_signature(base_url, *, max_new_tokens=16, temperature=0.0):
+def _get_decode_logprob_signature(base_url, *, max_new_tokens=64, temperature=0.0):
     """
     Get the full logprob signature for a deterministic decode.
 
@@ -579,9 +579,7 @@ class TestNPUMoEWeightUpdateFromTensorTP2(_BaseNPUMoEWeightUpdateTest):
         """load_format=None → goes through model.load_weights() path.
 
         Sends per-expert weights in checkpoint format (e.g. model.layers.0.mlp.experts.0.gate_proj.weight).
-        Product code's load_weights() completes fuse (gate+up→w13) and TP sharding
-        via expert_params_mapping.
-        This is the real RL training (VERL) weight reload scenario.
+
         """
         import base64
 
@@ -868,8 +866,6 @@ class TestNPUMoEWeightUpdateFromTensorTP2(_BaseNPUMoEWeightUpdateTest):
 
         config = AutoConfig.from_pretrained(self.model, trust_remote_code=True)
         num_experts = config.num_experts
-        inter_size = config.moe_intermediate_size
-        hidden_size = config.hidden_size
 
         index_path = f"{self.model}/model.safetensors.index.json"
         with open(index_path) as f:
