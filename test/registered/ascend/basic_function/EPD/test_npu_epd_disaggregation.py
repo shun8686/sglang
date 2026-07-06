@@ -41,15 +41,15 @@ os.environ["SGLANG_MM_SKIP_COMPUTE_HASH"] = "True"
 
 DEFAULT_NPU_ENCODER_TRANSFER_BACKEND = "zmq_to_scheduler"
 
-DEFAULT_NPU_TP_SIZE = "2"
+DEFAULT_NPU_TP_SIZE = "4"
 
-register_npu_ci(est_time=400, suite="full-8-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-16-npu-a3", nightly=True)
 
 
 class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, PDDisaggregationServerBase):
     """
     EPD test with multiple encode servers for load balancing.
-    Uses 8 NPUs: 2 encoders (TP=2 each) + prefill (TP=2) + decode (TP=2).
+    Uses 16 NPUs: 2 encoders (TP=4 each) + prefill (TP=4) + decode (TP=4).
     """
 
     model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
@@ -88,7 +88,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, PDDisaggregationServerBas
         )
 
         t1 = threading.Thread(target=cls._start_encode1, args=(cls.encode_port1, 0))
-        t2 = threading.Thread(target=cls._start_encode2, args=(cls.encode_port2, 2))
+        t2 = threading.Thread(target=cls._start_encode2, args=(cls.encode_port2, 4))
         t1.start()
         t2.start()
         t1.join()
@@ -169,7 +169,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, PDDisaggregationServerBas
             "--tp-size",
             cls.tp_size,
             "--base-gpu-id",
-            "4",
+            "8",
             "--port",
             cls.prefill_port,
             "--context-length",
@@ -197,7 +197,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, PDDisaggregationServerBas
             "--tp-size",
             cls.tp_size,
             "--base-gpu-id",
-            "6",
+            "12",
             "--port",
             cls.decode_port,
         ]
