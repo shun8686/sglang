@@ -1,12 +1,12 @@
 name: Full Test (NPU) - debug
 
 on:
-pull_request:
-  branches:
-    - main
-    - testcases
-  paths:
-    - ".github/workflows/full-test-npu-debug.yml"
+  pull_request:
+    branches:
+      - main
+      - testcases
+    paths:
+      - ".github/workflows/full-test-npu-debug.yml"
   workflow_dispatch:
 
 concurrency:
