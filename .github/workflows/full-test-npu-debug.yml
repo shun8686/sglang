@@ -57,5 +57,4 @@ jobs:
           GDN_ATTN_BACKEND_TRITON: 1
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          echo $ASCEND_RT_VISIBLE_DEVICES
-          python3 test/registered/ascend/basic_function/rl/test_npu_moe_rl_weight_updates_from_disk_and_tensor.py
+          python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_spec_decoding.py

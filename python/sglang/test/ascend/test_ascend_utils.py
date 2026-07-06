@@ -302,6 +302,7 @@ QWEN3_5_397B_W4A8_MODEL_PATH = os.path.join(
 QWEN3_5_397B_W8A8_MODEL_PATH = os.path.join(
     MODEL_WEIGHTS_DIR, "Eco-Tech/Qwen3.5-397B-A17B-w8a8-mtp"
 )
+QWEN3_5_9B_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "Qwen/Qwen3.5-9B")
 
 # Embedding model weights path
 BGE_LARGE_EN_V1_5_WEIGHTS_PATH = os.path.join(MODEL_WEIGHTS_DIR, "bge-large-en-v1.5")
@@ -1024,13 +1025,3 @@ logging.basicConfig(
     handlers=[logging.StreamHandler()],
 )
 logger = logging.getLogger(__name__)
-
-
-def _get_npu_url_for_test():
-    """Return the test server URL with port offset based on ASCEND_RT_VISIBLE_DEVICES."""
-    device_id = int(os.environ.get("ASCEND_RT_VISIBLE_DEVICES", "0").split(",")[0])
-    base_port = 10000 if is_in_ci() else 20000
-    return f"http://127.0.0.1:{base_port + device_id * 100}"
-
-
-DEFAULT_NPU_URL_FOR_TEST = _get_npu_url_for_test()
