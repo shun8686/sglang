@@ -15,7 +15,6 @@ concurrency:
 
 jobs:
   debug-full-2-npu-a3:
-    if: ${{ github.event_name == 'pull_request') }}
     runs-on: linux-aarch64-a3-2
     container:
       image: "swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-B090-20260703"
