@@ -1,6 +1,6 @@
 import unittest
-
 from types import SimpleNamespace
+
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
