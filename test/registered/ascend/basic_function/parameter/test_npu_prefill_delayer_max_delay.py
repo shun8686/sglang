@@ -61,7 +61,8 @@ LONG_PROMPT = (
 LONG_MAX_TOKENS = 256
 # 更大的长请求 max_tokens：保证 running 在整个 max_delay 窗口内维持高位，
 # 否则长请求过早 decode 完会导致 queue_min 下降、延迟提前放行。
-LONG_SUSTAINED_MAX_TOKENS = 1024
+# 2048 token 的 decode 窗口（~2300 tok/s）约十几秒，足以覆盖短请求的 5s 延迟。
+LONG_SUSTAINED_MAX_TOKENS = 2048
 LONG_CONCURRENT = 20
 
 # 快速请求参数（用于触发排队）
@@ -118,17 +119,49 @@ def _parse_gauge(metrics_text: str, name: str):
     return int(float(matches[-1]))
 
 
-def _query_status(base_url: str, tag: str):
+def _query_status(base_url: str, tag: str, verbose: bool = True):
     try:
         stats = requests.get(f"{base_url}/metrics", timeout=10).text
     except Exception as e:  # noqa: BLE001
-        print(f"[{tag}] 查询 /metrics 失败: {e}")
+        if verbose:
+            print(f"[{tag}] 查询 /metrics 失败: {e}")
         return None, None
     running = _parse_gauge(stats, "sglang:num_running_reqs")
     waiting = _parse_gauge(stats, "sglang:num_queue_reqs")
-    print(f"[{tag}] num_running_reqs = {running if running is not None else '未知'}")
-    print(f"[{tag}] num_queue_reqs   = {waiting if waiting is not None else '未知'}")
+    if verbose:
+        print(f"[{tag}] num_running_reqs = {running if running is not None else '未知'}")
+        print(f"[{tag}] num_queue_reqs   = {waiting if waiting is not None else '未知'}")
     return running, waiting
+
+
+def _wait_until_stable_running(
+    base_url: str,
+    expected_running: int,
+    stable_secs: float = 4.0,
+    interval: float = 0.5,
+    timeout: float = 40.0,
+):
+    """轮询 /metrics，直到 running 连续 stable_secs 秒维持 >= expected_running。
+
+    仅凭单次 running>=expected 不够：metrics 计数早于实际 prefill/decode，
+    上一轮日志里 running 在长请求真正 prefill 前就已显示为 20。用"持续稳定"
+    来跨过长请求自身的 prefill/flush 延迟阶段，确保短请求发出时系统已进入
+    持续 decode，从而落在干净的延迟窗口。返回稳定时的 running，超时返回 None。
+    """
+    deadline = time.perf_counter() + timeout
+    stable_since = None
+    while time.perf_counter() < deadline:
+        running, _ = _query_status(base_url, "wait", verbose=False)
+        now = time.perf_counter()
+        if running is not None and running >= expected_running:
+            if stable_since is None:
+                stable_since = now
+            elif now - stable_since >= stable_secs:
+                return running
+        else:
+            stable_since = None
+        time.sleep(interval)
+    return None
 
 
 def _send_long_request(base_url: str, max_tokens: int = LONG_MAX_TOKENS):
@@ -270,11 +303,17 @@ class TestNpuPrefillDelayerBelowThreshold(CustomTestCase):
             t.start()
         print(f"    已启动 {LONG_CONCURRENT} 个长请求")
 
-        # 等待 running 起来（NPU 首次 prefill 有延迟，需比 stepwise 多等一会）
-        time.sleep(3)
-
-        # 2. 查询状态，确认 running 已被占满
-        print("[步骤2] 查询当前状态（发送短请求前）")
+        # 2. 轮询直到长请求进入稳定 decode（running 连续维持高位），而非固定
+        #    sleep：确保短请求落在干净的稳定窗口，不被长请求自身的
+        #    prefill/flush 延迟周期裹挟。
+        print("[步骤2] 轮询等待长请求进入稳定 decode...")
+        stable_running = _wait_until_stable_running(
+            self.base_url, expected_running=LONG_CONCURRENT
+        )
+        self.assertIsNotNone(
+            stable_running,
+            f"长请求未能稳定占满 running(>= {LONG_CONCURRENT})，无法验证 max_delay",
+        )
         _query_status(self.base_url, "发送前")
 
         # 3. 发送远小于阈值的短请求
