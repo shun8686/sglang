@@ -4,17 +4,16 @@ import unittest
 import requests
 
 from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
+    QWEN3_30B_A3B_INSTRUCT_2507_THEO_STYLE_LORA_PATH,
+)
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
-)
-
-from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
-    QWEN3_30B_A3B_INSTRUCT_2507_THEO_STYLE_LORA_PATH,
 )
 
 register_npu_ci(est_time=200, suite="full-2-npu-a3", nightly=True)
@@ -27,6 +26,7 @@ class TestExpertsSharedOuterLora(CustomTestCase):
     [Test Category] Parameter
     [Test Target] --experts-shared-outer-loras
     """
+
     lora_a = QWEN3_30B_A3B_INSTRUCT_2507_THEO_STYLE_LORA_PATH
 
     @classmethod

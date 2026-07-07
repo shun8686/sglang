@@ -1,5 +1,4 @@
 import unittest
-from sglang.test.run_eval import run_eval
 
 from types import SimpleNamespace
 from sglang.srt.utils import kill_process_tree
@@ -7,6 +6,7 @@ from sglang.test.ascend.test_ascend_utils import (
     QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -77,9 +77,7 @@ class TestEpDispatchAlgorithmDynamic(CustomTestCase):
         self.assertGreater(metrics["score"], 0.90)
 
 
-class TestEpDispatchAlgorithmFake(
-    TestEpDispatchAlgorithmDynamic
-):
+class TestEpDispatchAlgorithmFake(TestEpDispatchAlgorithmDynamic):
     ep_dispatch_algorithm = "fake"
 
 

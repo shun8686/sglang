@@ -2,10 +2,10 @@ import tempfile
 import unittest
 from types import SimpleNamespace
 
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH,
 )
-from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
@@ -57,7 +57,7 @@ class TestEnableDeepepWaterFill(CustomTestCase):
                 "deepep",
                 "--deepep-mode",
                 "normal",
-                "--enable-deepep-waterfill"
+                "--enable-deepep-waterfill",
             ],
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
             env={
