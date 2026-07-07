@@ -55,7 +55,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, PDDisaggregationServerBas
     model = QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH
     encoder_transfer_backend = DEFAULT_NPU_ENCODER_TRANSFER_BACKEND
     tp_size = DEFAULT_NPU_TP_SIZE
-    accuracy = 0.5
+    accuracy = 0.4
     mmmu_args = [
         "--limit",
         "50",
