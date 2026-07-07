@@ -233,7 +233,7 @@ class TestMultimodalSpeculativeDecoding(_SpecDecBase):
 
     _baseline_port = 21000
     _spec_port = 21001
-    _extra_args = []
+    _extra_args = ["--cuda-graph-bs", "1", "2"]
 
     def test_speculative_decoding_speedup_and_correctness(self):
         """Compare MTP speculative decoding vs non-speculative baseline."""
