@@ -22,7 +22,7 @@ from sglang.test.ascend.test_npu_multimodal_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=400, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=300, suite="nightly-2-npu-a3", nightly=True)
 
 
 def _create_multi_object_image():
@@ -103,121 +103,131 @@ class _SpecDecBase(CustomTestCase):
         _, cls._image_b64 = _create_multi_object_image()
         cls._prompt = "Describe each object in the image"
 
-    def _run_spec_dec_test(self):
-        tag = self.__class__.__name__
-        baseline_port = self._baseline_port
-        spec_port = self._spec_port
+        cls._baseline_process = None
+        cls._spec_process = None
 
-        baseline_process = spec_process = None
+        # ---- Launch baseline + speculative servers in parallel ----
+        # They run on separate chips (--base-gpu-id 1 vs 0) and separate
+        # ports, so both can load and serve concurrently.
         try:
-            # ---- Launch baseline + speculative servers in parallel ----
-            # They run on separate chips (--base-gpu-id 1 vs 0) and separate
-            # ports, so both can load and serve concurrently.
             with ThreadPoolExecutor(max_workers=2) as executor:
                 fut_baseline = executor.submit(
                     launch_server,
-                    self._model,
-                    extra_args=self._common_args
-                    + self._extra_args
+                    cls._model,
+                    extra_args=cls._common_args
+                    + cls._extra_args
                     + ["--base-gpu-id", "1"],
-                    port=baseline_port,
+                    port=cls._baseline_port,
                 )
                 fut_spec = executor.submit(
                     launch_server,
-                    self._model,
-                    extra_args=self._common_args
-                    + self._extra_args
-                    + self._spec_args
+                    cls._model,
+                    extra_args=cls._common_args
+                    + cls._extra_args
+                    + cls._spec_args
                     + ["--base-gpu-id", "0"],
-                    port=spec_port,
+                    port=cls._spec_port,
                 )
-                baseline_process, baseline_url = fut_baseline.result()
-                spec_process, spec_url = fut_spec.result()
+                cls._baseline_process, cls._baseline_url = fut_baseline.result()
+                cls._spec_process, cls._spec_url = fut_spec.result()
+        except Exception:
+            cls.tearDownClass()
+            raise
 
-            # ---- Baseline (non-speculative) output ----
-            output_bl = chat_single_image(
-                baseline_url,
-                self._image_b64,
-                self._prompt,
-                max_tokens=64,
-                temperature=0,
-            )
-            self.assertTrue(output_bl, f"{tag}: Baseline returned empty output")
-            self.assertGreater(
-                len(output_bl), 5, f"{tag}: Baseline too short: '{output_bl}'"
-            )
-            self.assertTrue(
-                content_has_keywords(output_bl),
-                f"{tag}: Baseline output doesn't reference image: '{output_bl[:200]}'",
-            )
+    @classmethod
+    def tearDownClass(cls):
+        import time as _time
 
-            # ---- Speculative decoding output ----
-            output_spec = chat_single_image(
+        if cls._spec_process is not None:
+            kill_process_tree(cls._spec_process.pid)
+        if cls._baseline_process is not None:
+            kill_process_tree(cls._baseline_process.pid)
+
+        # Give NPU driver time to release HBM from killed processes.
+        _time.sleep(5)
+
+    def _run_spec_dec_test(self):
+        tag = self.__class__.__name__
+        baseline_url = self._baseline_url
+        spec_url = self._spec_url
+
+        # ---- Baseline (non-speculative) output ----
+        output_bl = chat_single_image(
+            baseline_url,
+            self._image_b64,
+            self._prompt,
+            max_tokens=64,
+            temperature=0,
+        )
+        self.assertTrue(output_bl, f"{tag}: Baseline returned empty output")
+        self.assertGreater(
+            len(output_bl), 5, f"{tag}: Baseline too short: '{output_bl}'"
+        )
+        self.assertTrue(
+            content_has_keywords(output_bl),
+            f"{tag}: Baseline output doesn't reference image: '{output_bl[:200]}'",
+        )
+
+        # ---- Speculative decoding output ----
+        output_spec = chat_single_image(
+            spec_url,
+            self._image_b64,
+            self._prompt,
+            max_tokens=64,
+            temperature=0,
+        )
+        self.assertTrue(output_spec, f"{tag}: Spec returned empty output")
+        self.assertGreater(
+            len(output_spec), 5, f"{tag}: Spec too short: '{output_spec}'"
+        )
+        self.assertTrue(
+            content_has_keywords(output_spec),
+            f"{tag}: Spec output doesn't reference image: '{output_spec[:200]}'",
+        )
+
+        # At temperature=0 (greedy), speculative decoding must produce
+        # identical output to the non-speculative baseline.  The rejection
+        # sampling algorithm guarantees the output distribution matches the
+        # target model, and greedy collapses that to a deterministic sequence.
+        self.assertEqual(
+            output_bl,
+            output_spec,
+            f"{tag}: Spec output differs from baseline at temperature=0:\n"
+            f"  baseline: '{output_bl[:200]}'\n"
+            f"  spec:     '{output_spec[:200]}'",
+        )
+
+        # ---- Verify MTP is actually accepting drafts ----
+        for _ in range(3):
+            chat_single_image(
                 spec_url,
                 self._image_b64,
                 self._prompt,
                 max_tokens=64,
                 temperature=0,
             )
-            self.assertTrue(output_spec, f"{tag}: Spec returned empty output")
-            self.assertGreater(
-                len(output_spec), 5, f"{tag}: Spec too short: '{output_spec}'"
-            )
-            self.assertTrue(
-                content_has_keywords(output_spec),
-                f"{tag}: Spec output doesn't reference image: '{output_spec[:200]}'",
-            )
 
-            # At temperature=0 (greedy), speculative decoding must produce
-            # identical output to the non-speculative baseline.  The rejection
-            # sampling algorithm guarantees the output distribution matches the
-            # target model, and greedy collapses that to a deterministic sequence.
-            self.assertEqual(
-                output_bl,
-                output_spec,
-                f"{tag}: Spec output differs from baseline at temperature=0:\n"
-                f"  baseline: '{output_bl[:200]}'\n"
-                f"  spec:     '{output_spec[:200]}'",
-            )
-
-            # ---- Verify MTP is actually accepting drafts ----
-            for _ in range(3):
-                chat_single_image(
-                    spec_url,
-                    self._image_b64,
-                    self._prompt,
-                    max_tokens=64,
-                    temperature=0,
+        # Poll for avg_spec_accept_length to stabilise instead of a fixed sleep.
+        avg_spec_accept_length = 1.0
+        for _ in range(15):
+            time.sleep(1)
+            try:
+                server_info = requests.get(spec_url + "/server_info", timeout=10).json()
+                avg_spec_accept_length = server_info["internal_states"][0].get(
+                    "avg_spec_accept_length", 1.0
                 )
+            except Exception:
+                continue
+            if avg_spec_accept_length > 1.5:
+                break
 
-            # Poll for avg_spec_accept_length to stabilise instead of a fixed sleep.
-            avg_spec_accept_length = 1.0
-            for _ in range(15):
-                time.sleep(1)
-                try:
-                    server_info = requests.get(
-                        spec_url + "/server_info", timeout=10
-                    ).json()
-                    avg_spec_accept_length = server_info["internal_states"][0].get(
-                        "avg_spec_accept_length", 1.0
-                    )
-                except Exception:
-                    continue
-                if avg_spec_accept_length > 1.5:
-                    break
-
-            print(f"  [{tag}] avg_spec_accept_length={avg_spec_accept_length:.2f}")
-            self.assertGreater(
-                avg_spec_accept_length,
-                1.5,
-                f"{tag}: accept_length={avg_spec_accept_length:.2f} <= 1.5 — "
-                f"MTP drafts are mostly rejected, speculative decoding is ineffective",
-            )
-        finally:
-            if spec_process is not None:
-                kill_process_tree(spec_process.pid)
-            if baseline_process is not None:
-                kill_process_tree(baseline_process.pid)
+        print(f"  [{tag}] avg_spec_accept_length={avg_spec_accept_length:.2f}")
+        self.assertGreater(
+            avg_spec_accept_length,
+            1.5,
+            f"{tag}: accept_length={avg_spec_accept_length:.2f} <= 1.5 — "
+            f"MTP drafts are mostly rejected, speculative decoding is ineffective",
+        )
 
 
 class TestMultimodalSpeculativeDecoding(_SpecDecBase):
@@ -233,7 +243,7 @@ class TestMultimodalSpeculativeDecoding(_SpecDecBase):
 
     _baseline_port = 21000
     _spec_port = 21001
-    _extra_args = ["--cuda-graph-bs", "1", "2"]
+    _extra_args = ["--cuda-graph-bs-decode", "1", "2"]
 
     def test_speculative_decoding_speedup_and_correctness(self):
         """Compare MTP speculative decoding vs non-speculative baseline."""
