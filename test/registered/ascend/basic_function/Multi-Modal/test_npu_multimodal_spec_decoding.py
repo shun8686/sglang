@@ -22,7 +22,7 @@ from sglang.test.ascend.test_npu_multimodal_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=300, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="nightly-2-npu-a3", nightly=True)
 
 
 def _create_multi_object_image():
@@ -136,15 +136,10 @@ class _SpecDecBase(CustomTestCase):
 
     @classmethod
     def tearDownClass(cls):
-        import time as _time
-
         if cls._spec_process is not None:
             kill_process_tree(cls._spec_process.pid)
         if cls._baseline_process is not None:
             kill_process_tree(cls._baseline_process.pid)
-
-        # Give NPU driver time to release HBM from killed processes.
-        _time.sleep(5)
 
     def _run_spec_dec_test(self):
         tag = self.__class__.__name__

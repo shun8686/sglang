@@ -7,6 +7,7 @@ test files.  Each helper has zero or minimal external dependencies.
 
 import base64
 import io
+import logging
 import os
 import shlex
 import subprocess
@@ -14,6 +15,13 @@ import time
 from enum import Enum
 
 from PIL import Image, ImageDraw
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    handlers=[logging.StreamHandler()],
+)
+logger = logging.getLogger(__name__)
 
 # ============================================================
 # Color & Shape enums
@@ -270,11 +278,11 @@ def launch_router(prefill_url, decode_url, host, port):
         "--port",
         str(port),
     ]
-    print(f"Launching router: {shlex.join(lb_command)}")
+    logger.info(f"Launching router: {shlex.join(lb_command)}")
     process = subprocess.Popen(lb_command)
     router_url = f"http://{host}:{port}"
     wait_for_http_ready(url=router_url + "/health", timeout=300, process=process)
-    print(f"Router {router_url} is ready")
+    logger.info(f"Router {router_url} is ready")
     return process, router_url
 
 
@@ -316,7 +324,7 @@ def chat(base_url, messages, temperature=0, max_tokens=256, seed=None):
         create_kwargs["seed"] = seed
     response = client.chat.completions.create(**create_kwargs)
     text = response.choices[0].message.content
-    print(f"VLM response:\n{text}\n")
+    logger.info(f"VLM response:\n{text}\n")
     return text
 
 
