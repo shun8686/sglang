@@ -50,7 +50,6 @@ class TestInitExpertLocationString(GSM8KAscendMixin, CustomTestCase):
 
     env = {
         "HCCL_BUFFSIZE": "1024",
-        "SGLANG_LOG_EXPERT_LOCATION_METADATA": "1"  # 可以从打屏看到更多信息，用不到的话可以删掉
     }
 
 
