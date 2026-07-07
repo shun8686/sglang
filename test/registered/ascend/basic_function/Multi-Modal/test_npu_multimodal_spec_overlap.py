@@ -1,5 +1,5 @@
 """
-NPU P1-010: Overlap Schedule + speculative decoding + image -> multimodal drafts.
+NPU Multimodal + Overlap Schedule + speculative decoding.
 
 Deploy Qwen3-VL-8B-Instruct with EAGLE3 + overlap schedule env vars,
 send an image request, and verify output correctness.

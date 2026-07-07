@@ -1,5 +1,5 @@
 """
-NPU P1-001: Speculative decoding + image -> speedup without correctness loss.
+NPU Multimodal Speculative decoding -> speedup without correctness loss.
 
 """
 

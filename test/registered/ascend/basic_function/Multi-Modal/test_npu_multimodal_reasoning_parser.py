@@ -1,5 +1,5 @@
 """
-NPU P2-009: Reasoning Parser + image -> reasoning content preserved.
+NPU Multimodal + Reasoning Parser -> reasoning content preserved.
 
 Verify the reasoning parser with image input, testing both
 ``separate_reasoning=True`` and ``separate_reasoning=False`` modes.
@@ -30,7 +30,7 @@ from sglang.test.test_utils import (
 # ---------------------------------------------------------------------------
 # CI registration
 # ---------------------------------------------------------------------------
-register_npu_ci(est_time=1800, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=90, suite="nightly-2-npu-a3", nightly=True)
 
 
 _REASONING_PARSER_ARGS = ["--reasoning-parser", "qwen3"]
