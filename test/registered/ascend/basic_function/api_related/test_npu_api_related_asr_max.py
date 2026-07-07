@@ -24,6 +24,8 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
+from python.sglang.test.ascend.test_ascend_utils import WAV_PATH
+
 register_npu_ci(est_time=400, suite="full-2-npu-a3", nightly=True)
 
 parsed = urlparse(DEFAULT_URL_FOR_TEST)
@@ -32,7 +34,6 @@ port = parsed.port
 WS_URL = f"ws://{host}:{port}/v1/realtime"
 TARGET_SR = 16000
 CHUNK_SEC = 0.5
-WAV_PATH = "/home/q30061833/asr_en.wav"
 
 
 class TestAsrMaxTranscription(CustomTestCase):
