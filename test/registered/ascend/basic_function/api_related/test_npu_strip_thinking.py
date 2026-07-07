@@ -6,7 +6,8 @@ import unittest
 import urllib.request
 
 from sglang.srt.utils import kill_process_tree
-# from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
+
+from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -16,12 +17,15 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
-QWEN3_0_6B_WEIGHTS_PATH = "/home/weights/Qwen/Qwen3-0.6B"
-HARNONY = "Seth is twice as old as Brooke. In 2 years, the sum of their ages will be 28. How old is Seth?" * 20
+HARNONY = (
+    "Seth is twice as old as Brooke. In 2 years, the sum of their ages will be 28. How old is Seth?"
+    * 20
+)
 
 
 class _CacheResultStore:
     """Cross-category shared storage results"""
+
     disabled_cached = None
     enabled_cached = None
 
@@ -51,9 +55,7 @@ class TestStripThinkingCacheBase(CustomTestCase):
 
     def _flush_cache(self):
         # Clear cache
-        req = urllib.request.Request(
-            f"{self.base_url}/flush_cache", method="POST"
-        )
+        req = urllib.request.Request(f"{self.base_url}/flush_cache", method="POST")
         urllib.request.urlopen(req, timeout=30).read()
 
     def _run_test_and_get_cached(self):
@@ -65,14 +67,16 @@ class TestStripThinkingCacheBase(CustomTestCase):
 
         # Sending the request for the first time
         logging.warning("[info]First request (warming up)...")
-        request1 = self._post_generate({
-            "text": HARNONY,
-            "return_logprob": True,
-            "logprob_start_len": 0,
-            "return_token_str": True,
-            "sampling_parms": {"max_new_tokens": 100, "temperature": 0},
-            "require_reasoning": True,
-        })
+        request1 = self._post_generate(
+            {
+                "text": HARNONY,
+                "return_logprob": True,
+                "logprob_start_len": 0,
+                "return_token_str": True,
+                "sampling_parms": {"max_new_tokens": 100, "temperature": 0},
+                "require_reasoning": True,
+            }
+        )
 
         prompt_ids = [x[1] for x in request1["meta_info"]["input_token_logprobs"]]
         oids = request1["output_ids"]
@@ -83,12 +87,13 @@ class TestStripThinkingCacheBase(CustomTestCase):
         logging.warning(f"[Info] probe length = {len(probe)}")
 
         # Send the second request.
-        request2 = self._post_generate({
-            "input_ids": probe,
-            "sampling_parms": {"max_new_tokens": 100, "temperature": 0},
-            "require_reasoning": True,
-        },
-            timeout=60
+        request2 = self._post_generate(
+            {
+                "input_ids": probe,
+                "sampling_parms": {"max_new_tokens": 100, "temperature": 0},
+                "require_reasoning": True,
+            },
+            timeout=60,
         )
         cached = request2["meta_info"].get("cached_tokens", 0)
         return cached
@@ -172,15 +177,17 @@ class TestStripThinkingCacheEnable(TestStripThinkingCacheBase):
 
     def test_strip_thinking_cache_enable(self):
         """Configure with `--strip-thinking-cache` and record the cached_tokens results,
-        then compare them with the cached_tokens results obtained without configuring `--strip-thinking-cache`."""
+        then compare them with the cached_tokens results obtained without configuring `--strip-thinking-cache`.
+        """
         cached = self._run_test_and_get_cached()
         _CacheResultStore.enabled_cached = cached
         logging.warning(f"[Result] Enabled cached_tokens = {cached}")
 
         # contrast
         self.assertLess(
-            _CacheResultStore.enabled_cached, _CacheResultStore.disabled_cached,
-            f"Cache was not reduced."
+            _CacheResultStore.enabled_cached,
+            _CacheResultStore.disabled_cached,
+            f"Cache was not reduced.",
         )
 
 

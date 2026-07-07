@@ -8,11 +8,12 @@ import unittest
 from urllib.parse import urlparse
 
 import numpy as np
+import soundfile as sf
 import torch
 import torchaudio
-import soundfile as sf
+
 import websocket
-from websocket import WebSocketTimeoutException, WebSocketConnectionClosedException
+from websocket import WebSocketConnectionClosedException, WebSocketTimeoutException
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
@@ -98,7 +99,9 @@ class TestAsrMaxTranscription(CustomTestCase):
             data = data.mean(axis=1)
         if orig_sr != target_sr:
             audio_t = torch.from_numpy(data).unsqueeze(0)
-            audio_t = torchaudio.functional.resample(audio_t, orig_freq=orig_sr, new_freq=target_sr)
+            audio_t = torchaudio.functional.resample(
+                audio_t, orig_freq=orig_sr, new_freq=target_sr
+            )
             data = audio_t.squeeze(0).numpy()
 
         data = np.clip(data, -1.0, 1.0)
@@ -123,10 +126,12 @@ class TestAsrMaxTranscription(CustomTestCase):
                 logging.warning("Initial service message:", init_msg)
             except WebSocketTimeoutException:
                 self.fail(
-                    "Service unresponsive: Initial `session.created` event not received within 10 seconds of connecting to WebSocket.")
+                    "Service unresponsive: Initial `session.created` event not received within 10 seconds of connecting to WebSocket."
+                )
 
             # Update session configuration
-            session_update_msg = json.dumps({
+            session_update_msg = json.dumps(
+                {
                 "type": "session.update",
                 "session": {
                     "type": "transcription",
@@ -137,7 +142,8 @@ class TestAsrMaxTranscription(CustomTestCase):
                         }
                     },
                 },
-            })
+                }
+            )
             ws.send(session_update_msg)
             # wait session.updated
             ws.settimeout(10)
@@ -154,7 +160,10 @@ class TestAsrMaxTranscription(CustomTestCase):
                         break
                 except (WebSocketTimeoutException, WebSocketConnectionClosedException):
                     continue
-            self.assertTrue(session_ok, "Failed to wait for the session.updated configuration timeout.")
+            self.assertTrue(
+                session_ok,
+                "Failed to wait for the session.updated configuration timeout."
+            )
 
             offset = 0
             total_sec = 0.0
@@ -165,10 +174,12 @@ class TestAsrMaxTranscription(CustomTestCase):
                 end = offset + chunk_bytes_len
                 chunk = full_pcm[offset:end]
                 offset = end
-                send_msg = json.dumps({
-                    "type": "input_audio_buffer.append",
-                    "audio": base64.b64encode(chunk).decode("ascii"),
-                })
+                send_msg = json.dumps(
+                    {
+                        "type": "input_audio_buffer.append",
+                        "audio": base64.b64encode(chunk).decode("ascii"),
+                    }
+                )
                 ws.send(send_msg)
 
                 total_sec += CHUNK_SEC
@@ -181,7 +192,9 @@ class TestAsrMaxTranscription(CustomTestCase):
                     if evt["type"] == "error":
                         error = evt
                         logging.warning("Received a server-side error:", error)
-                        self.assertIn("Accumulated audio exceeded", error["error"]["message"])
+                        self.assertIn(
+                            "Accumulated audio exceeded", error["error"]["message"]
+                        )
                         break
                 except (WebSocketTimeoutException, WebSocketConnectionClosedException):
                     continue
@@ -196,20 +209,33 @@ class TestAsrMaxTranscription(CustomTestCase):
                     try:
                         resp_raw = ws.recv()
                         resp = json.loads(resp_raw)
-                        if resp["type"] == "conversation.item.input_audio_transcription.completed":
+                        if (
+                            resp["type"]
+                            == "conversation.item.input_audio_transcription.completed"
+                        ):
                             transcript_text = resp["transcript"]
                             logging.warning("Final version:", transcript_text)
                             finish_flag = True
                             break
                         if resp["type"] == "error":
                             error = resp
-                            logging.warning("Service error during the transcription stage:", error)
+                            logging.warning(
+                                "Service error during the transcription stage:", error
+                            )
                             break
-                    except (WebSocketTimeoutException, WebSocketConnectionClosedException):
+                    except (
+                        WebSocketTimeoutException,
+                        WebSocketConnectionClosedException
+                    ):
                         logging.warning("Timed out waiting for transcription event.")
                         continue
-                self.assertTrue(finish_flag, f"Transcription completion event not received within 30 seconds.")
-                self.assertGreater(len(transcript_text.strip()), 0, "Transcription result is empty.")
+                self.assertTrue(
+                    finish_flag,
+                    f"Transcription completion event not received within 30 seconds."
+                )
+                self.assertGreater(
+                    len(transcript_text.strip()), 0, "Transcription result is empty."
+                )
 
         finally:
             ws.close()
@@ -226,10 +252,14 @@ class TestAsrMaxTranscription(CustomTestCase):
 
             if first_msg.get("type") == "error":
                 err = first_msg.get("error", {})
-                res["msg"] = f"Service rejected | code={err.get('code')} | {err.get('message')}"
+                res["msg"] = (
+                    f"Service rejected | code={err.get('code')} | {err.get('message')}"
+                )
 
             elif first_msg.get("type") != "session.created":
-                res["msg"] = f"Session creation event not received; actual type is: {first_msg.get('type')}"
+                res["msg"] = (
+                    f"Session creation event not received; actual type is: {first_msg.get('type')}"
+                )
 
             else:
                 time.sleep(2)
@@ -250,8 +280,7 @@ class TestAsrMaxTranscription(CustomTestCase):
 
         for i in range(1, 4):
             t = threading.Thread(
-                target=self.create_active_session,
-                args=(i, result_list, lock)
+                target=self.create_active_session, args=(i, result_list, lock)
             )
             thread_list.append(t)
             t.start()
@@ -267,8 +296,11 @@ class TestAsrMaxTranscription(CustomTestCase):
             logging.warning(f"session{idx}: {status} {msg}")
             if ok:
                 success_count += 1
-        self.assertEqual(success_count, 2,
-                         f"The restrictions did not take effect as expected. In reality, it is {success_count}")
+        self.assertEqual(
+            success_count,
+            2,
+            f"The restrictions did not take effect as expected. In reality, it is {success_count}",
+        )
 
 
 if __name__ == "__main__":

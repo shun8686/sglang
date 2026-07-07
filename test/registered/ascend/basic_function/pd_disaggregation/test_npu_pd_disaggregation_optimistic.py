@@ -5,7 +5,6 @@ import tempfile
 import unittest
 from types import SimpleNamespace
 
-
 from sglang.bench_serving import get_tokenizer
 from sglang.test.ascend.test_ascend_utils import QWEN3_30B_A3B_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
@@ -98,6 +97,7 @@ class DisaggregationHiCacheBase(PDDisaggregationServerBase):
     def start_decode(cls):
         pass
 
+
 class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
     """Decode startup parameters"""
 
@@ -139,12 +139,13 @@ class TestDisaggregationDecodeWithHiCache(DisaggregationHiCacheBase):
             env=env,
         )
 
-
     def assert_prefill_retry(self):
         # Check for the existence of num_prefill_retries_total.
         result = subprocess.run(
             f"curl -s {self.prefill_url}/metrics | grep num_prefill_retries_total",
-            shell=True, capture_output=True, text=True,
+            shell=True,
+            capture_output=True,
+            text=True,
         )
         value = result.stdout
         self.assertIn("num_prefill_retries_total", value)

@@ -55,7 +55,9 @@ class TestMultiDetokenizer(CustomTestCase):
         # Check the number of threads in a process.
         result = subprocess.run(
             'ps -ef | grep -w "sglang::detokenizer" | grep -v grep',
-            shell=True, capture_output=True, text=True,
+            shell=True,
+            capture_output=True,
+            text=True,
         )
 
         lines = [line for line in result.stdout.strip().split("\n") if line.strip()]
@@ -71,7 +73,9 @@ class TestMultiDetokenizer(CustomTestCase):
             f"{self.base_url}/v1/chat/completions",
             json={
                 "model": self.model,
-                "messages": [{"role": "user", "content": "Explain what a large model is?"}],
+                "messages": [
+                    {"role": "user", "content": "Explain what a large model is?"}
+                ],
                 "max_tokens": 512,
             },
         )
