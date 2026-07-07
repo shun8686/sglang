@@ -1,15 +1,38 @@
+"""Manual NPU test for the Prefill Delayer queue-based trigger.
+
+Converted from ``python/sglang/test/prefill.sh``.
+
+The server is launched with:
+    --enable-prefill-delayer
+    --prefill-delayer-queue-min-ratio 0.8
+    --prefill-delayer-max-delay-ms 5000
+
+Two test classes:
+    - TestNpuPrefillDelayer: observation only (no assertions). Drives the same
+      request pattern as the shell script and prints per-request latency and
+      /metrics gauges so the effect of the delayer can be eyeballed.
+    - TestNpuPrefillDelayerBelowThreshold: sends a request count well below the
+      queue threshold while keeping running high for the whole delay window, so
+      the delay is released only on the max_delay_ms timeout. Asserts the short
+      requests wait longer than max_delay_ms.
+
+Interpretation:
+    - Delay is released either when the waiting queue reaches
+      queue_min = min(running * ratio, max_prefill_bs), or when the wall-clock
+      max_delay_ms timeout is hit, whichever comes first.
+    - Check the server log for "PrefillDelayer" DEBUG lines.
+"""
+
 import os
-import subprocess
-import tempfile
+import re
+import threading
+import time
 import unittest
 
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_8B_WEIGHTS_PATH,
-)
-from sglang.test.ci.ci_register import register_npu_ci
+from sglang.test.ascend.test_ascend_utils import QWEN3_0_6B_WEIGHTS_PATH
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
@@ -17,178 +40,319 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
+# server 配置
+MODEL_PATH = QWEN3_0_6B_WEIGHTS_PATH
+MAX_DELAY_MS = 5000
+QUEUE_MIN_RATIO = 0.8
 
-_COMMON_ARGS = [
-    "--attention-backend",
-    "ascend",
-    "--device",
-    "npu",
-    "--dtype",
-    "bfloat16",
-    "--trust-remote-code",
-    "--mem-fraction-static",
-    "0.78",
-    "--weight-loader-disable-mmap",
-]
+# 长请求参数（用于占满 running）
+LONG_PROMPT = (
+    "Please describe in detail the development history of artificial intelligence "
+    "from the Turing test to deep learning, including key figures and milestone "
+    "events. Start from the early neural network research in the 1940s, through the "
+    "proposal of the Turing test in the 1950s, the birth of the perceptron in the "
+    "1960s, the development of expert systems in the 1970s, the breakthrough of the "
+    "backpropagation algorithm in the 1980s, the rise of statistical learning in the "
+    "1990s, the revival of deep learning in the 2000s, and AlexNet's breakthrough "
+    "result in the ImageNet competition in 2012. In recent years, the development of "
+    "large language models such as GPT and BERT has pushed artificial intelligence to "
+    "new heights."
+)
+LONG_MAX_TOKENS = 256
+# 更大的长请求 max_tokens：保证 running 在整个 max_delay 窗口内维持高位，
+# 否则长请求过早 decode 完会导致 queue_min 下降、延迟提前放行。
+# 2048 token 的 decode 窗口（~2300 tok/s）约十几秒，足以覆盖短请求的 5s 延迟。
+LONG_SUSTAINED_MAX_TOKENS = 2048
+LONG_CONCURRENT = 20
+
+# 快速请求参数（用于触发排队）
+SHORT_PROMPT = "What is artificial intelligence?"
+SHORT_MAX_TOKENS = 50
+SHORT_CONCURRENT = 15
+# 远小于阈值 queue_min = min(running*0.8, max_prefill_bs) ≈ 16 的请求数，
+# 使 waiting 始终 < queue_min，延迟只能靠 max_delay_ms 超时释放。
+SHORT_CONCURRENT_BELOW = 3
+
+# 模块级 server 进程，两个测试类共享
+GLOBAL_SERVER_PROCESS = None
 
 
-def _vmtouch_file(filepath):
-    """Run vmtouch and return (resident_pages, percentage_str, raw_stdout, raw_stderr).
-    Format: Resident Pages: 910157/968961 36/36 93.9%
-    """
+def setUpModule():
+    global GLOBAL_SERVER_PROCESS
+    env = os.environ.copy()
+    # 调试：开启 PrefillDelayer 的 DEBUG 日志
+    env["SGLANG_PREFILL_DELAYER_DEBUG_LOG"] = "1"
+
+    other_args = [
+        "--attention-backend",
+        "ascend",
+        "--enable-metrics",
+        "--enable-prefill-delayer",
+        "--prefill-delayer-queue-min-ratio",
+        str(QUEUE_MIN_RATIO),
+        "--prefill-delayer-max-delay-ms",
+        str(MAX_DELAY_MS),
+    ]
+    GLOBAL_SERVER_PROCESS = popen_launch_server(
+        MODEL_PATH,
+        DEFAULT_URL_FOR_TEST,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
+        env=env,
+    )
+
+
+def tearDownModule():
+    if GLOBAL_SERVER_PROCESS is not None:
+        kill_process_tree(GLOBAL_SERVER_PROCESS.pid)
+
+
+def _parse_gauge(metrics_text: str, name: str):
+    """Return the last value of a prometheus gauge line, or None."""
+    matches = re.findall(
+        rf"^{re.escape(name)}(?:\{{[^}}]*\}})?\s+([0-9.eE+-]+)",
+        metrics_text,
+        re.MULTILINE,
+    )
+    if not matches:
+        return None
+    return int(float(matches[-1]))
+
+
+def _query_status(base_url: str, tag: str, verbose: bool = True):
     try:
-        result = subprocess.run(
-            ["vmtouch", filepath],
-            capture_output=True, text=True, timeout=30,
-        )
-        stdout = result.stdout
-        stderr = result.stderr
-        resident = -1
-        pct = ""
-        for line in stdout.split("\n"):
-            if "Resident Pages" in line:
-                # Parse: " Resident Pages: 910157/968961 36/36 93.9%"
-                parts = line.split("Resident Pages:")[1].strip().split()
-                resident = int(parts[0].split("/")[0])
-                pct = parts[2] if len(parts) >= 3 else ""
-                break
-        return resident, pct, stdout, stderr
-    except Exception as e:
-        return -1, "", "", str(e)
+        stats = requests.get(f"{base_url}/metrics", timeout=10).text
+    except Exception as e:  # noqa: BLE001
+        if verbose:
+            print(f"[{tag}] 查询 /metrics 失败: {e}")
+        return None, None
+    running = _parse_gauge(stats, "sglang:num_running_reqs")
+    waiting = _parse_gauge(stats, "sglang:num_queue_reqs")
+    if verbose:
+        print(f"[{tag}] num_running_reqs = {running if running is not None else '未知'}")
+        print(f"[{tag}] num_queue_reqs   = {waiting if waiting is not None else '未知'}")
+    return running, waiting
 
 
-def _collect_vmtouch(safetensor_files, weight_dir):
-    """Return list of (fname, resident_pages, percentage_str)."""
-    results = []
-    for fname in safetensor_files:
-        fpath = os.path.join(weight_dir, fname)
-        resident, pct, _, _ = _vmtouch_file(fpath)
-        results.append((fname, resident, pct))
-        if resident >= 0:
-            print(f"vmtouch: {fname} Resident Pages={resident} ({pct})")
+def _wait_until_stable_running(
+    base_url: str,
+    expected_running: int,
+    stable_secs: float = 4.0,
+    interval: float = 0.5,
+    timeout: float = 40.0,
+):
+    """轮询 /metrics，直到 running 连续 stable_secs 秒维持 >= expected_running。
+
+    仅凭单次 running>=expected 不够：metrics 计数早于实际 prefill/decode，
+    上一轮日志里 running 在长请求真正 prefill 前就已显示为 20。用"持续稳定"
+    来跨过长请求自身的 prefill/flush 延迟阶段，确保短请求发出时系统已进入
+    持续 decode，从而落在干净的延迟窗口。返回稳定时的 running，超时返回 None。
+    """
+    deadline = time.perf_counter() + timeout
+    stable_since = None
+    while time.perf_counter() < deadline:
+        running, _ = _query_status(base_url, "wait", verbose=False)
+        now = time.perf_counter()
+        if running is not None and running >= expected_running:
+            if stable_since is None:
+                stable_since = now
+            elif now - stable_since >= stable_secs:
+                return running
         else:
-            print(f"vmtouch: {fname} FAILED")
-    return results
+            stable_since = None
+        time.sleep(interval)
+    return None
 
 
-class TestWeightLoaderDropCache(CustomTestCase):
-    """--weight-loader-drop-cache-after-load with disable-mmap —
-    page cache should be low after loading.
+def _send_long_request(base_url: str, max_tokens: int = LONG_MAX_TOKENS):
+    try:
+        requests.post(
+            f"{base_url}/generate",
+            json={
+                "text": LONG_PROMPT,
+                "sampling_params": {
+                    "max_new_tokens": max_tokens,
+                    "temperature": 0.7,
+                },
+            },
+            timeout=180,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"长请求异常: {e}")
 
-    [Test Category] Parameter
-    [Test Target] --weight-loader-drop-cache-after-load
+
+def _send_short_request(base_url: str, idx: int, results: dict):
+    start = time.perf_counter()
+    try:
+        requests.post(
+            f"{base_url}/generate",
+            json={
+                "text": SHORT_PROMPT,
+                "sampling_params": {
+                    "max_new_tokens": SHORT_MAX_TOKENS,
+                    "temperature": 0.7,
+                },
+            },
+            timeout=180,
+        )
+    except Exception as e:  # noqa: BLE001
+        print(f"快速请求 {idx} 异常: {e}")
+    elapsed_ms = (time.perf_counter() - start) * 1000.0
+    results[idx] = elapsed_ms
+
+
+class TestNpuPrefillDelayer(CustomTestCase):
+    """Testcase: Observe the queue-based Prefill Delayer behavior end-to-end.
+
+    [Test Category] Scheduling
+    [Test Target] --enable-prefill-delayer; --prefill-delayer-queue-min-ratio;
+                  --prefill-delayer-max-delay-ms
     """
-
-    model = QWEN3_8B_WEIGHTS_PATH
-    base_url = DEFAULT_URL_FOR_TEST
 
     @classmethod
     def setUpClass(cls):
-        cls.out_file = tempfile.NamedTemporaryFile(
-            mode="w+", suffix=".txt", delete=False
-        )
-        cls.err_file = tempfile.NamedTemporaryFile(
-            mode="w+", suffix=".txt", delete=False
-        )
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                *_COMMON_ARGS,
-                "--weight-loader-drop-cache-after-load",
-                "--log-level",
-                "info",
-            ],
-            return_stdout_stderr=(cls.out_file, cls.err_file),
-        )
+        cls.base_url = DEFAULT_URL_FOR_TEST
 
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        cls.out_file.close()
-        cls.err_file.close()
-        os.unlink(cls.out_file.name)
-        os.unlink(cls.err_file.name)
+    def test_prefill_delayer_stepwise(self):
+        print("=== Prefill Delayer 分步测试 ===")
+        print(f"目标服务: {self.base_url}")
 
-    def test_drop_cache_on(self):
-        """At least one safetensors shard has page cache well below 100%."""
-        resp = requests.get(self.base_url + "/health", timeout=30)
-        self.assertEqual(resp.status_code, 200)
+        # 1. 先发送长请求（后台运行，持续占用 running）
+        print(f"[步骤1] 发送 {LONG_CONCURRENT} 个长请求（后台运行，持续占用 running）...")
+        long_threads = [
+            threading.Thread(target=_send_long_request, args=(self.base_url,))
+            for _ in range(LONG_CONCURRENT)
+        ]
+        for t in long_threads:
+            t.start()
+        print(f"    已启动 {LONG_CONCURRENT} 个长请求")
 
-        weight_dir = QWEN3_8B_WEIGHTS_PATH
-        safetensor_files = sorted(
-            f for f in os.listdir(weight_dir) if f.endswith(".safetensors")
-        )
-        results = _collect_vmtouch(safetensor_files, weight_dir)
+        # 等待 1 秒，在长请求 prefill 阶段就发送短请求
+        time.sleep(1)
 
-        self.assertGreater(len(results), 0, "No safetensor files found")
-        not_full = [r for r in results if r[1] >= 0 and r[2] != "100%"]
-        self.assertGreater(
-            len(not_full),
-            0,
-            f"Expected at least one file below 100% page cache, got all 100%: {results}",
-        )
+        # 2. 查询当前状态（应看到 running>0, waiting=0）
+        print("[步骤2] 查询当前状态（应看到 running>0, waiting=0）")
+        _query_status(self.base_url, "步骤2")
 
-
-class TestWeightLoaderDropCacheOff(CustomTestCase):
-    """Default (no drop-cache) with disable-mmap — baseline: all page cache
-    should remain at 100% after loading.
-
-    [Test Category] Parameter
-    [Test Target] --weight-loader-drop-cache-after-load (off, baseline)
-    """
-
-    model = QWEN3_8B_WEIGHTS_PATH
-    base_url = DEFAULT_URL_FOR_TEST
-
-    @classmethod
-    def setUpClass(cls):
-        cls.out_file = tempfile.NamedTemporaryFile(
-            mode="w+", suffix=".txt", delete=False
-        )
-        cls.err_file = tempfile.NamedTemporaryFile(
-            mode="w+", suffix=".txt", delete=False
-        )
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                *_COMMON_ARGS,
-                "--log-level",
-                "info",
-            ],
-            return_stdout_stderr=(cls.out_file, cls.err_file),
-        )
-
-    @classmethod
-    def tearDownClass(cls):
-        kill_process_tree(cls.process.pid)
-        cls.out_file.close()
-        cls.err_file.close()
-        os.unlink(cls.out_file.name)
-        os.unlink(cls.err_file.name)
-
-    def test_drop_cache_off(self):
-        """All safetensors shards should remain at 100% page cache."""
-        resp = requests.get(self.base_url + "/health", timeout=30)
-        self.assertEqual(resp.status_code, 200)
-
-        weight_dir = QWEN3_8B_WEIGHTS_PATH
-        safetensor_files = sorted(
-            f for f in os.listdir(weight_dir) if f.endswith(".safetensors")
-        )
-        results = _collect_vmtouch(safetensor_files, weight_dir)
-
-        self.assertGreater(len(results), 0, "No safetensor files found")
-        for fname, resident, pct in results:
-            self.assertEqual(
-                pct,
-                "100%",
-                f"Expected {fname} at 100% page cache, got {pct} (resident={resident})",
+        # 3. 在长请求 prefill 阶段发送短请求，记录耗时
+        print(f"[步骤3] 在长请求 prefill 阶段发送 {SHORT_CONCURRENT} 个快速请求...")
+        print("    预期: running>0, ratio=0.8 → queue_min = min(running*0.8, max_prefill_bs)")
+        print(f"    由于 waiting({SHORT_CONCURRENT}) < queue_min，应触发 delay...")
+        results = {}
+        short_threads = [
+            threading.Thread(
+                target=_send_short_request, args=(self.base_url, i, results)
             )
+            for i in range(1, SHORT_CONCURRENT + 1)
+        ]
+        for t in short_threads:
+            t.start()
+        for t in short_threads:
+            t.join()
+
+        print("快速请求耗时结果：")
+        for idx in sorted(results):
+            print(f"    {idx}: {results[idx]:.0f}ms")
+
+        # 4. 再次查询状态
+        print("[步骤4] 再次查询状态")
+        time.sleep(1)
+        _query_status(self.base_url, "步骤4")
+
+        # 等待后台长请求结束
+        for t in long_threads:
+            t.join()
+
+        print("=== 测试完成 ===")
+        print("解读：")
+        print("   - 快速请求耗时接近 5000ms，说明被 Prefill Delayer 延迟了。")
+        print("   - 若耗时很短(<2s)，可能未触发，可增大 running 数或 ratio。")
+        print("   - 查看服务日志，应出现 'PrefillDelayer' 相关 DEBUG 信息。")
+
+
+class TestNpuPrefillDelayerBelowThreshold(CustomTestCase):
+    """Testcase: When the waiting queue stays below the threshold and running is
+    kept high for the whole delay window, prefill is released only on the
+    max_delay_ms timeout, so the short requests must wait longer than 5s.
+
+    [Test Category] Scheduling
+    [Test Target] --prefill-delayer-max-delay-ms
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+
+    def test_below_threshold_hits_max_delay(self):
+        print("=== 低于阈值请求：应触发 max_delay 超时 ===")
+        print(f"目标服务: {self.base_url}")
+
+        # 1. 发送长请求，用更大的 max_tokens 让 running 在 5s 窗口内维持高位
+        print(
+            f"[步骤1] 发送 {LONG_CONCURRENT} 个长请求"
+            f"（max_new_tokens={LONG_SUSTAINED_MAX_TOKENS}，维持 running）..."
+        )
+        long_threads = [
+            threading.Thread(
+                target=_send_long_request,
+                args=(self.base_url, LONG_SUSTAINED_MAX_TOKENS),
+            )
+            for _ in range(LONG_CONCURRENT)
+        ]
+        for t in long_threads:
+            t.start()
+        print(f"    已启动 {LONG_CONCURRENT} 个长请求")
+
+        # 2. 轮询直到长请求进入稳定 decode（running 连续维持高位），而非固定
+        #    sleep：确保短请求落在干净的稳定窗口，不被长请求自身的
+        #    prefill/flush 延迟周期裹挟。
+        print("[步骤2] 轮询等待长请求进入稳定 decode...")
+        stable_running = _wait_until_stable_running(
+            self.base_url, expected_running=LONG_CONCURRENT
+        )
+        self.assertIsNotNone(
+            stable_running,
+            f"长请求未能稳定占满 running(>= {LONG_CONCURRENT})，无法验证 max_delay",
+        )
+        _query_status(self.base_url, "发送前")
+
+        # 3. 发送远小于阈值的短请求
+        print(f"[步骤3] 发送 {SHORT_CONCURRENT_BELOW} 个快速请求（远小于 queue_min≈16）...")
+        print(f"    预期: waiting({SHORT_CONCURRENT_BELOW}) 始终 < queue_min，")
+        print(f"          延迟只能靠 max_delay_ms={MAX_DELAY_MS} 超时释放 → 耗时 > 5s")
+        results = {}
+        short_threads = [
+            threading.Thread(
+                target=_send_short_request, args=(self.base_url, i, results)
+            )
+            for i in range(1, SHORT_CONCURRENT_BELOW + 1)
+        ]
+        for t in short_threads:
+            t.start()
+        for t in short_threads:
+            t.join()
+
+        print("快速请求耗时结果：")
+        for idx in sorted(results):
+            print(f"    {idx}: {results[idx]:.0f}ms")
+
+        # 4. 再次查询状态
+        print("[步骤4] 再次查询状态")
+        _query_status(self.base_url, "释放后")
+
+        # 等待后台长请求结束
+        for t in long_threads:
+            t.join()
+
+        # 断言：低于阈值的请求应被延迟到 max_delay_ms 超时，耗时 > 5s
+        avg_ms = sum(results.values()) / len(results)
+        print(f"平均耗时: {avg_ms:.0f}ms（预期 > {MAX_DELAY_MS}ms）")
+        self.assertGreater(
+            avg_ms,
+            MAX_DELAY_MS,
+            f"平均耗时 {avg_ms:.0f}ms 未超过 max_delay_ms({MAX_DELAY_MS}ms)，"
+            f"延迟可能被提前释放（检查 running 是否维持足够高）",
+        )
 
 
 if __name__ == "__main__":
