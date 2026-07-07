@@ -59,3 +59,4 @@ jobs:
           export PYTHONPATH=$PYTHONPATH:$(pwd)
           python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_spec_overlap.py
           python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_spec_decoding.py
+          python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_reasoning_parser.py
