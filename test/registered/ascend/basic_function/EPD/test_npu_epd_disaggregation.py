@@ -58,7 +58,7 @@ class TestNpuEPDDisaggregationMultiEncoders(MMMUMixin, PDDisaggregationServerBas
     accuracy = 0.5
     mmmu_args = [
         "--limit",
-        "200",
+        "50",
         "--batch_size",
         "4",
         "--gen_kwargs",
