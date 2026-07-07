@@ -17,7 +17,10 @@ register_npu_ci(
 
 # Environment variables for DSV4-Flash single-node PD-mix deployment.
 # Derived from run_dsv4_flash.sh (latest deployment script from dev).
-DEEPSEEK_V4_FLASH_W8A8_16P_ENVS = {
+# NOTE: A3 is 8 cards / 16 NPUs. Variables are named "8p" to reflect the
+# 8-card physical topology; the actual TP/DP values below remain 16 (one
+# per NPU) and are unchanged from the deployment script.
+DEEPSEEK_V4_FLASH_W8A8_8P_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "INF_NAN_MODE_FORCE_DISABLE": "1",
@@ -47,11 +50,11 @@ DEEPSEEK_V4_FLASH_W8A8_16P_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-# Server launch arguments for DSV4-Flash W8A8 single-node 16-card PD-mix.
-# Derived from run_dsv4_flash.sh (latest deployment script from dev) and the
-# test case design (Excel) which requires max-running-requests=160 and MTP
-# (EAGLE) enabled.
-DEEPSEEK_V4_FLASH_W8A8_16P_OTHER_ARGS = [
+# Server launch arguments for DSV4-Flash W8A8 single-node 8-card (16-NPU)
+# PD-mix. Derived from run_dsv4_flash.sh (latest deployment script from dev)
+# and the test case design (Excel) which requires max-running-requests=160
+# and MTP (EAGLE) enabled. TP/DP/EP values stay 16 (one per NPU).
+DEEPSEEK_V4_FLASH_W8A8_8P_OTHER_ARGS = [
     "--page-size",
     128,
     "--tp-size",
@@ -102,21 +105,21 @@ DEEPSEEK_V4_FLASH_W8A8_16P_OTHER_ARGS = [
 ]
 
 
-class TestNPUDeepSeekV4FlashW8A816PIn8kOut1k50ms(TestAscendPerformanceTestCaseBase):
-    """Test NPU performance for DeepSeek-V4-Flash W8A8 16p PD-mix in8k out1k.
+class TestNPUDeepSeekV4FlashW8A88PIn8kOut1k50ms(TestAscendPerformanceTestCaseBase):
+    """Test NPU performance for DeepSeek-V4-Flash W8A8 8p in8k out1k.
 
-    Single-node 16-card PD mixed deployment with TP=16, DP=16, EP=16 and MTP
-    (EAGLE) enabled. Random short-sequence benchmark from benchmark.sh:
-    input_len=8000, output_len=1000, num_prompts=160, max_concurrency=160.
-    Expected: TPOT <= 50ms and output token throughput >= 1708 tokens/s
-    (1.6x H20 baseline) on A3-560T.
+    Single-node 8-card (16-NPU) PD mixed deployment with TP=16, DP=16, EP=16
+    and MTP (EAGLE) enabled. Random short-sequence benchmark from
+    benchmark.sh: input_len=8000, output_len=1000, num_prompts=160,
+    max_concurrency=160. Expected: TPOT <= 50ms and output token throughput
+    >= 1708 tokens/s (1.6x H20 baseline) on A3-560T.
     """
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     dataset_type = AISBENCHMARK_DATASET_DEFAULT
     model = DEEPSEEK_V4_FLASH_W8A8_MTP_MODEL_PATH
-    other_args = DEEPSEEK_V4_FLASH_W8A8_16P_OTHER_ARGS
-    envs = DEEPSEEK_V4_FLASH_W8A8_16P_ENVS
+    other_args = DEEPSEEK_V4_FLASH_W8A8_8P_OTHER_ARGS
+    envs = DEEPSEEK_V4_FLASH_W8A8_8P_ENVS
     dataset_name = "random"
     input_len = 8000
     output_len = 1000
@@ -129,8 +132,8 @@ class TestNPUDeepSeekV4FlashW8A816PIn8kOut1k50ms(TestAscendPerformanceTestCaseBa
     tpot = 50
     output_token_throughput = 1708
 
-    def test_npu_deepseek_v4_flash_w8a8_16p_in8k_out1k_50ms(self):
-        """Run NPU performance test for DeepSeek-V4-Flash W8A8 16p in8k out1k."""
+    def test_npu_deepseek_v4_flash_w8a8_8p_in8k_out1k_50ms(self):
+        """Run NPU performance test for DeepSeek-V4-Flash W8A8 8p in8k out1k."""
         self.run_throughput()
 
 

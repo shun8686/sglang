@@ -18,7 +18,10 @@ register_npu_ci(
 
 # Environment variables for DSV4-Flash single-node PD-mix deployment.
 # Derived from run_dsv4_flash.sh (latest deployment script from dev).
-DEEPSEEK_V4_FLASH_W8A8_16P_ENVS = {
+# NOTE: A3 is 8 cards / 16 NPUs. Variables are named "8p" to reflect the
+# 8-card physical topology; the actual TP/DP values below remain 16 (one
+# per NPU) and are unchanged from the deployment script.
+DEEPSEEK_V4_FLASH_W8A8_8P_ENVS = {
     "PYTORCH_NPU_ALLOC_CONF": "expandable_segments:True",
     "STREAMS_PER_DEVICE": "32",
     "INF_NAN_MODE_FORCE_DISABLE": "1",
@@ -48,11 +51,11 @@ DEEPSEEK_V4_FLASH_W8A8_16P_ENVS = {
     "SGLANG_ENABLE_OVERLAP_PLAN_STREAM": "1",
 }
 
-# Server launch arguments for DSV4-Flash W8A8 single-node 16-card PD-mix.
-# Derived from run_dsv4_flash.sh (latest deployment script from dev) and the
-# test case design (Excel) which requires max-running-requests=160 and MTP
-# (EAGLE) enabled.
-DEEPSEEK_V4_FLASH_W8A8_16P_OTHER_ARGS = [
+# Server launch arguments for DSV4-Flash W8A8 single-node 8-card (16-NPU)
+# PD-mix. Derived from run_dsv4_flash.sh (latest deployment script from dev)
+# and the test case design (Excel) which requires max-running-requests=160
+# and MTP (EAGLE) enabled. TP/DP/EP values stay 16 (one per NPU).
+DEEPSEEK_V4_FLASH_W8A8_8P_OTHER_ARGS = [
     "--page-size",
     128,
     "--tp-size",
@@ -129,8 +132,8 @@ DEEPSEEK_V4_FLASH_W8A8_GENERATION_CONFIG_HIGH = {
 }
 
 
-class TestNPUDeepSeekV4FlashW8A816PGPQAHigh(TestAscendAccuracyTestCaseBase):
-    """Test NPU accuracy for DeepSeek-V4-Flash W8A8 16p PD-mix on GPQA-Diamond.
+class TestNPUDeepSeekV4FlashW8A88PGPQAHigh(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for DeepSeek-V4-Flash W8A8 8p on GPQA-Diamond.
 
     Think High mode: thinking=true, reasoning_effort=high.
     Baseline accuracy 0.85 (official 0.874, W8A8 measured 0.84-0.86).
@@ -140,8 +143,8 @@ class TestNPUDeepSeekV4FlashW8A816PGPQAHigh(TestAscendAccuracyTestCaseBase):
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = DEEPSEEK_V4_FLASH_W8A8_MTP_MODEL_PATH
-    other_args = DEEPSEEK_V4_FLASH_W8A8_16P_OTHER_ARGS
-    envs = DEEPSEEK_V4_FLASH_W8A8_16P_ENVS
+    other_args = DEEPSEEK_V4_FLASH_W8A8_8P_OTHER_ARGS
+    envs = DEEPSEEK_V4_FLASH_W8A8_8P_ENVS
     accuracy = 0.85
     datasets = ["gpqa_diamond"]
     few_shot_num = 0
@@ -151,13 +154,13 @@ class TestNPUDeepSeekV4FlashW8A816PGPQAHigh(TestAscendAccuracyTestCaseBase):
     timeout = 6000
     seed = 1
 
-    def test_npu_deepseek_v4_flash_w8a8_16p_gpqa_high(self):
-        """Run NPU accuracy test for DeepSeek-V4-Flash W8A8 16p GPQA High mode."""
+    def test_npu_deepseek_v4_flash_w8a8_8p_gpqa_high(self):
+        """Run NPU accuracy test for DeepSeek-V4-Flash W8A8 8p GPQA High mode."""
         self.run_accuracy()
 
 
-class TestNPUDeepSeekV4FlashW8A816PGPQANonThink(TestAscendAccuracyTestCaseBase):
-    """Test NPU accuracy for DeepSeek-V4-Flash W8A8 16p PD-mix on GPQA-Diamond.
+class TestNPUDeepSeekV4FlashW8A88PGPQANonThink(TestAscendAccuracyTestCaseBase):
+    """Test NPU accuracy for DeepSeek-V4-Flash W8A8 8p on GPQA-Diamond.
 
     Non-Think mode: no thinking parameter (per official docs).
     Baseline accuracy 0.71 (official 0.712, W8A8 measured 0.7121).
@@ -167,8 +170,8 @@ class TestNPUDeepSeekV4FlashW8A816PGPQANonThink(TestAscendAccuracyTestCaseBase):
 
     benchmark_tool = BENCHMARK_TOOL_DEFAULT
     model = DEEPSEEK_V4_FLASH_W8A8_MTP_MODEL_PATH
-    other_args = DEEPSEEK_V4_FLASH_W8A8_16P_OTHER_ARGS
-    envs = DEEPSEEK_V4_FLASH_W8A8_16P_ENVS
+    other_args = DEEPSEEK_V4_FLASH_W8A8_8P_OTHER_ARGS
+    envs = DEEPSEEK_V4_FLASH_W8A8_8P_ENVS
     accuracy = 0.71
     datasets = ["gpqa_diamond"]
     few_shot_num = 0
@@ -178,8 +181,8 @@ class TestNPUDeepSeekV4FlashW8A816PGPQANonThink(TestAscendAccuracyTestCaseBase):
     timeout = 6000
     seed = 1
 
-    def test_npu_deepseek_v4_flash_w8a8_16p_gpqa_non_think(self):
-        """Run NPU accuracy test for DeepSeek-V4-Flash W8A8 16p GPQA Non-Think."""
+    def test_npu_deepseek_v4_flash_w8a8_8p_gpqa_non_think(self):
+        """Run NPU accuracy test for DeepSeek-V4-Flash W8A8 8p GPQA Non-Think."""
         self.run_accuracy()
 
 
