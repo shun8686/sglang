@@ -1,5 +1,5 @@
 """
-NPU Quantization (w8a8) multimodal tests.
+NPU quantization (w8a8) multimodal tests.
 
   - P2-004: Quantization (w8a8) + image -> accuracy acceptable
   - P2-011: Quantization + chunked prefill + image -> accuracy persists
@@ -27,7 +27,7 @@ from sglang.test.test_utils import CustomTestCase
 # ---------------------------------------------------------------------------
 # CI registration
 # ---------------------------------------------------------------------------
-register_npu_ci(est_time=250, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=250, suite="full-2-npu-a3", nightly=True)
 
 
 _COMMON_EXTRA_ARGS = [

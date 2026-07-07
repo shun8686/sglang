@@ -1,5 +1,5 @@
 """
-NPU Multimodal Speculative decoding -> speedup without correctness loss.
+NPU multimodal Speculative decoding -> speedup without correctness loss.
 
 """
 
@@ -22,7 +22,7 @@ from sglang.test.ascend.test_npu_multimodal_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=200, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="full-2-npu-a3", nightly=True)
 
 
 def _create_multi_object_image():

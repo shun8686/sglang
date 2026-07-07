@@ -1,5 +1,5 @@
 """
-NPU Multimodal PD Disaggregation Test Case.
+NPU multimodal PD disaggregation test case.
 
 Deploy prefill and decode servers on two NPU cards, launch a
 sglang_router, and verify image inference through the router.
@@ -22,7 +22,7 @@ from sglang.test.ascend.test_npu_multimodal_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-register_npu_ci(est_time=150, suite="nightly-2-npu-a3", nightly=True)
+register_npu_ci(est_time=150, suite="full-2-npu-a3", nightly=True)
 
 
 class TestMultimodalPDDisaggregation(CustomTestCase):
