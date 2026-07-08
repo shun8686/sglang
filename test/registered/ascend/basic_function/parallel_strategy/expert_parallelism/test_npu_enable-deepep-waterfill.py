@@ -58,7 +58,7 @@ class TestEnableDeepepWaterFill(CustomTestCase):
             return_stdout_stderr=(cls.out_log_file, cls.err_log_file),
             env={
                 "HCCL_BUFFSIZE": "2048",
-                "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",  #Quantize activations to INT8 before dispatch
+                "DEEP_NORMAL_MODE_USE_INT8_QUANT": "1",  # Quantize activations to INT8 before dispatch
             },
         )
 
