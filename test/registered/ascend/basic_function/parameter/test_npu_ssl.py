@@ -19,7 +19,6 @@ Coverage:
 
 import os
 import shutil
-import socket
 import subprocess
 import sys
 import tempfile
@@ -122,13 +121,6 @@ def _generate_encrypted_key_cert(password="testssl123"):
     return key_path, cert_path, password
 
 
-def _find_free_port():
-    """Return an available TCP port number."""
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind(("", 0))
-        return s.getsockname()[1]
-
-
 def _launch_https_server(
     model,
     ssl_keyfile,
@@ -146,7 +138,7 @@ def _launch_https_server(
     Returns (process, port, full_stdout).
     """
     extra_args = extra_args or []
-    port = _find_free_port()
+    port = 21055
 
     command = [
         "sglang",
