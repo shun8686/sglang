@@ -1,8 +1,10 @@
 """
-NPU P2-008: EPLB + image -> elastic load balancing correct.
+NPU multimodal + EPLB
 
 Verify EPLB (Expert Parallel Load Balancing) does not disrupt image inference.
 """
+
+import unittest
 
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
@@ -21,19 +23,16 @@ from sglang.test.ascend.test_npu_multimodal_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-# ---------------------------------------------------------------------------
-# CI registration
-# ---------------------------------------------------------------------------
 register_npu_ci(est_time=150, suite="full-2-npu-a3", nightly=True)
 
 
 # ============================================
-# P2-008: EPLB + image -> elastic load balancing correct
+# EPLB + image -> elastic load balancing correct
 # ============================================
 
 
 class TestMultimodalEPLB(CustomTestCase):
-    """P2-008: Verify EPLB does not disrupt image inference.
+    """Verify EPLB does not disrupt image inference.
 
     Deploy Qwen3.5-35B-A3B with ``--enable-eplb``, send an image
     request, and verify the output correctly identifies the expected
@@ -117,3 +116,7 @@ class TestMultimodalEPLB(CustomTestCase):
             "rectangle",
             prefix="test_multimodal_eplb: ",
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

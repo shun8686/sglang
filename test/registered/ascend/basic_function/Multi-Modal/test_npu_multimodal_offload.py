@@ -54,12 +54,10 @@ def _generate_long_prefix_5k():
 
 
 # ============================================
-# P1-008: Offloading + image -> inference correctness
+# Offloading + image -> inference correctness
 # ============================================
-
-
 class TestMultimodalOffload(CustomTestCase):
-    """P1-008: Verify image inference is correct when weights are offloaded to CPU.
+    """Verify image inference is correct when weights are offloaded to CPU.
 
     [Test Category] multimodal
     [Test Target] multimodal + CPU offloading
@@ -122,7 +120,7 @@ class TestMultimodalOffload(CustomTestCase):
             text,
             "blue",
             "rectangle",
-            prefix="P1-008: ",
+            prefix="test_offload_image_inference: ",
         )
 
 

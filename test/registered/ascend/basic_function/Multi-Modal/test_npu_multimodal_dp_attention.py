@@ -1,8 +1,8 @@
 """
 NPU DP + multimodal tests.
 
-  - P1-004: multimodal + DP-attention + high concurrency correctness
-  - P1-009: multimodal + DP-attention + DP LM Head
+  - multimodal + DP-attention + high concurrency correctness
+  - multimodal + DP-attention + DP LM Head
 """
 
 import unittest
@@ -30,7 +30,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
 )
 
-register_npu_ci(est_time=600, suite="full-2-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="full-2-npu-a3", nightly=True)
 
 
 def _send_concurrent(base_url, image_b64, prompt, num_requests=50, max_tokens=32):
@@ -62,13 +62,8 @@ def _send_concurrent(base_url, image_b64, prompt, num_requests=50, max_tokens=32
     return results
 
 
-# ============================================
-# P1-004: DP-attention + image -> high concurrency correctness
-# ============================================
-
-
 class TestMultimodalDPAttention(CustomTestCase):
-    """P1-004: Verify DP-attention + image handles high concurrency correctly.
+    """Verify DP-attention + image handles high concurrency correctly.
 
     [Test Category] multimodal
     [Test Target] multimodal + DP-attention (2-NPU)
@@ -124,29 +119,22 @@ class TestMultimodalDPAttention(CustomTestCase):
         self.assertEqual(
             ok_count,
             self._num_concurrent,
-            f"P1-004: only {ok_count}/{self._num_concurrent} requests succeeded",
+            f"Only {ok_count}/{self._num_concurrent} requests succeeded",
         )
 
         for idx, (status, content, _tokens) in enumerate(results):
             if status == "ok":
                 self.assertTrue(
                     content and len(content) > 0,
-                    f"P1-004: request {idx} returned empty content",
+                    f"Request {idx} returned empty content",
                 )
                 assert_color_and_shape(
-                    self, content, "green", "rectangle", prefix=f"P1-004/req{idx}: "
+                    self, content, "green", "rectangle", prefix=f"Request {idx}: "
                 )
-
-        print(f"  [P1-004] {ok_count}/{self._num_concurrent} ok")
-
-
-# ============================================
-# P1-009: DP-attention + DP LM Head + image -> LM head sharding
-# ============================================
 
 
 class TestMultimodalDpLmHead(CustomTestCase):
-    """P1-009: Verify DP LM head sharding does not affect image token projection.
+    """Verify DP LM head sharding does not affect image token projection.
 
     [Test Category] multimodal
     [Test Target] multimodal + DP-attention + DP LM Head (2-NPU)
@@ -179,12 +167,6 @@ class TestMultimodalDpLmHead(CustomTestCase):
                 "2",
                 "--enable-dp-attention",
                 "--enable-dp-lm-head",
-                "--mamba-radix-cache-strategy",
-                "extra_buffer",
-                "--dtype",
-                "bfloat16",
-                "--mamba-ssm-dtype",
-                "bfloat16",
             ],
         )
 
@@ -196,17 +178,16 @@ class TestMultimodalDpLmHead(CustomTestCase):
         """Send image request with DP LM Head, verify output and feature gating."""
         output = chat(self._url, self._messages, max_tokens=128, seed=42)
 
-        self.assertIsNotNone(output, "P1-009: DP LM Head returned None")
-        self.assertGreater(len(output), 0, "P1-009: DP LM Head output is empty")
+        self.assertIsNotNone(output, "DP LM Head returned None")
+        self.assertGreater(len(output), 0, "DP LM Head output is empty")
 
         assert_color_and_shape(
             self,
             output,
             "blue",
             "rectangle",
-            prefix="P1-009: ",
+            prefix="test_dp_lm_head_image: ",
         )
-        print(f"  [P1-009] Output len={len(output)}")
 
 
 if __name__ == "__main__":

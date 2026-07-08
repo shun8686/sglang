@@ -27,9 +27,6 @@ from sglang.test.test_utils import (
     CustomTestCase,
 )
 
-# ---------------------------------------------------------------------------
-# CI registration
-# ---------------------------------------------------------------------------
 register_npu_ci(est_time=90, suite="full-2-npu-a3", nightly=True)
 
 
@@ -44,7 +41,7 @@ _EXTRA_SERVER_ARGS = [
 
 
 class TestMultimodalReasoningParser(CustomTestCase):
-    """P2-009: Verify reasoning parser with image input.
+    """Verify reasoning parser with image input.
 
     [Test Category] multimodal
     [Test Target] multimodal + reasoning parser

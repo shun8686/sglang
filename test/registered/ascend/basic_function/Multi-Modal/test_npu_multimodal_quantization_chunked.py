@@ -24,9 +24,6 @@ from sglang.test.ascend.test_npu_multimodal_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import CustomTestCase
 
-# ---------------------------------------------------------------------------
-# CI registration
-# ---------------------------------------------------------------------------
 register_npu_ci(est_time=250, suite="full-2-npu-a3", nightly=True)
 
 
@@ -54,17 +51,13 @@ _LONG_PREFIX = (
 
 
 # ============================================
-# P2-004: Quantization (w8a8) + image -> accuracy acceptable
+# Quantization (w8a8) + image -> accuracy acceptable
 # ============================================
-
-
 class TestMultimodalQuantization(CustomTestCase):
-    """P2-004: Verify w8a8 quantization does not degrade image understanding.
+    """Verify w8a8 quantization does not degrade image understanding.
 
     Deploy Qwen3.5-35B-A3B-w8a8-mtp (weight-only INT8 quantization),
     send an image request, and verify the output references visual content.
-    The quantized model should produce semantically equivalent output to
-    the FP16 baseline.
 
     [Test Category] multimodal
     [Test Target] multimodal + quantization + w8a8
@@ -122,12 +115,10 @@ class TestMultimodalQuantization(CustomTestCase):
 
 
 # ============================================
-# P2-011: Quantization + chunked prefill + image -> accuracy persists
+# Quantization + chunked prefill + image -> accuracy persists
 # ============================================
-
-
 class TestMultimodalQuantizationChunked(CustomTestCase):
-    """P2-011: Verify quantized accuracy survives chunked prefill boundaries.
+    """Verify quantized accuracy survives chunked prefill boundaries.
 
     Deploy Qwen3.5-35B-A3B-w8a8-mtp with chunked prefill, send a long
     text prefix + image request, and verify the image content is
@@ -192,8 +183,6 @@ class TestMultimodalQuantizationChunked(CustomTestCase):
             "ellipse",
             prefix="test_multimodal_quantization_chunked_image: ",
         )
-
-        print(f"  [test_multimodal_quantization_chunked_image] output_len={len(text)}")
 
 
 if __name__ == "__main__":

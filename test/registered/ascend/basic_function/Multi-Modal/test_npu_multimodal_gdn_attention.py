@@ -24,7 +24,7 @@ register_npu_ci(est_time=200, suite="full-1-npu-a3", nightly=True)
 
 
 class TestMultimodalGDNLinearAttention(CustomTestCase):
-    """P0-009: Verify GDN linear attention + visual encoder produce correct multimodal output.
+    """Verify GDN linear attention + visual encoder produce correct multimodal output.
 
     [Test Category] multimodal
     [Test Target] multimodal + GDN linear attention

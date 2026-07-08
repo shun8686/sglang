@@ -30,7 +30,7 @@ register_npu_ci(est_time=90, suite="full-2-npu-a3", nightly=True)
 
 
 class TestMultimodalOverlapSchedule(CustomTestCase):
-    """P1-010: Verify overlap schedule does not break multimodal draft generation.
+    """Verify overlap schedule does not break multimodal draft generation.
 
     [Test Category] multimodal
     [Test Target] Overlap Schedule + speculative decoding (EAGLE3)

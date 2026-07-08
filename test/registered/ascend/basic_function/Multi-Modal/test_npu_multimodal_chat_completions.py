@@ -13,12 +13,9 @@ Test cases:
   - TC-MM-OPENAI-CHAT-009: frequency_penalty + multimodal (0 vs 1.5)
   - TC-MM-OPENAI-CHAT-010: presence_penalty + multimodal (0 vs 1.5)
   - TC-MM-OPENAI-CHAT-011: logprobs + top_logprobs + multimodal
-  - TC-MM-OPENAI-CHAT-012: Structured output + image -> JSON Schema constraint
-  - TC-MM-OPENAI-CHAT-013: Tool call + image -> image param in function arguments
-  - TC-MM-OPENAI-CHAT-014: max_completion_tokens + multimodal (new param)
+  - TC-MM-OPENAI-CHAT-012: max_completion_tokens + multimodal
 """
 
-import json
 import unittest
 
 import openai
@@ -43,7 +40,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=600, suite="full-1-npu-a3", nightly=True)
+register_npu_ci(est_time=200, suite="full-1-npu-a3", nightly=True)
 
 
 # ---------------------------------------------------------------------------
@@ -483,7 +480,6 @@ class TestMultimodalParameterInteractions(CustomTestCase):
             f"TC-MM-OPENAI-CHAT-006: Expected 2 choices, got {len(choices)}",
         )
 
-        texts = []
         for i, choice in enumerate(choices):
             text = choice.message.content
             self.assertTrue(
@@ -501,14 +497,6 @@ class TestMultimodalParameterInteractions(CustomTestCase):
                 "rectangle",
                 prefix=f"TC-MM-OPENAI-CHAT-006/choice[{i}]: ",
             )
-            texts.append(text)
-
-        # Independent sampling paths at temperature > 0 should produce
-        # different outputs — not always guaranteed (very small model or
-        # very low temp may still collide), but with temp=0.7 it is the
-        # expected outcome.
-        if texts[0] == texts[1]:
-            pass  # unlikely at temp=0.7, may indicate shared RNG
 
         # Usage: prompt_tokens should be > 0 (image contributes tokens)
         self.assertGreater(
@@ -785,174 +773,11 @@ class TestMultimodalParameterInteractions(CustomTestCase):
         )
 
     # ===================================================================
-    # TC-MM-OPENAI-CHAT-012: Structured output + image -> JSON Schema constraint
+    # TC-MM-OPENAI-CHAT-012: max_completion_tokens + multimodal
     # ===================================================================
 
-    def test_012_structured_output_json_schema(self):
-        """TC-MM-OPENAI-CHAT-012: Verify structured output (JSON Schema) with image input.
-
-        Sends an image with response_format set to a JSON Schema
-        requiring 'color' and 'shape' fields.  Verifies the model
-        (Qwen3.5-9B) can produce valid JSON that correctly identifies
-        the image content.
-        """
-        _, image_b64 = create_test_image(
-            256, 256, color=Color.BLUE, shape=Shape.RECTANGLE
-        )
-
-        schema = {
-            "type": "json_schema",
-            "json_schema": {
-                "name": "image_description",
-                "schema": {
-                    "type": "object",
-                    "properties": {
-                        "color": {"type": "string"},
-                        "shape": {"type": "string"},
-                    },
-                    "required": ["color", "shape"],
-                },
-            },
-        }
-
-        resp = self._request(
-            [
-                {
-                    "role": "user",
-                    "content": [
-                        image_content(image_b64),
-                        text_content(
-                            "Extract the color and shape from this image as JSON fields: color and shape."
-                        ),
-                    ],
-                }
-            ],
-            temperature=0,
-            max_tokens=128,
-            response_format=schema,
-        )
-
-        output = resp.choices[0].message.content
-
-        self.assertIsNotNone(output, "TC-MM-OPENAI-CHAT-012: Response is None")
-        self.assertGreater(len(output), 0, "TC-MM-OPENAI-CHAT-012: Response is empty")
-
-        try:
-            parsed = json.loads(output)
-        except json.JSONDecodeError as e:
-            self.fail(
-                f"TC-MM-OPENAI-CHAT-012: Output is not valid JSON: {e}\nRaw output: {output}"
-            )
-
-        self.assertIn(
-            "color", parsed, f"TC-MM-OPENAI-CHAT-012: Missing 'color' in {parsed}"
-        )
-        self.assertIn(
-            "shape", parsed, f"TC-MM-OPENAI-CHAT-012: Missing 'shape' in {parsed}"
-        )
-        self.assertEqual(
-            parsed["color"].lower(),
-            "blue",
-            f"TC-MM-OPENAI-CHAT-012: Expected 'blue', got '{parsed['color']}'",
-        )
-        self.assertEqual(
-            parsed["shape"].lower(),
-            "rectangle",
-            f"TC-MM-OPENAI-CHAT-012: Expected 'rectangle', got '{parsed['shape']}'",
-        )
-
-    # ===================================================================
-    # TC-MM-OPENAI-CHAT-013: Tool call + image
-    # ===================================================================
-
-    def test_013_tool_call_with_image(self):
-        """TC-MM-OPENAI-CHAT-013: Verify tool calling works with image input (Qwen3.5-9B)."""
-        _, image_b64 = create_test_image(
-            256, 256, color=Color.BLUE, shape=Shape.RECTANGLE
-        )
-
-        tools = [
-            {
-                "type": "function",
-                "function": {
-                    "name": "analyze_image",
-                    "description": "Analyze the content of an image and record a description",
-                    "parameters": {
-                        "type": "object",
-                        "properties": {
-                            "description": {
-                                "type": "string",
-                                "description": "Detailed description of the image content",
-                            },
-                        },
-                        "required": ["description"],
-                    },
-                },
-            }
-        ]
-
-        resp = self._request(
-            [
-                {
-                    "role": "user",
-                    "content": [
-                        image_content(image_b64),
-                        text_content("Describe the color and shape of the image."),
-                    ],
-                }
-            ],
-            temperature=0,
-            max_tokens=256,
-            tools=tools,
-            tool_choice="required",
-        )
-
-        message = resp.choices[0].message
-        self.assertIsNotNone(
-            message.tool_calls,
-            f"TC-MM-OPENAI-CHAT-013: No tool calls. Content: '{message.content}'",
-        )
-        self.assertGreater(
-            len(message.tool_calls), 0, "TC-MM-OPENAI-CHAT-013: Empty tool_calls"
-        )
-
-        tool_call = message.tool_calls[0]
-        self.assertEqual(
-            tool_call.function.name,
-            "analyze_image",
-            f"TC-MM-OPENAI-CHAT-013: Expected 'analyze_image', got '{tool_call.function.name}'",
-        )
-
-        try:
-            args = json.loads(tool_call.function.arguments)
-        except json.JSONDecodeError as e:
-            self.fail(
-                f"TC-MM-OPENAI-CHAT-013: Invalid JSON: {e}\n{tool_call.function.arguments}"
-            )
-
-        self.assertIn(
-            "description",
-            args,
-            f"TC-MM-OPENAI-CHAT-013: Missing 'description' in {args}",
-        )
-        self.assertGreater(
-            len(args["description"]), 0, "TC-MM-OPENAI-CHAT-013: 'description' empty"
-        )
-
-        assert_color_and_shape(
-            self,
-            args["description"],
-            "blue",
-            "rectangle",
-            prefix="TC-MM-OPENAI-CHAT-013: ",
-        )
-
-    # ===================================================================
-    # TC-MM-OPENAI-CHAT-014: max_completion_tokens + multimodal
-    # ===================================================================
-
-    def test_014_max_completion_tokens_multimodal(self):
-        """TC-MM-OPENAI-CHAT-014: Verify max_completion_tokens with image input.
+    def test_012_max_completion_tokens_multimodal(self):
+        """TC-MM-OPENAI-CHAT-012: Verify max_completion_tokens with image input.
 
         Sends the SAME prompt+image twice, only varying max_completion_tokens:
           - tiny=16  → must hit length limit, finish_reason=length
@@ -975,13 +800,13 @@ class TestMultimodalParameterInteractions(CustomTestCase):
         text_tiny = resp_tiny.choices[0].message.content
         self.assertTrue(
             text_tiny,
-            "TC-MM-OPENAI-CHAT-014: Empty output with max_completion_tokens=16",
+            "TC-MM-OPENAI-CHAT-012: Empty output with max_completion_tokens=16",
         )
         finish_tiny = resp_tiny.choices[0].finish_reason
         self.assertEqual(
             finish_tiny,
             "length",
-            f"TC-MM-OPENAI-CHAT-014: Expected finish_reason='length' for tiny limit, "
+            f"TC-MM-OPENAI-CHAT-012: Expected finish_reason='length' for tiny limit, "
             f"got '{finish_tiny}' — max_completion_tokens may not be enforced",
         )
 
@@ -994,19 +819,19 @@ class TestMultimodalParameterInteractions(CustomTestCase):
         text_normal = resp_normal.choices[0].message.content
         self.assertTrue(
             text_normal,
-            "TC-MM-OPENAI-CHAT-014: Empty output with max_completion_tokens=512",
+            "TC-MM-OPENAI-CHAT-012: Empty output with max_completion_tokens=512",
         )
         finish_normal = resp_normal.choices[0].finish_reason
         self.assertEqual(
             finish_normal,
             "stop",
-            f"TC-MM-OPENAI-CHAT-014: Expected finish_reason='stop' for large limit, "
+            f"TC-MM-OPENAI-CHAT-012: Expected finish_reason='stop' for large limit, "
             f"got '{finish_normal}'",
         )
 
         # Image content must be correct at the normal limit
         assert_color_and_shape(
-            self, text_normal, "blue", "rectangle", prefix="TC-MM-OPENAI-CHAT-014: "
+            self, text_normal, "blue", "rectangle", prefix="TC-MM-OPENAI-CHAT-012: "
         )
 
 

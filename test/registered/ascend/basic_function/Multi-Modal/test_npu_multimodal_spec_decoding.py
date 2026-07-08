@@ -226,7 +226,7 @@ class _SpecDecBase(CustomTestCase):
 
 
 class TestMultimodalSpeculativeDecoding(_SpecDecBase):
-    """P1-001: Verify MTP speculative decoding produces correct multimodal
+    """Enable cuda-graph: verify MTP speculative decoding produces correct multimodal
     output vs a non-speculative baseline.
 
     Uses Qwen3.5-9B with built-in MTP heads (no external draft model).
@@ -246,7 +246,7 @@ class TestMultimodalSpeculativeDecoding(_SpecDecBase):
 
 
 class TestMultimodalSpeculativeDecodingNoGraph(_SpecDecBase):
-    """P1-001 (no cuda-graph variant): Verify MTP speculative decoding produces
+    """Disable cuda-graph: verify MTP speculative decoding produces
     correct multimodal output with cuda-graph disabled.
 
     Uses Qwen3.5-9B with built-in MTP heads (no external draft model).

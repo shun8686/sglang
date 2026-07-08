@@ -25,9 +25,6 @@ from sglang.test.test_utils import (
     CustomTestCase,
 )
 
-# ---------------------------------------------------------------------------
-# CI registration
-# ---------------------------------------------------------------------------
 register_npu_ci(est_time=90, suite="full-2-npu-a3", nightly=True)
 
 
@@ -41,13 +38,8 @@ _SERVER_ARGS = [
 ]
 
 
-# ============================================
-# P2-014: Multistream MoE + image -> dual-stream routing correct
-# ============================================
-
-
 class TestMultimodalMultistreamMoE(CustomTestCase):
-    """P2-014: Verify dual-stream MoE execution does not break image routing.
+    """Verify dual-stream MoE execution does not break image routing.
 
     Deploy Qwen3.5-35B-A3B with ``SGLANG_NPU_USE_MULTI_STREAM=1``, send
     an image request, and verify expert routing remains correct under
@@ -86,18 +78,16 @@ class TestMultimodalMultistreamMoE(CustomTestCase):
             max_tokens=128,
         )
 
-        self.assertIsNotNone(text, "P2-014: Response is None")
-        self.assertGreater(len(text), 0, "P2-014: Response is empty")
+        self.assertIsNotNone(text, "Response is None")
+        self.assertGreater(len(text), 0, "Response is empty")
 
         assert_color_and_shape(
             self,
             text,
             "red",
             "ellipse",
-            prefix="P2-014: ",
+            prefix="test_multimodal_multistream_moe: ",
         )
-
-        print(f"  [P2-014] output_len={len(text)}")
 
 
 if __name__ == "__main__":

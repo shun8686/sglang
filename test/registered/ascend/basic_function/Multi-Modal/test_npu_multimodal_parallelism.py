@@ -2,10 +2,10 @@
 NPU parallelism + multimodal tests (TP / CP / PP / DP).
 
 Verify each parallel strategy works correctly with image input:
-  - P1-003: TP parallelism + image -> multi-card inference correct
-  - P2-002: Context Parallelism + multi-image -> long context correct
-  - P2-006: Pipeline Parallelism + image -> pipeline correct
-  - P2-010: Full model DP + image -> multi-replica inference correct
+  - TP parallelism + image -> multi-card inference correct
+  - Context Parallelism + multi-image -> long context correct
+  - Pipeline Parallelism + image -> pipeline correct
+  - Full model DP + image -> multi-replica inference correct
 """
 
 import unittest
@@ -35,10 +35,10 @@ register_npu_ci(est_time=300, suite="full-2-npu-a3", nightly=True)
 
 
 # ============================================
-# P1-003: TP parallelism + image -> multi-card inference correct
+# TP parallelism + image -> multi-card inference correct
 # ============================================
 class TestMultimodalTPParallelism(CustomTestCase):
-    """P1-003: Verify tensor parallelism + image inference is correct.
+    """Verify tensor parallelism + image inference is correct.
 
     [Test Category] multimodal
     [Test Target] multimodal + TP parallelism (2-NPU)
@@ -88,16 +88,22 @@ class TestMultimodalTPParallelism(CustomTestCase):
             temperature=0,
             seed=42,
         )
-        self.assertIsNotNone(text, "P1-003: TP=2 server returned empty output")
-        self.assertGreater(len(text), 5, f"P1-003: TP=2 output too short: '{text}'")
-        assert_color_and_shape(self, text, "blue", "rectangle", prefix="P1-003: ")
+        self.assertIsNotNone(text, "TP=2 server returned empty output")
+        self.assertGreater(len(text), 5, f"TP=2 output too short: '{text}'")
+        assert_color_and_shape(
+            self,
+            text,
+            "blue",
+            "rectangle",
+            prefix="test_tp_parallelism_image_inference: ",
+        )
 
 
 # ============================================
-# P2-002: Context Parallelism + multi-image -> long context correct
+# Context Parallelism + multi-image -> long context correct
 # ============================================
 class TestMultimodalContextParallelism(CustomTestCase):
-    """P2-002: Verify context parallelism works with multi-image input.
+    """Verify context parallelism works with multi-image input.
 
     [Test Category] multimodal
     [Test Target] multimodal + CP parallelism (2-NPU)
@@ -159,39 +165,39 @@ class TestMultimodalContextParallelism(CustomTestCase):
             max_tokens=256,
         )
 
-        self.assertIsNotNone(text, "P2-002: Response is None")
-        self.assertGreater(len(text), 0, "P2-002: Response is empty")
+        self.assertIsNotNone(text, "Response is None")
+        self.assertGreater(len(text), 0, "Response is empty")
 
         # Both images must be described — each color mentioned
         text_lower = text.lower()
         self.assertIn(
             "red",
             text_lower,
-            "P2-002: First image (red ellipse) not described — "
-            "CP may have lost its tokens",
+            "First image (red ellipse) not described — " "CP may have lost its tokens",
         )
         self.assertIn(
             "blue",
             text_lower,
-            "P2-002: Second image (blue rectangle) not described — "
+            "Second image (blue rectangle) not described — "
             "CP may have lost its tokens",
         )
         self.assertIn(
             "ellipse",
             text_lower,
-            "P2-002: Ellipse shape from first image not mentioned",
+            "Ellipse shape from first image not mentioned",
         )
         self.assertIn(
             "rectangle",
             text_lower,
-            "P2-002: Rectangle shape from second image not mentioned",
+            "Rectangle shape from second image not mentioned",
         )
 
 
-# P2-006: Pipeline Parallelism + image -> pipeline correct
+# ============================================
+# Pipeline Parallelism + image -> pipeline correct
 # ============================================
 class TestMultimodalPipelineParallelism(CustomTestCase):
-    """P2-006: Verify pipeline parallelism with image input.
+    """Verify pipeline parallelism with image input.
 
     [Test Category] multimodal
     [Test Target] multimodal + PP parallelism (2-NPU)
@@ -242,23 +248,23 @@ class TestMultimodalPipelineParallelism(CustomTestCase):
             max_tokens=128,
         )
 
-        self.assertIsNotNone(text, "P2-006: Response is None")
-        self.assertGreater(len(text), 0, "P2-006: Response is empty")
+        self.assertIsNotNone(text, "Response is None")
+        self.assertGreater(len(text), 0, "Response is empty")
 
         assert_color_and_shape(
             self,
             text,
             "purple",
             "ellipse",
-            prefix="P2-006: ",
+            prefix="test_pipeline_parallelism_image: ",
         )
 
 
 # ============================================
-# P2-010: Full model DP + image -> multi-replica inference correct
+# Full model DP + image -> multi-replica inference correct
 # ============================================
 class TestMultimodalFullModelDP(CustomTestCase):
-    """P2-010: Verify full-model data parallelism (2 replicas) with image input.
+    """Verify full-model data parallelism (2 replicas) with image input.
 
     [Test Category] multimodal
     [Test Target] multimodal + DP parallelism (2-NPU)
@@ -305,15 +311,15 @@ class TestMultimodalFullModelDP(CustomTestCase):
             max_tokens=128,
         )
 
-        self.assertIsNotNone(text, "P2-010: Response is None")
-        self.assertGreater(len(text), 0, "P2-010: Response is empty")
+        self.assertIsNotNone(text, "Response is None")
+        self.assertGreater(len(text), 0, "Response is empty")
 
         assert_color_and_shape(
             self,
             text,
             "purple",
             "rectangle",
-            prefix="P2-010: ",
+            prefix="test_full_model_dp_image: ",
         )
 
 

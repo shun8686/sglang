@@ -1,26 +1,24 @@
 """
 NPU OpenAI multimodal tool call test.
 
-Test case:
-  - P1-007: Tool call + image -> image param in function arguments
 """
 
 import json
 import unittest
 
 import openai
-from test_npu_multimodal_utils import (
+
+from sglang.srt.utils import kill_process_tree
+from sglang.test.ascend.test_ascend_utils import (
+    QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH,
+)
+from sglang.test.ascend.test_npu_multimodal_utils import (
     Color,
     Shape,
     assert_color_and_shape,
     create_test_image,
     image_content,
     text_content,
-)
-
-from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_VL_4B_INSTRUCT_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
@@ -34,7 +32,7 @@ register_npu_ci(est_time=120, suite="full-1-npu-a3", nightly=True)
 
 
 class TestMultimodalToolCall(CustomTestCase):
-    """P1-007: Verify tool calling works with image input.
+    """Verify tool calling works with image input.
 
     [Test Category] multimodal
     [Test Target] multimodal + tool calling
@@ -119,15 +117,15 @@ class TestMultimodalToolCall(CustomTestCase):
 
         message = response.choices[0].message
         self.assertIsNotNone(
-            message.tool_calls, f"P1-007: No tool calls. Content: '{message.content}'"
+            message.tool_calls, f"No tool calls. Content: '{message.content}'"
         )
-        self.assertGreater(len(message.tool_calls), 0, "P1-007: Empty tool_calls")
+        self.assertGreater(len(message.tool_calls), 0, "Empty tool_calls")
 
         tool_call = message.tool_calls[0]
         self.assertEqual(
             tool_call.function.name,
             "analyze_image",
-            f"P1-007: Expected 'analyze_image', got '{tool_call.function.name}'",
+            f"Expected 'analyze_image', got '{tool_call.function.name}'",
         )
 
         try:
@@ -139,7 +137,11 @@ class TestMultimodalToolCall(CustomTestCase):
         self.assertGreater(len(args["description"]), 0, "P1-007: 'description' empty")
 
         assert_color_and_shape(
-            self, args["description"], "blue", "rectangle", prefix="P1-007: "
+            self,
+            args["description"],
+            "blue",
+            "rectangle",
+            prefix="test_tool_call_with_image: ",
         )
 
 
