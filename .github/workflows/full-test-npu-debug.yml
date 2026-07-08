@@ -42,6 +42,8 @@ jobs:
 
           cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
           cp ~/.cache/modelscope/hub/datasets/tmp/test.jsonl /tmp
+
+          pip install watchfiles granian httpx[http2]
       - name: Print Log Information
         run: bash scripts/ci/npu/npu_log_print.sh
       - name: Run test
@@ -57,6 +59,4 @@ jobs:
           GDN_ATTN_BACKEND_TRITON: 1
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_basic.py
-          python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_chat_completions.py
-          python3 test/registered/ascend/basic_function/Multi-Modal/test_npu_multimodal_pd_disaggregation.py
+          python3 test/registered/ascend/basic_function/parameter/test_npu_ssl.py
