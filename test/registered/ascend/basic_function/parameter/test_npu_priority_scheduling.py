@@ -18,7 +18,7 @@ register_npu_ci(est_time=200, suite="nightly-1-npu-a3", nightly=True)
 
 
 class TestDefaultPriorityValue(CustomTestCase):
-    """ --default-priority-value A/B comparison — high-default vs low-default.
+    """--default-priority-value A/B comparison — high-default vs low-default.
 
     [Test Category] Parameter
     [Test Target] --default-priority-value
@@ -162,7 +162,7 @@ class TestDefaultPriorityValue(CustomTestCase):
 
 
 class TestDisablePriorityPreemption(CustomTestCase):
-    """ --disable-priority-preemption A/B comparison — with vs without.
+    """--disable-priority-preemption A/B comparison — with vs without.
 
     [Test Category] Parameter
     [Test Target] --disable-priority-preemption
