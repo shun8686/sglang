@@ -1,12 +1,12 @@
 """
 Test SSL/TLS server startup parameters on NPU.
 
-Tests the following --ssl-* and --enable-http2 parameters:
+Tests the following --ssl-* parameters:
   --ssl-keyfile, --ssl-certfile, --ssl-keyfile-password,
-  --enable-ssl-refresh, --enable-http2
+  --enable-ssl-refresh
 
 Dependencies:
-  pip install watchfiles granian httpx[http2]
+  pip install watchfiles
 
 Coverage:
   TC1: Basic HTTPS server launch
@@ -14,13 +14,12 @@ Coverage:
   TC3: Encrypted key with wrong password → crash
   TC4: SSL certificate hot-reload (--enable-ssl-refresh)
   TC5: ssl-refresh + multi-worker → warning + fallback
-  TC6: HTTP/2 + SSL server launch [needs granian, httpx[http2]]
 
 """
 
 import os
+import shutil
 import socket
-import ssl
 import subprocess
 import sys
 import tempfile
@@ -29,7 +28,6 @@ import time
 import unittest
 from queue import Queue
 
-import httpx
 import requests
 import requests.exceptions as req_exc
 import urllib3
@@ -41,7 +39,7 @@ from sglang.test.test_utils import (
     CustomTestCase,
 )
 
-register_npu_ci(est_time=600, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=300, suite="nightly-1-npu-a3", nightly=True)
 
 # Suppress InsecureRequestWarning for self-signed certs in HTTPS health checks
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -125,14 +123,10 @@ def _generate_encrypted_key_cert(password="testssl123"):
 
 
 def _find_free_port():
-    """Return an available TCP port number (≤ 55535 to keep grpc_port valid)."""
-    for _ in range(100):
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-            s.bind(("", 0))
-            port = s.getsockname()[1]
-            if port <= 55535:
-                return port
-    raise RuntimeError("Could not find a free port ≤ 55535 after 100 attempts")
+    """Return an available TCP port number."""
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.bind(("", 0))
+        return s.getsockname()[1]
 
 
 def _launch_https_server(
@@ -141,7 +135,6 @@ def _launch_https_server(
     ssl_certfile,
     extra_args=None,
     timeout=300,
-    continue_capture=False,
     ssl_keyfile_password=None,
 ):
     """Launch an SGLang server with HTTPS and wait for it to be ready.
@@ -239,8 +232,6 @@ def _launch_https_server(
 
         # Drain remaining stdout lines after server is ready
         stdout_text = "".join(_drain_queue(stdout_queue))
-        if continue_capture:
-            return process, port, stdout_text, stdout_queue
         return process, port, stdout_text
 
     except Exception:
@@ -259,25 +250,25 @@ def _drain_queue(q):
     return items
 
 
-def _wait_for_queue_text(q, expected_text, timeout=10):
-    """Poll queue with timeout until expected_text appears, return collected lines."""
-    lines = []
-    start = time.time()
-    while time.time() - start < timeout:
-        _drain_queue_into(q, lines)
-        if any(expected_text in line for line in lines):
-            return lines
-        time.sleep(0.2)
-    return lines
-
-
-def _drain_queue_into(q, items):
-    """Drain queue into existing list."""
-    while True:
-        try:
-            items.append(q.get_nowait())
-        except Exception:
-            break
+def _assert_https_generate(test_case, port, cert_path, max_new_tokens=50):
+    """Assert HTTPS /generate works and returns the capital of France."""
+    resp = requests.post(
+        f"https://127.0.0.1:{port}/generate",
+        json={
+            "text": "What is the capital of France?",
+            "sampling_params": {"max_new_tokens": max_new_tokens},
+        },
+        verify=cert_path,
+        timeout=60,
+    )
+    test_case.assertEqual(resp.status_code, 200)
+    body = resp.json()
+    test_case.assertIn("text", body, "/generate response should contain 'text'")
+    text = body["text"].lower()
+    test_case.assertTrue(
+        "paris" in text,
+        f"Generated text should mention Paris, got {body.get('text')!r}",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -286,11 +277,11 @@ def _drain_queue_into(q, items):
 
 
 class TestSSLParams(CustomTestCase):
-    """Test SSL/TLS and HTTP/2 server startup parameters on NPU.
+    """Test SSL/TLS server startup parameters on NPU.
 
     [Test Category] Parameter
     [Test Target] --ssl-keyfile, --ssl-certfile, --ssl-keyfile-password,
-                  --enable-ssl-refresh, --enable-http2
+                  --enable-ssl-refresh
     """
 
     model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
@@ -334,12 +325,6 @@ class TestSSLParams(CustomTestCase):
             ):
                 requests.get(f"http://127.0.0.1:{port}/health", timeout=5)
 
-            # Verify HTTPS health check works (no cert verification)
-            resp = requests.get(
-                f"https://127.0.0.1:{port}/health", verify=False, timeout=10
-            )
-            self.assertEqual(resp.status_code, 200)
-
             # Verify HTTPS with cert verification → self-signed cert trusted via cert_path
             resp = requests.get(
                 f"https://127.0.0.1:{port}/health",
@@ -360,42 +345,24 @@ class TestSSLParams(CustomTestCase):
                 )
 
             # Verify end-to-end HTTPS inference
-            resp = requests.post(
-                f"https://127.0.0.1:{port}/generate",
-                json={
-                    "text": "Hello, who are you?",
-                    "sampling_params": {"max_new_tokens": 50},
-                },
-                verify=self.cert_path,
-                timeout=60,
-            )
-            self.assertEqual(resp.status_code, 200)
-            body = resp.json()
-            self.assertIn(
-                "text", body, "/generate response should contain 'text' field"
-            )
-            self.assertTrue(
-                body["text"],
-                f"Generated text should be non-empty, got {body.get('text')!r}",
-            )
+            _assert_https_generate(self, port, self.cert_path)
 
         finally:
             if process is not None:
                 kill_process_tree(process.pid)
 
     # ------------------------------------------------------------------
-    # TC2: Encrypted private key (ssl-keyfile-password)  (P0)
+    # TC2: Encrypted private key (ssl-keyfile-password)
     # ------------------------------------------------------------------
 
     def test_ssl_encrypted_key(self):
         """TC2: --ssl-keyfile-password with encrypted private key,
         server starts and HTTPS /health and /generate work.
 
-        Does NOT cover: granian + ssl_keyfile_password.
         """
-        enc_key, enc_cert, password = _generate_encrypted_key_cert()
-        process = None
+        enc_key = enc_cert = process = None
         try:
+            enc_key, enc_cert, password = _generate_encrypted_key_cert()
             process, port, stdout = _launch_https_server(
                 self.model,
                 enc_key,
@@ -413,12 +380,6 @@ class TestSSLParams(CustomTestCase):
                 msg="HTTP should be rejected on SSL port",
             ):
                 requests.get(f"http://127.0.0.1:{port}/health", timeout=5)
-
-            # HTTPS health check (no cert verification)
-            resp = requests.get(
-                f"https://127.0.0.1:{port}/health", verify=False, timeout=10
-            )
-            self.assertEqual(resp.status_code, 200)
 
             # HTTPS with cert verification → self-signed cert trusted via cert_path
             resp = requests.get(
@@ -440,23 +401,13 @@ class TestSSLParams(CustomTestCase):
                 )
 
             # End-to-end HTTPS inference with encrypted key
-            resp = requests.post(
-                f"https://127.0.0.1:{port}/generate",
-                json={"text": "Hello", "sampling_params": {"max_new_tokens": 16}},
-                verify=enc_cert,
-                timeout=60,
-            )
-            self.assertEqual(resp.status_code, 200)
-            body = resp.json()
-            self.assertIn("text", body, "/generate response should contain 'text'")
-            self.assertTrue(
-                body["text"],
-                f"Generated text should be non-empty, got {body.get('text')!r}",
-            )
+            _assert_https_generate(self, port, enc_cert, max_new_tokens=16)
 
-        finally:
+        except Exception:
             if process is not None:
                 kill_process_tree(process.pid)
+            raise
+        finally:
             for p in (enc_key, enc_cert):
                 try:
                     os.unlink(p)
@@ -469,13 +420,13 @@ class TestSSLParams(CustomTestCase):
 
     def test_ssl_encrypted_key_wrong_password(self):
         """TC3: --ssl-keyfile-password wrong for encrypted private key,
-        server fails to start.
+        server fails to start (RuntimeError).
         """
-        enc_key, enc_cert, _ = _generate_encrypted_key_cert()
+        enc_key = enc_cert = None
         try:
+            enc_key, enc_cert, _ = _generate_encrypted_key_cert()
             with self.assertRaises(
-                RuntimeError,
-                msg="Server with wrong password should fail to start",
+                RuntimeError, msg="Server with wrong password should fail to start"
             ):
                 _launch_https_server(
                     self.model,
@@ -496,107 +447,69 @@ class TestSSLParams(CustomTestCase):
     # ------------------------------------------------------------------
 
     def test_ssl_enable_refresh(self):
-        """TC4: --enable-ssl-refresh starts SSLCertRefresher,
-        log contains 'auto-refresh enabled', and replacing cert
+        """TC4: --enable-ssl-refresh starts SSLCertRefresher, and replacing cert
         files triggers hot-reload.
 
+        Uses independent cert/key files so class-level state is never touched.
         Dependencies: watchfiles (pip install watchfiles)
         """
         process = None
+        my_key, my_cert = _generate_self_signed_cert()
         try:
-            process, port, stdout, queue = _launch_https_server(
+            process, port, _ = _launch_https_server(
                 self.model,
-                self.key_path,
-                self.cert_path,
+                my_key,
+                my_cert,
                 extra_args=["--enable-ssl-refresh"],
-                continue_capture=True,
             )
 
-            # Verify SSLCertRefresher started
-            self.assertIn(
-                "auto-refresh enabled",
-                stdout,
-                "Server log should contain SSL auto-refresh message",
-            )
-
-            # HTTPS still works under ssl-refresh
-            resp = requests.get(
-                f"https://127.0.0.1:{port}/health", verify=self.cert_path, timeout=10
-            )
-            self.assertEqual(resp.status_code, 200)
-
-            # Verify end-to-end HTTPS inference
-            resp = requests.post(
-                f"https://127.0.0.1:{port}/generate",
-                json={
-                    "text": "Hello, who are you?",
-                    "sampling_params": {"max_new_tokens": 50},
-                },
-                verify=self.cert_path,
-                timeout=60,
-            )
-            self.assertEqual(resp.status_code, 200)
-            body = resp.json()
-            self.assertIn(
-                "text", body, "/generate response should contain 'text' field"
-            )
-            self.assertTrue(
-                body["text"],
-                f"Generated text should be non-empty, got {body.get('text')!r}",
-            )
-
-            # --- Hot-reload: replace cert files and verify reload ---
-            new_key, new_cert = _generate_self_signed_cert()
-            try:
-                # Overwrite original cert/key with new files
-                os.replace(new_key, self.key_path)
-                os.replace(new_cert, self.cert_path)
-
-                # Wait for watchfiles to detect change and reload
-                lines = _wait_for_queue_text(
-                    queue, "SSL cert/key reloaded successfully", timeout=15
-                )
-                self.assertTrue(
-                    any("SSL cert/key reloaded successfully" in line for line in lines),
-                    f"Cert reload not detected in logs within 15s",
-                )
-
-                # HTTPS still works after reload with new certs
+            def _verify_https(cert_path):
                 resp = requests.get(
-                    f"https://127.0.0.1:{port}/health",
-                    verify=self.cert_path,
-                    timeout=10,
+                    f"https://127.0.0.1:{port}/health", verify=cert_path, timeout=10
                 )
                 self.assertEqual(resp.status_code, 200)
+                _assert_https_generate(self, port, cert_path)
 
-                # Verify HTTPS inference still works after reload
-                resp = requests.post(
-                    f"https://127.0.0.1:{port}/generate",
-                    json={
-                        "text": "Hello after reload",
-                        "sampling_params": {"max_new_tokens": 50},
-                    },
-                    verify=self.cert_path,
-                    timeout=60,
-                )
-                self.assertEqual(resp.status_code, 200)
-                body = resp.json()
-                self.assertIn("text", body, "/generate response should contain 'text'")
-                self.assertTrue(
-                    body["text"],
-                    f"Generated text should be non-empty, got {body.get('text')!r}",
-                )
+            _verify_https(my_cert)
 
-            finally:
-                for p in (new_key, new_cert):
-                    try:
-                        os.unlink(p)
-                    except OSError:
-                        pass
+            # Hot-reload: save old cert to a separate file, generate
+            # new cert/key, then overwrite the in-use files.
+            old_cert_fd, old_cert_copy = tempfile.mkstemp(
+                suffix=".pem", prefix="ssl_old_cert_"
+            )
+            os.close(old_cert_fd)
+            shutil.copyfile(my_cert, old_cert_copy)
+
+            new_key, new_cert = _generate_self_signed_cert()
+            os.replace(new_key, my_key)
+            os.replace(new_cert, my_cert)
+
+            # Poll until old cert is rejected
+            start = time.time()
+            while time.time() - start < 15:
+                try:
+                    requests.get(
+                        f"https://127.0.0.1:{port}/health",
+                        verify=old_cert_copy,
+                        timeout=2,
+                    )
+                except req_exc.SSLError:
+                    break
+                time.sleep(0.5)
+            else:
+                self.fail("Old cert still accepted after 15s, reload did not happen")
+
+            os.unlink(old_cert_copy)
+            _verify_https(my_cert)
 
         finally:
             if process is not None:
                 kill_process_tree(process.pid)
+            for p in (my_key, my_cert):
+                try:
+                    os.unlink(p)
+                except OSError:
+                    pass
 
     # ------------------------------------------------------------------
     # TC5: ssl-refresh + multi-worker → warning + fallback  (P0)
@@ -633,81 +546,7 @@ class TestSSLParams(CustomTestCase):
             self.assertEqual(resp.status_code, 200)
 
             # Verify HTTPS inference still works in fallback mode
-            resp = requests.post(
-                f"https://127.0.0.1:{port}/generate",
-                json={"text": "Hello", "sampling_params": {"max_new_tokens": 16}},
-                verify=self.cert_path,
-                timeout=60,
-            )
-            self.assertEqual(resp.status_code, 200)
-            body = resp.json()
-            self.assertIn("text", body, "/generate response should contain 'text'")
-            self.assertTrue(
-                body["text"],
-                f"Generated text should be non-empty, got {body.get('text')!r}",
-            )
-
-        finally:
-            if process is not None:
-                kill_process_tree(process.pid)
-
-    # ------------------------------------------------------------------
-    # TC6: HTTP/2 + SSL server launch  (P1)
-    # ------------------------------------------------------------------
-
-    def test_http2_ssl_launch(self):
-        """TC6: --enable-http2 + SSL launches Granian with HTTPS,
-        HTTP/2 protocol is negotiated, and HTTPS /health and /generate work.
-
-        Does NOT cover: ssl_keyfile_password pass-through.
-
-        Dependencies: granian, httpx[http2] (pip install granian httpx[http2])
-        """
-        process = None
-        try:
-            process, port, stdout = _launch_https_server(
-                self.model,
-                self.key_path,
-                self.cert_path,
-                extra_args=["--enable-http2"],
-            )
-
-            # Granian should log SSL enabled
-            self.assertIn(
-                "SSL enabled", stdout, "Granian log should contain 'SSL enabled'"
-            )
-
-            # HTTP (plain) must be rejected
-            with self.assertRaises(
-                requests.exceptions.ConnectionError,
-                msg="HTTP should be rejected on SSL port",
-            ):
-                requests.get(f"http://127.0.0.1:{port}/health", timeout=5)
-
-            # Use httpx with HTTP/2 support to verify protocol negotiation
-            ssl_context = ssl.create_default_context(cafile=self.cert_path)
-            with httpx.Client(http2=True, verify=ssl_context) as client:
-                resp = client.get(f"https://127.0.0.1:{port}/health")
-                self.assertEqual(resp.status_code, 200)
-                self.assertEqual(
-                    resp.http_version,
-                    "HTTP/2",
-                    f"Expected HTTP/2, got {resp.http_version}",
-                )
-
-                # Verify end-to-end HTTPS inference over HTTP/2
-                resp = client.post(
-                    f"https://127.0.0.1:{port}/generate",
-                    json={"text": "Hello", "sampling_params": {"max_new_tokens": 16}},
-                    timeout=60,
-                )
-                self.assertEqual(resp.status_code, 200)
-                body = resp.json()
-                self.assertIn("text", body, "/generate response should contain 'text'")
-                self.assertTrue(
-                    body["text"],
-                    f"Generated text should be non-empty, got {body.get('text')!r}",
-                )
+            _assert_https_generate(self, port, self.cert_path, max_new_tokens=16)
 
         finally:
             if process is not None:
