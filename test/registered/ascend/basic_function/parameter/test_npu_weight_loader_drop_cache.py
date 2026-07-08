@@ -1,26 +1,28 @@
-"""Manual NPU test for the Prefill Delayer queue-based trigger.
+"""NPU test for the Prefill Delayer queue-based trigger: above/below threshold.
 
 Converted from ``python/sglang/test/prefill.sh``.
 
 The server is launched with:
     --enable-prefill-delayer
     --prefill-delayer-queue-min-ratio 0.8
-    --prefill-delayer-max-delay-ms 5000
+    --prefill-delayer-max-delay-ms {MAX_DELAY_MS}
 
-Two test classes:
-    - TestNpuPrefillDelayer: observation only (no assertions). Drives the same
-      request pattern as the shell script and prints per-request latency and
-      /metrics gauges so the effect of the delayer can be eyeballed.
-    - TestNpuPrefillDelayerBelowThreshold: sends a request count well below the
-      queue threshold while keeping running high for the whole delay window, so
-      the delay is released only on the max_delay_ms timeout. Asserts the short
-      requests wait longer than max_delay_ms.
+Three test classes:
+    - TestNpuPrefillDelayerAboveThreshold: sends requests exceeding
+      queue_min (= min(running*ratio, max_prefill_bs)) so the condition
+      "waiting >= queue_min" is met and prefill is released promptly.
+      Asserts short requests complete quickly (below max_delay_ms).
+    - TestNpuPrefillDelayerBelowThreshold: sends a request count far below
+      queue_min while keeping running high. The delay can only be released
+      on the max_delay_ms timeout. Asserts each short request waits > max_delay_ms.
+    - TestNpuPrefillDelayerObserve (for investigation): no assertions,
+      prints per-request latency and /metrics gauges.
 
 Interpretation:
-    - Delay is released either when the waiting queue reaches
-      queue_min = min(running * ratio, max_prefill_bs), or when the wall-clock
-      max_delay_ms timeout is hit, whichever comes first.
-    - Check the server log for "PrefillDelayer" DEBUG lines.
+    - queue_min = min(running * ratio, max_prefill_bs).
+    - waiting >= queue_min → no delay, immediate release.
+    - waiting < queue_min → delay until queue fills or max_delay_ms timeout.
+    - Check server log for "PrefillDelayer" DEBUG lines.
 """
 
 import os
@@ -72,10 +74,13 @@ LONG_CONCURRENT = 20
 # 快速请求参数（用于触发排队）
 SHORT_PROMPT = "What is artificial intelligence?"
 SHORT_MAX_TOKENS = 50
-SHORT_CONCURRENT = 15
-# 远小于阈值 queue_min = min(running*0.8, max_prefill_bs) ≈ 16 的请求数，
-# 使 waiting 始终 < queue_min，延迟只能靠 max_delay_ms 超时释放。
+# 超过阈值：queue_min = min(running*0.8, max_prefill_bs) ≈ 16 (running=20时)，
+# 发 25 远大于 queue_min → waiting >= queue_min → 无延迟，立刻下发。
+SHORT_CONCURRENT_ABOVE = 25
+# 远小于阈值 → waiting 始终 < queue_min，延迟只能靠 max_delay_ms 超时释放。
 SHORT_CONCURRENT_BELOW = 3
+# 观察类用的并发数（接近阈值边界，用于人工观察行为）
+SHORT_CONCURRENT_OBSERVE = 15
 
 # 模块级 server 进程，两个测试类共享
 GLOBAL_SERVER_PROCESS = None
@@ -186,9 +191,11 @@ def _send_long_request(base_url: str, max_tokens: int = LONG_MAX_TOKENS):
 
 
 def _send_short_request(base_url: str, idx: int, results: dict):
+    """发送短请求，将 (elapsed_ms, status_code) 写入 results[idx]。"""
     start = time.perf_counter()
+    status = None
     try:
-        requests.post(
+        resp = requests.post(
             f"{base_url}/generate",
             json={
                 "text": SHORT_PROMPT,
@@ -199,14 +206,28 @@ def _send_short_request(base_url: str, idx: int, results: dict):
             },
             timeout=180,
         )
+        status = resp.status_code
     except Exception as e:  # noqa: BLE001
         print(f"快速请求 {idx} 异常: {e}")
     elapsed_ms = (time.perf_counter() - start) * 1000.0
-    results[idx] = elapsed_ms
+    results[idx] = (elapsed_ms, status)
 
 
-class TestNpuPrefillDelayer(CustomTestCase):
-    """Testcase: Observe the queue-based Prefill Delayer behavior end-to-end.
+def _print_short_results(results: dict):
+    """打印短请求耗时结果，同时检查全部 status_code=200。"""
+    all_ok = True
+    for idx in sorted(results):
+        elapsed_ms, status = results[idx]
+        status_str = "OK" if status == 200 else str(status)
+        print(f"    {idx}: {elapsed_ms:.0f}ms  (HTTP {status_str})")
+        if status != 200:
+            all_ok = False
+    return all_ok
+
+
+class TestNpuPrefillDelayerAboveThreshold(CustomTestCase):
+    """Testcase: Send short requests exceeding queue_min so the condition
+    "waiting >= queue_min" is met and prefill is released promptly (no delay).
 
     [Test Category] Scheduling
     [Test Target] --enable-prefill-delayer; --prefill-delayer-queue-min-ratio;
@@ -217,37 +238,53 @@ class TestNpuPrefillDelayer(CustomTestCase):
     def setUpClass(cls):
         cls.base_url = DEFAULT_URL_FOR_TEST
 
-    def test_prefill_delayer_stepwise(self):
-        print("=== Prefill Delayer 分步测试 ===")
+    def test_above_threshold_released_immediately(self):
+        print("=== 超过阈值请求：应立刻下发，无延迟 ===")
         print(f"目标服务: {self.base_url}")
 
-        # 1. 先发送长请求（后台运行，持续占用 running）
-        print(f"[步骤1] 发送 {LONG_CONCURRENT} 个长请求（后台运行，持续占用 running）...")
+        # 1. 发送长请求占满 running
+        print(
+            f"[步骤1] 发送 {LONG_CONCURRENT} 个长请求"
+            f"（max_new_tokens={LONG_SUSTAINED_MAX_TOKENS}，维持 running）..."
+        )
         long_threads = [
-            threading.Thread(target=_send_long_request, args=(self.base_url,))
+            threading.Thread(
+                target=_send_long_request,
+                args=(self.base_url, LONG_SUSTAINED_MAX_TOKENS),
+            )
             for _ in range(LONG_CONCURRENT)
         ]
         for t in long_threads:
             t.start()
         print(f"    已启动 {LONG_CONCURRENT} 个长请求")
 
-        # 等待 1 秒，在长请求 prefill 阶段就发送短请求
-        time.sleep(1)
+        # 2. 轮询等到 stable running
+        print("[步骤2] 轮询等待长请求进入稳定 decode...")
+        stable_running = _wait_until_stable_running(
+            self.base_url, expected_running=LONG_CONCURRENT
+        )
+        self.assertIsNotNone(
+            stable_running,
+            f"长请求未能稳定占满 running(>= {LONG_CONCURRENT})",
+        )
+        running, waiting = _query_status(self.base_url, "发送前")
 
-        # 2. 查询当前状态（应看到 running>0, waiting=0）
-        print("[步骤2] 查询当前状态（应看到 running>0, waiting=0）")
-        _query_status(self.base_url, "步骤2")
-
-        # 3. 在长请求 prefill 阶段发送短请求，记录耗时
-        print(f"[步骤3] 在长请求 prefill 阶段发送 {SHORT_CONCURRENT} 个快速请求...")
-        print("    预期: running>0, ratio=0.8 → queue_min = min(running*0.8, max_prefill_bs)")
-        print(f"    由于 waiting({SHORT_CONCURRENT}) < queue_min，应触发 delay...")
+        # 3. 发送超过阈值的短请求
+        queue_min_est = int(stable_running * QUEUE_MIN_RATIO) if stable_running else "?"
+        print(
+            f"[步骤3] 发送 {SHORT_CONCURRENT_ABOVE} 个快速请求"
+            f"（超过 queue_min≈{queue_min_est}）..."
+        )
+        print(
+            f"    预期: waiting({SHORT_CONCURRENT_ABOVE}) >= queue_min"
+            f" → 立刻下发，耗时 < {MAX_DELAY_MS}ms"
+        )
         results = {}
         short_threads = [
             threading.Thread(
                 target=_send_short_request, args=(self.base_url, i, results)
             )
-            for i in range(1, SHORT_CONCURRENT + 1)
+            for i in range(1, SHORT_CONCURRENT_ABOVE + 1)
         ]
         for t in short_threads:
             t.start()
@@ -255,23 +292,27 @@ class TestNpuPrefillDelayer(CustomTestCase):
             t.join()
 
         print("快速请求耗时结果：")
-        for idx in sorted(results):
-            print(f"    {idx}: {results[idx]:.0f}ms")
+        all_ok = _print_short_results(results)
 
         # 4. 再次查询状态
         print("[步骤4] 再次查询状态")
-        time.sleep(1)
-        _query_status(self.base_url, "步骤4")
+        _query_status(self.base_url, "释放后")
 
         # 等待后台长请求结束
         for t in long_threads:
             t.join()
 
-        print("=== 测试完成 ===")
-        print("解读：")
-        print("   - 快速请求耗时接近 5000ms，说明被 Prefill Delayer 延迟了。")
-        print("   - 若耗时很短(<2s)，可能未触发，可增大 running 数或 ratio。")
-        print("   - 查看服务日志，应出现 'PrefillDelayer' 相关 DEBUG 信息。")
+        # 断言
+        self.assertTrue(all_ok, "部分短请求未返回 HTTP 200")
+        elapsed_values = [ms for ms, _ in results.values()]
+        avg_ms = sum(elapsed_values) / len(elapsed_values)
+        print(f"平均耗时: {avg_ms:.0f}ms（预期 < {MAX_DELAY_MS}ms）")
+        self.assertLess(
+            avg_ms,
+            MAX_DELAY_MS,
+            f"平均耗时 {avg_ms:.0f}ms 未低于 max_delay_ms({MAX_DELAY_MS}ms)，"
+            f"超过阈值后仍被延迟，不符合预期",
+        )
 
 
 class TestNpuPrefillDelayerBelowThreshold(CustomTestCase):
@@ -341,8 +382,7 @@ class TestNpuPrefillDelayerBelowThreshold(CustomTestCase):
             t.join()
 
         print("快速请求耗时结果：")
-        for idx in sorted(results):
-            print(f"    {idx}: {results[idx]:.0f}ms")
+        all_ok = _print_short_results(results)
 
         # 4. 再次查询状态
         print("[步骤4] 再次查询状态")
@@ -352,15 +392,84 @@ class TestNpuPrefillDelayerBelowThreshold(CustomTestCase):
         for t in long_threads:
             t.join()
 
-        # 断言：低于阈值的请求应被延迟到 max_delay_ms 超时，耗时 > 5s
-        avg_ms = sum(results.values()) / len(results)
-        print(f"平均耗时: {avg_ms:.0f}ms（预期 > {MAX_DELAY_MS}ms）")
-        self.assertGreater(
-            avg_ms,
-            MAX_DELAY_MS,
-            f"平均耗时 {avg_ms:.0f}ms 未超过 max_delay_ms({MAX_DELAY_MS}ms)，"
-            f"延迟可能被提前释放（检查 running 是否维持足够高）",
+        self.assertTrue(all_ok, "部分短请求未返回 HTTP 200")
+        # 断言：低于阈值的每个请求都应被延迟到 max_delay_ms 超时
+        for idx in sorted(results):
+            elapsed_ms, _ = results[idx]
+            self.assertGreater(
+                elapsed_ms,
+                MAX_DELAY_MS,
+                f"请求 {idx} 耗时 {elapsed_ms:.0f}ms 未超过"
+                f" max_delay_ms({MAX_DELAY_MS}ms)，"
+                f"延迟可能被提前释放",
+            )
+
+
+class TestNpuPrefillDelayerObserve(CustomTestCase):
+    """Testcase: Observe the Prefill Delayer behavior at the threshold boundary.
+    No assertions — prints per-request latency and /metrics for investigation.
+
+    [Test Category] Scheduling
+    [Test Target] --enable-prefill-delayer; --prefill-delayer-queue-min-ratio;
+                  --prefill-delayer-max-delay-ms
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.base_url = DEFAULT_URL_FOR_TEST
+
+    def test_prefill_delayer_stepwise(self):
+        print("=== Prefill Delayer 观察测试（接近阈值边界） ===")
+        print(f"目标服务: {self.base_url}")
+
+        # 1. 先发送长请求（后台运行，持续占用 running）
+        print(f"[步骤1] 发送 {LONG_CONCURRENT} 个长请求（后台运行，持续占用 running）...")
+        long_threads = [
+            threading.Thread(target=_send_long_request, args=(self.base_url,))
+            for _ in range(LONG_CONCURRENT)
+        ]
+        for t in long_threads:
+            t.start()
+        print(f"    已启动 {LONG_CONCURRENT} 个长请求")
+
+        # 等待 1 秒，在长请求 prefill 阶段就发送短请求
+        time.sleep(1)
+
+        # 2. 查询当前状态（应看到 running>0, waiting=0）
+        print("[步骤2] 查询当前状态（应看到 running>0, waiting=0）")
+        _query_status(self.base_url, "步骤2")
+
+        # 3. 发送接近阈值的短请求（15，略低于 queue_min≈16），观察行为
+        print(
+            f"[步骤3] 发送 {SHORT_CONCURRENT_OBSERVE} 个快速请求"
+            f"（略低于 queue_min≈16，观察边界行为）..."
         )
+        print("    预期: 可能被延迟，释放时机取决于 running 持续时间和 queue 积累速度")
+        results = {}
+        short_threads = [
+            threading.Thread(
+                target=_send_short_request, args=(self.base_url, i, results)
+            )
+            for i in range(1, SHORT_CONCURRENT_OBSERVE + 1)
+        ]
+        for t in short_threads:
+            t.start()
+        for t in short_threads:
+            t.join()
+
+        print("快速请求耗时结果：")
+        _print_short_results(results)
+
+        # 4. 再次查询状态
+        print("[步骤4] 再次查询状态")
+        time.sleep(1)
+        _query_status(self.base_url, "步骤4")
+
+        # 等待后台长请求结束
+        for t in long_threads:
+            t.join()
+
+        print("=== 观察完成 ===")
 
 
 if __name__ == "__main__":
