@@ -4,14 +4,13 @@ import requests
 
 from sglang.test.ascend.disaggregation_utils import TestDisaggregationBase
 from sglang.test.ascend.test_ascend_utils import (
-    QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH,
     INVOICE_WITH_BARCODE_LOGO_IMAGES_PATH,
+    QWEN3_VL_8B_INSTRUCT_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     popen_launch_server,
-
 )
 
 register_npu_ci(est_time=400, suite="full-2-npu-a3", nightly=True)
@@ -117,8 +116,12 @@ class TestPrefixMmCache(TestDisaggregationBase):
         )
         self.assertEqual(response2.status_code, 200)
 
-        self.assertEqual(response1.json()["usage"]["prompt_tokens_details"]["cached_tokens"], 0)
-        self.assertGreater(response2.json()["usage"]["prompt_tokens_details"]["cached_tokens"], 0)
+        self.assertEqual(
+            response1.json()["usage"]["prompt_tokens_details"]["cached_tokens"], 0
+        )
+        self.assertGreater(
+            response2.json()["usage"]["prompt_tokens_details"]["cached_tokens"], 0
+        )
 
     @classmethod
     def tearDownClass(cls):
