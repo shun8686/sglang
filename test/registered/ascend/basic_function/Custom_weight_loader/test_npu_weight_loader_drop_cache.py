@@ -40,7 +40,9 @@ def _vmtouch_file(filepath):
     try:
         result = subprocess.run(
             ["vmtouch", filepath],
-            capture_output=True, text=True, timeout=30,
+            capture_output=True,
+            text=True,
+            timeout=30,
         )
         stdout = result.stdout
         stderr = result.stderr
