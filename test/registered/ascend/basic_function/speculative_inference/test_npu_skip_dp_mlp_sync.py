@@ -6,12 +6,6 @@
 --tp-size; --dp-size
 [Platform] NPU (Ascend A3, CANN 9.0.0)
 [Porting Source] New test case
-
-Test strategy:
-  - Positive: EAGLE + skip-dp-mlp-sync -> server starts, GSM8K passes
-  - Negative: EAGLE3 + skip-dp-mlp-sync -> server crashes with Assert error,
-    captured via subprocess.run, stderr asserted to contain expected message.
-    This ensures CI does NOT fail when the assert is correctly triggered.
 """
 
 import os
@@ -60,17 +54,7 @@ NPU_ENV = {
 
 
 class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
-    """Positive test: EAGLE + skip-dp-mlp-sync should work correctly.
-
-    --speculative-skip-dp-mlp-sync skips the DP MLP synchronization step
-    in EAGLE speculative decoding with DP attention. This improves
-    performance by avoiding unnecessary cross-DP communication.
-
-    Note: The assert in speculative_hook.py requires
-    speculative_algorithm == "EAGLE" (not EAGLE3). We use the EAGLE3 draft
-    model weights with --speculative-algorithm EAGLE, which the framework
-    accepts because EAGLE3 is a superset of EAGLE.
-    """
+    """Verify EAGLE + skip-dp-mlp-sync starts and passes GSM8K on NPU."""
 
     @classmethod
     def setUpClass(cls):
@@ -154,21 +138,16 @@ class TestNPUSkipDPMLPSyncPositive(CustomTestCase):
                 f"{avg_spec_accept_length=}\n"
             )
 
+        # Qwen3-8B official GSM8K (thinking mode) ~0.92; EAGLE is lossless
+        # speculation so score should match target. Threshold 0.80 leaves
+        # ~13% margin for NPU precision variance and 200-example sampling.
         self.assertGreater(
-            metrics["score"], 0.69, "GSM8K score should be > 0.69 with skip-dp-mlp-sync"
+            metrics["score"], 0.80, "GSM8K score should be > 0.80 with skip-dp-mlp-sync"
         )
 
 
 class TestNPUSkipDPMLPSyncNegative(unittest.TestCase):
-    """Negative test: non-EAGLE algorithm + skip-dp-mlp-sync should be rejected.
-
-    --speculative-skip-dp-mlp-sync is only supported with EAGLE algorithm
-    (not EAGLE3, not DFLASH). When used with EAGLE3, the server should
-    assert and refuse to start.
-
-    This test uses subprocess.run to capture the crash output and verify
-    the expected assert message, ensuring CI does NOT fail.
-    """
+    """Verify EAGLE3 + skip-dp-mlp-sync is rejected (Assert crash)."""
 
     @classmethod
     def setUpClass(cls):
