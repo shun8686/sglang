@@ -2,7 +2,6 @@ import os
 import unittest
 
 import requests
-import torch
 
 os.environ.setdefault("HCCL_BUFFSIZE", "600")
 
@@ -20,24 +19,6 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(est_time=600, suite="full-4-npu-a3", nightly=True)
-
-
-def _require_devices(test_case, n):
-    """Skip test if fewer than *n* devices are available.
-
-    Checks CUDA_VISIBLE_DEVICES first (used by CI to limit visible cards),
-    then falls back to torch.cuda.device_count().
-    """
-    visible = os.environ.get("CUDA_VISIBLE_DEVICES", "")
-    if visible:
-        count = len([d for d in visible.split(",") if d.strip()])
-    else:
-        try:
-            count = torch.cuda.device_count()
-        except Exception:
-            count = 1
-    if count < n:
-        test_case.skipTest(f"Requires at least {n} NPU devices, found {count}")
 
 
 class TestAttnTpGatherA2APath(CustomTestCase):
@@ -72,7 +53,6 @@ class TestAttnTpGatherA2APath(CustomTestCase):
         With the flag, the opt-out takes effect and gather is disabled.
         Both configurations must start successfully and produce correct output.
         """
-        _require_devices(self, 2)
         prompts = [
             "The capital of France is",
             "What is the largest planet in our solar system?",
@@ -234,8 +214,6 @@ class TestAttnTpGatherDPAttn(CustomTestCase):
         The flag is a no-op in this configuration. Tests both with and
         without the flag to verify neither breaks.
         """
-        _require_devices(self, 2)
-
         # WITHOUT --disable-attn-tp-gather
         process1 = self._launch(tp_size=2, dp_size=2, disable_gather=False)
         try:
@@ -261,8 +239,6 @@ class TestAttnTpGatherDPAttn(CustomTestCase):
         by default. --disable-attn-tp-gather overrides this behavior.
         Tests both with and without the flag to verify the override works.
         """
-        _require_devices(self, 4)
-
         # WITHOUT --disable-attn-tp-gather
         process1 = self._launch(tp_size=4, dp_size=2, disable_gather=False)
         try:
