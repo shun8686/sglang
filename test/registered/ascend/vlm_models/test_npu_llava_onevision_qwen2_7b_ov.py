@@ -7,7 +7,10 @@ from sglang.test.ascend.vlm_utils import TestVLMModels
 from sglang.test.ci.ci_register import register_npu_ci
 
 register_npu_ci(
-    est_time=400, suite="full-2-npu-a3", nightly=True, disabled="unsupported"
+    est_time=400,
+    suite="full-1-npu-a3",
+    nightly=True,
+    disabled="no longer being monitored",
 )
 
 
