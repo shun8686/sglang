@@ -3,8 +3,6 @@
 [Test Category] EPD
 [Test Target] --encoder-bootstrap-port; --encoder-register-urls;
 --language-only; --encoder-only; --base-gpu-id; --tp-size
-[Platform] NPU (Ascend A3, CANN 9.0.0)
-[Porting Source] New test case
 
 Fused workflow: start language-only + encoder-only servers, verify health,
 registration, end-to-end VLM request, encoder offline, and re-registration.
