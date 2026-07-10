@@ -167,7 +167,7 @@ class TestNPUDFlashSpeculative(CustomTestCase):
                 ) or internal_state.get("spec_accept_length")
         except Exception as e:
             logger.warning("Failed to query /server_info after GSM8K: %s", e)
-        
+            
         if is_in_ci():
             write_github_step_summary(
                 f"### test_dflash_speculative (DFLASH on NPU)\n"
