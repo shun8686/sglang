@@ -1,11 +1,11 @@
 import unittest
 from types import SimpleNamespace
 
+from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
     QWEN3_5_35B_A3B_WEIGHTS_PATH,
     QWEN3_5_35B_W8A8_MODEL_PATH,
 )
-from sglang.srt.utils import kill_process_tree
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.run_eval import run_eval
 from sglang.test.test_utils import (
