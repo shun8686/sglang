@@ -66,7 +66,10 @@ class TestNPUGCWarningThreshold(TestNPULoggingBase):
                     f"{self.base_url}/generate",
                     json={
                         "text": prompt_template,
-                        "sampling_params": {"temperature": 0, "max_new_tokens": max_token},
+                        "sampling_params": {
+                            "temperature": 0,
+                            "max_new_tokens": max_token,
+                        },
                     },
                     timeout=10,
                 )
