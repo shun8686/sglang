@@ -38,9 +38,7 @@ class TestNPUSRTEngine(CustomTestCase):
         engine = sgl.Engine(
             model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
             random_seed=42,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
-            # disable_radix_cache=True,
+            attention_backend="ascend",
         )
         out1 = engine.generate(prompt, sampling_params)["text"]
         engine.shutdown()
@@ -48,9 +46,7 @@ class TestNPUSRTEngine(CustomTestCase):
         runtime = sgl.Runtime(
             model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
             random_seed=42,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
-            # disable_radix_cache=True,
+            attention_backend="ascend",
         )
         out2 = json.loads(runtime.generate(prompt, sampling_params))["text"]
         runtime.shutdown()
@@ -71,9 +67,7 @@ class TestNPUSRTEngine(CustomTestCase):
             model_path=QWEN2_1_5B_INSTRUCT_GTE_WEIGHTS_PATH,
             is_embedding=True,
             random_seed=42,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
-            # disable_radix_cache=True,
+            attention_backend="ascend",
         )
         out1 = torch.tensor(engine.encode(prompt)["embedding"])
         engine.shutdown()
@@ -82,9 +76,7 @@ class TestNPUSRTEngine(CustomTestCase):
             model_path=QWEN2_1_5B_INSTRUCT_GTE_WEIGHTS_PATH,
             is_embedding=True,
             random_seed=42,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
-            # disable_radix_cache=True,
+            attention_backend="ascend",
         )
         out2 = torch.tensor(json.loads(runtime.encode(prompt))["embedding"])
         runtime.shutdown()
@@ -103,8 +95,7 @@ class TestNPUSRTEngine(CustomTestCase):
             model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
             random_seed=42,
             disable_radix_cache=True,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
+            attention_backend="ascend",
         )
         out1 = engine.generate(prompt, sampling_params)["text"]
 
@@ -133,9 +124,7 @@ class TestNPUSRTEngine(CustomTestCase):
 
         server_args = ServerArgs(
             model_path=LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
-            # disable_radix_cache=True,
+            attention_backend="ascend",
         )
         bench_args = BenchArgs(num_prompts=10)
         result = throughput_test(server_args=server_args, bench_args=bench_args)
@@ -153,8 +142,7 @@ class TestNPUSRTEngine(CustomTestCase):
             is_embedding=True,
             random_seed=42,
             disable_radix_cache=True,
-            attention_backend="torch_native",
-            # disable_cuda_graph=True,
+            attention_backend="ascend",
         )
 
         out1 = torch.tensor(engine.encode(prompt)["embedding"])
