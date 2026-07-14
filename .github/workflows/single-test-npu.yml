@@ -1,5 +1,5 @@
 name: Single Test (NPU)
-# EPD (Encode Prefill Disaggregation) tests on Ascend NPU
+# test round 1: <测试用例描述>
 
 on:
   pull_request:
@@ -15,7 +15,7 @@ concurrency:
 jobs:
   single-node-poc:
     name: single-node-poc
-    runs-on: linux-aarch64-a3-8
+    runs-on: linux-aarch64-a3-2
     container:
       image: swr.cn-southwest-2.myhuaweicloud.com/base_image/dockerhub/lmsysorg/sglang:cann9.0.0-a3-20260622
     steps:
@@ -26,21 +26,8 @@ jobs:
         run: |
           npu-smi info
 
-      - name: Install dependencies
-        shell: bash
-        run: |
-          export PIP_INDEX_URL=https://repo.huaweicloud.com/repository/pypi/simple
-          export PIP_TRUSTED_HOST=repo.huaweicloud.com
-          pip install --retries 10 --timeout 300 sglang_router
-          pip install --retries 10 --timeout 300 sentence_transformers
-          pip install --retries 10 --timeout 300 wandb tenacity loguru openpyxl zstandard transformers-stream-generator tqdm-multiprocess pycocoevalcap
-          pip install --retries 10 --timeout 300 yt-dlp sentencepiece nltk av ftfy sqlitedict sacrebleu pytablewriter peft accelerate
-          pip install --retries 10 --timeout 300 jsonlines httpx evaluate datasets numexpr numpy dotenv granian
-          pip install --retries 10 --timeout 300 pytz pybind11 scikit-learn timm einops openai opencv-python-headless hf_transfer
-          git clone --branch v0.3.3 --depth 1 https://github.com/EvolvingLMMs-Lab/lmms-eval.git
-
       - name: Run test
-        timeout-minutes: 240
+        timeout-minutes: 120
         env:
           SGLANG_USE_MODELSCOPE: true
           HF_ENDPOINT: https://hf-mirror.com
@@ -51,16 +38,9 @@ jobs:
           echo "Source code path: ${sglang_source_path}"
           ln -sf ${sglang_source_path} /root/sglang
 
-          cd ./lmms-eval
-          export PIP_INDEX_URL=https://repo.huaweicloud.com/repository/pypi/simple
-          export PIP_TRUSTED_HOST=repo.huaweicloud.com
-          nohup pip install --retries 10 --timeout 300 . > lmmslog.txt 2>&1 &
-          sleep 60
-          export PYTHONPATH=$PYTHONPATH:$(pwd)
-          cd ..
-
+          # Test cases - 使用时替换为实际的测试用例路径
           test_cases=(
-            "test/registered/ascend/basic_function/EPD/test_npu_epd_disaggregation.py"
+            "test/registered/ascend/llm_models/test_npu_deepseek_v3_2_w8a8.py"
           )
 
           for test_case in "${test_cases[@]}"; do
@@ -69,6 +49,10 @@ jobs:
               exit 1
             fi
           done
+
+          # copy required file from our daily cache
+          cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
+          cp ~/.cache/modelscope/hub/datasets/tmp/test.jsonl /tmp
 
           echo "scaling_governor performance num: \
             $(cat /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor | grep performance | wc -l)"
