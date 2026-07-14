@@ -43,6 +43,8 @@ jobs:
           cp ~/.cache/modelscope/hub/datasets/otavia/ShareGPT_Vicuna_unfiltered/ShareGPT_V3_unfiltered_cleaned_split.json /tmp
           cp ~/.cache/modelscope/hub/datasets/tmp/test.jsonl /tmp
 
+          pip install ~/.cache/.cache/npu-pkgs/torch_memory_saver-0.0.8-cp311-cp311-linux_aarch64.whl
+
       - name: Print Log Information
         run: bash scripts/ci/npu/npu_log_print.sh
       - name: Run test
@@ -58,4 +60,4 @@ jobs:
           GDN_ATTN_BACKEND_TRITON: 1
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          python3 test/registered/ascend/basic_function/rl/test_npu_moe_rl_routing_capture.py
+          python3 test/registered/ascend/basic_function/rl/test_npu_moe_rl_full_loop.py
