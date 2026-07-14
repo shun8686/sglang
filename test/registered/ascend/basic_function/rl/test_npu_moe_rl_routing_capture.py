@@ -32,9 +32,6 @@ from sglang.srt.state_capturer.routed_experts import (
 )
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
-    DEFAULT_NPU_URL_FOR_TEST,
-)
-from sglang.test.ascend.test_ascend_utils import (
     QWEN3_30B_A3B_INSTRUCT_2507_WEIGHTS_PATH as QWEN3_30B_A3B_INSTRUCT,
 )
 from sglang.test.ascend.test_ascend_utils import (
@@ -46,11 +43,12 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+    DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
-register_npu_ci(est_time=1200, suite="full-1-npu-a3", nightly=True)
+register_npu_ci(est_time=1200, suite="full-2-npu-a3", nightly=True)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -212,7 +210,7 @@ class _BaseNPURoutingCaptureTest(CustomTestCase):
 
     model = None
     tp_size = 1
-    base_url = DEFAULT_NPU_URL_FOR_TEST
+    base_url = DEFAULT_URL_FOR_TEST
     server_process = None
     server_extra_args = []
     _disable_cuda_graph = True
