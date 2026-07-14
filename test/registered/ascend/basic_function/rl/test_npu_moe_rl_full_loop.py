@@ -33,7 +33,7 @@ from sglang.test.test_utils import (
 )
 
 register_npu_ci(
-    est_time=600,
+    est_time=300,
     suite="full-1-npu-a3",
     disabled="Depends on the NPU-customized version of torch_memory_saver.",
 )

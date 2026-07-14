@@ -60,4 +60,4 @@ jobs:
           GDN_ATTN_BACKEND_TRITON: 1
         run: |
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          python3 test/registered/ascend/basic_function/rl/test_npu_moe_rl_full_loop.py
+          python3 test/registered/ascend/basic_function/rl/test_npu_rl_release_memory_occupation.py
