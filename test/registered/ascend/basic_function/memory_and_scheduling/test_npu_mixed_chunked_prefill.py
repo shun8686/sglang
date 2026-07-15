@@ -35,7 +35,6 @@ class TestMixedChunkedPrefill(GSM8KMixin, CustomTestCase):
         "128",
         "--attention-backend",
         "ascend",
-        "--disable-cuda-graph",
     ]
 
     @classmethod
@@ -67,7 +66,6 @@ class TestMixedChunkedPrefillNoRadixCache(TestMixedChunkedPrefill):
         "--disable-radix-cache",
         "--attention-backend",
         "ascend",
-        "--disable-cuda-graph",
     ]
 
 
