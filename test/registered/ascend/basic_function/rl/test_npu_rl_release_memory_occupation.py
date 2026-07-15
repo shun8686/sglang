@@ -52,9 +52,24 @@ _MIN_DELTA_SMI_KV_MB = 1000  # npu-smi kv_cache release (1B model, 60% static po
 _MIN_DELTA_SMI_W_MB = 500  # npu-smi weights release (~2 GB model)
 
 
+def _tms_enabled():
+    """Check whether torch_memory_saver is actually enabled and intercepting allocations."""
+    try:
+        from torch_memory_saver import torch_memory_saver as tms
+
+        return tms is not None and tms.enabled
+    except Exception:
+        return False
+
+
 # NPU memory
 def _npu_mem_used_all_mb() -> float:
-    """Sum of used memory across all visible NPU devices (for TP>1 tests)."""
+    """Sum of used memory across all visible NPU devices (for TP>1 tests).
+
+    Calls empty_cache() first to flush the PyTorch NPU caching allocator,
+    so that memory released by torch_memory_saver is visible to the driver.
+    """
+    torch.npu.empty_cache()
     total = 0.0
     for d in range(torch.npu.device_count()):
         torch.npu.synchronize(d)
@@ -120,14 +135,47 @@ def _npu_smi_mem_mb() -> float:
 
 def _assert_mem_decreased(before, after, tag, min_delta):
     delta = before - after
+    logger.info(
+        f"[MEM] {tag}: before={before:.0f} MB, after={after:.0f} MB, "
+        f"delta={delta:.0f} MB, threshold={min_delta} MB, "
+        f"tms_enabled={_tms_enabled()}"
+    )
     assert delta > min_delta, (
         f"[{tag}] Expected mem decrease > {min_delta} MB, "
         f"got {delta:.0f} MB ({before:.0f} → {after:.0f})"
     )
 
 
+def _wait_mem_decreased(measure_fn, before, tag, min_delta, timeout=10.0, interval=1.0):
+    """Retry memory measurement until decrease is observed or timeout.
+
+    NPU driver memory deallocation can be asynchronous; after
+    release_memory_occupation() returns, the freed memory may not be
+    immediately visible to torch.npu.mem_get_info() or npu-smi.
+    """
+    deadline = time.perf_counter() + timeout
+    while True:
+        after = measure_fn()
+        delta = before - after
+        logger.info(
+            f"[MEM-WAIT] {tag}: before={before:.0f} MB, after={after:.0f} MB, "
+            f"delta={delta:.0f} MB, threshold={min_delta} MB, "
+            f"elapsed={timeout - (deadline - time.perf_counter()):.1f}s"
+        )
+        if delta > min_delta:
+            return after
+        if time.perf_counter() >= deadline:
+            _assert_mem_decreased(before, after, tag, min_delta)  # raises
+        time.sleep(interval)
+
+
 def _assert_mem_increased(before, after, tag, min_delta):
     delta = after - before
+    logger.info(
+        f"[MEM] {tag}: before={before:.0f} MB, after={after:.0f} MB, "
+        f"delta={delta:.0f} MB, threshold={min_delta} MB, "
+        f"tms_enabled={_tms_enabled()}"
+    )
     assert delta > min_delta, (
         f"[{tag}] Expected mem increase > {min_delta} MB, "
         f"got {delta:.0f} MB ({before:.0f} → {after:.0f})"
@@ -210,9 +258,11 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
                 mem_before = _npu_mem_used_all_mb()
                 t0 = time.perf_counter()
                 engine.release_memory_occupation()
-                mem_after = _npu_mem_used_all_mb()
-                _assert_mem_decreased(
-                    mem_before, mem_after, f"{tag}-release", _MIN_DELTA_MB_SMALL
+                mem_after = _wait_mem_decreased(
+                    _npu_mem_used_all_mb,
+                    mem_before,
+                    f"{tag}-release",
+                    _MIN_DELTA_MB_SMALL,
                 )
                 logger.info(
                     f"[{tag}] release: {time.perf_counter()-t0:.1f}s, {mem_before:.0f}→{mem_after:.0f} MB"
@@ -251,9 +301,8 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
 
             mem_before = _npu_mem_used_all_mb()
             engine.release_memory_occupation()
-            mem_after = _npu_mem_used_all_mb()
-            _assert_mem_decreased(
-                mem_before, mem_after, "cpu-backup", _MIN_DELTA_MB_SMALL
+            mem_after = _wait_mem_decreased(
+                _npu_mem_used_all_mb, mem_before, "cpu-backup", _MIN_DELTA_MB_SMALL
             )
             logger.info(f"[CB] release: {mem_before:.0f}→{mem_after:.0f} MB")
 
@@ -299,13 +348,15 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
 
                 # Stage 1: release kv_cache
                 engine.release_memory_occupation(tags=[GPU_MEMORY_TYPE_KV_CACHE])
-                mem1 = _npu_smi_mem_mb()
-                _assert_mem_decreased(mem0, mem1, f"{tag}-kv", _MIN_DELTA_SMI_KV_MB)
+                mem1 = _wait_mem_decreased(
+                    _npu_smi_mem_mb, mem0, f"{tag}-kv", _MIN_DELTA_SMI_KV_MB
+                )
 
                 # Stage 2: release weights
                 engine.release_memory_occupation(tags=[GPU_MEMORY_TYPE_WEIGHTS])
-                mem2 = _npu_smi_mem_mb()
-                _assert_mem_decreased(mem1, mem2, f"{tag}-w", _MIN_DELTA_SMI_W_MB)
+                mem2 = _wait_mem_decreased(
+                    _npu_smi_mem_mb, mem1, f"{tag}-w", _MIN_DELTA_SMI_W_MB
+                )
 
                 logger.info(
                     f"[{tag}] release: {mem0:.0f}→{mem1:.0f}→{mem2:.0f} MB, {time.perf_counter()-t0:.1f}s"
@@ -375,9 +426,8 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
 
             mem_before = _npu_mem_used_all_mb()
             engine.release_memory_occupation()
-            mem_after = _npu_mem_used_all_mb()
-            _assert_mem_decreased(
-                mem_before, mem_after, "moe-release", _MIN_DELTA_MB_MOE
+            mem_after = _wait_mem_decreased(
+                _npu_mem_used_all_mb, mem_before, "moe-release", _MIN_DELTA_MB_MOE
             )
             logger.info(f"[MoE] release: {mem_before:.0f}→{mem_after:.0f} MB")
 
@@ -429,9 +479,8 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
 
             mem_before = _npu_mem_used_all_mb()
             engine.release_memory_occupation()
-            mem_after = _npu_mem_used_all_mb()
-            _assert_mem_decreased(
-                mem_before, mem_after, "disk-release", _MIN_DELTA_MB_SMALL
+            mem_after = _wait_mem_decreased(
+                _npu_mem_used_all_mb, mem_before, "disk-release", _MIN_DELTA_MB_SMALL
             )
             logger.info(f"[GDN] release: {mem_before:.0f}→{mem_after:.0f} MB")
 
