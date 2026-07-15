@@ -98,6 +98,7 @@ unset ASCEND_LAUNCH_BLOCKING
 if [ "${INSTALL_SGLANG_FROM_SOURCE}" = "true" ] || [ "${INSTALL_SGLANG_FROM_SOURCE}" = "True" ];then
     echo "Use sglang from source: ${sglang_source_path}"
     export PYTHONPATH=${sglang_source_path}/python:$PYTHONPATH
+    coverage_source="${sglang_source_path}/python/sglang/srt/hardware_backend/npu"
 else
     echo "Use sglang from docker image"
     sglang_pkg_path=/sgl-workspace/sglang/python
@@ -105,6 +106,17 @@ else
     mkdir -p "${ascend_test_util_path}"
     mv "${ascend_test_util_path}" "${ascend_test_util_path}_bak"
     cp -r ${sglang_source_path}/python/sglang/test/ascend "${ascend_test_util_path}"
+    coverage_source="/sgl-workspace/sglang/python/sglang/srt/hardware_backend/npu"
+fi
+
+# install coverage if COVERAGE_FILE is set
+if [ -n "${COVERAGE_FILE}" ]; then
+    echo "Installing coverage..."
+    python -c "import coverage" 2>/dev/null || pip install coverage
+    # Enable subprocess coverage tracking via .pth file and COVERAGE_PROCESS_START
+    SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
+    echo "import coverage; coverage.process_startup()" > "${SITE_PACKAGES}/coverage.pth"
+    export COVERAGE_PROCESS_START="/root/.cache/coverage_data/.coveragerc"
 fi
 
 # set environment of cann
@@ -125,10 +137,18 @@ echo "Log path: ${log_path}"
 
 if [ "${TROUBLE_SHOTTING}" = "true" ] || [ "${TROUBLE_SHOTTING}" = "True" ];then
     echo "TROUBLE_SHOTTING=true, the pod will keep alive for four hour."
-    ( ${PYTHON_FOR_SGLANG} -u "${sglang_source_path}/${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
+    if [ -n "${COVERAGE_FILE}" ]; then
+        ( coverage run --source=${coverage_source} "${sglang_source_path}/${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
+    else
+        ( ${PYTHON_FOR_SGLANG} -u "${sglang_source_path}/${test_case}" 2>&1 || true ) | tee -a "${log_path}/${tc_name}.log"
+    fi
     sleep 14400
 else
-    ${PYTHON_FOR_SGLANG} -u "${sglang_source_path}/${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
+    if [ -n "${COVERAGE_FILE}" ]; then
+        coverage run --source=${coverage_source} "${sglang_source_path}/${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
+    else
+        ${PYTHON_FOR_SGLANG} -u "${sglang_source_path}/${test_case}" 2>&1 | tee -a "${log_path}/${tc_name}.log"
+    fi
 fi
 echo "Finished test case ${test_case}"
 
