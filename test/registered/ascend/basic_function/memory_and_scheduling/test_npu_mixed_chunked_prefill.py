@@ -3,7 +3,7 @@ import unittest
 from sglang.srt.environ import envs
 from sglang.srt.utils import kill_process_tree
 from sglang.test.ascend.test_ascend_utils import (
-    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+    LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH,
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.kits.eval_accuracy_kit import GSM8KMixin
@@ -19,16 +19,15 @@ register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
 class TestMixedChunkedPrefill(GSM8KMixin, CustomTestCase):
     """Verify that --enable-mixed-chunk works correctly on NPU and the
-    GSM8K accuracy of Llama-3.2-1B-Instruct meets the threshold.
+    GSM8K accuracy meets the threshold.
 
     [Test Category] Parameter
     [Test Target] --enable-mixed-chunk;--chunked-prefill-size
     """
 
-    model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+    model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
     base_url = DEFAULT_URL_FOR_TEST
-    # Llama-3.2-1B is a small model; GSM8K accuracy is expected to be low.
-    gsm8k_accuracy_thres = 0.1
+    gsm8k_accuracy_thres = 0.62
 
     extra_args = [
         "--enable-mixed-chunk",
