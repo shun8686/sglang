@@ -370,6 +370,9 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
             self.assertGreater(len(baseline), 0)
             logger.info(f"[MoE] baseline: {baseline}")
 
+            # Wait for the scheduler to become fully idle
+            time.sleep(3)
+
             mem_before = _npu_mem_used_all_mb()
             engine.release_memory_occupation()
             mem_after = _npu_mem_used_all_mb()
@@ -420,6 +423,9 @@ class TestReleaseMemoryOccupationNPU(CustomTestCase):
             self.assertIsNotNone(baseline)
             self.assertGreater(len(baseline), 0)
             logger.info(f"[GDN] baseline: {baseline!r}")
+
+            # Wait for the scheduler to become fully idle after generate().
+            time.sleep(2)
 
             mem_before = _npu_mem_used_all_mb()
             engine.release_memory_occupation()
