@@ -1,5 +1,5 @@
 """
-E2E tests for NPU — tool call with sleep mode (pause/resume).
+E2E tests for NPU pause/resume generation — tool call.
 """
 
 import json
@@ -22,10 +22,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=80, suite="full-1-npu-a3", nightly=True)
 
 
-class TestNpuToolCallWithSleep(CustomTestCase):
+class TestNpuToolCallWithPauseResume(CustomTestCase):
     """E2E: tool call generation survives pause/resume correctly.
 
-    [Test Category] RL Sleep Mode + Tool Call
+    [Test Category] RL Pause/Resume + Tool Call
     [Test Target] POST /v1/chat/completions (with tools),
                   POST /pause_generation, POST /continue_generation
     """

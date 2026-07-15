@@ -1,5 +1,5 @@
 """
-E2E tests for NPU sleep mode pause/resume (in_place, retract, abort).
+E2E tests for NPU pause/resume generation (in_place, retract, abort).
 
 Covers:
   S1 : in_place concurrent pause blocks progress; resume completes all.
@@ -30,10 +30,10 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=90, suite="full-1-npu-a3", nightly=True)
 
 
-class TestNpuSleepMode(CustomTestCase):
-    """E2E: in_place / retract / abort pause/resume for NPU sleep mode.
+class TestNpuPauseResumeGeneration(CustomTestCase):
+    """E2E: in_place / retract / abort mode for NPU pause/resume generation.
 
-    [Test Category] RL Sleep Mode
+    [Test Category] RL Pause/Resume
     [Test Target] POST /pause_generation (mode=in_place, retract, abort),
                   POST /continue_generation
     """

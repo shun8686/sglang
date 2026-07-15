@@ -135,7 +135,7 @@ def _npu_smi_mem_mb() -> float:
 
 def _assert_mem_decreased(before, after, tag, min_delta):
     delta = before - after
-    logger.info(
+    print(
         f"[MEM] {tag}: before={before:.0f} MB, after={after:.0f} MB, "
         f"delta={delta:.0f} MB, threshold={min_delta} MB, "
         f"tms_enabled={_tms_enabled()}"
@@ -157,7 +157,7 @@ def _wait_mem_decreased(measure_fn, before, tag, min_delta, timeout=10.0, interv
     while True:
         after = measure_fn()
         delta = before - after
-        logger.info(
+        print(
             f"[MEM-WAIT] {tag}: before={before:.0f} MB, after={after:.0f} MB, "
             f"delta={delta:.0f} MB, threshold={min_delta} MB, "
             f"elapsed={timeout - (deadline - time.perf_counter()):.1f}s"
@@ -171,7 +171,7 @@ def _wait_mem_decreased(measure_fn, before, tag, min_delta, timeout=10.0, interv
 
 def _assert_mem_increased(before, after, tag, min_delta):
     delta = after - before
-    logger.info(
+    print(
         f"[MEM] {tag}: before={before:.0f} MB, after={after:.0f} MB, "
         f"delta={delta:.0f} MB, threshold={min_delta} MB, "
         f"tms_enabled={_tms_enabled()}"

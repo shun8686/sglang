@@ -1,5 +1,5 @@
 """
-E2E tests for NPU sleep mode — multi-tokenizer worker PauseContinueBroadcast.
+E2E tests for NPU pause/resume generation — multi-tokenizer worker PauseContinueBroadcast.
 """
 
 import logging
@@ -29,10 +29,10 @@ logger = logging.getLogger(__name__)
 register_npu_ci(est_time=90, suite="full-2-npu-a3", nightly=True)
 
 
-class TestNpuMultiTokenizerSleep(CustomTestCase):
+class TestNpuMultiTokenizerPauseResume(CustomTestCase):
     """E2E: pause/resume in multi-tokenizer worker mode.
 
-    [Test Category] RL Sleep Mode + Multi-Worker
+    [Test Category] RL Pause/Resume + Multi-Worker
     [Test Target] POST /pause_generation, POST /continue_generation
                   with PauseContinueBroadcast (multi_tokenizer_mixin.py)
     """

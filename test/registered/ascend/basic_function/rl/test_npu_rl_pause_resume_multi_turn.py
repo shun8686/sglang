@@ -1,5 +1,5 @@
 """
-E2E tests for NPU — multi-turn conversation with sleep mode.
+E2E tests for NPU pause/resume generation — multi-turn conversatio.
 """
 
 import time
@@ -21,11 +21,11 @@ from sglang.test.test_utils import (
 register_npu_ci(est_time=60, suite="full-1-npu-a3", nightly=True)
 
 
-class TestNpuMultiTurnWithSleep(CustomTestCase):
+class TestNpuMultiTurnWithPauseResume(CustomTestCase):
     """E2E: multi-turn chat works correctly when pause/resume is inserted
     between conversation turns.
 
-    [Test Category] RL Sleep Mode + Multi-Turn
+    [Test Category] RL Pause/Resume + Multi-Turn
     [Test Target] POST /v1/chat/completions, POST /pause_generation,
                   POST /continue_generation
     """
