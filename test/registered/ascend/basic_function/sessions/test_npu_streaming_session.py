@@ -63,9 +63,7 @@ class NPUStreamingSessionServerBase(StreamingSessionServerBase):
         cls.tokenizer = get_tokenizer(cls.model)
 
 
-class TestNPUStreamingSession(
-    NPUStreamingSessionServerBase, StreamingSessionKitMixin
-):
+class TestNPUStreamingSession(NPUStreamingSessionServerBase, StreamingSessionKitMixin):
     model = QWEN3_8B_WEIGHTS_PATH
     extra_args = [
         "--trust-remote-code",
