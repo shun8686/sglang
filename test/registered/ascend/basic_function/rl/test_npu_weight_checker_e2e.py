@@ -22,7 +22,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
+register_npu_ci(est_time=1500, suite="full-1-npu-a3", nightly=True)
 
 _MODEL_NAME = QWEN3_0_6B_WEIGHTS_PATH
 # We address the up half via the HF-style unfused name "up_proj.weight". sglang's
@@ -66,8 +66,11 @@ class TestWeightCheckerE2E(CustomTestCase):
         kill_process_tree(cls.process.pid)
 
     def _post(self, action: str) -> requests.Response:
+        # checksum action iterates over all model weights on NPU and is much
+        # slower than snapshot/compare, so allow a generous timeout.
+        timeout = 600 if action == "checksum" else 120
         return requests.post(
-            f"{self.url}/weights_checker", json={"action": action}, timeout=120
+            f"{self.url}/weights_checker", json={"action": action}, timeout=timeout
         )
 
     def _update_weights(
