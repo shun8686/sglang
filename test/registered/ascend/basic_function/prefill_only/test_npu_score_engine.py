@@ -321,61 +321,9 @@ class TestSeqClsMISScoring(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.engine = Engine(
-            model_path=_SEQCLS_MODEL,
-            disable_radix_cache=True,
-            chunked_prefill_size=-1,
-            enable_mis=True,
-            attention_backend="ascend",
-            disable_cuda_graph=True,
-            json_model_override_args=json.dumps(
-                {
-                    "architectures": ["Qwen3ForSequenceClassification"],
-                    "num_labels": cls.NUM_LABELS,
-                }
-            ),
-            mem_fraction_static=0.15,
+        raise unittest.SkipTest(
+            "--enable-mis requires flashinfer attention backend, not available on NPU"
         )
-
-    @classmethod
-    def tearDownClass(cls):
-        if hasattr(cls, "engine") and cls.engine:
-            cls.engine.shutdown()
-        torch.cuda.empty_cache()
-
-    def test_mis_one_vector_per_item(self):
-        """MIS produces exactly one score vector per item."""
-        items = ["Option A", "Option B", "Option C"]
-        scores = self.engine.score(
-            query="Rate each option:", items=items, apply_softmax=True
-        ).scores
-        self.assertEqual(len(scores), len(items))
-        for i, row in enumerate(scores):
-            self.assertEqual(len(row), self.NUM_LABELS)
-            self.assertAlmostEqual(sum(row), 1.0, places=5)
-            for v in row:
-                self.assertGreaterEqual(v, 0.0)
-                self.assertLessEqual(v, 1.0)
-
-    def test_mis_single_item_edge_case(self):
-        """Single item through MIS path."""
-        scores = self.engine.score(
-            query="Evaluate:", items=["Single item"], apply_softmax=True
-        ).scores
-        self.assertEqual(len(scores), 1)
-        self.assertEqual(len(scores[0]), self.NUM_LABELS)
-        self.assertAlmostEqual(sum(scores[0]), 1.0, places=5)
-
-    def test_mis_many_items(self):
-        """10 items all return valid probability vectors."""
-        items = [f"Item {i}" for i in range(10)]
-        scores = self.engine.score(
-            query="Classify each:", items=items, apply_softmax=True
-        ).scores
-        self.assertEqual(len(scores), len(items))
-        for row in scores:
-            self.assertEqual(len(row), self.NUM_LABELS)
-            self.assertAlmostEqual(sum(row), 1.0, places=5)
 
 
 class TestSeqClsMISAdvancedScoring(CustomTestCase):
@@ -383,38 +331,9 @@ class TestSeqClsMISAdvancedScoring(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.engine = Engine(
-            model_path=_SEQCLS_MODEL,
-            disable_radix_cache=True,
-            chunked_prefill_size=-1,
-            enable_mis=True,
-            attention_backend="ascend",
-            disable_cuda_graph=True,
-            json_model_override_args=json.dumps(
-                {
-                    "architectures": ["Qwen3ForSequenceClassification"],
-                    "num_labels": cls.NUM_LABELS,
-                }
-            ),
-            mem_fraction_static=0.15,
+        raise unittest.SkipTest(
+            "--enable-mis requires flashinfer attention backend, not available on NPU"
         )
-
-    @classmethod
-    def tearDownClass(cls):
-        if hasattr(cls, "engine") and cls.engine:
-            cls.engine.shutdown()
-        torch.cuda.empty_cache()
-
-    def test_many_labels_correct_shape(self):
-        """5 items × 12 labels — each score vector has the right length."""
-        items = [f"Item {i}" for i in range(5)]
-        scores = self.engine.score(
-            query="Classify:", items=items, apply_softmax=True
-        ).scores
-        self.assertEqual(len(scores), len(items))
-        for row in scores:
-            self.assertEqual(len(row), self.NUM_LABELS)
-            self.assertAlmostEqual(sum(row), 1.0, places=5)
 
 
 if __name__ == "__main__":
