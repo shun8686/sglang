@@ -50,6 +50,23 @@ class TestQwen3NextMTPTopk(
         "ascend",
     ]
 
+    @classmethod
+    def setUpClass(cls):
+        assert cls.model is not None, "Please set cls.model in subclass"
+        with openai_api_env(cls.api_key):
+            cls.process = popen_launch_server(
+                cls.model,
+                cls.base_url,
+                timeout=cls.timeout,
+                other_args=cls.other_args,
+                env={
+                    "SGLANG_ENABLE_SPEC_V2": "1",
+                    "SGLANG_NPU_DISABLE_MEGA_CHUNK_GDN": "1",
+                    "TRITON_ASCEND_DISABLE_AUTO_MULTI_BUFFER": "1",
+                    "TRITON_ASCEND_DISABLE_AUTO_SUB_BLOCK": "1",
+                },
+            )
+
 
 class TestQwen3NextMTPV2(GSM8KMixin, KLDivergenceMixin, DefaultServerBase):
     model = QWEN3_NEXT_MODEL
@@ -80,20 +97,22 @@ class TestQwen3NextMTPV2(GSM8KMixin, KLDivergenceMixin, DefaultServerBase):
         "ascend",
     ]
 
-
-@classmethod
-def setUpClass(cls):
-    assert cls.model is not None, "Please set cls.model in subclass"
-    with openai_api_env(cls.api_key):
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=cls.timeout,
-            other_args=cls.other_args,
-            env={
-                "SGLANG_ENABLE_SPEC_V2": "1",
-            },
-        )
+    @classmethod
+    def setUpClass(cls):
+        assert cls.model is not None, "Please set cls.model in subclass"
+        with openai_api_env(cls.api_key):
+            cls.process = popen_launch_server(
+                cls.model,
+                cls.base_url,
+                timeout=cls.timeout,
+                other_args=cls.other_args,
+                env={
+                    "SGLANG_ENABLE_SPEC_V2": "1",
+                    "SGLANG_NPU_DISABLE_MEGA_CHUNK_GDN": "1",
+                    "TRITON_ASCEND_DISABLE_AUTO_MULTI_BUFFER": "1",
+                    "TRITON_ASCEND_DISABLE_AUTO_SUB_BLOCK": "1",
+                },
+            )
 
 
 if __name__ == "__main__":
