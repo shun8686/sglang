@@ -1,4 +1,6 @@
 import multiprocessing
+import os
+import random
 import threading
 import time
 import unittest
@@ -19,8 +21,101 @@ from sglang.test.test_utils import (
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
-    run_and_check_memory_leak,
+    read_output,
 )
+
+# Mirror the temp-file names used by sglang.test.test_utils so that the
+# streamed output thread can pick them up. We intentionally re-implement the
+# body of run_and_check_memory_leak here because that helper hard-codes
+# `DEFAULT_MODEL_NAME_FOR_TEST` ("meta-llama/Llama-3.1-8B-Instruct"), which is
+# not available on ModelScope and thus cannot run on NPU CI runners.
+_STDERR_FILENAME = "/tmp/stderr.txt"
+_STDOUT_FILENAME = "/tmp/stdout.txt"
+
+
+def _run_and_check_memory_leak_npu(
+    workload_func,
+    disable_radix_cache,
+    enable_mixed_chunk,
+    disable_overlap,
+    chunked_prefill_size,
+    assert_has_abort,
+    api_key=None,
+):
+    """NPU-friendly replacement for run_and_check_memory_leak.
+
+    Differs only in that it uses LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH (a
+    ModelScope-resolvable path) instead of DEFAULT_MODEL_NAME_FOR_TEST, and
+    adds NPU required args (--attention-backend ascend, --disable-cuda-graph).
+    """
+    other_args = [
+        "--chunked-prefill-size",
+        str(chunked_prefill_size),
+        "--log-level",
+        "debug",
+        "--attention-backend",
+        "ascend",
+        "--disable-cuda-graph",
+    ]
+    if disable_radix_cache:
+        other_args += ["--disable-radix-cache"]
+    if enable_mixed_chunk:
+        other_args += ["--enable-mixed-chunk"]
+    if disable_overlap:
+        other_args += ["--disable-overlap-schedule"]
+
+    model = LLAMA_3_1_8B_INSTRUCT_WEIGHTS_PATH
+    port = random.randint(4000, 5000)
+    base_url = f"http://127.0.0.1:{port}"
+
+    # Create files and launch the server
+    stdout = open(_STDOUT_FILENAME, "w")
+    stderr = open(_STDERR_FILENAME, "w")
+    process = popen_launch_server(
+        model,
+        base_url,
+        timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+        other_args=other_args,
+        return_stdout_stderr=(stdout, stderr),
+        api_key=api_key,
+    )
+
+    # Launch a thread to stream the output
+    output_lines = []
+    t = threading.Thread(target=read_output, args=(output_lines, _STDERR_FILENAME))
+    t.start()
+
+    # Run the workload
+    workload_func(base_url, model)
+
+    # Clean up everything
+    kill_process_tree(process.pid)
+    stdout.close()
+    stderr.close()
+    if os.path.exists(_STDOUT_FILENAME):
+        os.remove(_STDOUT_FILENAME)
+    if os.path.exists(_STDERR_FILENAME):
+        os.remove(_STDERR_FILENAME)
+    kill_process_tree(process.pid)
+    t.join()
+
+    # Assert success
+    has_new_server = False
+    has_leak = False
+    has_abort = False
+    for line in output_lines:
+        if "Uvicorn running" in line:
+            has_new_server = True
+        if "leak" in line:
+            has_leak = True
+        if "Abort" in line:
+            has_abort = True
+
+    assert has_new_server
+    assert not has_leak
+    if assert_has_abort:
+        assert has_abort
+
 
 register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
@@ -57,7 +152,7 @@ class TestAbort(CustomTestCase):
         time.sleep(10)
 
     def test_memory_leak(self):
-        run_and_check_memory_leak(
+        _run_and_check_memory_leak_npu(
             self.workload_func,
             disable_radix_cache=False,
             enable_mixed_chunk=False,
@@ -101,7 +196,7 @@ class TestAbortWithApiKey(CustomTestCase):
 
     def test_memory_leak_with_api_key(self):
         api_key = "test-api-key"
-        run_and_check_memory_leak(
+        _run_and_check_memory_leak_npu(
             lambda base_url, model: self.workload_func(base_url, model, api_key),
             disable_radix_cache=False,
             enable_mixed_chunk=False,
