@@ -109,21 +109,8 @@ class TestCausalLMScoringHTTP(CustomTestCase):
 class TestCausalLMMISScoringHTTP(CustomTestCase):
     @classmethod
     def setUpClass(cls):
-        cls.model = _MODEL
-        cls.base_url = DEFAULT_URL_FOR_TEST
-        cls.process = popen_launch_server(
-            cls.model,
-            cls.base_url,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
-            other_args=[
-                "--disable-radix-cache",
-                "--chunked-prefill-size",
-                "-1",
-                "--enable-mis",
-                "--attention-backend",
-                "ascend",
-                "--disable-cuda-graph",
-            ],
+        raise unittest.SkipTest(
+            "--enable-mis requires flashinfer attention backend, not available on NPU"
         )
 
     @classmethod
