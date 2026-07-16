@@ -109,7 +109,9 @@ class TestOpenAIServer(CustomTestCase):
 
         assert response.id
         assert response.created
-        assert response.usage.prompt_tokens > 0, f"Prompt tokens should be positive,got {response.usage.prompt_tokens}"
+        assert (
+            response.usage.prompt_tokens > 0
+        ), f"Prompt tokens should be positive,got {response.usage.prompt_tokens}"
         assert response.usage.completion_tokens > 0
         assert response.usage.total_tokens > 0
 
