@@ -61,7 +61,7 @@ class TestMixedChunkedPrefillNoRadixCache(TestMixedChunkedPrefill):
 
     extra_args = [
         "--enable-mixed-chunk",
-        "--chunked-prefill-size",
+        "--chunked-prefill-size", #DEFAULT_NPU_PAGE_SIZE = 128，we need to make sure --chunked-prefill-size%128=0
         "128",
         "--disable-radix-cache",
         "--attention-backend",
