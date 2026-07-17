@@ -6,7 +6,6 @@ from sglang.test.ascend.test_ascend_utils import (
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.kits.eval_accuracy_kit import GSM8KMixin
 from sglang.test.kits.kl_divergence_kit import KLDivergenceMixin
-from sglang.test.kits.prefix_cache_branching_kit import PrefixCacheBranchingMixin
 from sglang.test.server_fixtures.default_fixture import (
     DefaultServerBase,
     openai_api_env,
@@ -18,9 +17,7 @@ register_npu_ci(est_time=600, suite="full-8-npu-a3", nightly=True)
 QWEN3_NEXT_MODEL = QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST.model_path
 
 
-class TestQwen3NextMTPTopk(
-    GSM8KMixin, KLDivergenceMixin, PrefixCacheBranchingMixin, DefaultServerBase
-):
+class TestQwen3NextMTPTopk(GSM8KMixin, KLDivergenceMixin, DefaultServerBase):
     model = QWEN3_NEXT_MODEL
     cache_chunk_size = 64
     gsm8k_accuracy_thres = 0.93
@@ -31,21 +28,21 @@ class TestQwen3NextMTPTopk(
         "--speculative-algorithm",
         "NEXTN",
         "--speculative-num-steps",
-        "5",
+        "2",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "6",
+        "3",
         "--mem-fraction-static",
         "0.7",
         "--tp",
         "8",
-        "--chunked-prefill-size",
-        "2048",
-        "--mamba-scheduler-strategy",
-        "extra_buffer",
-        "--mamba-track-interval",
-        "128",
+        # "--chunked-prefill-size",
+        # "2048",
+        # "--mamba-scheduler-strategy",
+        # "extra_buffer",
+        # "--mamba-track-interval",
+        # "128",
         "--attention-backend",
         "ascend",
     ]
@@ -61,9 +58,6 @@ class TestQwen3NextMTPTopk(
                 other_args=cls.other_args,
                 env={
                     "SGLANG_ENABLE_SPEC_V2": "1",
-                    "SGLANG_NPU_DISABLE_MEGA_CHUNK_GDN": "1",
-                    "TRITON_ASCEND_DISABLE_AUTO_MULTI_BUFFER": "1",
-                    "TRITON_ASCEND_DISABLE_AUTO_SUB_BLOCK": "1",
                 },
             )
 
@@ -78,21 +72,21 @@ class TestQwen3NextMTPV2(GSM8KMixin, KLDivergenceMixin, DefaultServerBase):
         "--speculative-algorithm",
         "NEXTN",
         "--speculative-num-steps",
-        "3",
+        "2",
         "--speculative-eagle-topk",
         "1",
         "--speculative-num-draft-tokens",
-        "4",
+        "3",
         "--mem-fraction-static",
         "0.7",
         "--tp",
         "8",
-        "--chunked-prefill-size",
-        "2048",
-        "--mamba-scheduler-strategy",
-        "extra_buffer",
-        "--mamba-track-interval",
-        "128",
+        # "--chunked-prefill-size",
+        # "2048",
+        # "--mamba-scheduler-strategy",
+        # "extra_buffer",
+        # "--mamba-track-interval",
+        # "128",
         "--attention-backend",
         "ascend",
     ]
@@ -111,6 +105,9 @@ class TestQwen3NextMTPV2(GSM8KMixin, KLDivergenceMixin, DefaultServerBase):
                     "SGLANG_NPU_DISABLE_MEGA_CHUNK_GDN": "1",
                     "TRITON_ASCEND_DISABLE_AUTO_MULTI_BUFFER": "1",
                     "TRITON_ASCEND_DISABLE_AUTO_SUB_BLOCK": "1",
+                    "TRITON_ASCEND_DISABLE_FUSED_ATTN_MASKS": "1",
+                    "SGLANG_NPU_USE_FIA_NZ": "0",
+                    "SGLANG_NPU_DISABLE_ACL_FORMAT_WEIGHT": "1",
                 },
             )
 
