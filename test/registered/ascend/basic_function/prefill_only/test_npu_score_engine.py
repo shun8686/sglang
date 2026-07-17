@@ -316,25 +316,5 @@ class TestSeqClsScoring(CustomTestCase):
         self.assertEqual(len(scores[0]), self.NUM_LABELS)
 
 
-class TestSeqClsMISScoring(CustomTestCase):
-    NUM_LABELS = 2
-
-    @classmethod
-    def setUpClass(cls):
-        raise unittest.SkipTest(
-            "--enable-mis requires flashinfer attention backend, not available on NPU"
-        )
-
-
-class TestSeqClsMISAdvancedScoring(CustomTestCase):
-    NUM_LABELS = 12
-
-    @classmethod
-    def setUpClass(cls):
-        raise unittest.SkipTest(
-            "--enable-mis requires flashinfer attention backend, not available on NPU"
-        )
-
-
 if __name__ == "__main__":
     unittest.main(verbosity=3)
