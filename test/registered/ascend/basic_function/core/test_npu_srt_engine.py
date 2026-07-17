@@ -107,7 +107,6 @@ class TestNPUSRTEngine(CustomTestCase):
             random_seed=42,
             max_total_tokens=128,
             attention_backend="ascend",
-            disable_cuda_graph=True,
         )
         out1 = engine.generate(prompt, sampling_params)["text"]
         engine.shutdown()
@@ -118,7 +117,6 @@ class TestNPUSRTEngine(CustomTestCase):
             max_total_tokens=128,
             cpu_offload_gb=3,
             attention_backend="ascend",
-            disable_cuda_graph=True,
         )
         out2 = engine.generate(prompt, sampling_params)["text"]
         engine.shutdown()
