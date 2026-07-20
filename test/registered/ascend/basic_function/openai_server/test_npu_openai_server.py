@@ -72,7 +72,7 @@ class TestOpenAIServer(CustomTestCase):
 
         if use_list_input:
             prompt_arg = [prompt_input, prompt_input]
-            # 精确计算：分别编码每个 prompt 并求和
+            # Calculate precisely: encode each prompt individually and sum the token counts.
             num_choices = len(prompt_arg)
             if isinstance(prompt_arg[0], list):
                 num_prompt_tokens = sum(len(p) for p in prompt_arg)
@@ -110,7 +110,6 @@ class TestOpenAIServer(CustomTestCase):
             ret_num_top_logprobs = len(response.choices[0].logprobs.top_logprobs[1])
 
             # FIXME: Sometimes, some top_logprobs are missing in the return value. The reason is that some output id maps to the same output token and duplicate in the map
-            # assert ret_num_top_logprobs == logprobs, f"{ret_num_top_logprobs} vs {logprobs}"
             assert ret_num_top_logprobs > 0
 
             # when echo=True and request.logprobs>0, logprob_start_len is 0, so the first token's logprob would be None.
@@ -186,7 +185,6 @@ class TestOpenAIServer(CustomTestCase):
                         response.choices[0].logprobs.top_logprobs[0]
                     )
                     # FIXME: Sometimes, some top_logprobs are missing in the return value. The reason is that some output id maps to the same output token and duplicate in the map
-                    # assert ret_num_top_logprobs == logprobs, f"{ret_num_top_logprobs} vs {logprobs}"
                     assert ret_num_top_logprobs > 0, f"ret_num_top_logprobs was 0"
 
             if is_first:
@@ -911,7 +909,6 @@ class TestOpenAIServerCustomLogitProcessor(CustomTestCase):
 
         If target_token_id is None, the custom logit processor won't be passed in.
         """
-
         class DeterministicLogitProcessor(CustomLogitProcessor):
             """A dummy logit processor that changes the logits to always sample the given token id."""
 
@@ -1163,7 +1160,6 @@ class TestOpenAIV1Score(CustomTestCase):
         error_response = response.json()
         self.assertEqual(error_response["type"], "BadRequestError")
         self.assertIn("Token ID 999999 is out of vocabulary", error_response["message"])
-
 
 if __name__ == "__main__":
     unittest.main()
