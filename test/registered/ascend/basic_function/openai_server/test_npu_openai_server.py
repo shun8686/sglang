@@ -72,10 +72,17 @@ class TestOpenAIServer(CustomTestCase):
 
         if use_list_input:
             prompt_arg = [prompt_input, prompt_input]
+            # 精确计算：分别编码每个 prompt 并求和
             num_choices = len(prompt_arg)
-            num_prompt_tokens *= 2
+            if isinstance(prompt_arg[0], list):
+                num_prompt_tokens = sum(len(p) for p in prompt_arg)
+            else:
+                num_prompt_tokens = sum(
+                    len(self.tokenizer.encode(str(p))) for p in prompt_arg
+                )
         else:
             prompt_arg = prompt_input
+            num_prompt_tokens = len(self.tokenizer.encode(prompt))
             num_choices = 1
 
         response = client.completions.create(
@@ -113,8 +120,8 @@ class TestOpenAIServer(CustomTestCase):
         assert response.id
         assert response.created
         assert (
-            response.usage.prompt_tokens > 0
-        ), f"Prompt tokens should be positive,got {response.usage.prompt_tokens}"
+            response.usage.prompt_tokens == num_prompt_tokens
+        ), f"{response.usage.prompt_tokens} vs {num_prompt_tokens}"
         assert response.usage.completion_tokens > 0
         assert response.usage.total_tokens > 0
 
