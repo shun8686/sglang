@@ -6,7 +6,6 @@ from sglang.test.ascend.test_ascend_utils import LLaDA2_0_MINI_WEIGHTS_PATH
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     CustomTestCase,
-    is_in_ci,
 )
 
 register_npu_ci(est_time=400, suite="stage-b-test-4-npu-a3", nightly=False)
