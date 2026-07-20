@@ -891,7 +891,6 @@ class TestOpenAIServerCustomLogitProcessor(CustomTestCase):
             cls.base_url,
             timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             api_key=cls.api_key,
-            # other_args=["--enable-custom-logit-processor"],
             other_args=[
                 "--attention-backend",
                 "ascend",
