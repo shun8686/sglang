@@ -909,6 +909,7 @@ class TestOpenAIServerCustomLogitProcessor(CustomTestCase):
 
         If target_token_id is None, the custom logit processor won't be passed in.
         """
+
         class DeterministicLogitProcessor(CustomLogitProcessor):
             """A dummy logit processor that changes the logits to always sample the given token id."""
 
@@ -1160,6 +1161,7 @@ class TestOpenAIV1Score(CustomTestCase):
         error_response = response.json()
         self.assertEqual(error_response["type"], "BadRequestError")
         self.assertIn("Token ID 999999 is out of vocabulary", error_response["message"])
+
 
 if __name__ == "__main__":
     unittest.main()
