@@ -7,20 +7,20 @@ from sglang.test.test_utils import CustomTestCase
 
 register_npu_ci(
     est_time=400,
-    suite="nightly-8-npu-a3",
+    suite="full-8-npu-a3",
     nightly=True,
 )
 
 
-class TestAFM(GSM8KAscendMixin, CustomTestCase):
-    """Testcase: Verify that the inference accuracy of the eigen-ai-labs/gpt-oss-120b-bf16 model on the GSM8K dataset is no less than 0.
+class TestGptOss120bBf16(GSM8KAscendMixin, CustomTestCase):
+    """Testcase: Verify that the inference accuracy of the eigen-ai-labs/gpt-oss-120b-bf16 model on the GSM8K dataset is no less than 0.84.
 
     [Test Category] Model
     [Test Target] eigen-ai-labs/gpt-oss-120b-bf16
     """
 
     model = GPT_OSS_120B_BF16_WEIGHTS_PATH
-    accuracy = 0
+    accuracy = 0.84
     other_args = [
         "--trust-remote-code",
         "--mem-fraction-static",

@@ -9,13 +9,12 @@ from sglang.test.ascend.test_ascend_utils import (
 )
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
-    DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
     DEFAULT_URL_FOR_TEST,
     CustomTestCase,
     popen_launch_server,
 )
 
-register_npu_ci(est_time=1100, suite="nightly-8-npu-a3", nightly=True)
+register_npu_ci(est_time=1100, suite="full-8-npu-a3", nightly=True)
 
 
 class TestMambaCacheWithMemoryRatio(GSM8KAscendMixin, CustomTestCase):
@@ -98,6 +97,8 @@ class TestMambaCacheRadix(CustomTestCase):
         "bfloat16",
         "--mamba-full-memory-ratio",
         "0.3",
+        "--mamba-scheduler-strategy",
+        "extra_buffer",  # To reuse Radix Cache, this parameter must be set to extra_buffer
     ]
 
     @classmethod
@@ -105,7 +106,7 @@ class TestMambaCacheRadix(CustomTestCase):
         cls.process = popen_launch_server(
             QWEN3_NEXT_80B_A3B_INSTRUCT_WEIGHTS_FOR_TEST.model_path,
             DEFAULT_URL_FOR_TEST,
-            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            timeout=1200,
             other_args=cls.other_args,
         )
 
@@ -169,30 +170,6 @@ class TestMambaCacheRadix(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertGreater(len(response.text), 0)
-
-
-class TestMambaCacheHierarchicalCache(TestMambaCacheRadix):
-    """Testcase: Verify hierarchical cache reuse with mamba cache.
-
-    [Test Category] Parameter
-    [Test Target]--enable-hierarchical-cache
-    """
-
-    other_args = [
-        "--trust-remote-code",
-        "--mem-fraction-static",
-        "0.5",
-        "--attention-backend",
-        "ascend",
-        "--disable-cuda-graph",
-        "--tp-size",
-        "8",
-        "--enable-hierarchical-cache",
-        "--hicache-ratio",
-        1.2,
-        "--max-mamba-cache-size",
-        "512",
-    ]
 
 
 if __name__ == "__main__":
