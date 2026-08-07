@@ -22,7 +22,7 @@ from sglang.test.test_utils import (
 
 OUTPUT_DIR = "./profiler_dir"
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
 
 class TestStartProfile(CustomTestCase):
@@ -34,6 +34,7 @@ class TestStartProfile(CustomTestCase):
 
     @classmethod
     def setUpClass(cls):
+        os.makedirs(OUTPUT_DIR, exist_ok=True)
         envs.SGLANG_TORCH_PROFILER_DIR.set(OUTPUT_DIR)
         cls.model = LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
         cls.base_url = DEFAULT_URL_FOR_TEST

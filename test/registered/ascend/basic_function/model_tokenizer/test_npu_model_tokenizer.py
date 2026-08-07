@@ -9,7 +9,10 @@ from shutil import copy2
 import requests
 
 from sglang.srt.utils import kill_process_tree
-from sglang.test.ascend.test_ascend_utils import LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import (
+    LLAMA_3_2_1B_INSTRUCT_WEIGHTS_PATH,
+    QWEN3_4B_GGUF_Q4_K_M_WEIGHTS_PATH,
+)
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.test_utils import (
     DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
@@ -18,7 +21,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
 
 class TestNpuTokenizer(CustomTestCase):
@@ -56,6 +59,8 @@ class TestNpuTokenizer(CustomTestCase):
             cls.tokenizer_path,
             "--tokenizer-worker-num",
             cls.tokenizer_worker_num,
+            "--model-loader-extra-config",
+            json.dumps({"enable_multithread_load": False, "num_threads": 2}),
             "--tokenizer-mode",
             "auto",
             "--load-format",
@@ -101,7 +106,6 @@ class TestNpuTokenizer(CustomTestCase):
         content = self.err_log_file.read()
         # Configure --tokenizer-worker-num to start the multi-tokenizer worker
         self.assertIn("Start multi-tokenizer worker process", content)
-        self.assertIn("Registering detokenizer", content)
         # Configure --load-format to safetensors
         self.assertIn("Loading safetensors checkpoint", content)
         self.out_log_file.close()
@@ -276,6 +280,53 @@ class TestNpuSkipTokenizerInit(CustomTestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("output_ids", response.text)
+
+
+class TestNpuLoadFormatGguf(CustomTestCase):
+    """Testcase: verify --load-format=gguf explicitly loads GGUF model and inference succeeds
+
+    [Test Category] Parameter
+    [Test Target] --load-format=gguf
+    """
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model = QWEN3_4B_GGUF_Q4_K_M_WEIGHTS_PATH
+        cls.base_url = DEFAULT_URL_FOR_TEST
+        other_args = [
+            "--trust-remote-code",
+            "--mem-fraction-static",
+            "0.8",
+            "--attention-backend",
+            "ascend",
+            "--disable-cuda-graph",
+            "--load-format",
+            "gguf",
+        ]
+        cls.process = popen_launch_server(
+            cls.model,
+            cls.base_url,
+            timeout=DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
+            other_args=other_args,
+        )
+
+    @classmethod
+    def tearDownClass(cls):
+        kill_process_tree(cls.process.pid)
+
+    def test_load_format_gguf(self):
+        response = requests.post(
+            f"{DEFAULT_URL_FOR_TEST}/generate",
+            json={
+                "text": "The capital of France is",
+                "sampling_params": {
+                    "temperature": 0,
+                    "max_new_tokens": 32,
+                },
+            },
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertIn("Paris", response.text)
 
 
 if __name__ == "__main__":

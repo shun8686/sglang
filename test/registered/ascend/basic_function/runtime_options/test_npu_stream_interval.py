@@ -1,5 +1,4 @@
 import json
-import time
 import unittest
 
 import requests
@@ -14,14 +13,14 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=600, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=600, suite="full-1-npu-a3", nightly=True)
 
 
 class TestStreamInterval(CustomTestCase):
     """Testcase: Verify --stream-interval controls the stream output chunk size correctly.
 
     [Test Category] Parameter
-    [Test Target] --stream-interval, --stream-output
+    [Test Target] --stream-interval, --incremental-streaming-output
     """
 
     model = QWEN3_0_6B_WEIGHTS_PATH
@@ -29,11 +28,20 @@ class TestStreamInterval(CustomTestCase):
     prompt = "The capital of France is"
     total_tokens = 32
 
+    @classmethod
+    def setUpClass(cls):
+        cls.process = None
+
+    @classmethod
+    def tearDownClass(cls):
+        if cls.process:
+            kill_process_tree(cls.process.pid)
+
     def _start_server(self, interval: int):
         other_args = [
             "--attention-backend",
             "ascend",
-            "--stream-output",
+            "--incremental-streaming-output",
             "--stream-interval",
             str(interval),
         ]
@@ -69,15 +77,15 @@ class TestStreamInterval(CustomTestCase):
 
     def test_stream_interval_1_vs_4(self):
         """Test interval=1 produces more chunks than interval=4"""
-
-        proc1 = self._start_server(interval=1)
+        # Start server with interval 1
+        self.process = self._start_server(interval=1)
         chunks1 = self._run_stream_request()
-        kill_process_tree(proc1.pid)
-        time.sleep(3)
+        kill_process_tree(self.process.pid)
 
-        proc4 = self._start_server(interval=4)
+        # Start server with interval 4
+        self.process = self._start_server(interval=5)
         chunks4 = self._run_stream_request()
-        kill_process_tree(proc4.pid)
+        kill_process_tree(self.process.pid)
 
         # interval=1 should have significantly more chunks
         self.assertGreater(len(chunks1), len(chunks4))

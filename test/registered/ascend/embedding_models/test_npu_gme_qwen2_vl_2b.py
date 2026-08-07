@@ -3,19 +3,22 @@ import unittest
 
 import torch
 
-from sglang.test.ascend.test_ascend_utils import GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH
+from sglang.test.ascend.test_ascend_utils import (
+    GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH,
+    IMAGES_023_PATH,
+)
 from sglang.test.ci.ci_register import register_npu_ci
 from sglang.test.runners import HFRunner, SRTRunner
 from sglang.test.test_utils import CustomTestCase, get_similarities
 
 register_npu_ci(
     est_time=400,
-    suite="nightly-1-npu-a3",
+    suite="full-1-npu-a3",
     nightly=True,
 )
 
 TEXTS = "two Subway Series sandwiches with meats, cheese, lettuce, tomatoes, and onions on a black background, accompanied by the Subway Series logo, highlighting a new sandwich series."
-IMAGES = "https://huggingface.co/datasets/liuhaotian/llava-bench-in-the-wild/resolve/main/images/023.jpg"
+IMAGES = IMAGES_023_PATH
 
 MODELS = [
     (GME_QWEN2_VL_2B_INSTRUCT_WEIGHTS_PATH, 1e-3),

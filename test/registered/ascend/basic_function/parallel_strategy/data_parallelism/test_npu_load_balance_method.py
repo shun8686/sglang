@@ -17,7 +17,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=700, suite="nightly-16-npu-a3", nightly=True)
+register_npu_ci(est_time=700, suite="full-16-npu-a3", nightly=True)
 
 
 class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
@@ -61,6 +61,9 @@ class TestDPAttentionRoundBinLoadBalance(CustomTestCase):
             cls.base_url,
             timeout=3 * DEFAULT_TIMEOUT_FOR_SERVER_LAUNCH,
             other_args=other_args,
+            env={
+                "TRANSFORMERS_VERBOSITY": "error",
+            },
         )
 
     @classmethod

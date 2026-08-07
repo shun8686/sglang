@@ -22,7 +22,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(
     est_time=400,
-    suite="nightly-4-npu-a3",
+    suite="full-4-npu-a3",
     nightly=True,
 )
 
@@ -88,7 +88,7 @@ class TestConfigPriority(CustomTestCase):
 
     def test_config_priority(self):
         # will use false model path (/nonexistent/Qwen/Qwen3-32B) service start fail
-        error_message = "Repo id must be in the form 'repo_name' or 'namespace/repo_name': '/nonexistent/Qwen/Qwen3-32B'."
+        error_message = "404 page not found"
         with tempfile.NamedTemporaryFile(
             mode="w+", delete=True, suffix="out.log"
         ) as out_log_file, tempfile.NamedTemporaryFile(

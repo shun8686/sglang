@@ -15,7 +15,7 @@ from sglang.test.test_utils import (
 
 register_npu_ci(
     est_time=400,
-    suite="nightly-2-npu-a3",
+    suite="full-2-npu-a3",
     nightly=True,
 )
 
@@ -39,7 +39,9 @@ class TestEnableThinking(CustomTestCase):
             "--mem-fraction-static",
             0.95,
             "--tp",
-            16,
+            2,
+            "--reasoning-parser",
+            "qwen3",
         ]
         cls.process = popen_launch_server(
             cls.model,

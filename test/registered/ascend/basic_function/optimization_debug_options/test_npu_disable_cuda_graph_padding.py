@@ -12,7 +12,7 @@ from sglang.test.test_utils import (
     popen_launch_server,
 )
 
-register_npu_ci(est_time=400, suite="nightly-1-npu-a3", nightly=True)
+register_npu_ci(est_time=400, suite="full-1-npu-a3", nightly=True)
 
 
 class TestDisableCudaGraphPadding(CustomTestCase):
@@ -80,7 +80,7 @@ class TestDisableCudaGraphPadding(CustomTestCase):
             },
         )
         self.assertEqual(resp.status_code, 200)
-        self.assertIn("text", resp.json())
+        self.assertIn("Paris", resp.text)
 
 
 if __name__ == "__main__":
