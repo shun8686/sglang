@@ -1143,8 +1143,8 @@ jobs:
           RUN_DIR="/root/.cache/tests/precise-test/${{ github.run_id }}-attempt-${{ github.run_attempt }}"
           # Fixed-name copy for manual use; the recommend job's baseline lives
           # in OBS (upload outputs.tar.gz + test_case_map.json manually after
-          # each run). coverage-data.tar.gz has no automatic consumer — no OBS
-          # copy, only this dir and the precise-test-coverage-data artifact.
+          # each run). The overwrite-in-place OBS copy under coverage/pr/ is
+          # pushed by the next step.
           PUBLISH_DIR="/root/.cache/tests/precise-test/coverage"
 
           # Skip publish when no coverage data this run — never overwrite
@@ -1177,8 +1177,76 @@ jobs:
             tar -czf "${PUBLISH_DIR}/htmlcov-npu.tar.gz" -C "${RUN_DIR}" htmlcov-npu
           fi
 
+          # Marker for the OBS step: PUBLISH_DIR keeps files from older runs,
+          # so the upload must be able to tell "published this run" apart from
+          # the early-exit no-data path above and never re-upload stale data.
+          touch "${RUN_DIR}/publish.done"
+
           echo "Published baseline to ${PUBLISH_DIR}"
           ls -lh "${PUBLISH_DIR}" | tail -n +2
+
+      - name: Upload coverage data to OBS
+        # Best-effort archive: OBS outage must never block the pipeline.
+        continue-on-error: true
+        shell: bash
+        env:
+          OBS_ACCESS_KEY: ${{ secrets.OBS_ACCESS_KEY_PRECISION }}
+          OBS_SECRET_ACCESS_KEY: ${{ secrets.OBS_SECRET_ACCESS_KEY_PRECISION }}
+          OBS_ENDPOINT: obs.cn-southwest-2.myhuaweicloud.com
+        run: |
+          set -euo pipefail
+
+          RUN_DIR="/root/.cache/tests/precise-test/${{ github.run_id }}-attempt-${{ github.run_attempt }}"
+          PUBLISH_DIR="/root/.cache/tests/precise-test/coverage"
+          # Fixed destination: every run overwrites the two files in place.
+          DEST="obs://sglang-npu/coverage/pr/"
+
+          # Same guard as publish: no coverage data this run -> nothing to push.
+          if [ ! -f "${RUN_DIR}/publish.done" ]; then
+            echo "::warning::No coverage published this run, skip OBS upload"
+            exit 0
+          fi
+          if [ -z "${OBS_ACCESS_KEY:-}" ] || [ -z "${OBS_SECRET_ACCESS_KEY:-}" ]; then
+            echo "::warning::OBS credentials not configured, skip OBS upload"
+            exit 0
+          fi
+
+          # obsutil is not guaranteed in the CI image; fetch the official
+          # standalone build into /tmp when missing.
+          if ! command -v obsutil >/dev/null 2>&1; then
+            OBSUTIL_DIR=/tmp/obsutil
+            mkdir -p "${OBSUTIL_DIR}"
+            curl -fsSL --retry 3 --connect-timeout 30 \
+              https://obs-community.obs.cn-north-1.myhuaweicloud.com/obsutil/current/obsutil_linux_amd64.tar.gz \
+              -o "${OBSUTIL_DIR}/obsutil.tar.gz"
+            tar -xzf "${OBSUTIL_DIR}/obsutil.tar.gz" -C "${OBSUTIL_DIR}" --strip-components=1
+            chmod +x "${OBSUTIL_DIR}/obsutil"
+            export PATH="${OBSUTIL_DIR}:${PATH}"
+          fi
+
+          # Credentials land in a private throwaway config, never in argv.
+          OBS_CONFIG=/tmp/obsutilconfig
+          {
+            echo "ak=${OBS_ACCESS_KEY}"
+            echo "sk=${OBS_SECRET_ACCESS_KEY}"
+            echo "endpoint=${OBS_ENDPOINT}"
+          } > "${OBS_CONFIG}"
+          chmod 600 "${OBS_CONFIG}"
+
+          uploaded=0
+          for f in outputs.tar.gz test_case_map.json; do
+            if [ -s "${PUBLISH_DIR}/${f}" ]; then
+              obsutil cp "${PUBLISH_DIR}/${f}" "${DEST}" \
+                -f -config="${OBS_CONFIG}"
+              uploaded=$((uploaded + 1))
+            fi
+          done
+
+          if [ "${uploaded}" -eq 0 ]; then
+            echo "::warning::No coverage files found in ${PUBLISH_DIR}, nothing uploaded"
+            exit 0
+          fi
+          echo "Uploaded ${uploaded} file(s) to ${DEST}"
 
       - name: Clean up per-run directory
         # Skipped on publish failure, keeping RUN_DIR for manual recovery.
